@@ -1,0 +1,34 @@
+{
+  "name": "@ak/root",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "sync-control-extension-version": "node ./scripts/sync-control-extension-version.mjs",
+    "ce-help": "node ./scripts/ce-help.mjs",
+    "check-tools": "node ./scripts/check-tools.mjs",
+    "dev-app": "yarn workspace @ak/web-app run start-playing",
+    "test-app": "yarn workspace @ak/web-app run cy-tests",
+    "dev-docs": "bundle exec jekyll serve",
+    "check-lua": "luacheck --std max+busted lua/LUA && busted --verbose --coverage --",
+    "check-e2e": "yarn workspace @ak/web-app run cy-tests-run-headless",
+    "check-doc": "bundle exec jekyll build",
+    "check": "yarn run check-lua && yarn run check-e2e && yarn run check-doc",
+    "build": "yarn run check && node ./scripts/build-release.mjs",
+    "play": "yarn workspace @ak/web-server run start-with-app"
+  },
+  "packageManager": "yarn@4.9.1",
+  "devDependencies": {
+    "@types/eslint": "^9.6.1",
+    "@types/prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}

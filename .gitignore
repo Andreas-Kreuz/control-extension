@@ -1,0 +1,190 @@
+# Yarn
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Global yarn modules
+node_modules
+
+# Python cache files
+__pycache__
+
+# Apps build and shared folders
+/apps/*/build
+/apps/*/dist
+/apps/*/node_modules
+
+/packages/*/build
+/packages/*/dist
+/packages/*/node_modules
+
+# @ak/web-app
+/apps/web-app/VERSION
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/ce-*
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/events-from-ce
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/events-from-ce.pending
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/log-from-ce
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/commands-to-ce
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-is-running
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-state.*
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/ak*
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/ce-*
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce.pending
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/log-from-ce
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/commands-to-ce
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-is-running
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-state.*
+/apps/web-app/cypress/io/ak*
+/apps/web-app/cypress/screenshots
+/apps/web-app/cypress/videos
+/apps/web-app/dist
+
+# @ak/web-server
+/apps/web-server/target
+
+# @ak/web-shared
+/apps/web-shared/resources/public
+
+# compiled output
+/web-app/cypress/io/LUA/ce/databridge/exchange/ce-*
+/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce
+/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce.pending
+/web-app/cypress/io/LUA/ce/databridge/exchange/log-from-ce
+/web-app/cypress/io/LUA/ce/databridge/exchange/commands-to-ce
+/web-app/cypress/io/LUA/ce/databridge/exchange/server-is-running
+/web-app/cypress/io/LUA/ce/databridge/exchange/server-state.*
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/ak*
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/ce-*
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/events-from-ce
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/events-from-ce.pending
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/log-from-ce
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/commands-to-ce
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-is-running
+/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-state.*
+/web-app/cypress/videos
+/web-app/cypress/screenshots
+/web-app/dist
+/web-app/tmp
+/web-app/out-tsc
+/web-app/.angular
+
+# Ressources
+/web-app/cypress/fixtures/from-eep
+
+# dependencies
+/web-app/node_modules
+
+# Andreas Kreuz's projects
+/server/target
+/server/node_modules
+/server/dist
+/web-server/node_modules
+/web-server/build
+/web-server/dist
+/web-server/resources/public
+/web-shared/node_modules
+/web-shared/build
+/web-shared/dist
+/web-shared/resources/public
+
+# Project based settings
+/lua/LUA/**/*.jar
+/lua/LUA/**/AkSpeicherWerte.txt
+/lua/LUA/ModellInstallationPrivat.lua
+/lua/LUA/SlotNames_BH2.lua
+/lua/LUA/StorageUtilityValues.txt
+/lua/LUA/ce/anlagen
+/lua/LUA/ce/VERSION
+/lua/LUA/ce/databridge/exchange/ce-*
+/lua/LUA/ce/databridge/exchange/events-from-ce
+/lua/LUA/ce/databridge/exchange/events-from-ce.pending
+/lua/LUA/ce/databridge/exchange/log-from-ce
+/lua/LUA/ce/databridge/exchange/commands-to-ce
+/lua/LUA/ce/databridge/exchange/ce-version.txt
+/lua/LUA/ce/databridge/exchange/server-is-running
+/lua/LUA/ce/databridge/exchange/server-state.*
+/lua/LUA/comm_*
+/lua/modell-pakete
+
+# Private files
+/scripts/private
+
+# EEP Files to ignore
+*.dds
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# General files
+scratch.*
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jekyll documentation files
+_site
+Gemfile.lock
+.sass-cache
+.jekyll*
+.bundle/
+.bundle-user/
+/vendor/bundle/
+
+# Compiled Lua sources
+luac.out
+
+# luarocks build files
+*.src.rock
+*.zip
+*.tar.gz
+
+# Object files
+*.o
+*.os
+*.ko
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+*.def
+*.exp
+
+# Shared objects (inc. Windows DLLs)
+# *.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Other
+.claude
+web-app/src/app/client/modules/intersection/intersection-lane-display/example-svg.ts
+Lua_manual.pdf
+EEP18_Manual_GER.pdf

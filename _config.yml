@@ -1,0 +1,139 @@
+# SITE CONFIGURATION
+baseurl: "/ak-lua-bibliothek-fuer-eep"
+url: "https://andreas-kreuz.github.io"
+title: "Control Extension für EEP"
+description: "Control Extension für EEP mit Lua-Hub, Data Bridge, optionalem Server und optionaler Web App."
+
+# THEME-SPECIFIC CONFIGURATION
+theme_settings:
+    # Meta
+    title: Control Extension für EEP
+    avatar: assets/img/ce-logo-simple.png
+    favicon: assets/favicon.ico
+    gravatar: b3d6b9ea43f1401c06bf20a38fa3ba91 # Email MD5 hash
+    description: "Control Extension für EEP - Verkehrssteuerung und mehr" # used by search engines
+
+    # Header and footer text
+    header_text: >
+        <p>Control Extension für EEP</p>
+    header_text_feature_image: assets/headers/Titelbild-Simulator.jpg
+    footer_text: >
+        <p>Präsentiert von <a href="http://andreas-kreuz.github.io/">Andreas Kreuz</a> - Diskussion bitte in <a href="http://www.eepforum.de">Mein EEP Forum</a>.</p>
+    # Icons
+    github: "Andreas-Kreuz"
+
+    # Scripts
+    google_analytics: # Tracking ID, e.g. "UA-000000-01"
+    disqus_shortname:
+    katex: # Enable if using math markup
+
+    # Localization strings
+    str_follow_on: "Folgen"
+    str_rss_follow: "RSS-Feed abonieren"
+    str_email: "Email"
+    str_next_post: "Nächster Beitrag"
+    str_previous_post: "Vorheriger Beitrag"
+    str_next_page: "Weiter"
+    str_previous_page: "Zurück"
+    str_continue_reading: "Weiterlesen"
+    str_javascript_required_disqus: "Bitte Javascript einschalten, um die Kommentare zu lesen."
+
+    # Colours, typography and padding
+    # Open the "_sass > base" folder, and open "_variables.scss"
+    google_fonts: "Source+Sans+Pro:400,700,700italic,400italic"
+
+    # Post navigation
+    post_navigation: false
+
+# PAGINATION
+paginate: 5
+paginate_path: "blog/page:num"
+
+# PORTFOLIO
+collections:
+    anleitungen-installation:
+        output: true
+        title: Erster Eindruck
+        permalink: /docs/:collection/:name
+    anleitungen-ampelkreuzung:
+        output: true
+        title: Schritt-für-Schritt-Anleitungen
+        permalink: /docs/:collection/:name
+    anleitungen-entwickler:
+        output: true
+        title: Für Entwickler
+        permalink: /docs/:collection/:name
+    seiten:
+        output: true
+        title: Seiten
+        permalink: /docs/:name
+
+# BUILD SETTINGS
+markdown: kramdown
+highlighter: rouge
+
+#################################################################
+#
+# IMPORTANT: GENERATE THE DOCUMENTATION FROM THE MASTER BRANCH
+#            BUT NOT FROM THE /docs FOLDER.
+#
+#            Building from the project directory will include
+#            the neccessary README files from the Lua Folders.
+#
+#################################################################
+
+# Where things are
+source: .
+destination: docs/_site
+collections_dir: docs/
+plugins_dir: docs/_plugins
+layouts_dir: docs/_layouts
+data_dir: docs/_data
+includes_dir: docs/_includes
+sass:
+    sass_dir: docs/_sass
+    style: :compressed
+    quiet_deps: true
+    silence_deprecations:
+        - import
+        - global-builtin
+        - color-functions
+        - slash-div
+
+# Plugins
+plugins:
+    - jekyll-github-metadata
+    - jekyll-paginate
+    - jekyll-seo-tag
+    - jemoji
+exclude:
+    [
+        "Gemfile",
+        "Gemfile.lock",
+        "node_modules",
+        "vendor/bundle/",
+        "vendor/cache/",
+        "vendor/gems/",
+        "vendor/ruby/",
+        ".bundle/",
+        ".bundle-user/",
+        "apps/",
+        "packages/",
+        "apps/web-app",
+        "apps/web-server",
+        "packages/web-shared",
+        "lua/LUA/ce/databridge/exchange",
+        "*.lua",
+        "LICENSE",
+        "screenshot.png",
+        "server",
+        "web-app",
+        "web-server",
+        "web-shared",
+    ]
+
+defaults:
+    - scope:
+          path: "../lua"
+      values:
+          layout: "default"

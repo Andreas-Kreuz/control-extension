@@ -1,0 +1,14 @@
+return {
+  _all = {
+    directory = "lua/LUA",
+    verbose = true,
+    loaders = { 'lua' },
+    output = 'utfTerminal'
+},
+default = {
+},
+apiUnit = {
+    coverage = true,
+    tags = "api"
+  }
+}

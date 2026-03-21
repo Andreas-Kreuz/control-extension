@@ -1,0 +1,97 @@
+{
+  "name": "@ak/web-server",
+  "version": "0.0.1",
+  "description": "Control Extension Server für EEP",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "build-shared": "yarn workspace @ak/web-shared run build",
+    "build-app": "yarn workspace @ak/web-app run build",
+    "copy-web-app": "yarn run pub-del ; yarn run pub-mkdir && yarn run pub-copy",
+    "bash": "bash",
+    "pub-copy": "yarn run bash -c \"cp -r ../web-app/dist/* build/public_html/\"",
+    "pub-del": "yarn run bash -c \"test -d build/public_html && rm -rf build/public_html\"",
+    "pub-mkdir": "yarn run bash -c \"mkdir -p build/public_html\"",
+    "build": "node ../../scripts/sync-control-extension-version.mjs && yarn build-shared && yarn build-app && yarn copy-web-app && tsc --build",
+    "watch": "tsc -w",
+    "lint": "eslint \"src/**/*.ts\"",
+    "start": "yarn run build && electron ./build/main/index.js",
+    "start-headless": "tsc && node ./build/server/app/HeadlessStart.js",
+    "start-with-app": "yarn build && electron ./build/main/index.js",
+    "start-e2e-headless": "yarn build-shared && tsc && node ./build/server/app/HeadlessStart.js --testmode --exchange-dir ../web-app/cypress/io",
+    "start-e2e-electron": "yarn build-shared && tsc && electron ./build/main/index.js --testmode --exchange-dir ../web-app/cypress/io",
+    "package-win": "node ../../scripts/sync-control-extension-version.mjs && yarn build && electron-builder build --win --x64",
+    "pack": "node ../../scripts/sync-control-extension-version.mjs && electron-builder --dir",
+    "dist": "node ../../scripts/sync-control-extension-version.mjs && electron-builder",
+    "persist-eep-state": "tsc && node ./build/server/eep-service/eep-state-reader.js"
+  },
+  "repository": "https://github.com/ak-lua-bibliothek-fuer-eep",
+  "keywords": [
+    "EEP",
+    "Lua"
+  ],
+  "main": "./build/main/index.js",
+  "build": {
+    "electronVersion": "35.1.2",
+    "appId": "io.github.andreas-kreuz.control-extention-for-eep",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    },
+    "mac": {
+      "category": "Application"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "compression": "maximum",
+      "artifactName": "control-extension-server.${ext}"
+    }
+  },
+  "author": "Andreas-Kreuz",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/command-line-args": "^5.2.3",
+    "@types/command-line-usage": "^5.0.4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "@types/tail": "^2.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "del-cli": "^7.0.0",
+    "electron": "^41.0.3",
+    "electron-builder": "26.8.1",
+    "eslint": "^10.0.3",
+    "npm-run-all": "^4.1.5",
+    "run-script-os": "^1.1.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@ak/web-shared": "workspace:^",
+    "@electron/typescript-definitions": "^9.1.5",
+    "command-line-args": "^6.0.1",
+    "command-line-usage": "^7.0.4",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "rxjs": "^7.8.2",
+    "socket.io": "^4.8.3",
+    "tail": "^2.2.6"
+  }
+}
