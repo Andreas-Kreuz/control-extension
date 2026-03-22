@@ -1,7 +1,7 @@
 import { useTrain } from './TrainProvider';
-import { TrainListEntry } from '@ak/web-shared';
+import { TrainListDto } from '@ak/web-shared';
 
-function useTrains(): TrainListEntry[] {
+function useTrains(): TrainListDto[] {
   const trainStore = useTrain();
   return trainStore?.trainList || [];
 }

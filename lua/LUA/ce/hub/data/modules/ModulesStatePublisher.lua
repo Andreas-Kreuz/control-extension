@@ -5,7 +5,6 @@ local ModulesDataCollector = require("ce.hub.data.modules.ModulesDataCollector")
 local TableUtils = require("ce.hub.util.TableUtils")
 
 ---@class ModulesStatePublisher
----@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():table
 ModulesStatePublisher = {}

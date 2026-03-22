@@ -1,3 +1,4 @@
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/time/TimeLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeDtoFactory ...") end
 
 local TimeDtoFactory = {}

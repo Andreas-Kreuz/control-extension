@@ -57,11 +57,9 @@
 ---@field sequenceInfo any
 ---@field laneInfo any
 ---@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field addLightStructure
---- fun(self: TrafficLight, redStructure?: string, greenStructure?: string,
+---@field addLightStructure fun(self: TrafficLight, redStructure?: string, greenStructure?: string,
 --- yellowStructure?: string, requestStructure?: string):nil
----@field addAxisStructure
---- fun(self: TrafficLight, structureName: string, axisName: string, positionDefault: number,
+---@field addAxisStructure fun(self: TrafficLight, structureName: string, axisName: string, positionDefault: number,
 --- positionRed?: number, positionGreen?: number, positionYellow?: number,
 --- positionRedYellow?: number, positionPedestrian?: number):nil
 ---@field setSequenceInfo fun(self: TrafficLight, sequenceInfo: any):nil
@@ -100,8 +98,7 @@
 ---@field incrementWaitCount fun(self: Lane):nil
 ---@field laneCanDrive fun(lane: Lane, trafficLights: table):boolean
 ---@field name string
----@field new
---- fun(self: Lane, name: string, eepSaveId: number, trafficLight: TrafficLight,
+---@field new fun(self: Lane, name: string, eepSaveId: number, trafficLight: TrafficLight,
 --- directions?: string[], trafficType?: string):Lane
 ---@field queue Queue
 ---@field requestInfoText string|nil
@@ -153,9 +150,8 @@
 ---@field getName fun(self: IntersectionSequence):string
 ---@field new fun(self: IntersectionSequence, name: string, greenPhaseSeconds?: number):IntersectionSequence
 ---@field initSequence fun(self: IntersectionSequence):nil
----@field trafficLightsToTurnRedAndGreen
---- fun(self: IntersectionSequence, oldSequence?: IntersectionSequence):
---- (table<TrafficLight, TrafficLightType>, table<TrafficLight, TrafficLightType>)
+---@field trafficLightsToTurnRedAndGreen fun(self: IntersectionSequence, oldSequence?: IntersectionSequence):
+---(table<TrafficLight, TrafficLightType>, table<TrafficLight, TrafficLightType>)
 ---@field tasksForSwitchingFrom fun(self: IntersectionSequence, oldSequence?: IntersectionSequence, afterRedTask?: any):table
 ---@field getLanes fun(self: IntersectionSequence):table<Lane, boolean>
 ---@field lanesNamesText fun(self: IntersectionSequence):string
@@ -220,11 +216,11 @@
 ---@field createIntersectionLaneDtoList fun(lanes: table):string,string,table
 ---@field createIntersectionSwitchingDto fun(switching: table):string,string,string|number,IntersectionSwitchingDto
 ---@field createIntersectionSwitchingDtoList fun(switchings: table):string,string,table
----@field createIntersectionTrafficLightDto
---- fun(trafficLight: table):string,string,string|number,IntersectionTrafficLightDto
+---@field createIntersectionTrafficLightDto fun(trafficLight: table):string,string,string|number,
+---IntersectionTrafficLightDto
 ---@field createIntersectionTrafficLightDtoList fun(trafficLights: table):string,string,table
----@field createIntersectionModuleSettingDto
---- fun(setting: table):string,string,string|number,IntersectionModuleSettingDto
+---@field createIntersectionModuleSettingDto fun(setting: table):
+---string,string,string|number, IntersectionModuleSettingDto
 ---@field createIntersectionModuleSettingDtoList fun(settings: table):string,string,table
 ---@class TrafficLightModelDtoFactory
 ---@field createSignalTypeDefinitionDto fun(definition: table):string,string,string|number,SignalTypeDefinitionDto

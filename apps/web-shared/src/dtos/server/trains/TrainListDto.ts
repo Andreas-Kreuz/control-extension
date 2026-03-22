@@ -1,6 +1,7 @@
-import TrainType from './TrainType';
+// Produced by: web-server/src/server/mod/train/TrainSelector.ts
+import { TrainType } from '../../../model/trains/TrainType';
 
-interface TrainListEntry {
+export interface TrainListDto {
   id: string;
   name: string;
   route: string;
@@ -14,6 +15,3 @@ interface TrainListEntry {
   rollingStockCount: number;
   movesForward: boolean;
 }
-
-export default TrainListEntry;
-export type { TrainListEntry };

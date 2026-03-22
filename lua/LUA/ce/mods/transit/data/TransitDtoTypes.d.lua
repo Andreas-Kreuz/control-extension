@@ -33,9 +33,7 @@
 ---@field createTransitStationDtoList fun(stations: table):string,string,table
 ---@field createTransitLineDto fun(line: Line|table):string,string,string|number,TransitLineDto
 ---@field createTransitLineDtoList fun(lines: table):string,string,table
----@field createTransitModuleSettingDto fun(
----    setting: table
----):string,string,string|number,TransitModuleSettingDto
+---@field createTransitModuleSettingDto fun(setting: table):string,string,string|number,TransitModuleSettingDto
 ---@field createTransitModuleSettingDtoList fun(settings: table):string,string,table
 ---@field createTransitLineNameDto fun(line: Line|table):string,string,string|number,TransitLineDto
 ---@field createTransitLineNameDtoList fun(lines: table):string,string,table

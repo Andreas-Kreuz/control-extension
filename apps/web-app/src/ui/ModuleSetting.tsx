@@ -1,14 +1,14 @@
 import { useSocket } from '../io/SocketProvider';
-import { CommandEvent, LuaSetting } from '@ak/web-shared';
+import { CommandEvent, SettingDto } from '@ak/web-shared';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import FormHelperText from '@mui/material/FormHelperText';
 import Switch from '@mui/material/Switch';
 import { useState } from 'react';
 
-const ModuleSetting = (props: { setting: LuaSetting<boolean> }) => {
+const ModuleSetting = (props: { setting: SettingDto<unknown> }) => {
   const socket = useSocket();
-  const [checked, setChecked] = useState(props.setting.value);
+  const [checked, setChecked] = useState(props.setting.value as boolean);
   const handleChange = () => {
     const wasChecked = checked;
     setChecked(!checked);

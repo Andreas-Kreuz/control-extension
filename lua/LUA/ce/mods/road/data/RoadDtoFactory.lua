@@ -1,3 +1,5 @@
+-- TypeScript LuaDtos: apps/web-server/src/server/ce/dto/roads/
+--   IntersectionLuaDto, IntersectionLaneLuaDto, IntersectionSwitchingLuaDto, IntersectionTrafficLightLuaDto
 if AkDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDtoFactory ...") end
 
 local RoadDtoFactory = {}

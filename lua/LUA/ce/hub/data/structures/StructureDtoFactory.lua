@@ -1,3 +1,4 @@
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/structures/StructureLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDtoFactory ...") end
 
 local StructureDtoFactory = {}
