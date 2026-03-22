@@ -359,6 +359,7 @@ insulate("Check traffic light sequence", function ()
     _G.EEPTime = 10000
 
     ControlExtension.setDebug(false)
+    ControlExtension.deactivateServer()
     Scheduler.debug = false
     Intersection.debug = false
     IntersectionSequence.debug = false

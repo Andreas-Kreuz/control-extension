@@ -39,6 +39,7 @@ local function deleteLogFile()
 end
 
 function LogOutputFileWriter.initialize()
+    _G.print = function () end -- suppress print output for this test
     if initialized then return end
 
     originalAssert = assert
