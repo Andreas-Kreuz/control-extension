@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="http://andreas-kreuz.github.io/ak-lua-bibliothek-fuer-eep">
+  <a href="https://andreas-kreuz.github.io/control-extension">
     <img src="assets/img/ce-logo-72@2x.png" alt="" width=72 height=72>
   </a>
 
@@ -10,7 +10,7 @@
     <b>Lua Hub</b> | <b>Data Bridge</b> | <b>Web App</b>
     <br>
     <br>
-    <a href="http://andreas-kreuz.github.io/ak-lua-bibliothek-fuer-eep"><strong>Anleitungen und Dokumentation</strong></a>
+    <a href="https://andreas-kreuz.github.io/control-extension"><strong>Anleitungen und Dokumentation</strong></a>
   </p>
 </p>
 <br>
@@ -35,7 +35,7 @@ Das Paket besteht aus vier Bausteinen:
 
 ## Ausführliche Dokumentation
 
-- Die Webseite enthält [Anleitungen und Dokumentation](http://andreas-kreuz.github.io/ak-lua-bibliothek-fuer-eep/lua/ce/) zur Verwendung der Control Extension für EEP.
+- Die Webseite enthält [Anleitungen und Dokumentation](https://andreas-kreuz.github.io/control-extension/lua/ce/) zur Verwendung der Control Extension für EEP.
 
 ## Beiträge sind Willkommen
 

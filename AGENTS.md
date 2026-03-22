@@ -20,18 +20,34 @@
 
 ## Dateikodierung
 
-- Alle Dateien mit der Endung `.lua` sind immer als `latin1` / `ISO-8859-1` zu lesen und zu schreiben.
+**Grundregel:** `.lua`-Dateien = `latin1` / `ISO-8859-1`, alle anderen Dateien = `UTF-8`.
+
+### Edit- und Write-Tool: NIEMALS für `.lua`-Dateien mit Umlauten verwenden
+
+Die Edit- und Write-Tools schreiben Dateien als UTF-8 zurück. Das korrumpiert alle latin1-Bytes in der gesamten Datei — auch in Zeilen, die gar nicht geändert wurden. Aus `ü` (0xFC) wird das UTF-8-Ersatzzeichen U+FFFD (0xEF 0xBF 0xBD), das nicht mehr reparierbar ist.
+
+**Stattdessen für `.lua`-Änderungen Bash + Python auf Byte-Ebene verwenden:**
+
+```python
+with open('datei.lua', 'rb') as f:
+    data = f.read()
+data = data.replace(b'alter ascii text', b'neuer ascii text')
+with open('datei.lua', 'wb') as f:
+    f.write(data)
+```
+
+- Alle Ersetzungen müssen reines ASCII bleiben (0x00–0x7F) — niemals Umlaute in den Ersetzungsstrings
+- Neue `.lua`-Dateien ohne Umlaute (reines ASCII) dürfen mit Write erstellt werden
+- Prüfen ob keine Ersatzzeichen enthalten: `python -c "d=open('datei.lua','rb').read(); assert b'\xef\xbf\xbd' not in d, 'ENCODING BROKEN'"`
+
+### Shell-Kommandos mit latin1
+
 - Bei Shell-Kommandos zum Lesen oder Schreiben von `.lua`-Dateien immer die Kodierung explizit auf `latin1` setzen.
-- Alle anderen Dateien sind als `UTF-8` zu lesen und zu schreiben.
-- Die Kodierung bestehender Dateien muss beim Bearbeiten erhalten bleiben; `.lua`-Dateien dürfen niemals versehentlich als `UTF-8` zurückgeschrieben werden.
-- Wenn ein Tool keine Kodierung pro Datei explizit setzen kann, für Änderungen an `.lua`-Dateien lieber ein geeignetes Shell-Kommando mit `latin1` verwenden als eine Änderung mit unklarer Kodierung vorzunehmen.
-- Für PowerShell gilt:
-  - `Windows PowerShell 5.1` unterstützt bei `Get-Content` und `Set-Content` weder `-Encoding ISO88591` noch `-Encoding Latin1`.
-  - `.lua` lesen in `Windows PowerShell 5.1`: `[System.IO.File]::ReadAllText($path, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
-  - `.lua` schreiben in `Windows PowerShell 5.1`: `[System.IO.File]::WriteAllText($path, $content, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
-  - `PowerShell 7` unterstützt `-Encoding Latin1`; für Repo-Kompatibilität die `Windows PowerShell 5.1`-taugliche Variante bevorzugen.
-  - andere Dateien lesen: `Get-Content -Encoding UTF8`
-  - andere Dateien schreiben: `Set-Content -Encoding UTF8`
+- `Windows PowerShell 5.1` unterstützt bei `Get-Content`/`Set-Content` weder `-Encoding ISO88591` noch `-Encoding Latin1`:
+  - lesen:  `[System.IO.File]::ReadAllText($path, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
+  - schreiben: `[System.IO.File]::WriteAllText($path, $content, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
+- `PowerShell 7` unterstützt `-Encoding Latin1`; für Kompatibilität die PS-5.1-Variante bevorzugen.
+- Andere Dateien: `Get-Content -Encoding UTF8` / `Set-Content -Encoding UTF8`
 
 ## Lua-Hinweise
 

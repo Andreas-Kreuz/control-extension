@@ -35,7 +35,7 @@ Das Skript liegt in `ce.modellpacker.AkModellPacker`.
 
 # Beispiel
 
-Alle Anlagen und die Lua-Bibliothek dieser Webseite werden automatisch verpackt - Siehe [Modellinstallation.lua](https://github.com/Andreas-Kreuz/ak-lua-bibliothek-fuer-eep/blob/master/LUA/ModellInstallation.lua)
+Alle Anlagen und die Lua-Bibliothek dieser Webseite werden automatisch verpackt - Siehe [Modellinstallation.lua](https://github.com/Andreas-Kreuz/control-extension/blob/master/LUA/ModellInstallation.lua)
 
 Du benötigst ein in Windows installiertes Lua - siehe:
 [Demo-Anlage-Testen](../../../anleitungen-ampelkreuzung/demo-anlage-testen)

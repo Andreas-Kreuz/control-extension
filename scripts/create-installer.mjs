@@ -55,8 +55,8 @@ const INSTALLER_NAME = `control-extension-for-eep-${version}`;
 const packages = [
     {
         eepVersion: "13,2",
-        germanName: "Lua-Bibliothek von Andreas Kreuz",
-        germanDescription: "Lua-Bibliothek mit Verkehrssteuerung, Aufgabenplanung und Modell-Installation",
+        germanName: "Control Extension für EEP",
+        germanDescription: "Control Extension mit Verkehrssteuerung, Aufgabenplanung und Modell-Installation",
         sources: [
             {
                 subdirectory: "LUA\\ce",

@@ -2,5 +2,5 @@
 
 ## 0.0.1
 
-Diese Lösung ist ein kompletter Neustart der Lua-Bibliothek für EEP von Andreas Kreuz.
+Die Control Extension für EEP ist ein Neustart. Sie ersetzt die Lua-Bibliothek für EEP von Andreas Kreuz.
 Der erste Fokus liegt auf dem Webserver und der Bereitstellung der Daten von EEP.
