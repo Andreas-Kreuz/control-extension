@@ -19,7 +19,8 @@
     "check-doc": "bundle exec jekyll build",
     "check": "yarn run check-lua && yarn run check-e2e && yarn run check-doc",
     "build": "yarn run check && node ./scripts/build-release.mjs",
-    "play": "yarn workspace @ak/web-server run start-with-app"
+    "play": "yarn workspace @ak/web-server run start-with-app",
+    "rebuild-server": "yarn workspace @ak/web-server run build-app && yarn workspace @ak/web-server run copy-web-app"
   },
   "packageManager": "yarn@4.9.1",
   "devDependencies": {

@@ -1,6 +1,6 @@
 import ErrorBoundary from './ErrorBoundary';
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, RouterProvider, createBrowserRouter, Outlet } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 const ConnectionWrapper = lazy(() => import('./ConnectionWrapper'));
 const IntersectionDetails = lazy(() => import('../mod/road/IntersectionDetails'));
@@ -32,6 +32,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <ConnectionWrapper />, children: homeRoutes },
   { path: '/status', element: <StatusGrid /> },
   { path: '/server', element: <Server /> },
+  { path: '*', element: <div>Not Found: {window.location.pathname}</div> },
 ]);
 
 function RoutedApp() {

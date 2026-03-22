@@ -1,6 +1,5 @@
 {
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.fontFamily": "'Source Code Pro', Consolas, 'Courier New', monospace",
   "editor.minimap.maxColumn": 120,
   "editor.rulers": [120],
   "editor.wordWrap": "bounded",
@@ -37,7 +36,7 @@
   "html.format.indentHandlebars": true,
   "html.format.maxPreserveNewLines": 2,
   "html.format.wrapAttributes": "preserve-aligned",
-  "javascript.preferences.quoteStyle": "single",
+  "js/ts.preferences.quoteStyle": "single",
   "prettier.bracketSameLine": true,
   "prettier.jsxSingleQuote": true,
   "prettier.printWidth": 120,
@@ -59,7 +58,6 @@
     "**/.yarn": true,
     "**/.pnp.*": true
   },
-  "typescript.preferences.quoteStyle": "single",
   "Lua.diagnostics.globals": [
     "AkDebugLoad",
     "EEPChangeInfoStructure",
@@ -162,8 +160,15 @@
   "eslint.probe": ["javascript", "javascriptreact", "typescript", "typescriptreact", "html", "vue", "markdown", "html"],
   "editor.formatOnSave": true,
   "eslint.nodePath": ".yarn/sdks",
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "js/ts.tsdk.path": ".yarn/sdks/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "npm.packageManager": "yarn",
-  "vscode-lua-format.configPath": "lua-format.conf"
+  "vscode-lua-format.configPath": "lua-format.conf",
+  "editor.fontVariations": false,
+  "terminal.integrated.profiles.windows": {
+    "PowerShell (UTF-8)": {
+      "source": "PowerShell",
+      "args": ["-NoExit", "/c", "chcp.com 65001"]
+    }
+  }
 }

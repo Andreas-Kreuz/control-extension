@@ -35,6 +35,12 @@ const io = new Server(httpServer, {
 });
 const router = express.Router();
 
+function dirPage(title: string, items: string): string {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
+<style>body{font-family:sans-serif;padding:2rem;max-width:600px}h1{color:#333}a{color:#0070f3}li{margin:.3rem 0}</style>
+</head><body><h1>${title}</h1><ul>${items}</ul></body></html>`;
+}
+
 export class ServerMain {
   private appEffects: AppEffects;
   private socketService: SocketService;
@@ -54,6 +60,15 @@ export class ServerMain {
     console.log('Starting Server with ' + this.serverConfigPath);
     const appDir = path.join(__dirname, '../../public_html');
     app.use('/api/v1', router);
+    // Fallback for /api/v1 when the router has no handlers yet (no EEP directory loaded)
+    app.get('/api/v1', (_req: express.Request, res: express.Response) => {
+      res.setHeader('Content-Type', 'text/html');
+      res.send(dirPage('/api/v1', ''));
+    });
+    app.get('/api', (_req: express.Request, res: express.Response) => {
+      res.setHeader('Content-Type', 'text/html');
+      res.send(dirPage('/api', '<li><a href="/api/v1">v1</a></li>'));
+    });
     app.use(function (req, res, next) {
       res.setHeader('Cache-Control', 'public, max-age=86400');
       return next();

@@ -11,7 +11,7 @@
 - [x] Einfaches Einbinden der Control Extension \
        Funktioniert mit minimalem Code: [lua/LUA/ce/README.md](lua/LUA/ce/README.md)
 
-- [ ] TODO: Interne Erfassung der kompletten erfassten Daten \
+- [ ] TODO: Internes Halten der kompletten erfassten Daten \
        geplant mit [lua/LUA/ce/hub/publish/InternalDataStore.lua](lua/LUA/ce/hub/publish/InternalDataStore.lua)
 
 - [ ] TODO: Erfassung weiterer Daten mit Lua-Funktionen \
@@ -33,8 +33,8 @@ siehe [lua/LUA/ce/hub/databridge/README.md](lua/LUA/ce/databridge/README.md)
 
 siehe [apps/web-server/README.md](apps/web-server/README.md)
 
-- [ ] TODO: Bereitstellung DTOs als TypeScript und Abgleich mit LUA
-- [ ] TODO: Bereitstellung der Daten über eine Web-API
+- [x] TODO: Bereitstellung DTOs als TypeScript und Abgleich mit LUA
+- [x] TODO: Bereitstellung der Daten über eine Web-API
 - [ ] TODO: Bereitstellung der Daten über eine versionierte Web-API
 
 ## Ziele für Web-App
