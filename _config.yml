@@ -1,5 +1,5 @@
 # SITE CONFIGURATION
-baseurl: "/ak-lua-bibliothek-fuer-eep"
+baseurl: "/control-extension"
 url: "https://andreas-kreuz.github.io"
 title: "Control Extension für EEP"
 description: "Control Extension für EEP mit Lua-Hub, Data Bridge, optionalem Server und optionaler Web App."

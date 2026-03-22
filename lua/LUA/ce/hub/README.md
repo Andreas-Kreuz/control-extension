@@ -1,25 +1,45 @@
 ---
 layout: page_with_toc
-title: ControlExtension verwenden
-subtitle: Öffentliche API für das Einbinden und Starten der Hub-Module in EEP
+title: Lua Hub
+subtitle: Das Herz von Control Extension für EEP
 permalink: lua/ce/hub/
 feature-img: "/docs/assets/headers/SourceCode.png"
 img: "/docs/assets/headers/SourceCode.png"
 ---
 
-# Motivation
+# Was ist der Lua Hub?
 
-`ce.ControlExtension` ist der stabile Einstiegspunkt für EEP-Skripte.
+Der Lua Hub dient der Sammlung aller Daten aus einer EEP-Anlage.
 
-Über diese API bindest Du die benötigten Module ein und führst sie in `EEPMain()` zyklisch aus.
-Dabei musst Du die interne Hub-Infrastruktur nicht kennen.
+Seine Aufgaben sind:
 
-Die öffentliche Beschreibung endet bewusst dort, wo Du Module an `ControlExtension.addModules(...)` übergibst.
-Interne Dateien unter `ce.hub` sind Implementierungsdetails und gehören nicht zur öffentlichen API.
+1. **Erfassen und Bereitstellen von Daten**
+   - Erfassen der Daten beim Anlagenstart
+   - Erkennen geänderter Daten im Betrieb
+   - Halten der Daten zur späteren Verwendung
+   - Bereitstellen der Daten über den DataBus
+
+2. **Steuern der Datenübergabe und Module**
+   - Initialisieren und Ausführen von Control Extension Modulen
+   - Planen und Ausführen verzögerter Funktionenaufrufe
+   - Datenbereitstellung an den Control Extension Server
+
+# Schnellstart
+
+`ce.ControlExtension` ist der stabile Einstiegspunkt für EEP-Skripte — darüber bindest Du die Control Extension in deine EEP-Anlage ein und führst sie in `EEPMain()` zyklisch aus.
+
+Das folgende Beispiel skizziert den minimalen Lua-Code, den du für eine Anlage benötigst.
+
+```lua
+local ControlExtension = require("ce.ControlExtension")
+
+function EEPMain()
+    ControlExtension.runTasks(1)
+    return 1
+end
+```
 
 # Öffentliche API
-
-## Einstiegspunkt laden
 
 ```lua
 local ControlExtension = require("ce.ControlExtension")
@@ -117,3 +137,7 @@ Wichtig ist dabei:
 - [eep/README.md](eep/README.md) — EEP-Simulator für Tests ohne EEP
 - [scheduler/README.md](scheduler/README.md) — Zeitbasierter Task-Planer
 - [util/README.md](util/README.md) — Hilfsfunktionen für persistente Zustandsablage
+
+---
+
+Architekturbeschreibung: [README_DEV.md](README_DEV.md)

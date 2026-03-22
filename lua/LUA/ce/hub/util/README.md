@@ -7,7 +7,7 @@ feature-img: "/docs/assets/headers/SourceCode.png"
 img: "/docs/assets/headers/SourceCode.png"
 ---
 
-# Paket `ce.hub.util`
+# Was ist `ce.hub.util`?
 
 Dieses Paket enthält Hilfsfunktionen für die persistente Ablage kleiner Zustände in EEP-Datenslots und in Rollingstock-Tags.
 
@@ -76,3 +76,7 @@ local name = loaded.n
 ## Empfehlung
 
 Für persistente Zustände kurze Schlüssel wie `b`, `z`, `r` oder `t` verwenden und optionale Felder beim Speichern lieber weglassen als Platzhalter wie `"nil"` abzulegen.
+
+---
+
+Architekturbeschreibung: [README_DEV.md](README_DEV.md)

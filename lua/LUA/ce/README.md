@@ -7,44 +7,41 @@ feature-img: "/docs/assets/headers/SourceCode.png"
 img: "/docs/assets/headers/SourceCode.png"
 ---
 
-# Motivation
+# Was ist die Control Extension?
 
-Die Control Extension für EEP ist eine Erweiterung für EEP.
+Die Control Extension erweitert Deine EEP-Anlage um einen strukturierten Laufzeitkern für Lua-Module.
+Du kannst Deine Anlagenlogik in wiederverwendbare Module aufteilen und bei Bedarf Daten und Steuerfunktionen über zusätzliche Werkzeuge nach außen bereitstellen.
 
-Sie besteht aus 4 Bestandteilen:
+Das Paket besteht aus vier Bausteinen:
 
-1. **Lua Hub** in `ce.hub` ist die Steuerzentrale und wird mittels `ce.ControlExtension` in EEPMain() genutzt. Er erfüllt verschiedene Aufgaben:
-   - Datenerfassung zur aktuellen Anlage aus EEP.
-   - Datenhaltung und Datenbereitstellung über einen Datenbus.
-   - Allgemeine Steuerung mittels EEP-Funktionen.
+1. **Lua Hub** in `ce.hub` — der Laufzeitkern. Er lädt und führt alle registrierten Module aus.
+2. **Data Bridge** _(optional)_ in `ce.databridge` — überträgt Daten aus EEP an externe Werkzeuge.
+3. **Control Extension Server** _(optional)_ — bereitet die Daten auf und stellt sie für Clients bereit.
+4. **Control Extension Web App** _(optional)_ — zeigt Daten im Browser an und erlaubt die Bedienung.
 
-2. **Data Bridge** (optional) in `ce.databridge` besteht aus Lua Code und stellt Daten des Datenbus nach außen bereit und nimmt Funktionsaufrufe entgegen.
+Für die Anlagensteuerung genügt der Lua Hub. Server und Web App sind optional.
 
-3. **Control Extension Server** (optional) bereitet die Daten der Data Bridge generisch auf und stellt sie für externe Clients bereit.
+## Schnellstart
 
-4. **Control Extension Web App** (optional) bietet eine Web-Oberfläche für Anzeige und Bedienung.
+Damit ein EEP Anlage den Hub nutzt, wird der Einstiegspunkt `ce.ControlExtension` in den Lua Code der Anlage aufgenommen.
 
-## Modulerweiterungen `CeModule`
+1. **Ändere den Lua Code deiner Anlage** \
+   Nutze den Lua-Editor von EEP und klicke dann auf Skript neu laden. \
+   ⚠️ **Wenn du schon eigenen Lua-Code hast, dann füge nur die beiden Zeilen mit `ControlExtension` hinzu.**
 
-Der Lua Hub selbst ist so aufgebaut, dass er weitere CeModule einbinden kann. Diese CeModule müssen dafür mitbringen:
+   ```lua
+   local ControlExtension = require("ce.ControlExtension")
 
-### Notwendige Felder für Module
+   function EEPMain()
+      ControlExtension.runTasks(1)
+      return 1
+   end
+   ```
 
-- `id` (`string`) - Eindeutige UUID des Modules, die sich nicht ändern darf, z.B. `8aeef2ab-8672-4f9a-a929-d62845f5f1fc`
-- `name` (`string`) - Name des Moduls - ist der Name der Datei wie in der require-Methode von Lua beschrieben, z.B. `ce.hub.mods.CoreCeModule`
-- `enabled` (`boolean`) - Soll gesetzt werden können, um das Modul zu aktivieren
+2. **Starte dann den Control Server im EEP-Verzeichnis** \
+   Ist dein EEP in `C:\Trend\EEP18` installiert, dann findest du ihn in `C:\Trend\EEP18\LUA\ce\control-extension-server.exe`.
 
-### Notwendige Methoden für Module
-
-- `init()` - Kein Rückgabewert - Wird beim ersten Lauf von EEPMain() aufgerufen und dann nicht wieder.
-- `run()` - Kein Rückgabewert - Wird bei jedem Lauf von EEPMain() aufgerufen.
-
-### Daten mit Modulen an die Data Bridge übergeben
-
-Wenn ein Modul Daten bereitstellen möchte, kann es das über den Datenbus tun. Dazu bietet sich die run()-Methode an, aber auch jeder andere beliebige Zeitpunkt.
-
-Die Konvention, an die sich die integrierten Module des Hubs halten ist folgender Ablauf: \
-Die gesammelten Daten werden vom `*StatePublisher` des Moduls mit `*DataCollector` eingesammelt und mittels `*DtoFactory` in Datentransferobjekte (DTOs) umgewandelt. Damit die Summe aller DTOs eindeutig ist, werden alle Daten in Datenabschnitte (`room`) einsortiert und jeder dieser Datenabschnitte enthält eine Liste von Daten, für jeden Typ von DTOs ist klar festgelegt, anhand welches Feldes, die DTOs eindeutig in der Tabelle aufgefunden werden. Dies erlaubt die Ablage in Map-Strukturen `room:string` -> `dtoId:string|number` -> `dto:table`
+Eine vollständige Beschreibung der API findest Du in [hub/README.md](hub/README.md).
 
 ## Dokumentation
 
@@ -57,7 +54,7 @@ Die gesammelten Daten werden vom `*StatePublisher` des Moduls mit `*DataCollecto
 
 ### Für Entwickler
 
-- [DEVELOP.md](DEVELOP.md) — Eigene CeModule entwickeln und integrieren
+- [README_DEV.md](README_DEV.md) — Eigene CeModule entwickeln und integrieren
 - [hub/data/DTO.md](hub/data/DTO.md) — Alle Datenräume und DTO-Typen im Überblick
 
 ### Weitere Pakete

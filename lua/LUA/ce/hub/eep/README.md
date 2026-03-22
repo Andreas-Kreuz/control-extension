@@ -7,11 +7,10 @@ feature-img: "/docs/assets/headers/SourceCode.png"
 img: "/docs/assets/headers/SourceCode.png"
 ---
 
-# Paket ce.hub.eep
+# Was ist `ce.hub.eep`?
 
-* Bietet die Funktionen von EEP 16 für Deine Tests.
-
-Das Skript `EepSimulator` stellt alle dokumentierten Funktionen von EEP zur Verfügung und ist für die Verwendung in Test-Klassen vorgesehen.
+Mit dem `EepSimulator` kannst Du Deine Lua-Skripte testen, ohne EEP laufen zu haben.
+`EepOriginalApi.d.lua` beschreibt alle EEP-Funktionen so, dass IDEs sie als Code-Vervollständigung anbieten können.
 
 ## Verwendung
 
@@ -33,3 +32,7 @@ require("ce.hub.eep.EepSimulator")
 EEPSetSignal(32, 2)
 assert (2 == EEPGetSignal(32))
 ```
+
+---
+
+Architekturbeschreibung: [README_DEV.md](README_DEV.md)

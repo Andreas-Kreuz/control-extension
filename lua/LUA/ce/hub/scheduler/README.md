@@ -7,11 +7,9 @@ feature-img: "/docs/assets/headers/SourceCode.png"
 img: "/docs/assets/headers/SourceCode.png"
 ---
 
-# Motivation
+# Was ist `ce.hub.scheduler`?
 
-Der Planer erlaubt es Dir **Aktionen** nach einer von Dir festgelegten Zeitspanne in Sekunden auszuführen.
-
-Weiterhin kann der Planer **Folgeaktionen** dann einplanen, wenn eine von Dir festgelegte Zeitspanne nach der vorhergehenden Aktion vergangen ist.
+Der Planer erlaubt es Dir, **Aktionen** nach einer festgelegten Zeitspanne in Sekunden auszuführen und **Folgeaktionen** einzuplanen, sobald eine Zeitspanne nach der vorherigen Aktion vergangen ist.
 
 # Funktionen
 
@@ -60,3 +58,7 @@ function EEPMain()
     return 1
 end
 ```
+
+---
+
+Architekturbeschreibung: [README_DEV.md](README_DEV.md)
