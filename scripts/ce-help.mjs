@@ -21,6 +21,7 @@ const targets = [
     { name: "check", description: "Run all checks: check-lua + check-e2e + check-doc" },
     { name: "build", description: "Run all checks, then build Windows .exe and create EEP release package" },
     { name: "play", description: "Build and start Electron server for real-life testing with EEP" },
+    { name: "rebuild-server", description: "Build the web app and copy it into the server (no Electron restart)" },
     { name: "ce-help", description: "Print this help message" },
 ];
 

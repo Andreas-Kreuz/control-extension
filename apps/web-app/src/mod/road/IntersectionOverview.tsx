@@ -45,7 +45,7 @@ function IntersectionOverview() {
             </CardActionArea>
             <CardActions>
               <Button
-                href="https://andreas-kreuz.github.io/ak-lua-bibliothek-fuer-eep/docs/anleitungen/"
+                href="https://andreas-kreuz.github.io/control-extension/docs/anleitungen/"
                 target="_blank"
                 rel="noopener noreferrer"
               >

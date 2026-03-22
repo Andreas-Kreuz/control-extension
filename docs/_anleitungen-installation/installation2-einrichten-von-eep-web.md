@@ -18,7 +18,7 @@ date: 2017-09-08
 
 1. **Du brauchst für Lua**
 
-   Eine aktuelle Version der Lua-Bibliothek von Andreas Kreuz - mindestens Version 0.9.0 ([siehe Installation](../anleitungen-installation/installation))
+   Eine aktuelle Version der Control Extension - mindestens Version 0.9.0 ([siehe Installation](../anleitungen-installation/installation))
 
 2. **Lua einrichten**
 

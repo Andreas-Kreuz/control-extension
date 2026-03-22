@@ -15,4 +15,4 @@
 Dieses Projekt enthält die optionale Web-Applikation der Control Extension für EEP.
 
 Mehr Informationen zur Control Extension für EEP:
-<https://github.com/Andreas-Kreuz/ak-lua-bibliothek-fuer-eep>
+<https://github.com/Andreas-Kreuz/control-extension>

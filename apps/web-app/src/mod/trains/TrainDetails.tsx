@@ -1,5 +1,5 @@
 import TrainCamList from './TrainCamList';
-import { TrainListEntry } from '@ak/web-shared';
+import { TrainListDto } from '@ak/web-shared';
 import BadgeIcon from '@mui/icons-material/Badge';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -18,12 +18,12 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 
-export const getTrainChips = (t: TrainListEntry) => {
+export const getTrainChips = (t: TrainListDto) => {
   const elements = getTrainElements(t).filter((el) => el.key !== 1 && el.on);
   return elements.map((el) => <Chip key={el.key} variant="outlined" label={el.primary} icon={<el.icon />} />);
 };
 
-export const getTrainElements = (t: TrainListEntry) => [
+export const getTrainElements = (t: TrainListDto) => [
   { key: 1, on: t.id, icon: BadgeIcon, primary: t.id, description: 'Name des Fahrzeugs in EEP' },
   { key: 2, on: t.route, icon: DirectionsIcon, primary: t.route, description: 'Route aus EEP' },
   { key: 3, on: t.line, icon: RouteIcon, primary: t.line || '-', description: 'Linie' },
@@ -37,7 +37,7 @@ export const getTrainElements = (t: TrainListEntry) => [
   { key: 'Zugname', on: t.name, icon: LabelIcon, primary: t.name || '-', description: 'Name des Zuges' },
 ];
 
-const TrainDetails = (props: { train: TrainListEntry }) => {
+const TrainDetails = (props: { train: TrainListDto }) => {
   const [editMode, setEditMode] = useState(false);
   const t = props.train;
   const trainElements = getTrainElements(t);

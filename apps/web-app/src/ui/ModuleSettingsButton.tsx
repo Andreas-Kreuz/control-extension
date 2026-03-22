@@ -1,5 +1,5 @@
 import ModuleSettings from './ModuleSettings';
-import { LuaSettings } from '@ak/web-shared';
+import { SettingsDto } from '@ak/web-shared';
 import CloseIcon from '@mui/icons-material/CloseOutlined';
 import TuneIcon from '@mui/icons-material/TuneOutlined';
 import AppBar from '@mui/material/AppBar';
@@ -24,7 +24,7 @@ const Transition = forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function ModuleSettingsButton(props: { settings?: LuaSettings }) {
+function ModuleSettingsButton(props: { settings?: SettingsDto }) {
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('sm'));
   const [open, setOpen] = useState(false);

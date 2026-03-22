@@ -24,11 +24,19 @@ local function writeFile(fileName, content)
     file:close()
 end
 
+local function getServerIsRunningFile()
+    return ExchangeDirRegistry.getExchangeDirectory() .. "/server-is-running"
+end
+
+function ServerExchangeFileIo.isServerRunning()
+    return fileExists(getServerIsRunningFile())
+end
+
 local serverWasReadyLastTime = true
 local serverWasListeningLastTime = true
 --- Pruefe Status des Web Servers.
 function ServerExchangeFileIo.isServerReady()
-    local serverIsRunningFileName = ExchangeDirRegistry.getExchangeDirectory() .. "/server-is-running"
+    local serverIsRunningFileName = getServerIsRunningFile()
     local eventsFromCePendingFileName = ExchangeDirRegistry.getExchangeDirectory() .. "/events-from-ce.pending"
 
     if fileExists(serverIsRunningFileName) then
@@ -64,7 +72,7 @@ function ServerExchangeFileIo.writeOutgoingEvents(jsonData)
     local serverIsRunningFileName = ExchangeDirRegistry.getExchangeDirectory() .. "/server-is-running"
 
     ServerExchangeFileIo.serverStateCounterFileName = ExchangeDirRegistry.getExchangeDirectory() ..
-                                                      "/server-state.counter"
+        "/server-state.counter"
 
     if not writing then
         writing = true

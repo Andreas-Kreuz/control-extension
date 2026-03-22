@@ -2,6 +2,7 @@ import { lazy, useMemo } from 'react';
 import useNavState from '../nav/NavElements';
 import { useNavigate } from 'react-router-dom';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 
@@ -33,9 +34,12 @@ function MainMenu() {
             </AppCardGrid>
           ))}
         </AppCardGridContainer>
-        <Grid container style={{ alignItems: 'center' }} justifyContent={'space-between'} mt={2}>
+        <Grid container style={{ alignItems: 'flex-start' }} justifyContent={'flex-start'} spacing={2} mt={2}>
           <Button variant="text" startIcon={<BarChartIcon />} onClick={() => navigate('statistics')}>
             Statistik
+          </Button>
+          <Button variant="text" startIcon={<Inventory2Icon />} href="/api">
+            API
           </Button>
         </Grid>
       </AppPage>

@@ -1,7 +1,7 @@
-import LuaSetting from './LuaSetting';
+import { SettingDto } from '../../dtos/server/settings/SettingDto';
 
-export class LuaSettingChangeEvent {
-  constructor(public setting: LuaSetting<any>, public newValue: any) {}
+export class SettingDtoChangeEvent {
+  constructor(public setting: SettingDto<any>, public newValue: any) {}
 }
 
-export default LuaSettingChangeEvent;
+export default SettingDtoChangeEvent;

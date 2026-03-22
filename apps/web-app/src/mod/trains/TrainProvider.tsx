@@ -1,14 +1,14 @@
 import { useApiDataRoomHandler, useDynamicRoomHandler, useRoomHandler } from '../../io/useRoomHandler';
-import { RollingStock, TrackType, TrainListRoom } from '@ak/web-shared';
-import { Train, TrainListEntry, TrainType } from '@ak/web-shared';
+import { RollingStockDto, TrackType, TrainListRoom } from '@ak/web-shared';
+import { TrainDto, TrainListDto, TrainType } from '@ak/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
 import useDebug from '../../io/useDebug';
 
 export interface State {
   trackType: TrackType;
-  trainList: TrainListEntry[];
-  rollingStock: Record<string, RollingStock>;
-  selectedTrain?: Train;
+  trainList: TrainListDto[];
+  rollingStock: Record<string, RollingStockDto>;
+  selectedTrain?: TrainDto;
   selectedTrainName?: string;
 }
 
@@ -21,8 +21,8 @@ export const initialState: State = {
 };
 
 type Action =
-  | { type: 'trains updated'; trains: TrainListEntry[] }
-  | { type: 'rollingstock updated'; rollingStock: Record<string, RollingStock> }
+  | { type: 'trains updated'; trains: TrainListDto[] }
+  | { type: 'rollingstock updated'; rollingStock: Record<string, RollingStockDto> }
   | { type: 'set track type'; trackType: TrackType };
 
 const reducer = (state: State, action: Action) => {
@@ -51,7 +51,7 @@ export const TrainProvider = (props: { children: ReactNode }) => {
 
   const trainDispatcher = (payload: string) => {
     if (debug) console.log('                 |⚠️ FIRED ---', '🚂 TRAINS UPDATED');
-    const data: Record<string, TrainListEntry> = JSON.parse(payload);
+    const data: Record<string, TrainListDto> = JSON.parse(payload);
     const trains = Object.values(data).sort((a, b) => a.id.localeCompare(b.id, 'de'));
     dispatch({ type: 'trains updated', trains: trains });
   };
@@ -59,7 +59,7 @@ export const TrainProvider = (props: { children: ReactNode }) => {
 
   const rollingStockDispatcher = (payload: string) => {
     if (debug) console.log('                 |⚠️ FIRED ---', '🚂 ROLLING STOCK UPDATED');
-    const data: Record<string, RollingStock> = JSON.parse(payload);
+    const data: Record<string, RollingStockDto> = JSON.parse(payload);
     dispatch({
       type: 'rollingstock updated',
       rollingStock: data,

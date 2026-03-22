@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="http://andreas-kreuz.github.io/ak-lua-bibliothek-fuer-eep">
+  <a href="http://andreas-kreuz.github.io/control-extension">
     <img src="../assets/img/eep-web-logo-shadow-72.png" alt="" width=72 height=72>
   </a>
   <h3 align="center">Lua-Bibliothek entwickeln</h3>
@@ -57,16 +57,16 @@ Für das Betrachten der statischen Dokumentation vor dem Upload wird [Jekyll](ht
 
 ### Projekt klonen auf der Kommandozeile
 
-- Dieses Projekt klonen (wird in ein Unterverzeichnis `ak-lua-bibliothek-fuer-eep` gespeichert):
+- Dieses Projekt klonen (wird in ein Unterverzeichnis `control-extension` gespeichert):
 
   ```bash
   cd ein-verzeichnis-deiner-wahl
-  git clone https://github.com/Andreas-Kreuz/ak-lua-bibliothek-fuer-eep.git
+  git clone https://github.com/Andreas-Kreuz/control-extension.git
   ```
 
 ### Projekt öffnen
 
-Nun kann das Verzeichnis `ak-lua-bibliothek-fuer-eep` in VS Code als Ordner geöffnet werden.
+Nun kann das Verzeichnis `control-extension` in VS Code als Ordner geöffnet werden.
 
 ### Vorbereitung der Entwicklung
 
@@ -115,7 +115,7 @@ Wenn Du Server und Web-App getrennt starten willst, benutze:
 Wenn Du möchtest, kannst Du das Lua-Verzeichnis aus Git direkt in EEP nutzen. Erstelle dazu einen Link mit der Kommandozeile:
 
 ```cmd
-mklink /D C:\Trend\EEP15\LUA\ce C:\GitHub\ak-lua-bibliothek-fuer-eep\lua\LUA\ce
+mklink /D C:\Trend\EEP15\LUA\ce C:\GitHub\control-extension\lua\LUA\ce
 ```
 
 ### Webseite bearbeiten

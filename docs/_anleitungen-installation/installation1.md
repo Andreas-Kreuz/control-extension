@@ -1,7 +1,7 @@
 ---
 layout: page_with_toc
-title: Lua-Bibliothek installieren
-subtitle: Hier erfährst Du, wie Du die Lua-Bibliothek von Andreas Kreuz herunterladen und direkt in EEP installieren kannst.
+title: Control Extension installieren
+subtitle: Hier erfährst Du, wie Du die Control Extension herunterladen und direkt in EEP installieren kannst.
 type: Anleitung
 img: "/assets/thumbnails/ModellPacker.png"
 date: 2017-09-01
@@ -9,15 +9,15 @@ permalink: docs/anleitungen-installation/installation
 tags: [Installation]
 ---
 
-# Installieren der Lua-Bibliothek
+# Installieren der Control Extension
 
 ## Herunterladen
 
-- Lade Dir die Datei [`Installer-AK-Bibliothek-fuer-EEP.zip`]({{ site.github.latest_release.assets[0].browser_download_url }}) herunter.
+- Lade Dir die Datei [`control-extension-for-eep-*.zip`]({{ site.github.latest_release.assets[0].browser_download_url }}) herunter.
 
 ## Installieren
 
-Öffne EEP und verwende den Modell-Installer, um die Lua-Bibliothek zu installieren
+Öffne EEP und verwende den Modell-Installer, um die Control Extension zu installieren
 
 - Klicke auf Modell-Installer
 

@@ -1,3 +1,4 @@
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDtoFactory ...") end
 
 local TrainDtoFactory = {}

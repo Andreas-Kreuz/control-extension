@@ -28,10 +28,10 @@ local function copyRuntimeEntries(runtimeEntries)
     return copy
 end
 
-local function runInitModulesPhase(executionOrderModuleNames, registeredCeModules)
+local function runInitModulesPhase(executionOrderModuleNames, registeredCeModules, serverEnabled)
     if modulesInitialized then return end
 
-    ServerExchangeCoordinator.initialize()
+    ServerExchangeCoordinator.initialize(serverEnabled)
 
     for _, moduleName in ipairs(executionOrderModuleNames) do
         if MainLoopRunner.debug then
@@ -98,9 +98,9 @@ end
 
 function MainLoopRunner.areModulesInitialized() return modulesInitialized end
 
-function MainLoopRunner.initModules(executionOrderModuleNames, registeredCeModules)
+function MainLoopRunner.initModules(executionOrderModuleNames, registeredCeModules, serverEnabled)
     runTimed("MainLoopRunner.runCycle-1-initModules", function ()
-        runInitModulesPhase(executionOrderModuleNames, registeredCeModules)
+        runInitModulesPhase(executionOrderModuleNames, registeredCeModules, serverEnabled)
     end)
 end
 
@@ -121,7 +121,7 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
 
     runTimed("MainLoopRunner.runCycle-OVERALL", function ()
         runTimed("MainLoopRunner.runCycle-1-initModules", function ()
-            runInitModulesPhase(executionOrderModuleNames, registeredCeModules)
+            runInitModulesPhase(executionOrderModuleNames, registeredCeModules, enableServer)
         end)
         runTimed("MainLoopRunner.runCycle-2-runModules", function ()
             runModulesPhase(executionOrderModuleNames, registeredCeModules)

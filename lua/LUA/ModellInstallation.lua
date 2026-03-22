@@ -9,9 +9,9 @@ if arg and arg[1] then currentDirectory = arg[1] end
 print("[#ModellInstallation] Suche Installationsdateien in Verzeichnis \"" .. currentDirectory .. "\"")
 
 -----------------------------------------
--- Paket: Skripte von Andreas Kreuz
+-- Paket: Control Extension
 -----------------------------------------
-local paket0 = AkModellPaket:new("13,2", "Lua-Bibliothek von Andreas Kreuz",
+local paket0 = AkModellPaket:new("13,2", "Control Extension für EEP",
                                  "Lua-Bibliothek mit Verkehrssteuerung, Aufgabenplanung und Modell-Installation")
 paket0:addFiles(currentDirectory, "", "LUA\\ce", {
     "README.md",
@@ -26,7 +26,7 @@ paket0:addFiles(currentDirectory, "", "LUA\\ce", {
 })
 
 do
-    local installer = AkModellInstaller:new("Installer-AK-Lua-Bibliothek-fuer-EEP")
+    local installer = AkModellInstaller:new("Installer-Control-Extension-fuer-EEP")
     installer:addModelPackage(paket0)
     installer:generatePackage(currentDirectory .. "\\modell-pakete")
 end
@@ -66,7 +66,7 @@ print("[#ModellInstallation] " .. paket1.germanName)
 print("[#ModellInstallation] " .. paket2.germanName)
 print("[#ModellInstallation] " .. paket3.germanName)
 
-local installer = AkModellInstaller:new("Installer-AK-Lua-Bibliothek-fuer-EEP")
+local installer = AkModellInstaller:new("Installer-Control-Extension-fuer-EEP")
 installer:addModelPackage(paket0)
 installer:addModelPackage(paket1)
 installer:addModelPackage(paket2)

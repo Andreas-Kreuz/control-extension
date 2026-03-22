@@ -86,13 +86,11 @@
 ---@field createIntersectionLaneDtoList fun(lanes: table):string,string,table
 ---@field createIntersectionSwitchingDto fun(switching: table):string,string,string|number,IntersectionSwitchingDto
 ---@field createIntersectionSwitchingDtoList fun(switchings: table):string,string,table
----@field createIntersectionTrafficLightDto fun(
----    trafficLight: table
----):string,string,string|number,IntersectionTrafficLightDto
+---@field createIntersectionTrafficLightDto fun(trafficLight: table):string,string,string|number,
+---IntersectionTrafficLightDto
 ---@field createIntersectionTrafficLightDtoList fun(trafficLights: table):string,string,table
----@field createIntersectionModuleSettingDto fun(
----    setting: table
----):string,string,string|number,IntersectionModuleSettingDto
+---@field createIntersectionModuleSettingDto fun(setting: table):string,string,string|number,
+---IntersectionModuleSettingDto
 ---@field createIntersectionModuleSettingDtoList fun(settings: table):string,string,table
 
 ---@class TrafficLightModelDtoFactory

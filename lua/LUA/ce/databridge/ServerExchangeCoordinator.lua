@@ -1,12 +1,4 @@
---- Export EEP data / read and execute commands.
--- LuaDoc: http://keplerproject.github.io/luadoc/manual.html
---
---[[ Usage:
--- Do NOT use this class manually
 -- Use this class in XxxBridgeConnector to register commands
-local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
---]] -- @author Andreas Kreuz
--- @release 0.10.2
 if AkDebugLoad then print("[#Start] Loading ce.databridge.ServerExchangeCoordinator ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local ServerEventBuffer = require("ce.databridge.ServerEventBuffer")
@@ -27,10 +19,18 @@ function ServerExchangeCoordinator.registerAllowedCommand(fName, f)
     IncomingCommandExecutor.registerAllowedCommand(fName, f)
 end
 
-function ServerExchangeCoordinator.initialize()
+function ServerExchangeCoordinator.initialize(serverShallBeUsed)
     if initialized then return end
-
     DataChangeBus.initialize()
+
+    -- Print hint if server should be used but is not ready
+    if serverShallBeUsed and not ServerExchangeFileIo.isServerRunning() then
+        print(
+            "HINWEIS: Starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis, " ..
+            "wenn du den Web Server der Control Extension für EEP verwenden willst."
+        )
+    end
+
     initialized = true
 end
 

@@ -9,7 +9,7 @@ local ControlExtensionHub = {}
 ControlExtensionHub.debug = AkStartWithDebug or false
 ControlExtensionHub.pauseEepDuringInitialization = false
 
-local enableServer = true
+local serverEnabled = true
 
 -- ACHTUNG: DIE VERWENDUNG ERFOLGT AUF EIGENE GEFAHR. ES IST GUT MOEGLICH,
 --          DASS EEP ABSTUERZT, WENN NICHT ALLE ABHAENGIGKEITEN DER BIBLIOTHEK
@@ -28,7 +28,10 @@ end
 
 function ControlExtensionHub.initTasks()
     MainLoopRunner.debug = ControlExtensionHub.debug
-    MainLoopRunner.initModules(ModuleRegistry.getModuleNames(), ModuleRegistry.getRegisteredCeModules())
+    MainLoopRunner.initModules(
+        ModuleRegistry.getModuleNames(),
+        ModuleRegistry.getRegisteredCeModules(),
+        serverEnabled)
 end
 
 function ControlExtensionHub.runTasks(cycleCount)
@@ -42,7 +45,7 @@ function ControlExtensionHub.runTasks(cycleCount)
 
     local totalTime = MainLoopRunner.runCycle(effectiveCycleCount, ModuleRegistry.getModuleNames(),
                                               ModuleRegistry.getRegisteredCeModules(),
-                                              { debug = ControlExtensionHub.debug, enableServer = enableServer })
+                                              { debug = ControlExtensionHub.debug, enableServer = serverEnabled })
 
     if resumeEEP then
         if ControlExtensionHub.debug then
@@ -54,8 +57,8 @@ function ControlExtensionHub.runTasks(cycleCount)
     return totalTime
 end
 
-function ControlExtensionHub.activateServer() enableServer = true end
+function ControlExtensionHub.activateServer() serverEnabled = true end
 
-function ControlExtensionHub.deactivateServer() enableServer = false end
+function ControlExtensionHub.deactivateServer() serverEnabled = false end
 
 return ControlExtensionHub

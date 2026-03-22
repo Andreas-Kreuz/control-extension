@@ -14,7 +14,27 @@ export default class JsonApiUpdateService {
     private router: express.Router,
     private io: Server,
     private cacheService: CacheService,
-  ) {}
+  ) {
+    this.router.get('/', (_req, res) => {
+      const names = this.reducer.getAllRoomNames().sort();
+      const items = names.map((n) => `<li><a href="/api/v1/${n}">${n}</a></li>`).join('');
+      res.setHeader('Content-Type', 'text/html');
+      res.send(
+        `<!DOCTYPE html><html><head><meta charset="utf-8"><title>/api/v1</title>` +
+          `<style>body{font-family:sans-serif;padding:2rem;max-width:600px}h1{color:#333}a{color:#0070f3}li{margin:.3rem 0}</style>` +
+          `</head><body><h1>/api/v1</h1><ul>${items}</ul></body></html>`,
+      );
+    });
+    this.router.get('/:room', (req, res) => {
+      const { room } = req.params;
+      if (!this.reducer.roomAvailable(room)) {
+        res.status(404).json({ error: 'not found' });
+        return;
+      }
+      res.setHeader('Content-Type', 'application/json');
+      res.send(this.reducer.getRoomJsonString(room));
+    });
+  }
 
   onJoinRoom = (socket: Socket, room: string) => {
     // Send data on join
@@ -91,7 +111,6 @@ export default class JsonApiUpdateService {
 
   private onRoomAdded(key: string, json: string): void {
     if (this.debug) console.log('🟦 EMIT to all IO: ' + ApiDataRoom.roomId(key) + ' (' + ApiDataRoom.eventId(key));
-    this.registerApiUrls(key);
     this.io.to(ApiDataRoom.roomId(key)).emit(ApiDataRoom.eventId(key), json);
   }
 
@@ -104,22 +123,6 @@ export default class JsonApiUpdateService {
     if (this.debug) console.log('🟦 EMIT to all IO: ' + ApiDataRoom.roomId(key) + ' (' + ApiDataRoom.eventId(key));
     this.io.to(ServerStatusEvent.Room).emit(ServerStatusEvent.UrlsChanged, this.reducer.getUrlJson());
     this.io.to(ApiDataRoom.roomId(key)).emit(ApiDataRoom.eventId(key), '{}');
-  }
-
-  private registerApiUrls(key: string) {
-    // if (this.debug) console.log('Register: /api/v1/' + key);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.router.get('/' + key, (req: any, res: any) => {
-      res.json(this.getCurrentApiEntry(key));
-    });
-  }
-
-  private getCurrentApiEntry(roomName: string) {
-    if (this.reducer.roomAvailable(roomName)) {
-      return this.reducer.getRoomJson(roomName);
-    } else {
-      return '';
-    }
   }
 
   private lastTimeOut: NodeJS.Timeout;

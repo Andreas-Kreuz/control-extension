@@ -17,3 +17,12 @@
 ---@field createTrainDto fun(train: Train|table):string,string,string|number,TrainDto
 ---@field createTrainDtoList fun(trains: table):string,string,table
 ---@field createTrainReferenceDto fun(trainId: string):string,string,string|number,TrainDto
+
+---@class TrainUpdateInfo
+---@field name string
+---@field speed number
+---@field created boolean
+---@field dirty boolean
+---@field moved boolean
+---@field tracks table|nil
+---@field trackType string|nil

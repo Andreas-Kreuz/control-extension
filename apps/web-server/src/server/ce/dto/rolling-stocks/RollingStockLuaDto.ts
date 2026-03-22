@@ -1,4 +1,6 @@
-interface RollingStock {
+// Lua DtoFactory: lua/LUA/ce/hub/data/rollingstock/RollingStockDtoFactory.lua
+// Room: rolling-stocks
+export interface RollingStockLuaDto {
   id: string;
   name: string;
   trainName: string;
@@ -21,6 +23,3 @@ interface RollingStock {
   posZ: number;
   mileage: number;
 }
-
-export default RollingStock;
-export type { RollingStock };

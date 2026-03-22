@@ -1,7 +1,7 @@
 import useRollingStocks from './useRollingStocks';
-import { RollingStock } from '@ak/web-shared';
+import { RollingStockDto } from '@ak/web-shared';
 
-function useRollingStock(name: string): RollingStock {
+function useRollingStock(name: string): RollingStockDto {
   const rollingStockRecord = useRollingStocks();
   return rollingStockRecord[name] || undefined;
 }

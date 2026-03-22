@@ -25,7 +25,7 @@
     "dist": "node ../../scripts/sync-control-extension-version.mjs && electron-builder",
     "persist-eep-state": "tsc && node ./build/server/eep-service/eep-state-reader.js"
   },
-  "repository": "https://github.com/ak-lua-bibliothek-fuer-eep",
+  "repository": "https://github.com/Andreas-Kreuz/control-extension",
   "keywords": [
     "EEP",
     "Lua"

@@ -1,4 +1,4 @@
-insulate("MainLoopRunner", function()
+insulate("MainLoopRunner", function ()
     require("ce.hub.eep.EepSimulator")
 
     local function clearModule(name) package.loaded[name] = nil end
@@ -35,14 +35,15 @@ insulate("MainLoopRunner", function()
         clearModule("ce.hub.util.RuntimeRegistry")
     end
 
-    before_each(function()
+    before_each(function ()
         resetCoreModules()
         require("ce.hub.eep.EepSimulator")
         local IoInit = require("ce.databridge.IoInit")
-        IoInit.initialize = function() end
+        IoInit.initialize = function () end
     end)
 
-    it("runs modules, state publishers and io on every ControlExtension cycle", function()
+    it("runs modules, state publishers and io on every ControlExtension cycle", function ()
+        _G.print = function () end -- suppress print output for this test
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local ControlExtension = require("ce.ControlExtension")
         local ModuleRegistry = require("ce.hub.ModuleRegistry")
@@ -64,43 +65,43 @@ insulate("MainLoopRunner", function()
             id = "spec-test-module-1",
             name = "spec.TestCeModule",
             enabled = true,
-            init = function() moduleInitCalls = moduleInitCalls + 1 end,
-            run = function() moduleRunCalls = moduleRunCalls + 1 end
+            init = function () moduleInitCalls = moduleInitCalls + 1 end,
+            run = function () moduleRunCalls = moduleRunCalls + 1 end
         }
         local testStatePublisher = {
             name = "spec.TestStatePublisher",
-            initialize = function() publisherInitCalls = publisherInitCalls + 1 end,
-            syncState = function()
+            initialize = function () publisherInitCalls = publisherInitCalls + 1 end,
+            syncState = function ()
                 publisherSyncCalls = publisherSyncCalls + 1
                 return {}
             end
         }
 
-        DataChangeBus.fireListChange = function(room, keyId, list)
+        DataChangeBus.fireListChange = function (room, keyId, list)
             if room ~= "runtime" then return end
             table.insert(capturedRuntimePublishes, {
                 keyId = keyId,
                 overallCount = list["MainLoopRunner.runCycle-OVERALL"] and
-                list["MainLoopRunner.runCycle-OVERALL"].count or 0,
+                    list["MainLoopRunner.runCycle-OVERALL"].count or 0,
                 syncStateCount = list["MainLoopRunner.runCycle-4-syncState"] and
-                list["MainLoopRunner.runCycle-4-syncState"].count or 0,
+                    list["MainLoopRunner.runCycle-4-syncState"].count or 0,
                 serverOutputCount = list["MainLoopRunner.runCycle-7-serverOutput"] and
-                list["MainLoopRunner.runCycle-7-serverOutput"].count or 0,
+                    list["MainLoopRunner.runCycle-7-serverOutput"].count or 0,
                 initModuleCount = list["CeModule.spec.TestCeModule.init"] and
-                list["CeModule.spec.TestCeModule.init"].count or 0
+                    list["CeModule.spec.TestCeModule.init"].count or 0
             })
         end
-        DataChangeBus.printEventCounter = function() end
+        DataChangeBus.printEventCounter = function () end
 
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function()
+        IncomingCommandFileReader.readAndExecuteIncomingCommands = function ()
             commandReadCalls = commandReadCalls + 1
         end
-        ServerExchangeCoordinator.isServerReady = function() return true end
-        ServerExchangeCoordinator.runServerOutputCycle = function()
+        ServerExchangeCoordinator.isServerReady = function () return true end
+        ServerExchangeCoordinator.runServerOutputCycle = function ()
             communicateCalls = communicateCalls + 1
-            return {encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01}
+            return { encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01 }
         end
-        DataStoreFileWriter.write = function() dataStoreWriteCalls = dataStoreWriteCalls + 1 end
+        DataStoreFileWriter.write = function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end
 
         ModuleRegistry.registerModules(testModule)
         StatePublisherRegistry.registerStatePublishers(testStatePublisher)
@@ -130,7 +131,7 @@ insulate("MainLoopRunner", function()
         assert.is_true(RuntimeMetrics.get("CeModule.spec.TestCeModule.init").lastTime >= 0)
     end)
 
-    it("skips server output while server is deactivated but still reads commands", function()
+    it("skips server output while server is deactivated but still reads commands", function ()
         local ControlExtension = require("ce.ControlExtension")
         local ModuleRegistry = require("ce.hub.ModuleRegistry")
         local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
@@ -145,24 +146,24 @@ insulate("MainLoopRunner", function()
             id = "spec-test-module-2",
             name = "spec.DisabledServerModule",
             enabled = true,
-            init = function() end,
-            run = function() end
+            init = function () end,
+            run = function () end
         }
         local testStatePublisher = {
             name = "spec.DisabledServerPublisher",
-            initialize = function() end,
-            syncState = function()
+            initialize = function () end,
+            syncState = function ()
                 publisherSyncCalls = publisherSyncCalls + 1
                 return {}
             end
         }
 
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function()
+        IncomingCommandFileReader.readAndExecuteIncomingCommands = function ()
             commandReadCalls = commandReadCalls + 1
         end
-        ServerExchangeCoordinator.runServerOutputCycle = function()
+        ServerExchangeCoordinator.runServerOutputCycle = function ()
             communicateCalls = communicateCalls + 1
-            return {encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01}
+            return { encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01 }
         end
 
         ModuleRegistry.registerModules(testModule)
@@ -180,7 +181,7 @@ insulate("MainLoopRunner", function()
         assert.equals(0, RuntimeMetrics.get("MainLoopRunner.runCycle-8-dataStoreWrite").lastTime)
     end)
 
-    it("writes the DataStore json only on publish cycles when enabled", function()
+    it("writes the DataStore json only on publish cycles when enabled", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local MainLoopRunner = require("ce.hub.MainLoopRunner")
         local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
@@ -190,27 +191,27 @@ insulate("MainLoopRunner", function()
         local commandReadCalls = 0
         local communicateCalls = 0
 
-        DataChangeBus.fireListChange = function() end
-        DataChangeBus.printEventCounter = function() end
+        DataChangeBus.fireListChange = function () end
+        DataChangeBus.printEventCounter = function () end
 
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function()
+        IncomingCommandFileReader.readAndExecuteIncomingCommands = function ()
             commandReadCalls = commandReadCalls + 1
         end
-        ServerExchangeCoordinator.runServerOutputCycle = function()
+        ServerExchangeCoordinator.runServerOutputCycle = function ()
             communicateCalls = communicateCalls + 1
-            return {encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01}
+            return { encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01 }
         end
-        DataStoreFileWriter.write = function() dataStoreWriteCalls = dataStoreWriteCalls + 1 end
+        DataStoreFileWriter.write = function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end
 
-        MainLoopRunner.runCycle(5, {}, {}, {enableServer = false, enableDataStoreJson = true})
-        MainLoopRunner.runCycle(5, {}, {}, {enableServer = false, enableDataStoreJson = true})
+        MainLoopRunner.runCycle(5, {}, {}, { enableServer = false, enableDataStoreJson = true })
+        MainLoopRunner.runCycle(5, {}, {}, { enableServer = false, enableDataStoreJson = true })
 
         assert.equals(2, commandReadCalls)
         assert.equals(0, communicateCalls)
         assert.equals(1, dataStoreWriteCalls)
     end)
 
-    it("prints all collected runCycle timings in debug output", function()
+    it("prints all collected runCycle timings in debug output", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local MainLoopRunner = require("ce.hub.MainLoopRunner")
         local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
@@ -218,17 +219,17 @@ insulate("MainLoopRunner", function()
         local printedMessages = {}
         local originalPrint = print
 
-        DataChangeBus.fireListChange = function() end
-        DataChangeBus.printEventCounter = function() end
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function() end
-        DataStoreFileWriter.write = function() end
+        DataChangeBus.fireListChange = function () end
+        DataChangeBus.printEventCounter = function () end
+        IncomingCommandFileReader.readAndExecuteIncomingCommands = function () end
+        DataStoreFileWriter.write = function () end
 
-        _G.print = function(message)
+        _G.print = function (message)
             table.insert(printedMessages, tostring(message))
         end
 
-        local ok, err = pcall(function()
-            MainLoopRunner.runCycle(5, {}, {}, {debug = true, enableServer = false, enableDataStoreJson = true})
+        local ok, err = pcall(function ()
+            MainLoopRunner.runCycle(5, {}, {}, { debug = true, enableServer = false, enableDataStoreJson = true })
         end)
 
         _G.print = originalPrint
@@ -249,7 +250,7 @@ insulate("MainLoopRunner", function()
         assert.is_truthy(string.find(runCycleLog, "8%-dataStoreWrite:") ~= nil)
     end)
 
-    it("pauses EEP around first initialization when enabled", function()
+    it("pauses EEP around first initialization when enabled", function ()
         local ControlExtension = require("ce.ControlExtension")
         local ModuleRegistry = require("ce.hub.ModuleRegistry")
         local MainLoopRunner = require("ce.hub.MainLoopRunner")
@@ -259,18 +260,18 @@ insulate("MainLoopRunner", function()
             id = "spec-test-module-3",
             name = "spec.PauseModule",
             enabled = true,
-            init = function() end,
-            run = function() end
+            init = function () end,
+            run = function () end
         }
 
         ModuleRegistry.registerModules(testModule)
         ControlExtension.setPauseEepDuringInitialization(true)
-        MainLoopRunner.runCycle = function()
+        MainLoopRunner.runCycle = function ()
             assert.equals(1, #pauseCalls)
             assert.equals(1, pauseCalls[1])
             return 0
         end
-        _G.EEPPause = function(value)
+        _G.EEPPause = function (value)
             table.insert(pauseCalls, value)
         end
 

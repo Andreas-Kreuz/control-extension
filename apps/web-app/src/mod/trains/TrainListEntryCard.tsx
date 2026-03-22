@@ -2,7 +2,7 @@ import { lazy } from 'react';
 const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
 import TrainDetails, { getTrainChips } from './TrainDetails';
 import { trainIconFor } from './trainIconFor';
-import { TrainListEntry, TrainType } from '@ak/web-shared';
+import { TrainListDto, TrainType } from '@ak/web-shared';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
@@ -25,7 +25,7 @@ const getImageName = (trackType: string): string => {
   }
 };
 
-const TrainListEntryCard = (props: { train: TrainListEntry }) => {
+const TrainListDtoCard = (props: { train: TrainListDto }) => {
   const [expanded, setExpanded] = useState(false);
   const t = props.train;
   const additionalChips = getTrainChips(t);
@@ -50,4 +50,4 @@ const TrainListEntryCard = (props: { train: TrainListEntry }) => {
   );
 };
 
-export default TrainListEntryCard;
+export default TrainListDtoCard;

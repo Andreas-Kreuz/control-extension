@@ -17,18 +17,18 @@ Ein `CeModule` ist ein Lua-Modul (eine Tabelle), das eine festgelegte Schnittste
 
 ## Pflichtfelder
 
-| Feld | Typ | Beschreibung |
-| --- | --- | --- |
-| `id` | `string` | Eindeutige UUID des Moduls — darf sich nie ändern |
-| `name` | `string` | Lua-require-Name des Moduls, z.B. `"ce.mods.road.RoadCeModule"` |
+| Feld      | Typ       | Beschreibung                                                        |
+| --------- | --------- | ------------------------------------------------------------------- |
+| `id`      | `string`  | Eindeutige UUID des Moduls — darf sich nie ändern                   |
+| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.RoadCeModule"`     |
 | `enabled` | `boolean` | Kann gesetzt werden um das Modul zu aktivieren oder zu deaktivieren |
 
 ## Pflichtmethoden
 
-| Methode | Rückgabe | Beschreibung |
-| --- | --- | --- |
-| `init()` | — | Wird einmalig beim ersten Lauf von `EEPMain()` aufgerufen |
-| `run()` | — | Wird bei jedem Lauf von `EEPMain()` aufgerufen |
+| Methode  | Rückgabe | Beschreibung                                              |
+| -------- | -------- | --------------------------------------------------------- |
+| `init()` | —        | Wird einmalig beim ersten Lauf von `EEPMain()` aufgerufen |
+| `run()`  | —        | Wird bei jedem Lauf von `EEPMain()` aufgerufen            |
 
 ## Minimales Beispiel
 
@@ -66,6 +66,8 @@ end
 ## Daten auf den Datenbus schreiben
 
 Wenn Dein Modul Daten für die Data Bridge oder die Web App bereitstellen soll, schreibst Du diese über den eingebauten Datenbus.
+
+Das geht zu jedem beliebigen Zeitpunkt — am naheliegendsten in `run()`, aber auch in `init()` oder bei externen Ereignissen.
 
 Die Konvention der eingebauten Module:
 

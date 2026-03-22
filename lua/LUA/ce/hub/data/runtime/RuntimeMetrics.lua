@@ -14,10 +14,6 @@ function RuntimeMetrics.storeRunTime(group, time)
     if not runtimeData then runtimeData = {} end
     if not runtimeData[group] then
         ---@class RuntimeEntry
-        ---@field id string
-        ---@field count number
-        ---@field time number
-        ---@field lastTime number
         local runTimeEntry = { id = group, count = 0, time = 0, lastTime = 0 }
         runtimeData[group] = runTimeEntry
     end
