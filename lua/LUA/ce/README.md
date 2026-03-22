@@ -48,6 +48,12 @@ Eine vollständige Beschreibung der API findest Du in [hub/README.md](hub/README
 ### Für Anwender
 
 - [hub/README.md](hub/README.md) — Öffentliche API: `ControlExtension.addModules`, `runTasks`, `setDebug` u.a.
+  - [hub/data/README.md](hub/data/README.md) — Daten aus EEP einsammeln und bereitstellen
+  - [hub/eep/README.md](hub/eep/README.md) — EEP-Simulator für Tests; API-Beschreibung für IDEs
+  - [hub/mods/README.md](hub/mods/README.md) — CeModule-Schnittstellendefinition und eingebaute Module
+  - [hub/publish/README.md](hub/publish/README.md) — DataChangeBus: Events empfangen und auswerten
+  - [hub/scheduler/README.md](hub/scheduler/README.md) — Aktionen nach Zeitablauf einplanen
+  - [hub/util/README.md](hub/util/README.md) — Hilfsfunktionen für persistente Zustandsablage
 - [databridge/README.md](databridge/README.md) — Dateibasierte Kommunikation mit dem Web-Server
 - [mods/README.md](mods/README.md) — Verfügbare Erweiterungsmodule (Ampel, ÖPNV)
 - [template/README.md](template/README.md) — Vorlagen für eigene Anlagen
@@ -55,6 +61,13 @@ Eine vollständige Beschreibung der API findest Du in [hub/README.md](hub/README
 ### Für Entwickler
 
 - [README_DEV.md](README_DEV.md) — Eigene CeModule entwickeln und integrieren
+- [hub/README_DEV.md](hub/README_DEV.md) — Interne Hub-Architektur (ModuleRegistry, MainLoopRunner)
+  - [hub/data/README_DEV.md](hub/data/README_DEV.md) — DTO-Konvention und Datenstruktur
+  - [hub/eep/README_DEV.md](hub/eep/README_DEV.md) — EepSimulator-Implementierung
+  - [hub/mods/README_DEV.md](hub/mods/README_DEV.md) — CeModule-Architektur: Felder, Lebenszyklus, Datenbus
+  - [hub/publish/README_DEV.md](hub/publish/README_DEV.md) — DataChangeBus-Architektur und Invarianten
+  - [hub/scheduler/README_DEV.md](hub/scheduler/README_DEV.md) — Scheduler/Task-Implementierung
+  - [hub/util/README_DEV.md](hub/util/README_DEV.md) — StorageUtility-Implementierung
 - [hub/data/DTO.md](hub/data/DTO.md) — Alle Datenräume und DTO-Typen im Überblick
 
 ### Weitere Pakete
