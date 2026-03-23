@@ -142,4 +142,4 @@ with open('datei.lua', 'wb') as f:
   - EEP-/Callback-Integration
   - Verhaltensregressionen
   - fehlende Tests
-- Gegencheck der Architekturdokumentationen in ARCHITECTURE.md wo vorhanden
+- Gegencheck der Architekturdokumentationen in [ARCHITECTURE.md](ARCHITECTURE.md) und den jeweiligen Teilarchitekturen (`ARCHITECTURE_LUA.md`, `ARCHITECTURE_SERVER.md`, `ARCHITECTURE_SHARED.md`, `ARCHITECTURE_APP.md`)
