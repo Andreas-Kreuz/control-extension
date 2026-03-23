@@ -13,7 +13,7 @@ EEP-Programm (Lua 5.3)
         v
 [2] Data Bridge      lua/LUA/ce/databridge/
         |
-        v (Dateien: events-from-ce, log.txt)
+        v (Dateien: events-from-ce, log-from-ce)
 [3] Control Extension Server    apps/web-server/
         |
         v (Socket.IO / REST-API)

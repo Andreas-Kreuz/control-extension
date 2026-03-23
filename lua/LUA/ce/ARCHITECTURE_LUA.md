@@ -44,7 +44,7 @@ erhalten — ohne Nebeneffekte durch Module.
 ### Lua Store
 
 Der Lua Store hält alle aktuellen Zustände der Datenräume im Speicher.
-Module können über den Lua-Datenbus Daten lesen oder schreiben.
+Module können über den `DataChangeBus` Daten lesen oder schreiben.
 
 ---
 
@@ -52,7 +52,7 @@ Module können über den Lua-Datenbus Daten lesen oder schreiben.
 
 Ein CeModule ist ein optionaler Lua-Baustein, der in den Hub eingehängt wird.
 
-### Verantwortung
+### Aufgaben eines CeModuls
 
 - Kann reine EEP-Lua-DTOs aus dem Store lesen.
 - Darf eigene, modulspezifische DTOs erzeugen (Erweiterung, Transformation, Kombination).
@@ -61,14 +61,14 @@ Ein CeModule ist ein optionaler Lua-Baustein, der in den Hub eingehängt wird.
 
 ### Kommunikationskanal
 
-CeModule kommunizieren über den Lua-Datenbus oder lesen direkt aus dem Lua Store:
+CeModule kommunizieren über den `DataChangeBus` oder lesen direkt aus dem Lua Store:
 
 ```text
 Lua Store (alle aktuellen Zustände)
     ^         |
     |  lesen  | schreiben
     |         v
-  CeModule <--> Lua-Datenbus
+  CeModule <--> DataChangeBus
 ```
 
 ### Beispiel: Road-Modul (`ce/mods/road/`)
@@ -82,11 +82,11 @@ Das Road-Modul liest Signalzustände aus dem Lua Store und erzeugt daraus Ampel-
 
 Die Data Bridge ist der Transportkanal zwischen Lua und dem Server.
 
-### Verantwortung
+### Aufgaben der Data Bridge
 
 - Nimmt DTOs aus den Datenräumen entgegen.
 - Schreibt diese als newline-delimited JSON (Kodierung: latin1) in die Datei `events-from-ce`.
-- Schreibt Logmeldungen in `log.txt`.
+- Schreibt Logmeldungen in `log-from-ce`.
 
 ### Unabhängigkeit vom Server
 
