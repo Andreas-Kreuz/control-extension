@@ -34,7 +34,7 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
         assert.equals("waiting-on-signals", waitingListRoom)
         assert.equals("id", waitingListKeyId)
         assert.same({
-            { id = "7-1", signalId = 7, waitingPosition = 1, vehicleName = "Bus 1", waitingCount = 3 }
-        }, waitingDtos)
+                        { id = "7-1", signalId = 7, waitingPosition = 1, vehicleName = "Bus 1", waitingCount = 3 }
+                    }, waitingDtos)
     end)
 end)

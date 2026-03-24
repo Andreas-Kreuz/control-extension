@@ -53,24 +53,24 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
         assert.equals("id", keyId)
         assert.equals("10", key)
         assert.same({
-            id = "10",
-            nr = "10",
-            trafficType = "BUS",
-            lineSegments = {
-                {
-                    id = "route-10",
-                    destination = "Central",
-                    routeName = "Route 10",
-                    lineNr = "10",
-                    stations = {
-                        {
-                            station = { name = "Station A" },
-                            timeToStation = 3
+                        id = "10",
+                        nr = "10",
+                        trafficType = "BUS",
+                        lineSegments = {
+                            {
+                                id = "route-10",
+                                destination = "Central",
+                                routeName = "Route 10",
+                                lineNr = "10",
+                                stations = {
+                                    {
+                                        station = { name = "Station A" },
+                                        timeToStation = 3
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        }, lineDto)
+                    }, lineDto)
         assert.equals("transit-stations", stationRoom)
         assert.equals("id", stationKeyId)
         assert.equals("Station A", stationKey)
@@ -78,14 +78,14 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
         assert.equals("transit-module-settings", settingsRoom)
         assert.equals("name", settingsKeyId)
         assert.same({
-            {
-                category = "Display",
-                name = "Next",
-                description = "Show next departures",
-                type = "boolean",
-                value = true,
-                eepFunction = "TransitSettings.setShowDepartureTippText"
-            }
-        }, settingsDtos)
+                        {
+                            category = "Display",
+                            name = "Next",
+                            description = "Show next departures",
+                            type = "boolean",
+                            value = true,
+                            eepFunction = "TransitSettings.setShowDepartureTippText"
+                        }
+                    }, settingsDtos)
     end)
 end)

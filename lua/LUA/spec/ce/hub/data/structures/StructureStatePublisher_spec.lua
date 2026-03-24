@@ -86,23 +86,23 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         StructureStatePublisher.initialize()
 
         assert.same({
-            ["#2"] = {
-                id = "#2",
-                name = "#2",
-                pos_x = 1,
-                pos_y = 2,
-                pos_z = 3,
-                rot_x = 4,
-                rot_y = 5,
-                rot_z = 6,
-                modelType = 22,
-                modelTypeText = "Immobilie",
-                tag = "shed",
-                light = true,
-                smoke = false,
-                fire = false
-            }
-        }, DataStore.getRoom("structures"))
+                        ["#2"] = {
+                            id = "#2",
+                            name = "#2",
+                            pos_x = 1,
+                            pos_y = 2,
+                            pos_z = 3,
+                            rot_x = 4,
+                            rot_y = 5,
+                            rot_z = 6,
+                            modelType = 22,
+                            modelTypeText = "Immobilie",
+                            tag = "shed",
+                            light = true,
+                            smoke = false,
+                            fire = false
+                        }
+                    }, DataStore.getRoom("structures"))
 
         _G.__structure_state_test_states["#2"].fire = true
         StructureStatePublisher.syncState()

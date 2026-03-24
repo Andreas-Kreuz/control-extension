@@ -9,9 +9,9 @@ local ControlExtension = require("ce.ControlExtension")
 -- * Data (Export der Daten für EEP)
 -- * Intersection (für die Ampelsteuerung notwendig)
 ControlExtension.addModules(require("ce.hub.mods.CoreCeModule"),
-                               require("ce.hub.mods.DataCeModule"),
-                               require("ce.mods.road.RoadCeModule"),
-                               require("ce.mods.transit.TransitCeModule"))
+                            require("ce.hub.mods.DataCeModule"),
+                            require("ce.mods.road.RoadCeModule"),
+                            require("ce.mods.transit.TransitCeModule"))
 
 -- Die EEPMain Methode wird von EEP genutzt. Sie muss immer 1 zurückgeben.
 function EEPMain()

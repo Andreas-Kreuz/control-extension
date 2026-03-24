@@ -1,4 +1,4 @@
-*		text=auto
+*	text=auto
 trace.info text merge=mps
 generated text merge=mps
 dependencies text merge=mps

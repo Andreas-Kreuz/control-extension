@@ -42,9 +42,9 @@ insulate("ce.hub.data.switches.SwitchDataCollector", function ()
 
         assert.same(1, #switches)
         assert.same({
-            id = 4,
-            position = 2,
-            tag = "West"
-        }, switches[1])
+                        id = 4,
+                        position = 2,
+                        tag = "West"
+                    }, switches[1])
     end)
 end)

@@ -8,20 +8,22 @@ insulate("RuntimeDataCollector", function ()
     it("returns only the latest publishable snapshot", function ()
         local RuntimeDataCollector = require("ce.hub.data.runtime.RuntimeDataCollector")
 
-        RuntimeDataCollector.setLastCycleRuntimeEntries({
-            sample = { id = "sample", count = 1, time = 2, lastTime = 2 }
-        }, false)
+        RuntimeDataCollector.setLastCycleRuntimeEntries(
+            {
+                sample = { id = "sample", count = 1, time = 2, lastTime = 2 }
+            }, false)
 
         assert.is_nil(RuntimeDataCollector.collectRuntimeEntries())
 
-        RuntimeDataCollector.setLastCycleRuntimeEntries({
-            sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
-        }, true)
+        RuntimeDataCollector.setLastCycleRuntimeEntries(
+            {
+                sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
+            }, true)
 
         local firstSnapshot = RuntimeDataCollector.collectRuntimeEntries()
         assert.same({
-            sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
-        }, firstSnapshot)
+                        sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
+                    }, firstSnapshot)
 
         firstSnapshot.sample.count = 99
 

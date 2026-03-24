@@ -47,11 +47,11 @@ insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
         SwitchStatePublisher.syncState()
 
         assert.same({
-            ["8"] = {
-                id = 8,
-                position = 2,
-                tag = "South"
-            }
-        }, DataStore.getRoom("switches"))
+                        ["8"] = {
+                            id = 8,
+                            position = 2,
+                            tag = "South"
+                        }
+                    }, DataStore.getRoom("switches"))
     end)
 end)

@@ -49,4 +49,3 @@ function RollingStockRegistry.fireChangeRollingStockEvent()
 end
 
 return RollingStockRegistry
-

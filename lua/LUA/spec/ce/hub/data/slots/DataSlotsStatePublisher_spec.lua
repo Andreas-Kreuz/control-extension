@@ -39,16 +39,16 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         DataSlotsStatePublisher.syncState()
 
         assert.same({
-            ["1"] = {
-                id = 1,
-                name = "Named Slot",
-                data = "payload-1"
-            }
-        }, DataStore.getRoom("save-slots"))
+                        ["1"] = {
+                            id = 1,
+                            name = "Named Slot",
+                            data = "payload-1"
+                        }
+                    }, DataStore.getRoom("save-slots"))
         assert.same({
-            ["2"] = {
-                id = 2
-            }
-        }, { ["2"] = DataStore.get("free-slots", 2) })
+                        ["2"] = {
+                            id = 2
+                        }
+                    }, { ["2"] = DataStore.get("free-slots", 2) })
     end)
 end)

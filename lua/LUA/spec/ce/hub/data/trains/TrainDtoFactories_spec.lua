@@ -58,44 +58,44 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
         assert.equals("id", trainKeyId)
         assert.equals("T1", trainKey)
         assert.same({
-            id = "T1",
-            route = "R",
-            rollingStockCount = 1,
-            length = 2,
-            line = "L1",
-            destination = "Depot",
-            direction = "North",
-            trackType = "rail",
-            movesForward = true,
-            speed = 3,
-            occupiedTacks = { [11] = 11 }
-        },
+                        id = "T1",
+                        route = "R",
+                        rollingStockCount = 1,
+                        length = 2,
+                        line = "L1",
+                        destination = "Depot",
+                        direction = "North",
+                        trackType = "rail",
+                        movesForward = true,
+                        speed = 3,
+                        occupiedTacks = { [11] = 11 }
+                    },
                     trainDto)
         assert.equals("rolling-stocks", rsRoom)
         assert.equals("id", rsKeyId)
         assert.equals("RS1", rsKey)
         assert.same({
-            id = "RS1",
-            name = "RS1",
-            trainName = "T1",
-            positionInTrain = 0,
-            couplingFront = 2,
-            couplingRear = 3,
-            length = 12.5,
-            propelled = true,
-            modelType = 8,
-            modelTypeText = "Tram",
-            tag = "tag",
-            nr = "42",
-            trackId = 99,
-            trackDistance = 10.5,
-            trackDirection = 1,
-            trackSystem = 3,
-            trackType = "road",
-            posX = 1,
-            posY = 2,
-            posZ = 3,
-            mileage = 4
-        }, rsDto)
+                        id = "RS1",
+                        name = "RS1",
+                        trainName = "T1",
+                        positionInTrain = 0,
+                        couplingFront = 2,
+                        couplingRear = 3,
+                        length = 12.5,
+                        propelled = true,
+                        modelType = 8,
+                        modelTypeText = "Tram",
+                        tag = "tag",
+                        nr = "42",
+                        trackId = 99,
+                        trackDistance = 10.5,
+                        trackDirection = 1,
+                        trackSystem = 3,
+                        trackType = "road",
+                        posX = 1,
+                        posY = 2,
+                        posZ = 3,
+                        mileage = 4
+                    }, rsDto)
     end)
 end)

@@ -21,7 +21,7 @@ function RoadDataCollector.collectCrossings(allCrossings)
     local intersectionIdCounter = 0
     local sortedNames = {}
     for name in pairs(allCrossings) do table.insert(sortedNames, name) end
-    table.sort(sortedNames, function(a, b) return a < b end)
+    table.sort(sortedNames, function (a, b) return a < b end)
 
     for _, name in ipairs(sortedNames) do
         local crossing = allCrossings[name]
@@ -144,7 +144,7 @@ function RoadDataCollector.collectCrossings(allCrossings)
         table.insert(intersectionLanes, dto)
     end
 
-    table.sort(intersectionLanes, function(a, b)
+    table.sort(intersectionLanes, function (a, b)
         return tostring(a.name):gsub("%.?%d+", padnum) .. ("%3d"):format(#b.name) <
             tostring(b.name):gsub("%.?%d+", padnum) .. ("%3d"):format(#a.name)
     end)

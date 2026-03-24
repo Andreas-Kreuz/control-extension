@@ -21,17 +21,16 @@ insulate("RuntimeStatePublisher", function ()
         RuntimeStatePublisher.syncState()
         assert.equals(0, #published)
 
-        RuntimeDataCollector.setLastCycleRuntimeEntries({
-            sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
-        }, true)
+        RuntimeDataCollector.setLastCycleRuntimeEntries(
+        { sample = { id = "sample", count = 2, time = 4, lastTime = 1 } }, true)
 
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)
         assert.equals("runtime", published[1].room)
         assert.equals("id", published[1].keyId)
         assert.same({
-            sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
-        }, published[1].list)
+                        sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
+                    }, published[1].list)
 
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)

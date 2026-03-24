@@ -24,22 +24,22 @@ insulate("ce.hub.data.time.TimeDtoFactory", function ()
         assert.equals("id", keyId)
         assert.equals("times", key)
         assert.same({
-            id = "times",
-            name = "times",
-            timeComplete = 3723,
-            timeH = 1,
-            timeM = 2,
-            timeS = 3
-        }, timeDto)
+                        id = "times",
+                        name = "times",
+                        timeComplete = 3723,
+                        timeH = 1,
+                        timeM = 2,
+                        timeS = 3
+                    }, timeDto)
         assert.equals("times", listRoom)
         assert.equals("id", listKeyId)
         assert.same({ {
-            id = "times",
-            name = "times",
-            timeComplete = 3723,
-            timeH = 1,
-            timeM = 2,
-            timeS = 3
-        } }, timeDtos)
+                        id = "times",
+                        name = "times",
+                        timeComplete = 3723,
+                        timeH = 1,
+                        timeM = 2,
+                        timeS = 3
+                    } }, timeDtos)
     end)
 end)

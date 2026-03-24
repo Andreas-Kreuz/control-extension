@@ -81,21 +81,21 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
 
         assert.same(1, #structures)
         assert.same({
-            id = "#3",
-            name = "#3",
-            pos_x = 1.11,
-            pos_y = 2.22,
-            pos_z = 3.33,
-            rot_x = 4.44,
-            rot_y = 5.55,
-            rot_z = 6.67,
-            modelType = 22,
-            modelTypeText = "Immobilie",
-            tag = "Depot",
-            light = true,
-            smoke = false,
-            fire = false
-        }, structures[1])
+                        id = "#3",
+                        name = "#3",
+                        pos_x = 1.11,
+                        pos_y = 2.22,
+                        pos_z = 3.33,
+                        rot_x = 4.44,
+                        rot_y = 5.55,
+                        rot_z = 6.67,
+                        modelType = 22,
+                        modelTypeText = "Immobilie",
+                        tag = "Depot",
+                        light = true,
+                        smoke = false,
+                        fire = false
+                    }, structures[1])
     end)
 
     it("refreshes only dirty structures and updates them in place", function ()

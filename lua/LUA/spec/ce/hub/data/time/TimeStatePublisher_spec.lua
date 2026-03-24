@@ -34,14 +34,14 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
         TimeStatePublisher.syncState()
 
         assert.same({
-            times = {
-                id = "times",
-                name = "times",
-                timeComplete = 3723,
-                timeH = 1,
-                timeM = 2,
-                timeS = 3
-            }
-        }, DataStore.getRoom("times"))
+                        times = {
+                            id = "times",
+                            name = "times",
+                            timeComplete = 3723,
+                            timeH = 1,
+                            timeM = 2,
+                            timeS = 3
+                        }
+                    }, DataStore.getRoom("times"))
     end)
 end)

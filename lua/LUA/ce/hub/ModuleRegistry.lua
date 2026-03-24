@@ -12,7 +12,7 @@ local function updateModuleOrder()
     TableUtils.clearArray(executionOrderModuleNames)
     for moduleName in pairs(registeredCeModules) do table.insert(executionOrderModuleNames, moduleName) end
     -- keep the hub bootstrap order stable across namespace changes
-    table.sort(executionOrderModuleNames, function(n1, n2)
+    table.sort(executionOrderModuleNames, function (n1, n2)
         local priority = {
             ["ce.hub.mods.HubCeModule"] = 1,
         }
@@ -38,7 +38,7 @@ function ModuleRegistry.registerModules(...)
     assert(not MainLoopRunner.areModulesInitialized(),
            "All tasks must be registered before initialization starts")
 
-    for _, module in ipairs({...}) do
+    for _, module in ipairs({ ... }) do
         -- Check the module
         assert(module.name and type(module.name) == "string", "A module must have a string name")
         assert(type(module.enabled) == "boolean", string.format("Module %s must have a boolean enabled", module.name))
@@ -61,7 +61,7 @@ end
 -- Unregisters a module
 -- @param module a module of type AkLuaControlModule
 function ModuleRegistry.unregisterModules(...)
-    for _, module in ipairs({...}) do
+    for _, module in ipairs({ ... }) do
         -- Check the module
         assert(module.name and type(module.name) == "string", "A module must have a string name")
 

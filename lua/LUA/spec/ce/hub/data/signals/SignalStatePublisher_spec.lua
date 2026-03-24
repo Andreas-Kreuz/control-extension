@@ -63,21 +63,21 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
         SignalStatePublisher.syncState()
 
         assert.same({
-            ["9"] = {
-                id = 9,
-                position = 2,
-                tag = "North",
-                waitingVehiclesCount = 1
-            }
-        }, DataStore.getRoom("signals"))
+                        ["9"] = {
+                            id = 9,
+                            position = 2,
+                            tag = "North",
+                            waitingVehiclesCount = 1
+                        }
+                    }, DataStore.getRoom("signals"))
         assert.same({
-            ["9-1"] = {
-                id = "9-1",
-                signalId = 9,
-                waitingPosition = 1,
-                vehicleName = "Train X",
-                waitingCount = 1
-            }
-        }, DataStore.getRoom("waiting-on-signals"))
+                        ["9-1"] = {
+                            id = "9-1",
+                            signalId = 9,
+                            waitingPosition = 1,
+                            vehicleName = "Train X",
+                            waitingCount = 1
+                        }
+                    }, DataStore.getRoom("waiting-on-signals"))
     end)
 end)

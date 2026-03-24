@@ -329,7 +329,7 @@ function EEPRollingstockSetSlot(rsName, slot) return Runtime.callEEPRollingstock
 --- Ab: EEP 11.0.
 function EEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter)
     return Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName,
-                                                 axisPosition, useNameFilter)
+                                              axisPosition, useNameFilter)
 end
 
 --- Ermittelt die aktuelle Position einer mittels Achsnamen benannten Achse des benannten Rollmaterials.

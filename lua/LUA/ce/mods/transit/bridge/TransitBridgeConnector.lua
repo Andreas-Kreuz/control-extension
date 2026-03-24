@@ -14,7 +14,7 @@ end
 function TransitBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand(
         "TransitSettings.setShowDepartureTippText",
-        function(param) TransitSettings.setShowDepartureTippText(param == "true") end
+        function (param) TransitSettings.setShowDepartureTippText(param == "true") end
     )
 end
 

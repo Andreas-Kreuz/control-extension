@@ -24,13 +24,13 @@ insulate("ce.hub.publish.InternalDataStore", function ()
         DataChangeBus.fireDataRemoved("signals", "id", "signal-b", {})
 
         assert.is_true(TableUtils.deepDictCompare({
-            ["signal-a"] = {
-                id = "signal-a",
-                name = "Alpha",
-                nested = { value = 1 },
-                status = "go"
-            }
-        }, DataStore.getRoom("signals")))
+                                                      ["signal-a"] = {
+                                                          id = "signal-a",
+                                                          name = "Alpha",
+                                                          nested = { value = 1 },
+                                                          status = "go"
+                                                      }
+                                                  }, DataStore.getRoom("signals")))
 
         DataChangeBus.fireListChange("signals", "id", {
             { id = "signal-c", name = "Gamma" },
@@ -39,9 +39,9 @@ insulate("ce.hub.publish.InternalDataStore", function ()
 
         assert.is_nil(DataStore.get("signals", "signal-a"))
         assert.is_true(TableUtils.deepDictCompare({
-            ["signal-c"] = { id = "signal-c", name = "Gamma" },
-            ["signal-d"] = { id = "signal-d", name = "Delta" }
-        }, DataStore.getRoom("signals")))
+                                                      ["signal-c"] = { id = "signal-c", name = "Gamma" },
+                                                      ["signal-d"] = { id = "signal-d", name = "Delta" }
+                                                  }, DataStore.getRoom("signals")))
 
         DataChangeBus.fireCompleteReset()
         assert.is_nil(DataStore.getRoom("signals"))

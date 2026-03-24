@@ -45,4 +45,3 @@ function LineRegistry.fireChangeLinesEvent()
 end
 
 return LineRegistry
-

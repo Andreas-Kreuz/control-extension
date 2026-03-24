@@ -67,26 +67,26 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
         local waitingOnSignals = SignalDataCollector.collectWaitingOnSignals(signals)
 
         assert.same({
-            id = 5,
-            position = 2,
-            tag = "Entry",
-            waitingVehiclesCount = 2
-        }, signals[1])
+                        id = 5,
+                        position = 2,
+                        tag = "Entry",
+                        waitingVehiclesCount = 2
+                    }, signals[1])
         assert.same({
-            {
-                id = "5-1",
-                signalId = 5,
-                waitingPosition = 1,
-                vehicleName = "Train A",
-                waitingCount = 2
-            },
-            {
-                id = "5-2",
-                signalId = 5,
-                waitingPosition = 2,
-                vehicleName = "Train B",
-                waitingCount = 2
-            }
-        }, waitingOnSignals)
+                        {
+                            id = "5-1",
+                            signalId = 5,
+                            waitingPosition = 1,
+                            vehicleName = "Train A",
+                            waitingCount = 2
+                        },
+                        {
+                            id = "5-2",
+                            signalId = 5,
+                            waitingPosition = 2,
+                            vehicleName = "Train B",
+                            waitingCount = 2
+                        }
+                    }, waitingOnSignals)
     end)
 end)
