@@ -8,6 +8,10 @@ import { registerRoadMod } from '../mod/road/registerRoadMod';
 import { registerLogMod } from '../mod/log/registerLogMod';
 import TransitService from '../mod/transit/TransitService';
 import TrainUpdateService from '../mod/train/TrainUpdateService';
+import VersionService from '../mod/version/VersionService';
+import TimeService from '../mod/time/TimeService';
+import EepDataService from '../mod/eepdata/EepDataService';
+import RoadDataService from '../mod/road/RoadDataService';
 import AppConfig from './config/AppConfig';
 import AppReducer from './config/AppData';
 import CommandLineParser from './config/CommandLineParser';
@@ -174,6 +178,10 @@ export default class AppEffects {
     // register dynamic rooms services
     eepDataEffects.registerDynamicRoom(new TrainUpdateService(this.io));
     eepDataEffects.registerDynamicRoom(new TransitService(this.io));
+    eepDataEffects.registerDynamicRoom(new VersionService(this.io));
+    eepDataEffects.registerDynamicRoom(new TimeService(this.io));
+    eepDataEffects.registerDynamicRoom(new EepDataService(this.io));
+    eepDataEffects.registerDynamicRoom(new RoadDataService(this.io));
 
     // register mods
     registerLogMod(this.io, this.socketService, eepService, this.debug);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useApiDataRoomHandler } from '../../io/useRoomHandler';
+import { useDynamicRoomHandler } from '../../io/useRoomHandler';
 import TimeDesc from './model/TimeDesc';
+import { RuntimeRoom, RuntimeDto } from '@ak/web-shared';
 
 function useStatistics() {
   const [publisherSyncTimes, setPublisherSyncTimes] = useState<TimeDesc[]>([]);
@@ -9,10 +10,11 @@ function useStatistics() {
   const [moduleInitTimes, setModuleInitTimes] = useState<TimeDesc[]>([]);
   const [controllerUpdateTimes, setControllerUpdateTimes] = useState<TimeDesc[]>([]);
 
-  useApiDataRoomHandler(
-    'runtime',
+  useDynamicRoomHandler(
+    RuntimeRoom,
+    'RuntimeRoom',
     (payload: string) => {
-      const record: Record<string, { id: string; count: number; time: number }> = JSON.parse(payload);
+      const record: Record<string, RuntimeDto> = JSON.parse(payload);
 
       const publisherTimes: Record<string, TimeDesc[]> = {};
       for (const suffix of ['.syncState', '.initialize']) {
@@ -75,9 +77,7 @@ function useStatistics() {
         ),
         new TimeDesc(
           'Server output',
-          record['MainLoopRunner.runCycle-7-serverOutput']
-            ? record['MainLoopRunner.runCycle-7-serverOutput'].time
-            : 0,
+          record['MainLoopRunner.runCycle-7-serverOutput'] ? record['MainLoopRunner.runCycle-7-serverOutput'].time : 0,
         ),
         new TimeDesc(
           'DataStore write',

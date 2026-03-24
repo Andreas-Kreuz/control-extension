@@ -4,8 +4,17 @@ import { DynamicRoom } from '@ak/web-shared';
 import { useEffect, useRef, useState } from 'react';
 import useDebug from './useDebug';
 
-export function useDynamicRoomHandler(dynRoom: DynamicRoom, element: string, handler: (data: any) => any): void {
-  return useRoomHandler(dynRoom.roomId(element), [{ eventName: dynRoom.eventId(element), handler: handler }]);
+export function useDynamicRoomHandler(
+  dynRoom: DynamicRoom,
+  element: string,
+  handler: (data: any) => any,
+  cleanUpHandler?: () => void,
+): void {
+  return useRoomHandler(
+    dynRoom.roomId(element),
+    [{ eventName: dynRoom.eventId(element), handler: handler }],
+    cleanUpHandler,
+  );
 }
 
 export function useApiDataRoomHandler(apiName: string, handler: (data: any) => any, cleanUpHandler?: () => void): void {
