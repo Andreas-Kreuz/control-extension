@@ -5,9 +5,9 @@
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.runtime.RuntimeDtoFactory`
 
-| Name | Typ |
-| --- | --- |
-| `id` | `string` |
-| `count` | `number` |
-| `time` | `number` |
+| Name       | Typ      |
+| ---------- | -------- |
+| `id`       | `string` |
+| `count`    | `number` |
+| `time`     | `number` |
 | `lastTime` | `number` |

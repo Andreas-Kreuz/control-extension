@@ -3,8 +3,8 @@ layout: page_with_toc
 title: DataChangeBus
 subtitle: Ereignisverteilung für Datenänderungen in der Control Extension
 permalink: lua/ce/hub/publish/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Was ist `ce.hub.publish`?

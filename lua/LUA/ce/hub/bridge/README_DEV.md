@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Bridge-Anbindung — Entwickler
 subtitle: Interne Architektur und Design-Entscheidungen der Hub-Bridge-Kopplung
 permalink: lua/ce/hub/bridge/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Architektur der Bridge-Anbindung

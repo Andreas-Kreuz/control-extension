@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Eigene Module entwickeln
 subtitle: Wie Du ein eigenes CeModule baust und in die Control Extension integrierst
 permalink: lua/ce/develop/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Eigene Module entwickeln

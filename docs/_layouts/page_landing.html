@@ -1,19 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
   <head>
     {% include head-content.html %}
     <style>
-       .jumbotron {
-         background-color: transparent;
-       }
+      .jumbotron {
+        background-color: transparent;
+      }
     </style>
   </head>
-  <body style="background:
+  <body
+    style="background:
     url('{{ site.baseurl }}/assets/img/landing-page.jpg');
     background-size: 66%;
     background-position: top right;
     background-repeat: no-repeat;
-    ">
+    "
+  >
     {% include navbar.html %}
     <div class="container">
       <div class="row">
@@ -26,7 +28,6 @@
       </div>
       {{ content }}
     </div>
-    {% include footer.html %}
-    {% include scripts.html %}
+    {% include footer.html %} {% include scripts.html %}
   </body>
 </html>

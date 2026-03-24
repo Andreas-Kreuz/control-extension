@@ -7,7 +7,7 @@ export const defaultSizes = [
 
 export const createScreenshots = (
   tests: (size: string, simulator: EepSimulator) => void,
-  screenShotsizes?: string[][]
+  screenShotsizes?: string[][],
 ) => {
   const simulator = new EepSimulator();
   (screenShotsizes || defaultSizes).forEach((size) => {

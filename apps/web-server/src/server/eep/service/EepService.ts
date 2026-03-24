@@ -113,7 +113,7 @@ export default class EepService implements CacheService {
     performance.measure(
       ServerStatisticsService.TimeForEepJsonFile,
       'eep:start-write-cache-file',
-      'eep:stop-write-cache-file'
+      'eep:stop-write-cache-file',
     );
   }
 
@@ -163,7 +163,7 @@ export default class EepService implements CacheService {
       performance.measure(
         ServerStatisticsService.TimeForEepJsonFile,
         'eep:start-wait-for-json',
-        'eep:stop-wait-for-json'
+        'eep:stop-wait-for-json',
       );
 
       // Delete the EEP FINISHED file, so EEP will know we are ready
@@ -180,7 +180,7 @@ export default class EepService implements CacheService {
 
   getCurrentLogLines = (): string => {
     return this.logFileMonitor.readCurrentLogLines();
-  }
+  };
 
   public createServerIsRunningFile() {
     const watchFile = path.resolve(this.dir, FileNames.serverIsRunning);

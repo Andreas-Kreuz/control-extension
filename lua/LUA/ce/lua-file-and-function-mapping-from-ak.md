@@ -51,113 +51,113 @@ end
 
 ## Öffentliche Funktionszuordnung
 
-| Alt                                                  | Neu                                                      | Hinweis                                                         |
-| ---------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------- |
-| `require("ak.LuaForEEP")`                            | `require("ce.ControlExtension")`                         | Neuer öffentlicher Einstiegspunkt                               |
-| `require("ak.core.ModuleRegistry")`                  | `require("ce.ControlExtension")`                         | Für EEP-Skripte nicht mehr direkt `ce.hub.ModuleRegistry` laden |
-| `LuaForEEP.useModules(...)`                          | `ControlExtension.addModules(...)`                       | Registriert Module                                              |
-| `ModuleRegistry.registerModules(...)`                | `ControlExtension.addModules(...)`                       | Benutzerpfad                                                    |
-| `LuaForEEP.run(cycleCount)`                          | `ControlExtension.runTasks(cycleCount)`                  | Zyklus ausführen                                                |
-| `ModuleRegistry.runTasks(cycleCount)`                | `ControlExtension.runTasks(cycleCount)`                  | Benutzerpfad                                                    |
-| `LuaForEEP.disableServer()`                          | `ControlExtension.deactivateServer()`                    | Server deaktivieren                                             |
-| `ModuleRegistry.deactivateServer()`                  | `ControlExtension.deactivateServer()`                    | Benutzerpfad                                                    |
-| `ModuleRegistry.activateServer()`                    | `ControlExtension.activateServer()`                      | Benutzerpfad                                                    |
-| `ModuleRegistry.debug = true`                        | `ControlExtension.setDebug(true)`                        | Setter statt Feldzugriff                                        |
-| `ModuleRegistry.pauseEepDuringInitialization = true` | `ControlExtension.setPauseEepDuringInitialization(true)` | Setter statt Feldzugriff                                        |
+| Alt                                                  | Neu                                                      | Hinweis                                                           |
+| ---------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------- |
+| `require("ak.LuaForEEP")`                            | `require("ce.ControlExtension")`                         | Neuer öffentlicher Einstiegspunkt                                 |
+| `require("ak.core.ModuleRegistry")`                  | `require("ce.ControlExtension")`                         | Für EEP-Skripte nicht mehr direkt `ce.hub.ModuleRegistry` laden   |
+| `LuaForEEP.useModules(...)`                          | `ControlExtension.addModules(...)`                       | Registriert Module                                                |
+| `ModuleRegistry.registerModules(...)`                | `ControlExtension.addModules(...)`                       | Benutzerpfad                                                      |
+| `LuaForEEP.run(cycleCount)`                          | `ControlExtension.runTasks(cycleCount)`                  | Zyklus ausführen                                                  |
+| `ModuleRegistry.runTasks(cycleCount)`                | `ControlExtension.runTasks(cycleCount)`                  | Benutzerpfad                                                      |
+| `LuaForEEP.disableServer()`                          | `ControlExtension.deactivateServer()`                    | Server deaktivieren                                               |
+| `ModuleRegistry.deactivateServer()`                  | `ControlExtension.deactivateServer()`                    | Benutzerpfad                                                      |
+| `ModuleRegistry.activateServer()`                    | `ControlExtension.activateServer()`                      | Benutzerpfad                                                      |
+| `ModuleRegistry.debug = true`                        | `ControlExtension.setDebug(true)`                        | Setter statt Feldzugriff                                          |
+| `ModuleRegistry.pauseEepDuringInitialization = true` | `ControlExtension.setPauseEepDuringInitialization(true)` | Setter statt Feldzugriff                                          |
 | `ModuleRegistry.useDlls(true)`                       | entfällt                                                 | In `ce.ControlExtension` gibt es dafür keinen öffentlichen Ersatz |
 
 ## Ersetzte `*LuaModule`-Requires
 
 Diese alten Modul-Wrapper sind die häufigsten Stellen, an denen deine bestehende Anlage jetzt bricht:
 
-| Alt                                                       | Neu                                                           | Hinweis                                                    |
-| --------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------- |
-| `require("ak.core.CoreLuaModule")`                        | `require("ce.hub.mods.CoreCeModule")`                         | Wird über `ce.ControlExtension` bereits intern registriert |
-| `require("ak.data.DataLuaModule")`                        | `require("ce.hub.mods.DataCeModule")`                         | Für Hub-Datenexport                                        |
-| `require("ak.scheduler.SchedulerLuaModule")`              | `require("ce.hub.mods.SchedulerCeModule")`                    | Meist nur bei direkter Scheduler-Nutzung nötig             |
-| `require("ak.road.CrossingLuaModule")`                    | `require("ce.mods.road.RoadCeModule")`                        | Straßenverkehrsmodul                                       |
-| `require("ak.road.CrossingLuaModul")`                     | `require("ce.mods.road.RoadCeModule")`                        | Alter Tippfehler in einigen Anlagen-Dateien                |
-| `require("ak.transit.TransitLuaModule")` | `require("ce.mods.transit.TransitCeModule")` | ÖPNV-Modul                                                 |
+| Alt                                          | Neu                                          | Hinweis                                                    |
+| -------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
+| `require("ak.core.CoreLuaModule")`           | `require("ce.hub.mods.CoreCeModule")`        | Wird über `ce.ControlExtension` bereits intern registriert |
+| `require("ak.data.DataLuaModule")`           | `require("ce.hub.mods.DataCeModule")`        | Für Hub-Datenexport                                        |
+| `require("ak.scheduler.SchedulerLuaModule")` | `require("ce.hub.mods.SchedulerCeModule")`   | Meist nur bei direkter Scheduler-Nutzung nötig             |
+| `require("ak.road.CrossingLuaModule")`       | `require("ce.mods.road.RoadCeModule")`       | Straßenverkehrsmodul                                       |
+| `require("ak.road.CrossingLuaModul")`        | `require("ce.mods.road.RoadCeModule")`       | Alter Tippfehler in einigen Anlagen-Dateien                |
+| `require("ak.transit.TransitLuaModule")`     | `require("ce.mods.transit.TransitCeModule")` | ÖPNV-Modul                                                 |
 
 ## Direkte `require()`-Ersetzungen nach Bereich
 
 Die folgenden Ersetzungen decken die typischen direkten Modulzugriffe aus bestehenden Lua-Skripten und Specs ab.
 
-| Alt                                            | Neu                                                  |
-| ---------------------------------------------- | ---------------------------------------------------- |
-| `require("ak.io.IoInit")`                      | `require("ce.databridge.IoInit")`                    |
-| `require("ak.io.ServerExchangeCoordinator")`   | `require("ce.databridge.ServerExchangeCoordinator")` |
-| `require("ak.io.DataStoreFileWriter")`         | `require("ce.databridge.DataStoreFileWriter")`       |
-| `require("ak.core.eep.EepSimulator")`          | `require("ce.hub.eep.EepSimulator")`                 |
-| `require("ak.core.eep.TippTextFormatter")`     | `require("ce.hub.eep.TippTextFormatter")`            |
-| `require("ak.events.DataChangeBus")`           | `require("ce.hub.publish.DataChangeBus")`            |
-| `require("ak.data.DataStore")`                 | `require("ce.hub.publish.InternalDataStore")`        |
-| `require("ak.storage.StorageUtility")`         | `require("ce.hub.util.StorageUtility")`              |
-| `require("ak.util.TableUtils")`                | `require("ce.hub.util.TableUtils")`                  |
-| `require("ak.util.Queue")`                     | `require("ce.hub.util.Queue")`                       |
-| `require("ak.util.RuntimeRegistry")`           | `require("ce.hub.util.RuntimeRegistry")`             |
-| `require("ak.scheduler.Scheduler")`            | `require("ce.hub.scheduler.Scheduler")`              |
-| `require("ak.scheduler.Task")`                 | `require("ce.hub.scheduler.Task")`                   |
-| `require("ak.modellpacker.AkModellInstaller")` | `require("ce.modellpacker.AkModellInstaller")`       |
-| `require("ak.modellpacker.AkModellPaket")`     | `require("ce.modellpacker.AkModellPaket")`           |
-| `require("ak.modellpacker.AkModellPacker")`    | `require("ce.modellpacker.AkModellPacker")`          |
-| `require("ak.third-party.json")`               | `require("ce.third-party.json")`                     |
-| `require("ak.third-party.BetterContacts_BH2")` | `require("ce.third-party.BetterContacts_BH2")`       |
-| `require("ak.demo-anlagen...")`                | `require("ce.demo-anlagen...")`                      |
-| `require("ak.anlagen...")`                     | `require("ce.anlagen...")`                           |
-| `require("ak.template...")`                    | `require("ce.template...")`                          |
-| `require("ak.rail.Rail")`                      | `require("ce.rail.Rail")`                            |
-| `require("ak.road.TramSwitch")`                | `require("ce.mods.road.TramSwitch")`                 |
-| `require("ak.road.TrafficLightModel")`         | `require("ce.mods.road.TrafficLightModel")`          |
-| `require("ak.road.AxisStructureTrafficLight")` | `require("ce.mods.road.AxisStructureTrafficLight")`  |
-| `require("ak.road.LightStructureTrafficLight")`| `require("ce.mods.road.LightStructureTrafficLight")` |
-| `require("ak.road.TrafficLight")`              | `require("ce.mods.road.TrafficLight")`               |
-| `require("ak.road.Lane")`                      | `require("ce.mods.road.Lane")`                       |
-| `require("ak.road.Crossing")`                  | `require("ce.mods.road.Intersection")`                   |
-| `require("ak.road.CrossingSequence")`          | `require("ce.mods.road.IntersectionSequence")`           |
-| `require("ak.transit.Line")`          | `require("ce.mods.transit.Line")`           |
-| `require("ak.transit.LineRegistry")`  | `require("ce.mods.transit.LineRegistry")`   |
-| `require("ak.transit.RoadStation")`   | `require("ce.mods.transit.RoadStation")`    |
+| Alt                                             | Neu                                                         |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| `require("ak.io.IoInit")`                       | `require("ce.databridge.IoInit")`                           |
+| `require("ak.io.ServerExchangeCoordinator")`    | `require("ce.databridge.ServerExchangeCoordinator")`        |
+| `require("ak.io.DataStoreFileWriter")`          | `require("ce.databridge.DataStoreFileWriter")`              |
+| `require("ak.core.eep.EepSimulator")`           | `require("ce.hub.eep.EepSimulator")`                        |
+| `require("ak.core.eep.TippTextFormatter")`      | `require("ce.hub.eep.TippTextFormatter")`                   |
+| `require("ak.events.DataChangeBus")`            | `require("ce.hub.publish.DataChangeBus")`                   |
+| `require("ak.data.DataStore")`                  | `require("ce.hub.publish.InternalDataStore")`               |
+| `require("ak.storage.StorageUtility")`          | `require("ce.hub.util.StorageUtility")`                     |
+| `require("ak.util.TableUtils")`                 | `require("ce.hub.util.TableUtils")`                         |
+| `require("ak.util.Queue")`                      | `require("ce.hub.util.Queue")`                              |
+| `require("ak.util.RuntimeRegistry")`            | `require("ce.hub.util.RuntimeRegistry")`                    |
+| `require("ak.scheduler.Scheduler")`             | `require("ce.hub.scheduler.Scheduler")`                     |
+| `require("ak.scheduler.Task")`                  | `require("ce.hub.scheduler.Task")`                          |
+| `require("ak.modellpacker.AkModellInstaller")`  | `require("ce.modellpacker.AkModellInstaller")`              |
+| `require("ak.modellpacker.AkModellPaket")`      | `require("ce.modellpacker.AkModellPaket")`                  |
+| `require("ak.modellpacker.AkModellPacker")`     | `require("ce.modellpacker.AkModellPacker")`                 |
+| `require("ak.third-party.json")`                | `require("ce.third-party.json")`                            |
+| `require("ak.third-party.BetterContacts_BH2")`  | `require("ce.third-party.BetterContacts_BH2")`              |
+| `require("ak.demo-anlagen...")`                 | `require("ce.demo-anlagen...")`                             |
+| `require("ak.anlagen...")`                      | `require("ce.anlagen...")`                                  |
+| `require("ak.template...")`                     | `require("ce.template...")`                                 |
+| `require("ak.rail.Rail")`                       | `require("ce.rail.Rail")`                                   |
+| `require("ak.road.TramSwitch")`                 | `require("ce.mods.road.TramSwitch")`                        |
+| `require("ak.road.TrafficLightModel")`          | `require("ce.mods.road.TrafficLightModel")`                 |
+| `require("ak.road.AxisStructureTrafficLight")`  | `require("ce.mods.road.AxisStructureTrafficLight")`         |
+| `require("ak.road.LightStructureTrafficLight")` | `require("ce.mods.road.LightStructureTrafficLight")`        |
+| `require("ak.road.TrafficLight")`               | `require("ce.mods.road.TrafficLight")`                      |
+| `require("ak.road.Lane")`                       | `require("ce.mods.road.Lane")`                              |
+| `require("ak.road.Crossing")`                   | `require("ce.mods.road.Intersection")`                      |
+| `require("ak.road.CrossingSequence")`           | `require("ce.mods.road.IntersectionSequence")`              |
+| `require("ak.transit.Line")`                    | `require("ce.mods.transit.Line")`                           |
+| `require("ak.transit.LineRegistry")`            | `require("ce.mods.transit.LineRegistry")`                   |
+| `require("ak.transit.RoadStation")`             | `require("ce.mods.transit.RoadStation")`                    |
 | `require("ak.transit.RoadStationDisplayModel")` | `require("ce.mods.transit.models.RoadStationDisplayModel")` |
-| `require("ak.train.TrainRegistry")`            | `require("ce.hub.data.trains.TrainRegistry")`        |
+| `require("ak.train.TrainRegistry")`             | `require("ce.hub.data.trains.TrainRegistry")`               |
 
 ## Fachmodule: alte Pfade zu neuen Pfaden
 
 Viele bisher flache `ak.*`-Bereiche wurden beim Refactoring fachlich aufgeteilt. Für dich ist vor allem diese Zuordnung relevant:
 
-| Alter Bereich           | Neuer Bereich                                                      | Typische Beispiele                             |
-| ----------------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
-| `ak.core.*`             | `ce.hub.*`                                                         | Laufzeit, Registry, EEP-Simulator              |
-| `ak.io.*`               | `ce.databridge.*`                                                  | Datei- und Serveraustausch                     |
-| `ak.events.*`           | `ce.hub.publish.*`                                                 | Event- und Änderungsbus                        |
-| `ak.storage.*`          | `ce.hub.util.*`                                                    | Persistenz-Helfer                              |
-| `ak.util.*`             | `ce.hub.util.*`                                                    | Tabellen, Queue, Laufzeit-Helfer               |
-| `ak.scheduler.*`        | `ce.hub.scheduler.*` und `ce.hub.mods.*`                           | Scheduler-Kern und Scheduler-Modul             |
-| `ak.data.*`             | `ce.hub.data.*`, `ce.hub.publish.*` und `ce.hub.mods.*`            | Slots, Signale, Strukturen, Zeit, Tracks, Züge |
-| `ak.train.*`            | `ce.hub.data.trains.*` und `ce.hub.data.rollingstock.*`            | Zug- und Rollmaterialdaten                     |
-| `ak.road.*`             | `ce.mods.road.*` und `ce.mods.road.data.*`                         | Kreuzungen, Ampeln, Road-Daten                 |
-| `ak.transit.*` | `ce.mods.transit.*` und `ce.mods.transit.data.*` | Linien, Haltestellen, ÖPNV-Daten               |
-| `ak.roadline.*`         | `ce.mods.transit.*`                                       | Frühere Linien-Tests und Linienlogik           |
+| Alter Bereich    | Neuer Bereich                                           | Typische Beispiele                             |
+| ---------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| `ak.core.*`      | `ce.hub.*`                                              | Laufzeit, Registry, EEP-Simulator              |
+| `ak.io.*`        | `ce.databridge.*`                                       | Datei- und Serveraustausch                     |
+| `ak.events.*`    | `ce.hub.publish.*`                                      | Event- und Änderungsbus                        |
+| `ak.storage.*`   | `ce.hub.util.*`                                         | Persistenz-Helfer                              |
+| `ak.util.*`      | `ce.hub.util.*`                                         | Tabellen, Queue, Laufzeit-Helfer               |
+| `ak.scheduler.*` | `ce.hub.scheduler.*` und `ce.hub.mods.*`                | Scheduler-Kern und Scheduler-Modul             |
+| `ak.data.*`      | `ce.hub.data.*`, `ce.hub.publish.*` und `ce.hub.mods.*` | Slots, Signale, Strukturen, Zeit, Tracks, Züge |
+| `ak.train.*`     | `ce.hub.data.trains.*` und `ce.hub.data.rollingstock.*` | Zug- und Rollmaterialdaten                     |
+| `ak.road.*`      | `ce.mods.road.*` und `ce.mods.road.data.*`              | Kreuzungen, Ampeln, Road-Daten                 |
+| `ak.transit.*`   | `ce.mods.transit.*` und `ce.mods.transit.data.*`        | Linien, Haltestellen, ÖPNV-Daten               |
+| `ak.roadline.*`  | `ce.mods.transit.*`                                     | Frühere Linien-Tests und Linienlogik           |
 
 ## Häufige 1:1-Dateiwechsel
 
 Die folgenden Dateien wurden nicht nur umbenannt, sondern oft auch in die neue fachliche Zielstruktur verschoben:
 
-| Alte Datei                                          | Neue Datei                                                       |
-| --------------------------------------------------- | ---------------------------------------------------------------- |
-| `ak/LuaForEEP.lua`                                  | `ce/ControlExtension.lua`                                        |
-| `ak/core/ModuleRegistry.lua`                        | `ce/hub/ModuleRegistry.lua` und `ce/hub/ControlExtensionHub.lua` |
-| `ak/core/MainLoopRunner.lua`                        | `ce/hub/MainLoopRunner.lua`                                      |
-| `ak/io/ExchangeDirRegistry.lua`                     | `ce/databridge/ExchangeDirRegistry.lua`                          |
-| `ak/io/ServerEventBuffer.lua`                       | `ce/databridge/ServerEventBuffer.lua`                            |
-| `ak/events/DataChangeBus.lua`                       | `ce/hub/publish/DataChangeBus.lua`                               |
-| `ak/data/DataStore.lua`                             | `ce/hub/publish/InternalDataStore.lua`                           |
-| `ak/core/VersionInfo.lua`                           | `ce/hub/data/version/VersionInfo.lua`                            |
-| `ak/train/Train.lua`                                | `ce/hub/data/trains/Train.lua`                                   |
-| `ak/train/RollingStock.lua`                         | `ce/hub/data/rollingstock/RollingStock.lua`                      |
-| `ak/road/CrossingDtoFactory.lua`                    | `ce/mods/road/data/RoadDtoFactory.lua`                       |
-| `ak/road/TrafficLightModelDtoFactory.lua`           | `ce/mods/road/data/TrafficLightModelDtoFactory.lua`              |
-| `ak/transit/TransitDtoFactory.lua` | `ce/mods/transit/data/TransitDtoFactory.lua`    |
+| Alte Datei                                | Neue Datei                                                       |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `ak/LuaForEEP.lua`                        | `ce/ControlExtension.lua`                                        |
+| `ak/core/ModuleRegistry.lua`              | `ce/hub/ModuleRegistry.lua` und `ce/hub/ControlExtensionHub.lua` |
+| `ak/core/MainLoopRunner.lua`              | `ce/hub/MainLoopRunner.lua`                                      |
+| `ak/io/ExchangeDirRegistry.lua`           | `ce/databridge/ExchangeDirRegistry.lua`                          |
+| `ak/io/ServerEventBuffer.lua`             | `ce/databridge/ServerEventBuffer.lua`                            |
+| `ak/events/DataChangeBus.lua`             | `ce/hub/publish/DataChangeBus.lua`                               |
+| `ak/data/DataStore.lua`                   | `ce/hub/publish/InternalDataStore.lua`                           |
+| `ak/core/VersionInfo.lua`                 | `ce/hub/data/version/VersionInfo.lua`                            |
+| `ak/train/Train.lua`                      | `ce/hub/data/trains/Train.lua`                                   |
+| `ak/train/RollingStock.lua`               | `ce/hub/data/rollingstock/RollingStock.lua`                      |
+| `ak/road/CrossingDtoFactory.lua`          | `ce/mods/road/data/RoadDtoFactory.lua`                           |
+| `ak/road/TrafficLightModelDtoFactory.lua` | `ce/mods/road/data/TrafficLightModelDtoFactory.lua`              |
+| `ak/transit/TransitDtoFactory.lua`        | `ce/mods/transit/data/TransitDtoFactory.lua`                     |
 
 ## Praktische Regel für deine bestehende Anlage
 
@@ -173,12 +173,12 @@ Wenn bei dir eine Fehlermeldung wie `module 'ak.core.ModuleRegistry' not found` 
 
 Einige alte Sammelmodule wurden bewusst aufgeteilt:
 
-| Alt                                            | Neu                                                                                                                                      |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `ak.core.ModuleRegistry`                       | Öffentlicher Einstieg über `ce.ControlExtension`, Laufzeit über `ce.hub.ControlExtensionHub`, Registry intern in `ce.hub.ModuleRegistry` |
-| `ak.core.CoreWebConnector`                     | `ce.hub.bridge.CoreBridgeConnector` und `ce.hub.bridge.DataBridgeConnector`                                                              |
-| `ak.data.DataLuaModule`                        | `ce.hub.mods.DataCeModule` mit `ce.hub.bridge.DataBridgeConnector`                                                                       |
-| `ak.road.CrossingLuaModule`                    | `ce.mods.road.RoadCeModule` mit `ce.mods.road.bridge.RoadBridgeConnector`                                                            |
-| `ak.transit.TransitLuaModule` | `ce.mods.transit.TransitCeModule` mit `ce.mods.transit.bridge.TransitBridgeConnector`                  |
+| Alt                           | Neu                                                                                                                                      |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `ak.core.ModuleRegistry`      | Öffentlicher Einstieg über `ce.ControlExtension`, Laufzeit über `ce.hub.ControlExtensionHub`, Registry intern in `ce.hub.ModuleRegistry` |
+| `ak.core.CoreWebConnector`    | `ce.hub.bridge.CoreBridgeConnector` und `ce.hub.bridge.DataBridgeConnector`                                                              |
+| `ak.data.DataLuaModule`       | `ce.hub.mods.DataCeModule` mit `ce.hub.bridge.DataBridgeConnector`                                                                       |
+| `ak.road.CrossingLuaModule`   | `ce.mods.road.RoadCeModule` mit `ce.mods.road.bridge.RoadBridgeConnector`                                                                |
+| `ak.transit.TransitLuaModule` | `ce.mods.transit.TransitCeModule` mit `ce.mods.transit.bridge.TransitBridgeConnector`                                                    |
 
 Für deine bestehenden Skripte ist der sichere Weg daher: Verwende nur `ce.ControlExtension` und die neuen `*CeModule` direkt und greife nicht mehr auf alte interne `ak.*`-Pfade zurück.

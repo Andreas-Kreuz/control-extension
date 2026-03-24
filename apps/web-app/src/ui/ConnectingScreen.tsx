@@ -22,10 +22,7 @@ const ConnectingScreen = (props: ConnectingScreenProps) => {
         </MuiStack>
         <MuiDivider sx={{ my: 2 }} />
         <MuiTypography gutterBottom>
-          <img
-            src={'/icon-192.png'}
-            style={{ height: 48, float: 'left', marginRight: '1rem' }}
-          ></img>
+          <img src={'/icon-192.png'} style={{ height: 48, float: 'left', marginRight: '1rem' }}></img>
           <strong>Hast Du den Server für EEP beendet?</strong>
           <br />
           Schließe diese Seite oder starte den Server erneut.

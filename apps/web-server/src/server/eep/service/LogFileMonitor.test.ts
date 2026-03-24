@@ -118,10 +118,7 @@ async function testInitialEmptyLogAndLuaStyleAppends(): Promise<void> {
       });
 
       assert.ok(seenBatches.every((batch) => !batch.includes('\n\n')));
-      assert.equal(
-        monitor.readCurrentLogLines(),
-        '12:34:56 Alpha\n12:34:56 Bravo\n       . Charlie',
-      );
+      assert.equal(monitor.readCurrentLogLines(), '12:34:56 Alpha\n12:34:56 Bravo\n       . Charlie');
     },
     async ({ logFilePath }) => {
       await luaRestart(logFilePath);
@@ -194,12 +191,7 @@ async function testShrinkRereadsFromStartAndUsesLastResetMarker(): Promise<void>
 
       await luaRestart(
         logFilePath,
-        [
-          '12:34:56 Old restart noise',
-          resetMarker,
-          '12:34:56 After restart',
-          '',
-        ].join('\n'),
+        ['12:34:56 Old restart noise', resetMarker, '12:34:56 After restart', ''].join('\n'),
       );
 
       await waitFor(() => {
@@ -246,10 +238,22 @@ async function testRecreatedFileRebuildsVisibleState(): Promise<void> {
 
 export async function run(): Promise<void> {
   await runTest('LogFileMonitor reads lua-style log appends without duplicates', testInitialEmptyLogAndLuaStyleAppends);
-  await runTest('LogFileMonitor startup uses only lines after the last reset marker', testStartupUsesOnlyLinesAfterLastResetMarker);
-  await runTest('LogFileMonitor clears the visible log when the reset marker appears', testRuntimeResetMarkerClearsVisibleLog);
-  await runTest('LogFileMonitor resets after file shrink and rereads from the last reset marker', testShrinkRereadsFromStartAndUsesLastResetMarker);
-  await runTest('LogFileMonitor rebuilds the visible state when the log file disappears and later reappears', testRecreatedFileRebuildsVisibleState);
+  await runTest(
+    'LogFileMonitor startup uses only lines after the last reset marker',
+    testStartupUsesOnlyLinesAfterLastResetMarker,
+  );
+  await runTest(
+    'LogFileMonitor clears the visible log when the reset marker appears',
+    testRuntimeResetMarkerClearsVisibleLog,
+  );
+  await runTest(
+    'LogFileMonitor resets after file shrink and rereads from the last reset marker',
+    testShrinkRereadsFromStartAndUsesLastResetMarker,
+  );
+  await runTest(
+    'LogFileMonitor rebuilds the visible state when the log file disappears and later reappears',
+    testRecreatedFileRebuildsVisibleState,
+  );
 }
 
 if (require.main === module) {

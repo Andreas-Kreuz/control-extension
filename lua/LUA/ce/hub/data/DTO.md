@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Datenmodell
 subtitle: Alle Räume und Datentypen der Control Extension im Überblick
 permalink: lua/ce/hub/data/dto/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Datenmodell der `*StatePublisher.lua`
@@ -25,19 +25,19 @@ Wichtig:
 
 ## Überblick
 
-| Collector                        | Datei                                                          | Effektive Ausgabe                                                                |
-| -------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `ModulesStatePublisher`           | `lua/LUA/ce/hub/data/modules/ModulesStatePublisher.lua`               | direkte Rückgabe; zusätzlich `DataAdded`/`DataChanged` für `modules`             |
-| `VersionStatePublisher`           | `lua/LUA/ce/hub/data/version/VersionStatePublisher.lua`               | `ListChanged` für `eep-version`; Rückgabe leer                                   |
-| `SignalStatePublisher`            | `lua/LUA/ce/hub/data/signals/SignalStatePublisher.lua`                | `ListChanged` für `signals` und `waiting-on-signals`; Rückgabe leer              |
-| `SwitchStatePublisher`            | `lua/LUA/ce/hub/data/switches/SwitchStatePublisher.lua`               | `ListChanged` für `switches`; Rückgabe leer                                      |
-| `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`                     | `ListChanged` für `times`; Rückgabe leer                                         |
-| `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`               | `ListChanged` für `save-slots` und `free-slots`; Rückgabe leer                   |
-| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`          | `ListChanged` für `structures`; Rückgabe leer                                    |
-| `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`        | indirekte Events für `trains` und `rolling-stocks`; Rückgabe leer                |
-| `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua`       | `ListChanged` für `signal-type-definitions`; Rückgabe leer                       |
-| `RoadStatePublisher`          | `lua/LUA/ce/mods/road/data/RoadStatePublisher.lua`                | Events für Kreuzungsdaten; internes Datenobjekt wird derzeit nicht zurückgegeben |
-| `TransitStatePublisher`   | `lua/LUA/ce/mods/transit/data/TransitStatePublisher.lua` | Events für ÖPNV-Daten; internes Datenobjekt wird derzeit nicht zurückgegeben     |
+| Collector                         | Datei                                                           | Effektive Ausgabe                                                                |
+| --------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `ModulesStatePublisher`           | `lua/LUA/ce/hub/data/modules/ModulesStatePublisher.lua`         | direkte Rückgabe; zusätzlich `DataAdded`/`DataChanged` für `modules`             |
+| `VersionStatePublisher`           | `lua/LUA/ce/hub/data/version/VersionStatePublisher.lua`         | `ListChanged` für `eep-version`; Rückgabe leer                                   |
+| `SignalStatePublisher`            | `lua/LUA/ce/hub/data/signals/SignalStatePublisher.lua`          | `ListChanged` für `signals` und `waiting-on-signals`; Rückgabe leer              |
+| `SwitchStatePublisher`            | `lua/LUA/ce/hub/data/switches/SwitchStatePublisher.lua`         | `ListChanged` für `switches`; Rückgabe leer                                      |
+| `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`               | `ListChanged` für `times`; Rückgabe leer                                         |
+| `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`         | `ListChanged` für `save-slots` und `free-slots`; Rückgabe leer                   |
+| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`    | `ListChanged` für `structures`; Rückgabe leer                                    |
+| `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`  | indirekte Events für `trains` und `rolling-stocks`; Rückgabe leer                |
+| `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua` | `ListChanged` für `signal-type-definitions`; Rückgabe leer                       |
+| `RoadStatePublisher`              | `lua/LUA/ce/mods/road/data/RoadStatePublisher.lua`              | Events für Kreuzungsdaten; internes Datenobjekt wird derzeit nicht zurückgegeben |
+| `TransitStatePublisher`           | `lua/LUA/ce/mods/transit/data/TransitStatePublisher.lua`        | Events für ÖPNV-Daten; internes Datenobjekt wird derzeit nicht zurückgegeben     |
 
 ## Transportform
 
@@ -55,15 +55,15 @@ Wichtig:
 | Züge                                | `trains`                           | `id`      |
 | RollingStock                        | `rolling-stocks`                   | `id`      |
 | Ampelmodell-Definitionen            | `signal-type-definitions`          | `id`      |
-| Kreuzungen                          | `road-intersections`                    | `id`      |
-| Kreuzungs-Fahrspuren                | `road-intersection-lanes`               | `id`      |
-| Kreuzungs-Schaltungen               | `road-intersection-switchings`          | `id`      |
-| Kreuzungs-Ampeln                    | `road-intersection-traffic-lights`      | `id`      |
-| Kreuzungs-Moduleinstellungen        | `road-module-settings`     | `name`    |
-| ÖPNV-Linien                         | `transit-lines`           | `id`      |
-| ÖPNV-Stationen                      | `transit-stations`        | `id`      |
-| ÖPNV-Moduleinstellungen             | `transit-module-settings` | `name`    |
-| Änderungsereignisse für Liniennamen | `transit-line-names`      | `id`      |
+| Kreuzungen                          | `road-intersections`               | `id`      |
+| Kreuzungs-Fahrspuren                | `road-intersection-lanes`          | `id`      |
+| Kreuzungs-Schaltungen               | `road-intersection-switchings`     | `id`      |
+| Kreuzungs-Ampeln                    | `road-intersection-traffic-lights` | `id`      |
+| Kreuzungs-Moduleinstellungen        | `road-module-settings`             | `name`    |
+| ÖPNV-Linien                         | `transit-lines`                    | `id`      |
+| ÖPNV-Stationen                      | `transit-stations`                 | `id`      |
+| ÖPNV-Moduleinstellungen             | `transit-module-settings`          | `name`    |
+| Änderungsereignisse für Liniennamen | `transit-line-names`               | `id`      |
 
 ## Datenschemata
 
@@ -365,7 +365,7 @@ Elementtyp: Fahrspur einer Kreuzung
 | Name                         | Typ                | Wertebereich                                                 | Beschreibung                                     |
 | ---------------------------- | ------------------ | ------------------------------------------------------------ | ------------------------------------------------ |
 | `id`                         | `string`           | `<intersectionId>-<laneName>`                                | technischer Schlüssel                            |
-| `intersectionId`             | `integer`          | referenziert `road-intersections.id`                              | zugehörige Kreuzung                              |
+| `intersectionId`             | `integer`          | referenziert `road-intersections.id`                         | zugehörige Kreuzung                              |
 | `name`                       | `string`           | freier Text                                                  | Fahrspurname                                     |
 | `phase`                      | `string`           | `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN` | aus der Ampelphasenlogik der Bibliothek          |
 | `vehicleMultiplier`          | `number`           | projektabhängig                                              | Gewichtungsfaktor für Zähler                     |
@@ -382,26 +382,26 @@ Elementtyp: Fahrspur einer Kreuzung
 
 Elementtyp: Kreuzungs-Schaltung
 
-| Name             | Typ             | Wertebereich                    | Beschreibung                                                                     |
-| ---------------- | --------------- | ------------------------------- | -------------------------------------------------------------------------------- |
-| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                            |
+| Name             | Typ             | Wertebereich                    | Beschreibung                                                                          |
+| ---------------- | --------------- | ------------------------------- | ------------------------------------------------------------------------------------- |
+| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                                 |
 | `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `road-intersections.id` |
-| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                               |
-| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                          |
+| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                                    |
+| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                               |
 
 ### `road-intersection-traffic-lights`
 
 Elementtyp: Ampel innerhalb einer Kreuzung
 
-| Name              | Typ                           | Wertebereich                    | Beschreibung                |
-| ----------------- | ----------------------------- | ------------------------------- | --------------------------- |
-| `id`              | `integer \| string`           | Signal-ID                       | technischer Schlüssel       |
-| `signalId`        | `integer`                     | Signal-ID                       | referenziertes EEP-Signal   |
-| `modelId`         | `string`                      | Modellname                      | referenziertes Ampelmodell  |
-| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                 | aktuelle interne Ampelphase |
+| Name              | Typ                           | Wertebereich                         | Beschreibung                |
+| ----------------- | ----------------------------- | ------------------------------------ | --------------------------- |
+| `id`              | `integer \| string`           | Signal-ID                            | technischer Schlüssel       |
+| `signalId`        | `integer`                     | Signal-ID                            | referenziertes EEP-Signal   |
+| `modelId`         | `string`                      | Modellname                           | referenziertes Ampelmodell  |
+| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                      | aktuelle interne Ampelphase |
 | `intersectionId`  | `integer`                     | referenziert `road-intersections.id` | zugehörige Kreuzung         |
-| `lightStructures` | `table<string, object>`       | indexierte Map                  | zugehörige Lichtstrukturen  |
-| `axisStructures`  | `object[]`                    | Liste                           | zugehörige Achsstrukturen   |
+| `lightStructures` | `table<string, object>`       | indexierte Map                       | zugehörige Lichtstrukturen  |
+| `axisStructures`  | `object[]`                    | Liste                                | zugehörige Achsstrukturen   |
 
 Unterobjekt `lightStructures[*]`:
 
@@ -499,8 +499,8 @@ Schema:
 
 ## Rückgabewerte der `syncState()`-Funktionen
 
-| Collector                                      | Rückgabe heute             | Bemerkung                               |
-| ---------------------------------------------- | -------------------------- | --------------------------------------- |
+| Collector                                     | Rückgabe heute             | Bemerkung                               |
+| --------------------------------------------- | -------------------------- | --------------------------------------- |
 | `ModulesStatePublisher.syncState()`           | Objekt mit Modulen nach ID | einzig relevanter direkter Rückgabewert |
 | `VersionStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
 | `SignalStatePublisher.syncState()`            | `{}`                       | Nutzdaten nur im Event                  |
@@ -510,8 +510,8 @@ Schema:
 | `StructureStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
 | `TrainsAndTracksStatePublisher.syncState()`   | leeres `data`              | Nutzdaten über Registries               |
 | `TrafficLightModelStatePublisher.syncState()` | `{}`                       | Nutzdaten nur im Event                  |
-| `RoadStatePublisher.syncState()`          | `{}`                       | internes Datenobjekt wird verworfen     |
-| `TransitStatePublisher.syncState()`   | `{}`                       | internes Datenobjekt wird verworfen     |
+| `RoadStatePublisher.syncState()`              | `{}`                       | internes Datenobjekt wird verworfen     |
+| `TransitStatePublisher.syncState()`           | `{}`                       | internes Datenobjekt wird verworfen     |
 
 ## Verwendete EEP-Funktionen und Handbuchbezug
 

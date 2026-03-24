@@ -152,9 +152,7 @@ export class LogFileMonitor {
     }
 
     const newLines = visibleLines.join('\n');
-    this.currentLogLines = this.currentLogLines.length > 0
-      ? this.currentLogLines + '\n' + newLines
-      : newLines;
+    this.currentLogLines = this.currentLogLines.length > 0 ? this.currentLogLines + '\n' + newLines : newLines;
     this.callbacks.onLinesAppeared(newLines);
   }
 }

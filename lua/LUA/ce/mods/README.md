@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Erweiterungsmodule
 subtitle: Domain-spezifische CeModule für Ampelsteuerung, ÖPNV und Zugsteuerung
 permalink: lua/ce/mods/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Paket `ce.mods` — Erweiterungsmodule

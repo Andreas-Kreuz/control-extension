@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Zielarchitektur
 subtitle: Angestrebte Aufteilung der Verantwortlichkeiten im Lua-Teil der Bibliothek
 permalink: lua/ce/hub/docs/architecture/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Zielarchitektur der Lua-Bibliothek

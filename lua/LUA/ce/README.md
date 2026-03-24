@@ -3,8 +3,8 @@ layout: page_landing
 title: Control Extension
 subtitle: Hier findest du Informationen zur Control Extension
 permalink: lua/ce/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Was ist die Control Extension?

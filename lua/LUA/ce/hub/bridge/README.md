@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Bridge-Anbindung
 subtitle: Lua-seitige Anbindung der Control Extension an den Web-Server
 permalink: lua/ce/hub/bridge/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Was ist `ce.hub.bridge`?

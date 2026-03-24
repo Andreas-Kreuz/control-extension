@@ -44,7 +44,7 @@ with open('datei.lua', 'wb') as f:
 
 - Bei Shell-Kommandos zum Lesen oder Schreiben von `.lua`-Dateien immer die Kodierung explizit auf `latin1` setzen.
 - `Windows PowerShell 5.1` unterstützt bei `Get-Content`/`Set-Content` weder `-Encoding ISO88591` noch `-Encoding Latin1`:
-  - lesen:  `[System.IO.File]::ReadAllText($path, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
+  - lesen: `[System.IO.File]::ReadAllText($path, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
   - schreiben: `[System.IO.File]::WriteAllText($path, $content, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
 - `PowerShell 7` unterstützt `-Encoding Latin1`; für Kompatibilität die PS-5.1-Variante bevorzugen.
 - Andere Dateien: `Get-Content -Encoding UTF8` / `Set-Content -Encoding UTF8`

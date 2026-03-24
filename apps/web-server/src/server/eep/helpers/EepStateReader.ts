@@ -10,13 +10,13 @@ const persistState = () => {
       const event = JSON.parse(line);
 
       console.log(
-        'Event ' + event.eventCounter + ' ' + event.payload.room + ' (' + line.length.toLocaleString('de-DE') + ')'
+        'Event ' + event.eventCounter + ' ' + event.payload.room + ' (' + line.length.toLocaleString('de-DE') + ')',
       );
 
       fs.writeFileSync(
         path.resolve('../web-app/cypress/fixtures/from-eep/eep-event' + event.eventCounter + '.json'),
         JSON.stringify(event),
-        { encoding: 'latin1' }
+        { encoding: 'latin1' },
       );
     }
   }

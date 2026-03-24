@@ -39,15 +39,8 @@ describe('Server Tests "/server"', () => {
             .should('be.enabled')
             .click()
             .then(() => {
-              cy.get('input#dir-dialog-dir')
-                .should('exist')
-                .should('be.visible')
-                .clear()
-                .type(pwd.dir)
-                .type('{esc}');
-              cy.get('#dir-dialog-choose')
-                .should('be.enabled')
-                .click();
+              cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(pwd.dir).type('{esc}');
+              cy.get('#dir-dialog-choose').should('be.enabled').click();
               cy.get('#responsive-dialog-title').should('not.exist');
             });
         });
@@ -67,10 +60,7 @@ describe('Server Tests "/server"', () => {
   describe('Changing the directory', () => {
     it('button "Wählen" is enabled', () => {
       cy.get('#choose-dir-button').click();
-      cy.get('input#dir-dialog-dir')
-        .should('exist')
-        .should('be.visible')
-        .should('contain.value', pwd.dir);
+      cy.get('input#dir-dialog-dir').should('exist').should('be.visible').should('contain.value', pwd.dir);
       cy.get('#dir-dialog-choose').should('be.enabled');
       cy.get('#dir-dialog-cancel').should('be.enabled');
       cy.get('input#dir-dialog-dir').type('{esc}');
@@ -140,15 +130,8 @@ describe('Server Tests "/server"', () => {
               .should('be.enabled')
               .click()
               .then(() => {
-                cy.get('input#dir-dialog-dir')
-                  .should('exist')
-                  .should('be.visible')
-                  .clear()
-                  .type(pwd.dir)
-                  .type('{esc}');
-                cy.get('#dir-dialog-choose')
-                  .should('be.enabled')
-                  .click();
+                cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(pwd.dir).type('{esc}');
+                cy.get('#dir-dialog-choose').should('be.enabled').click();
                 cy.get('#responsive-dialog-title').should('not.exist');
               });
           });

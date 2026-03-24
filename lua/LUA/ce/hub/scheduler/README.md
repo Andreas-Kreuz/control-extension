@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Plane Aktionen nach Zeitablauf
 subtitle: Sichere Planung zukünftiger Aktionen in EEP - so funktioniert die Ampelsteuerung auch in 10-facher Geschwindigkeit.
 permalink: lua/ce/hub/scheduler/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Was ist `ce.hub.scheduler`?

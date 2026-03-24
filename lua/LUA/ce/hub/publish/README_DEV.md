@@ -3,8 +3,8 @@ layout: page_with_toc
 title: DataChangeBus — Entwickler
 subtitle: Interne Architektur und Design-Entscheidungen des Publish-Pakets
 permalink: lua/ce/hub/publish/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # DataChangeBus — Entwickler

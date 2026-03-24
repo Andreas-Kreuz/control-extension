@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Ampeln aufstellen
 type: Tipps & Tricks
 subtitle: Verwende maximal eine Ampel zum Steuern jeder Fahrspur. Verwende "alte" Ampeln mit dem richtigen Abstand im 1-Spur-System.
-img: "/assets/thumbnails/ampel-aufstellen.jpg"
+img: '/assets/thumbnails/ampel-aufstellen.jpg'
 date: 2017-09-30
 permalink: docs/anleitungen-ampelkreuzung/ampel-aufstellen
 tags: [Verwendung, Anleitung]
@@ -23,8 +23,8 @@ Die Ampeln haben normalerweise einen _Signalabstand_ von 3 Metern. Ändere diese
 
 Um Probleme durch hintereinander aufgestellte Ampeln zu vermeiden, muss jede Fahrspur genau eine Fahrspur-Ampel haben:
 
-* **Stelle nur eine Ampel** auf die Fahrspur, auf der die Fahrzeuge anhalten sollen.
-* **Stelle alle anderen Ampeln auf die Gegenfahrbahn** und ändere ihren Seitenabstand, so dass sie passend zu Deiner Spur stehen.
+- **Stelle nur eine Ampel** auf die Fahrspur, auf der die Fahrzeuge anhalten sollen.
+- **Stelle alle anderen Ampeln auf die Gegenfahrbahn** und ändere ihren Seitenabstand, so dass sie passend zu Deiner Spur stehen.
 
 Die Ampel in der Mitte oben beeinflusst den Verkehr auf der "richtigen" Fahrspur.
 

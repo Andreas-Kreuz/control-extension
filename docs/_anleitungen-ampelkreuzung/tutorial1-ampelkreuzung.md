@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Ampelsteuerung 1
 type: Tutorial mit Anlage
 subtitle: Hier erfährst Du, wie Du die Ampeln einer Kreuzung mit 4 Fahrspuren in Lua verwendest - danach funktioniert alles automatisch.
-img: "/assets/thumbnails/tutorial1-ampel.jpg"
+img: '/assets/thumbnails/tutorial1-ampel.jpg'
 date: 2017-09-01
 permalink: docs/anleitungen-ampelkreuzung/ampelkreuzung
 tags: [Verwendung, Anleitung]
@@ -151,7 +151,6 @@ In der Beispielanlage sind es:
   Du kannst aber weitere Ampeln für Fahrzeuge aufstellen, z.B. eine zweite Ampel auf der linken Straßenseite oder ein dritte über dem Verkehr. Nur die Fahrspur-Ampel darf den Verkehr auf der Straße steuern - alle anderen Ampeln müssen so aufgestellt werden, dass sie den Verkehr nicht beeinflussen.
 
 - **Fahrspuren werden nicht geschaltet, sondern Ampeln.** Jede Schaltung der Kreuzung schaltet bestimmte Ampeln auf grün. Dabei wird auch die Fahrspur-Ampel gesteuert.
-
   - Im einfachen Fall wird die Fahrspur-Ampel direkt in der Schaltung gesteuert
   - Später werden wir Szenarien haben, in denen die Fahrspur-Ampel unsichtbar ist, da mehrere andere Ampeln für die Fahrspur gelten. Der Verkehr wird dann abhängig von den anderen Ampeln gesteuert.
 
@@ -368,7 +367,6 @@ Du hast diese Anleitung abgeschlossen 🍀
 - Reihenfolge der Schaltungen ändern:
 
   Nachdem Du die Kreuzung mit `k1 = Crossing:new("Tutorial 1")` angegeben hast, kannst Du entscheiden, ob die Schaltungen in Reihenfolge ablaufen sollen oder nicht:
-
   - `k1:setSwitchInStrictOrder(true)` sorgt dafür, dass die Schaltungen in der Reihenfolge durchgeschaltet werden, in der sie mit `addSequence()` eingeführt wurden.
   - `k1:setSwitchInStrictOrder(false)` sorgt dafür, dass die Priorisierung der Schaltungen anhand der Wartezeit der einzelnen Fahrspuren und des anliegenden Verkehrs erfolgt.
 

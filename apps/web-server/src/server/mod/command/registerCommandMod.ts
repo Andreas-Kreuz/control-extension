@@ -7,7 +7,7 @@ export const registerCommandMod = (
   _io: Server,
   socketService: SocketService,
   eepService: EepService,
-  _debug: boolean
+  _debug: boolean,
 ) => {
   const queueCommand = eepService.queueCommand;
   const socketConnected = (socket: Socket) => {
@@ -60,7 +60,7 @@ export const registerCommandMod = (
           '|' +
           action.activate;
         queueCommand(command);
-      }
+      },
     );
 
     socket.on(CommandEvent.ChangeSetting, (action: { name: string; func: string; newValue: unknown }) => {

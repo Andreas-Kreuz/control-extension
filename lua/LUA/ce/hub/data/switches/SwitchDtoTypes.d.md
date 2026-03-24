@@ -5,8 +5,8 @@
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.switches.SwitchDtoFactory`
 
-| Name | Typ |
-| --- | --- |
-| `id` | `number` |
+| Name       | Typ      |
+| ---------- | -------- |
+| `id`       | `number` |
 | `position` | `number` |
-| `tag` | `string` |
+| `tag`      | `string` |

@@ -3,8 +3,8 @@ layout: page_with_toc
 title: CeModule — Entwickler
 subtitle: Was ein CeModule ist, wie es sich verhält und wie man eines entwickelt
 permalink: lua/ce/hub/mods/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Architektur von CeModule

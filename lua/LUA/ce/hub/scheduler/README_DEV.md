@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Scheduler — Entwickler
 subtitle: Interner Aufbau und Design-Entscheidungen des Schedulers
 permalink: lua/ce/hub/scheduler/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Scheduler — Entwickler

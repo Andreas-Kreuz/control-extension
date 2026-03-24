@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Simuliere den Simulator!
 subtitle: Mit diesem Skript kannst Du Deine Skripte ohne EEP testen.<br>Binde diese Skripte in ein Testskript ein und prüfe Deine Schaltungen.
 permalink: lua/ce/hub/eep/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Was ist `ce.hub.eep`?
@@ -14,10 +14,10 @@ Mit dem `EepSimulator` kannst Du Deine Lua-Skripte testen, ohne EEP laufen zu ha
 
 ## Verwendung
 
-* Ein Testskript lädt zuerst die Funktionen von EEP:<br>
+- Ein Testskript lädt zuerst die Funktionen von EEP:<br>
   `require 'ce.hub.eep.EepSimulator'`
 
-* Danach wird das eigentliche Skript geladen:<br>
+- Danach wird das eigentliche Skript geladen:<br>
   `require 'anlagen-script'`
 
 Ein ausführlicheres Tutorial zu dem Thema findest Du hier: **[Demo-Anlage-Testen](../../../../anleitungen-ampelkreuzung/demo-anlage-testen)**

@@ -3,22 +3,20 @@ layout: page_with_toc
 title: Vorlagen für Dich
 subtitle: Nutze die Vorlagen um schneller mit EEP-Web zu starten.
 permalink: lua/ce/template/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Paket ce.template - Vorlagen für Dich
 
 - `eep-web-main.lua` - kannst Du mit `require("ce.template.eep-web-main")` in jede Anlage einbinden, die noch kein Lua verwendet
 - `intersection-simple.lua` - kannst Du verwenden um mit einer einfachen Ampelanlage zu starten
-
   1. Kopiere die Datei in das `LUA`-Verzeichnis von EEP
   2. Benenne die Datei um, z.B. in `anlage1.lua`
   3. Nutze im Lua-Editor von EEP die Zeile `require("anlage1")`
   4. Vervollständige die Datei mit Deinen Kreuzungsdaten
 
 - `intersection-simple-test.lua` kannst Du verwenden um eine Anlage mit Kreuzung zu testen
-
   1. Kopiere die Datei in das `LUA`-Verzeichnis von EEP
   2. Benenne die Datei um, z.B. in `anlage1-test.lua`
   3. Ruf die zu testende Anlage mit `require` auf, z.B. `require("anlage1")`

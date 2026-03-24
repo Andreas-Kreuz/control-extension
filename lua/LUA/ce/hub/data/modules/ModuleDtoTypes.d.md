@@ -5,8 +5,8 @@
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.modules.ModuleDtoFactory`
 
-| Name | Typ |
-| --- | --- |
-| `id` | `string` |
-| `name` | `string` |
+| Name      | Typ       |
+| --------- | --------- |
+| `id`      | `string`  |
+| `name`    | `string`  |
 | `enabled` | `boolean` |
