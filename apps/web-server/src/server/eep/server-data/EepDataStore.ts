@@ -4,16 +4,15 @@ import { ListChangePayload } from './ListChangePayload';
 
 export interface State {
   eventCounter: number;
-  rooms: Record<string, Record<string, unknown>>;
+  ceTypes: Record<string, Record<string, unknown>>;
 }
 
 const initialState: State = {
   eventCounter: 0,
-  rooms: {},
+  ceTypes: {},
 };
 
 export default class EepDataStore {
-  private debug = false;
   private state: State = initialState;
 
   constructor() {}
@@ -24,7 +23,7 @@ export default class EepDataStore {
 
   init(previousState: unknown) {
     const state = previousState as State;
-    if (state && state.eventCounter && state.rooms) {
+    if (state && state.eventCounter && state.ceTypes) {
       this.state = state;
     } else {
       this.state = initialState;
@@ -37,41 +36,42 @@ export default class EepDataStore {
         console.log('Resetting state');
         return {
           eventCounter: event.eventCounter,
-          rooms: {},
+          ceTypes: {},
         };
       case 'DataAdded':
       case 'DataChanged': {
-        const payload = event.payload as DataChangePayload<unknown>;
-        const roomName = payload.room;
-        const key = payload.element[payload.keyId];
+        const payload = event.payload as DataChangePayload<Record<string, unknown>>;
+        const ceType = payload.ceType;
+        const key = String(payload.element[payload.keyId]);
         return {
           ...state,
           eventCounter: event.eventCounter,
-          rooms: { ...state.rooms, [roomName]: { ...state.rooms[roomName], [key]: payload.element } },
+          ceTypes: { ...state.ceTypes, [ceType]: { ...state.ceTypes[ceType], [key]: payload.element } },
         };
       }
       case 'DataRemoved': {
-        const payload = event.payload as DataChangePayload<unknown>;
-        const roomName = payload.room;
-        const key = payload.element[payload.keyId];
-        const { [key]: _, ...remainingEntries } = state.rooms[roomName];
+        const payload = event.payload as DataChangePayload<Record<string, unknown>>;
+        const ceType = payload.ceType;
+        const key = String(payload.element[payload.keyId]);
+        const currentEntries = state.ceTypes[ceType] ?? {};
+        const { [key]: _, ...remainingEntries } = currentEntries;
         return {
           ...state,
           eventCounter: event.eventCounter,
-          rooms: { ...state.rooms, [roomName]: remainingEntries },
+          ceTypes: { ...state.ceTypes, [ceType]: remainingEntries },
         };
       }
       case 'ListChanged': {
-        const payload = event.payload as ListChangePayload<unknown>;
-        const roomName = payload.room;
+        const payload = event.payload as ListChangePayload<Record<string, unknown>>;
+        const ceType = payload.ceType;
         const newEntries: Record<string, unknown> = {};
         for (const element of Object.values(payload.list)) {
-          newEntries[element[payload.keyId]] = element;
+          newEntries[String(element[payload.keyId])] = element;
         }
         return {
           ...state,
           eventCounter: event.eventCounter,
-          rooms: { ...state.rooms, [roomName]: { ...state.rooms[roomName], ...newEntries } },
+          ceTypes: { ...state.ceTypes, [ceType]: newEntries },
         };
       }
       default:

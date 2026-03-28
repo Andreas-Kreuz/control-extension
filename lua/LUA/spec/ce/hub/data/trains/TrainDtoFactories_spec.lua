@@ -54,11 +54,13 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
 
         occupiedTracks[12] = 12
 
-        assert.equals("trains", trainRoom)
+        assert.equals("ce.hub.Train", trainRoom)
         assert.equals("id", trainKeyId)
         assert.equals("T1", trainKey)
         assert.same({
+                        ceType = "ce.hub.Train",
                         id = "T1",
+                        name = "T1",
                         route = "R",
                         rollingStockCount = 1,
                         length = 2,
@@ -71,10 +73,11 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
                         occupiedTacks = { [11] = 11 }
                     },
                     trainDto)
-        assert.equals("rolling-stocks", rsRoom)
+        assert.equals("ce.hub.RollingStock", rsRoom)
         assert.equals("id", rsKeyId)
         assert.equals("RS1", rsKey)
         assert.same({
+                        ceType = "ce.hub.RollingStock",
                         id = "RS1",
                         name = "RS1",
                         trainName = "T1",

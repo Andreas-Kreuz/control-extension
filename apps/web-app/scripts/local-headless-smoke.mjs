@@ -3,7 +3,11 @@ import process from 'node:process';
 
 const appDir = process.cwd();
 const baseUrl = 'http://127.0.0.1:3000';
-const probeUrls = [`${baseUrl}/server`, `${baseUrl}/api/v1/api-stats`, `${baseUrl}/api/v1/api-entries`];
+const probeUrls = [
+  `${baseUrl}/server`,
+  `${baseUrl}/api/v1/ce.server.ServerStats`,
+  `${baseUrl}/api/v1/ce.server.ApiEntries`,
+];
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 

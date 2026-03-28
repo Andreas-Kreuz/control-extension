@@ -6,11 +6,13 @@ local ModuleRegistry = require("ce.hub.ModuleRegistry")
 local ControlExtension = {}
 
 function ControlExtension.addModules(...)
-    return ModuleRegistry.registerModules(...)
+    ModuleRegistry.registerModules(...)
+    return ControlExtension
 end
 
 function ControlExtension.initTasks()
-    return ControlExtensionHub.initTasks()
+    ControlExtensionHub.initTasks()
+    return ControlExtension
 end
 
 function ControlExtension.runTasks(cycleCount)
@@ -18,19 +20,23 @@ function ControlExtension.runTasks(cycleCount)
 end
 
 function ControlExtension.activateServer()
-    return ControlExtensionHub.activateServer()
+    ControlExtensionHub.activateServer()
+    return ControlExtension
 end
 
 function ControlExtension.deactivateServer()
-    return ControlExtensionHub.deactivateServer()
+    ControlExtensionHub.deactivateServer()
+    return ControlExtension
 end
 
 function ControlExtension.setDebug(debug)
-    return ControlExtensionHub.setDebug(debug)
+    ControlExtensionHub.setDebug(debug)
+    return ControlExtension
 end
 
 function ControlExtension.setPauseEepDuringInitialization(pauseEepDuringInitialization)
-    return ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringInitialization)
+    ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringInitialization)
+    return ControlExtension
 end
 
 return ControlExtension

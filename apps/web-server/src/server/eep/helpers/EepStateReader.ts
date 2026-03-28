@@ -10,7 +10,7 @@ const persistState = () => {
       const event = JSON.parse(line);
 
       console.log(
-        'Event ' + event.eventCounter + ' ' + event.payload.room + ' (' + line.length.toLocaleString('de-DE') + ')',
+        'Event ' + event.eventCounter + ' ' + event.payload.ceType + ' (' + line.length.toLocaleString('de-DE') + ')',
       );
 
       fs.writeFileSync(

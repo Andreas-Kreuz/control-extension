@@ -7,6 +7,7 @@ insulate("ce.hub.publish.InternalDataStore", function ()
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
+        clearModule("ce.hub.publish.ServerEventDispatcher")
     end)
 
     it("tracks added, changed, removed and list replacement events", function ()
@@ -15,13 +16,13 @@ insulate("ce.hub.publish.InternalDataStore", function ()
         local TableUtils = require("ce.hub.util.TableUtils")
 
         local addedElement = { name = "Alpha", nested = { value = 1 } }
-        DataChangeBus.fireDataAdded("signals", "id", "signal-a", addedElement)
+        DataChangeBus.fireDataAdded("ce.hub.Signal", "id", "signal-a", addedElement)
         addedElement.name = "mutated outside"
         addedElement.nested.value = 7
 
-        DataChangeBus.fireDataChanged("signals", "id", "signal-a", { status = "go" })
-        DataChangeBus.fireDataAdded("signals", "id", { id = "signal-b", name = "Beta" })
-        DataChangeBus.fireDataRemoved("signals", "id", "signal-b", {})
+        DataChangeBus.fireDataChanged("ce.hub.Signal", "id", "signal-a", { status = "go" })
+        DataChangeBus.fireDataAdded("ce.hub.Signal", "id", { ceType = "ce.hub.Signal", id = "signal-b", name = "Beta" })
+        DataChangeBus.fireDataRemoved("ce.hub.Signal", "id", "signal-b", {})
 
         assert.is_true(TableUtils.deepDictCompare({
                                                       ["signal-a"] = {
@@ -30,21 +31,21 @@ insulate("ce.hub.publish.InternalDataStore", function ()
                                                           nested = { value = 1 },
                                                           status = "go"
                                                       }
-                                                  }, DataStore.getRoom("signals")))
+                                                  }, DataStore.getCeType("ce.hub.Signal")))
 
-        DataChangeBus.fireListChange("signals", "id", {
+        DataChangeBus.fireListChange("ce.hub.Signal", "id", {
             { id = "signal-c", name = "Gamma" },
             { id = "signal-d", name = "Delta" }
         })
 
-        assert.is_nil(DataStore.get("signals", "signal-a"))
+        assert.is_nil(DataStore.get("ce.hub.Signal", "signal-a"))
         assert.is_true(TableUtils.deepDictCompare({
                                                       ["signal-c"] = { id = "signal-c", name = "Gamma" },
                                                       ["signal-d"] = { id = "signal-d", name = "Delta" }
-                                                  }, DataStore.getRoom("signals")))
+                                                  }, DataStore.getCeType("ce.hub.Signal")))
 
         DataChangeBus.fireCompleteReset()
-        assert.is_nil(DataStore.getRoom("signals"))
+        assert.is_nil(DataStore.getCeType("ce.hub.Signal"))
     end)
 
     it("registers standard listeners once and emits the reset from the bus", function ()
@@ -53,7 +54,11 @@ insulate("ce.hub.publish.InternalDataStore", function ()
         local DataStore = require("ce.hub.publish.InternalDataStore")
         local json = require("ce.third-party.json")
 
-        DataChangeBus.fireDataAdded("modules", "id", { id = "module-a", name = "Module A" })
+        DataChangeBus.fireDataAdded("ce.hub.Module", "id", {
+                                      ceType = "ce.hub.Module",
+                                      id = "module-a",
+                                      name = "Module A"
+                                  })
 
         local bufferedEvents = ServerEventBuffer.drainBufferedEvents()
         local eventLines = {}
@@ -62,7 +67,11 @@ insulate("ce.hub.publish.InternalDataStore", function ()
         assert.equals(2, #eventLines)
         assert.equals(DataChangeBus.eventType.completeReset, json.decode(eventLines[1]).type)
         assert.equals(DataChangeBus.eventType.dataAdded, json.decode(eventLines[2]).type)
-        assert.same({ id = "module-a", name = "Module A" }, DataStore.get("modules", "module-a"))
+        assert.same({
+                        ceType = "ce.hub.Module",
+                        id = "module-a",
+                        name = "Module A"
+                    }, DataStore.get("ce.hub.Module", "module-a"))
 
         DataChangeBus.initialize()
         assert.equals("", ServerEventBuffer.drainBufferedEvents())

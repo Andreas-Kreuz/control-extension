@@ -1,9 +1,9 @@
-# Train DTO-Räume
+# Train DTO-CeTypes
 
-## Raum `trains`
+## CeType `ce.hub.Train`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.trains.TrainDtoFactory`
+- DtoFactory: `ce.hub.data.ce.hub.Train.TrainDtoFactory`
 
 | Name                | Typ           |
 | ------------------- | ------------- |

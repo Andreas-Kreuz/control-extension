@@ -1,6 +1,7 @@
 ---@meta
 
 ---@class IntersectionDto
+---@field ceType string
 ---@field id number
 ---@field name string
 ---@field currentSwitching string|nil
@@ -11,6 +12,7 @@
 ---@field staticCams table
 
 ---@class IntersectionLaneDto
+---@field ceType string
 ---@field id string
 ---@field intersectionId number
 ---@field name string
@@ -26,6 +28,7 @@
 ---@field tracks table
 
 ---@class IntersectionSwitchingDto
+---@field ceType string
 ---@field id string
 ---@field intersectionId string|number
 ---@field name string
@@ -48,6 +51,7 @@
 ---@field positionRedYellow number|nil
 
 ---@class IntersectionTrafficLightDto
+---@field ceType string
 ---@field id number
 ---@field signalId number
 ---@field modelId string
@@ -57,6 +61,7 @@
 ---@field axisStructures IntersectionTrafficLightAxisStructureDto[]
 
 ---@class IntersectionModuleSettingDto
+---@field ceType string
 ---@field category string
 ---@field name string
 ---@field description string
@@ -74,6 +79,7 @@
 ---@field positionOffBlinking number
 
 ---@class SignalTypeDefinitionDto
+---@field ceType string
 ---@field id string
 ---@field name string
 ---@field type string

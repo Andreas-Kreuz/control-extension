@@ -14,22 +14,22 @@ insulate("RuntimeStatePublisher", function ()
         local RuntimeStatePublisher = require("ce.hub.data.runtime.RuntimeStatePublisher")
         local published = {}
 
-        DataChangeBus.fireListChange = function (room, keyId, list)
-            table.insert(published, { room = room, keyId = keyId, list = list })
+        DataChangeBus.fireListChange = function (ceType, keyId, list)
+            table.insert(published, { ceType = ceType, keyId = keyId, list = list })
         end
 
         RuntimeStatePublisher.syncState()
         assert.equals(0, #published)
 
         RuntimeDataCollector.setLastCycleRuntimeEntries(
-        { sample = { id = "sample", count = 2, time = 4, lastTime = 1 } }, true)
+        { sample = { ceType = "ce.hub.Runtime", id = "sample", count = 2, time = 4, lastTime = 1 } }, true)
 
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)
-        assert.equals("runtime", published[1].room)
+        assert.equals("ce.hub.Runtime", published[1].ceType)
         assert.equals("id", published[1].keyId)
         assert.same({
-                        sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
+                        sample = { ceType = "ce.hub.Runtime", id = "sample", count = 2, time = 4, lastTime = 1 }
                     }, published[1].list)
 
         RuntimeStatePublisher.syncState()

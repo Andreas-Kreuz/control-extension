@@ -1,6 +1,6 @@
-# Time DTO-Räume
+# Time DTO-CeTypes
 
-## Raum `times`
+## CeType `ce.hub.Time`
 
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.time.TimeDtoFactory`

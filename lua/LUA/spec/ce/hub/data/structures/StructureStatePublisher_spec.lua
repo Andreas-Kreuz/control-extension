@@ -79,7 +79,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         _G.__structure_state_test_states = nil
     end)
 
-    it("fires initial room data and later only dirty room data", function ()
+    it("fires initial ceType data and later only dirty ceType data", function ()
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
@@ -87,6 +87,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
         assert.same({
                         ["#2"] = {
+                            ceType = "ce.hub.Structure",
                             id = "#2",
                             name = "#2",
                             pos_x = 1,
@@ -102,11 +103,11 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                             smoke = false,
                             fire = false
                         }
-                    }, DataStore.getRoom("structures"))
+                    }, DataStore.getCeType("ce.hub.Structure"))
 
         _G.__structure_state_test_states["#2"].fire = true
         StructureStatePublisher.syncState()
 
-        assert.is_true(DataStore.get("structures", "#2").fire)
+        assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
     end)
 end)

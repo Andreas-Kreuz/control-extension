@@ -1,7 +1,7 @@
 ---
 layout: page_with_toc
 title: Datenmodell
-subtitle: Alle Räume und Datentypen der Control Extension im Überblick
+subtitle: Alle CeTypes und Datentypen der Control Extension im Überblick
 permalink: lua/ce/hub/data/dto/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
@@ -27,47 +27,47 @@ Wichtig:
 
 | Collector                         | Datei                                                           | Effektive Ausgabe                                                                |
 | --------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `ModulesStatePublisher`           | `lua/LUA/ce/hub/data/modules/ModulesStatePublisher.lua`         | direkte Rückgabe; zusätzlich `DataAdded`/`DataChanged` für `modules`             |
-| `VersionStatePublisher`           | `lua/LUA/ce/hub/data/version/VersionStatePublisher.lua`         | `ListChanged` für `eep-version`; Rückgabe leer                                   |
-| `SignalStatePublisher`            | `lua/LUA/ce/hub/data/signals/SignalStatePublisher.lua`          | `ListChanged` für `signals` und `waiting-on-signals`; Rückgabe leer              |
-| `SwitchStatePublisher`            | `lua/LUA/ce/hub/data/switches/SwitchStatePublisher.lua`         | `ListChanged` für `switches`; Rückgabe leer                                      |
-| `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`               | `ListChanged` für `times`; Rückgabe leer                                         |
-| `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`         | `ListChanged` für `save-slots` und `free-slots`; Rückgabe leer                   |
-| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`    | `ListChanged` für `structures`; Rückgabe leer                                    |
-| `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`  | indirekte Events für `trains` und `rolling-stocks`; Rückgabe leer                |
-| `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua` | `ListChanged` für `signal-type-definitions`; Rückgabe leer                       |
+| `ModulesStatePublisher`           | `lua/LUA/ce/hub/data/modules/ModulesStatePublisher.lua`         | direkte Rückgabe; zusätzlich `DataAdded`/`DataChanged` für `ce.hub.Module`       |
+| `VersionStatePublisher`           | `lua/LUA/ce/hub/data/version/VersionStatePublisher.lua`         | `ListChanged` für `ce.hub.EepVersion`; Rückgabe leer                             |
+| `SignalStatePublisher`            | `lua/LUA/ce/hub/data/signals/SignalStatePublisher.lua`          | `ListChanged` für `ce.hub.Signal` und `ce.hub.WaitingOnSignal`; Rückgabe leer    |
+| `SwitchStatePublisher`            | `lua/LUA/ce/hub/data/switches/SwitchStatePublisher.lua`         | `ListChanged` für `ce.hub.Switch`; Rückgabe leer                                 |
+| `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`               | `ListChanged` für `ce.hub.Time`; Rückgabe leer                                   |
+| `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`         | `ListChanged` für `ce.hub.SaveSlot` und `ce.hub.FreeSlot`; Rückgabe leer         |
+| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`    | `ListChanged` für `ce.hub.Structure`; Rückgabe leer                              |
+| `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`  | indirekte Events für `ce.hub.Train` und `ce.hub.RollingStock`; Rückgabe leer     |
+| `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua` | `ListChanged` für `ce.mods.road.SignalTypeDefinition`; Rückgabe leer             |
 | `RoadStatePublisher`              | `lua/LUA/ce/mods/road/data/RoadStatePublisher.lua`              | Events für Kreuzungsdaten; internes Datenobjekt wird derzeit nicht zurückgegeben |
 | `TransitStatePublisher`           | `lua/LUA/ce/mods/transit/data/TransitStatePublisher.lua`        | Events für ÖPNV-Daten; internes Datenobjekt wird derzeit nicht zurückgegeben     |
 
 ## Transportform
 
-| Thema                               | Event-Raum                         | Schlüssel |
-| ----------------------------------- | ---------------------------------- | --------- |
-| Module                              | `modules`                          | `id`      |
-| Version                             | `eep-version`                      | `id`      |
-| Signale                             | `signals`                          | `id`      |
-| Wartende Fahrzeuge an Signalen      | `waiting-on-signals`               | `id`      |
-| Weichen                             | `switches`                         | `id`      |
-| Zeit                                | `times`                            | `id`      |
-| Belegte Datenslots                  | `save-slots`                       | `id`      |
-| Freie Datenslots                    | `free-slots`                       | `id`      |
-| Strukturen                          | `structures`                       | `id`      |
-| Züge                                | `trains`                           | `id`      |
-| RollingStock                        | `rolling-stocks`                   | `id`      |
-| Ampelmodell-Definitionen            | `signal-type-definitions`          | `id`      |
-| Kreuzungen                          | `road-intersections`               | `id`      |
-| Kreuzungs-Fahrspuren                | `road-intersection-lanes`          | `id`      |
-| Kreuzungs-Schaltungen               | `road-intersection-switchings`     | `id`      |
-| Kreuzungs-Ampeln                    | `road-intersection-traffic-lights` | `id`      |
-| Kreuzungs-Moduleinstellungen        | `road-module-settings`             | `name`    |
-| ÖPNV-Linien                         | `transit-lines`                    | `id`      |
-| ÖPNV-Stationen                      | `transit-stations`                 | `id`      |
-| ÖPNV-Moduleinstellungen             | `transit-module-settings`          | `name`    |
-| Änderungsereignisse für Liniennamen | `transit-line-names`               | `id`      |
+| Thema                               | CeType                                  | Schlüssel |
+| ----------------------------------- | --------------------------------------- | --------- |
+| Module                              | `ce.hub.Module`                         | `id`      |
+| Version                             | `ce.hub.EepVersion`                     | `id`      |
+| Signale                             | `ce.hub.Signal`                         | `id`      |
+| Wartende Fahrzeuge an Signalen      | `ce.hub.WaitingOnSignal`                | `id`      |
+| Weichen                             | `ce.hub.Switch`                         | `id`      |
+| Zeit                                | `ce.hub.Time`                           | `id`      |
+| Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
+| Freie Datenslots                    | `ce.hub.FreeSlot`                       | `id`      |
+| Strukturen                          | `ce.hub.Structure`                      | `id`      |
+| Züge                                | `ce.hub.Train`                          | `id`      |
+| RollingStock                        | `ce.hub.RollingStock`                   | `id`      |
+| Ampelmodell-Definitionen            | `ce.mods.road.SignalTypeDefinition`     | `id`      |
+| Kreuzungen                          | `ce.mods.road.Intersection`             | `id`      |
+| Kreuzungs-Fahrspuren                | `ce.mods.road.IntersectionLane`         | `id`      |
+| Kreuzungs-Schaltungen               | `ce.mods.road.IntersectionSwitching`    | `id`      |
+| Kreuzungs-Ampeln                    | `ce.mods.road.IntersectionTrafficLight` | `id`      |
+| Kreuzungs-Moduleinstellungen        | `ce.mods.road.ModuleSetting`            | `name`    |
+| ÖPNV-Linien                         | `ce.mods.transit.Line`                  | `id`      |
+| ÖPNV-Stationen                      | `ce.mods.transit.Station`               | `id`      |
+| ÖPNV-Moduleinstellungen             | `ce.mods.transit.ModuleSetting`         | `name`    |
+| Änderungsereignisse für Liniennamen | `ce.mods.transit.LineName`              | `id`      |
 
 ## Datenschemata
 
-### `modules`
+### `ce.hub.Module`
 
 Elementtyp: Modulstatus
 
@@ -79,9 +79,9 @@ Elementtyp: Modulstatus
 
 Hinweis:
 
-- `syncState()` liefert aktuell kein Listenobjekt, sondern ein Root-Objekt mit leeren `modules = {}` plus Einträgen unter `root[module.id]`.
+- `syncState()` liefert aktuell kein Listenobjekt, sondern ein Root-Objekt mit leeren `ceTypes = {}` plus Einträgen unter `root[module.id]`.
 
-### `eep-version`
+### `ce.hub.EepVersion`
 
 Elementtyp: Versionsinfo
 
@@ -93,7 +93,7 @@ Elementtyp: Versionsinfo
 | `luaVersion`    | `string` | Lua-Versionsstring | `_VERSION` des eingebetteten Lua                                     |
 | `singleVersion` | `string` | Versionsstring     | Programmversion des Web-/Single-Prozesses                            |
 
-### `signals`
+### `ce.hub.Signal`
 
 Elementtyp: Signal
 
@@ -109,7 +109,7 @@ Abgeleitet aus:
 - `EEPGetSignal(signalId)`
 - `EEPGetSignalTrainsCount(signalId)`
 
-### `waiting-on-signals`
+### `ce.hub.WaitingOnSignal`
 
 Elementtyp: Wartender Fahrzeugverband an einem Signal
 
@@ -125,7 +125,7 @@ Abgeleitet aus:
 
 - `EEPGetSignalTrainName(signalId, position)`
 
-### `switches`
+### `ce.hub.Switch`
 
 Elementtyp: Weiche
 
@@ -139,7 +139,7 @@ Abgeleitet aus:
 
 - `EEPGetSwitch(switchId)`
 
-### `times`
+### `ce.hub.Time`
 
 Elementtyp: EEP-Zeit
 
@@ -159,7 +159,7 @@ Abgeleitet aus:
 - `EEPTimeM`
 - `EEPTimeS`
 
-### `save-slots`
+### `ce.hub.SaveSlot`
 
 Elementtyp: belegter Datenslot
 
@@ -173,7 +173,7 @@ Abgeleitet aus:
 
 - `EEPLoadData(slot)`
 
-### `free-slots`
+### `ce.hub.FreeSlot`
 
 Elementtyp: freier Datenslot
 
@@ -222,7 +222,7 @@ Vollständige Liste `modelType` für Strukturen laut `Lua_manual.pdf` und `EEPSt
 | `25` | Landschaftselemente Terra                             |
 | `38` | Landschaftselemente, Bodenmodelle zur 3D-Texturierung |
 
-### `trains`
+### `ce.hub.Train`
 
 Elementtyp: Zug / Fahrzeugverband
 
@@ -257,7 +257,7 @@ Vollständige Liste `trackType` laut `TrainDetection` / `TrackDetection`:
 | `auxiliary` | sonstige Splines / Wasserwege                                         |
 | `control`   | Steuerstrecken / nicht direkt einem der vier Track-Systeme zugeordnet |
 
-### `rolling-stocks`
+### `ce.hub.RollingStock`
 
 Elementtyp: RollingStock / Fahrzeug
 
@@ -326,7 +326,7 @@ Vollständige Liste `modelType` für RollingStock laut `Lua_manual.pdf` und `EEP
 | `14` | LKW                  |
 | `15` | PKW                  |
 
-### `signal-type-definitions`
+### `ce.mods.road.SignalTypeDefinition`
 
 Elementtyp: Ampelmodell-Definition
 
@@ -343,7 +343,7 @@ Elementtyp: Ampelmodell-Definition
 | `positions.positionOff`         | `integer` \| `nil` | Signalzustandsindex | ausgeschaltet                          |
 | `positions.positionOffBlinking` | `integer` \| `nil` | Signalzustandsindex | Blinkbetrieb                           |
 
-### `road-intersections`
+### `ce.mods.road.Intersection`
 
 Elementtyp: Kreuzung
 
@@ -358,14 +358,14 @@ Elementtyp: Kreuzung
 | `timeForGreen`     | `number`          | Sekunden               | Grünphasenlänge                                |
 | `staticCams`       | `string[]`        | Kameranamen            | Liste statischer Kameras der Kreuzung          |
 
-### `road-intersection-lanes`
+### `ce.mods.road.IntersectionLane`
 
 Elementtyp: Fahrspur einer Kreuzung
 
 | Name                         | Typ                | Wertebereich                                                 | Beschreibung                                     |
 | ---------------------------- | ------------------ | ------------------------------------------------------------ | ------------------------------------------------ |
 | `id`                         | `string`           | `<intersectionId>-<laneName>`                                | technischer Schlüssel                            |
-| `intersectionId`             | `integer`          | referenziert `road-intersections.id`                         | zugehörige Kreuzung                              |
+| `intersectionId`             | `integer`          | referenziert `ce.mods.road.Intersection.id`                  | zugehörige Kreuzung                              |
 | `name`                       | `string`           | freier Text                                                  | Fahrspurname                                     |
 | `phase`                      | `string`           | `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN` | aus der Ampelphasenlogik der Bibliothek          |
 | `vehicleMultiplier`          | `number`           | projektabhängig                                              | Gewichtungsfaktor für Zähler                     |
@@ -378,30 +378,30 @@ Elementtyp: Fahrspur einer Kreuzung
 | `switchings`                 | `string[]`         | Sequenznamen                                                 | Schaltungen, die diese Fahrspur freigeben        |
 | `tracks`                     | `table`            | Track-IDs oder Highlight-Daten                               | für Hervorhebung genutzte Tracks                 |
 
-### `road-intersection-switchings`
+### `ce.mods.road.IntersectionSwitching`
 
 Elementtyp: Kreuzungs-Schaltung
 
-| Name             | Typ             | Wertebereich                    | Beschreibung                                                                          |
-| ---------------- | --------------- | ------------------------------- | ------------------------------------------------------------------------------------- |
-| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                                 |
-| `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `road-intersections.id` |
-| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                                    |
-| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                               |
+| Name             | Typ             | Wertebereich                    | Beschreibung                                                                                 |
+| ---------------- | --------------- | ------------------------------- | -------------------------------------------------------------------------------------------- |
+| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                                        |
+| `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `ce.mods.road.Intersection.id` |
+| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                                           |
+| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                                      |
 
-### `road-intersection-traffic-lights`
+### `ce.mods.road.IntersectionTrafficLight`
 
 Elementtyp: Ampel innerhalb einer Kreuzung
 
-| Name              | Typ                           | Wertebereich                         | Beschreibung                |
-| ----------------- | ----------------------------- | ------------------------------------ | --------------------------- |
-| `id`              | `integer \| string`           | Signal-ID                            | technischer Schlüssel       |
-| `signalId`        | `integer`                     | Signal-ID                            | referenziertes EEP-Signal   |
-| `modelId`         | `string`                      | Modellname                           | referenziertes Ampelmodell  |
-| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                      | aktuelle interne Ampelphase |
-| `intersectionId`  | `integer`                     | referenziert `road-intersections.id` | zugehörige Kreuzung         |
-| `lightStructures` | `table<string, object>`       | indexierte Map                       | zugehörige Lichtstrukturen  |
-| `axisStructures`  | `object[]`                    | Liste                                | zugehörige Achsstrukturen   |
+| Name              | Typ                           | Wertebereich                                | Beschreibung                |
+| ----------------- | ----------------------------- | ------------------------------------------- | --------------------------- |
+| `id`              | `integer \| string`           | Signal-ID                                   | technischer Schlüssel       |
+| `signalId`        | `integer`                     | Signal-ID                                   | referenziertes EEP-Signal   |
+| `modelId`         | `string`                      | Modellname                                  | referenziertes Ampelmodell  |
+| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                             | aktuelle interne Ampelphase |
+| `intersectionId`  | `integer`                     | referenziert `ce.mods.road.Intersection.id` | zugehörige Kreuzung         |
+| `lightStructures` | `table<string, object>`       | indexierte Map                              | zugehörige Lichtstrukturen  |
+| `axisStructures`  | `object[]`                    | Liste                                       | zugehörige Achsstrukturen   |
 
 Unterobjekt `lightStructures[*]`:
 
@@ -425,7 +425,7 @@ Unterobjekt `axisStructures[*]`:
 | `positionPedestrian` | `number \| nil` | projektabhängig | Position bei Fußgängerphase |
 | `positionRedYellow`  | `number \| nil` | projektabhängig | Position bei Rot-Gelb       |
 
-### `road-module-settings`
+### `ce.mods.road.ModuleSetting`
 
 Elementtyp: Kreuzungs-Moduloption
 
@@ -438,7 +438,7 @@ Elementtyp: Kreuzungs-Moduloption
 | `value`       | `boolean` | `true`, `false`      | aktueller Wert                 |
 | `eepFunction` | `string`  | Lua-Funktionsname    | Setter-Funktion für die Option |
 
-### `transit-lines`
+### `ce.mods.transit.Line`
 
 Elementtyp: ÖPNV-Linie
 
@@ -466,7 +466,7 @@ Unterobjekt `stations[*]`:
 | `station.name`  | `string` | Stationsname    | Name der Zielstation     |
 | `timeToStation` | `number` | Minuten, `>= 0` | Fahrzeit bis zur Station |
 
-### `transit-stations`
+### `ce.mods.transit.Station`
 
 Elementtyp: ÖPNV-Station
 
@@ -475,7 +475,7 @@ Aktueller Stand:
 - Der Collector erzeugt derzeit immer eine leere Liste.
 - Es gibt aktuell kein JSON-Schema, weil noch keine Stationseinträge erzeugt werden.
 
-### `transit-module-settings`
+### `ce.mods.transit.ModuleSetting`
 
 Elementtyp: ÖPNV-Moduloption
 
@@ -488,13 +488,13 @@ Elementtyp: ÖPNV-Moduloption
 | `value`       | `boolean` | `true`, `false`      | aktueller Wert                 |
 | `eepFunction` | `string`  | Lua-Funktionsname    | Setter-Funktion für die Option |
 
-### `transit-line-names`
+### `ce.mods.transit.LineName`
 
 Elementtyp: Änderungsereignis für Linien
 
 Schema:
 
-- identisch zu `transit-lines`
+- identisch zu `ce.mods.transit.Line`
 - wird von `LineRegistry.fireChangeLinesEvent()` gesendet
 
 ## Rückgabewerte der `syncState()`-Funktionen

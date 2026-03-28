@@ -1,9 +1,9 @@
-# Runtime DTO-Räume
+# Runtime DTO-CeTypes
 
-## Raum `runtime`
+## CeType `ce.hub.Runtime`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.runtime.RuntimeDtoFactory`
+- DtoFactory: `ce.hub.data.ce.hub.Runtime.RuntimeDtoFactory`
 
 | Name       | Typ      |
 | ---------- | -------- |

@@ -24,14 +24,15 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
             fire = true
         }
 
-        local room, keyId, key, structureDto = StructureDtoFactory.createStructureDto(structure)
+        local ceType, keyId, key, structureDto = StructureDtoFactory.createStructureDto(structure)
         local listRoom, listKeyId, structureDtos = StructureDtoFactory.createStructureDtoList({ structure })
         structure.tag = "changed"
 
-        assert.equals("structures", room)
+        assert.equals("ce.hub.Structure", ceType)
         assert.equals("id", keyId)
         assert.equals("#7", key)
         assert.same({
+                        ceType = "ce.hub.Structure",
                         id = "#7",
                         name = "#7",
                         pos_x = 1,
@@ -47,9 +48,10 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
                         smoke = false,
                         fire = true
                     }, structureDto)
-        assert.equals("structures", listRoom)
+        assert.equals("ce.hub.Structure", listRoom)
         assert.equals("id", listKeyId)
         assert.same({ {
+                        ceType = "ce.hub.Structure",
                         id = "#7",
                         name = "#7",
                         pos_x = 1,

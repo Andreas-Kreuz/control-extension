@@ -8,6 +8,7 @@ import { StructureLuaDto } from '../../ce/dto/structures/StructureLuaDto';
 import { TrackLuaDto } from '../../ce/dto/tracks/TrackLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import {
+  CeTypes,
   RuntimeDto,
   ModuleDto,
   DataSlotDto,
@@ -16,6 +17,7 @@ import {
   SwitchDto,
   StructureDto,
   TrackDto,
+  trackTypeForCeType,
 } from '@ak/web-shared';
 
 export default class EepDataSelector {
@@ -36,41 +38,41 @@ export default class EepDataSelector {
     }
     this.lastState = state;
 
-    this.runtime = this.mapRoom<RuntimeLuaDto, RuntimeDto>(state, 'runtime', (dto) => ({
+    this.runtime = this.mapCeType<RuntimeLuaDto, RuntimeDto>(state, CeTypes.HubRuntime, (dto) => ({
       id: dto.id,
       count: dto.count,
       time: dto.time,
       lastTime: dto.lastTime,
     }));
 
-    this.modules = this.mapRoom<ModuleLuaDto, ModuleDto>(state, 'modules', (dto) => ({
+    this.modules = this.mapCeType<ModuleLuaDto, ModuleDto>(state, CeTypes.HubModule, (dto) => ({
       id: dto.id,
       name: dto.name,
       enabled: dto.enabled,
     }));
 
-    this.saveSlots = this.mapRoom<DataSlotLuaDto, DataSlotDto>(state, 'save-slots', (dto) => ({
+    this.saveSlots = this.mapCeType<DataSlotLuaDto, DataSlotDto>(state, CeTypes.HubSaveSlot, (dto) => ({
       id: dto.id,
       name: dto.name,
       data: dto.data,
     }));
 
-    this.freeSlots = this.mapRoom<DataSlotLuaDto, DataSlotDto>(state, 'free-slots', (dto) => ({
+    this.freeSlots = this.mapCeType<DataSlotLuaDto, DataSlotDto>(state, CeTypes.HubFreeSlot, (dto) => ({
       id: dto.id,
       name: dto.name,
       data: dto.data,
     }));
 
-    this.signals = this.mapRoom<SignalLuaDto, SignalDto>(state, 'signals', (dto) => ({
+    this.signals = this.mapCeType<SignalLuaDto, SignalDto>(state, CeTypes.HubSignal, (dto) => ({
       id: dto.id,
       position: dto.position,
       tag: dto.tag,
       waitingVehiclesCount: dto.waitingVehiclesCount,
     }));
 
-    this.waitingOnSignals = this.mapRoom<WaitingOnSignalLuaDto, WaitingOnSignalDto>(
+    this.waitingOnSignals = this.mapCeType<WaitingOnSignalLuaDto, WaitingOnSignalDto>(
       state,
-      'waiting-on-signals',
+      CeTypes.HubWaitingOnSignal,
       (dto) => ({
         id: dto.id,
         signalId: dto.signalId,
@@ -80,13 +82,13 @@ export default class EepDataSelector {
       }),
     );
 
-    this.switches = this.mapRoom<SwitchLuaDto, SwitchDto>(state, 'switches', (dto) => ({
+    this.switches = this.mapCeType<SwitchLuaDto, SwitchDto>(state, CeTypes.HubSwitch, (dto) => ({
       id: dto.id,
       position: dto.position,
       tag: dto.tag,
     }));
 
-    this.structures = this.mapRoom<StructureLuaDto, StructureDto>(state, 'structures', (dto) => ({
+    this.structures = this.mapCeType<StructureLuaDto, StructureDto>(state, CeTypes.HubStructure, (dto) => ({
       id: dto.id,
       name: dto.name,
       pos_x: dto.pos_x,
@@ -103,24 +105,23 @@ export default class EepDataSelector {
       fire: dto.fire,
     }));
 
-    // Tracks: dynamic room names like "rail-tracks", "road-tracks", etc.
     this.tracks = {};
-    for (const roomName of Object.keys(state.rooms)) {
-      if (roomName.endsWith('-tracks')) {
-        this.tracks[roomName] = this.mapRoom<TrackLuaDto, TrackDto>(state, roomName, (dto) => ({
-          id: dto.id,
-        }));
-      }
+    for (const ceType of Object.keys(state.ceTypes)) {
+      const trackType = trackTypeForCeType(ceType);
+      if (!trackType) continue;
+      this.tracks[trackType] = this.mapCeType<TrackLuaDto, TrackDto>(state, ceType, (dto) => ({
+        id: dto.id,
+      }));
     }
   }
 
-  private mapRoom<TLua, TDto>(
+  private mapCeType<TLua, TDto>(
     state: fromEepData.State,
-    roomName: string,
+    ceType: string,
     mapper: (dto: TLua) => TDto,
   ): Record<string, TDto> {
-    if (!state.rooms[roomName]) return {};
-    const dict = state.rooms[roomName] as unknown as Record<string, TLua>;
+    if (!state.ceTypes[ceType]) return {};
+    const dict = state.ceTypes[ceType] as unknown as Record<string, TLua>;
     const result: Record<string, TDto> = {};
     Object.values(dict).forEach((dto: TLua) => {
       const mapped = mapper(dto);
@@ -137,6 +138,6 @@ export default class EepDataSelector {
   getWaitingOnSignals = (): Record<string, WaitingOnSignalDto> => this.waitingOnSignals;
   getSwitches = (): Record<string, SwitchDto> => this.switches;
   getStructures = (): Record<string, StructureDto> => this.structures;
-  getTracksForRoom = (roomName: string): Record<string, TrackDto> => this.tracks[roomName] ?? {};
+  getTracksForRoom = (trackType: string): Record<string, TrackDto> => this.tracks[trackType] ?? {};
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);
 }

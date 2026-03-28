@@ -1,7 +1,7 @@
 import { TransitLineLuaDto } from '../../ce/dto/transit/TransitLineLuaDto';
 import { TransitStationLuaDto } from '../../ce/dto/transit/TransitStationLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { TransitLineDto, TransitStationDto } from '@ak/web-shared';
+import { CeTypes, TransitLineDto, TransitStationDto } from '@ak/web-shared';
 
 export default class TransitSelector {
   private lastState: fromEepData.State = undefined;
@@ -14,8 +14,8 @@ export default class TransitSelector {
     }
     this.lastState = state;
 
-    if (state.rooms['transit-lines']) {
-      const dict = state.rooms['transit-lines'] as unknown as Record<string, TransitLineLuaDto>;
+    if (state.ceTypes[CeTypes.TransitLine]) {
+      const dict = state.ceTypes[CeTypes.TransitLine] as unknown as Record<string, TransitLineLuaDto>;
       this.transitLines = {};
       Object.values(dict).forEach((dto: TransitLineLuaDto) => {
         this.transitLines[dto.id] = {
@@ -36,8 +36,8 @@ export default class TransitSelector {
       });
     }
 
-    if (state.rooms['transit-stations']) {
-      const dict = state.rooms['transit-stations'] as unknown as Record<string, TransitStationLuaDto>;
+    if (state.ceTypes[CeTypes.TransitStation]) {
+      const dict = state.ceTypes[CeTypes.TransitStation] as unknown as Record<string, TransitStationLuaDto>;
       this.transitStations = {};
       Object.values(dict).forEach((dto: TransitStationLuaDto) => {
         this.transitStations[dto.id] = { id: dto.id };

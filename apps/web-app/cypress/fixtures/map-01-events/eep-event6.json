@@ -1,1 +1,1 @@
-{"eventCounter":6,"payload":{"keyId":"id","room":"control-tracks","list":[]},"type":"ListChanged"}
+{"eventCounter":6,"payload":{"keyId":"id","list":[],"ceType":"ce.hub.ControlTrack"},"type":"ListChanged"}

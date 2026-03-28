@@ -1,5 +1,5 @@
 import { useApiDataRoomHandler, useDynamicRoomHandler, useRoomHandler } from '../../io/useRoomHandler';
-import { RollingStockDto, TrackType, TrainListRoom } from '@ak/web-shared';
+import { CeTypes, RollingStockDto, TrackType, TrainListRoom } from '@ak/web-shared';
 import { TrainDto, TrainListDto, TrainType } from '@ak/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
 import useDebug from '../../io/useDebug';
@@ -65,7 +65,7 @@ export const TrainProvider = (props: { children: ReactNode }) => {
       rollingStock: data,
     });
   };
-  useApiDataRoomHandler('rolling-stocks', rollingStockDispatcher);
+  useApiDataRoomHandler(CeTypes.HubRollingStock, rollingStockDispatcher);
 
   return (
     <TrainContext.Provider value={state}>

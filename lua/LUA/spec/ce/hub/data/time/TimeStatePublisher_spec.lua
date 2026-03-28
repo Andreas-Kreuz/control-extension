@@ -26,7 +26,7 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
         _G.EEPTimeS = originalEEPTimeS
     end)
 
-    it("fires times with the existing wire format", function ()
+    it("fires time ceTypes with the existing wire format", function ()
         local TimeStatePublisher = require("ce.hub.data.time.TimeStatePublisher")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
@@ -35,6 +35,7 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
 
         assert.same({
                         times = {
+                            ceType = "ce.hub.Time",
                             id = "times",
                             name = "times",
                             timeComplete = 3723,
@@ -42,6 +43,6 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
                             timeM = 2,
                             timeS = 3
                         }
-                    }, DataStore.getRoom("times"))
+                    }, DataStore.getCeType("ce.hub.Time"))
     end)
 end)

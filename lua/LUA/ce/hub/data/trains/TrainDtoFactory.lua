@@ -1,9 +1,10 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDtoFactory ...") end
 
+local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local TrainDtoFactory = {}
 
-local ROOM = "trains"
+local CE_TYPE = HubCeTypes.Train
 local KEY_ID = "id"
 
 local function copyTable(values)
@@ -14,7 +15,9 @@ end
 
 local function toTrainDto(train)
     return {
+        ceType = CE_TYPE,
         id = train:getName(),
+        name = train:getName(),
         route = train:getRoute(),
         rollingStockCount = train:getRollingStockCount(),
         length = train:getLength(),
@@ -30,23 +33,21 @@ end
 
 function TrainDtoFactory.createTrainDto(train)
     local dto = toTrainDto(train)
-    return ROOM, KEY_ID, dto[KEY_ID], dto
+    return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
 function TrainDtoFactory.createTrainDtoList(trains)
     local trainDtos = {}
-
     for trainId, train in pairs(trains) do
         local _, _, _, dto = TrainDtoFactory.createTrainDto(train)
         trainDtos[trainId] = dto
     end
-
-    return ROOM, KEY_ID, trainDtos
+    return CE_TYPE, KEY_ID, trainDtos
 end
 
 function TrainDtoFactory.createTrainReferenceDto(trainId)
-    local dto = { id = trainId }
-    return ROOM, KEY_ID, trainId, dto
+    local dto = { ceType = CE_TYPE, id = trainId }
+    return CE_TYPE, KEY_ID, trainId, dto
 end
 
 return TrainDtoFactory

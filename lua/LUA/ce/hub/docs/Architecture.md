@@ -87,7 +87,7 @@ Unterbereiche des Zielbilds:
   - gemeinsame DTO-Definitionen wie `DtoTypes.d.lua` und `DtoTypes.d.md`
 - `slots`
   - Datenslot-Namen, Datenslot-DTOs und Datenslot-Publisher
-- `signals`
+- `signal-detection`
   - Signalerkennung, Signal-DTOs und Signal-Publisher
 - `switches`
   - Weichenerkennung, Weichen-DTOs und Weichen-Publisher
@@ -230,7 +230,7 @@ lua/LUA/ce/
     data/
       contracts/
       slots/
-      signals/
+      signal-detection/
       switches/
       structures/
       time/

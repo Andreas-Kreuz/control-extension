@@ -1,7 +1,7 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainLuaDto } from '../../ce/dto/trains/TrainLuaDto';
 import { RollingStockSelector } from './RollingStockSelector';
-import { calcTrainType, TrainDto, TrainListDto, TrainType } from '@ak/web-shared';
+import { calcTrainType, CeTypes, TrainDto, TrainListDto, TrainType } from '@ak/web-shared';
 
 export class TrainSelector {
   private state: fromJsonData.State = undefined;
@@ -11,7 +11,7 @@ export class TrainSelector {
   constructor(private rollingStockSelector: RollingStockSelector) {}
 
   updateFromState = (state: Readonly<fromJsonData.State>): void => {
-    if (this.state === state || !state.rooms['trains']) {
+    if (this.state === state || !state.ceTypes[CeTypes.HubTrain]) {
       return;
     }
     this.rollingStockSelector.updateFromState(state);
@@ -19,7 +19,7 @@ export class TrainSelector {
     this.trainMap.clear();
     this.trainListMap.clear();
 
-    const trainDict = state.rooms['trains'] as unknown as Record<string, TrainLuaDto>;
+    const trainDict = state.ceTypes[CeTypes.HubTrain] as unknown as Record<string, TrainLuaDto>;
     Object.values(trainDict).forEach((trainDto: TrainLuaDto) => {
       const rollingStock = this.rollingStockSelector.rollingStockListOfTrain(trainDto.id);
       const trainType: TrainType = this.getTrainType(trainDto);

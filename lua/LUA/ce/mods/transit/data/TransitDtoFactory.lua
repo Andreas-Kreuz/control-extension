@@ -2,10 +2,12 @@
 --   TransitStationLuaDto, TransitLineLuaDto, TransitLineSegmentLuaDto
 if AkDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitDtoFactory ...") end
 
+local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitDtoFactory = {}
 
 local function toTransitStationDto(station)
     return {
+        ceType = TransitCeTypes.Station,
         id = station.id or station.name
     }
 end
@@ -35,12 +37,13 @@ local function toTransitLineSegmentDto(lineSegment)
     }
 end
 
-local function toTransitLineDto(line)
+local function toTransitLineDto(line, ceType)
     local lineSegments = {}
     for _, lineSegment in pairs(line.lineSegments or {}) do
         table.insert(lineSegments, toTransitLineSegmentDto(lineSegment))
     end
     return {
+        ceType = ceType,
         id = line.id or line.nr,
         nr = line.nr,
         trafficType = line.trafficType,
@@ -50,6 +53,7 @@ end
 
 local function toTransitModuleSettingDto(setting)
     return {
+        ceType = TransitCeTypes.ModuleSetting,
         category = setting.category,
         name = setting.name,
         description = setting.description,
@@ -59,55 +63,51 @@ local function toTransitModuleSettingDto(setting)
     }
 end
 
-local function createDto(room, keyId, value, toDto)
-    local dto = toDto(value)
-    return room, keyId, dto[keyId], dto
+local function createDto(ceType, keyId, value, toDto)
+    local dto = toDto(value, ceType)
+    return ceType, keyId, dto[keyId], dto
 end
 
-local function createDtoList(room, keyId, values, createSingleDto)
+local function createDtoList(ceType, keyId, values, createSingleDto)
     local dtos = {}
-
     for key, value in pairs(values) do
         local _, _, _, dto = createSingleDto(value)
         dtos[key] = dto
     end
-
-    return room, keyId, dtos
+    return ceType, keyId, dtos
 end
 
 function TransitDtoFactory.createTransitStationDto(station)
-    return createDto("transit-stations", "id", station, toTransitStationDto)
+    return createDto(TransitCeTypes.Station, "id", station, toTransitStationDto)
 end
 
 function TransitDtoFactory.createTransitStationDtoList(stations)
-    return createDtoList("transit-stations", "id", stations,
-                         TransitDtoFactory.createTransitStationDto)
+    return createDtoList(TransitCeTypes.Station, "id", stations, TransitDtoFactory.createTransitStationDto)
 end
 
 function TransitDtoFactory.createTransitLineDto(line)
-    return createDto("transit-lines", "id", line, toTransitLineDto)
+    return createDto(TransitCeTypes.Line, "id", line, toTransitLineDto)
 end
 
 function TransitDtoFactory.createTransitLineDtoList(lines)
-    return createDtoList("transit-lines", "id", lines, TransitDtoFactory.createTransitLineDto)
+    return createDtoList(TransitCeTypes.Line, "id", lines, TransitDtoFactory.createTransitLineDto)
 end
 
 function TransitDtoFactory.createTransitModuleSettingDto(setting)
-    return createDto("transit-module-settings", "name", setting, toTransitModuleSettingDto)
+    return createDto(TransitCeTypes.ModuleSetting, "name", setting, toTransitModuleSettingDto)
 end
 
 function TransitDtoFactory.createTransitModuleSettingDtoList(settings)
-    return createDtoList("transit-module-settings", "name", settings,
-                         TransitDtoFactory.createTransitModuleSettingDto)
+    return createDtoList(TransitCeTypes.ModuleSetting, "name", settings,
+        TransitDtoFactory.createTransitModuleSettingDto)
 end
 
 function TransitDtoFactory.createTransitLineNameDto(line)
-    return createDto("transit-line-names", "id", line, toTransitLineDto)
+    return createDto(TransitCeTypes.LineName, "id", line, toTransitLineDto)
 end
 
 function TransitDtoFactory.createTransitLineNameDtoList(lines)
-    return createDtoList("transit-line-names", "id", lines,
-                         TransitDtoFactory.createTransitLineNameDto)
+    return createDtoList(TransitCeTypes.LineName, "id", lines, TransitDtoFactory.createTransitLineNameDto)
 end
 
 return TransitDtoFactory

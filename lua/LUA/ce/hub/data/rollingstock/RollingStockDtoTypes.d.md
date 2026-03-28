@@ -1,6 +1,6 @@
-# RollingStock DTO-Räume
+# RollingStock DTO-CeTypes
 
-## Raum `rolling-stocks`
+## CeType `ce.hub.RollingStock`
 
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.rollingstock.RollingStockDtoFactory`

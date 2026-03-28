@@ -2,6 +2,7 @@
 --   IntersectionLuaDto, IntersectionLaneLuaDto, IntersectionSwitchingLuaDto, IntersectionTrafficLightLuaDto
 if AkDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDtoFactory ...") end
 
+local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadDtoFactory = {}
 
 local function copyTable(values)
@@ -12,6 +13,7 @@ end
 
 local function toIntersectionDto(intersection)
     return {
+        ceType = RoadCeTypes.Intersection,
         id = intersection.id,
         name = intersection.name,
         currentSwitching = intersection.currentSwitching,
@@ -25,6 +27,7 @@ end
 
 local function toIntersectionLaneDto(lane)
     return {
+        ceType = RoadCeTypes.IntersectionLane,
         id = lane.id,
         intersectionId = lane.intersectionId,
         name = lane.name,
@@ -43,6 +46,7 @@ end
 
 local function toIntersectionSwitchingDto(switching)
     return {
+        ceType = RoadCeTypes.IntersectionSwitching,
         id = switching.id,
         intersectionId = switching.intersectionId,
         name = switching.name,
@@ -84,6 +88,7 @@ local function toIntersectionTrafficLightDto(trafficLight)
     end
 
     return {
+        ceType = RoadCeTypes.IntersectionTrafficLight,
         id = trafficLight.id,
         signalId = trafficLight.signalId,
         modelId = trafficLight.modelId,
@@ -96,6 +101,7 @@ end
 
 local function toIntersectionModuleSettingDto(setting)
     return {
+        ceType = RoadCeTypes.ModuleSetting,
         category = setting.category,
         name = setting.name,
         description = setting.description,
@@ -105,66 +111,61 @@ local function toIntersectionModuleSettingDto(setting)
     }
 end
 
-local function createDto(room, keyId, value, toDto)
+local function createDto(ceType, keyId, value, toDto)
     local dto = toDto(value)
-    return room, keyId, dto[keyId], dto
+    return ceType, keyId, dto[keyId], dto
 end
 
-local function createDtoList(room, keyId, values, createSingleDto)
+local function createDtoList(ceType, keyId, values, createSingleDto)
     local dtos = {}
-
     for key, value in pairs(values) do
         local _, _, _, dto = createSingleDto(value)
         dtos[key] = dto
     end
-
-    return room, keyId, dtos
+    return ceType, keyId, dtos
 end
 
 function RoadDtoFactory.createRoadIntersectionDto(intersection)
-    return createDto("road-intersections", "id", intersection, toIntersectionDto)
+    return createDto(RoadCeTypes.Intersection, "id", intersection, toIntersectionDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionDtoList(intersections)
-    return createDtoList("road-intersections", "id", intersections, RoadDtoFactory.createRoadIntersectionDto)
+    return createDtoList(RoadCeTypes.Intersection, "id", intersections, RoadDtoFactory.createRoadIntersectionDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionLaneDto(lane)
-    return createDto("road-intersection-lanes", "id", lane, toIntersectionLaneDto)
+    return createDto(RoadCeTypes.IntersectionLane, "id", lane, toIntersectionLaneDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionLaneDtoList(lanes)
-    return createDtoList("road-intersection-lanes", "id", lanes, RoadDtoFactory.createRoadIntersectionLaneDto)
+    return createDtoList(RoadCeTypes.IntersectionLane, "id", lanes, RoadDtoFactory.createRoadIntersectionLaneDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionSwitchingDto(switching)
-    return createDto("road-intersection-switchings", "id", switching, toIntersectionSwitchingDto)
+    return createDto(RoadCeTypes.IntersectionSwitching, "id", switching, toIntersectionSwitchingDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionSwitchingDtoList(switchings)
-    return createDtoList(
-        "road-intersection-switchings",
-        "id",
-        switchings,
+    return createDtoList(RoadCeTypes.IntersectionSwitching, "id", switchings,
         RoadDtoFactory.createRoadIntersectionSwitchingDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionTrafficLightDto(trafficLight)
-    return createDto("road-intersection-traffic-lights", "id", trafficLight, toIntersectionTrafficLightDto)
+    return createDto(RoadCeTypes.IntersectionTrafficLight, "id", trafficLight, toIntersectionTrafficLightDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionTrafficLightDtoList(trafficLights)
-    return createDtoList("road-intersection-traffic-lights", "id", trafficLights,
-                         RoadDtoFactory.createRoadIntersectionTrafficLightDto)
+    return createDtoList(RoadCeTypes.IntersectionTrafficLight, "id", trafficLights,
+        RoadDtoFactory.createRoadIntersectionTrafficLightDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionModuleSettingDto(setting)
-    return createDto("road-module-settings", "name", setting, toIntersectionModuleSettingDto)
+    return createDto(RoadCeTypes.ModuleSetting, "name", setting, toIntersectionModuleSettingDto)
 end
 
 function RoadDtoFactory.createRoadIntersectionModuleSettingDtoList(settings)
-    return createDtoList("road-module-settings", "name", settings,
-                         RoadDtoFactory.createRoadIntersectionModuleSettingDto)
+    return createDtoList(RoadCeTypes.ModuleSetting, "name", settings,
+        RoadDtoFactory.createRoadIntersectionModuleSettingDto)
 end
 
 return RoadDtoFactory

@@ -8,8 +8,8 @@ insulate("ce.hub.data.time.TimeDtoFactory", function ()
     it("projects times to detached DTO tables", function ()
         local TimeDtoFactory = require("ce.hub.data.time.TimeDtoFactory")
         local timeData = {
-            id = "times",
-            name = "times",
+            id = "time",
+            name = "time",
             timeComplete = 3723,
             timeH = 1,
             timeM = 2,
@@ -20,22 +20,24 @@ insulate("ce.hub.data.time.TimeDtoFactory", function ()
         local listRoom, listKeyId, timeDtos = TimeDtoFactory.createTimeDtoList({ timeData })
         timeData.timeS = 9
 
-        assert.equals("times", room)
+        assert.equals("ce.hub.Time", room)
         assert.equals("id", keyId)
-        assert.equals("times", key)
+        assert.equals("time", key)
         assert.same({
-                        id = "times",
-                        name = "times",
+                        ceType = "ce.hub.Time",
+                        id = "time",
+                        name = "time",
                         timeComplete = 3723,
                         timeH = 1,
                         timeM = 2,
                         timeS = 3
                     }, timeDto)
-        assert.equals("times", listRoom)
+        assert.equals("ce.hub.Time", listRoom)
         assert.equals("id", listKeyId)
         assert.same({ {
-                        id = "times",
-                        name = "times",
+                        ceType = "ce.hub.Time",
+                        id = "time",
+                        name = "time",
                         timeComplete = 3723,
                         timeH = 1,
                         timeM = 2,

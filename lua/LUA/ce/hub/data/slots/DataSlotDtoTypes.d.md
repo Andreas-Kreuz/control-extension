@@ -1,6 +1,6 @@
-# DataSlot DTO-Räume
+# DataSlot DTO-CeTypes
 
-## Raum `save-slots`
+## CeType `ce.hub.SaveSlot`
 
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.slots.DataSlotDtoFactory`
@@ -11,7 +11,7 @@
 | `name` | `string\|nil` |
 | `data` | `string\|nil` |
 
-## Raum `free-slots`
+## CeType `ce.hub.FreeSlot`
 
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.slots.DataSlotDtoFactory`

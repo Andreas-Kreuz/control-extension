@@ -1,9 +1,9 @@
-# Signal DTO-Räume
+# Signal DTO-CeTypes
 
-## Raum `signals`
+## CeType `ce.hub.Signal`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.signals.SignalDtoFactory`
+- DtoFactory: `ce.hub.data.ce.hub.Signal.SignalDtoFactory`
 
 | Name                   | Typ      |
 | ---------------------- | -------- |
@@ -12,10 +12,10 @@
 | `tag`                  | `string` |
 | `waitingVehiclesCount` | `number` |
 
-## Raum `waiting-on-signals`
+## CeType `ce.hub.WaitingOnSignal`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.signals.SignalDtoFactory`
+- DtoFactory: `ce.hub.data.ce.hub.Signal.SignalDtoFactory`
 
 | Name              | Typ      |
 | ----------------- | -------- |

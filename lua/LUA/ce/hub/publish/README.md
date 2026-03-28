@@ -44,7 +44,7 @@ Jedes Event enthält:
 
 - `eventCounter` — fortlaufende Nummer
 - `type` — Event-Typ (siehe oben)
-- `payload` — fachliche Nutzdaten mit `room`, `keyId` und `element` oder `list`
+- `payload` — fachliche Nutzdaten mit `ceType`, `keyId` und `element` oder `list`
 
 ---
 

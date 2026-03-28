@@ -8,6 +8,8 @@ export { ServerInfoEvent } from './ServerInfoEvent';
 export { ServerStatusEvent } from './ServerStatusEvent';
 export { SettingsEvent } from './SettingsEvent';
 export { DataType } from './data/model/DataType';
+export { CeTypes, ceTypeForTrackType, trackTypeForCeType } from './CeTypes';
+export type { CeType } from './CeTypes';
 
 export { calcTrainType } from './model/trains/calcTrainType';
 export { TrainType } from './model/trains/TrainType';
@@ -40,6 +42,7 @@ export type { TransitStationDto } from './dtos/server/transit/TransitStationDto'
 
 export { DynamicRoom } from './rooms/DynamicRoom';
 export { ApiDataRoom } from './rooms/DynamicRooms';
+export { ApiEntriesRoom } from './rooms/DynamicRooms';
 export { FreeSlotRoom } from './rooms/DynamicRooms';
 export { IntersectionLaneRoom } from './rooms/DynamicRooms';
 export { IntersectionRoom } from './rooms/DynamicRooms';
@@ -48,6 +51,7 @@ export { IntersectionTrafficLightRoom } from './rooms/DynamicRooms';
 export { ModuleRoom } from './rooms/DynamicRooms';
 export { RuntimeRoom } from './rooms/DynamicRooms';
 export { SaveSlotRoom } from './rooms/DynamicRooms';
+export { ServerStatsRoom } from './rooms/DynamicRooms';
 export { SignalRoom } from './rooms/DynamicRooms';
 export { StructureRoom } from './rooms/DynamicRooms';
 export { SwitchRoom } from './rooms/DynamicRooms';

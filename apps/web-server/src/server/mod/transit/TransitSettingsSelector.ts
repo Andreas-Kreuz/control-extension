@@ -1,6 +1,6 @@
 import { SettingLuaDto } from '../../ce/dto/settings/SettingLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { SettingDto, SettingsDto } from '@ak/web-shared';
+import { CeTypes, SettingDto, SettingsDto } from '@ak/web-shared';
 
 export default class TransitSettingsSelector {
   private lastState: fromEepData.State = undefined;
@@ -9,11 +9,14 @@ export default class TransitSettingsSelector {
   updateFromState(state: fromEepData.State): void {
     this.settings = { moduleName: 'Public Transport', settings: [] };
 
-    if (state === this.lastState || !state.rooms['transit-module-settings']) {
+    if (state === this.lastState || !state.ceTypes[CeTypes.TransitModuleSetting]) {
       return;
     }
 
-    const settingsDict = state.rooms['transit-module-settings'] as unknown as Record<string, SettingLuaDto<unknown>>;
+    const settingsDict = state.ceTypes[CeTypes.TransitModuleSetting] as unknown as Record<
+      string,
+      SettingLuaDto<unknown>
+    >;
     Object.values(settingsDict).forEach((settingDto: SettingLuaDto<unknown>) => {
       const setting: SettingDto<unknown> = {
         name: settingDto.name,

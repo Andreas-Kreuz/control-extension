@@ -1,6 +1,6 @@
-# Public-Transport DTO-Räume
+# Public-Transport DTO-CeTypes
 
-## Raum `transit-stations`
+## CeType `ce.mods.transit.Station`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitStationDto`
@@ -9,7 +9,7 @@
 | ---- | -------- |
 | `id` | `string` |
 
-## Raum `transit-lines`
+## CeType `ce.mods.transit.Line`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitLineDto`
@@ -21,7 +21,7 @@
 | `trafficType`  | `string`                  |
 | `lineSegments` | `TransitLineSegmentDto[]` |
 
-## Raum `transit-module-settings`
+## CeType `ce.mods.transit.ModuleSetting`
 
 - Key-ID: `name`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitModuleSettingDto`
@@ -35,7 +35,7 @@
 | `value`       | `boolean` |
 | `eepFunction` | `string`  |
 
-## Raum `transit-line-names`
+## CeType `ce.mods.transit.LineName`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitLineNameDto`

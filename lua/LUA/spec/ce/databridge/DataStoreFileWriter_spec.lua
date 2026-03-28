@@ -14,7 +14,7 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
 
     after_each(function () io.open = originalIoOpen end)
 
-    it("writes DataStore.rooms as json to ak-eep-lib-store.json in the exchange directory", function ()
+    it("writes DataStore.ceTypes as json to ak-eep-lib-store.json in the exchange directory", function ()
         local writtenContent
         local flushCalled = false
         local closeCalled = false
@@ -45,9 +45,10 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
 
         ExchangeDirRegistry.setExchangeDirectory("exchange-dir")
 
-        DataStore.rooms = {
-            signals = {
+        DataStore.ceTypes = {
+                        ["ce.hub.Signal"] = {
                 ["signal-1"] = {
+                    ceType = "ce.hub.Signal",
                     id = "signal-1",
                     active = true,
                     retries = 3,
@@ -55,7 +56,13 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
                     nested = { section = "A", enabled = true }
                 }
             },
-            modules = { ["module-1"] = { id = "module-1", name = "Module A" } }
+                        ["ce.hub.Module"] = {
+                            ["module-1"] = {
+                                ceType = "ce.hub.Module",
+                                id = "module-1",
+                                name = "Module A"
+                            }
+                        }
         }
 
         local returnedContent = DataStoreFileWriter.write()
@@ -68,6 +75,6 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
         assert.equals(writtenContent, returnedContent)
         assert.is_true(flushCalled)
         assert.is_true(closeCalled)
-        assert.same(DataStore.rooms, json.decode(writtenContent))
+        assert.same(DataStore.ceTypes, json.decode(writtenContent))
     end)
 end)

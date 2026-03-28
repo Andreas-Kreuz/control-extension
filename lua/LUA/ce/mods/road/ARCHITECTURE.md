@@ -292,13 +292,13 @@ Verantwortlichkeiten:
 - Sortierung der Kreuzungen und Fahrspuren für stabile Ausgaben
 - Emission der Daten über `DataChangeBus.fireListChange(...)`
 
-Exportierte Räume:
+Exportierte CeTypes:
 
-- `road-intersections`
-- `road-intersection-lanes`
-- `road-intersection-switchings`
-- `road-intersection-traffic-lights`
-- `road-module-settings`
+- `ce.mods.road.Intersection`
+- `ce.mods.road.IntersectionLane`
+- `ce.mods.road.IntersectionSwitching`
+- `ce.mods.road.IntersectionTrafficLight`
+- `ce.mods.road.ModuleSetting`
 
 Wichtig: `syncState()` baut die Nutzdaten zwar intern auf, liefert derzeit aber bewusst ein leeres Tabellenobjekt zurück. Der eigentliche Datentransport erfolgt über `DataChangeBus`.
 
@@ -309,7 +309,7 @@ State-Publisher für statische Ampelmodelle.
 Verantwortlichkeiten:
 
 - Export aller registrierten `TrafficLightModel`-Definitionen
-- Emission des Raums `signal-type-definitions` über `DataChangeBus`
+- Emission des CeTypes `ce.mods.road.SignalTypeDefinition` über `DataChangeBus`
 
 Wie bei `RoadStatePublisher` erfolgt der eigentliche Transport aktuell über Events, nicht über den Rückgabewert von `syncState()`.
 

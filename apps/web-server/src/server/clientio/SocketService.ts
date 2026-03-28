@@ -313,7 +313,9 @@ export default class SocketService {
   }
 
   private emitPendingClientsToAdmins(): void {
-    const pendingClients = Array.from(this.pendingClients.values()).sort((left, right) => left.connectedAt - right.connectedAt);
+    const pendingClients = Array.from(this.pendingClients.values()).sort(
+      (left, right) => left.connectedAt - right.connectedAt,
+    );
 
     for (const socket of this.io.sockets.sockets.values()) {
       if (this.isAdminSocket(socket)) {
@@ -325,7 +327,8 @@ export default class SocketService {
   private emitPendingClientsToAdmin(socket: Socket, pendingClients?: PendingPairingClient[]): void {
     socket.emit(
       PairingEvent.PendingList,
-      pendingClients ?? Array.from(this.pendingClients.values()).sort((left, right) => left.connectedAt - right.connectedAt),
+      pendingClients ??
+        Array.from(this.pendingClients.values()).sort((left, right) => left.connectedAt - right.connectedAt),
     );
   }
 

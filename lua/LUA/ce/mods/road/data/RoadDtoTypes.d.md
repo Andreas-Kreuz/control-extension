@@ -1,6 +1,6 @@
-# Road DTO-Räume
+# Road DTO-CeTypes
 
-## Raum `road-intersections`
+## CeType `ce.mods.road.Intersection`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionDto`
@@ -16,7 +16,7 @@
 | `timeForGreen`     | `number`      |
 | `staticCams`       | `table`       |
 
-## Raum `road-intersection-lanes`
+## CeType `ce.mods.road.IntersectionLane`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionLaneDto`
@@ -37,7 +37,7 @@
 | `switchings`                 | `table`  |
 | `tracks`                     | `table`  |
 
-## Raum `road-intersection-switchings`
+## CeType `ce.mods.road.IntersectionSwitching`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionSwitchingDto`
@@ -49,7 +49,7 @@
 | `name`           | `string`         |
 | `prio`           | `number`         |
 
-## Raum `road-intersection-traffic-lights`
+## CeType `ce.mods.road.IntersectionTrafficLight`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionTrafficLightDto`
@@ -64,7 +64,7 @@
 | `lightStructures` | `table<string, IntersectionTrafficLightStructureDto>` |
 | `axisStructures`  | `IntersectionTrafficLightAxisStructureDto[]`          |
 
-## Raum `road-module-settings`
+## CeType `ce.mods.road.ModuleSetting`
 
 - Key-ID: `name`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionModuleSettingDto`
@@ -78,7 +78,7 @@
 | `value`       | `boolean` |
 | `eepFunction` | `string`  |
 
-## Raum `signal-type-definitions`
+## CeType `ce.mods.road.SignalTypeDefinition`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.TrafficLightModelDtoFactory.createSignalTypeDefinitionDto`

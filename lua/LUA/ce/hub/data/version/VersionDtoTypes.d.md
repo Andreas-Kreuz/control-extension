@@ -1,6 +1,6 @@
-# Version DTO-Räume
+# Version DTO-CeTypes
 
-## Raum `eep-version`
+## CeType `ce.hub.EepVersion`
 
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.version.VersionDtoFactory`

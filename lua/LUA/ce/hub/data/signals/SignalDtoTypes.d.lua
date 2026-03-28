@@ -1,12 +1,14 @@
 ---@meta
 
 ---@class SignalDto
+---@field ceType string
 ---@field id number
 ---@field position number
 ---@field tag string
 ---@field waitingVehiclesCount number
 
 ---@class WaitingOnSignalDto
+---@field ceType string
 ---@field id string
 ---@field signalId number
 ---@field waitingPosition number

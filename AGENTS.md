@@ -130,6 +130,8 @@ with open('datei.lua', 'wb') as f:
   - `luacheck --config .luacheckrc lua/LUA`
   - `busted --config-file .busted --verbose --coverage --`
 - Für Änderungen an Web-Typen oder Events mindestens `@ak/web-shared` und den betroffenen Consumer mitdenken.
+- Nach Änderungen an Nicht-Lua-Dateien nach Möglichkeit `yarn format` ausführen, damit Prettier auf Web-, TS-, JSON- und Markdown-Dateien angewendet wird.
+  - `.lua`-Dateien werden dabei nicht formatiert und sollen weiterhin nur mit den projektspezifischen Lua-Regeln behandelt werden.
 - Wenn keine passende Laufzeit verfügbar ist, statisch prüfen und explizit benennen, was nicht ausgeführt werden konnte.
 
 ## Änderungsstil

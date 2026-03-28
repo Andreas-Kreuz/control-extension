@@ -22,7 +22,7 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         rawset(_G, "EEPLoadData", originalLoadData)
     end)
 
-    it("fires save-slots and free-slots with the existing wire format", function ()
+    it("fires save-slot and free-slot ceTypes with the existing wire format", function ()
         local DataSlotsStatePublisher = require("ce.hub.data.slots.DataSlotsStatePublisher")
         local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
         local StorageUtility = require("ce.hub.util.StorageUtility")
@@ -40,15 +40,17 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
 
         assert.same({
                         ["1"] = {
+                            ceType = "ce.hub.SaveSlot",
                             id = 1,
                             name = "Named Slot",
                             data = "payload-1"
                         }
-                    }, DataStore.getRoom("save-slots"))
+                    }, DataStore.getCeType("ce.hub.SaveSlot"))
         assert.same({
                         ["2"] = {
+                            ceType = "ce.hub.FreeSlot",
                             id = 2
                         }
-                    }, { ["2"] = DataStore.get("free-slots", 2) })
+                    }, { ["2"] = DataStore.get("ce.hub.FreeSlot", 2) })
     end)
 end)

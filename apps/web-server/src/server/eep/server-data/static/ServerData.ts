@@ -1,6 +1,6 @@
 import { alphabeticalSort } from '../../../clientio/alphabeticalSort';
 import * as fromEepStore from '../EepDataStore';
-import { DataType } from '@ak/web-shared';
+import { CeTypes, DataType } from '@ak/web-shared';
 
 export interface ServerData {
   rooms: Record<string, unknown>;
@@ -31,46 +31,41 @@ export default class JsonApiReducer {
     const urlPrefix = '/api/v1/';
     const data: ServerData = { roomToJson: {}, rooms: {}, urls: [], urlJson: '' };
     const dataTypes: DataType[] = [];
-    data.rooms = { ...state.rooms };
-    for (const roomName of Object.keys(state.rooms)) {
-      // Update room data
-      data.roomToJson[roomName] = JSON.stringify(state.rooms[roomName]);
+    data.rooms = { ...state.ceTypes };
+    for (const roomName of Object.keys(state.ceTypes)) {
+      data.roomToJson[roomName] = JSON.stringify(state.ceTypes[roomName]);
 
-      // Update URL data
       dataTypes.push({
         name: roomName,
         checksum: state.eventCounter.toString(),
         url: urlPrefix + roomName,
-        count: Object.keys(state.rooms[roomName]).length,
+        count: Object.keys(state.ceTypes[roomName]).length,
         updated: true,
       });
     }
 
-    // Add data information
     dataTypes.push({
-      name: 'api-stats',
+      name: CeTypes.ServerStats,
       checksum: state.eventCounter.toString(),
-      url: urlPrefix + 'api-stats',
+      url: urlPrefix + CeTypes.ServerStats,
       count: 1,
       updated: true,
     });
-    data.roomToJson['api-stats'] = JSON.stringify({
+    data.roomToJson[CeTypes.ServerStats] = JSON.stringify({
       eepDataUpToDate: dataTypes.length > 1,
       luaDataReceived: dataTypes.length > 1,
       apiEntryCount: dataTypes.length + 1,
     });
 
-    // Add 'api-entries' Room
     dataTypes.push({
-      name: 'api-entries',
+      name: CeTypes.ServerApiEntries,
       checksum: state.eventCounter.toString(),
-      url: urlPrefix + 'api-entries',
+      url: urlPrefix + CeTypes.ServerApiEntries,
       count: dataTypes.length + 1,
       updated: true,
     });
-    data.roomToJson['api-entries'] = JSON.stringify(dataTypes);
+    data.roomToJson[CeTypes.ServerApiEntries] = JSON.stringify(dataTypes);
 
-    // Add URLs
     data.urls = dataTypes.map((dt) => dt.name).sort(alphabeticalSort);
     data.urlJson = JSON.stringify(data.urls);
 

@@ -5,7 +5,16 @@ TransitCeModule.id = "83ce6b42-1bda-45e0-8b4a-e8daeed047ab"
 TransitCeModule.enabled = true
 local initialized = false
 TransitCeModule.name = "ce.mods.transit.TransitCeModule"
+TransitCeModule.CeTypes = require("ce.mods.transit.data.TransitCeTypes")
+local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local TransitSettings = require("ce.mods.transit.TransitSettings")
+
+CeTypeRegistry.registerCeTypes(
+    { ceType = TransitCeModule.CeTypes.Station, keyId = "id", owner = TransitCeModule.name },
+    { ceType = TransitCeModule.CeTypes.Line, keyId = "id", owner = TransitCeModule.name },
+    { ceType = TransitCeModule.CeTypes.ModuleSetting, keyId = "name", owner = TransitCeModule.name },
+    { ceType = TransitCeModule.CeTypes.LineName, keyId = "id", owner = TransitCeModule.name }
+)
 
 function TransitCeModule.loadSettingsFromSlot(eepSaveId) return TransitSettings.loadSettingsFromSlot(eepSaveId) end
 

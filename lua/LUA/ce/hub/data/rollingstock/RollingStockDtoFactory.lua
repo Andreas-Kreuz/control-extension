@@ -1,13 +1,15 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/rolling-stocks/RollingStockLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockDtoFactory ...") end
 
+local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local RollingStockDtoFactory = {}
 
-local ROOM = "rolling-stocks"
+local CE_TYPE = HubCeTypes.RollingStock
 local KEY_ID = "id"
 
 local function toRollingStockDto(rollingStock)
     return {
+        ceType = CE_TYPE,
         id = rollingStock.rollingStockName,
         name = rollingStock.rollingStockName,
         trainName = rollingStock:getTrainName(),
@@ -34,23 +36,21 @@ end
 
 function RollingStockDtoFactory.createRollingStockDto(rollingStock)
     local dto = toRollingStockDto(rollingStock)
-    return ROOM, KEY_ID, dto[KEY_ID], dto
+    return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
 function RollingStockDtoFactory.createRollingStockDtoList(rollingStocks)
     local rollingStockDtos = {}
-
     for rollingStockId, rollingStock in pairs(rollingStocks) do
         local _, _, _, dto = RollingStockDtoFactory.createRollingStockDto(rollingStock)
         rollingStockDtos[rollingStockId] = dto
     end
-
-    return ROOM, KEY_ID, rollingStockDtos
+    return CE_TYPE, KEY_ID, rollingStockDtos
 end
 
 function RollingStockDtoFactory.createRollingStockReferenceDto(rollingStockId)
-    local dto = { id = rollingStockId }
-    return ROOM, KEY_ID, rollingStockId, dto
+    local dto = { ceType = CE_TYPE, id = rollingStockId }
+    return CE_TYPE, KEY_ID, rollingStockId, dto
 end
 
 return RollingStockDtoFactory

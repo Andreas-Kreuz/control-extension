@@ -1,4 +1,5 @@
 import * as assert from 'node:assert/strict';
+import { CeTypes } from '@ak/web-shared';
 import JsonApiUpdateService from './JsonApiUpdateService';
 
 // ---- Fakes ----
@@ -57,9 +58,9 @@ function makeRouter() {
 const fakeIo: any = { to: () => ({ emit: () => {} }) };
 const fakeCacheService: any = { writeCache: () => {}, readCache: () => null };
 
-function makeStore(rooms: Record<string, unknown>, eventCounter = 1) {
+function makeStore(ceTypes: Record<string, unknown>, eventCounter = 1) {
   return {
-    currentState: () => ({ rooms, eventCounter }),
+    currentState: () => ({ ceTypes, eventCounter }),
     hasInitialState: () => false,
   };
 }
@@ -91,13 +92,13 @@ function testIndexListsRoomsAfterStateChange(): void {
   const { router, callIndex } = makeRouter();
   const svc = new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
 
-  svc.onStateChange(makeStore({ signals: { 1: { id: 1 } } }) as any);
+  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as any);
 
   const { body } = callIndex();
   const html = body as string;
-  assert.ok(html.includes('href="/api/v1/signals"'));
-  assert.ok(html.includes('href="/api/v1/api-entries"'));
-  assert.ok(html.includes('href="/api/v1/api-stats"'));
+  assert.ok(html.includes(`href="/api/v1/${CeTypes.HubSignal}"`));
+  assert.ok(html.includes(`href="/api/v1/${CeTypes.ServerApiEntries}"`));
+  assert.ok(html.includes(`href="/api/v1/${CeTypes.ServerStats}"`));
 }
 
 function testRoomReturns404WhenUnknown(): void {
@@ -113,9 +114,9 @@ function testRoomReturnsJsonAfterStateChange(): void {
   const { router, callRoom } = makeRouter();
   const svc = new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
 
-  svc.onStateChange(makeStore({ signals: { 1: { id: 1 } } }) as any);
+  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as any);
 
-  const { status, headers, body } = callRoom('signals');
+  const { status, headers, body } = callRoom(CeTypes.HubSignal);
   assert.equal(status, 200);
   assert.equal(headers['content-type'], 'application/json');
   assert.deepEqual(JSON.parse(body as string), { 1: { id: 1 } });
@@ -125,10 +126,10 @@ function testRoomReturns404AfterRoomIsRemoved(): void {
   const { router, callRoom } = makeRouter();
   const svc = new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
 
-  svc.onStateChange(makeStore({ signals: { 1: { id: 1 } } }) as any);
+  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as any);
   svc.onStateChange(makeStore({}) as any);
 
-  const { status } = callRoom('signals');
+  const { status } = callRoom(CeTypes.HubSignal);
   assert.equal(status, 404);
 }
 

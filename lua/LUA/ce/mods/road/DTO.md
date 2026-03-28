@@ -19,11 +19,11 @@ Wichtige Vorbemerkungen:
 
 ## `TrafficLightModelStatePublisher`
 
-| Collector                         | Raumname                  |
-| --------------------------------- | ------------------------- |
-| `TrafficLightModelStatePublisher` | `signal-type-definitions` |
+| Collector                         | CeType                              |
+| --------------------------------- | ----------------------------------- |
+| `TrafficLightModelStatePublisher` | `ce.mods.road.SignalTypeDefinition` |
 
-### Raum `signal-type-definitions`
+### CeType `ce.mods.road.SignalTypeDefinition`
 
 Jeder Eintrag beschreibt das Verhalten eines bestimmten Modells von Ampeln. Das Modell bestimmt, welche Signalstellung für die Ampelschaltung genutzt werden soll, also für rot, gelb, grün, Fußgängergrün usw.
 Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, signalIndex, 1)` verwendet werden und kommen bei `EEPGetSignal(signalId)` als zweiter Rückgabewert zurück.
@@ -44,15 +44,15 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 
 ## `RoadStatePublisher`
 
-| Collector            | Raumname                           |
-| -------------------- | ---------------------------------- |
-| `RoadStatePublisher` | `road-intersections`               |
-| `RoadStatePublisher` | `road-intersection-switchings`     |
-| `RoadStatePublisher` | `road-intersection-traffic-lights` |
-| `RoadStatePublisher` | `road-intersection-lanes`          |
-| `RoadStatePublisher` | `road-module-settings`             |
+| Collector            | CeType                                  |
+| -------------------- | --------------------------------------- |
+| `RoadStatePublisher` | `ce.mods.road.Intersection`             |
+| `RoadStatePublisher` | `ce.mods.road.IntersectionSwitching`    |
+| `RoadStatePublisher` | `ce.mods.road.IntersectionTrafficLight` |
+| `RoadStatePublisher` | `ce.mods.road.IntersectionLane`         |
+| `RoadStatePublisher` | `ce.mods.road.ModuleSetting`            |
 
-### Raum `road-intersections`
+### CeType `ce.mods.road.Intersection`
 
 - Jeder Eintrag beschreibt eine Kreuzung mit eindeutiger `id` und einem `name`.
 - Wird eine Kreuzung manuell geschaltet, dann ist `manualSwitching` gesetzt. Dann steuert der Nutzer über die EEP-Web-App die Schaltung.
@@ -68,7 +68,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `timeForGreen`     | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `IntersectionSequence:new(...)`.                                                                   |
 | `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `EEPSetCamera \| 0 \| <staticCam>` umgesetzt. |
 
-### Raum `road-intersection-switchings`
+### CeType `ce.mods.road.IntersectionSwitching`
 
 - Jeder Eintrag beschreibt eine bestimmte Schaltung für eine Kreuzung.
 - Die Schaltung enthält eine `prio`, die sich aus der Wichtung der wartenden Fahrzeuge in den Fahrspuren, die für diese Schaltung grün bekommen, sowie der Zeit berechnet, in der diese Schaltung nicht grün war.
@@ -81,7 +81,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `name`           | `string`; Beispiel: `S1`                                                      | Schaltungsname aus `IntersectionSequence.name`.                                                                                            |
 | `prio`           | `number`; Beispiel: `11.25`                                                   | Aktuelle Priorität der Schaltung aus `IntersectionSequence.prio`. Sie wird aus der Fahrspur-Logik berechnet, nicht direkt aus EEP gelesen. |
 
-### Raum `road-intersection-traffic-lights`
+### CeType `ce.mods.road.IntersectionTrafficLight`
 
 - Beschreibt eine Ampel einer Kreuzung.
 - Normalerweise werden EEP-Signale genutzt, die als Ampelmodelle ausgeführt sind und durch Signalstellungen geschaltet werden. Dann ist `signalId` positiv.
@@ -110,7 +110,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `axisStructures[].positionRedYellow`   | `number` oder nicht gesetzt; Beispiel: `50`                                                                                | Achsstellung für Rot-Gelb.                                                                                                                                                                                     |
 | `axisStructures[].positionPedestrian`  | `number` oder nicht gesetzt; Beispiel: `50`                                                                                | Achsstellung für Fußgänger-Grün.                                                                                                                                                                               |
 
-### Raum `road-intersection-lanes`
+### CeType `ce.mods.road.IntersectionLane`
 
 | Name                         | Typ und Wertebereich / Beispiel                                          | Beschreibung                                                                                                                                                        |
 | ---------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -128,7 +128,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `switchings`                 | `string[]`; Beispiel: `["S1","S1a"]`                                     | Alle Schaltungen, in denen diese Fahrspur vorkommt. Vom Collector aus den Sequenzen abgeleitet.                                                                     |
 | `tracks`                     | `string[]`; Beispiel: `[]`                                               | Optional konfigurierte Gleis-/Straßennamen für Hervorhebung. Keine direkte EEP-Abfrage im Collector.                                                                |
 
-### Raum `road-module-settings`
+### CeType `ce.mods.road.ModuleSetting`
 
 - Generelle Einstellungen für das Ampelmodul.
 - Hier werden derzeit Anzeigeeinstellungen für Signale und Immobilien hinterlegt, damit man die Schaltungen und Fahrzeugwarteschlangen im Tooltip sehen kann. Diese werden in `IntersectionSettings.xxx` abgelegt.
@@ -157,10 +157,10 @@ Alle derzeit verfügbaren `IntersectionSettings` sind boolesche Anzeigeeinstellu
 
 ### Tatsächlicher Transportpfad
 
-1. `TrafficLightModelStatePublisher` und `RoadStatePublisher` rufen `DataChangeBus.fireListChange(room, keyId, list)` auf.
+1. `TrafficLightModelStatePublisher` und `RoadStatePublisher` rufen `DataChangeBus.fireListChange(ceType, keyId, list)` auf.
 2. `ServerEventBuffer` puffert daraus JSON-Zeilen-Events im Speicher.
 3. `ServerExchangeCoordinator.runServerExchangeCycle(...)` schreibt diese Events über `ServerExchangeFileIo.writeOutgoingEvents(...)` in den Austauschkanal; der persistierte State liegt in `lua/LUA/ce/databridge/exchange/server-state.json`.
-4. `apps/web-server/src/server/eep/server-data/EepDataStore.ts` normalisiert `ListChanged` zu `rooms[roomName][element[keyId]] = element`.
+4. `apps/web-server/src/server/eep/server-data/EepDataStore.ts` normalisiert `ListChanged` zu `ceTypes[ceType][element[keyId]] = element`.
 5. `apps/web-server/src/server/eep/server-data/static/ServerData.ts` serialisiert diese Objekt-Mappings für REST und Socket-API.
 6. Die Web-App hört mit `useApiDataRoomHandler(...)` auf den API-Datenräumen und macht daraus per `Object.values(JSON.parse(payload))` wieder Listen.
 
@@ -168,36 +168,36 @@ Alle derzeit verfügbaren `IntersectionSettings` sind boolesche Anzeigeeinstellu
 
 Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen Repo liegen die Road-Consumer tatsächlich unter `apps/web-app/src/mod/intersections`.
 
-| Raumname                           | Collector-Form in Lua      | Form im Web-Server-State / API | Web-App-Nutzung                                                                                      | Abgleich                                                                                                                                                                                              |
-| ---------------------------------- | -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signal-type-definitions`          | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Inhalt des Snapshots passt zum Collector; die Web-App hat dafür derzeit keinen Consumer.                                                                                                              |
-| `road-intersections`               | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersections.tsx`, `useIntersection.tsx`, `IntersectionOverview.tsx`, `IntersectionDetails.tsx` | Passt weitgehend. Achtung: `currentSwitching`, `manualSwitching` und `nextSwitching` können im JSON fehlen, sind im TS-Modell aber als Pflicht-`string` typisiert.                                    |
-| `road-intersection-switchings`     | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersectionSwitchings.tsx`, `useIntersectionSwitching.tsx`, `IntersectionDetails.tsx`           | Wird aktiv genutzt. Wichtig: `intersectionId` ist hier ein `string` mit dem Kreuzungsnamen, nicht die numerische ID. Die Web-App berücksichtigt das korrekt über `useIntersectionSwitching(i?.name)`. |
-| `road-intersection-traffic-lights` | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Snapshot und Collector passen fachlich zusammen. `lightStructures` bleibt auch im Server-State ein Objekt mit String-Indizes.                                                                         |
-| `road-intersection-lanes`          | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Daten werden erzeugt und im State gehalten, aktuell aber nicht in `src/mod/intersections` dargestellt.                                                                                                |
-| `road-module-settings`             | Liste mit Schlüssel `name` | Objekt-Mapping nach `name`     | `useIntersectionSettings.tsx`, `ModuleSettingsButton`, `ModuleSetting.tsx`                           | Passt. Die Web-App behandelt die Daten generisch als `LuaSetting<boolean>`.                                                                                                                           |
+| Raumname                            | Collector-Form in Lua      | Form im Web-Server-State / API | Web-App-Nutzung                                                                                      | Abgleich                                                                                                                                                                                              |
+| ----------------------------------- | -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ce.mods.road.SignalTypeDefinition` | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Inhalt des Snapshots passt zum Collector; die Web-App hat dafür derzeit keinen Consumer.                                                                                                              |
+| `ce.mods.road.Intersection`         | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersections.tsx`, `useIntersection.tsx`, `IntersectionOverview.tsx`, `IntersectionDetails.tsx` | Passt weitgehend. Achtung: `currentSwitching`, `manualSwitching` und `nextSwitching` können im JSON fehlen, sind im TS-Modell aber als Pflicht-`string` typisiert.                                    |
+| `road-intersection-switchings`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersectionSwitchings.tsx`, `useIntersectionSwitching.tsx`, `IntersectionDetails.tsx`           | Wird aktiv genutzt. Wichtig: `intersectionId` ist hier ein `string` mit dem Kreuzungsnamen, nicht die numerische ID. Die Web-App berücksichtigt das korrekt über `useIntersectionSwitching(i?.name)`. |
+| `road-intersection-traffic-lights`  | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Snapshot und Collector passen fachlich zusammen. `lightStructures` bleibt auch im Server-State ein Objekt mit String-Indizes.                                                                         |
+| `road-intersection-lanes`           | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Daten werden erzeugt und im State gehalten, aktuell aber nicht in `src/mod/intersections` dargestellt.                                                                                                |
+| `road-module-settings`              | Liste mit Schlüssel `name` | Objekt-Mapping nach `name`     | `useIntersectionSettings.tsx`, `ModuleSettingsButton`, `ModuleSetting.tsx`                           | Passt. Die Web-App behandelt die Daten generisch als `LuaSetting<boolean>`.                                                                                                                           |
 
 ### Auffällige Schema- und Integrationsbesonderheiten
 
-- Der Collector liefert Listen, der Web-Server-State speichert dieselben Räume aber als Objekte nach `keyId`. Das ist die Form, die auch die Web-App empfängt.
+- Der Collector liefert Listen, der Web-Server-State speichert dieselben CeTypes aber als Objekte nach `keyId`. Das ist die Form, die auch die Web-App empfängt.
 - `road-intersection-switchings.intersectionId` ist ein Kreuzungsname (`string`), während `road-intersection-lanes.intersectionId` und `road-intersection-traffic-lights.intersectionId` numerische IDs sind.
 - `road-intersection-traffic-lights.lightStructures` wird als Objekt mit String-Indizes serialisiert, nicht als JSON-Array.
-- Mehrere Felder in `road-intersections` sind optional, weil Lua-`nil`-Felder beim JSON-Export nicht erscheinen.
-- Der aktuelle Snapshot in `server-state.json` enthält bereits alle sechs Road-Räume.
-- Der Web-Server-Reducer merged `ListChanged` aktuell in vorhandene Raumobjekte hinein. Für die Road-Räume ist das nur dann exakt, wenn Schlüssel nicht verschwinden oder vorher ein `CompleteReset` erfolgt.
+- Mehrere Felder in `ce.mods.road.Intersection` sind optional, weil Lua-`nil`-Felder beim JSON-Export nicht erscheinen.
+- Der aktuelle Snapshot in `server-state.json` enthält bereits alle sechs Road-CeTypes.
+- Der Web-Server-Reducer merged `ListChanged` aktuell in vorhandene CeType-Objekte hinein. Für die Road-CeTypes ist das nur dann exakt, wenn Schlüssel nicht verschwinden oder vorher ein `CompleteReset` erfolgt.
 
 ## Events in `ce/mods/road`
 
 ### Von den Collectoren erzeugte Daten-Events
 
-| Ursprung in `ce/mods/road`                    | Eventtyp      | Raum / Schlüssel                          |
-| --------------------------------------------- | ------------- | ----------------------------------------- |
-| `TrafficLightModelStatePublisher.syncState()` | `ListChanged` | `signal-type-definitions` / `id`          |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersections` / `id`               |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-lanes` / `id`          |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-switchings` / `id`     |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-traffic-lights` / `id` |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-module-settings` / `name`           |
+| Ursprung in `ce/mods/road`                    | Eventtyp      | CeType / Schlüssel                         |
+| --------------------------------------------- | ------------- | ------------------------------------------ |
+| `TrafficLightModelStatePublisher.syncState()` | `ListChanged` | `ce.mods.road.SignalTypeDefinition` / `id` |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `ce.mods.road.Intersection` / `id`         |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-lanes` / `id`           |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-switchings` / `id`      |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-traffic-lights` / `id`  |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-module-settings` / `name`            |
 
 ### In `ce/mods/road` ausgewertete Eingangs-Events und Callbacks
 

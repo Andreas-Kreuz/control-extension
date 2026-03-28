@@ -1,6 +1,6 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { RollingStockLuaDto } from '../../ce/dto/rolling-stocks/RollingStockLuaDto';
-import { RollingStockDto } from '@ak/web-shared';
+import { CeTypes, RollingStockDto } from '@ak/web-shared';
 
 export class RollingStockSelector {
   private lastState: fromJsonData.State = undefined;
@@ -8,14 +8,14 @@ export class RollingStockSelector {
   private trainRollingStock = new Map<string, Map<number, RollingStockDto>>();
 
   updateFromState(state: fromJsonData.State): void {
-    if (state === this.lastState || !state.rooms['rolling-stocks']) {
+    if (state === this.lastState || !state.ceTypes[CeTypes.HubRollingStock]) {
       return;
     }
 
     this.allRollingStock.clear();
     this.trainRollingStock.clear();
 
-    const rollingStockDict = state.rooms['rolling-stocks'] as unknown as Record<string, RollingStockLuaDto>;
+    const rollingStockDict = state.ceTypes[CeTypes.HubRollingStock] as unknown as Record<string, RollingStockLuaDto>;
     Object.values(rollingStockDict).forEach((rsDto: RollingStockLuaDto) => {
       const rollingStock: RollingStockDto = {
         id: rsDto.id,

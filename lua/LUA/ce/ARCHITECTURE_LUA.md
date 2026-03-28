@@ -28,7 +28,7 @@ und erfasst dabei reine EEP-Daten.
 
 - EEP-Daten (Züge, Signale, Weichen, Strukturen, Gleise, …) über die EEP-API abfragen.
 - Diese Daten über DtoFactories in strukturierte Lua DTOs umwandeln.
-- DTOs in Datenräume (`room`) einsortieren und für die Data Bridge bereitstellen.
+- DTOs nach `ceType` einsortieren und für die Data Bridge bereitstellen.
 
 ### DtoFactories — Regel: nur reine EEP-Daten
 
@@ -43,7 +43,7 @@ erhalten — ohne Nebeneffekte durch Module.
 
 ### Lua Store
 
-Der Lua Store hält alle aktuellen Zustände der Datenräume im Speicher.
+Der Lua Store hält alle aktuellen Zustände der CeTypes im Speicher.
 Module können über den `DataChangeBus` Daten lesen oder schreiben.
 
 ---
@@ -56,7 +56,7 @@ Ein CeModule ist ein optionaler Lua-Baustein, der in den Hub eingehängt wird.
 
 - Kann reine EEP-Lua-DTOs aus dem Store lesen.
 - Darf eigene, modulspezifische DTOs erzeugen (Erweiterung, Transformation, Kombination).
-- Diese modulspezifischen DTOs werden separat in eigenen Datenräumen abgelegt —
+- Diese modulspezifischen DTOs werden separat in eigenen CeTypes abgelegt —
   **nicht** in den DtoFactories des Lua Hub.
 
 ### Kommunikationskanal
@@ -84,7 +84,7 @@ Die Data Bridge ist der Transportkanal zwischen Lua und dem Server.
 
 ### Aufgaben der Data Bridge
 
-- Nimmt DTOs aus den Datenräumen entgegen.
+- Nimmt DTOs aus den CeTypes entgegen.
 - Schreibt diese als newline-delimited JSON (Kodierung: latin1) in die Datei `events-from-ce`.
 - Schreibt Logmeldungen in `log-from-ce`.
 

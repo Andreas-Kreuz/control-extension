@@ -177,11 +177,7 @@ export class ServerMain {
     });
   }
 
-  private handleServerRouteProtection(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ): void {
+  private handleServerRouteProtection(req: express.Request, res: express.Response, next: express.NextFunction): void {
     if (!this.isServerRoute(req)) {
       next();
       return;
@@ -246,7 +242,8 @@ export class ServerMain {
 
   private createCorsOptions(): cors.CorsOptions {
     return {
-      origin: (origin, callback) => callback(null, this.trustedServerAddressPolicy.isTrustedOrigin(origin ?? undefined)),
+      origin: (origin, callback) =>
+        callback(null, this.trustedServerAddressPolicy.isTrustedOrigin(origin ?? undefined)),
       credentials: false,
       methods: ['GET', 'POST'],
     };

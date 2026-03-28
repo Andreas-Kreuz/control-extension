@@ -9,16 +9,16 @@ insulate("ce.hub.data.switches.SwitchDtoFactory", function ()
         local SwitchDtoFactory = require("ce.hub.data.switches.SwitchDtoFactory")
         local switch = { id = 11, position = 1, tag = "Main" }
 
-        local room, keyId, key, switchDto = SwitchDtoFactory.createSwitchDto(switch)
+        local ceType, keyId, key, switchDto = SwitchDtoFactory.createSwitchDto(switch)
         local listRoom, listKeyId, switchDtos = SwitchDtoFactory.createSwitchDtoList({ switch })
         switch.tag = "Changed"
 
-        assert.equals("switches", room)
+        assert.equals("ce.hub.Switch", ceType)
         assert.equals("id", keyId)
         assert.equals(11, key)
-        assert.same({ id = 11, position = 1, tag = "Main" }, switchDto)
-        assert.equals("switches", listRoom)
+        assert.same({ ceType = "ce.hub.Switch", id = 11, position = 1, tag = "Main" }, switchDto)
+        assert.equals("ce.hub.Switch", listRoom)
         assert.equals("id", listKeyId)
-        assert.same({ { id = 11, position = 1, tag = "Main" } }, switchDtos)
+        assert.same({ { ceType = "ce.hub.Switch", id = 11, position = 1, tag = "Main" } }, switchDtos)
     end)
 end)

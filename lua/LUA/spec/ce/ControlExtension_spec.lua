@@ -59,20 +59,20 @@ insulate("ControlExtension", function ()
         local firstModule = { name = "spec.FirstModule" }
         local secondModule = { name = "spec.SecondModule" }
 
-        assert.equals("registered", ControlExtension.addModules(firstModule, secondModule))
+        assert.equals(ControlExtension, ControlExtension.addModules(firstModule, secondModule))
         assert.same({ firstModule, secondModule }, calls.registerModules)
-        assert.equals("initialized", ControlExtension.initTasks())
+        assert.equals(ControlExtension, ControlExtension.initTasks())
         assert.is_true(calls.initTasks)
         assert.equals("ran", ControlExtension.runTasks(7))
         assert.equals(7, calls.runTasks)
-        assert.equals("activated", ControlExtension.activateServer())
+        assert.equals(ControlExtension, ControlExtension.activateServer())
         assert.is_true(calls.activateServer)
-        assert.equals("deactivated", ControlExtension.deactivateServer())
+        assert.equals(ControlExtension, ControlExtension.deactivateServer())
         assert.is_true(calls.deactivateServer)
 
-        assert.is_true(ControlExtension.setDebug(true))
+        assert.equals(ControlExtension, ControlExtension.setDebug(true))
         assert.is_true(calls.setDebug)
-        assert.is_true(ControlExtension.setPauseEepDuringInitialization(true))
+        assert.equals(ControlExtension, ControlExtension.setPauseEepDuringInitialization(true))
         assert.is_true(calls.setPause)
 
         assert.is_nil(ControlExtension.useModules)
@@ -93,5 +93,13 @@ insulate("ControlExtension", function ()
         ControlExtensionHub.setPauseEepDuringInitialization = oldSetPause
         ControlExtensionHub.activateServer = oldActivateServer
         ControlExtensionHub.deactivateServer = oldDeactivateServer
+    end)
+
+    it("keeps the minimal startup path optional", function ()
+        local ControlExtension = require("ce.ControlExtension")
+
+        assert.has_no.errors(function ()
+            ControlExtension.runTasks(1)
+        end)
     end)
 end)

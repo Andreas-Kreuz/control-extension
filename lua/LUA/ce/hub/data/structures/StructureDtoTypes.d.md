@@ -1,9 +1,9 @@
-# Structure DTO-Räume
+# Structure DTO-CeTypes
 
-## Raum `structures`
+## CeType `ce.hub.Structure`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.structures.StructureDtoFactory`
+- DtoFactory: `ce.hub.data.ce.hub.Structure.StructureDtoFactory`
 
 | Name            | Typ       |
 | --------------- | --------- |

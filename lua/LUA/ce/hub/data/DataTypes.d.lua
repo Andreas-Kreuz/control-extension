@@ -2,12 +2,12 @@
 
 ---@alias DataStoreElement table
 ---@alias DataStoreList table<any, DataStoreElement>
----@alias DataStoreRoom table<string, DataStoreElement>
----@alias DataStoreRooms table<string, DataStoreRoom>
+---@alias DataStoreCeType table<string, DataStoreElement>
+---@alias DataStoreCeTypes table<string, DataStoreCeType>
 ---@alias InternalDataStoreElement DataStoreElement
 ---@alias InternalDataStoreList DataStoreList
----@alias InternalDataStoreRoom DataStoreRoom
----@alias InternalDataStoreRooms DataStoreRooms
+---@alias InternalDataStoreCeType DataStoreCeType
+---@alias InternalDataStoreCeTypes DataStoreCeTypes
 ---@alias TrainNameSet table<string, boolean>
 ---@alias TrainTrackIds table<string, number>
 ---@alias TrainTracksByTrain table<string, TrainTrackIds>
@@ -15,10 +15,10 @@
 ---@alias TrainUpdateInfos table<string, TrainUpdateInfo>
 ---@alias TrainInfosFn fun(d: TrainNameSet, dt: TrainNameSet, m: TrainNameSet, tt: TrainTracksByType):TrainUpdateInfos
 ---@class InternalDataStore: EventListener
----@field rooms InternalDataStoreRooms
+---@field ceTypes InternalDataStoreCeTypes
 ---@field reset fun():nil
----@field getRoom fun(room: string):DataStoreRoom|nil
----@field get fun(room: string, key: string|number):DataStoreElement|nil
+---@field getCeType fun(ceType: string):DataStoreCeType|nil
+---@field get fun(ceType: string, key: string|number):DataStoreElement|nil
 ---@field fireEvent fun(event: DataChangeEvent):nil
 
 ---@class DataCeModule
@@ -30,4 +30,4 @@
 ---@field setOptions fun(options: table):nil
 
 ---@class DataBridgeConnector
----@field registerStatePublishers fun(activeCollectors: table<string, boolean>|nil):nil
+---@field registerStatePublishers fun():nil

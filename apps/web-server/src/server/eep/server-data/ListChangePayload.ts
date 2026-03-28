@@ -1,5 +1,5 @@
 export interface ListChangePayload<T> {
-  room: string;
+  ceType: string;
   keyId: string & keyof T;
   list: Record<string, T>;
 }

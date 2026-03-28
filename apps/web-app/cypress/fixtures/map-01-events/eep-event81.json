@@ -1,1 +1,1 @@
-{"eventCounter":81,"payload":{"keyId":"id","room":"times","list":[{"id":"times","timeS":3,"timeComplete":16563,"timeH":4,"timeM":36,"name":"times"}]},"type":"ListChanged"}
+{"eventCounter":81,"payload":{"keyId":"id","list":[{"id":"times","timeS":3,"timeComplete":16563,"timeH":4,"timeM":36,"name":"times","ceType":"ce.hub.Time"}],"ceType":"ce.hub.Time"},"type":"ListChanged"}

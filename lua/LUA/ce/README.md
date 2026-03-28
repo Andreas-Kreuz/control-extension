@@ -25,21 +25,49 @@ Für die Anlagensteuerung genügt der Lua Hub. Server und Web App sind optional.
 
 Damit ein EEP Anlage den Hub nutzt, wird der Einstiegspunkt `ce.ControlExtension` in den Lua Code der Anlage aufgenommen.
 
-1. **Ändere den Lua Code deiner Anlage** \
-   Nutze den Lua-Editor von EEP und klicke dann auf Skript neu laden. \
-   ⚠️ **Wenn du schon eigenen Lua-Code hast, dann füge nur die beiden Zeilen mit `ControlExtension` hinzu.**
+### Kurzes Beispiel
 
-   ```lua
-   local ControlExtension = require("ce.ControlExtension")
+Nutze den Lua-Editor von EEP und klicke dann auf Skript neu laden. \
+⚠️ **Wenn du schon eigenen Lua-Code hast, dann füge nur die beiden Zeilen mit `ControlExtension` hinzu.**
 
-   function EEPMain()
-      ControlExtension.runTasks(1)
-      return 1
-   end
-   ```
+```lua
+local ControlExtension = require("ce.ControlExtension")
 
-2. **Starte dann den Control Server im EEP-Verzeichnis** \
-   Ist dein EEP in `C:\Trend\EEP18` installiert, dann findest du ihn in `C:\Trend\EEP18\LUA\ce\control-extension-server.exe`.
+function EEPMain()
+   ControlExtension.runTasks(1)
+   return 1
+end
+```
+
+### Langes Beispiel
+
+Die zusätzliche Konfiguration ist optional. Wenn du sie nicht verwendest, bleiben die Standardwerte aktiv.
+
+```lua
+local ControlExtension = require("ce.ControlExtension")
+
+ControlExtension
+    .setDebug(true)
+    .activateServer()
+    .setPauseEepDuringInitialization(true)
+    .addModules(
+        require("ce.mods.road.RoadCeModule"),
+        require("ce.hub.mods.HubCeModule").setOptions({
+            collectedCeTypes = {
+                require("ce.hub.mods.HubCeModule").CeTypes.Train,
+            },
+        })
+    )
+
+function EEPMain()
+    ControlExtension.runTasks(1)
+    return 1
+end
+```
+
+### Control Server starten
+
+Ist dein EEP in `C:\Trend\EEP18` installiert, dann findest du den Control Server in `C:\Trend\EEP18\LUA\ce\control-extension-server.exe`.
 
 Eine vollständige Beschreibung der API findest Du in [hub/README.md](hub/README.md).
 

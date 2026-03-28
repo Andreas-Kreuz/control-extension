@@ -55,7 +55,7 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
         _G.__signal_state_test_states = nil
     end)
 
-    it("fires both rooms with the existing wire format", function ()
+    it("fires both ceTypes with the existing wire format", function ()
         local SignalStatePublisher = require("ce.hub.data.signals.SignalStatePublisher")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
@@ -64,20 +64,22 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
 
         assert.same({
                         ["9"] = {
+                            ceType = "ce.hub.Signal",
                             id = 9,
                             position = 2,
                             tag = "North",
                             waitingVehiclesCount = 1
                         }
-                    }, DataStore.getRoom("signals"))
+                    }, DataStore.getCeType("ce.hub.Signal"))
         assert.same({
                         ["9-1"] = {
+                            ceType = "ce.hub.WaitingOnSignal",
                             id = "9-1",
                             signalId = 9,
                             waitingPosition = 1,
                             vehicleName = "Train X",
                             waitingCount = 1
                         }
-                    }, DataStore.getRoom("waiting-on-signals"))
+                    }, DataStore.getCeType("ce.hub.WaitingOnSignal"))
     end)
 end)

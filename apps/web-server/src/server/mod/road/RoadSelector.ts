@@ -5,6 +5,7 @@ import { IntersectionTrafficLightLuaDto } from '../../ce/dto/roads/IntersectionT
 import { TrafficLightModelLuaDto } from '../../ce/dto/traffic-light-models/TrafficLightModelLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import {
+  CeTypes,
   IntersectionDto,
   IntersectionLaneDto,
   IntersectionSwitchingDto,
@@ -26,20 +27,24 @@ export default class RoadSelector {
     }
     this.lastState = state;
 
-    this.intersections = this.mapRoom<IntersectionLuaDto, IntersectionDto>(state, 'intersections', (dto) => ({
-      id: dto.id,
-      name: dto.name,
-      currentSwitching: dto.currentSwitching,
-      manualSwitching: dto.manualSwitching,
-      nextSwitching: dto.nextSwitching,
-      ready: dto.ready,
-      timeForGreen: dto.timeForGreen,
-      staticCams: dto.staticCams,
-    }));
-
-    this.intersectionLanes = this.mapRoom<IntersectionLaneLuaDto, IntersectionLaneDto>(
+    this.intersections = this.mapCeType<IntersectionLuaDto, IntersectionDto>(
       state,
-      'intersection-lanes',
+      CeTypes.RoadIntersection,
+      (dto) => ({
+        id: dto.id,
+        name: dto.name,
+        currentSwitching: dto.currentSwitching,
+        manualSwitching: dto.manualSwitching,
+        nextSwitching: dto.nextSwitching,
+        ready: dto.ready,
+        timeForGreen: dto.timeForGreen,
+        staticCams: dto.staticCams,
+      }),
+    );
+
+    this.intersectionLanes = this.mapCeType<IntersectionLaneLuaDto, IntersectionLaneDto>(
+      state,
+      CeTypes.RoadIntersectionLane,
       (dto) => ({
         id: dto.id,
         intersectionId: dto.intersectionId,
@@ -57,9 +62,9 @@ export default class RoadSelector {
       }),
     );
 
-    this.intersectionSwitchings = this.mapRoom<IntersectionSwitchingLuaDto, IntersectionSwitchingDto>(
+    this.intersectionSwitchings = this.mapCeType<IntersectionSwitchingLuaDto, IntersectionSwitchingDto>(
       state,
-      'intersection-switchings',
+      CeTypes.RoadIntersectionSwitching,
       (dto) => ({
         id: dto.id,
         intersectionId: dto.intersectionId,
@@ -68,9 +73,9 @@ export default class RoadSelector {
       }),
     );
 
-    this.intersectionTrafficLights = this.mapRoom<IntersectionTrafficLightLuaDto, IntersectionTrafficLightDto>(
+    this.intersectionTrafficLights = this.mapCeType<IntersectionTrafficLightLuaDto, IntersectionTrafficLightDto>(
       state,
-      'intersection-traffic-lights',
+      CeTypes.RoadIntersectionTrafficLight,
       (dto) => ({
         id: dto.id,
         signalId: dto.signalId,
@@ -82,9 +87,9 @@ export default class RoadSelector {
       }),
     );
 
-    this.trafficLightModels = this.mapRoom<TrafficLightModelLuaDto, TrafficLightModelDto>(
+    this.trafficLightModels = this.mapCeType<TrafficLightModelLuaDto, TrafficLightModelDto>(
       state,
-      'signal-type-definitions',
+      CeTypes.RoadSignalTypeDefinition,
       (dto) => ({
         id: dto.id,
         name: dto.name,
@@ -100,13 +105,13 @@ export default class RoadSelector {
     );
   }
 
-  private mapRoom<TLua, TDto>(
+  private mapCeType<TLua, TDto>(
     state: fromEepData.State,
-    roomName: string,
+    ceType: string,
     mapper: (dto: TLua) => TDto,
   ): Record<string, TDto> {
-    if (!state.rooms[roomName]) return {};
-    const dict = state.rooms[roomName] as unknown as Record<string, TLua>;
+    if (!state.ceTypes[ceType]) return {};
+    const dict = state.ceTypes[ceType] as unknown as Record<string, TLua>;
     const result: Record<string, TDto> = {};
     Object.values(dict).forEach((dto: TLua) => {
       const mapped = mapper(dto);

@@ -1,8 +1,7 @@
 import { CacheService } from '../CacheService';
 import EepDataStore, { State } from '../EepDataStore';
 import JsonApiReducer, { ServerData } from './ServerData';
-import { ServerStatusEvent } from '@ak/web-shared';
-import { ApiDataRoom } from '@ak/web-shared';
+import { ApiDataRoom, CeTypes, ServerStatusEvent } from '@ak/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
@@ -132,7 +131,7 @@ export default class JsonApiUpdateService {
       clearTimeout(this.lastTimeOut);
     }
     this.lastTimeOut = setTimeout(() => {
-      const roomName = 'api-stats';
+      const roomName = CeTypes.ServerStats;
       const currentStats = JSON.parse(data.roomToJson[roomName]);
       const newStats = { ...currentStats, eepDataUpToDate: false };
       const newStatsJsonString = JSON.stringify(newStats);

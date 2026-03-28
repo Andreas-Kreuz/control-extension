@@ -30,10 +30,10 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
                 }
             }
         }
-        local room, keyId, key, lineDto = TransitDtoFactory.createTransitLineDto(line)
-        local stationRoom, stationKeyId, stationKey, stationDto =
+        local ceType, keyId, key, lineDto = TransitDtoFactory.createTransitLineDto(line)
+        local stationCeType, stationKeyId, stationKey, stationDto =
             TransitDtoFactory.createTransitStationDto({ id = "Station A", name = "ignored" })
-        local settingsRoom, settingsKeyId, settingsDtos =
+        local settingsCeType, settingsKeyId, settingsDtos =
             TransitDtoFactory.createTransitModuleSettingDtoList({
                 {
                     category = "Display",
@@ -49,10 +49,11 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
         line.nr = "11"
         line.lineSegments[1].stations[1].station.name = "Changed"
 
-        assert.equals("transit-lines", room)
+        assert.equals("ce.mods.transit.Line", ceType)
         assert.equals("id", keyId)
         assert.equals("10", key)
         assert.same({
+                        ceType = "ce.mods.transit.Line",
                         id = "10",
                         nr = "10",
                         trafficType = "BUS",
@@ -71,14 +72,15 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
                             }
                         }
                     }, lineDto)
-        assert.equals("transit-stations", stationRoom)
+        assert.equals("ce.mods.transit.Station", stationCeType)
         assert.equals("id", stationKeyId)
         assert.equals("Station A", stationKey)
-        assert.same({ id = "Station A" }, stationDto)
-        assert.equals("transit-module-settings", settingsRoom)
+        assert.same({ ceType = "ce.mods.transit.Station", id = "Station A" }, stationDto)
+        assert.equals("ce.mods.transit.ModuleSetting", settingsCeType)
         assert.equals("name", settingsKeyId)
         assert.same({
                         {
+                            ceType = "ce.mods.transit.ModuleSetting",
                             category = "Display",
                             name = "Next",
                             description = "Show next departures",
