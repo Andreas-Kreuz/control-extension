@@ -8,6 +8,8 @@
 | Name | Typ      |
 | ---- | -------- |
 | `id` | `number` |
+| `reserved` | `boolean` |
+| `reservedByTrainName` | `string` |
 
 ## CeType `ce.hub.ControlTrack`
 
@@ -17,6 +19,8 @@
 | Name | Typ      |
 | ---- | -------- |
 | `id` | `number` |
+| `reserved` | `boolean` |
+| `reservedByTrainName` | `string` |
 
 ## CeType `ce.hub.RoadTrack`
 
@@ -26,6 +30,8 @@
 | Name | Typ      |
 | ---- | -------- |
 | `id` | `number` |
+| `reserved` | `boolean` |
+| `reservedByTrainName` | `string` |
 
 ## CeType `ce.hub.RailTrack`
 
@@ -35,6 +41,8 @@
 | Name | Typ      |
 | ---- | -------- |
 | `id` | `number` |
+| `reserved` | `boolean` |
+| `reservedByTrainName` | `string` |
 
 ## CeType `ce.hub.TramTrack`
 
@@ -44,3 +52,5 @@
 | Name | Typ      |
 | ---- | -------- |
 | `id` | `number` |
+| `reserved` | `boolean` |
+| `reservedByTrainName` | `string` |

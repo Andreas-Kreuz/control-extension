@@ -5,6 +5,10 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
     local originalSignalGetTagText = _G.EEPSignalGetTagText
     local originalGetSignalTrainsCount = _G.EEPGetSignalTrainsCount
     local originalGetSignalTrainName = _G.EEPGetSignalTrainName
+    local originalGetSignalStopDistance = _G.EEPGetSignalStopDistance
+    local originalGetSignalItemName = _G.EEPGetSignalItemName
+    local originalGetSignalFunctions = _G.EEPGetSignalFunctions
+    local originalGetSignalFunction = _G.EEPGetSignalFunction
 
     before_each(function ()
         clearModule("ce.hub.data.signals.SignalDataCollector")
@@ -13,6 +17,10 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
             [5] = {
                 position = 2,
                 tag = "Entry",
+                stopDistance = 12.5,
+                itemName = "Signal 5",
+                itemNameWithModelPath = "Signals/Signal 5",
+                functions = { 1, 2, 4 },
                 waitingCount = 2,
                 vehicles = { "Train A", "Train B" }
             }
@@ -38,6 +46,26 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
             if not entry then return nil end
             return entry.vehicles[position]
         end)
+        rawset(_G, "EEPGetSignalStopDistance", function (id)
+            local entry = states[id]
+            if not entry then return false, nil end
+            return true, entry.stopDistance
+        end)
+        rawset(_G, "EEPGetSignalItemName", function (id, includeModelPath)
+            local entry = states[id]
+            if not entry then return false, nil end
+            return true, includeModelPath and entry.itemNameWithModelPath or entry.itemName
+        end)
+        rawset(_G, "EEPGetSignalFunctions", function (id)
+            local entry = states[id]
+            if not entry then return false, 0 end
+            return true, #entry.functions
+        end)
+        rawset(_G, "EEPGetSignalFunction", function (id, selectionIndex)
+            local entry = states[id]
+            if not entry then return false, nil end
+            return true, entry.functions[selectionIndex]
+        end)
 
         _G.__signal_test_states = states
     end)
@@ -47,6 +75,10 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
         rawset(_G, "EEPSignalGetTagText", originalSignalGetTagText)
         rawset(_G, "EEPGetSignalTrainsCount", originalGetSignalTrainsCount)
         rawset(_G, "EEPGetSignalTrainName", originalGetSignalTrainName)
+        rawset(_G, "EEPGetSignalStopDistance", originalGetSignalStopDistance)
+        rawset(_G, "EEPGetSignalItemName", originalGetSignalItemName)
+        rawset(_G, "EEPGetSignalFunctions", originalGetSignalFunctions)
+        rawset(_G, "EEPGetSignalFunction", originalGetSignalFunction)
         _G.__signal_test_states = nil
     end)
 
@@ -70,6 +102,11 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
                         id = 5,
                         position = 2,
                         tag = "Entry",
+                        stopDistance = 12.5,
+                        itemName = "Signal 5",
+                        itemNameWithModelPath = "Signals/Signal 5",
+                        signalFunctions = { "1", "2", "4" },
+                        activeFunction = "2",
                         waitingVehiclesCount = 2
                     }, signals[1])
         assert.same({

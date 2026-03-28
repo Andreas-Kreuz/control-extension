@@ -5,4 +5,9 @@ export interface SignalLuaDto {
   position: number;
   tag: string;
   waitingVehiclesCount: number;
+  stopDistance?: number;
+  itemName?: string;
+  itemNameWithModelPath?: string;
+  signalFunctions?: string[];
+  activeFunction?: string;
 }

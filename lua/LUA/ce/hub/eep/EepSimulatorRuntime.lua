@@ -91,6 +91,8 @@ local function create(simulator, globals)
             rollingStock.tag = nil
             if rollingStock.hookEnabled == nil then rollingStock.hookEnabled = false end
             if rollingStock.fixedLoad == nil then rollingStock.fixedLoad = false end
+            if rollingStock.smokeEnabled == nil then rollingStock.smokeEnabled = false end
+            if rollingStock.rotation == nil then rollingStock.rotation = { rotX = 0, rotY = 0, rotZ = 0 } end
             if rollingStock.userCamera == nil then rollingStock.userCamera = nil end
             return rollingStock
         end
@@ -604,6 +606,36 @@ local function create(simulator, globals)
             or 2
     end
 
+    function Runtime.callEEPGetSignalStopDistance(signalId)
+        local signal = state.signals[signalId]
+        if not signal then return false, nil end
+        return true, signal.stopDistance or 0
+    end
+
+    function Runtime.callEEPGetSignalItemName(signalId, includeModelPath)
+        local signal = state.signals[signalId]
+        if not signal then return false, nil end
+        if includeModelPath == true or includeModelPath == 1 then
+            return true, signal.itemNameWithModelPath or signal.itemName or ("Signal " .. signalId)
+        end
+        return true, signal.itemName or ("Signal " .. signalId)
+    end
+
+    function Runtime.callEEPGetSignalFunctions(signalId)
+        local signal = state.signals[signalId]
+        local functions = signal and signal.functions or nil
+        if not functions then return false, 0 end
+        return true, #functions
+    end
+
+    function Runtime.callEEPGetSignalFunction(signalId, selectionIndex)
+        local signal = state.signals[signalId]
+        local functions = signal and signal.functions or nil
+        local signalFunction = functions and functions[selectionIndex] or nil
+        if signalFunction == nil then return false, nil end
+        return true, signalFunction
+    end
+
     function Runtime.callEEPSetSwitch(switchId, switchPosition, activateEEPOnSwitch)
         Store.ensurePath(state, { "switches", switchId }, createEmptyTable).switchPosition = switchPosition
         return 1
@@ -652,6 +684,22 @@ local function create(simulator, globals)
 
     function Runtime.callEEPGetTimeLapse()
         return 1
+    end
+
+    function Runtime.callEEPGetAnlVer()
+        return state.layout.version or 18.1
+    end
+
+    function Runtime.callEEPGetAnlLng()
+        return state.layout.language or "GER"
+    end
+
+    function Runtime.callEEPGetAnlName()
+        return state.layout.name or "Simulator Layout"
+    end
+
+    function Runtime.callEEPGetAnlPath()
+        return state.layout.path or "C:\\Trend\\Simulator.anl3"
     end
 
     function Runtime.callEEPSetColourFilter(hue, saturation, brightness, contrast) end
@@ -1307,11 +1355,30 @@ local function create(simulator, globals)
 
     function Runtime.callEEPRollingstockGetSmoke(rollingstockName) return true, 0 end
 
-    function Runtime.callEEPRollingstockSetSmoke(rollingstockName, status) return true end
+    function Runtime.callEEPRollingstockSetSmoke(rollingstockName, status)
+        getOrCreateRollingStockEntry(rollingstockName).smokeEnabled = status == true or status == 1
+        return true
+    end
+
+    function Runtime.callEEPRollingstockGetSmoke(rollingstockName)
+        local rollingStock = select(1, getRollingStockTrainContext(rollingstockName))
+        return true, rollingStock and rollingStock.smokeEnabled and 1 or 0
+    end
+
+    function Runtime.callEEPRollingstockGetRotation(rollingstockName)
+        local rollingStock = select(1, getRollingStockTrainContext(rollingstockName))
+        if not rollingStock then return false, nil, nil, nil end
+        local rotation = rollingStock.rotation or { rotX = 0, rotY = 0, rotZ = 0 }
+        return true, rotation.rotX or 0, rotation.rotY or 0, rotation.rotZ or 0
+    end
 
     function Runtime.callEEPGoodsGetRotation(goodsName) return true, 60, 10, -20 end
 
     function Runtime.callEEPStructureGetRotation(immobilieName) return true, 60, 10, -20 end
+
+    function Runtime.callEEPGetSeason() return state.weather.season or 0 end
+
+    function Runtime.callEEPGetCloudsMode() return state.weather.cloudsMode or 0 end
 
     function Runtime.callEEPGetWindIntensity() return true, state.weather.wind or 10 end
 

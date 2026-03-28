@@ -18,6 +18,11 @@
 | `modelType`       | `number`      |
 | `modelTypeText`   | `string`      |
 | `tag`             | `string`      |
+| `orientationForward` | `boolean`  |
+| `smoke`           | `number`      |
+| `hookStatus`      | `number`      |
+| `hookGlueMode`    | `number`      |
+| `active`          | `boolean`     |
 | `nr`              | `string\|nil` |
 | `trackId`         | `number`      |
 | `trackDistance`   | `number`      |

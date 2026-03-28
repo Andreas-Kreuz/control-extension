@@ -6,10 +6,14 @@ import { WaitingOnSignalLuaDto } from '../../ce/dto/signals/WaitingOnSignalLuaDt
 import { SwitchLuaDto } from '../../ce/dto/switches/SwitchLuaDto';
 import { StructureLuaDto } from '../../ce/dto/structures/StructureLuaDto';
 import { TrackLuaDto } from '../../ce/dto/tracks/TrackLuaDto';
+import { RollingStockTexturesLuaDto } from '../../ce/dto/rolling-stocks/RollingStockTexturesLuaDto';
+import { RollingStockRotationLuaDto } from '../../ce/dto/rolling-stocks/RollingStockRotationLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import {
   CeTypes,
   RuntimeDto,
+  RuntimeStatisticsDto,
+  RuntimeStatisticsTimeDto,
   ModuleDto,
   DataSlotDto,
   SignalDto,
@@ -17,12 +21,45 @@ import {
   SwitchDto,
   StructureDto,
   TrackDto,
+  RollingStockTexturesDto,
+  RollingStockRotationDto,
   trackTypeForCeType,
 } from '@ak/web-shared';
+
+const publisherCollectors = [
+  'ce.hub.ModulesStatePublisher',
+  'ce.hub.VersionStatePublisher',
+  'ce.hub.data.runtime.RuntimeStatePublisher',
+  'ce.hub.data.slots.DataSlotsStatePublisher',
+  'ce.hub.data.signals.SignalStatePublisher',
+  'ce.hub.data.structures.StructureStatePublisher',
+  'ce.hub.data.switches.SwitchStatePublisher',
+  'ce.hub.data.time.TimeStatePublisher',
+  'ce.hub.data.weather.WeatherStatePublisher',
+  'ce.hub.data.trains.TrainsAndTracksStatePublisher',
+  'ce.mods.road.data.TrafficLightModelStatePublisher',
+  'ce.mods.road.data.RoadStatePublisher',
+  'ce.mods.transit.data.TransitStatePublisher',
+] as const;
+
+const ceModules = ['ce.hub.mods.HubCeModule', 'ce.mods.road.RoadCeModule', 'ce.mods.transit.TransitCeModule'] as const;
+const runtimeStatisticsHistoryLimit = 10;
+
+interface RuntimeStatisticsSample {
+  eventCounter: number;
+  publisherSyncTimes: RuntimeStatisticsTimeDto[];
+  moduleRunTimes: RuntimeStatisticsTimeDto[];
+  controllerUpdateTimes: RuntimeStatisticsTimeDto[];
+}
 
 export default class EepDataSelector {
   private lastState: fromEepData.State = undefined;
   private runtime: Record<string, RuntimeDto> = {};
+  private runtimeStatisticsHistory: RuntimeStatisticsSample[] = [];
+  private runtimeStatisticsInitialization: RuntimeStatisticsDto['initialization'] = {
+    publisherInitTimes: [],
+    moduleInitTimes: [],
+  };
   private modules: Record<string, ModuleDto> = {};
   private saveSlots: Record<string, DataSlotDto> = {};
   private freeSlots: Record<string, DataSlotDto> = {};
@@ -31,6 +68,8 @@ export default class EepDataSelector {
   private switches: Record<string, SwitchDto> = {};
   private structures: Record<string, StructureDto> = {};
   private tracks: Record<string, Record<string, TrackDto>> = {};
+  private rollingStockTextures: Record<string, RollingStockTexturesDto> = {};
+  private rollingStockRotation: Record<string, RollingStockRotationDto> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState) {
@@ -43,7 +82,11 @@ export default class EepDataSelector {
       count: dto.count,
       time: dto.time,
       lastTime: dto.lastTime,
+      framesPerSecond: dto.framesPerSecond,
+      currentFrame: dto.currentFrame,
+      currentRenderFrame: dto.currentRenderFrame,
     }));
+    this.updateRuntimeStatistics(state.eventCounter, this.runtime);
 
     this.modules = this.mapCeType<ModuleLuaDto, ModuleDto>(state, CeTypes.HubModule, (dto) => ({
       id: dto.id,
@@ -68,6 +111,11 @@ export default class EepDataSelector {
       position: dto.position,
       tag: dto.tag,
       waitingVehiclesCount: dto.waitingVehiclesCount,
+      stopDistance: dto.stopDistance,
+      itemName: dto.itemName,
+      itemNameWithModelPath: dto.itemNameWithModelPath,
+      signalFunctions: dto.signalFunctions,
+      activeFunction: dto.activeFunction,
     }));
 
     this.waitingOnSignals = this.mapCeType<WaitingOnSignalLuaDto, WaitingOnSignalDto>(
@@ -111,8 +159,30 @@ export default class EepDataSelector {
       if (!trackType) continue;
       this.tracks[trackType] = this.mapCeType<TrackLuaDto, TrackDto>(state, ceType, (dto) => ({
         id: dto.id,
+        reserved: dto.reserved,
+        reservedByTrainName: dto.reservedByTrainName,
       }));
     }
+
+    this.rollingStockTextures = this.mapCeType<RollingStockTexturesLuaDto, RollingStockTexturesDto>(
+      state,
+      CeTypes.HubRollingStockTextures,
+      (dto) => ({
+        id: dto.id,
+        surfaceTexts: { ...(dto.surfaceTexts || {}) },
+      }),
+    );
+
+    this.rollingStockRotation = this.mapCeType<RollingStockRotationLuaDto, RollingStockRotationDto>(
+      state,
+      CeTypes.HubRollingStockRotation,
+      (dto) => ({
+        id: dto.id,
+        rotX: dto.rotX,
+        rotY: dto.rotY,
+        rotZ: dto.rotZ,
+      }),
+    );
   }
 
   private mapCeType<TLua, TDto>(
@@ -130,7 +200,109 @@ export default class EepDataSelector {
     return result;
   }
 
+  private updateRuntimeStatistics(eventCounter: number, runtime: Record<string, RuntimeDto>): void {
+    if (Object.keys(runtime).length === 0) {
+      this.runtimeStatisticsHistory = [];
+      this.runtimeStatisticsInitialization = { publisherInitTimes: [], moduleInitTimes: [] };
+      return;
+    }
+
+    this.runtimeStatisticsInitialization = {
+      publisherInitTimes: publisherCollectors.map((collector) =>
+        this.toRuntimeStatisticsTime(runtime, 'StatePublisher.' + collector + '.initialize', collector),
+      ),
+      moduleInitTimes: ceModules.map((moduleName) =>
+        this.toRuntimeStatisticsTime(runtime, 'CeModule.' + moduleName + '.init', moduleName),
+      ),
+    };
+
+    const nextSample: RuntimeStatisticsSample = {
+      eventCounter,
+      publisherSyncTimes: publisherCollectors.map((collector) =>
+        this.toRuntimeStatisticsTime(runtime, 'StatePublisher.' + collector + '.syncState', collector),
+      ),
+      moduleRunTimes: ceModules.map((moduleName) =>
+        this.toRuntimeStatisticsTime(runtime, 'CeModule.' + moduleName + '.run', moduleName),
+      ),
+      controllerUpdateTimes: [
+        this.toRuntimeStatisticsTime(
+          runtime,
+          'MainLoopRunner.runCycle-6-waitForServer',
+          'Wait for server to be ready',
+        ),
+        this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-5-commands', 'Command execution'),
+        this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-7-serverOutput', 'Server output'),
+        this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-8-dataStoreWrite', 'DataStore write'),
+      ],
+    };
+
+    const lastSample = this.runtimeStatisticsHistory[this.runtimeStatisticsHistory.length - 1];
+    if (!lastSample || !this.runtimeStatisticsSampleEquals(lastSample, nextSample)) {
+      this.runtimeStatisticsHistory = [...this.runtimeStatisticsHistory, nextSample].slice(
+        -runtimeStatisticsHistoryLimit,
+      );
+    }
+  }
+
+  private toRuntimeStatisticsTime(
+    runtime: Record<string, RuntimeDto>,
+    runtimeKey: string,
+    label: string,
+  ): RuntimeStatisticsTimeDto {
+    return {
+      id: label,
+      ms: runtime[runtimeKey]?.time ?? 0,
+    };
+  }
+
+  private runtimeStatisticsSampleEquals(left: RuntimeStatisticsSample, right: RuntimeStatisticsSample): boolean {
+    return (
+      this.runtimeStatisticsTimeListsEqual(left.publisherSyncTimes, right.publisherSyncTimes) &&
+      this.runtimeStatisticsTimeListsEqual(left.moduleRunTimes, right.moduleRunTimes) &&
+      this.runtimeStatisticsTimeListsEqual(left.controllerUpdateTimes, right.controllerUpdateTimes)
+    );
+  }
+
+  private runtimeStatisticsTimeListsEqual(
+    left: RuntimeStatisticsTimeDto[],
+    right: RuntimeStatisticsTimeDto[],
+  ): boolean {
+    if (left.length !== right.length) {
+      return false;
+    }
+
+    for (let i = 0; i < left.length; i += 1) {
+      if (left[i].id !== right[i].id || left[i].ms !== right[i].ms) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private cloneRuntimeStatisticsTimeList(list: RuntimeStatisticsTimeDto[]): RuntimeStatisticsTimeDto[] {
+    return list.map((entry) => ({ ...entry }));
+  }
+
   getRuntime = (): Record<string, RuntimeDto> => this.runtime;
+  getRuntimeStatistics = (): RuntimeStatisticsDto => ({
+    history: {
+      publisherSyncTimes: this.runtimeStatisticsHistory.map((sample) =>
+        this.cloneRuntimeStatisticsTimeList(sample.publisherSyncTimes),
+      ),
+      moduleRunTimes: this.runtimeStatisticsHistory.map((sample) =>
+        this.cloneRuntimeStatisticsTimeList(sample.moduleRunTimes),
+      ),
+      controllerUpdateTimes: this.runtimeStatisticsHistory.map((sample) =>
+        this.cloneRuntimeStatisticsTimeList(sample.controllerUpdateTimes),
+      ),
+      sampleEventCounters: this.runtimeStatisticsHistory.map((sample) => sample.eventCounter),
+    },
+    initialization: {
+      publisherInitTimes: this.cloneRuntimeStatisticsTimeList(this.runtimeStatisticsInitialization.publisherInitTimes),
+      moduleInitTimes: this.cloneRuntimeStatisticsTimeList(this.runtimeStatisticsInitialization.moduleInitTimes),
+    },
+  });
   getModules = (): Record<string, ModuleDto> => this.modules;
   getSaveSlots = (): Record<string, DataSlotDto> => this.saveSlots;
   getFreeSlots = (): Record<string, DataSlotDto> => this.freeSlots;
@@ -140,4 +312,6 @@ export default class EepDataSelector {
   getStructures = (): Record<string, StructureDto> => this.structures;
   getTracksForRoom = (trackType: string): Record<string, TrackDto> => this.tracks[trackType] ?? {};
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);
+  getRollingStockTextures = (): Record<string, RollingStockTexturesDto> => this.rollingStockTextures;
+  getRollingStockRotation = (): Record<string, RollingStockRotationDto> => this.rollingStockRotation;
 }

@@ -83,7 +83,9 @@ function TrainRegistry.fireChangeTrainsEvent()
             train.valuesUpdated = false
         end
     end
-    DataChangeBus.fireListChange(TrainDtoFactory.createTrainDtoList(modifiedTrains))
+    for _, train in pairs(modifiedTrains) do
+        DataChangeBus.fireDataChanged(TrainDtoFactory.createTrainDto(train))
+    end
 end
 
 function TrainRegistry.getAllTrainNames()

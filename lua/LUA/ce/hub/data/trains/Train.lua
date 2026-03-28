@@ -23,6 +23,14 @@ function Train:new(o)
     local rollingStockCount = EEPGetRollingstockItemsCount(o.name)
     local _, length = EEPGetTrainLength(o.name)
     local _, speed = EEPGetTrainSpeed(o.name)
+    local _, targetSpeed = EEPGetTrainSpeed(o.name, true)
+    local _, couplingFront = false, nil
+    if EEPGetTrainCouplingFront then _, couplingFront = EEPGetTrainCouplingFront(o.name) end
+    local _, couplingRear = false, nil
+    if EEPGetTrainCouplingRear then _, couplingRear = EEPGetTrainCouplingRear(o.name) end
+    local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
+    local inTrainyard, trainyardId = false, nil
+    if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(o.name) end
     assert(haveTrain, o.name)
     self.__index = self
     setmetatable(o, self)
@@ -33,6 +41,12 @@ function Train:new(o)
     o.rollingStockCount = rollingStockCount
     o.length = tonumber(string.format("%.2f", length or 0)) or 0
     o.speed = speed
+    o.targetSpeed = targetSpeed or speed
+    o.couplingFront = couplingFront or 0
+    o.couplingRear = couplingRear or 0
+    o.active = activeTrain == o.name
+    o.inTrainyard = inTrainyard == true
+    o.trainyardId = inTrainyard and trainyardId or nil
     o.movesForward = speed >= 0
     o.trackType = nil
     o.onTracks = {}
@@ -183,6 +197,79 @@ function Train:getSpeed()
     return self.speed
 end
 
+function Train:setTargetSpeed(targetSpeed)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(targetSpeed) == "number", "Need 'targetSpeed' as number")
+    targetSpeed = tonumber(string.format("%1.1f", targetSpeed)) or 0
+    local oldTargetSpeed = self.targetSpeed
+    self.targetSpeed = targetSpeed
+    if oldTargetSpeed ~= targetSpeed then self.valuesUpdated = true end
+end
+
+function Train:getTargetSpeed()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.targetSpeed
+end
+
+function Train:setCouplingFront(couplingFront)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(couplingFront) == "number", "Need 'couplingFront' as number")
+    local oldCouplingFront = self.couplingFront
+    self.couplingFront = couplingFront
+    if oldCouplingFront ~= couplingFront then self.valuesUpdated = true end
+end
+
+function Train:getCouplingFront()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.couplingFront
+end
+
+function Train:setCouplingRear(couplingRear)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(couplingRear) == "number", "Need 'couplingRear' as number")
+    local oldCouplingRear = self.couplingRear
+    self.couplingRear = couplingRear
+    if oldCouplingRear ~= couplingRear then self.valuesUpdated = true end
+end
+
+function Train:getCouplingRear()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.couplingRear
+end
+
+function Train:setActive(active)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(active) == "boolean", "Need 'active' as boolean")
+    local oldActive = self.active
+    self.active = active
+    if oldActive ~= active then self.valuesUpdated = true end
+end
+
+function Train:getActive()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.active
+end
+
+function Train:setTrainyard(inTrainyard, trainyardId)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(inTrainyard) == "boolean", "Need 'inTrainyard' as boolean")
+    local oldInTrainyard = self.inTrainyard
+    local oldTrainyardId = self.trainyardId
+    self.inTrainyard = inTrainyard
+    self.trainyardId = inTrainyard and trainyardId or nil
+    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then self.valuesUpdated = true end
+end
+
+function Train:getTrainyardId()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.trainyardId
+end
+
+function Train:getInTrainyard()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.inTrainyard
+end
+
 --- Updates the trains speed in km/h
 ---@param movesForward boolean indicates if the train moves forward or backward
 function Train:setMovesForward(movesForward)
@@ -311,6 +398,12 @@ function Train:toJsonStatic()
         trackType = self:getTrackType(),
         movesForward = self:getMovesForward(),
         speed = self:getSpeed(),
+        targetSpeed = self:getTargetSpeed(),
+        couplingFront = self:getCouplingFront(),
+        couplingRear = self:getCouplingRear(),
+        active = self:getActive(),
+        inTrainyard = self:getInTrainyard(),
+        trainyardId = self:getTrainyardId(),
         occupiedTacks = self:getOnTrack()
     }
 end

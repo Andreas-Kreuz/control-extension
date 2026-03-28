@@ -8,7 +8,13 @@
 ---@field route string
 ---@field rollingStockCount number
 ---@field speed number
+---@field targetSpeed number
 ---@field length number
+---@field couplingFront number
+---@field couplingRear number
+---@field active boolean
+---@field trainyardId number|nil
+---@field inTrainyard boolean
 ---@field movesForward boolean
 ---@field trackType string|nil
 ---@field onTracks table<string, number>
@@ -28,6 +34,17 @@
 ---@field getRollingStockCount fun(self: Train):number
 ---@field setSpeed fun(self: Train, speed: number):nil
 ---@field getSpeed fun(self: Train):number
+---@field setTargetSpeed fun(self: Train, targetSpeed: number):nil
+---@field getTargetSpeed fun(self: Train):number
+---@field setCouplingFront fun(self: Train, couplingFront: number):nil
+---@field getCouplingFront fun(self: Train):number
+---@field setCouplingRear fun(self: Train, couplingRear: number):nil
+---@field getCouplingRear fun(self: Train):number
+---@field setActive fun(self: Train, active: boolean):nil
+---@field getActive fun(self: Train):boolean
+---@field setTrainyard fun(self: Train, inTrainyard: boolean, trainyardId: number|nil):nil
+---@field getTrainyardId fun(self: Train):number|nil
+---@field getInTrainyard fun(self: Train):boolean
 ---@field setMovesForward fun(self: Train, movesForward: boolean):nil
 ---@field getMovesForward fun(self: Train):boolean
 ---@field setOnTrack fun(self: Train, onTracks: table<string, number>):nil
@@ -76,7 +93,17 @@
 ---@field z number
 ---@field model RollingStockModel
 ---@field tag string
----@field textureText string
+---@field orientationForward boolean
+---@field smoke number
+---@field hookStatus number
+---@field hookGlueMode number
+---@field active boolean
+---@field textureTexts table<string, string>
+---@field textureTextsUpdated boolean
+---@field rotationUpdated boolean
+---@field rotX number|nil
+---@field rotY number|nil
+---@field rotZ number|nil
 ---@field trackType string|nil
 ---@field valuesUpdated boolean
 ---@field type string
@@ -98,6 +125,23 @@
 ---@field getModelTypeText fun(self: RollingStock):string
 ---@field getTag fun(self: RollingStock):string
 ---@field getPropelled fun(self: RollingStock):boolean
+---@field setOrientationForward fun(self: RollingStock, orientationForward: boolean):nil
+---@field getOrientationForward fun(self: RollingStock):boolean
+---@field setSmoke fun(self: RollingStock, smoke: number):nil
+---@field getSmoke fun(self: RollingStock):number
+---@field setHookStatus fun(self: RollingStock, hookStatus: number):nil
+---@field getHookStatus fun(self: RollingStock):number
+---@field setHookGlueMode fun(self: RollingStock, hookGlueMode: number):nil
+---@field getHookGlueMode fun(self: RollingStock):number
+---@field setActive fun(self: RollingStock, active: boolean):nil
+---@field getActive fun(self: RollingStock):boolean
+---@field setTextureTexts fun(self: RollingStock, textureTexts: table<string, string>):nil
+---@field getTextureTexts fun(self: RollingStock):table<string, string>
+---@field updateTextureTexts fun(self: RollingStock):nil
+---@field setRotation fun(self: RollingStock, rotX: number, rotY: number, rotZ: number):nil
+---@field getRotX fun(self: RollingStock):number|nil
+---@field getRotY fun(self: RollingStock):number|nil
+---@field getRotZ fun(self: RollingStock):number|nil
 ---@field setCouplingFront fun(self: RollingStock, couplingFront: number):nil
 ---@field getCouplingFront fun(self: RollingStock):number
 ---@field setCouplingRear fun(self: RollingStock, couplingRear: number):nil

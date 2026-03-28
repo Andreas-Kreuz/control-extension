@@ -22,7 +22,9 @@ end
 local function toTrackDto(trackType, track)
     return {
         ceType = ceTypeForTrackType(trackType),
-        id = track.id
+        id = track.id,
+        reserved = track.reserved,
+        reservedByTrainName = track.reservedByTrainName
     }
 end
 

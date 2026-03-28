@@ -4,11 +4,15 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
     before_each(function ()
         clearModule("ce.hub.data.trains.TrainDtoFactory")
         clearModule("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        clearModule("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
+        clearModule("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
     end)
 
     it("provides metadata for train and rolling stock DTOs", function ()
         local TrainDtoFactory = require("ce.hub.data.trains.TrainDtoFactory")
         local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        local RollingStockTexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
+        local RollingStockRotationDtoFactory = require("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
 
         local occupiedTracks = { [11] = 11 }
         local train = {
@@ -22,6 +26,12 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
             getTrackType = function () return "rail" end,
             getMovesForward = function () return true end,
             getSpeed = function () return 3 end,
+            getTargetSpeed = function () return 4 end,
+            getCouplingFront = function () return 1 end,
+            getCouplingRear = function () return 2 end,
+            getActive = function () return true end,
+            getTrainyardId = function () return 9 end,
+            getInTrainyard = function () return false end,
             getOnTrack = function () return occupiedTracks end,
             toJsonStatic = function () error("createTrainDto should not use toJsonStatic") end
         }
@@ -36,6 +46,15 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
             getModelType = function () return 8 end,
             getModelTypeText = function () return "Tram" end,
             getTag = function () return "tag" end,
+            getOrientationForward = function () return true end,
+            getSmoke = function () return 1 end,
+            getHookStatus = function () return 2 end,
+            getHookGlueMode = function () return 3 end,
+            getActive = function () return false end,
+            getTextureTexts = function () return { ["1"] = "Line", ["2"] = "" } end,
+            getRotX = function () return 1.23 end,
+            getRotY = function () return 2.35 end,
+            getRotZ = function () return 3.46 end,
             getWagonNr = function () return "42" end,
             getTrackId = function () return 99 end,
             getTrackDistance = function () return 10.5 end,
@@ -51,6 +70,10 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
 
         local trainRoom, trainKeyId, trainKey, trainDto = TrainDtoFactory.createTrainDto(train)
         local rsRoom, rsKeyId, rsKey, rsDto = RollingStockDtoFactory.createRollingStockDto(rollingStock)
+        local rsTexturesRoom, rsTexturesKeyId, rsTexturesKey, rsTexturesDto =
+            RollingStockTexturesDtoFactory.createRollingStockTexturesDto(rollingStock)
+        local rsRotationRoom, rsRotationKeyId, rsRotationKey, rsRotationDto =
+            RollingStockRotationDtoFactory.createRollingStockRotationDto(rollingStock)
 
         occupiedTracks[12] = 12
 
@@ -70,6 +93,12 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
                         trackType = "rail",
                         movesForward = true,
                         speed = 3,
+                        targetSpeed = 4,
+                        couplingFront = 1,
+                        couplingRear = 2,
+                        active = true,
+                        trainyardId = 9,
+                        inTrainyard = false,
                         occupiedTacks = { [11] = 11 }
                     },
                     trainDto)
@@ -89,6 +118,11 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
                         modelType = 8,
                         modelTypeText = "Tram",
                         tag = "tag",
+                        orientationForward = true,
+                        smoke = 1,
+                        hookStatus = 2,
+                        hookGlueMode = 3,
+                        active = false,
                         nr = "42",
                         trackId = 99,
                         trackDistance = 10.5,
@@ -100,5 +134,23 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
                         posZ = 3,
                         mileage = 4
                     }, rsDto)
+        assert.equals("ce.hub.RollingStockTextures", rsTexturesRoom)
+        assert.equals("id", rsTexturesKeyId)
+        assert.equals("RS1", rsTexturesKey)
+        assert.same({
+                        ceType = "ce.hub.RollingStockTextures",
+                        id = "RS1",
+                        surfaceTexts = { ["1"] = "Line", ["2"] = "" }
+                    }, rsTexturesDto)
+        assert.equals("ce.hub.RollingStockRotation", rsRotationRoom)
+        assert.equals("id", rsRotationKeyId)
+        assert.equals("RS1", rsRotationKey)
+        assert.same({
+                        ceType = "ce.hub.RollingStockRotation",
+                        id = "RS1",
+                        rotX = 1.23,
+                        rotY = 2.35,
+                        rotZ = 3.46
+                    }, rsRotationDto)
     end)
 end)

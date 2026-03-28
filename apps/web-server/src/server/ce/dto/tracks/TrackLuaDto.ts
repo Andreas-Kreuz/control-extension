@@ -2,4 +2,6 @@
 // Room: {trackType}-tracks (e.g. rail-tracks, road-tracks, tram-tracks)
 export interface TrackLuaDto {
   id: string;
+  reserved?: boolean;
+  reservedByTrainName?: string;
 }

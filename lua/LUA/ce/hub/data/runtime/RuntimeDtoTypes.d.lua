@@ -5,6 +5,9 @@
 ---@field count number
 ---@field time number
 ---@field lastTime number
+---@field framesPerSecond number|nil
+---@field currentFrame number|nil
+---@field currentRenderFrame number|nil
 
 ---@class RuntimeDtoFactory
 ---@field createRuntimeDto fun(runtimeEntry: table):string,string,string|number,RuntimeDto

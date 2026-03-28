@@ -26,6 +26,15 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                 rot = { 4, 5, 6 },
                 modelType = 22,
                 tag = "shed"
+            },
+            ["#3"] = {
+                light = false,
+                smoke = false,
+                fire = false,
+                pos = { 7, 8, 9 },
+                rot = { 10, 11, 12 },
+                modelType = 23,
+                tag = "tree"
             }
         }
 
@@ -102,6 +111,23 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                             light = true,
                             smoke = false,
                             fire = false
+                        },
+                        ["#3"] = {
+                            ceType = "ce.hub.Structure",
+                            id = "#3",
+                            name = "#3",
+                            pos_x = 7,
+                            pos_y = 8,
+                            pos_z = 9,
+                            rot_x = 10,
+                            rot_y = 11,
+                            rot_z = 12,
+                            modelType = 23,
+                            modelTypeText = "Landschaftselement/Fauna",
+                            tag = "tree",
+                            light = false,
+                            smoke = false,
+                            fire = false
                         }
                     }, DataStore.getCeType("ce.hub.Structure"))
 
@@ -109,5 +135,6 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         StructureStatePublisher.syncState()
 
         assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
+        assert.equals("tree", DataStore.get("ce.hub.Structure", "#3").tag)
     end)
 end)

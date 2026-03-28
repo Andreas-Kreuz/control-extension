@@ -22,4 +22,9 @@ export interface RollingStockLuaDto {
   posY: number;
   posZ: number;
   mileage: number;
+  orientationForward?: boolean;
+  smoke?: boolean;
+  hookStatus?: number;
+  hookGlueMode?: number;
+  active?: boolean;
 }

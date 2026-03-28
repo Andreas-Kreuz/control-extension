@@ -7,4 +7,10 @@ export interface TrainDto extends TrainListDto {
   length: number;
   direction: string;
   speed: number;
+  targetSpeed?: number;
+  couplingFront?: number;
+  couplingRear?: number;
+  active?: boolean;
+  trainyardId?: number;
+  inTrainyard?: boolean;
 }

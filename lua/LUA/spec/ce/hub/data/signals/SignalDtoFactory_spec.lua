@@ -7,7 +7,17 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
 
     it("projects signals and waiting entries to detached DTO tables", function ()
         local SignalDtoFactory = require("ce.hub.data.signals.SignalDtoFactory")
-        local signal = { id = 7, position = 1, tag = "Stop", waitingVehiclesCount = 3 }
+        local signal = {
+            id = 7,
+            position = 1,
+            tag = "Stop",
+            waitingVehiclesCount = 3,
+            stopDistance = 15,
+            itemName = "Signal 7",
+            itemNameWithModelPath = "Signals/Signal 7",
+            signalFunctions = { "1", "2" },
+            activeFunction = "1"
+        }
         local waiting = {
             ceType = "ce.hub.WaitingOnSignal",
             id = "7-1",
@@ -34,7 +44,12 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
                         id = 7,
                         position = 1,
                         tag = "Stop",
-                        waitingVehiclesCount = 3
+                        waitingVehiclesCount = 3,
+                        stopDistance = 15,
+                        itemName = "Signal 7",
+                        itemNameWithModelPath = "Signals/Signal 7",
+                        signalFunctions = { "1", "2" },
+                        activeFunction = "1"
                     }, signalDto)
         assert.equals("ce.hub.WaitingOnSignal", waitingRoom)
         assert.equals("id", waitingKeyId)
@@ -55,7 +70,12 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
                             id = 7,
                             position = 1,
                             tag = "Stop",
-                            waitingVehiclesCount = 3
+                            waitingVehiclesCount = 3,
+                            stopDistance = 15,
+                            itemName = "Signal 7",
+                            itemNameWithModelPath = "Signals/Signal 7",
+                            signalFunctions = { "1", "2" },
+                            activeFunction = "1"
                         }
                     }, signalDtos)
         assert.equals("ce.hub.WaitingOnSignal", waitingListRoom)

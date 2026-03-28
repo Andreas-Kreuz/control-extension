@@ -27,6 +27,12 @@ local function toTrainDto(train)
         trackType = train:getTrackType(),
         movesForward = train:getMovesForward(),
         speed = train:getSpeed(),
+        targetSpeed = train:getTargetSpeed(),
+        couplingFront = train:getCouplingFront(),
+        couplingRear = train:getCouplingRear(),
+        active = train:getActive(),
+        trainyardId = train:getTrainyardId(),
+        inTrainyard = train:getInTrainyard(),
         occupiedTacks = copyTable(train:getOnTrack())
     }
 end

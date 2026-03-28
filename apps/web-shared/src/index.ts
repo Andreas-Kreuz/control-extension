@@ -21,8 +21,15 @@ export type { RollingStockDto } from './dtos/server/trains/RollingStockDto';
 export type { SettingDto } from './dtos/server/settings/SettingDto';
 export type { SettingsDto } from './dtos/server/settings/SettingsDto';
 export type { VersionDto } from './dtos/server/version/VersionDto';
+export type { WeatherDto } from './dtos/server/weather/WeatherDto';
 export type { TimeDto } from './dtos/server/time/TimeDto';
 export type { RuntimeDto } from './dtos/server/runtime/RuntimeDto';
+export type {
+  RuntimeStatisticsDto,
+  RuntimeStatisticsHistoryDto,
+  RuntimeStatisticsInitializationDto,
+  RuntimeStatisticsTimeDto,
+} from './dtos/server/runtime/RuntimeStatisticsDto';
 export type { ModuleDto } from './dtos/server/modules/ModuleDto';
 export type { DataSlotDto } from './dtos/server/data-slots/DataSlotDto';
 export type { SignalDto } from './dtos/server/signals/SignalDto';
@@ -30,6 +37,8 @@ export type { WaitingOnSignalDto } from './dtos/server/signals/WaitingOnSignalDt
 export type { SwitchDto } from './dtos/server/switches/SwitchDto';
 export type { StructureDto } from './dtos/server/structures/StructureDto';
 export type { TrackDto } from './dtos/server/tracks/TrackDto';
+export type { RollingStockTexturesDto } from './dtos/server/trains/RollingStockTexturesDto';
+export type { RollingStockRotationDto } from './dtos/server/trains/RollingStockRotationDto';
 export type { IntersectionDto } from './dtos/server/roads/IntersectionDto';
 export type { IntersectionLaneDto } from './dtos/server/roads/IntersectionLaneDto';
 export type { IntersectionSwitchingDto } from './dtos/server/roads/IntersectionSwitchingDto';
@@ -50,6 +59,7 @@ export { IntersectionSwitchingRoom } from './rooms/DynamicRooms';
 export { IntersectionTrafficLightRoom } from './rooms/DynamicRooms';
 export { ModuleRoom } from './rooms/DynamicRooms';
 export { RuntimeRoom } from './rooms/DynamicRooms';
+export { RuntimeStatisticsRoom } from './rooms/DynamicRooms';
 export { SaveSlotRoom } from './rooms/DynamicRooms';
 export { ServerStatsRoom } from './rooms/DynamicRooms';
 export { SignalRoom } from './rooms/DynamicRooms';
@@ -66,7 +76,10 @@ export { TransitSettingsRoom } from './rooms/DynamicRooms';
 export { TransitStationDetailsRoom } from './rooms/DynamicRooms';
 export { TransitStationListRoom } from './rooms/DynamicRooms';
 export { VersionRoom } from './rooms/DynamicRooms';
+export { WeatherRoom } from './rooms/DynamicRooms';
 export { WaitingOnSignalRoom } from './rooms/DynamicRooms';
+export { RollingStockTexturesRoom } from './rooms/DynamicRooms';
+export { RollingStockRotationRoom } from './rooms/DynamicRooms';
 
 export type { ApprovePairingClientPayload } from './PairingEvent';
 export type { PairingStatusPayload } from './PairingEvent';

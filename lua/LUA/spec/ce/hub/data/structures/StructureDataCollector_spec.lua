@@ -14,6 +14,9 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
 
         local states = {
             ["#3"] = {
+                hasLight = true,
+                hasSmoke = true,
+                hasFire = true,
                 light = true,
                 smoke = false,
                 fire = false,
@@ -21,22 +24,31 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
                 rot = { 4.444, 5.555, 6.666 },
                 modelType = 22,
                 tag = "Depot"
+            },
+            ["#4"] = {
+                light = false,
+                smoke = false,
+                fire = false,
+                pos = { 7.777, 8.888, 9.999 },
+                rot = { 0.111, 0.222, 0.333 },
+                modelType = 23,
+                tag = ""
             }
         }
 
         rawset(_G, "EEPStructureGetLight", function (name)
             local entry = states[name]
-            if not entry then return false, false end
+            if not entry or entry.hasLight ~= true then return false, false end
             return true, entry.light
         end)
         rawset(_G, "EEPStructureGetSmoke", function (name)
             local entry = states[name]
-            if not entry then return false, false end
+            if not entry or entry.hasSmoke ~= true then return false, false end
             return true, entry.smoke
         end)
         rawset(_G, "EEPStructureGetFire", function (name)
             local entry = states[name]
-            if not entry then return false, false end
+            if not entry or entry.hasFire ~= true then return false, false end
             return true, entry.fire
         end)
         rawset(_G, "EEPStructureGetPosition", function (name)
@@ -79,7 +91,7 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
 
         local structures = StructureDataCollector.collectInitialStructures()
 
-        assert.same(1, #structures)
+        assert.same(2, #structures)
         assert.same({
                         id = "#3",
                         name = "#3",
@@ -96,13 +108,33 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
                         smoke = false,
                         fire = false
                     }, structures[1])
+        assert.same({
+                        id = "#4",
+                        name = "#4",
+                        pos_x = 7.78,
+                        pos_y = 8.89,
+                        pos_z = 10,
+                        rot_x = 0.11,
+                        rot_y = 0.22,
+                        rot_z = 0.33,
+                        modelType = 23,
+                        modelTypeText = "Landschaftselement/Fauna",
+                        tag = "",
+                        light = false,
+                        smoke = false,
+                        fire = false
+                    }, structures[2])
     end)
 
-    it("refreshes only dirty structures and updates them in place", function ()
+    it("refreshes only dirty structures, updates dynamic values and keeps modelType initial-only", function ()
         local StructureDataCollector = require("ce.hub.data.structures.StructureDataCollector")
 
         local structures = StructureDataCollector.collectInitialStructures()
         _G.__structure_test_states["#3"].smoke = true
+        _G.__structure_test_states["#3"].pos = { 11.111, 12.222, 13.333 }
+        _G.__structure_test_states["#3"].rot = { 14.444, 15.555, 16.666 }
+        _G.__structure_test_states["#3"].tag = "Depot Nord"
+        _G.__structure_test_states["#3"].modelType = 23
 
         local dirtyStructures = StructureDataCollector.refreshDirtyStructures(structures)
 
@@ -110,5 +142,14 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
         assert.is_true(dirtyStructures[1] == structures[1])
         assert.is_true(structures[1].smoke)
         assert.is_false(structures[1].fire)
+        assert.same(11.11, structures[1].pos_x)
+        assert.same(12.22, structures[1].pos_y)
+        assert.same(13.33, structures[1].pos_z)
+        assert.same(14.44, structures[1].rot_x)
+        assert.same(15.55, structures[1].rot_y)
+        assert.same(16.67, structures[1].rot_z)
+        assert.same("Depot Nord", structures[1].tag)
+        assert.same(22, structures[1].modelType)
+        assert.same("Immobilie", structures[1].modelTypeText)
     end)
 end)

@@ -51,16 +51,23 @@ function HubBridgeConnector.registerStatePublishers()
     if isSelected(HubCeTypes.Time) then
         StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.time.TimeStatePublisher"))
     end
+    if isSelected(HubCeTypes.Weather) then
+        StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.weather.WeatherStatePublisher"))
+    end
     if isSelected(
         HubCeTypes.Train,
         HubCeTypes.RollingStock,
+        HubCeTypes.RollingStockTextures,
+        HubCeTypes.RollingStockRotation,
         HubCeTypes.AuxiliaryTrack,
         HubCeTypes.ControlTrack,
         HubCeTypes.RoadTrack,
         HubCeTypes.RailTrack,
         HubCeTypes.TramTrack
     ) then
-        StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.trains.TrainsAndTracksStatePublisher"))
+        local TrainsAndTracksStatePublisher = require("ce.hub.data.trains.TrainsAndTracksStatePublisher")
+        TrainsAndTracksStatePublisher.setCollectedCeTypes(collectedCeTypes)
+        StatePublisherRegistry.registerStatePublishers(TrainsAndTracksStatePublisher)
     end
 end
 

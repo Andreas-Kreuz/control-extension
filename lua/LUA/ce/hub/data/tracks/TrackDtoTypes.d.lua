@@ -2,6 +2,8 @@
 
 ---@class TrackDto
 ---@field id number
+---@field reserved boolean|nil
+---@field reservedByTrainName string|nil
 
 ---@class TrackDtoFactory
 ---@field createTrackDto fun(trackType: string, track: table):string,string,string|number,TrackDto

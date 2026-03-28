@@ -2,6 +2,7 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStoc
 
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local StorageUtility = require("ce.hub.util.StorageUtility")
+local TableUtils = require("ce.hub.util.TableUtils")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
 -- local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 
@@ -13,8 +14,8 @@ local EEPRollingstockModelTypeText = {
     [5] = "Diesellok",
     [6] = "Triebwagen",
     [7] = "U- oder S-Bahn",
-    [8] = "Straßenbahn", -- German Umlaute are ok if stored as UTF-8
-    [9] = "Güterwaggon", -- German Umlaute are ok if stored as UTF-8
+    [8] = "Strassenbahn",
+    [9] = "Gueterwaggon",
     [10] = "Personenwaggon",
     [11] = "Luftfahrzeug",
     [12] = "Maschine",
@@ -22,6 +23,23 @@ local EEPRollingstockModelTypeText = {
     [14] = "LKW",
     [15] = "PKW"
 }
+
+local function round2(value)
+    return tonumber(string.format("%.2f", tonumber(value) or 0)) or 0
+end
+
+local function collectTextureTexts(rollingStockName)
+    if not EEPRollingstockGetTextureText then return {} end
+    local surfaceTexts = {}
+    local surfaceNumber = 1
+    while true do
+        local ok, textureText = EEPRollingstockGetTextureText(rollingStockName, surfaceNumber)
+        if not ok then break end
+        surfaceTexts[tostring(surfaceNumber)] = textureText or ""
+        surfaceNumber = surfaceNumber + 1
+    end
+    return surfaceTexts
+end
 
 local RollingStock = {}
 
@@ -43,13 +61,23 @@ function RollingStock:new(o)
     local _, propelled = EEPRollingstockGetMotor(o.id)             -- EEP 14.2
     local _, modelType = EEPRollingstockGetModelType(o.id)         -- EEP 14.2
     local _, tag = EEPRollingstockGetTagText(o.id)                 -- EEP 14.2
-    local _, textureText = EEPRollingstockGetTextureText(o.id, 1)  -- EEP 16.3 (limited to first entry)
+    local orientationOk, orientationForward = EEPRollingstockGetOrientation and EEPRollingstockGetOrientation(o.id) or
+        false, nil
+    local smokeOk, smoke = EEPRollingstockGetSmoke and EEPRollingstockGetSmoke(o.id) or false, nil
+    local hookOk, hookStatus = EEPRollingstockGetHook and EEPRollingstockGetHook(o.id) or false, nil
+    local hookGlueOk, hookGlueMode = EEPRollingstockGetHookGlue and EEPRollingstockGetHookGlue(o.id) or false,
+        nil
+    local activeRollingStock = EEPRollingstockGetActive and EEPRollingstockGetActive() or ""
 
     local _, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(o.id)
     -- EEP 14.2
 
     local hasPos, posX, posY, posZ = EEPRollingstockGetPosition(o.id) -- EEP 16.1
     local hasMileage, mileage = EEPRollingstockGetMileage(o.id)       -- EEP 16.1
+    local rotationOk, rotX, rotY, rotZ = false, nil, nil, nil
+    if EEPRollingstockGetRotation then
+        rotationOk, rotX, rotY, rotZ = EEPRollingstockGetRotation(o.id)
+    end
 
     o.type = "RollingStock"
     o.model = RollingStockModels.modelFor(o.id)
@@ -58,12 +86,17 @@ function RollingStock:new(o)
     o.couplingFront = couplingFront or 1
     o.couplingRear = couplingRear or 1
     o.length = tonumber(string.format("%.2f", length or -1)) or -1
-    o.propelled = propelled or true
+    o.propelled = propelled ~= false
     o.modelType = modelType or -1
     o.modelTypeText = EEPRollingstockModelTypeText[modelType] or ""
     o.tag = tag or ""
-    o.textureText = textureText or ""
     o.values = StorageUtility.parseTableFromString(tag)
+    o.orientationForward = orientationOk and orientationForward == true or false
+    o.smoke = smokeOk and smoke or 0
+    o.hookStatus = hookOk and hookStatus or 0
+    o.hookGlueMode = hookGlueOk and hookGlueMode or 0
+    o.active = activeRollingStock == o.id
+    o.textureTexts = collectTextureTexts(o.id)
     o.trackId = trackId or -1
     o.trackDistance = tonumber(string.format("%.2f", trackDistance or -1)) or -1
     o.trackDirection = trackDirection or -1
@@ -72,7 +105,12 @@ function RollingStock:new(o)
     o.y = hasPos and tonumber(posY) or -1
     o.z = hasPos and tonumber(posZ) or -1
     o.mileage = hasMileage and tonumber(mileage) or -1
+    o.rotX = rotationOk and round2(rotX) or 0
+    o.rotY = rotationOk and round2(rotY) or 0
+    o.rotZ = rotationOk and round2(rotZ) or 0
     o.valuesUpdated = true
+    o.textureTextsUpdated = true
+    o.rotationUpdated = true
     return o
 end
 
@@ -208,6 +246,119 @@ end
 function RollingStock:getPropelled()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return self.propelled
+end
+
+function RollingStock:setOrientationForward(orientationForward)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(orientationForward) == "boolean", "Need 'orientationForward' as boolean")
+    local oldOrientationForward = self.orientationForward
+    self.orientationForward = orientationForward
+    if oldOrientationForward ~= orientationForward then self.valuesUpdated = true end
+end
+
+function RollingStock:getOrientationForward()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.orientationForward
+end
+
+function RollingStock:setSmoke(smoke)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(smoke) == "number", "Need 'smoke' as number")
+    local oldSmoke = self.smoke
+    self.smoke = smoke
+    if oldSmoke ~= smoke then self.valuesUpdated = true end
+end
+
+function RollingStock:getSmoke()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.smoke
+end
+
+function RollingStock:setHookStatus(hookStatus)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(hookStatus) == "number", "Need 'hookStatus' as number")
+    local oldHookStatus = self.hookStatus
+    self.hookStatus = hookStatus
+    if oldHookStatus ~= hookStatus then self.valuesUpdated = true end
+end
+
+function RollingStock:getHookStatus()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.hookStatus
+end
+
+function RollingStock:setHookGlueMode(hookGlueMode)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(hookGlueMode) == "number", "Need 'hookGlueMode' as number")
+    local oldHookGlueMode = self.hookGlueMode
+    self.hookGlueMode = hookGlueMode
+    if oldHookGlueMode ~= hookGlueMode then self.valuesUpdated = true end
+end
+
+function RollingStock:getHookGlueMode()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.hookGlueMode
+end
+
+function RollingStock:setActive(active)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(active) == "boolean", "Need 'active' as boolean")
+    local oldActive = self.active
+    self.active = active
+    if oldActive ~= active then self.valuesUpdated = true end
+end
+
+function RollingStock:getActive()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.active
+end
+
+function RollingStock:setTextureTexts(textureTexts)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(textureTexts) == "table", "Need 'textureTexts' as table")
+    local oldTextureTexts = self.textureTexts or {}
+    self.textureTexts = textureTexts
+    if not TableUtils.sameDictEntries(oldTextureTexts, textureTexts) then self.textureTextsUpdated = true end
+end
+
+function RollingStock:getTextureTexts()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.textureTexts or {}
+end
+
+function RollingStock:updateTextureTexts()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    self:setTextureTexts(collectTextureTexts(self.rollingStockName))
+end
+
+function RollingStock:setRotation(rotX, rotY, rotZ)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(rotX) == "number", "Need 'rotX' as number")
+    assert(type(rotY) == "number", "Need 'rotY' as number")
+    assert(type(rotZ) == "number", "Need 'rotZ' as number")
+    rotX = round2(rotX)
+    rotY = round2(rotY)
+    rotZ = round2(rotZ)
+    local oldRotX, oldRotY, oldRotZ = self.rotX, self.rotY, self.rotZ
+    self.rotX = rotX
+    self.rotY = rotY
+    self.rotZ = rotZ
+    if oldRotX ~= rotX or oldRotY ~= rotY or oldRotZ ~= rotZ then self.rotationUpdated = true end
+end
+
+function RollingStock:getRotX()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.rotX
+end
+
+function RollingStock:getRotY()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.rotY
+end
+
+function RollingStock:getRotZ()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.rotZ
 end
 
 --- Updates the front coupling of the rolling stock
@@ -403,6 +554,11 @@ function RollingStock:toJsonStatic()
         modelType = self:getModelType(),
         modelTypeText = self:getModelTypeText(),
         tag = self:getTag(),
+        orientationForward = self:getOrientationForward(),
+        smoke = self:getSmoke(),
+        hookStatus = self:getHookStatus(),
+        hookGlueMode = self:getHookGlueMode(),
+        active = self:getActive(),
         nr = self:getWagonNr(),
         trackId = self:getTrackId(),
         trackDistance = self:getTrackDistance(),

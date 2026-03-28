@@ -11,6 +11,11 @@
 | `position`             | `number` |
 | `tag`                  | `string` |
 | `waitingVehiclesCount` | `number` |
+| `stopDistance`         | `number` |
+| `itemName`             | `string` |
+| `itemNameWithModelPath`| `string` |
+| `signalFunctions`      | `string[]` |
+| `activeFunction`       | `string` |
 
 ## CeType `ce.hub.WaitingOnSignal`
 

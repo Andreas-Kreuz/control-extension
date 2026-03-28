@@ -10,6 +10,7 @@ import TransitService from '../mod/transit/TransitService';
 import TrainUpdateService from '../mod/train/TrainUpdateService';
 import VersionService from '../mod/version/VersionService';
 import TimeService from '../mod/time/TimeService';
+import WeatherService from '../mod/weather/WeatherService';
 import EepDataService from '../mod/eepdata/EepDataService';
 import RoadDataService from '../mod/road/RoadDataService';
 import AppConfig from './config/AppConfig';
@@ -213,6 +214,7 @@ export default class AppEffects {
     eepDataEffects.registerDynamicRoom(new TransitService(this.io));
     eepDataEffects.registerDynamicRoom(new VersionService(this.io));
     eepDataEffects.registerDynamicRoom(new TimeService(this.io));
+    eepDataEffects.registerDynamicRoom(new WeatherService(this.io));
     eepDataEffects.registerDynamicRoom(new EepDataService(this.io));
     eepDataEffects.registerDynamicRoom(new RoadDataService(this.io));
 

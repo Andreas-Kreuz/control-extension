@@ -11,6 +11,12 @@
 ---@field trackType string|nil
 ---@field movesForward boolean
 ---@field speed number
+---@field targetSpeed number
+---@field couplingFront number
+---@field couplingRear number
+---@field active boolean
+---@field trainyardId number|nil
+---@field inTrainyard boolean
 ---@field occupiedTacks table
 
 ---@class TrainDtoFactory

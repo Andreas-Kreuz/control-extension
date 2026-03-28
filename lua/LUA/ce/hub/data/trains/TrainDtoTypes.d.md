@@ -17,4 +17,10 @@
 | `trackType`         | `string\|nil` |
 | `movesForward`      | `boolean`     |
 | `speed`             | `number`      |
+| `targetSpeed`       | `number`      |
+| `couplingFront`     | `number`      |
+| `couplingRear`      | `number`      |
+| `active`            | `boolean`     |
+| `trainyardId`       | `number\|nil` |
+| `inTrainyard`       | `boolean`     |
 | `occupiedTacks`     | `table`       |

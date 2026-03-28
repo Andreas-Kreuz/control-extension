@@ -14,7 +14,12 @@ local function toSignalDto(signal)
         id = signal.id,
         position = signal.position,
         tag = signal.tag,
-        waitingVehiclesCount = signal.waitingVehiclesCount
+        waitingVehiclesCount = signal.waitingVehiclesCount,
+        stopDistance = signal.stopDistance,
+        itemName = signal.itemName,
+        itemNameWithModelPath = signal.itemNameWithModelPath,
+        signalFunctions = signal.signalFunctions,
+        activeFunction = signal.activeFunction
     }
 end
 

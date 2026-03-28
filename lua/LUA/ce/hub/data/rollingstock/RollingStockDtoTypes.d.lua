@@ -12,6 +12,11 @@
 ---@field modelType number
 ---@field modelTypeText string
 ---@field tag string
+---@field orientationForward boolean
+---@field smoke number
+---@field hookStatus number
+---@field hookGlueMode number
+---@field active boolean
 ---@field nr string|nil
 ---@field trackId number
 ---@field trackDistance number

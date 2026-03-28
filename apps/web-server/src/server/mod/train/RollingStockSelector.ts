@@ -39,6 +39,11 @@ export class RollingStockSelector {
         posY: rsDto.posY,
         posZ: rsDto.posZ,
         mileage: rsDto.mileage,
+        orientationForward: rsDto.orientationForward,
+        smoke: rsDto.smoke,
+        hookStatus: rsDto.hookStatus,
+        hookGlueMode: rsDto.hookGlueMode,
+        active: rsDto.active,
       };
       const trainRs = this.trainRollingStock.get(rollingStock.trainName) || new Map();
       trainRs.set(rollingStock.positionInTrain, rollingStock);

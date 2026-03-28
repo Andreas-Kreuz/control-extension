@@ -9,6 +9,12 @@ Store.state = {
     },
     camera = {},
     goods = {},
+    layout = {
+        language = "GER",
+        name = "Simulator Layout",
+        path = "C:\\Trend\\Simulator.anl3",
+        version = 18.1
+    },
     persistence = {
         valueByStorageSlot = {}
     },
@@ -29,9 +35,11 @@ Store.state = {
     trainyards = {},
     weather = {
         clouds = nil,
+        cloudsMode = nil,
         fog = nil,
         hail = nil,
         rain = nil,
+        season = nil,
         snow = nil,
         wind = nil
     }

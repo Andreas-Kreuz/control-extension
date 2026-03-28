@@ -20,6 +20,11 @@ export default class VersionSelector {
         eepVersion: dto.eepVersion,
         luaVersion: dto.luaVersion,
         singleVersion: dto.singleVersion,
+        eepLanguage: dto.eepLanguage,
+        layoutVersion: dto.layoutVersion,
+        layoutLanguage: dto.layoutLanguage,
+        layoutName: dto.layoutName,
+        layoutPath: dto.layoutPath,
       };
     });
   }

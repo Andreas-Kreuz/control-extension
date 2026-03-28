@@ -42,4 +42,76 @@ describe("TrainDetection", function ()
         it("#EepTrain1 has 1 rollingStock", function () assert.equals(1, rsCount1AfterSplitting) end)
         it("#EepTrain1;001 has 1 rollingStock", function () assert.equals(1, rsCount2AfterSplitting) end)
     end)
+
+    insulate("with multi-return getters:", function ()
+        local TrainDetection = require("ce.hub.data.trains.TrainDetection")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        TrainDetection.debug = debug
+        TrainRegistry.debug = debug
+
+        EepSimulator.simulateAddTrain("#EepTrainMultiReturn", "RollingStock 3", "RollingStock 4")
+        TrainDetection.initialize()
+        EepSimulator.simulatePlaceTrainOnRailTrack(2, "#EepTrainMultiReturn")
+        TrainDetection.update()
+
+        it("uses all values from optional multi-return getters without errors", function ()
+            local rollingStockName = TrainRegistry.rollingStockNameInTrain("#EepTrainMultiReturn", 0)
+            local originalGetTrainCouplingFront = _G.EEPGetTrainCouplingFront
+            local originalGetTrainCouplingRear = _G.EEPGetTrainCouplingRear
+            local originalIsTrainInTrainyard = _G.EEPIsTrainInTrainyard
+            local originalGetOrientation = _G.EEPRollingstockGetOrientation
+            local originalGetSmoke = _G.EEPRollingstockGetSmoke
+            local originalGetHook = _G.EEPRollingstockGetHook
+            local originalGetHookGlue = _G.EEPRollingstockGetHookGlue
+
+            EEPSetTrainCouplingFront("#EepTrainMultiReturn", true)
+            EEPSetTrainCouplingRear("#EepTrainMultiReturn", false)
+            EepSimulator.simulateAddTrainToTrainyard(9, "#EepTrainMultiReturn", 0, 1)
+            EepSimulator.simulateSetRollingStockOrientation(rollingStockName, false)
+            EEPRollingstockSetSmoke(rollingStockName, true)
+            EEPRollingstockSetHook(rollingStockName, true)
+            EEPRollingstockSetHookGlue(rollingStockName, true)
+
+            assert.has_no.errors(function () TrainDetection.update() end)
+
+            local train = TrainRegistry.forName("#EepTrainMultiReturn")
+            local rollingStock = RollingStockRegistry.forName(rollingStockName)
+
+            assert.equals(1, train:getCouplingFront())
+            assert.equals(2, train:getCouplingRear())
+            assert.is_true(train:getInTrainyard())
+            assert.equals(9, train:getTrainyardId())
+            assert.is_false(rollingStock:getOrientationForward())
+            assert.equals(1, rollingStock:getSmoke())
+            assert.equals(1, rollingStock:getHookStatus())
+            assert.equals(1, rollingStock:getHookGlueMode())
+
+            _G.EEPGetTrainCouplingFront = nil
+            _G.EEPGetTrainCouplingRear = nil
+            _G.EEPIsTrainInTrainyard = nil
+            _G.EEPRollingstockGetOrientation = nil
+            _G.EEPRollingstockGetSmoke = nil
+            _G.EEPRollingstockGetHook = nil
+            _G.EEPRollingstockGetHookGlue = nil
+
+            assert.has_no.errors(function () TrainDetection.update() end)
+            assert.equals(1, train:getCouplingFront())
+            assert.equals(2, train:getCouplingRear())
+            assert.is_false(train:getInTrainyard())
+            assert.is_nil(train:getTrainyardId())
+            assert.is_false(rollingStock:getOrientationForward())
+            assert.equals(1, rollingStock:getSmoke())
+            assert.equals(1, rollingStock:getHookStatus())
+            assert.equals(1, rollingStock:getHookGlueMode())
+
+            _G.EEPGetTrainCouplingFront = originalGetTrainCouplingFront
+            _G.EEPGetTrainCouplingRear = originalGetTrainCouplingRear
+            _G.EEPIsTrainInTrainyard = originalIsTrainInTrainyard
+            _G.EEPRollingstockGetOrientation = originalGetOrientation
+            _G.EEPRollingstockGetSmoke = originalGetSmoke
+            _G.EEPRollingstockGetHook = originalGetHook
+            _G.EEPRollingstockGetHookGlue = originalGetHookGlue
+        end)
+    end)
 end)

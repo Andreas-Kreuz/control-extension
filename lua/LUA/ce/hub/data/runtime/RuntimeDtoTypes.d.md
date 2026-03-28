@@ -11,3 +11,6 @@
 | `count`    | `number` |
 | `time`     | `number` |
 | `lastTime` | `number` |
+| `framesPerSecond` | `number` |
+| `currentFrame` | `number` |
+| `currentRenderFrame` | `number` |

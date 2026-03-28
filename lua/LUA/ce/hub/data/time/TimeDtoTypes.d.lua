@@ -4,6 +4,7 @@
 ---@field id string
 ---@field name string
 ---@field timeComplete number
+---@field timeLapse number|nil
 ---@field timeH number
 ---@field timeM number
 ---@field timeS number

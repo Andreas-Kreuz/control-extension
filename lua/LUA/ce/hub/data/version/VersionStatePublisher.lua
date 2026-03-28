@@ -14,10 +14,7 @@ function VersionStatePublisher.initialize()
     local versionInfo = VersionDataCollector.collectVersionInfo()
     -- TODO: Send event only with detected changes
     DataChangeBus.fireListChange(
-        VersionDtoFactory.createVersionDtoList(
-            versionInfo.eepVersion,
-            versionInfo.luaVersion,
-            versionInfo.singleVersion))
+        VersionDtoFactory.createVersionDtoList(versionInfo))
     data = {
         -- ["eep-version"] = versionDtos
     }

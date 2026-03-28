@@ -44,6 +44,12 @@ export class TrainSelector {
         length: trainDto.length,
         direction: trainDto.direction,
         speed: trainDto.speed,
+        targetSpeed: trainDto.targetSpeed,
+        couplingFront: trainDto.couplingFront,
+        couplingRear: trainDto.couplingRear,
+        active: trainDto.active,
+        trainyardId: trainDto.trainyardId,
+        inTrainyard: trainDto.inTrainyard,
       };
 
       this.trainMap.set(train.id, train);

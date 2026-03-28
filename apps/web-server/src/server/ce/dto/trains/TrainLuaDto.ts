@@ -13,4 +13,10 @@ export interface TrainLuaDto {
   speed: number;
   movesForward: boolean;
   occupiedTacks: Record<string, number>;
+  targetSpeed?: number;
+  couplingFront?: number;
+  couplingRear?: number;
+  active?: boolean;
+  trainyardId?: number;
+  inTrainyard?: boolean;
 }

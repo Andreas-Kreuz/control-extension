@@ -21,6 +21,7 @@ export default class TimeSelector {
         timeH: dto.timeH,
         timeM: dto.timeM,
         timeS: dto.timeS,
+        timeLapse: dto.timeLapse,
       };
     });
   }
