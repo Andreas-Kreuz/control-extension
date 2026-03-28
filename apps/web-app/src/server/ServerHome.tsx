@@ -201,53 +201,75 @@ end`;
             }}
           >
             <Stack spacing={1}>
-              <Typography variant="body1">Zugriff von anderen Geräten</Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={pairingRequired}
-                    onChange={(_event, checked) => handlePairingRequiredChange(checked)}
-                    slotProps={{ input: { id: 'pairing-required-switch' } }}
-                  />
-                }
-                label="Andere Geräte erst freigeben (empfohlen)"
-              />
-              <Typography variant="body2">
-                {pairingRequired
-                  ? 'Andere Geräte können erst nach Freigabe zugreifen.'
-                  : 'Achtung: Alle Geräte im Netzwerk dürfen auf den Server zugreifen.'}
-              </Typography>
-              {pendingClients.length > 0 ? (
-                pendingClients.map((pendingClient) => (
-                  <Stack
-                    key={pendingClient.clientKey}
-                    sx={{
-                      alignItems: 'center',
-                      display: 'flex',
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      gap: 2,
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography sx={{ fontFamily: '"Roboto Mono", "Courier New", monospace' }} variant="h5">
-                        {pendingClient.code}
-                      </Typography>
-                      <Typography variant="body2">Zugriff auf: {pendingClient.requestedPath}</Typography>
-                    </Box>
-                    <Button
-                      onClick={() => handleApproveClient({ clientKey: pendingClient.clientKey })}
-                      variant="contained"
+              <Stack
+                sx={{
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 2,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexGrow: 1 }}>
+                  {pairingRequired ? (
+                    <CheckCircleOutlineRoundedIcon sx={{ color: 'success.main' }} />
+                  ) : (
+                    <WarningRoundedIcon sx={{ color: 'warning.main' }} />
+                  )}
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1">Zugriff auf den CE Server erst nach Freigabe (empfohlen)</Typography>
+                    <Typography variant="body2">
+                      {pairingRequired
+                        ? 'Andere Geräte können erst nach Freigabe zugreifen.'
+                        : 'Achtung: Alle Geräte im Netzwerk dürfen auf den Server zugreifen.'}
+                    </Typography>
+                  </Box>
+                </Stack>
+                <FormControlLabel
+                  labelPlacement="start"
+                  sx={{ m: 0, ml: { md: 'auto' } }}
+                  control={
+                    <Switch
+                      checked={pairingRequired}
+                      onChange={(_event, checked) => handlePairingRequiredChange(checked)}
+                      slotProps={{ input: { id: 'pairing-required-switch' } }}
+                    />
+                  }
+                  label="Zugriff mit Freigabe"
+                />
+              </Stack>
+              <Box sx={{ pl: { xs: 0, md: 4.5 } }}>
+                {pendingClients.length > 0 ? (
+                  pendingClients.map((pendingClient) => (
+                    <Stack
+                      key={pendingClient.clientKey}
+                      sx={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: 2,
+                        justifyContent: 'space-between',
+                      }}
                     >
-                      Freigeben
-                    </Button>
-                  </Stack>
-                ))
-              ) : pairingRequired ? (
-                <Typography variant="body2">Zurzeit wartet kein Gerät auf eine Freigabe.</Typography>
-              ) : (
-                ''
-              )}
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Typography sx={{ fontFamily: '"Roboto Mono", "Courier New", monospace' }} variant="h5">
+                          {pendingClient.code}
+                        </Typography>
+                        <Typography variant="body2">Zugriff auf: {pendingClient.requestedPath}</Typography>
+                      </Box>
+                      <Button
+                        onClick={() => handleApproveClient({ clientKey: pendingClient.clientKey })}
+                        variant="contained"
+                      >
+                        Freigeben
+                      </Button>
+                    </Stack>
+                  ))
+                ) : pairingRequired ? (
+                  <Typography variant="body2">Zurzeit wartet kein Gerät auf eine Freigabe.</Typography>
+                ) : (
+                  ''
+                )}
+              </Box>
             </Stack>
           </Paper>
         </>
