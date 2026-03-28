@@ -12,17 +12,26 @@ export const registerCommandMod = (
   const queueCommand = eepService.queueCommand;
   const socketConnected = (socket: Socket) => {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
+      if (!socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
       if (rooms.room === CommandEvent.Room) {
         // Nothing to do here!
       }
     });
 
     socket.on(CommandEvent.ChangeCamToStatic, (action: { staticCam: string }) => {
+      if (!socketService.ensureApprovedSocket(socket, CommandEvent.ChangeCamToStatic)) {
+        return;
+      }
       const command = 'EEPSetCamera|0|' + action.staticCam;
       queueCommand(command);
     });
 
     socket.on(CommandEvent.ChangeCamToTrain, (action: { trainName: string; rollingStockName: string; id?: number }) => {
+      if (!socketService.ensureApprovedSocket(socket, CommandEvent.ChangeCamToTrain)) {
+        return;
+      }
       if (action.id === 8 || action.id === 9 || action.id === 10) {
         queueCommand('EEPSetTrainActive|' + action.trainName);
         queueCommand('EEPRollingstockSetActive|' + action.rollingStockName);
@@ -43,6 +52,9 @@ export const registerCommandMod = (
         redV: number;
         activate: number;
       }) => {
+        if (!socketService.ensureApprovedSocket(socket, CommandEvent.ChangeCamToRollingStock)) {
+          return;
+        }
         queueCommand('EEPRollingstockSetActive|' + action.rollingStock);
         const command =
           'EEPRollingstockSetUserCamera|' +
@@ -64,6 +76,9 @@ export const registerCommandMod = (
     );
 
     socket.on(CommandEvent.ChangeSetting, (action: { name: string; func: string; newValue: unknown }) => {
+      if (!socketService.ensureApprovedSocket(socket, CommandEvent.ChangeSetting)) {
+        return;
+      }
       const command = action.func + '|' + action.newValue;
       queueCommand(command);
     });

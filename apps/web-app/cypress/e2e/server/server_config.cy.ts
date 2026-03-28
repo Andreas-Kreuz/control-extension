@@ -3,7 +3,7 @@ import EepSimulator from '../../test-helpers/eep-simulator';
 const simulator = new EepSimulator();
 
 describe('Server Tests "/server"', () => {
-  const pwd: { dir: string } = { dir: '-' };
+  const pwd: { dir: string; pairingRequired: boolean } = { dir: '-', pairingRequired: true };
 
   before(() => {
     // Remember the old server dir otherwise the following tests will not work!
@@ -15,6 +15,11 @@ describe('Server Tests "/server"', () => {
         .invoke('text')
         .then((value) => {
           pwd.dir = value as string;
+        });
+      cy.get('input#pairing-required-switch')
+        .invoke('prop', 'checked')
+        .then((value) => {
+          pwd.pairingRequired = Boolean(value);
         });
     });
     simulator.reset();
@@ -32,6 +37,16 @@ describe('Server Tests "/server"', () => {
       cy.log('RESET TO: ' + pwd.dir);
       cy.visit('/server');
       cy.wait(500);
+      cy.get('input#pairing-required-switch').then(($switch) => {
+        const currentValue = Boolean($switch.prop('checked'));
+        if (currentValue !== pwd.pairingRequired) {
+          if (pwd.pairingRequired) {
+            cy.wrap($switch).check({ force: true });
+          } else {
+            cy.wrap($switch).uncheck({ force: true });
+          }
+        }
+      });
       cy.get('#choose-dir-current-dir')
         .should('not.have.text', '-')
         .then(() => {
@@ -55,6 +70,13 @@ describe('Server Tests "/server"', () => {
   });
   it('contains "(2 Events)"', () => {
     cy.contains('aus 2 Events');
+  });
+
+  it('allows toggling approval for new connections and keeps the setting on reload', () => {
+    cy.get('input#pairing-required-switch').should('be.checked').uncheck({ force: true });
+    cy.get('input#pairing-required-switch').should('not.be.checked');
+    cy.reload();
+    cy.get('input#pairing-required-switch').should('not.be.checked');
   });
 
   describe('Changing the directory', () => {

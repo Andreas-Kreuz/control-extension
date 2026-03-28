@@ -61,6 +61,9 @@ export const registerLogMod = (io: Server, socketService: SocketService, eepServ
 
   const socketConnected = (socket: Socket) => {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
+      if (!socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
       if (rooms.room === LogEvent.Room) {
         // if (debug) console.log('🟩 JOIN 📄', LogEvent.Room, ': ', socket.id);
         socket.data.logJoinGeneration = currentGeneration;
@@ -78,12 +81,18 @@ export const registerLogMod = (io: Server, socketService: SocketService, eepServ
     });
 
     socket.on(LogEvent.ClearLog, () => {
+      if (!socketService.ensureApprovedSocket(socket, LogEvent.ClearLog)) {
+        return;
+      }
       if (debug) console.log('🟨 EMIT to all IO: 📄 ' + LogEvent.LinesCleared);
       queueCommand('clearlog');
       io.emit(LogEvent.LinesCleared);
     });
 
     socket.on(LogEvent.SendTestMessage, () => {
+      if (!socketService.ensureApprovedSocket(socket, LogEvent.SendTestMessage)) {
+        return;
+      }
       queueCommand('print|Hallo von EEP-Web! Umlaute: äöüÄÖÜß');
     });
   };

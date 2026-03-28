@@ -54,22 +54,42 @@ export default class AppEffects {
   private socketConnected(socket: Socket) {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
       if (rooms.room === SettingsEvent.Room) {
+        if (!this.socketService.ensureAdminSocket(socket, SettingsEvent.Room)) {
+          return;
+        }
         const event = this.store.getEepDirOk() ? SettingsEvent.DirOk : SettingsEvent.DirError;
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + event, this.getEepDirectory());
         socket.emit(event, this.getEepDirectory());
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + SettingsEvent.Host, this.getHostname());
         socket.emit(SettingsEvent.Host, this.getHostname());
+        if (this.debug)
+          console.log('🟨 EMIT to ' + socket.id + ': ' + SettingsEvent.PairingRequired, this.getPairingRequired());
+        socket.emit(SettingsEvent.PairingRequired, JSON.stringify(this.getPairingRequired()));
       }
 
       if (rooms.room === ServerInfoEvent.Room) {
+        if (!this.socketService.ensureAdminSocket(socket, ServerInfoEvent.Room)) {
+          return;
+        }
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + ServerInfoEvent.Room, this.getHostname());
         socket.emit(ServerInfoEvent.StatisticsUpdate, this.statistics);
       }
     });
 
     socket.on(SettingsEvent.ChangeDir, (dir: string) => {
+      if (!this.socketService.ensureAdminSocket(socket, SettingsEvent.ChangeDir)) {
+        return;
+      }
       if (this.debug) console.log(SettingsEvent.ChangeDir + '"' + dir + '"');
       this.changeEepDirectory(dir);
+    });
+
+    socket.on(SettingsEvent.ChangePairingRequired, (pairingRequired: boolean) => {
+      if (!this.socketService.ensureAdminSocket(socket, SettingsEvent.ChangePairingRequired)) {
+        return;
+      }
+      if (this.debug) console.log(SettingsEvent.ChangePairingRequired + '"' + pairingRequired + '"');
+      this.changePairingRequired(Boolean(pairingRequired));
     });
   }
 
@@ -87,10 +107,12 @@ export default class AppEffects {
     } catch (error) {
       console.log(error);
     }
+    appConfig.pairingRequired = appConfig.pairingRequired !== false;
     this.store.setAppConfig(appConfig);
+    this.socketService.setPairingRequired(this.store.getPairingRequired());
   }
 
-  private saveConfig(config: { eepDir: string }): void {
+  private saveConfig(config: AppConfig): void {
     if (!this.TESTMODE) {
       try {
         fs.mkdirSync(this.serverConfigPath);
@@ -116,6 +138,17 @@ export default class AppEffects {
   public saveEepDirectory(dir: string): void {
     this.store.setEepDir(dir);
     this.saveConfig(this.store.getAppConfig());
+  }
+
+  public getPairingRequired(): boolean {
+    return this.store.getPairingRequired();
+  }
+
+  public changePairingRequired(pairingRequired: boolean): void {
+    this.store.setPairingRequired(pairingRequired);
+    this.socketService.setPairingRequired(pairingRequired);
+    this.saveConfig(this.store.getAppConfig());
+    this.io.to(SettingsEvent.Room).emit(SettingsEvent.PairingRequired, JSON.stringify(pairingRequired));
   }
 
   public changeEepDirectory(eepDir: string) {

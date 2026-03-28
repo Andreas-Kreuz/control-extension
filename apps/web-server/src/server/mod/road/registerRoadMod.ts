@@ -8,16 +8,25 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
 
   function socketConnected(socket: Socket) {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
+      if (!socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
       if (rooms.room === RoadEvent.Room) {
         // Nothing to do here!
       }
     });
 
     socket.on(RoadEvent.SwitchAutomatically, (action: { intersectionName: string }) => {
+      if (!socketService.ensureApprovedSocket(socket, RoadEvent.SwitchAutomatically)) {
+        return;
+      }
       const command = 'AkKreuzungSchalteAutomatisch|' + action.intersectionName;
       queueCommand(command);
     });
     socket.on(RoadEvent.SwitchManually, (action: { intersectionName: string; switchingName: string }) => {
+      if (!socketService.ensureApprovedSocket(socket, RoadEvent.SwitchManually)) {
+        return;
+      }
       const command = 'AkKreuzungSchalteManuell|' + action.intersectionName + '|' + action.switchingName;
       queueCommand(command);
     });

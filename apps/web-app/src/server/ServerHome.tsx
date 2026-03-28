@@ -1,7 +1,13 @@
 import { useSocket } from '../io/SocketProvider';
 import { useRoomHandler } from '../io/useRoomHandler';
 import './ServerHome.css';
-import { ServerStatusEvent, SettingsEvent } from '@ak/web-shared';
+import {
+  ApprovePairingClientPayload,
+  PairingEvent,
+  PendingPairingClient,
+  ServerStatusEvent,
+  SettingsEvent,
+} from '@ak/web-shared';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Alert from '@mui/material/Alert';
@@ -14,14 +20,16 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QRCode } from 'react-qr-code';
 
 function ServerHome() {
@@ -32,6 +40,8 @@ function ServerHome() {
   const [data, setData] = useState<string[]>([]);
   const [eventCount, setEventCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [pendingClients, setPendingClients] = useState<PendingPairingClient[]>([]);
+  const [pairingRequired, setPairingRequired] = useState(true);
 
   const webAppUrl =
     window.location.protocol + '//' + (serverHost ? serverHost : window.location.hostname) + ':' + window.location.port;
@@ -45,6 +55,19 @@ function EEPMain()
 end`;
 
   const socket = useSocket();
+
+  useEffect(() => {
+    const handlePendingClients = (payload: PendingPairingClient[]) => {
+      setPendingClients(payload);
+    };
+
+    socket.on(PairingEvent.PendingList, handlePendingClients);
+    socket.emit(PairingEvent.PendingList);
+
+    return () => {
+      socket.off(PairingEvent.PendingList, handlePendingClients);
+    };
+  }, [socket]);
 
   useRoomHandler(ServerStatusEvent.Room, [
     {
@@ -81,6 +104,12 @@ end`;
         setEditedDirectoryName(payload);
       },
     },
+    {
+      eventName: SettingsEvent.PairingRequired,
+      handler: (payload: string) => {
+        setPairingRequired(JSON.parse(payload));
+      },
+    },
   ]);
 
   const handleClickOpen = () => {
@@ -93,6 +122,13 @@ end`;
   const handleCloseChoose = () => {
     setOpen(false);
     socket.emit(SettingsEvent.ChangeDir, editedDirectoryName);
+  };
+  const handleApproveClient = (payload: ApprovePairingClientPayload) => {
+    socket.emit(PairingEvent.ApproveClient, payload);
+  };
+  const handlePairingRequiredChange = (checked: boolean) => {
+    setPairingRequired(checked);
+    socket.emit(SettingsEvent.ChangePairingRequired, checked);
   };
 
   const eepInstallations = ['C:\\Trend\\EEP18', 'C:\\Trend\\EEP17', 'C:\\Trend\\EEP16'];
@@ -153,6 +189,66 @@ end`;
               <Typography variant="body2">Dein Smartphone muss dazu im selben WLAN sein.</Typography>
             </Box>
             <QRCode value={webAppUrl} size={64} />
+          </Paper>
+          <Paper
+            elevation={0}
+            sx={{
+              border: 1,
+              borderColor: '#aaaaaa',
+              py: 1,
+              px: 2,
+              pr: 3,
+            }}
+          >
+            <Stack spacing={1}>
+              <Typography variant="body1">Zugriff von anderen Geräten</Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={pairingRequired}
+                    onChange={(_event, checked) => handlePairingRequiredChange(checked)}
+                    slotProps={{ input: { id: 'pairing-required-switch' } }}
+                  />
+                }
+                label="Andere Geräte erst freigeben (empfohlen)"
+              />
+              <Typography variant="body2">
+                {pairingRequired
+                  ? 'Andere Geräte können erst nach Freigabe zugreifen.'
+                  : 'Achtung: Alle Geräte im Netzwerk dürfen auf den Server zugreifen.'}
+              </Typography>
+              {pendingClients.length > 0 ? (
+                pendingClients.map((pendingClient) => (
+                  <Stack
+                    key={pendingClient.clientKey}
+                    sx={{
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      gap: 2,
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Typography sx={{ fontFamily: '"Roboto Mono", "Courier New", monospace' }} variant="h5">
+                        {pendingClient.code}
+                      </Typography>
+                      <Typography variant="body2">Zugriff auf: {pendingClient.requestedPath}</Typography>
+                    </Box>
+                    <Button
+                      onClick={() => handleApproveClient({ clientKey: pendingClient.clientKey })}
+                      variant="contained"
+                    >
+                      Freigeben
+                    </Button>
+                  </Stack>
+                ))
+              ) : pairingRequired ? (
+                <Typography variant="body2">Zurzeit wartet kein Gerät auf eine Freigabe.</Typography>
+              ) : (
+                ''
+              )}
+            </Stack>
           </Paper>
         </>
       ) : (

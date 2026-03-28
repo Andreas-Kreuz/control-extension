@@ -38,6 +38,9 @@ export default class EepDataEffects {
 
   private socketConnected(socket: Socket) {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
+      if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
       const room = rooms.room;
       this.jsonApiController.onJoinRoom(socket, room);
       this.stateController.onJoinRoom(socket, room);

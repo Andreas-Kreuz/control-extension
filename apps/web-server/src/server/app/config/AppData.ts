@@ -21,6 +21,14 @@ export default class AppData {
     return this.appConfig.eepDir;
   }
 
+  public setPairingRequired(pairingRequired: boolean): void {
+    this.appConfig.pairingRequired = pairingRequired;
+  }
+
+  public getPairingRequired(): boolean {
+    return this.appConfig.pairingRequired;
+  }
+
   public setEepDirOk(ok: boolean): void {
     this.eepDirOk = ok;
   }

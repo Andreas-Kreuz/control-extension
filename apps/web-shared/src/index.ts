@@ -1,6 +1,8 @@
 export { CommandEvent } from './CommandEvent';
 export { RoadEvent } from './RoadEvent';
 export { LogEvent } from './LogEvent';
+export { PairingEvent } from './PairingEvent';
+export { PairingStatus } from './PairingEvent';
 export { RoomEvent } from './RoomEvent';
 export { ServerInfoEvent } from './ServerInfoEvent';
 export { ServerStatusEvent } from './ServerStatusEvent';
@@ -61,3 +63,7 @@ export { TransitStationDetailsRoom } from './rooms/DynamicRooms';
 export { TransitStationListRoom } from './rooms/DynamicRooms';
 export { VersionRoom } from './rooms/DynamicRooms';
 export { WaitingOnSignalRoom } from './rooms/DynamicRooms';
+
+export type { ApprovePairingClientPayload } from './PairingEvent';
+export type { PairingStatusPayload } from './PairingEvent';
+export type { PendingPairingClient } from './PairingEvent';

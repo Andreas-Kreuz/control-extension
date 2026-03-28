@@ -1,19 +1,7 @@
-// import os from 'os';
+import TrustedServerAddressPolicy from './TrustedServerAddressPolicy';
 
 function getHostName() {
-  var os = require('os');
-  const networkInterfaces: { [key: string]: [{ address: string; family: string; internal: boolean }] } =
-    os.networkInterfaces();
-  const addresses: string[] = [];
-  for (const [, val] of Object.entries(networkInterfaces)) {
-    addresses.push(...val.filter((v) => v.internal === false && v.family === 'IPv4').map((v) => v.address));
-  }
-
-  const hostname = os.hostname();
-  addresses.push(hostname);
-
-  console.log(addresses);
-  return addresses.length > 0 ? addresses[0] : undefined;
+  return new TrustedServerAddressPolicy({ serverPort: 3000 }).getPreferredServerHost();
 }
 
 export default getHostName;

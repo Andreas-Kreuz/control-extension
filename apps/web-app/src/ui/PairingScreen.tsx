@@ -1,35 +1,37 @@
 import { Divider as MuiDivider } from '@mui/material';
 import MuiBackdrop from '@mui/material/Backdrop';
-import MuiCircularProgress from '@mui/material/CircularProgress';
 import MuiPaper from '@mui/material/Paper';
 import MuiStack from '@mui/material/Stack';
 import MuiTypography from '@mui/material/Typography';
 
-export interface ConnectingScreenProps {
-  url: string;
+export interface PairingScreenProps {
+  pairingCode?: string;
 }
 
-const ConnectingScreen = (props: ConnectingScreenProps) => {
+const PairingScreen = (props: PairingScreenProps) => {
   return (
     <MuiBackdrop open>
       <MuiPaper sx={{ m: { xs: 1, sm: 'auto' }, p: { xs: 2, md: 4 }, borderRadius: 2 }} variant="outlined">
         <MuiStack sx={{ alignItems: 'center' }} spacing={1}>
-          <MuiTypography gutterBottom>
-            Verbinde zum Server für EEP an{' '}
-            <strong style={{ fontWeight: 500, wordBreak: 'break-word' }}>{props.url}</strong> ...
+          <MuiTypography gutterBottom>Die Verbindung steht. Warte auf Freigabe am Server für EEP.</MuiTypography>
+          <MuiTypography
+            sx={{ fontFamily: '"Roboto Mono", "Courier New", monospace', fontSize: { xs: '2.5rem', md: '3.5rem' } }}
+            variant="h3"
+          >
+            {props.pairingCode}
           </MuiTypography>
-          <MuiCircularProgress />
+          <MuiTypography gutterBottom>Bitte gib diesen Code auf der Server-Seite frei.</MuiTypography>
         </MuiStack>
         <MuiDivider sx={{ my: 2 }} />
         <MuiTypography gutterBottom>
           <img src={'/icon-192.png'} style={{ height: 48, float: 'left', marginRight: '1rem' }} />
-          <strong>Hast Du den Server für EEP beendet?</strong>
+          <strong>Dein Zugriff wird gerade freigegeben.</strong>
           <br />
-          Schließe diese Seite oder starte den Server erneut.
+          Sobald der Server die Anfrage bestaetigt, wird die App automatisch geoeffnet.
         </MuiTypography>
       </MuiPaper>
     </MuiBackdrop>
   );
 };
 
-export default ConnectingScreen;
+export default PairingScreen;
