@@ -37,7 +37,8 @@ export function useRoomHandler(
   const count = useRef(0);
   count.current = count.current + 1;
   const myNr = count.current;
-  const canJoinRoom = isConnected && (pairingStatus === PairingStatus.Approved || pairingStatus === PairingStatus.Admin);
+  const canJoinRoom =
+    isConnected && (pairingStatus === PairingStatus.Approved || pairingStatus === PairingStatus.Admin);
 
   useEffect(() => {
     if (debug) console.log('REGISTER HANDLERS ❇️❇️❇️❇️❇️', roomName, myNr, 'ADD NEW HANDLERS');

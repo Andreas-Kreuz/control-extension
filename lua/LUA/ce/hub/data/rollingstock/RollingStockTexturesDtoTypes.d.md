@@ -5,7 +5,7 @@
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.rollingstock.RollingStockTexturesDtoFactory`
 
-| Name           | Typ                   |
-| -------------- | --------------------- |
-| `id`           | `string`              |
-| `surfaceTexts` | `table<string,string>`|
+| Name           | Typ                    |
+| -------------- | ---------------------- |
+| `id`           | `string`               |
+| `surfaceTexts` | `table<string,string>` |

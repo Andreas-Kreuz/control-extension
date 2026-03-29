@@ -127,17 +127,17 @@ Elementtyp: Laufzeitmetrik
 
 Elementtyp: Signal
 
-| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                           |
-| ----------------------- | ------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                      |
+| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                          |
+| ----------------------- | ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                     |
 | `position`              | `integer`           | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal       |
 | `tag`                   | `string`            | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist |
-| `waitingVehiclesCount`  | `integer`           | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`                          |
-| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                              |
-| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                    |
-| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                   |
-| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                                |
-| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                       |
+| `waitingVehiclesCount`  | `integer`           | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`                         |
+| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                             |
+| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                   |
+| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                  |
+| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                               |
+| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                      |
 
 Abgeleitet aus:
 
@@ -182,15 +182,15 @@ Abgeleitet aus:
 
 Elementtyp: EEP-Zeit
 
-| Name           | Typ               | Wertebereich    | Beschreibung                                  |
-| -------------- | ----------------- | --------------- | --------------------------------------------- |
-| `id`           | `string`          | fest `times`    | technischer Schlüssel                         |
-| `name`         | `string`          | fest `times`    | Anzeigename                                   |
-| `timeComplete` | `integer`         | `0` bis `86399` | Sekunden seit Mitternacht aus `EEPTime`       |
+| Name           | Typ               | Wertebereich    | Beschreibung                                       |
+| -------------- | ----------------- | --------------- | -------------------------------------------------- |
+| `id`           | `string`          | fest `times`    | technischer Schlüssel                              |
+| `name`         | `string`          | fest `times`    | Anzeigename                                        |
+| `timeComplete` | `integer`         | `0` bis `86399` | Sekunden seit Mitternacht aus `EEPTime`            |
 | `timeLapse`    | `number` \| `nil` | Zeitraffer      | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()` |
-| `timeH`        | `integer`         | `0` bis `23`    | Stundenanteil aus `EEPTimeH`                  |
-| `timeM`        | `integer`         | `0` bis `59`    | Minutenanteil aus `EEPTimeM`                  |
-| `timeS`        | `integer`         | `0` bis `59`    | Sekundenanteil aus `EEPTimeS`                 |
+| `timeH`        | `integer`         | `0` bis `23`    | Stundenanteil aus `EEPTimeH`                       |
+| `timeM`        | `integer`         | `0` bis `59`    | Minutenanteil aus `EEPTimeM`                       |
+| `timeS`        | `integer`         | `0` bis `59`    | Sekundenanteil aus `EEPTimeS`                      |
 
 Abgeleitet aus:
 
@@ -204,18 +204,18 @@ Abgeleitet aus:
 
 Elementtyp: globaler Wetterzustand
 
-| Name              | Typ               | Wertebereich       | Beschreibung                                        |
-| ----------------- | ----------------- | ------------------ | --------------------------------------------------- |
-| `id`              | `string`          | fest `weather`     | technischer Schlüssel                               |
-| `name`            | `string`          | fest `weather`     | Anzeigename                                         |
-| `season`          | `number` \| `nil` | EEP-spezifisch     | Jahreszeit aus `EEPGetSeason()`                     |
-| `cloudsIntensity` | `number` \| `nil` | Prozent / EEP-Wert | globaler Wolkenanteil aus `EEPGetCloudsIntensity()` |
-| `cloudsMode`      | `number` \| `nil` | EEP-spezifisch     | Wolkenmodus aus `EEPGetCloudsMode()`                |
-| `windIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Windstärke aus `EEPGetWindIntensity()`      |
-| `rainIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Regenintensität aus `EEPGetRainIntensity()` |
+| Name              | Typ               | Wertebereich       | Beschreibung                                             |
+| ----------------- | ----------------- | ------------------ | -------------------------------------------------------- |
+| `id`              | `string`          | fest `weather`     | technischer Schlüssel                                    |
+| `name`            | `string`          | fest `weather`     | Anzeigename                                              |
+| `season`          | `number` \| `nil` | EEP-spezifisch     | Jahreszeit aus `EEPGetSeason()`                          |
+| `cloudsIntensity` | `number` \| `nil` | Prozent / EEP-Wert | globaler Wolkenanteil aus `EEPGetCloudsIntensity()`      |
+| `cloudsMode`      | `number` \| `nil` | EEP-spezifisch     | Wolkenmodus aus `EEPGetCloudsMode()`                     |
+| `windIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Windstärke aus `EEPGetWindIntensity()`           |
+| `rainIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Regenintensität aus `EEPGetRainIntensity()`      |
 | `snowIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Schneefallintensität aus `EEPGetSnowIntensity()` |
-| `hailIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Hagelintensität aus `EEPGetHailIntensity()` |
-| `fogIntensity`    | `number` \| `nil` | Prozent / EEP-Wert | globale Nebeldichte aus `EEPGetFogIntensity()`      |
+| `hailIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Hagelintensität aus `EEPGetHailIntensity()`      |
+| `fogIntensity`    | `number` \| `nil` | Prozent / EEP-Wert | globale Nebeldichte aus `EEPGetFogIntensity()`           |
 
 ### `ce.hub.SaveSlot`
 
@@ -346,17 +346,17 @@ Elementtyp: RollingStock / Fahrzeug
 | `smoke`              | `number` \| `nil`     | Statuscode                                | Rauchzustand des Rollmaterials aus `EEPRollingstockGetSmoke()`                                        |
 | `hookStatus`         | `number` \| `nil`     | Statuscode                                | Hakenzustand aus `EEPRollingstockGetHook()`                                                           |
 | `hookGlueMode`       | `number` \| `nil`     | Statuscode                                | Haken-/Ladegutzustand aus `EEPRollingstockGetHookGlue()`                                              |
-| `active`             | `boolean`             | `true`, `false`                           | ob das Rollmaterial aktuell in EEP ausgewählt ist, abgeleitet aus `EEPRollingstockGetActive()`       |
+| `active`             | `boolean`             | `true`, `false`                           | ob das Rollmaterial aktuell in EEP ausgewählt ist, abgeleitet aus `EEPRollingstockGetActive()`        |
 | `nr`                 | `string` \| `nil`     | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
 | `trackId`            | `integer`             | Track-ID                                  | aus `EEPRollingstockGetTrack`                                                                         |
 | `trackDistance`      | `number`              | Meter vom Gleisanfang                     | aus `EEPRollingstockGetTrack`                                                                         |
 | `trackDirection`     | `integer`             | `1` oder `0`                              | laut Lua-Handbuch: `1 = in Fahrtrichtung`, `0 = entgegen`                                             |
-| `trackSystem`        | `integer`             | `1` bis `4`                               | laut Lua-Handbuch: `1 = Bahngleise`, `2 = Straßen`, `3 = Tram`, `4 = sonstige Splines/Wasserwege`   |
+| `trackSystem`        | `integer`             | `1` bis `4`                               | laut Lua-Handbuch: `1 = Bahngleise`, `2 = Straßen`, `3 = Tram`, `4 = sonstige Splines/Wasserwege`     |
 | `trackType`          | `string` \| `nil`     | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
 | `posX`               | `number`              | Anlagenkoordinate                         | X-Position aus `EEPRollingstockGetPosition`                                                           |
 | `posY`               | `number`              | Anlagenkoordinate                         | Y-Position aus `EEPRollingstockGetPosition`                                                           |
 | `posZ`               | `number`              | Anlagenkoordinate                         | Z-Position aus `EEPRollingstockGetPosition`                                                           |
-| `mileage`            | `number`              | Zahl                                      | Zurückgelegte Strecke in Metern seit Einsetzen des Modells aus `EEPRollingstockGetMileage`           |
+| `mileage`            | `number`              | Zahl                                      | Zurückgelegte Strecke in Metern seit Einsetzen des Modells aus `EEPRollingstockGetMileage`            |
 
 Abgeleitet aus:
 
@@ -381,10 +381,10 @@ Hinweis:
 
 Elementtyp: beschreibbare Textflächen eines Rollmaterials
 
-| Name           | Typ                    | Wertebereich                  | Beschreibung                                                                     |
-| -------------- | ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
-| `id`           | `string`               | Fahrzeugname                  | technischer Schlüssel des Rollmaterials                                          |
-| `surfaceTexts` | `table<string,string>` | Surface-ID als String -> Text | alle fortlaufend auslesbaren Textflächen aus `EEPRollingstockGetTextureText()`   |
+| Name           | Typ                    | Wertebereich                  | Beschreibung                                                                   |
+| -------------- | ---------------------- | ----------------------------- | ------------------------------------------------------------------------------ |
+| `id`           | `string`               | Fahrzeugname                  | technischer Schlüssel des Rollmaterials                                        |
+| `surfaceTexts` | `table<string,string>` | Surface-ID als String -> Text | alle fortlaufend auslesbaren Textflächen aus `EEPRollingstockGetTextureText()` |
 
 Hinweis:
 
@@ -396,12 +396,12 @@ Hinweis:
 
 Elementtyp: Rotation eines Rollmaterials
 
-| Name   | Typ      | Wertebereich   | Beschreibung                                                  |
-| ------ | -------- | -------------- | ------------------------------------------------------------- |
-| `id`   | `string` | Fahrzeugname   | technischer Schlüssel des Rollmaterials                       |
-| `rotX` | `number` | Winkel in Grad | Rotation um die X-Achse aus `EEPRollingstockGetRotation()`    |
-| `rotY` | `number` | Winkel in Grad | Rotation um die Y-Achse aus `EEPRollingstockGetRotation()`    |
-| `rotZ` | `number` | Winkel in Grad | Rotation um die Z-Achse aus `EEPRollingstockGetRotation()`    |
+| Name   | Typ      | Wertebereich   | Beschreibung                                               |
+| ------ | -------- | -------------- | ---------------------------------------------------------- |
+| `id`   | `string` | Fahrzeugname   | technischer Schlüssel des Rollmaterials                    |
+| `rotX` | `number` | Winkel in Grad | Rotation um die X-Achse aus `EEPRollingstockGetRotation()` |
+| `rotY` | `number` | Winkel in Grad | Rotation um die Y-Achse aus `EEPRollingstockGetRotation()` |
+| `rotZ` | `number` | Winkel in Grad | Rotation um die Z-Achse aus `EEPRollingstockGetRotation()` |
 
 Hinweis:
 

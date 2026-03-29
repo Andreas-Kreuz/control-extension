@@ -225,11 +225,7 @@ export default class EepDataSelector {
         this.toRuntimeStatisticsTime(runtime, 'CeModule.' + moduleName + '.run', moduleName),
       ),
       controllerUpdateTimes: [
-        this.toRuntimeStatisticsTime(
-          runtime,
-          'MainLoopRunner.runCycle-6-waitForServer',
-          'Wait for server to be ready',
-        ),
+        this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-6-waitForServer', 'Wait for server to be ready'),
         this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-5-commands', 'Command execution'),
         this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-7-serverOutput', 'Server output'),
         this.toRuntimeStatisticsTime(runtime, 'MainLoopRunner.runCycle-8-dataStoreWrite', 'DataStore write'),
