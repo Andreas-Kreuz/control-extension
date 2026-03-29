@@ -26,8 +26,8 @@ Jedes Modul ist unabhängig und kann einzeln aktiviert werden.
 local ControlExtension = require("ce.ControlExtension")
 
 ControlExtension.addModules(
-    require("ce.mods.road.RoadCeModule"),
-    require("ce.mods.transit.TransitCeModule")
+    require("ce.mods.road.CeRoadModule"),
+    require("ce.mods.transit.CeTransitModule")
 )
 
 function EEPMain()

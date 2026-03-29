@@ -390,8 +390,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
   ```lua
   local ControlExtension = require("ce.ControlExtension")
   ControlExtension.addModules(
-      require("ce.hub.mods.CoreCeModule"),
-      require("ce.mods.road.RoadCeModule") -- Registriert das Kreuzungsmodul
+      require("ce.hub.CeHubModule"),
+      require("ce.mods.road.CeRoadModule") -- Registriert das Kreuzungsmodul
   )
 
   function EEPMain()

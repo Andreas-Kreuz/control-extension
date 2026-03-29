@@ -1,4 +1,4 @@
-insulate("HubCeModule", function ()
+insulate("CeHubModule", function ()
     local function clearModule(name)
         package.loaded[name] = nil
     end
@@ -13,7 +13,7 @@ insulate("HubCeModule", function ()
         clearModule("ce.hub.MainLoopRunner")
         clearModule("ce.hub.StatePublisherRegistry")
         clearModule("ce.hub.bridge.HubBridgeConnector")
-        clearModule("ce.hub.mods.HubCeModule")
+        clearModule("ce.hub.CeHubModule")
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.databridge.IoInit")
         clearModule("ce.databridge.ServerExchangeCoordinator")
@@ -26,21 +26,21 @@ insulate("HubCeModule", function ()
         _G.print = originalPrint
     end)
 
-    it("returns HubCeModule from setOptions and applies hub options", function ()
-        local HubCeModule = require("ce.hub.mods.HubCeModule")
+    it("returns CeHubModule from setOptions and applies hub options", function ()
+        local CeHubModule = require("ce.hub.CeHubModule")
         local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
         local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 
         ServerExchangeCoordinator.checkServerStatus = true
 
-        assert.equals(HubCeModule, HubCeModule.setOptions({
+        assert.equals(CeHubModule, CeHubModule.setOptions({
             waitForServer = false,
             collectedCeTypes = {
-                HubCeModule.CeTypes.Train,
+                CeHubModule.CeTypes.Train,
             },
         }))
 
-        HubCeModule.init()
+        CeHubModule.init()
 
         local publisherNames = {}
         for _, statePublisher in ipairs(StatePublisherRegistry.getStatePublishers()) do
@@ -54,14 +54,14 @@ insulate("HubCeModule", function ()
 
     it("works with inline hub configuration during module registration", function ()
         local ControlExtension = require("ce.ControlExtension")
-        local HubCeModule = require("ce.hub.mods.HubCeModule")
+        local CeHubModule = require("ce.hub.CeHubModule")
         local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 
         ControlExtension.addModules(
-            require("ce.mods.road.RoadCeModule"),
-            HubCeModule.setOptions({
+            require("ce.mods.road.CeRoadModule"),
+            CeHubModule.setOptions({
                 collectedCeTypes = {
-                    HubCeModule.CeTypes.Train,
+                    CeHubModule.CeTypes.Train,
                 },
             })
         )

@@ -34,7 +34,7 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
         'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
         1,
       ),
-      'CeModule.ce.hub.mods.HubCeModule.run': makeRuntimeEntry('CeModule.ce.hub.mods.HubCeModule.run', 2),
+      'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
     }) as any,
   );
@@ -44,7 +44,7 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
         'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
         1,
       ),
-      'CeModule.ce.hub.mods.HubCeModule.run': makeRuntimeEntry('CeModule.ce.hub.mods.HubCeModule.run', 2),
+      'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
     }) as any,
   );
@@ -56,7 +56,7 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
           'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
           eventCounter,
         ),
-        'CeModule.ce.hub.mods.HubCeModule.run': makeRuntimeEntry('CeModule.ce.hub.mods.HubCeModule.run', eventCounter),
+        'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', eventCounter),
         'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', eventCounter),
       }) as any,
     );
@@ -79,12 +79,12 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
         'StatePublisher.ce.hub.ModulesStatePublisher.initialize',
         11,
       ),
-      'CeModule.ce.hub.mods.HubCeModule.init': makeRuntimeEntry('CeModule.ce.hub.mods.HubCeModule.init', 12),
+      'CeModule.ce.hub.CeHubModule.init': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.init', 12),
       'StatePublisher.ce.hub.ModulesStatePublisher.syncState': makeRuntimeEntry(
         'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
         13,
       ),
-      'CeModule.ce.hub.mods.HubCeModule.run': makeRuntimeEntry('CeModule.ce.hub.mods.HubCeModule.run', 14),
+      'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 14),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 15),
     }) as any,
   );

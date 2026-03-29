@@ -42,7 +42,7 @@ const publisherCollectors = [
   'ce.mods.transit.data.TransitStatePublisher',
 ] as const;
 
-const ceModules = ['ce.hub.mods.HubCeModule', 'ce.mods.road.RoadCeModule', 'ce.mods.transit.TransitCeModule'] as const;
+const ceModules = ['ce.hub.CeHubModule', 'ce.mods.road.CeRoadModule', 'ce.mods.transit.CeTransitModule'] as const;
 const runtimeStatisticsHistoryLimit = 10;
 
 interface RuntimeStatisticsSample {

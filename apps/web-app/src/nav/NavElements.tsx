@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-const dataCeModuleId = 'e538a124-3f0a-4848-98cf-02b08563bf32'; // "ce.hub.mods.DataCeModule"
-const roadCeModuleId = 'c5a3e6d3-0f9b-4c89-a908-ed8cf8809362'; // "ce.mods.road.RoadCeModule"
-const publicTransportCeModuleId = '83ce6b42-1bda-45e0-8b4a-e8daeed047ab'; // "ce.mods.transit.TransitCeModule"
+const hubCeModuleId = 'b9f34a2e-1c5d-4f8a-9e7b-3d0a6c8f2e41'; // "ce.hub.CeHubModule"
+const roadCeModuleId = 'c5a3e6d3-0f9b-4c89-a908-ed8cf8809362'; // "ce.mods.road.CeRoadModule"
+const transitCeModuleId = '83ce6b42-1bda-45e0-8b4a-e8daeed047ab'; // "ce.mods.transit.CeTransitModule"
 
 function useNavState(): {
   name: string;
@@ -66,7 +66,7 @@ function useNavState(): {
           image: 'card-img-traffic.jpg',
           description: 'Schaue Deine Nahverkehrslinien und -Haltestellen an.',
           linkDescription: 'ÖNPV anzeigen',
-          requiredModuleId: publicTransportCeModuleId,
+          requiredModuleId: transitCeModuleId,
         },
         {
           available: availLuaData,
@@ -77,7 +77,7 @@ function useNavState(): {
           image: 'card-img-trains-all.jpg',
           description: 'Hier findest Du auch Trams, die auf der Straße fahren.',
           linkDescription: 'Fahrzeuge zeigen',
-          requiredModuleId: dataCeModuleId,
+          requiredModuleId: hubCeModuleId,
         },
         // {
         //   available: availLuaData,
@@ -88,7 +88,7 @@ function useNavState(): {
         //   image: 'card-img-trains-road.jpg',
         //   description: 'Hier findest Du auch Trams, die auf der Straße fahren.',
         //   linkDescription: 'Autos zeigen',
-        //   requiredModuleId: dataCeModuleId,
+        //   requiredModuleId: hubCeModuleId,
         // },
         // {
         //   available: availLuaData,
@@ -99,7 +99,7 @@ function useNavState(): {
         //   image: 'card-img-trains-tram.jpg',
         //   description: 'Trams, die auf der Straße fahren, findest Du unter Autos.',
         //   linkDescription: 'Trams zeigen',
-        //   requiredModuleId: dataCeModuleId,
+        //   requiredModuleId: hubCeModuleId,
         // },
         // {
         //   available: availLuaData,
@@ -110,7 +110,7 @@ function useNavState(): {
         //   image: 'card-img-trains-rail.jpg',
         //   description: 'Fahrzeuge, die auf Bahngleisen unterwegs sind.',
         //   linkDescription: 'Züge zeigen',
-        //   requiredModuleId: dataCeModuleId,
+        //   requiredModuleId: hubCeModuleId,
         // },
       ],
     },
@@ -138,7 +138,7 @@ function useNavState(): {
           image: undefined,
           description: 'Mit EEPSaveData gespeicherte Felder',
           linkDescription: 'Zu den Daten',
-          requiredModuleId: dataCeModuleId,
+          requiredModuleId: hubCeModuleId,
         },
         {
           available: availLuaData,
@@ -149,7 +149,7 @@ function useNavState(): {
           image: undefined,
           description: 'Enthält Signale, Ampeln und Schranken',
           linkDescription: 'Zu den Signalen',
-          requiredModuleId: dataCeModuleId,
+          requiredModuleId: hubCeModuleId,
         },
         {
           available: availModules,

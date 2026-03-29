@@ -6,8 +6,8 @@ local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 local Lane = require("ce.mods.road.Lane")
 local Intersection = require("ce.mods.road.Intersection")
-local RoadCeModule = require("ce.mods.road.RoadCeModule")
-RoadCeModule.loadSettingsFromSlot(100)
+local CeRoadModule = require("ce.mods.road.CeRoadModule")
+CeRoadModule.loadSettingsFromSlot(100)
 TrafficLight.zeigeAnforderungen = true
 
 ------------------------------------------------
@@ -207,7 +207,7 @@ end
 -- endregion
 
 local ControlExtension = require("ce.ControlExtension")
-local crossingCeModule = require("ce.mods.road.RoadCeModule")
+local crossingCeModule = require("ce.mods.road.CeRoadModule")
 ControlExtension.addModules(crossingCeModule)
 
 function EEPMain()

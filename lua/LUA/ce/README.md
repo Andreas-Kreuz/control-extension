@@ -51,10 +51,10 @@ ControlExtension
     .activateServer()
     .setPauseEepDuringInitialization(true)
     .addModules(
-        require("ce.mods.road.RoadCeModule"),
-        require("ce.hub.mods.HubCeModule").setOptions({
+        require("ce.mods.road.CeRoadModule"),
+        require("ce.hub.CeHubModule").setOptions({
             collectedCeTypes = {
-                require("ce.hub.mods.HubCeModule").CeTypes.Train,
+                require("ce.hub.CeHubModule").CeTypes.Train,
             },
         })
     )

@@ -23,7 +23,7 @@ Das Paket ist jetzt in drei Bereiche gegliedert:
   [AxisStructureTrafficLight.lua](./AxisStructureTrafficLight.lua),
   [Bus.lua](./Bus.lua),
   [Intersection.lua](./Intersection.lua),
-  [RoadCeModule.lua](./RoadCeModule.lua),
+  [CeRoadModule.lua](./CeRoadModule.lua),
   [IntersectionSequence.lua](./IntersectionSequence.lua),
   [IntersectionSettings.lua](./IntersectionSettings.lua),
   [Lane.lua](./Lane.lua),
@@ -55,7 +55,7 @@ Wichtige Einordnung:
 Das Paket besteht aktuell aus fünf funktionalen Bereichen:
 
 1. Domänenmodell: `TrafficLightState`, `TrafficLightModel`, `TrafficLight`, `Lane`, `IntersectionSequence`, `Intersection`
-2. Modul- und Laufzeitintegration: `RoadCeModule`, `IntersectionSettings`
+2. Modul- und Laufzeitintegration: `CeRoadModule`, `IntersectionSettings`
 3. Datenexport: `RoadDataCollector`, `TrafficLightModelsDataCollector`, `RoadDtoFactory`, `TrafficLightModelDtoFactory`
 4. Web-Anbindung: `RoadStatePublisher`, `TrafficLightModelStatePublisher`, `RoadBridgeConnector`
 5. EEP-Helfer und Wertobjekte: `AxisStructureTrafficLight`, `LightStructureTrafficLight`, `TramSwitch`, `Bus`, `LaneSettings`
@@ -63,8 +63,8 @@ Das Paket besteht aktuell aus fünf funktionalen Bereichen:
 Der reguläre Ablauf sieht fachlich so aus:
 
 1. Anwendercode erzeugt Modelle, Ampeln, Fahrspuren, Schaltungen und Kreuzungen.
-2. `RoadCeModule.init()` registriert State-Publisher und Remote-Funktionen und ruft `Intersection.initSequences()` auf.
-3. `RoadCeModule.run()` ruft zyklisch `Intersection.switchSequences()` auf.
+2. `CeRoadModule.init()` registriert State-Publisher und Remote-Funktionen und ruft `Intersection.initSequences()` auf.
+3. `CeRoadModule.run()` ruft zyklisch `Intersection.switchSequences()` auf.
 4. `Intersection` berechnet je Kreuzung die nächste Schaltung und plant deren Ablauf über `Task` und `Scheduler`.
 5. `TrafficLight` setzt Signalstellungen, Lichtimmobilien, Achsen und Tipptexte in EEP um.
 6. Die Publisher senden Web-Zustände über `DataChangeBus`, die Datenbeschaffung dafür liegt in den Collectors unter `data/`.
@@ -73,7 +73,7 @@ Wichtig: Die Web-Schicht liest den Zustand aus den Fachobjekten aus, steuert abe
 
 ## Bausteine
 
-### [RoadCeModule.lua](./RoadCeModule.lua)
+### [CeRoadModule.lua](./CeRoadModule.lua)
 
 Moduleinstieg für den regulären Betrieb in `EEPMain()`.
 
@@ -83,7 +83,7 @@ Verantwortlichkeiten:
 - Registrierung der State-Publisher und Remote-Funktionen über `RoadBridgeConnector`
 - Aufruf von `Intersection.initSequences()` nach Abschluss der Konfiguration
 - zyklischer Aufruf von `Intersection.switchSequences()`
-- implizites Nachziehen der Scheduler-Abhängigkeit durch Registrierung von `ce.hub.mods.SchedulerCeModule` beim Laden der Datei
+- implizites Nachziehen der Scheduler-Abhängigkeit über das eingebaute Hub-Modul `ce.hub.CeHubModule`
 
 ### [Intersection.lua](./Intersection.lua)
 
@@ -369,9 +369,9 @@ Der reguläre Ablauf für eine automatisch geschaltete Kreuzung ist aktuell:
 2. `Lane:new(...)` registriert den Save-Slot, koppelt die sichtbare Fahrspurampel an die Fahrspur und lädt gespeicherten Zustand.
 3. Zusätzliche Freigabeampeln werden optional über `Lane:driveOn(...)` oder `TrafficLight:applyToLane(...)` verdrahtet.
 4. Sequenzen registrieren ihre Ampeln über `addCarLights(...)`, `addTramLights(...)` und `addPedestrianLights(...)`.
-5. `RoadCeModule.init()` registriert Web-Anbindung und ruft `Intersection.initSequences()` auf.
+5. `CeRoadModule.init()` registriert Web-Anbindung und ruft `Intersection.initSequences()` auf.
 6. `Intersection.initSequences()` leitet aus allen Sequenzen die effektiven Fahrspuren und Ampeln je Kreuzung ab.
-7. `RoadCeModule.run()` ruft zyklisch `Intersection.switchSequences()` auf.
+7. `CeRoadModule.run()` ruft zyklisch `Intersection.switchSequences()` auf.
 8. `Intersection.switchSequences()` prüft pro Kreuzung, ob umgeschaltet werden darf, und ruft intern `switch(crossing)` auf.
 9. `Intersection:calculateNextSequence()` wählt die nächste Schaltung per manueller Vorgabe, strikter Reihenfolge oder Prioritätsvergleich.
 10. `IntersectionSequence:tasksForSwitchingFrom(...)` erzeugt die Taskfolge für Gelb-, Rot-, Rot-Gelb-, Grün- und Fußgängerphasen.
@@ -492,7 +492,7 @@ Wenn `Intersection.initSequences()`, `TrafficLight:applyToLane(...)` oder `Lane:
 `ce/mods/road` arbeitet aktuell eng mit diesen Paketen zusammen:
 
 - `ce.hub`: `ModuleRegistry`, `StatePublisherRegistry` und weitere Hub-Infrastruktur
-- `ce.hub.scheduler`: `Scheduler`, `Task` und `SchedulerCeModule`
+- `ce.hub.scheduler`: `Scheduler`, `Task` und `CeHubModule`
 - `ce.hub.publish`: `DataChangeBus` für Web-Zustandsänderungen
 - `ce.hub.util`: `StorageUtility` für Persistenz
 - `ce.hub.util.Queue`: Warteschlangen der Fahrspuren

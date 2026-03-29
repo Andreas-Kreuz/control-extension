@@ -21,7 +21,7 @@ Du bindest Module über `ControlExtension.addModules(...)` ein — der Hub über
 | Feld      | Typ       | Beschreibung                                                         |
 | --------- | --------- | -------------------------------------------------------------------- |
 | `id`      | `string`  | Eindeutige UUID des Moduls — darf sich nie ändern                    |
-| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.RoadCeModule"`      |
+| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.CeRoadModule"`      |
 | `enabled` | `boolean` | Kann gesetzt werden, um das Modul zu aktivieren oder zu deaktivieren |
 
 ## Pflichtmethoden
@@ -109,7 +109,7 @@ CeTypes und DTO-Strukturen aller eingebauten Module sind in [hub/data/DTO.md](..
 ## Vorlagen
 
 Fertige Vorlagen findest Du in [`ce.template`](../../template/README.md).
-Bestehende Module wie `ce.mods.road.RoadCeModule` können als Referenz dienen — siehe [`ce.mods`](../../mods/README.md).
+Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen — siehe [`ce.mods`](../../mods/README.md).
 
 ## Weiterführende Dokumentation
 

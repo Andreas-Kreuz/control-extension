@@ -38,9 +38,9 @@ local ControlExtension = require("ce.ControlExtension")
 ControlExtension.setDebug(true)
 ControlExtension.setPauseEepDuringInitialization(true)
 ControlExtension.addModules(
-    require("ce.hub.mods.DataCeModule"),
-    require("ce.mods.road.RoadCeModule"),
-    require("ce.mods.transit.TransitCeModule")
+    require("ce.hub.CeHubModule"),
+    require("ce.mods.road.CeRoadModule"),
+    require("ce.mods.transit.CeTransitModule")
 )
 
 function EEPMain()
@@ -72,12 +72,12 @@ Diese alten Modul-Wrapper sind die häufigsten Stellen, an denen deine bestehend
 
 | Alt                                          | Neu                                          | Hinweis                                                    |
 | -------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
-| `require("ak.core.CoreLuaModule")`           | `require("ce.hub.mods.CoreCeModule")`        | Wird über `ce.ControlExtension` bereits intern registriert |
-| `require("ak.data.DataLuaModule")`           | `require("ce.hub.mods.DataCeModule")`        | Für Hub-Datenexport                                        |
-| `require("ak.scheduler.SchedulerLuaModule")` | `require("ce.hub.mods.SchedulerCeModule")`   | Meist nur bei direkter Scheduler-Nutzung nötig             |
-| `require("ak.road.CrossingLuaModule")`       | `require("ce.mods.road.RoadCeModule")`       | Straßenverkehrsmodul                                       |
-| `require("ak.road.CrossingLuaModul")`        | `require("ce.mods.road.RoadCeModule")`       | Alter Tippfehler in einigen Anlagen-Dateien                |
-| `require("ak.transit.TransitLuaModule")`     | `require("ce.mods.transit.TransitCeModule")` | ÖPNV-Modul                                                 |
+| `require("ak.core.CoreLuaModule")`           | `require("ce.hub.CeHubModule")`              | Heutiger Hub-Einstieg                                      |
+| `require("ak.data.DataLuaModule")`           | `require("ce.hub.CeHubModule")`              | Datenexport ist im Hub-Modul enthalten                     |
+| `require("ak.scheduler.SchedulerLuaModule")` | `require("ce.hub.CeHubModule")`              | Scheduler-Lauf ist im Hub-Modul enthalten                  |
+| `require("ak.road.CrossingLuaModule")`       | `require("ce.mods.road.CeRoadModule")`       | Straßenverkehrsmodul                                       |
+| `require("ak.road.CrossingLuaModul")`        | `require("ce.mods.road.CeRoadModule")`       | Alter Tippfehler in einigen Anlagen-Dateien                |
+| `require("ak.transit.TransitLuaModule")`     | `require("ce.mods.transit.CeTransitModule")` | ÖPNV-Modul                                                 |
 
 ## Direkte `require()`-Ersetzungen nach Bereich
 
@@ -132,8 +132,8 @@ Viele bisher flache `ak.*`-Bereiche wurden beim Refactoring fachlich aufgeteilt.
 | `ak.events.*`    | `ce.hub.publish.*`                                      | Event- und Änderungsbus                        |
 | `ak.storage.*`   | `ce.hub.util.*`                                         | Persistenz-Helfer                              |
 | `ak.util.*`      | `ce.hub.util.*`                                         | Tabellen, Queue, Laufzeit-Helfer               |
-| `ak.scheduler.*` | `ce.hub.scheduler.*` und `ce.hub.mods.*`                | Scheduler-Kern und Scheduler-Modul             |
-| `ak.data.*`      | `ce.hub.data.*`, `ce.hub.publish.*` und `ce.hub.mods.*` | Slots, Signale, Strukturen, Zeit, Tracks, Züge |
+| `ak.scheduler.*` | `ce.hub.scheduler.*` und `ce.hub.CeHubModule`           | Scheduler-Kern und Hub-Modul                   |
+| `ak.data.*`      | `ce.hub.data.*`, `ce.hub.publish.*` und `ce.hub.CeHubModule` | Slots, Signale, Strukturen, Zeit, Tracks, Züge |
 | `ak.train.*`     | `ce.hub.data.trains.*` und `ce.hub.data.rollingstock.*` | Zug- und Rollmaterialdaten                     |
 | `ak.road.*`      | `ce.mods.road.*` und `ce.mods.road.data.*`              | Kreuzungen, Ampeln, Road-Daten                 |
 | `ak.transit.*`   | `ce.mods.transit.*` und `ce.mods.transit.data.*`        | Linien, Haltestellen, ÖPNV-Daten               |
@@ -177,8 +177,8 @@ Einige alte Sammelmodule wurden bewusst aufgeteilt:
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `ak.core.ModuleRegistry`      | Öffentlicher Einstieg über `ce.ControlExtension`, Laufzeit über `ce.hub.ControlExtensionHub`, Registry intern in `ce.hub.ModuleRegistry` |
 | `ak.core.CoreWebConnector`    | `ce.hub.bridge.CoreBridgeConnector` und `ce.hub.bridge.DataBridgeConnector`                                                              |
-| `ak.data.DataLuaModule`       | `ce.hub.mods.DataCeModule` mit `ce.hub.bridge.DataBridgeConnector`                                                                       |
-| `ak.road.CrossingLuaModule`   | `ce.mods.road.RoadCeModule` mit `ce.mods.road.bridge.RoadBridgeConnector`                                                                |
-| `ak.transit.TransitLuaModule` | `ce.mods.transit.TransitCeModule` mit `ce.mods.transit.bridge.TransitBridgeConnector`                                                    |
+| `ak.data.DataLuaModule`       | `ce.hub.CeHubModule` mit `ce.hub.bridge.HubBridgeConnector`                                                                              |
+| `ak.road.CrossingLuaModule`   | `ce.mods.road.CeRoadModule` mit `ce.mods.road.bridge.RoadBridgeConnector`                                                                |
+| `ak.transit.TransitLuaModule` | `ce.mods.transit.CeTransitModule` mit `ce.mods.transit.bridge.TransitBridgeConnector`                                                    |
 
 Für deine bestehenden Skripte ist der sichere Weg daher: Verwende nur `ce.ControlExtension` und die neuen `*CeModule` direkt und greife nicht mehr auf alte interne `ak.*`-Pfade zurück.

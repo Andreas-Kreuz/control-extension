@@ -220,8 +220,7 @@ Die Zielstruktur soll in kompakter Form so aussehen:
 lua/LUA/ce/
   ControlExtension.lua
   hub/
-    CoreCeModule.lua
-    DataCeModule.lua
+    CeHubModule.lua
     MainLoopRunner.lua
     ModuleRegistry.lua
     StatePublisherRegistry.lua
@@ -260,8 +259,8 @@ Diese Darstellung ist bewusst kompakt gehalten. Sie soll die Verantwortlichkeite
 Stabil gehalten werden sollen nur wenige öffentliche Einstiegspunkte:
 
 - `ce.ControlExtension`
-- `ce.modules.road.RoadCeModule`
-- `ce.modules.transit.TransitCeModule`
+- `ce.modules.road.CeRoadModule`
+- `ce.modules.transit.CeTransitModule`
 - perspektivisch weitere Einstiegspunkte unter `ce.modules.rail.*`
 
 Interne Pfade unter `ce.hub.*` und `ce.bridge.*` sind Infrastruktur und sollen nicht als stabile öffentliche API behandelt werden.

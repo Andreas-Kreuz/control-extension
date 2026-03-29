@@ -21,7 +21,7 @@
 ---@field get fun(ceType: string, key: string|number):DataStoreElement|nil
 ---@field fireEvent fun(event: DataChangeEvent):nil
 
----@class DataCeModule
+---@class CeModule
 ---@field id string
 ---@field enabled boolean
 ---@field name string

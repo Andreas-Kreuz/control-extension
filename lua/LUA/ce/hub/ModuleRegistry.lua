@@ -14,7 +14,7 @@ local function updateModuleOrder()
     -- keep the hub bootstrap order stable across namespace changes
     table.sort(executionOrderModuleNames, function (n1, n2)
         local priority = {
-            ["ce.hub.mods.HubCeModule"] = 1,
+            ["ce.hub.CeHubModule"] = 1,
         }
         local p1 = priority[n1] or 10
         local p2 = priority[n2] or 10
@@ -72,6 +72,6 @@ function ModuleRegistry.unregisterModules(...)
 end
 
 -- Register the hub module (bootstraps scheduler, core publishers, and data publishers)
-ModuleRegistry.registerModules(require("ce.hub.mods.HubCeModule"))
+ModuleRegistry.registerModules(require("ce.hub.CeHubModule"))
 
 return ModuleRegistry

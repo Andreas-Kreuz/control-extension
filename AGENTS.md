@@ -22,6 +22,11 @@
 
 **Grundregel:** `.lua`-Dateien = `latin1` / `ISO-8859-1`, alle anderen Dateien = `UTF-8`.
 
+Zusätzliche latin1-Ausnahmen:
+
+- Dateien unter `lua/LUA/ce/databridge/exchange/` werden von Lua gelesen und geschrieben und sind deshalb als `latin1` zu behandeln.
+- Fixtures unter `apps/web-app/cypress/fixtures/*/*.json` stammen aus von Lua geschriebenen `latin1`-Dateien und müssen deshalb ebenfalls als `latin1` behandelt werden.
+
 ### Edit- und Write-Tool: NIEMALS für `.lua`-Dateien mit Umlauten verwenden
 
 Die Edit- und Write-Tools schreiben Dateien als UTF-8 zurück. Das korrumpiert alle latin1-Bytes in der gesamten Datei — auch in Zeilen, die gar nicht geändert wurden. Aus `ü` (0xFC) wird das UTF-8-Ersatzzeichen U+FFFD (0xEF 0xBF 0xBD), das nicht mehr reparierbar ist.
@@ -43,10 +48,12 @@ with open('datei.lua', 'wb') as f:
 ### Shell-Kommandos mit latin1
 
 - Bei Shell-Kommandos zum Lesen oder Schreiben von `.lua`-Dateien immer die Kodierung explizit auf `latin1` setzen.
+- Dasselbe gilt für Dateien unter `lua/LUA/ce/databridge/exchange/` sowie für `apps/web-app/cypress/fixtures/*/*.json`.
+- In Windows PowerShell (Version 5.1 und früher) ist die Standardkodierung für Skripte und Ausgaben typischerweise `Windows-1252`, eine Erweiterung von `ISO-8859-1` (`Latin-1`).
 - `Windows PowerShell 5.1` unterstützt bei `Get-Content`/`Set-Content` weder `-Encoding ISO88591` noch `-Encoding Latin1`:
   - lesen: `[System.IO.File]::ReadAllText($path, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
   - schreiben: `[System.IO.File]::WriteAllText($path, $content, [System.Text.Encoding]::GetEncoding('iso-8859-1'))`
-- `PowerShell 7` unterstützt `-Encoding Latin1`; für Kompatibilität die PS-5.1-Variante bevorzugen.
+- Im Repo liegt dafür `scripts/latin1_tool.ps1` mit den Aktionen `read`, `write`, `replace` und `check`.
 - Andere Dateien: `Get-Content -Encoding UTF8` / `Set-Content -Encoding UTF8`
 
 ## Lua-Hinweise

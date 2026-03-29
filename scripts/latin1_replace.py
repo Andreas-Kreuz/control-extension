@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 
@@ -24,10 +25,14 @@ def resolve_repo_file(path_arg: str) -> tuple[Path, Path]:
     relative_posix = relative.as_posix()
     relative_posix_lower = relative_posix.lower()
     is_lua_file = candidate.suffix.lower() == ".lua"
-    is_exchange_file = relative_posix_lower.startswith("lua/lua/ak/io/exchange/")
-    if not (is_lua_file or is_exchange_file):
+    is_exchange_file = relative_posix_lower.startswith("lua/lua/ce/databridge/exchange/")
+    is_map_fixture = bool(
+        re.match(r"^apps/web-app/cypress/fixtures/[^/]+/[^/]+\.json$", relative_posix_lower)
+    )
+    if not (is_lua_file or is_exchange_file or is_map_fixture):
         raise SystemExit(
-            "Only *.lua files and files below lua/LUA/ak/io/exchange are allowed: "
+            "Only *.lua files, files below lua/LUA/ce/databridge/exchange, and "
+            "files below apps/web-app/cypress/fixtures/*/*.json are allowed: "
             f"{relative_posix}"
         )
 

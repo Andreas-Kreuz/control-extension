@@ -21,7 +21,7 @@ sequenceB:addCarLights(K2, K3)
 -- Modulverwaltung der Lua-Bibliothek laden
 local ControlExtension = require("ce.ControlExtension")
 ControlExtension.addModules(
-    require("ce.mods.road.RoadCeModule")
+    require("ce.mods.road.CeRoadModule")
 )
 
 function EEPMain()

@@ -30,7 +30,7 @@ function ServerEventDispatcher.fireEvent(event)
     local payload = event.payload or {}
     local ceType = payload.ceType
     local ceTypeDef = CeTypeRegistry.getCeTypeDefinition(ceType)
-    if not ceTypeDef or ceTypeDef.owner ~= "ce.hub.mods.HubCeModule" then
+    if not ceTypeDef or ceTypeDef.owner ~= "ce.hub.CeHubModule" then
         ServerEventBuffer.fireEvent(event)
         return
     end

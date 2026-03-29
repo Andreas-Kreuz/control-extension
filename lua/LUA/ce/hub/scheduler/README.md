@@ -43,7 +43,7 @@ Nimmt Aktionen für die Planung entgegen und führt diese nach Ablauf einer best
 - Funktion `Scheduler:runTasks()`
   Diese Funktion muss regelmäßig aufgerufen werden. Sie prüft die vergangene Zeit und führt alle eingeplanten Aktionen aus, deren Zeitspanne zum aktuellen Zeitpunkt erreicht oder vergangen ist.
 
-  Im Normalfall muss diese Funktion nicht manuell aufgerufen werden. Stattdessen wird dies erledigt durch das einmalige Registrieren des Moduls `SchedulerCeModule`.
+  Im Normalfall muss diese Funktion nicht manuell aufgerufen werden. Stattdessen wird dies durch das eingebaute Hub-Modul `CeHubModule` erledigt.
 
 # Wichtig
 
@@ -51,7 +51,7 @@ Damit der Planer funktioniert musst Du ihn registrieren und den runTasks()-Aufru
 
 ```lua
 local ControlExtension = require("ce.ControlExtension")
-ControlExtension.addModules(require("ce.hub.mods.SchedulerCeModule"))
+ControlExtension.addModules(require("ce.hub.CeHubModule"))
 
 function EEPMain()
     ControlExtension.runTasks()

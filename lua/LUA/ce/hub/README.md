@@ -51,9 +51,9 @@ Registriert die CeModule, die später ausgeführt werden sollen.
 
 Beispiele für zulässige Module:
 
-- `require("ce.mods.road.RoadCeModule")`
-- `require("ce.mods.transit.TransitCeModule")`
-- `require("ce.hub.mods.HubCeModule").setOptions({ ... })`
+- `require("ce.mods.road.CeRoadModule")`
+- `require("ce.mods.transit.CeTransitModule")`
+- `require("ce.hub.CeHubModule").setOptions({ ... })`
 
 Das Hub-Modul ist bereits eingebaut. Du musst es nur dann explizit an `addModules(...)` übergeben, wenn du seine Optionen direkt im Initialisierungscode setzen möchtest.
 
@@ -112,10 +112,10 @@ ControlExtension
     .activateServer()
     .setPauseEepDuringInitialization(true)
     .addModules(
-        require("ce.mods.road.RoadCeModule"),
-        require("ce.hub.mods.HubCeModule").setOptions({
+        require("ce.mods.road.CeRoadModule"),
+        require("ce.hub.CeHubModule").setOptions({
             collectedCeTypes = {
-                require("ce.hub.mods.HubCeModule").CeTypes.Train,
+                require("ce.hub.CeHubModule").CeTypes.Train,
             },
         })
     )

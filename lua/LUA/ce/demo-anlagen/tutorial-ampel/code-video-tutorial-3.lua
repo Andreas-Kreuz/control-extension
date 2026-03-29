@@ -150,7 +150,7 @@ k1:setSwitchInStrictOrder(true)
 
 local ControlExtension = require("ce.ControlExtension")
 ControlExtension.addModules(
-    require("ce.mods.road.RoadCeModule")
+    require("ce.mods.road.CeRoadModule")
 )
 
 function EEPMain()

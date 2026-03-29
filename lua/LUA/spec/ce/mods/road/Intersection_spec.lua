@@ -363,7 +363,7 @@ insulate("Check traffic light sequence", function ()
     Scheduler.debug = false
     Intersection.debug = false
     IntersectionSequence.debug = false
-    local crossingCeModule = require("ce.mods.road.RoadCeModule")
+    local crossingCeModule = require("ce.mods.road.CeRoadModule")
     ControlExtension.addModules(crossingCeModule)
 
     local U_R = 2

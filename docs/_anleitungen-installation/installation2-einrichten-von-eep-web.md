@@ -27,8 +27,8 @@ date: 2017-09-08
    ```lua
    local ControlExtension = require("ce.ControlExtension")
    ControlExtension.addModules(
-       require("ce.hub.mods.CoreCeModule"),
-       require("ce.mods.road.RoadCeModule")
+       require("ce.hub.CeHubModule"),
+       require("ce.mods.road.CeRoadModule")
    )
 
    function EEPMain()

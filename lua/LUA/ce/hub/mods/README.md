@@ -9,7 +9,8 @@ img: '/docs/assets/headers/SourceCode.png'
 
 # Was ist `ce.hub.mods`?
 
-Dieses Paket enthält die Schnittstellendefinition `CeModule.d.lua` und die eingebauten Hub-Module in `HubCeModule.lua`, die direkt über `ControlExtension.addModules(...)` eingebunden werden können.
+Dieses Paket enthält die Schnittstellendefinition `CeModule.d.lua`.
+Das eingebaute Hub-Modul liegt jetzt als `ce.hub.CeHubModule` eine Ebene höher und kann direkt über `ControlExtension.addModules(...)` eingebunden werden.
 
 ## Verwendung
 
@@ -19,7 +20,7 @@ Die Hub-Module werden über `ControlExtension.addModules(...)` eingebunden:
 local ControlExtension = require("ce.ControlExtension")
 
 ControlExtension.addModules(
-    require("ce.hub.mods.HubCeModule")
+    require("ce.hub.CeHubModule")
 )
 
 function EEPMain()

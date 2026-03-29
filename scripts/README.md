@@ -91,6 +91,21 @@ Das Skript `.\scripts\start-developing.cmd` startet die E2E-Testumgebung für di
 Dabei werden der Test-Server, eine Preview der Web-App und Cypress gestartet.
 Die Preview der Web-App ist typischerweise unter <http://localhost:4173/> erreichbar.
 
+### Latin1-Helfer für Lua-Dateien
+
+Für bestehende `.lua`-Dateien im Repository liegt mit `.\scripts\latin1_tool.ps1` ein Helfer für sicheres Lesen und Schreiben im Format `ISO-8859-1` bereit.
+Wegen lokaler Execution Policies ist der robuste Aufruf über `powershell.exe -NoProfile -ExecutionPolicy Bypass -File ...` oft die sicherste Variante.
+Der Helfer gilt außerdem für Dateien unter `lua/LUA/ce/databridge/exchange/` sowie für `apps/web-app/cypress/fixtures/*/*.json`.
+
+Beispiele:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\latin1_tool.ps1 -Action read -Path lua/LUA/ce/MyModule.lua
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\latin1_tool.ps1 -Action write -Path lua/LUA/spec/SandboxLatin1Roundtrip.lua -Text "-- Test: äöü`r`nreturn {}"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\latin1_tool.ps1 -Action replace -Path lua/LUA/ce/MyModule.lua -From "alter Text" -To "neuer Text"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\latin1_tool.ps1 -Action check -Path lua/LUA/ce/MyModule.lua
+```
+
 #### Von Hand testen
 
 Wenn Du vor dem Upload selbst testen willst, kannst Du

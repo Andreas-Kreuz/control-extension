@@ -67,19 +67,19 @@ insulate("Line Management 4 Line segments", function ()
     local ControlExtension = require("ce.ControlExtension")
 
     -- Intersections
-    local RoadCeModule = require("ce.mods.road.RoadCeModule")
+    local CeRoadModule = require("ce.mods.road.CeRoadModule")
 
     -- Public Transport
-    local TransitCeModule = require("ce.mods.transit.TransitCeModule")
+    local CeTransitModule = require("ce.mods.transit.CeTransitModule")
     local Line = require("ce.mods.transit.Line")
     local RoadStation = require("ce.mods.transit.RoadStation")
     local RSDM = require("ce.mods.transit.models.RoadStationDisplayModel")
 
     ---------------------------------------------------------------------------------------------------------------
     -- Register the required modules
-    ControlExtension.addModules(RoadCeModule, TransitCeModule)
-    RoadCeModule.loadSettingsFromSlot(1)
-    TransitCeModule.loadSettingsFromSlot(2)
+    ControlExtension.addModules(CeRoadModule, CeTransitModule)
+    CeRoadModule.loadSettingsFromSlot(1)
+    CeTransitModule.loadSettingsFromSlot(2)
     ---------------------------------------------------------------------------------------------------------------
     -- Die folgende Methode wird von EEP mind. alle 200 ms ausgeführt
     function EEPMain()

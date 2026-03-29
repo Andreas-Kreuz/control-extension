@@ -20,7 +20,7 @@ Ein `CeModule` ist ein Lua-Modul (eine Tabelle), das eine festgelegte Schnittste
 | Feld      | Typ       | Beschreibung                                                        |
 | --------- | --------- | ------------------------------------------------------------------- |
 | `id`      | `string`  | Eindeutige UUID des Moduls — darf sich nie ändern                   |
-| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.RoadCeModule"`     |
+| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.CeRoadModule"`     |
 | `enabled` | `boolean` | Kann gesetzt werden um das Modul zu aktivieren oder zu deaktivieren |
 
 ## Pflichtmethoden
@@ -96,7 +96,7 @@ ControlExtension.addModules(require("ce.mods.mymod.MyCeModule").setOptions({ deb
 ## Vorlagen
 
 Fertige Vorlagen findest Du in [`ce.template`](template/README.md).
-Bestehende Module wie `ce.mods.road.RoadCeModule` können als Referenz dienen — siehe [`ce.mods`](mods/README.md).
+Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen — siehe [`ce.mods`](mods/README.md).
 
 ## Weiterführende Dokumentation
 
