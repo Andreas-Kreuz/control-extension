@@ -35,7 +35,15 @@ insulate("RuntimeStatePublisher", function ()
         assert.equals(0, #published)
 
         RuntimeDataCollector.setLastCycleRuntimeEntries(
-        { sample = { ceType = "ce.hub.Runtime", id = "sample", count = 2, time = 4, lastTime = 1 } }, true)
+            {
+                sample = {
+                    ceType = "ce.hub.Runtime",
+                    id = "sample",
+                    count = 2,
+                    time = 4,
+                    lastTime = 1
+                }
+            }, true)
 
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)

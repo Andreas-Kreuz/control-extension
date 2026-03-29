@@ -10,9 +10,9 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
 
     it("provides metadata for train and rolling stock DTOs", function ()
         local TrainDtoFactory = require("ce.hub.data.trains.TrainDtoFactory")
-        local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
-        local RollingStockTexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
-        local RollingStockRotationDtoFactory = require("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
+        local StockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        local TexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
+        local RotationDtoFactory = require("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
 
         local occupiedTracks = { [11] = 11 }
         local train = {
@@ -65,15 +65,15 @@ insulate("ce.hub.data.trains.TrainDtoFactories", function ()
             getY = function () return 2 end,
             getZ = function () return 3 end,
             getMileage = function () return 4 end,
-            toJsonStatic = function () error("createRollingStockDto should not use toJsonStatic") end
+            toJsonStatic = function () error("createDto should not use toJsonStatic") end
         }
 
         local trainRoom, trainKeyId, trainKey, trainDto = TrainDtoFactory.createTrainDto(train)
-        local rsRoom, rsKeyId, rsKey, rsDto = RollingStockDtoFactory.createRollingStockDto(rollingStock)
+        local rsRoom, rsKeyId, rsKey, rsDto = StockDtoFactory.createDto(rollingStock)
         local rsTexturesRoom, rsTexturesKeyId, rsTexturesKey, rsTexturesDto =
-            RollingStockTexturesDtoFactory.createRollingStockTexturesDto(rollingStock)
+            TexturesDtoFactory.createDto(rollingStock)
         local rsRotationRoom, rsRotationKeyId, rsRotationKey, rsRotationDto =
-            RollingStockRotationDtoFactory.createRollingStockRotationDto(rollingStock)
+            RotationDtoFactory.createDto(rollingStock)
 
         occupiedTracks[12] = 12
 

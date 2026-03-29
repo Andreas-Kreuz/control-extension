@@ -9,7 +9,13 @@ insulate("ce.hub.data.tracks.TrackDtoFactory", function ()
         local TrackDtoFactory = require("ce.hub.data.tracks.TrackDtoFactory")
 
         local room, keyId, key, trackDto =
-            TrackDtoFactory.createTrackDto("rail", { id = 5, name = "ignored", reserved = true, reservedByTrainName = "T1" })
+            TrackDtoFactory.createTrackDto("rail",
+                                           {
+                                               id = 5,
+                                               name = "ignored",
+                                               reserved = true,
+                                               reservedByTrainName = "T1"
+                                           })
         local listRoom, listKeyId, trackDtos =
             TrackDtoFactory.createTrackDtoList("rail", {
                 ["5"] = { id = 5, name = "ignored", reserved = true, reservedByTrainName = "T1" }

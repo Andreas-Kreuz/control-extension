@@ -22,7 +22,11 @@ insulate("ce.hub.DtoFactories", function ()
         assert.same({ ceType = "ce.hub.Module", id = "m-1", name = "mod.name", enabled = true }, moduleDto)
 
         local versionRoom, versionKeyId, versionDtos =
-            VersionDtoFactory.createVersionDtoList("18.1", "Lua 5.3", "1.2.3")
+            VersionDtoFactory.createVersionDtoList({
+                eepVersion = "18.1",
+                luaVersion = "Lua 5.3",
+                singleVersion = "1.2.3"
+            })
         assert.equals("ce.hub.EepVersion", versionRoom)
         assert.equals("id", versionKeyId)
         assert.same({

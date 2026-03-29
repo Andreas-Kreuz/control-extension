@@ -19,14 +19,14 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
     it("collects texture texts sequentially and keeps empty valid surfaces", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-        local RollingStockTexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
+        local TexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
 
         EepSimulator.simulateAddTrain("T1", "RS1")
         EEPRollingstockSetTextureText("RS1", 1, "Line A")
         EEPRollingstockSetTextureText("RS1", 2, "")
 
         local rollingStock = RollingStockRegistry.forName("RS1")
-        local _, _, _, dto = RollingStockTexturesDtoFactory.createRollingStockTexturesDto(rollingStock)
+        local _, _, _, dto = TexturesDtoFactory.createDto(rollingStock)
 
         assert.same({
                         ceType = "ce.hub.RollingStockTextures",

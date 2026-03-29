@@ -77,37 +77,37 @@ local function createDtoList(ceType, keyId, values, createSingleDto)
     return ceType, keyId, dtos
 end
 
-function TransitDtoFactory.createTransitStationDto(station)
+function TransitDtoFactory.createStationDto(station)
     return createDto(TransitCeTypes.Station, "id", station, toTransitStationDto)
 end
 
-function TransitDtoFactory.createTransitStationDtoList(stations)
-    return createDtoList(TransitCeTypes.Station, "id", stations, TransitDtoFactory.createTransitStationDto)
+function TransitDtoFactory.createStationDtoList(stations)
+    return createDtoList(TransitCeTypes.Station, "id", stations, TransitDtoFactory.createStationDto)
 end
 
-function TransitDtoFactory.createTransitLineDto(line)
+function TransitDtoFactory.createLineDto(line)
     return createDto(TransitCeTypes.Line, "id", line, toTransitLineDto)
 end
 
-function TransitDtoFactory.createTransitLineDtoList(lines)
-    return createDtoList(TransitCeTypes.Line, "id", lines, TransitDtoFactory.createTransitLineDto)
+function TransitDtoFactory.createLineDtoList(lines)
+    return createDtoList(TransitCeTypes.Line, "id", lines, TransitDtoFactory.createLineDto)
 end
 
-function TransitDtoFactory.createTransitModuleSettingDto(setting)
+function TransitDtoFactory.createModuleSettingDto(setting)
     return createDto(TransitCeTypes.ModuleSetting, "name", setting, toTransitModuleSettingDto)
 end
 
-function TransitDtoFactory.createTransitModuleSettingDtoList(settings)
+function TransitDtoFactory.createModuleSettingDtoList(settings)
     return createDtoList(TransitCeTypes.ModuleSetting, "name", settings,
-        TransitDtoFactory.createTransitModuleSettingDto)
+                         TransitDtoFactory.createModuleSettingDto)
 end
 
-function TransitDtoFactory.createTransitLineNameDto(line)
+function TransitDtoFactory.createLineNameDto(line)
     return createDto(TransitCeTypes.LineName, "id", line, toTransitLineDto)
 end
 
-function TransitDtoFactory.createTransitLineNameDtoList(lines)
-    return createDtoList(TransitCeTypes.LineName, "id", lines, TransitDtoFactory.createTransitLineNameDto)
+function TransitDtoFactory.createLineNameDtoList(lines)
+    return createDtoList(TransitCeTypes.LineName, "id", lines, TransitDtoFactory.createLineNameDto)
 end
 
 return TransitDtoFactory

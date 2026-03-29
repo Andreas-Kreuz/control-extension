@@ -22,17 +22,17 @@ function RoadStatePublisher.syncState()
     local crossingData = RoadDataCollector.collectCrossings(Intersection.allIntersections)
     local moduleSettings = RoadDataCollector.collectModuleSettings()
 
-    DataChangeBus.fireListChange(RoadDtoFactory.createRoadIntersectionDtoList(crossingData.intersections))
+    DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionDtoList(crossingData.intersections))
     DataChangeBus.fireListChange(
-        RoadDtoFactory.createRoadIntersectionLaneDtoList(crossingData.intersectionLanes)
+        RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes)
     )
     DataChangeBus.fireListChange(
-        RoadDtoFactory.createRoadIntersectionSwitchingDtoList(crossingData.intersectionSwitchings)
+        RoadDtoFactory.createIntersectionSwitchingDtoList(crossingData.intersectionSwitchings)
     )
     DataChangeBus.fireListChange(
-        RoadDtoFactory.createRoadIntersectionTrafficLightDtoList(crossingData.intersectionTrafficLights)
+        RoadDtoFactory.createIntersectionTrafficLightDtoList(crossingData.intersectionTrafficLights)
     )
-    DataChangeBus.fireListChange(RoadDtoFactory.createRoadIntersectionModuleSettingDtoList(moduleSettings))
+    DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionModuleSettingDtoList(moduleSettings))
 
     return {}
 end

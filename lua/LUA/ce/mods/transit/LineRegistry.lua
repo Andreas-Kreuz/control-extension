@@ -41,7 +41,7 @@ function LineRegistry.fireChangeLinesEvent()
             line.valuesUpdated = false
         end
     end
-    DataChangeBus.fireListChange(TransitDtoFactory.createTransitLineNameDtoList(modifiedLines))
+    DataChangeBus.fireListChange(TransitDtoFactory.createLineNameDtoList(modifiedLines))
 end
 
 return LineRegistry

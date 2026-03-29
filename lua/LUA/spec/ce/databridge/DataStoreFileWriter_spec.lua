@@ -46,7 +46,7 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
         ExchangeDirRegistry.setExchangeDirectory("exchange-dir")
 
         DataStore.ceTypes = {
-                        ["ce.hub.Signal"] = {
+            ["ce.hub.Signal"] = {
                 ["signal-1"] = {
                     ceType = "ce.hub.Signal",
                     id = "signal-1",
@@ -56,13 +56,13 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
                     nested = { section = "A", enabled = true }
                 }
             },
-                        ["ce.hub.Module"] = {
-                            ["module-1"] = {
-                                ceType = "ce.hub.Module",
-                                id = "module-1",
-                                name = "Module A"
-                            }
-                        }
+            ["ce.hub.Module"] = {
+                ["module-1"] = {
+                    ceType = "ce.hub.Module",
+                    id = "module-1",
+                    name = "Module A"
+                }
+            }
         }
 
         local returnedContent = DataStoreFileWriter.write()

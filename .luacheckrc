@@ -142,6 +142,7 @@ files["lua/LUA/spec/ce/databridge/FunctionNameWriter_spec.lua"].ignore = {"122"}
 files["lua/LUA/spec/ce/databridge/IncomingCommandFileReader_spec.lua"].ignore = {"122"}
 files["lua/LUA/spec/ce/databridge/LogOutputFileWriter_spec.lua"].ignore = {"111", "113", "121", "122"}
 files["lua/LUA/spec/ce/databridge/ServerExchangeFileIo_spec.lua"].ignore = {"122"}
+files["lua/LUA/spec/ce/hub/data/tracks/TrackDetection_spec.lua"].ignore = {"212"}
 
 exclude_files = {
     ".vscode",

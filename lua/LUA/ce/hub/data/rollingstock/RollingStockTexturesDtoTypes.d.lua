@@ -4,7 +4,7 @@
 ---@field id string
 ---@field surfaceTexts table<string, string>
 
----@class RollingStockTexturesDtoFactory
----@field createRollingStockTexturesDto fun(rollingStock: RollingStock|table):string,string,string|number,RollingStockTexturesDto
----@field createRollingStockTexturesDtoList fun(rollingStocks: table):string,string,table
----@field createRollingStockTexturesReferenceDto fun(rollingStockId: string):string,string,string|number,RollingStockTexturesDto
+---@class TexturesDtoFactory
+---@field createDto fun(stock: RollingStock|table):string,string,string|number,RollingStockTexturesDto
+---@field createDtoList fun(stocks: table):string,string,table
+---@field createRefDto fun(stockId: string):string,string,string|number,RollingStockTexturesDto

@@ -77,14 +77,14 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             eepFunction = "IntersectionSettings.setShowRequestsOnSignal",
             hidden = true
         }
-        local ceType, keyId, key, intersectionDto = RoadDtoFactory.createRoadIntersectionDto(intersection)
-        local laneCeType, laneKeyId, laneKey, laneDto = RoadDtoFactory.createRoadIntersectionLaneDto(lane)
+        local ceType, keyId, key, intersectionDto = RoadDtoFactory.createIntersectionDto(intersection)
+        local laneCeType, laneKeyId, laneKey, laneDto = RoadDtoFactory.createIntersectionLaneDto(lane)
         local switchingCeType, switchingKeyId, switchingKey, switchingDto =
-            RoadDtoFactory.createRoadIntersectionSwitchingDto(switching)
+            RoadDtoFactory.createIntersectionSwitchingDto(switching)
         local tlCeType, tlKeyId, tlKey, trafficLightDto =
-            RoadDtoFactory.createRoadIntersectionTrafficLightDto(trafficLight)
+            RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight)
         local moduleCeType, moduleKeyId, moduleKey, moduleDto =
-            RoadDtoFactory.createRoadIntersectionModuleSettingDto(moduleSetting)
+            RoadDtoFactory.createIntersectionModuleSettingDto(moduleSetting)
         local defsCeType, defsKeyId, defs =
             TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList({
                 {

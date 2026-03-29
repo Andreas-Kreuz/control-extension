@@ -2,60 +2,60 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local RollingStockDtoFactory = {}
+local StockDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.RollingStock
 local KEY_ID = "id"
 
-local function toRollingStockDto(rollingStock)
+local function toDto(stock)
     return {
         ceType = CE_TYPE,
-        id = rollingStock.rollingStockName,
-        name = rollingStock.rollingStockName,
-        trainName = rollingStock:getTrainName(),
-        positionInTrain = rollingStock:getPositionInTrain(),
-        couplingFront = rollingStock:getCouplingFront(),
-        couplingRear = rollingStock:getCouplingRear(),
-        length = rollingStock:getLength(),
-        propelled = rollingStock:getPropelled(),
-        modelType = rollingStock:getModelType(),
-        modelTypeText = rollingStock:getModelTypeText(),
-        tag = rollingStock:getTag(),
-        orientationForward = rollingStock:getOrientationForward(),
-        smoke = rollingStock:getSmoke(),
-        hookStatus = rollingStock:getHookStatus(),
-        hookGlueMode = rollingStock:getHookGlueMode(),
-        active = rollingStock:getActive(),
-        nr = rollingStock:getWagonNr(),
-        trackId = rollingStock:getTrackId(),
-        trackDistance = rollingStock:getTrackDistance(),
-        trackDirection = rollingStock:getTrackDirection(),
-        trackSystem = rollingStock:getTrackSystem(),
-        trackType = rollingStock:getTrackType(),
-        posX = rollingStock:getX(),
-        posY = rollingStock:getY(),
-        posZ = rollingStock:getZ(),
-        mileage = rollingStock:getMileage()
+        id = stock.rollingStockName,
+        name = stock.rollingStockName,
+        trainName = stock:getTrainName(),
+        positionInTrain = stock:getPositionInTrain(),
+        couplingFront = stock:getCouplingFront(),
+        couplingRear = stock:getCouplingRear(),
+        length = stock:getLength(),
+        propelled = stock:getPropelled(),
+        modelType = stock:getModelType(),
+        modelTypeText = stock:getModelTypeText(),
+        tag = stock:getTag(),
+        orientationForward = stock:getOrientationForward(),
+        smoke = stock:getSmoke(),
+        hookStatus = stock:getHookStatus(),
+        hookGlueMode = stock:getHookGlueMode(),
+        active = stock:getActive(),
+        nr = stock:getWagonNr(),
+        trackId = stock:getTrackId(),
+        trackDistance = stock:getTrackDistance(),
+        trackDirection = stock:getTrackDirection(),
+        trackSystem = stock:getTrackSystem(),
+        trackType = stock:getTrackType(),
+        posX = stock:getX(),
+        posY = stock:getY(),
+        posZ = stock:getZ(),
+        mileage = stock:getMileage()
     }
 end
 
-function RollingStockDtoFactory.createRollingStockDto(rollingStock)
-    local dto = toRollingStockDto(rollingStock)
+function StockDtoFactory.createDto(stock)
+    local dto = toDto(stock)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function RollingStockDtoFactory.createRollingStockDtoList(rollingStocks)
-    local rollingStockDtos = {}
-    for rollingStockId, rollingStock in pairs(rollingStocks) do
-        local _, _, _, dto = RollingStockDtoFactory.createRollingStockDto(rollingStock)
-        rollingStockDtos[rollingStockId] = dto
+function StockDtoFactory.createDtoList(stocks)
+    local dtos = {}
+    for stockId, stock in pairs(stocks) do
+        local _, _, _, dto = StockDtoFactory.createDto(stock)
+        dtos[stockId] = dto
     end
-    return CE_TYPE, KEY_ID, rollingStockDtos
+    return CE_TYPE, KEY_ID, dtos
 end
 
-function RollingStockDtoFactory.createRollingStockReferenceDto(rollingStockId)
-    local dto = { ceType = CE_TYPE, id = rollingStockId }
-    return CE_TYPE, KEY_ID, rollingStockId, dto
+function StockDtoFactory.createRefDto(stockId)
+    local dto = { ceType = CE_TYPE, id = stockId }
+    return CE_TYPE, KEY_ID, stockId, dto
 end
 
-return RollingStockDtoFactory
+return StockDtoFactory

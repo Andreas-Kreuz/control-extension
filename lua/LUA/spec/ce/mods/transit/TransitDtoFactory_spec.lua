@@ -30,11 +30,11 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
                 }
             }
         }
-        local ceType, keyId, key, lineDto = TransitDtoFactory.createTransitLineDto(line)
+        local ceType, keyId, key, lineDto = TransitDtoFactory.createLineDto(line)
         local stationCeType, stationKeyId, stationKey, stationDto =
-            TransitDtoFactory.createTransitStationDto({ id = "Station A", name = "ignored" })
+            TransitDtoFactory.createStationDto({ id = "Station A", name = "ignored" })
         local settingsCeType, settingsKeyId, settingsDtos =
-            TransitDtoFactory.createTransitModuleSettingDtoList({
+            TransitDtoFactory.createModuleSettingDtoList({
                 {
                     category = "Display",
                     name = "Next",

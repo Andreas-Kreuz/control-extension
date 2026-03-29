@@ -1,9 +1,9 @@
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
-local RollingStockTexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
-local RollingStockRotationDtoFactory = require("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
+local StockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+local TexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
+local RotationDtoFactory = require("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
 local RollingStockRegistry = {}
 ---@type table<string,RollingStock>
 local allRollingStock = {}
@@ -42,41 +42,41 @@ end
 ---@param rollingStockName string
 function RollingStockRegistry.rollingStockDisappeared(rollingStockName)
     allRollingStock[rollingStockName] = nil
-    DataChangeBus.fireDataRemoved(RollingStockDtoFactory.createRollingStockReferenceDto(rollingStockName))
+    DataChangeBus.fireDataRemoved(StockDtoFactory.createRefDto(rollingStockName))
     DataChangeBus.fireDataRemoved(
-        RollingStockTexturesDtoFactory.createRollingStockTexturesReferenceDto(rollingStockName))
+        TexturesDtoFactory.createRefDto(rollingStockName))
     DataChangeBus.fireDataRemoved(
-        RollingStockRotationDtoFactory.createRollingStockRotationReferenceDto(rollingStockName))
+        RotationDtoFactory.createRefDto(rollingStockName))
 end
 
 function RollingStockRegistry.fireChangeRollingStockEvent(selectedCeTypes)
-    local modifiedRollingStock = {}
-    local modifiedRollingStockTextures = {}
-    local modifiedRollingStockRotation = {}
+    local modifiedStocks = {}
+    local modifiedTextures = {}
+    local modifiedRotations = {}
     for _, rs in pairs(allRollingStock) do
         if isSelected(selectedCeTypes, HubCeTypes.RollingStock) and rs.valuesUpdated then
-            modifiedRollingStock[rs.id] = rs
+            modifiedStocks[rs.id] = rs
             rs.valuesUpdated = false
         end
         if isSelected(selectedCeTypes, HubCeTypes.RollingStockTextures) and rs.textureTextsUpdated then
-            modifiedRollingStockTextures[rs.id] = rs
+            modifiedTextures[rs.id] = rs
             rs.textureTextsUpdated = false
         end
         if isSelected(selectedCeTypes, HubCeTypes.RollingStockRotation) and rs.rotationUpdated then
-            modifiedRollingStockRotation[rs.id] = rs
+            modifiedRotations[rs.id] = rs
             rs.rotationUpdated = false
         end
     end
-    if next(modifiedRollingStock) ~= nil then
-        for _, rollingStock in pairs(modifiedRollingStock) do
-            DataChangeBus.fireDataChanged(RollingStockDtoFactory.createRollingStockDto(rollingStock))
+    if next(modifiedStocks) ~= nil then
+        for _, stock in pairs(modifiedStocks) do
+            DataChangeBus.fireDataChanged(StockDtoFactory.createDto(stock))
         end
     end
-    for _, rollingStock in pairs(modifiedRollingStockTextures) do
-        DataChangeBus.fireDataChanged(RollingStockTexturesDtoFactory.createRollingStockTexturesDto(rollingStock))
+    for _, stock in pairs(modifiedTextures) do
+        DataChangeBus.fireDataChanged(TexturesDtoFactory.createDto(stock))
     end
-    for _, rollingStock in pairs(modifiedRollingStockRotation) do
-        DataChangeBus.fireDataChanged(RollingStockRotationDtoFactory.createRollingStockRotationDto(rollingStock))
+    for _, stock in pairs(modifiedRotations) do
+        DataChangeBus.fireDataChanged(RotationDtoFactory.createDto(stock))
     end
 end
 

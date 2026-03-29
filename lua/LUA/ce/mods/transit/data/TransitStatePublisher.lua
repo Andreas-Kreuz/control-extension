@@ -22,13 +22,13 @@ function TransitStatePublisher.syncState()
     local data = TransitDataCollector.collectTransitData()
 
     DataChangeBus.fireListChange(
-        TransitDtoFactory.createTransitStationDtoList(data.publicTransportStations)
+        TransitDtoFactory.createStationDtoList(data.publicTransportStations)
     )
     DataChangeBus.fireListChange(
-        TransitDtoFactory.createTransitLineDtoList(data.publicTransportLines)
+        TransitDtoFactory.createLineDtoList(data.publicTransportLines)
     )
     DataChangeBus.fireListChange(
-        TransitDtoFactory.createTransitModuleSettingDtoList(data.publicTransportSettings)
+        TransitDtoFactory.createModuleSettingDtoList(data.publicTransportSettings)
     )
     LineRegistry.fireChangeLinesEvent()
 

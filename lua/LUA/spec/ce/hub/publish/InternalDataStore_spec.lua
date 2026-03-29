@@ -55,10 +55,10 @@ insulate("ce.hub.publish.InternalDataStore", function ()
         local json = require("ce.third-party.json")
 
         DataChangeBus.fireDataAdded("ce.hub.Module", "id", {
-                                      ceType = "ce.hub.Module",
-                                      id = "module-a",
-                                      name = "Module A"
-                                  })
+            ceType = "ce.hub.Module",
+            id = "module-a",
+            name = "Module A"
+        })
 
         local bufferedEvents = ServerEventBuffer.drainBufferedEvents()
         local eventLines = {}

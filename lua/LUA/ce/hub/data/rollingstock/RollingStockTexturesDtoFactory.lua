@@ -2,7 +2,7 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockTexturesDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local RollingStockTexturesDtoFactory = {}
+local TexturesDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.RollingStockTextures
 local KEY_ID = "id"
@@ -13,31 +13,31 @@ local function copyTable(values)
     return copy
 end
 
-local function toRollingStockTexturesDto(rollingStock)
+local function toDto(stock)
     return {
         ceType = CE_TYPE,
-        id = rollingStock.rollingStockName,
-        surfaceTexts = copyTable(rollingStock:getTextureTexts())
+        id = stock.rollingStockName,
+        surfaceTexts = copyTable(stock:getTextureTexts())
     }
 end
 
-function RollingStockTexturesDtoFactory.createRollingStockTexturesDto(rollingStock)
-    local dto = toRollingStockTexturesDto(rollingStock)
+function TexturesDtoFactory.createDto(stock)
+    local dto = toDto(stock)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function RollingStockTexturesDtoFactory.createRollingStockTexturesDtoList(rollingStocks)
-    local rollingStockDtos = {}
-    for rollingStockId, rollingStock in pairs(rollingStocks) do
-        local _, _, _, dto = RollingStockTexturesDtoFactory.createRollingStockTexturesDto(rollingStock)
-        rollingStockDtos[rollingStockId] = dto
+function TexturesDtoFactory.createDtoList(stocks)
+    local dtos = {}
+    for stockId, stock in pairs(stocks) do
+        local _, _, _, dto = TexturesDtoFactory.createDto(stock)
+        dtos[stockId] = dto
     end
-    return CE_TYPE, KEY_ID, rollingStockDtos
+    return CE_TYPE, KEY_ID, dtos
 end
 
-function RollingStockTexturesDtoFactory.createRollingStockTexturesReferenceDto(rollingStockId)
-    local dto = { ceType = CE_TYPE, id = rollingStockId }
-    return CE_TYPE, KEY_ID, rollingStockId, dto
+function TexturesDtoFactory.createRefDto(stockId)
+    local dto = { ceType = CE_TYPE, id = stockId }
+    return CE_TYPE, KEY_ID, stockId, dto
 end
 
-return RollingStockTexturesDtoFactory
+return TexturesDtoFactory

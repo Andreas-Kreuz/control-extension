@@ -8,20 +8,22 @@
     "services/*"
   ],
   "scripts": {
-    "sync-control-extension-version": "node ./scripts/sync-control-extension-version.mjs",
+    "build": "yarn run check && node ./scripts/build-release.mjs",
     "ce-help": "node ./scripts/ce-help.mjs",
+    "check": "yarn run check-lua && yarn run check-e2e && yarn run check-doc",
+    "check-doc": "bundle exec jekyll build",
+    "check-e2e": "yarn workspace @ak/web-app run cy-tests-run-headless",
+    "check-lua": "luacheck -q --std max+busted lua/LUA && busted --output=plainTerminal --verbose --coverage --",
     "check-tools": "node ./scripts/check-tools.mjs",
     "dev-app": "yarn workspace @ak/web-app run start-playing",
-    "test-app": "yarn workspace @ak/web-app run cy-tests",
     "dev-docs": "bundle exec jekyll serve",
-    "check-lua": "luacheck --std max+busted lua/LUA && busted --output=plainTerminal --verbose --coverage --",
-    "check-e2e": "yarn workspace @ak/web-app run cy-tests-run-headless",
-    "check-doc": "bundle exec jekyll build",
-    "check": "yarn run check-lua && yarn run check-e2e && yarn run check-doc",
-    "build": "yarn run check && node ./scripts/build-release.mjs",
+    "format": "yarn run format-prettier && yarn run format-lua",
+    "format-lua": "node ./scripts/format-lua-with-sumneko.mjs",
+    "format-prettier": "prettier --write .",
     "play": "yarn workspace @ak/web-server run start-with-app",
     "rebuild-server": "yarn workspace @ak/web-server run build-app && yarn workspace @ak/web-server run copy-web-app",
-    "format": "prettier --write ."
+    "sync-control-extension-version": "node ./scripts/sync-control-extension-version.mjs",
+    "test-app": "yarn workspace @ak/web-app run cy-tests"
   },
   "packageManager": "yarn@4.9.1",
   "devDependencies": {

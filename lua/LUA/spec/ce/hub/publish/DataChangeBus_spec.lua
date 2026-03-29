@@ -20,10 +20,10 @@ insulate("ce.hub.publish.DataChangeBus", function ()
         })
 
         DataChangeBus.fireDataAdded("ce.hub.Signal", "id", {
-                                      ceType = "ce.hub.Signal",
-                                      id = "signal-a",
-                                      name = "Alpha"
-                                  })
+            ceType = "ce.hub.Signal",
+            id = "signal-a",
+            name = "Alpha"
+        })
         DataChangeBus.fireDataChanged("ce.hub.Signal", "id", "signal-b", { ceType = "ce.hub.Signal", status = "go" })
 
         assert.equals(DataChangeBus.eventType.completeReset, capturedEvents[1].type)
@@ -38,9 +38,9 @@ insulate("ce.hub.publish.DataChangeBus", function ()
 
         assert.has_error(function ()
                              DataChangeBus.fireDataRemoved("ce.hub.Signal", "id", "signal-a", {
-                                                         ceType = "ce.hub.Signal",
-                                                         id = "signal-b"
-                                                     })
+                                 ceType = "ce.hub.Signal",
+                                 id = "signal-b"
+                             })
                          end, "the key must match element[keyId]")
     end)
 end)

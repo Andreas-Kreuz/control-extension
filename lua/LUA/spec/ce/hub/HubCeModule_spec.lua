@@ -3,7 +3,10 @@ insulate("HubCeModule", function ()
         package.loaded[name] = nil
     end
 
+    local originalPrint = print
+
     before_each(function ()
+        _G.print = function () end
         clearModule("ce.ControlExtension")
         clearModule("ce.hub.ControlExtensionHub")
         clearModule("ce.hub.ModuleRegistry")
@@ -17,6 +20,10 @@ insulate("HubCeModule", function ()
         clearModule("ce.databridge.IncomingCommandExecutor")
         require("ce.hub.eep.EepSimulator")
         require("ce.databridge.IoInit").initialize = function () end
+    end)
+
+    after_each(function ()
+        _G.print = originalPrint
     end)
 
     it("returns HubCeModule from setOptions and applies hub options", function ()

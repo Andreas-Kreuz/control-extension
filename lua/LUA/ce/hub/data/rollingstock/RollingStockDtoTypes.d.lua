@@ -28,7 +28,7 @@
 ---@field posZ number
 ---@field mileage number
 
----@class RollingStockDtoFactory
----@field createRollingStockDto fun(rollingStock: RollingStock|table):string,string,string|number,RollingStockDto
----@field createRollingStockDtoList fun(rollingStocks: table):string,string,table
----@field createRollingStockReferenceDto fun(rollingStockId: string):string,string,string|number,RollingStockDto
+---@class StockDtoFactory
+---@field createDto fun(stock: RollingStock|table):string,string,string|number,RollingStockDto
+---@field createDtoList fun(stocks: table):string,string,table
+---@field createRefDto fun(stockId: string):string,string,string|number,RollingStockDto

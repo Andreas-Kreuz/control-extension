@@ -2,38 +2,38 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockRotationDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local RollingStockRotationDtoFactory = {}
+local RotationDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.RollingStockRotation
 local KEY_ID = "id"
 
-local function toRollingStockRotationDto(rollingStock)
+local function toDto(stock)
     return {
         ceType = CE_TYPE,
-        id = rollingStock.rollingStockName,
-        rotX = rollingStock:getRotX(),
-        rotY = rollingStock:getRotY(),
-        rotZ = rollingStock:getRotZ()
+        id = stock.rollingStockName,
+        rotX = stock:getRotX(),
+        rotY = stock:getRotY(),
+        rotZ = stock:getRotZ()
     }
 end
 
-function RollingStockRotationDtoFactory.createRollingStockRotationDto(rollingStock)
-    local dto = toRollingStockRotationDto(rollingStock)
+function RotationDtoFactory.createDto(stock)
+    local dto = toDto(stock)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function RollingStockRotationDtoFactory.createRollingStockRotationDtoList(rollingStocks)
-    local rollingStockDtos = {}
-    for rollingStockId, rollingStock in pairs(rollingStocks) do
-        local _, _, _, dto = RollingStockRotationDtoFactory.createRollingStockRotationDto(rollingStock)
-        rollingStockDtos[rollingStockId] = dto
+function RotationDtoFactory.createDtoList(stocks)
+    local dtos = {}
+    for stockId, stock in pairs(stocks) do
+        local _, _, _, dto = RotationDtoFactory.createDto(stock)
+        dtos[stockId] = dto
     end
-    return CE_TYPE, KEY_ID, rollingStockDtos
+    return CE_TYPE, KEY_ID, dtos
 end
 
-function RollingStockRotationDtoFactory.createRollingStockRotationReferenceDto(rollingStockId)
-    local dto = { ceType = CE_TYPE, id = rollingStockId }
-    return CE_TYPE, KEY_ID, rollingStockId, dto
+function RotationDtoFactory.createRefDto(stockId)
+    local dto = { ceType = CE_TYPE, id = stockId }
+    return CE_TYPE, KEY_ID, stockId, dto
 end
 
-return RollingStockRotationDtoFactory
+return RotationDtoFactory
