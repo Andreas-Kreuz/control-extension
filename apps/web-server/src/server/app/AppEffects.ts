@@ -26,7 +26,7 @@ import { Server, Socket } from 'socket.io';
 export default class AppEffects {
   private debug = true;
   private serverConfigFile: string;
-  private eepDataEffects: EepDataEffects;
+  private eepDataEffects!: EepDataEffects;
   private eepService: EepService | null = null;
   private store = new AppReducer();
   private TESTMODE = false;
@@ -161,7 +161,7 @@ export default class AppEffects {
 
     // Check the directory and register handlers on success
     const eepService = new EepService(this.debug);
-    eepService.reInit(completeDir, (err: string, dir: string) => {
+    eepService.reInit(completeDir, (err: string | null, dir: string | null) => {
       if (err) {
         console.error(err);
       }

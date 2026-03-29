@@ -1,23 +1,55 @@
 import * as assert from 'node:assert/strict';
 import { CeTypes } from '@ak/web-shared';
+import type EepDataStore from '../EepDataStore';
+import type { CacheService } from '../CacheService';
+import type { State } from '../EepDataStore';
 import JsonApiUpdateService from './JsonApiUpdateService';
 
 // ---- Fakes ----
 
-function makeRouter() {
-  const handlers: Record<string, (req: any, res: any) => void> = {};
+interface TestRequest {
+  params: { room: string };
+}
 
-  const router = {
-    get(path: string, handler: (req: any, res: any) => void) {
+interface TestResponseResult {
+  status: number;
+  headers: Record<string, string>;
+  body: unknown;
+}
+
+interface TestResponse {
+  status(code: number): TestResponse;
+  json(data: unknown): TestResponse;
+  send(data: unknown): TestResponse;
+  setHeader(key: string, value: string): void;
+  getResult(): TestResponseResult;
+}
+
+interface TestRouter {
+  get(path: string, handler: (req: TestRequest, res: TestResponse) => void): void;
+}
+
+interface TestServer {
+  to(room: string): { emit(event: string, payload?: unknown): void };
+}
+
+type TestStore = Pick<EepDataStore, 'currentState' | 'hasInitialState'>;
+type JsonApiUpdateServiceArgs = ConstructorParameters<typeof JsonApiUpdateService>;
+
+function makeRouter() {
+  const handlers: Record<string, (req: TestRequest, res: TestResponse) => void> = {};
+
+  const router: TestRouter = {
+    get(path: string, handler: (req: TestRequest, res: TestResponse) => void) {
       handlers[path] = handler;
     },
   };
 
-  function makeRes() {
+  function makeRes(): TestResponse {
     let statusCode = 200;
     const headers: Record<string, string> = {};
     let body: unknown;
-    const res: any = {
+    const res: TestResponse = {
       status(s: number) {
         statusCode = s;
         return res;
@@ -33,7 +65,7 @@ function makeRouter() {
       setHeader(k: string, v: string) {
         headers[k.toLowerCase()] = v;
       },
-      _result() {
+      getResult() {
         return { status: statusCode, headers, body };
       },
     };
@@ -44,21 +76,25 @@ function makeRouter() {
     router,
     callIndex() {
       const res = makeRes();
-      handlers['/']({}, res);
-      return res._result();
+      const handler = handlers['/'];
+      assert.ok(handler);
+      handler({ params: { room: '' } }, res);
+      return res.getResult();
     },
     callRoom(room: string) {
       const res = makeRes();
-      handlers['/:room']({ params: { room } }, res);
-      return res._result();
+      const handler = handlers['/:room'];
+      assert.ok(handler);
+      handler({ params: { room } }, res);
+      return res.getResult();
     },
   };
 }
 
-const fakeIo: any = { to: () => ({ emit: () => {} }) };
-const fakeCacheService: any = { writeCache: () => {}, readCache: () => null };
+const fakeIo: TestServer = { to: () => ({ emit: () => {} }) };
+const fakeCacheService: CacheService = { writeCache: () => {}, readCache: () => null };
 
-function makeStore(ceTypes: Record<string, unknown>, eventCounter = 1) {
+function makeStore(ceTypes: State['ceTypes'], eventCounter = 1): TestStore {
   return {
     currentState: () => ({ ceTypes, eventCounter }),
     hasInitialState: () => false,
@@ -81,7 +117,11 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
 
 function testIndexReturnsEmptyListWithNoRooms(): void {
   const { router, callIndex } = makeRouter();
-  new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
+  new JsonApiUpdateService(
+    router as unknown as JsonApiUpdateServiceArgs[0],
+    fakeIo as unknown as JsonApiUpdateServiceArgs[1],
+    fakeCacheService,
+  );
 
   const { headers, body } = callIndex();
   assert.equal(headers['content-type'], 'text/html');
@@ -90,9 +130,13 @@ function testIndexReturnsEmptyListWithNoRooms(): void {
 
 function testIndexListsRoomsAfterStateChange(): void {
   const { router, callIndex } = makeRouter();
-  const svc = new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
+  const svc = new JsonApiUpdateService(
+    router as unknown as JsonApiUpdateServiceArgs[0],
+    fakeIo as unknown as JsonApiUpdateServiceArgs[1],
+    fakeCacheService,
+  );
 
-  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as any);
+  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as unknown as Readonly<EepDataStore>);
 
   const { body } = callIndex();
   const html = body as string;
@@ -103,7 +147,11 @@ function testIndexListsRoomsAfterStateChange(): void {
 
 function testRoomReturns404WhenUnknown(): void {
   const { router, callRoom } = makeRouter();
-  new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
+  new JsonApiUpdateService(
+    router as unknown as JsonApiUpdateServiceArgs[0],
+    fakeIo as unknown as JsonApiUpdateServiceArgs[1],
+    fakeCacheService,
+  );
 
   const { status, body } = callRoom('nonexistent');
   assert.equal(status, 404);
@@ -112,9 +160,13 @@ function testRoomReturns404WhenUnknown(): void {
 
 function testRoomReturnsJsonAfterStateChange(): void {
   const { router, callRoom } = makeRouter();
-  const svc = new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
+  const svc = new JsonApiUpdateService(
+    router as unknown as JsonApiUpdateServiceArgs[0],
+    fakeIo as unknown as JsonApiUpdateServiceArgs[1],
+    fakeCacheService,
+  );
 
-  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as any);
+  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as unknown as Readonly<EepDataStore>);
 
   const { status, headers, body } = callRoom(CeTypes.HubSignal);
   assert.equal(status, 200);
@@ -124,10 +176,14 @@ function testRoomReturnsJsonAfterStateChange(): void {
 
 function testRoomReturns404AfterRoomIsRemoved(): void {
   const { router, callRoom } = makeRouter();
-  const svc = new JsonApiUpdateService(router as any, fakeIo, fakeCacheService);
+  const svc = new JsonApiUpdateService(
+    router as unknown as JsonApiUpdateServiceArgs[0],
+    fakeIo as unknown as JsonApiUpdateServiceArgs[1],
+    fakeCacheService,
+  );
 
-  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as any);
-  svc.onStateChange(makeStore({}) as any);
+  svc.onStateChange(makeStore({ [CeTypes.HubSignal]: { 1: { id: 1 } } }) as unknown as Readonly<EepDataStore>);
+  svc.onStateChange(makeStore({}) as unknown as Readonly<EepDataStore>);
 
   const { status } = callRoom(CeTypes.HubSignal);
   assert.equal(status, 404);

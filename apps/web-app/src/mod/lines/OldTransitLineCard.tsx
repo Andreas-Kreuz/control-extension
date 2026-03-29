@@ -11,11 +11,12 @@ import { useState } from 'react';
 
 export interface OldTransitLineCardProps {
   line: Line;
+  expanded?: boolean;
 }
 
 const OldTransitLineCard = (props: OldTransitLineCardProps) => {
   const line = props.line;
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(props.expanded ?? false);
 
   const Pre = styled('pre')({
     fontSize: 14,

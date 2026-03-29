@@ -1,9 +1,10 @@
 import { VersionLuaDto } from '../../ce/dto/version/VersionLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
+import { optionalProperty } from '../../utils/optionalProperty';
 import { CeTypes, VersionDto } from '@ak/web-shared';
 
 export default class VersionSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private versions: Record<string, VersionDto> = {};
 
   updateFromState(state: fromEepData.State): void {
@@ -20,11 +21,11 @@ export default class VersionSelector {
         eepVersion: dto.eepVersion,
         luaVersion: dto.luaVersion,
         singleVersion: dto.singleVersion,
-        eepLanguage: dto.eepLanguage,
-        layoutVersion: dto.layoutVersion,
-        layoutLanguage: dto.layoutLanguage,
-        layoutName: dto.layoutName,
-        layoutPath: dto.layoutPath,
+        ...optionalProperty('eepLanguage', dto.eepLanguage),
+        ...optionalProperty('layoutVersion', dto.layoutVersion),
+        ...optionalProperty('layoutLanguage', dto.layoutLanguage),
+        ...optionalProperty('layoutName', dto.layoutName),
+        ...optionalProperty('layoutPath', dto.layoutPath),
       };
     });
   }

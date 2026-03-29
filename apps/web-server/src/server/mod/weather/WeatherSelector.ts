@@ -1,9 +1,10 @@
 import { WeatherLuaDto } from '../../ce/dto/weather/WeatherLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
+import { optionalProperty } from '../../utils/optionalProperty';
 import { CeTypes, WeatherDto } from '@ak/web-shared';
 
 export default class WeatherSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private weather: Record<string, WeatherDto> = {};
 
   updateFromState(state: fromEepData.State): void {
@@ -17,14 +18,14 @@ export default class WeatherSelector {
       this.weather[dto.id] = {
         id: dto.id,
         name: dto.name,
-        season: dto.season,
-        cloudsIntensity: dto.cloudsIntensity,
-        cloudsMode: dto.cloudsMode,
-        windIntensity: dto.windIntensity,
-        rainIntensity: dto.rainIntensity,
-        snowIntensity: dto.snowIntensity,
-        hailIntensity: dto.hailIntensity,
-        fogIntensity: dto.fogIntensity,
+        ...optionalProperty('season', dto.season),
+        ...optionalProperty('cloudsIntensity', dto.cloudsIntensity),
+        ...optionalProperty('cloudsMode', dto.cloudsMode),
+        ...optionalProperty('windIntensity', dto.windIntensity),
+        ...optionalProperty('rainIntensity', dto.rainIntensity),
+        ...optionalProperty('snowIntensity', dto.snowIntensity),
+        ...optionalProperty('hailIntensity', dto.hailIntensity),
+        ...optionalProperty('fogIntensity', dto.fogIntensity),
       };
     });
   }

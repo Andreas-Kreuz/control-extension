@@ -23,7 +23,7 @@ function PairingGate(props: { children: ReactNode }) {
 
   // Show the pairing code if we're in the pending state.
   if (pairingStatus === PairingStatus.Pending) {
-    return <PairingScreen pairingCode={pairingCode} />;
+    return <PairingScreen {...(pairingCode !== undefined ? { pairingCode } : {})} />;
   }
 
   return <>{props.children}</>;

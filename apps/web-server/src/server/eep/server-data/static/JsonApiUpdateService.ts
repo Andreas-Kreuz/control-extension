@@ -124,7 +124,7 @@ export default class JsonApiUpdateService {
     this.io.to(ApiDataRoom.roomId(key)).emit(ApiDataRoom.eventId(key), '{}');
   }
 
-  private lastTimeOut: NodeJS.Timeout;
+  private lastTimeOut?: NodeJS.Timeout;
 
   private registerStatsTimeout(data: ServerData) {
     if (this.lastTimeOut) {
@@ -132,7 +132,11 @@ export default class JsonApiUpdateService {
     }
     this.lastTimeOut = setTimeout(() => {
       const roomName = CeTypes.ServerStats;
-      const currentStats = JSON.parse(data.roomToJson[roomName]);
+      const currentStatsJson = data.roomToJson[roomName];
+      if (!currentStatsJson) {
+        return;
+      }
+      const currentStats = JSON.parse(currentStatsJson);
       const newStats = { ...currentStats, eepDataUpToDate: false };
       const newStatsJsonString = JSON.stringify(newStats);
       data.roomToJson[roomName] = newStatsJsonString;

@@ -56,19 +56,24 @@ const line4Subway: Line = {
   nr: 'U5',
   trafficType: 'SUBWAY',
 };
+const firstSegment = line1.lineSegments[0];
+
+if (!firstSegment) {
+  throw new Error('Expected first transit line segment for story fixtures');
+}
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Segment: Story = {
   args: {
-    segment: line1.lineSegments[0],
+    segment: firstSegment,
   },
 };
 
 export const SegmentOnMobile: Story = {
   args: {
-    segment: line1.lineSegments[0],
+    segment: firstSegment,
   },
   globals: {
     viewport: { value: 'mobile1', isRotated: false },

@@ -6,7 +6,7 @@ const useSetRollingStockCam = () => {
   const socket = useSocket();
   const debug = useDebug();
 
-  return (rollingStock: RollingStockDto, key: number) => {
+  return (rollingStock: RollingStockDto | undefined, key: number) => {
     if (debug) console.log('                 |📹 CAM SET --', 'for ROLLING STOCK', rollingStock, key);
     if (!rollingStock) {
       return;

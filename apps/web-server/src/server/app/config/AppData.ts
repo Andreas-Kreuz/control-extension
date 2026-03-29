@@ -4,7 +4,7 @@ import getHostName from './getHostname';
 export default class AppData {
   private appConfig = new AppConfig();
   private eepDirOk = false;
-  private hostName = getHostName();
+  private hostName = getHostName() ?? 'localhost';
 
   public setAppConfig(appConfig: AppConfig): void {
     this.appConfig = appConfig;

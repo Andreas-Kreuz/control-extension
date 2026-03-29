@@ -1,9 +1,10 @@
 import { TimeLuaDto } from '../../ce/dto/time/TimeLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
+import { optionalProperty } from '../../utils/optionalProperty';
 import { CeTypes, TimeDto } from '@ak/web-shared';
 
 export default class TimeSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private times: Record<string, TimeDto> = {};
 
   updateFromState(state: fromEepData.State): void {
@@ -21,7 +22,7 @@ export default class TimeSelector {
         timeH: dto.timeH,
         timeM: dto.timeM,
         timeS: dto.timeS,
-        timeLapse: dto.timeLapse,
+        ...optionalProperty('timeLapse', dto.timeLapse),
       };
     });
   }

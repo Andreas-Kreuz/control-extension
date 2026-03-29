@@ -1,11 +1,9 @@
 import MyAppCardBg, { AppCardBgProps as MyAppCardProps } from '../../ui/AppCardBg';
 import { BrowserRouter } from 'react-router-dom';
 
-export interface AppCardBgProps extends MyAppCardProps {
-  label: string;
-}
+export type AppCardBgProps = MyAppCardProps;
 
-const Template = (args) => (
+const Template = (args: AppCardBgProps) => (
   <BrowserRouter>
     <MyAppCardBg {...args}></MyAppCardBg>
   </BrowserRouter>

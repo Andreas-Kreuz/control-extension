@@ -20,7 +20,8 @@ const reducer = (state: LogState, action: LogDispatch) => {
     case 'added': {
       const oldLines = state.lines;
       const newLines = [...oldLines];
-      var counter = state.lines.length > 0 ? state.lines[state.lines.length - 1].key : 0;
+      const lastLine = state.lines.length > 0 ? state.lines[state.lines.length - 1] : undefined;
+      let counter = lastLine?.key ?? 0;
       for (const l of action.fetchedLines) {
         if (l.length > 0) {
           newLines.push({ line: l, key: ++counter });

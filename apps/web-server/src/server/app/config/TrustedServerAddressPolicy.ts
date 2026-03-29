@@ -13,8 +13,8 @@ export interface TrustedServerAddressPolicyOptions {
 }
 
 interface TrustedLocalServerRequest {
-  hostHeader?: string | string[];
-  remoteAddress?: string;
+  hostHeader?: string | string[] | undefined;
+  remoteAddress?: string | undefined;
 }
 
 function normalizeHost(host: string | undefined): string | undefined {

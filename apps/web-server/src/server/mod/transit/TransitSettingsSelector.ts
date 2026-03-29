@@ -3,7 +3,7 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { CeTypes, SettingDto, SettingsDto } from '@ak/web-shared';
 
 export default class TransitSettingsSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private settings: SettingsDto = { moduleName: 'Public Transport', settings: [] };
 
   updateFromState(state: fromEepData.State): void {
@@ -12,6 +12,7 @@ export default class TransitSettingsSelector {
     if (state === this.lastState || !state.ceTypes[CeTypes.TransitModuleSetting]) {
       return;
     }
+    this.lastState = state;
 
     const settingsDict = state.ceTypes[CeTypes.TransitModuleSetting] as unknown as Record<
       string,

@@ -4,7 +4,7 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { CeTypes, TransitLineDto, TransitStationDto } from '@ak/web-shared';
 
 export default class TransitSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private transitLines: Record<string, TransitLineDto> = {};
   private transitStations: Record<string, TransitStationDto> = {};
 

@@ -14,7 +14,11 @@ function TransitOverview() {
 
   return (
     <AppPage>
-      <AppPageHeadline rightSettings={<ModuleSettingsButton settings={settings} />}>ÖPNV</AppPageHeadline>
+      <AppPageHeadline
+        {...(settings !== undefined ? { rightSettings: <ModuleSettingsButton settings={settings} /> } : {})}
+      >
+        ÖPNV
+      </AppPageHeadline>
       <AppCardGridContainer>
         {lines.map((i) => (
           <Grid size={{ xs: 12 }} key={i.id}>

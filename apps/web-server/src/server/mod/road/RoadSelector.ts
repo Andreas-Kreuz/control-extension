@@ -14,7 +14,7 @@ import {
 } from '@ak/web-shared';
 
 export default class RoadSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private intersections: Record<string, IntersectionDto> = {};
   private intersectionLanes: Record<string, IntersectionLaneDto> = {};
   private intersectionSwitchings: Record<string, IntersectionSwitchingDto> = {};

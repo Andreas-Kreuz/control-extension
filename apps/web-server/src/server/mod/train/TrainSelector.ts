@@ -1,10 +1,11 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainLuaDto } from '../../ce/dto/trains/TrainLuaDto';
 import { RollingStockSelector } from './RollingStockSelector';
+import { optionalProperty } from '../../utils/optionalProperty';
 import { calcTrainType, CeTypes, TrainDto, TrainListDto, TrainType } from '@ak/web-shared';
 
 export class TrainSelector {
-  private state: fromJsonData.State = undefined;
+  private state?: fromJsonData.State;
   private trainMap = new Map<string, TrainDto>();
   private trainListMap = new Map<string, TrainListDto>();
 
@@ -23,6 +24,8 @@ export class TrainSelector {
     Object.values(trainDict).forEach((trainDto: TrainLuaDto) => {
       const rollingStock = this.rollingStockSelector.rollingStockListOfTrain(trainDto.id);
       const trainType: TrainType = this.getTrainType(trainDto);
+      const firstRollingStock = rollingStock[trainDto.movesForward ? 0 : rollingStock.length - 1];
+      const lastRollingStock = rollingStock[trainDto.movesForward ? rollingStock.length - 1 : 0];
       const trainListDto: TrainListDto = {
         id: trainDto.id,
         name: trainDto.name,
@@ -33,8 +36,8 @@ export class TrainSelector {
         trackType: trainDto.trackType,
         rollingStockCount: rollingStock.length,
         movesForward: trainDto.movesForward,
-        firstRollingStockName: rollingStock[trainDto.movesForward ? 0 : rollingStock.length - 1]?.name,
-        lastRollingStockName: rollingStock[trainDto.movesForward ? rollingStock.length - 1 : 0]?.name,
+        firstRollingStockName: firstRollingStock?.name ?? trainDto.name,
+        lastRollingStockName: lastRollingStock?.name ?? trainDto.name,
       };
       this.trainListMap.set(trainListDto.id, trainListDto);
 
@@ -44,12 +47,12 @@ export class TrainSelector {
         length: trainDto.length,
         direction: trainDto.direction,
         speed: trainDto.speed,
-        targetSpeed: trainDto.targetSpeed,
-        couplingFront: trainDto.couplingFront,
-        couplingRear: trainDto.couplingRear,
-        active: trainDto.active,
-        trainyardId: trainDto.trainyardId,
-        inTrainyard: trainDto.inTrainyard,
+        ...optionalProperty('targetSpeed', trainDto.targetSpeed),
+        ...optionalProperty('couplingFront', trainDto.couplingFront),
+        ...optionalProperty('couplingRear', trainDto.couplingRear),
+        ...optionalProperty('active', trainDto.active),
+        ...optionalProperty('trainyardId', trainDto.trainyardId),
+        ...optionalProperty('inTrainyard', trainDto.inTrainyard),
       };
 
       this.trainMap.set(train.id, train);
@@ -64,14 +67,15 @@ export class TrainSelector {
       .sort((a, b) => a.id.localeCompare(b.id, 'de'));
   }
 
-  getTrain(trainId: string): TrainDto {
+  getTrain(trainId: string): TrainDto | undefined {
     return this.trainMap.get(trainId);
   }
 
   getTrainType(train: TrainLuaDto): TrainType {
-    if (this.rollingStockSelector.rollingStockInTrain(train.id, 0)) {
+    const firstRollingStock = this.rollingStockSelector.rollingStockInTrain(train.id, 0);
+    if (firstRollingStock) {
       return calcTrainType(
-        this.rollingStockSelector.rollingStockInTrain(train.id, 0).modelType,
+        firstRollingStock.modelType,
         train.rollingStockCount,
       );
     } else {

@@ -25,7 +25,7 @@ export default class TrainUpdateService implements DynamicRoomService {
       id: 'TrainDetailsRoom',
       jsonCreator: (room: string): string => {
         const trainId = TrainDetailsRoom.idOfRoom(room);
-        const json = JSON.stringify(this.trainSelector.getTrain(trainId));
+        const json = JSON.stringify(this.trainSelector.getTrain(trainId) ?? null);
         return json;
       },
     });

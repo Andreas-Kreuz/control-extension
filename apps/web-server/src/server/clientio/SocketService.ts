@@ -10,11 +10,11 @@ import { Server, Socket } from 'socket.io';
 import TrustedServerAddressPolicy from '../app/config/TrustedServerAddressPolicy';
 
 interface SocketServiceOptions {
-  adminCookieName?: string;
-  adminSessionValue?: string;
-  allowOpenServerRoute?: boolean;
-  allowViteDevServerRoute?: boolean;
-  trustedServerAddressPolicy?: TrustedServerAddressPolicy;
+  adminCookieName?: string | undefined;
+  adminSessionValue?: string | undefined;
+  allowOpenServerRoute?: boolean | undefined;
+  allowViteDevServerRoute?: boolean | undefined;
+  trustedServerAddressPolicy?: TrustedServerAddressPolicy | undefined;
 }
 
 export default class SocketService {
@@ -25,10 +25,10 @@ export default class SocketService {
   private pendingClients = new Map<string, PendingPairingClient>();
   private activeSocketsByClientKey = new Map<string, Set<string>>();
   private adminCookieName: string;
-  private adminSessionValue?: string;
+  private adminSessionValue: string | undefined;
   private allowOpenServerRoute: boolean;
   private allowViteDevServerRoute: boolean;
-  private trustedServerAddressPolicy?: TrustedServerAddressPolicy;
+  private trustedServerAddressPolicy: TrustedServerAddressPolicy | undefined;
 
   constructor(
     private io: Server,
@@ -305,9 +305,9 @@ export default class SocketService {
   private emitPairingStatus(socket: Socket, status: PairingStatus, code?: string): void {
     const payload: PairingStatusPayload = {
       status,
-      code,
-      clientKey: typeof socket.data.clientKey === 'string' ? socket.data.clientKey : undefined,
       isAdmin: status === PairingStatus.Admin,
+      ...(code !== undefined ? { code } : {}),
+      ...(typeof socket.data.clientKey === 'string' ? { clientKey: socket.data.clientKey } : {}),
     };
     socket.emit(PairingEvent.Status, payload);
   }

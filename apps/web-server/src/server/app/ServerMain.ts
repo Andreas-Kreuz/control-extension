@@ -93,9 +93,11 @@ export class ServerMain {
   private createSocketService(): SocketService {
     return new SocketService(this.io, {
       adminCookieName: this.adminCookieName,
-      adminSessionValue: this.options.adminSessionValue,
       allowOpenServerRoute: this.allowOpenServerRoute,
-      allowViteDevServerRoute: this.options.allowViteDevServerRoute,
+      ...(this.options.adminSessionValue !== undefined ? { adminSessionValue: this.options.adminSessionValue } : {}),
+      ...(this.options.allowViteDevServerRoute !== undefined
+        ? { allowViteDevServerRoute: this.options.allowViteDevServerRoute }
+        : {}),
       trustedServerAddressPolicy: this.trustedServerAddressPolicy,
     });
   }
@@ -249,11 +251,13 @@ export class ServerMain {
     };
   }
 
-  private isAllowedSocketRequest(req: { headers: { host?: string; origin?: string | string[] } }): boolean {
+  private isAllowedSocketRequest(req: {
+    headers: { host?: string | undefined; origin?: string | string[] | undefined };
+  }): boolean {
     return this.trustedServerAddressPolicy.isTrustedHostHeader(req.headers.host) && this.hasTrustedOriginHeader(req);
   }
 
-  private hasTrustedOriginHeader(req: { headers: { origin?: string | string[] } }): boolean {
+  private hasTrustedOriginHeader(req: { headers: { origin?: string | string[] | undefined } }): boolean {
     return this.trustedServerAddressPolicy.isTrustedOrigin(
       typeof req.headers.origin === 'string' ? req.headers.origin : undefined,
     );

@@ -9,6 +9,7 @@ import { TrackLuaDto } from '../../ce/dto/tracks/TrackLuaDto';
 import { RollingStockTexturesLuaDto } from '../../ce/dto/rolling-stocks/RollingStockTexturesLuaDto';
 import { RollingStockRotationLuaDto } from '../../ce/dto/rolling-stocks/RollingStockRotationLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
+import { optionalProperty } from '../../utils/optionalProperty';
 import {
   CeTypes,
   RuntimeDto,
@@ -53,7 +54,7 @@ interface RuntimeStatisticsSample {
 }
 
 export default class EepDataSelector {
-  private lastState: fromEepData.State = undefined;
+  private lastState?: fromEepData.State;
   private runtime: Record<string, RuntimeDto> = {};
   private runtimeStatisticsHistory: RuntimeStatisticsSample[] = [];
   private runtimeStatisticsInitialization: RuntimeStatisticsDto['initialization'] = {
@@ -82,9 +83,9 @@ export default class EepDataSelector {
       count: dto.count,
       time: dto.time,
       lastTime: dto.lastTime,
-      framesPerSecond: dto.framesPerSecond,
-      currentFrame: dto.currentFrame,
-      currentRenderFrame: dto.currentRenderFrame,
+      ...optionalProperty('framesPerSecond', dto.framesPerSecond),
+      ...optionalProperty('currentFrame', dto.currentFrame),
+      ...optionalProperty('currentRenderFrame', dto.currentRenderFrame),
     }));
     this.updateRuntimeStatistics(state.eventCounter, this.runtime);
 
@@ -111,11 +112,11 @@ export default class EepDataSelector {
       position: dto.position,
       tag: dto.tag,
       waitingVehiclesCount: dto.waitingVehiclesCount,
-      stopDistance: dto.stopDistance,
-      itemName: dto.itemName,
-      itemNameWithModelPath: dto.itemNameWithModelPath,
-      signalFunctions: dto.signalFunctions,
-      activeFunction: dto.activeFunction,
+      ...optionalProperty('stopDistance', dto.stopDistance),
+      ...optionalProperty('itemName', dto.itemName),
+      ...optionalProperty('itemNameWithModelPath', dto.itemNameWithModelPath),
+      ...optionalProperty('signalFunctions', dto.signalFunctions),
+      ...optionalProperty('activeFunction', dto.activeFunction),
     }));
 
     this.waitingOnSignals = this.mapCeType<WaitingOnSignalLuaDto, WaitingOnSignalDto>(
@@ -159,8 +160,8 @@ export default class EepDataSelector {
       if (!trackType) continue;
       this.tracks[trackType] = this.mapCeType<TrackLuaDto, TrackDto>(state, ceType, (dto) => ({
         id: dto.id,
-        reserved: dto.reserved,
-        reservedByTrainName: dto.reservedByTrainName,
+        ...optionalProperty('reserved', dto.reserved),
+        ...optionalProperty('reservedByTrainName', dto.reservedByTrainName),
       }));
     }
 
@@ -268,7 +269,9 @@ export default class EepDataSelector {
     }
 
     for (let i = 0; i < left.length; i += 1) {
-      if (left[i].id !== right[i].id || left[i].ms !== right[i].ms) {
+      const leftEntry = left[i];
+      const rightEntry = right[i];
+      if (!leftEntry || !rightEntry || leftEntry.id !== rightEntry.id || leftEntry.ms !== rightEntry.ms) {
         return false;
       }
     }

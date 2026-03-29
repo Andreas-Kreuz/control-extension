@@ -33,13 +33,17 @@ export default class JsonApiReducer {
     const dataTypes: DataType[] = [];
     data.rooms = { ...state.ceTypes };
     for (const roomName of Object.keys(state.ceTypes)) {
-      data.roomToJson[roomName] = JSON.stringify(state.ceTypes[roomName]);
+      const roomData = state.ceTypes[roomName];
+      if (!roomData) {
+        continue;
+      }
+      data.roomToJson[roomName] = JSON.stringify(roomData);
 
       dataTypes.push({
         name: roomName,
         checksum: state.eventCounter.toString(),
         url: urlPrefix + roomName,
-        count: Object.keys(state.ceTypes[roomName]).length,
+        count: Object.keys(roomData).length,
         updated: true,
       });
     }
@@ -89,7 +93,11 @@ export default class JsonApiReducer {
   }
 
   getRoomJsonString(roomName: string): string {
-    return this.data.roomToJson[roomName];
+    const roomJsonString = this.data.roomToJson[roomName];
+    if (roomJsonString === undefined) {
+      throw new Error('Room not available: ' + roomName);
+    }
+    return roomJsonString;
   }
 
   getRoomJson(roomName: string): unknown {

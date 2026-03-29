@@ -9,9 +9,9 @@ type LogFileMonitorCallbacks = {
 const resetMarker = '@@CE_LOG_RESET@@';
 
 export class LogFileMonitor {
-  private logFileWatcher: fs.FSWatcher;
-  private pollTimer: NodeJS.Timeout;
-  private logFilePath: string;
+  private logFileWatcher: fs.FSWatcher | undefined = undefined;
+  private pollTimer: NodeJS.Timeout | undefined = undefined;
+  private logFilePath: string | undefined = undefined;
   private readOffset = 0;
   private pendingFragment = '';
   private currentLogLines = '';
@@ -38,14 +38,14 @@ export class LogFileMonitor {
   public detach(): void {
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
-      this.pollTimer = null;
+      this.pollTimer = undefined;
     }
     if (this.logFileWatcher) {
       this.logFileWatcher.close();
-      this.logFileWatcher = null;
+      this.logFileWatcher = undefined;
     }
 
-    this.logFilePath = null;
+    this.logFilePath = undefined;
     this.readOffset = 0;
     this.pendingFragment = '';
     this.currentLogLines = '';
@@ -97,14 +97,14 @@ export class LogFileMonitor {
 
   private readLogFileSize(): number | null {
     try {
-      return fs.statSync(this.logFilePath).size;
+      return fs.statSync(this.requireLogFilePath()).size;
     } catch (_error) {
       return null;
     }
   }
 
   private readRange(offset: number, length: number): { content: string; bytesRead: number } {
-    const fd = fs.openSync(this.logFilePath, 'r');
+    const fd = fs.openSync(this.requireLogFilePath(), 'r');
     try {
       const buffer = Buffer.alloc(length);
       const bytesRead = fs.readSync(fd, buffer, 0, length, offset);
@@ -154,5 +154,13 @@ export class LogFileMonitor {
     const newLines = visibleLines.join('\n');
     this.currentLogLines = this.currentLogLines.length > 0 ? this.currentLogLines + '\n' + newLines : newLines;
     this.callbacks.onLinesAppeared(newLines);
+  }
+
+  private requireLogFilePath(): string {
+    if (!this.logFilePath) {
+      throw new Error('Log file path is not initialized');
+    }
+
+    return this.logFilePath;
   }
 }

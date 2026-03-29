@@ -16,8 +16,6 @@ export const initialState: State = {
   trackType: TrackType.Road,
   trainList: [],
   rollingStock: {},
-  selectedTrain: undefined,
-  selectedTrainName: undefined,
 };
 
 type Action =

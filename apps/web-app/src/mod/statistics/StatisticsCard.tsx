@@ -8,7 +8,8 @@ const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEn
   const maxEntries = props.maxEntries || 10;
   const list = props.samples;
   const max = getMax(list);
-  const ids = list.length > 0 ? list[list.length - 1].map((entry) => entry.id) : [];
+  const lastEntries = list.length > 0 ? list[list.length - 1] : undefined;
+  const ids = lastEntries?.map((entry: TimeDesc) => entry.id) ?? [];
   const title = props.title;
   const items = Array(maxEntries)
     .fill(30)
@@ -139,7 +140,7 @@ const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEn
           </svg>
           <p style={{ marginTop: '1rem', marginBottom: '0.3rem' }}>Legende</p>
           <svg width="100%" height={legendSvgHeight} style={{ backgroundColor: 'white' }}>
-            {ids.map((id, j) => (
+            {ids.map((id: string, j: number) => (
               <React.Fragment key={'Legend' + j}>
                 <rect
                   x="0"

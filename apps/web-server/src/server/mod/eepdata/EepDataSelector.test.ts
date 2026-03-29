@@ -1,12 +1,13 @@
 import * as assert from 'node:assert/strict';
 import { CeTypes } from '@ak/web-shared';
+import type { State } from '../../eep/server-data/EepDataStore';
 import EepDataSelector from './EepDataSelector';
 
 function makeRuntimeEntry(id: string, time: number) {
   return { id, count: 1, time, lastTime: time };
 }
 
-function makeState(eventCounter: number, runtimeEntries: Record<string, unknown>) {
+function makeState(eventCounter: number, runtimeEntries: Record<string, unknown>): State {
   return {
     eventCounter,
     ceTypes: {
@@ -36,7 +37,7 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
       ),
       'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
-    }) as any,
+    }),
   );
   selector.updateFromState(
     makeState(2, {
@@ -46,7 +47,7 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
       ),
       'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
-    }) as any,
+    }),
   );
 
   for (let eventCounter = 3; eventCounter <= 14; eventCounter += 1) {
@@ -58,16 +59,22 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
         ),
         'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', eventCounter),
         'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', eventCounter),
-      }) as any,
+      }),
     );
   }
 
   const runtimeStatistics = selector.getRuntimeStatistics();
+  const firstPublisherSyncTimes = runtimeStatistics.history.publisherSyncTimes[0];
+  const lastModuleRunTimes = runtimeStatistics.history.moduleRunTimes[9];
+  const lastControllerUpdateTimes = runtimeStatistics.history.controllerUpdateTimes[9];
+  assert.ok(firstPublisherSyncTimes);
+  assert.ok(lastModuleRunTimes);
+  assert.ok(lastControllerUpdateTimes);
   assert.equal(runtimeStatistics.history.publisherSyncTimes.length, 10);
   assert.deepEqual(runtimeStatistics.history.sampleEventCounters, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
-  assert.equal(runtimeStatistics.history.publisherSyncTimes[0][0].ms, 5);
-  assert.equal(runtimeStatistics.history.moduleRunTimes[9][0].ms, 14);
-  assert.equal(runtimeStatistics.history.controllerUpdateTimes[9][1].ms, 14);
+  assert.equal(firstPublisherSyncTimes[0]?.ms, 5);
+  assert.equal(lastModuleRunTimes[0]?.ms, 14);
+  assert.equal(lastControllerUpdateTimes[1]?.ms, 14);
 }
 
 function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRuntime(): void {
@@ -86,15 +93,15 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
       ),
       'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 14),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 15),
-    }) as any,
+    }),
   );
 
   const runtimeStatistics = selector.getRuntimeStatistics();
-  assert.equal(runtimeStatistics.initialization.publisherInitTimes[0].ms, 11);
-  assert.equal(runtimeStatistics.initialization.moduleInitTimes[0].ms, 12);
+  assert.equal(runtimeStatistics.initialization.publisherInitTimes[0]?.ms, 11);
+  assert.equal(runtimeStatistics.initialization.moduleInitTimes[0]?.ms, 12);
   assert.equal(runtimeStatistics.history.publisherSyncTimes.length, 1);
 
-  selector.updateFromState({ eventCounter: 2, ceTypes: {} } as any);
+  selector.updateFromState({ eventCounter: 2, ceTypes: {} });
 
   const resetStatistics = selector.getRuntimeStatistics();
   assert.deepEqual(resetStatistics.history.sampleEventCounters, []);

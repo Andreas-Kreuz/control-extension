@@ -6,7 +6,7 @@ import * as electron from 'electron';
 import * as path from 'path';
 import { randomBytes } from 'crypto';
 
-let mainWindow: Electron.BrowserWindow;
+let mainWindow: Electron.BrowserWindow | null = null;
 
 function createWindow() {
   const commandLineOptions = new CommandLineParser().parseOptions();
@@ -20,7 +20,7 @@ function createWindow() {
     width: 1024,
     height: 850,
     title: 'CE Server',
-    icon,
+    ...(icon !== undefined ? { icon } : {}),
     webPreferences: {
       preload: path.join(__dirname, '/preload/index.js'),
     },

@@ -1,9 +1,10 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { RollingStockLuaDto } from '../../ce/dto/rolling-stocks/RollingStockLuaDto';
+import { optionalProperty } from '../../utils/optionalProperty';
 import { CeTypes, RollingStockDto } from '@ak/web-shared';
 
 export class RollingStockSelector {
-  private lastState: fromJsonData.State = undefined;
+  private lastState?: fromJsonData.State;
   private allRollingStock = new Map<string, RollingStockDto>();
   private trainRollingStock = new Map<string, Map<number, RollingStockDto>>();
 
@@ -39,11 +40,11 @@ export class RollingStockSelector {
         posY: rsDto.posY,
         posZ: rsDto.posZ,
         mileage: rsDto.mileage,
-        orientationForward: rsDto.orientationForward,
-        smoke: rsDto.smoke,
-        hookStatus: rsDto.hookStatus,
-        hookGlueMode: rsDto.hookGlueMode,
-        active: rsDto.active,
+        ...optionalProperty('orientationForward', rsDto.orientationForward),
+        ...optionalProperty('smoke', rsDto.smoke),
+        ...optionalProperty('hookStatus', rsDto.hookStatus),
+        ...optionalProperty('hookGlueMode', rsDto.hookGlueMode),
+        ...optionalProperty('active', rsDto.active),
       };
       const trainRs = this.trainRollingStock.get(rollingStock.trainName) || new Map();
       trainRs.set(rollingStock.positionInTrain, rollingStock);
@@ -58,16 +59,15 @@ export class RollingStockSelector {
     const trainRollingStock = this.trainRollingStock.get(trainId) || new Map<number, RollingStockDto>();
     const sortedKeys: number[] = Array.from(trainRollingStock.keys()).sort((a, b) => a - b);
     for (const key of sortedKeys) {
-      rsList.push(trainRollingStock.get(key));
+      const rollingStock = trainRollingStock.get(key);
+      if (rollingStock) {
+        rsList.push(rollingStock);
+      }
     }
     return rsList;
   }
 
-  rollingStockInTrain(trainId: string, positionOfRollingStock: number): RollingStockDto {
-    if (this.trainRollingStock && this.trainRollingStock.get(trainId)) {
-      return this.trainRollingStock.get(trainId).get(positionOfRollingStock);
-    } else {
-      return undefined;
-    }
+  rollingStockInTrain(trainId: string, positionOfRollingStock: number): RollingStockDto | undefined {
+    return this.trainRollingStock.get(trainId)?.get(positionOfRollingStock);
   }
 }
