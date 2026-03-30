@@ -19,6 +19,7 @@ __pycache__
 /apps/*/dist
 /apps/*/node_modules
 /apps/*/*.tsbuildinfo
+/apps/web-server/settings.json
 
 /packages/*/build
 /packages/*/dist
@@ -189,3 +190,4 @@ luac.out
 web-app/src/app/client/modules/intersection/intersection-lane-display/example-svg.ts
 Lua_manual.pdf
 EEP18_Manual_GER.pdf
+package-lock.json

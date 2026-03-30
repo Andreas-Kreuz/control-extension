@@ -23,7 +23,7 @@
     "package-win": "node ../../scripts/sync-control-extension-version.mjs && yarn build && electron-builder build --win --x64",
     "pack": "node ../../scripts/sync-control-extension-version.mjs && electron-builder --dir",
     "dist": "node ../../scripts/sync-control-extension-version.mjs && electron-builder",
-    "persist-eep-state": "tsc && node ./build/server/eep-service/eep-state-reader.js"
+    "persist-eep-state": "tsc && node ./build/server/eep/helpers/EepStateReader.js"
   },
   "repository": "https://github.com/Andreas-Kreuz/control-extension",
   "keywords": [

@@ -17,6 +17,10 @@
 - Änderungen möglichst lokal und minimal halten. In diesem Repo sind viele Module zustandsbehaftet; kleine gezielte Patches sind besser als breite Refactorings.
 - Lua-Dateien verwenden das Charset latin1, alle anderen Dateien utf-8 (vergleiche .editorconfig)
 - Markdown-Dateien sollen korrekte deutsche Umlaute verwenden. ASCII-Ersatzschreibungen wie `ae`, `oe` oder `ue` nur beibehalten, wenn sie sich auf Lua-Code oder Lua-Bezeichner beziehen.
+- `yarn` ist die führende Paketverwaltung dieses Repos. Bei Doku- oder Script-Änderungen alte `npm`-Verweise aktiv prüfen und nur stehen lassen, wenn sie bewusst noch benötigt werden.
+- Generierte Build-Artefakte wie `*.tsbuildinfo` nicht einchecken; bei neu auftauchenden Cache-Dateien zuerst prüfen, ob sie in `.gitignore` gehören.
+- Unter Windows/PowerShell kann `yarn` an der lokalen Execution Policy scheitern; für Verifikation im Agent-Kontext ist dann `yarn.cmd` oft der robustere Aufruf.
+- Markdown-Dateien mit geplantem, aber noch nicht implementiertem Zielzustand klar als `TODO`, `Roadmap` oder `Zielbild` kennzeichnen, damit sie nicht mit der aktuellen Architektur verwechselt werden.
 
 ## Dateikodierung
 
@@ -129,6 +133,9 @@ with open('datei.lua', 'wb') as f:
   - `lua-format -c lua-format.conf -i <datei.lua>`
   - `lua-format -c lua-format.conf --check <datei.lua>`
   - dabei immer die Projektkonfiguration `lua-format.conf` aus dem Repo verwenden
+- Bei Änderungen an `package.json`-Skripten immer prüfen, ob die Hilfe aktualisiert werden muss:
+  - Root-Skripte aus dem Root-`package.json` müssen in `yarn ce-help` bzw. `scripts/ce-help.mjs` beschrieben sein.
+  - Wichtige Workspace-Skripte wie Entwicklerwerkzeuge müssen in der passenden Paket-README oder Kontextdoku beschrieben werden, auch wenn sie nicht in `ce-help` auftauchen.
 
 ## Testing und Verifikation
 
