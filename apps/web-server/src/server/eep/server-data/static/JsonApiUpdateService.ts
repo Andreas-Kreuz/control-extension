@@ -24,9 +24,13 @@ export default class JsonApiUpdateService {
           `</head><body><h1>/api/v1</h1><ul>${items}</ul></body></html>`,
       );
     });
-    this.router.get('/:room', (req, res) => {
+    this.router.get('/:room', (req, res, next?: express.NextFunction) => {
       const { room } = req.params;
       if (!this.reducer.roomAvailable(room)) {
+        if (next) {
+          next();
+          return;
+        }
         res.status(404).json({ error: 'not found' });
         return;
       }

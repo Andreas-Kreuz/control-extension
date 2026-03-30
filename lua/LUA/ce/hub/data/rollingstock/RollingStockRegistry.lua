@@ -1,7 +1,9 @@
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
 local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-local StockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+local RollingStockStaticDtoFactory = require("ce.hub.data.rollingstock.RollingStockStaticDtoFactory")
+local RollingStockDynamicDtoFactory = require("ce.hub.data.rollingstock.RollingStockDynamicDtoFactory")
 local TexturesDtoFactory = require("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
 local RotationDtoFactory = require("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
 local RollingStockRegistry = {}
@@ -13,18 +15,13 @@ local function isSelected(selectedCeTypes, ceType)
     return selectedCeTypes[ceType] == true
 end
 
----Creates a train object for the given train name, the train must exist
----@param rollingStockName string name of the train in EEP, e.g. "#Train 1"
----@return RollingStock
 function RollingStockRegistry.forName(rollingStockName)
     assert(rollingStockName, "Provide a rollingStockName")
     assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
     if allRollingStock[rollingStockName] then
-        ---@type RollingStock
         local rs = allRollingStock[rollingStockName]
         return rs
     else
-        ---@diagnostic disable-next-line: missing-fields
         local o = RollingStock:new({ rollingStockName = rollingStockName })
         allRollingStock[o.rollingStockName] = o
         RollingStockRegistry.rollingStockAppeared(o)
@@ -32,31 +29,35 @@ function RollingStockRegistry.forName(rollingStockName)
     end
 end
 
----A train appeared on the map
 function RollingStockRegistry.rollingStockAppeared(_)
-    -- is included in "TrainRegistry.fireChangeTrainsEvent()"
-    -- DataChangeBus.fireDataChanged("rolling-stocks", "id", rollingStock:toJsonStatic())
 end
 
----A train dissappeared from the map
----@param rollingStockName string
 function RollingStockRegistry.rollingStockDisappeared(rollingStockName)
     allRollingStock[rollingStockName] = nil
-    DataChangeBus.fireDataRemoved(StockDtoFactory.createRefDto(rollingStockName))
-    DataChangeBus.fireDataRemoved(
-        TexturesDtoFactory.createRefDto(rollingStockName))
-    DataChangeBus.fireDataRemoved(
-        RotationDtoFactory.createRefDto(rollingStockName))
+    DataChangeBus.fireDataRemoved(RollingStockStaticDtoFactory.createRefDto(rollingStockName))
+    DataChangeBus.fireDataRemoved(RollingStockDynamicDtoFactory.createRefDto(rollingStockName))
+    DataChangeBus.fireDataRemoved(TexturesDtoFactory.createRefDto(rollingStockName))
+    DataChangeBus.fireDataRemoved(RotationDtoFactory.createRefDto(rollingStockName))
 end
 
-function RollingStockRegistry.fireChangeRollingStockEvent(selectedCeTypes)
-    local modifiedStocks = {}
+function RollingStockRegistry.fireChangeRollingStockEvents(selectedCeTypes)
+    local modifiedStaticStocks = {}
+    local modifiedDynamicStocks = {}
     local modifiedTextures = {}
     local modifiedRotations = {}
     for _, rs in pairs(allRollingStock) do
-        if isSelected(selectedCeTypes, HubCeTypes.RollingStock) and rs.valuesUpdated then
-            modifiedStocks[rs.id] = rs
-            rs.valuesUpdated = false
+        if isSelected(selectedCeTypes, HubCeTypes.RollingStockStatic) and rs.staticValuesUpdated then
+            modifiedStaticStocks[rs.id] = rs
+            rs.staticValuesUpdated = false
+        end
+        if isSelected(selectedCeTypes, HubCeTypes.RollingStockDynamic)
+                and DynamicUpdateRegistry.isSelected(HubCeTypes.RollingStockDynamic, rs.id)
+                and (
+                    rs.dynamicValuesUpdated
+                    or DynamicUpdateRegistry.needsInitialSend(HubCeTypes.RollingStockDynamic, rs.id)
+                ) then
+            modifiedDynamicStocks[rs.id] = rs
+            rs.dynamicValuesUpdated = false
         end
         if isSelected(selectedCeTypes, HubCeTypes.RollingStockTextures) and rs.textureTextsUpdated then
             modifiedTextures[rs.id] = rs
@@ -67,10 +68,12 @@ function RollingStockRegistry.fireChangeRollingStockEvent(selectedCeTypes)
             rs.rotationUpdated = false
         end
     end
-    if next(modifiedStocks) ~= nil then
-        for _, stock in pairs(modifiedStocks) do
-            DataChangeBus.fireDataChanged(StockDtoFactory.createDto(stock))
-        end
+    for _, stock in pairs(modifiedStaticStocks) do
+        DataChangeBus.fireDataChanged(RollingStockStaticDtoFactory.createDto(stock))
+    end
+    for _, stock in pairs(modifiedDynamicStocks) do
+        DataChangeBus.fireDataChanged(RollingStockDynamicDtoFactory.createDto(stock))
+        DynamicUpdateRegistry.markSent(HubCeTypes.RollingStockDynamic, stock.id)
     end
     for _, stock in pairs(modifiedTextures) do
         DataChangeBus.fireDataChanged(TexturesDtoFactory.createDto(stock))

@@ -1,35 +1,27 @@
-import { useApiDataRoomHandler, useDynamicRoomHandler, useRoomHandler } from '../../io/useRoomHandler';
-import { CeTypes, RollingStockDto, TrackType, TrainListRoom } from '@ak/web-shared';
-import { TrainDto, TrainListDto, TrainType } from '@ak/web-shared';
+import { useDynamicRoomHandler } from '../../io/useRoomHandler';
+import { TrackType, TrainListRoom } from '@ak/web-shared';
+import { TrainListDto } from '@ak/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
 import useDebug from '../../io/useDebug';
 
 export interface State {
   trackType: TrackType;
   trainList: TrainListDto[];
-  rollingStock: Record<string, RollingStockDto>;
-  selectedTrain?: TrainDto;
-  selectedTrainName?: string;
 }
 
 export const initialState: State = {
   trackType: TrackType.Road,
   trainList: [],
-  rollingStock: {},
 };
 
 type Action =
   | { type: 'trains updated'; trains: TrainListDto[] }
-  | { type: 'rollingstock updated'; rollingStock: Record<string, RollingStockDto> }
   | { type: 'set track type'; trackType: TrackType };
 
 const reducer = (state: State, action: Action) => {
   switch (action.type) {
     case 'trains updated': {
       return { ...state, trainList: action.trains };
-    }
-    case 'rollingstock updated': {
-      return { ...state, rollingStock: action.rollingStock };
     }
     case 'set track type': {
       return { ...state, trackType: action.trackType };
@@ -54,16 +46,6 @@ export const TrainProvider = (props: { children: ReactNode }) => {
     dispatch({ type: 'trains updated', trains: trains });
   };
   useDynamicRoomHandler(TrainListRoom, state.trackType, trainDispatcher);
-
-  const rollingStockDispatcher = (payload: string) => {
-    if (debug) console.log('                 |⚠️ FIRED ---', '🚂 ROLLING STOCK UPDATED');
-    const data: Record<string, RollingStockDto> = JSON.parse(payload);
-    dispatch({
-      type: 'rollingstock updated',
-      rollingStock: data,
-    });
-  };
-  useApiDataRoomHandler(CeTypes.HubRollingStock, rollingStockDispatcher);
 
   return (
     <TrainContext.Provider value={state}>

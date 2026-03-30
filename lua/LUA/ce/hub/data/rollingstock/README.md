@@ -10,3 +10,5 @@
   - `values`: `table` of all entries stored in the train
 
 - `RollingStock` enthält alle Fahrzeuge
+
+Hinweis: Die aktuelle Tag-Strategie, Ownership der reservierten Schlüssel und der geplante Umbau sind im lokalen [TODO.md](TODO.md) beschrieben.

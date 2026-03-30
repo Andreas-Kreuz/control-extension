@@ -11,6 +11,8 @@ interface TestRequest {
   params: { room: string };
 }
 
+type TestNext = () => void;
+
 interface TestResponseResult {
   status: number;
   headers: Record<string, string>;
@@ -26,7 +28,7 @@ interface TestResponse {
 }
 
 interface TestRouter {
-  get(path: string, handler: (req: TestRequest, res: TestResponse) => void): void;
+  get(path: string, handler: (req: TestRequest, res: TestResponse, next?: TestNext) => void): void;
 }
 
 interface TestServer {
@@ -37,10 +39,10 @@ type TestStore = Pick<EepDataStore, 'currentState' | 'hasInitialState'>;
 type JsonApiUpdateServiceArgs = ConstructorParameters<typeof JsonApiUpdateService>;
 
 function makeRouter() {
-  const handlers: Record<string, (req: TestRequest, res: TestResponse) => void> = {};
+  const handlers: Record<string, (req: TestRequest, res: TestResponse, next?: TestNext) => void> = {};
 
   const router: TestRouter = {
-    get(path: string, handler: (req: TestRequest, res: TestResponse) => void) {
+    get(path: string, handler: (req: TestRequest, res: TestResponse, next?: TestNext) => void) {
       handlers[path] = handler;
     },
   };
@@ -87,6 +89,16 @@ function makeRouter() {
       assert.ok(handler);
       handler({ params: { room } }, res);
       return res.getResult();
+    },
+    callRoomWithNext(room: string) {
+      const res = makeRes();
+      const handler = handlers['/:room'];
+      assert.ok(handler);
+      let nextCalled = false;
+      handler({ params: { room } }, res, () => {
+        nextCalled = true;
+      });
+      return { nextCalled, result: res.getResult() };
     },
   };
 }
@@ -158,6 +170,20 @@ function testRoomReturns404WhenUnknown(): void {
   assert.deepEqual(body, { error: 'not found' });
 }
 
+function testRoomDelegatesToNextWhenUnknownAndNextProvided(): void {
+  const { router, callRoomWithNext } = makeRouter();
+  new JsonApiUpdateService(
+    router as unknown as JsonApiUpdateServiceArgs[0],
+    fakeIo as unknown as JsonApiUpdateServiceArgs[1],
+    fakeCacheService,
+  );
+
+  const { nextCalled, result } = callRoomWithNext('nonexistent');
+  assert.equal(nextCalled, true);
+  assert.equal(result.status, 200);
+  assert.equal(result.body, undefined);
+}
+
 function testRoomReturnsJsonAfterStateChange(): void {
   const { router, callRoom } = makeRouter();
   const svc = new JsonApiUpdateService(
@@ -193,6 +219,7 @@ export async function run(): Promise<void> {
   await runTest('index returns empty list when no rooms registered', testIndexReturnsEmptyListWithNoRooms);
   await runTest('index lists room links after state change', testIndexListsRoomsAfterStateChange);
   await runTest('/:room returns 404 for unknown room', testRoomReturns404WhenUnknown);
+  await runTest('/:room delegates to next for unknown room when provided', testRoomDelegatesToNextWhenUnknownAndNextProvided);
   await runTest('/:room returns JSON data for known room', testRoomReturnsJsonAfterStateChange);
   await runTest('/:room returns 404 after room is removed', testRoomReturns404AfterRoomIsRemoved);
 }

@@ -124,7 +124,7 @@ Die öffentlichen DTO-Felddefinitionen liegen in:
 Jede DtoFactory enthält einen Querverweis auf die zugehörige TypeScript-Definition im Server:
 
 ```lua
--- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainStaticLuaDto.ts
 ```
 
 Umgekehrt verweist jede TypeScript-LuaDto-Datei auf ihre Lua-DtoFactory.

@@ -24,7 +24,7 @@ ceType : string
        └─ dto : table
 ```
 
-- `ceType` ist die stabile Typkennung des Datenbereichs, z.B. `"ce.hub.Train"` oder `"ce.hub.Signal"`.
+- `ceType` ist die stabile Typkennung des Datenbereichs, z.B. `"ce.hub.TrainStatic"` oder `"ce.hub.Signal"`.
 - `dtoId` ist ein eindeutiger Schlüssel innerhalb des CeTypes, z.B. der Zugname oder die Signal-ID.
 - `dto` ist eine flache Tabelle mit serialisierbaren Werten — keine Funktionen, keine gemischten Schlüsseltypen.
 

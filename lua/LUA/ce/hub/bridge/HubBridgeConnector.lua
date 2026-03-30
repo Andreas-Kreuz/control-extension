@@ -1,6 +1,8 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.bridge.HubBridgeConnector ...") end
 local HubBridgeConnector = {}
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
+local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
+local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local collectedCeTypes = {}
 
@@ -55,8 +57,10 @@ function HubBridgeConnector.registerStatePublishers()
         StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.weather.WeatherStatePublisher"))
     end
     if isSelected(
-            HubCeTypes.Train,
-            HubCeTypes.RollingStock,
+            HubCeTypes.TrainStatic,
+            HubCeTypes.TrainDynamic,
+            HubCeTypes.RollingStockStatic,
+            HubCeTypes.RollingStockDynamic,
             HubCeTypes.RollingStockTextures,
             HubCeTypes.RollingStockRotation,
             HubCeTypes.AuxiliaryTrack,
@@ -69,6 +73,17 @@ function HubBridgeConnector.registerStatePublishers()
         TrainsAndTracksStatePublisher.setCollectedCeTypes(collectedCeTypes)
         StatePublisherRegistry.registerStatePublishers(TrainsAndTracksStatePublisher)
     end
+end
+
+function HubBridgeConnector.registerFunctions()
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "HubDynamicData.startUpdatesFor",
+        DynamicUpdateRegistry.startUpdatesFor
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "HubDynamicData.stopUpdatesFor",
+        DynamicUpdateRegistry.stopUpdatesFor
+    )
 end
 
 return HubBridgeConnector

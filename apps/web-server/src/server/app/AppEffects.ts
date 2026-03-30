@@ -210,7 +210,7 @@ export default class AppEffects {
 
   private registerMods(eepDataEffects: EepDataEffects, eepService: EepService) {
     // register dynamic rooms services
-    eepDataEffects.registerDynamicRoom(new TrainUpdateService(this.io));
+    eepDataEffects.registerDynamicRoom(new TrainUpdateService(this.io, this.router, eepService));
     eepDataEffects.registerDynamicRoom(new TransitService(this.io));
     eepDataEffects.registerDynamicRoom(new VersionService(this.io));
     eepDataEffects.registerDynamicRoom(new TimeService(this.io));

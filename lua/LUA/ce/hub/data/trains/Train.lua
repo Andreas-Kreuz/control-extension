@@ -11,6 +11,16 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 
 local Train = {}
 
+local function markStaticUpdated(train)
+    train.valuesUpdated = true
+    train.staticValuesUpdated = true
+end
+
+local function markDynamicUpdated(train)
+    train.dynamicValuesUpdated = true
+end
+
+
 ---Create a new train with the given object
 ---@param o Train must contain a string o.name
 function Train:new(o)
@@ -52,6 +62,8 @@ function Train:new(o)
     o.onTracks = {}
     o.occupiedTracks = {}
     o.valuesUpdated = true
+    o.staticValuesUpdated = true
+    o.dynamicValuesUpdated = true
     return o
 end
 
@@ -100,7 +112,7 @@ function Train:setValue(key, value)
         local rs = RollingStockRegistry.forName(rollingStockName)
         rs:setValue(key, value)
     end
-    self.valuesUpdated = true
+    markStaticUpdated(self)
 end
 
 ---Get the current value for key
@@ -141,7 +153,7 @@ function Train:setRoute(routeName)
     self.route = routeName
     EEPSetTrainRoute(self.name, self.route)
     if oldRoute ~= routeName then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, route = route})
     end
 end
@@ -161,7 +173,7 @@ function Train:setRollingStockCount(count)
     local oldCount = self.rollingStockCount
     self.rollingStockCount = count
     if oldCount ~= count then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, rollingStockCount = count})
     end
 end
@@ -182,7 +194,7 @@ function Train:setSpeed(speed)
     local oldSpeed = self.speed
     self.speed = speed
     if oldSpeed ~= speed then
-        self.valuesUpdated = true
+        markDynamicUpdated(self)
 
         if (oldSpeed < 0 and speed > 0) then self:setMovesForward(true) end
         if (oldSpeed > 0 and speed < 0) then self:setMovesForward(false) end
@@ -203,7 +215,7 @@ function Train:setTargetSpeed(targetSpeed)
     targetSpeed = tonumber(string.format("%1.1f", targetSpeed)) or 0
     local oldTargetSpeed = self.targetSpeed
     self.targetSpeed = targetSpeed
-    if oldTargetSpeed ~= targetSpeed then self.valuesUpdated = true end
+    if oldTargetSpeed ~= targetSpeed then markDynamicUpdated(self) end
 end
 
 function Train:getTargetSpeed()
@@ -216,7 +228,7 @@ function Train:setCouplingFront(couplingFront)
     assert(type(couplingFront) == "number", "Need 'couplingFront' as number")
     local oldCouplingFront = self.couplingFront
     self.couplingFront = couplingFront
-    if oldCouplingFront ~= couplingFront then self.valuesUpdated = true end
+    if oldCouplingFront ~= couplingFront then markDynamicUpdated(self) end
 end
 
 function Train:getCouplingFront()
@@ -229,7 +241,7 @@ function Train:setCouplingRear(couplingRear)
     assert(type(couplingRear) == "number", "Need 'couplingRear' as number")
     local oldCouplingRear = self.couplingRear
     self.couplingRear = couplingRear
-    if oldCouplingRear ~= couplingRear then self.valuesUpdated = true end
+    if oldCouplingRear ~= couplingRear then markDynamicUpdated(self) end
 end
 
 function Train:getCouplingRear()
@@ -242,7 +254,7 @@ function Train:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
-    if oldActive ~= active then self.valuesUpdated = true end
+    if oldActive ~= active then markDynamicUpdated(self) end
 end
 
 function Train:getActive()
@@ -257,7 +269,7 @@ function Train:setTrainyard(inTrainyard, trainyardId)
     local oldTrainyardId = self.trainyardId
     self.inTrainyard = inTrainyard
     self.trainyardId = inTrainyard and trainyardId or nil
-    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then self.valuesUpdated = true end
+    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then markDynamicUpdated(self) end
 end
 
 function Train:getTrainyardId()
@@ -278,7 +290,7 @@ function Train:setMovesForward(movesForward)
     local oldMovesForward = self.movesForward
     self.movesForward = movesForward
     if oldMovesForward ~= movesForward then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, speed = speed})
     end
 end
@@ -316,7 +328,7 @@ function Train:setTrackType(trackType)
     local oldTrackType = self.trackType
     self.trackType = trackType
     if oldTrackType ~= trackType then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, trackType = trackType})
     end
 end
@@ -329,7 +341,7 @@ function Train:setDirection(direction)
     local oldDirection = self:getDirection()
     self:setValue(TagKeys.Train.direction, direction)
     if oldDirection ~= direction then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, direction = direction})
     end
 end
@@ -341,7 +353,7 @@ function Train:setDestination(destination)
     local oldDestination = self:getDestination()
     self:setValue(TagKeys.Train.destination, destination)
     if oldDestination ~= destination then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, destination = destination})
     end
 end
@@ -358,7 +370,7 @@ function Train:setLine(line)
     local oldLine = self:getLine()
     self:setValue(TagKeys.Train.line, line)
     if oldLine ~= line then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, line = line})
     end
 end

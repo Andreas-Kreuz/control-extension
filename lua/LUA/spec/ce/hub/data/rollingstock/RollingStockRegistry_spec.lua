@@ -4,9 +4,11 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
     before_each(function ()
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.hub.eep.EepSimulatorStore")
+        clearModule("ce.hub.data.dynamic.DynamicUpdateRegistry")
         clearModule("ce.hub.data.rollingstock.RollingStock")
         clearModule("ce.hub.data.rollingstock.RollingStockRegistry")
-        clearModule("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        clearModule("ce.hub.data.rollingstock.RollingStockStaticDtoFactory")
+        clearModule("ce.hub.data.rollingstock.RollingStockDynamicDtoFactory")
         clearModule("ce.hub.data.rollingstock.RollingStockTexturesDtoFactory")
         clearModule("ce.hub.data.rollingstock.RollingStockRotationDtoFactory")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -35,7 +37,7 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
                     }, dto)
     end)
 
-    it("keeps all rolling stock entries when only one rolling stock changes", function ()
+    it("keeps all rolling stock static entries when only one rolling stock changes", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local HubCeTypes = require("ce.hub.data.HubCeTypes")
         local InternalDataStore = require("ce.hub.publish.InternalDataStore")
@@ -43,19 +45,41 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
 
         EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
         local rollingStock1 = RollingStockRegistry.forName("RS1")
-        local rollingStock2 = RollingStockRegistry.forName("RS2")
+        RollingStockRegistry.forName("RS2")
 
-        RollingStockRegistry.fireChangeRollingStockEvent({ [HubCeTypes.RollingStock] = true })
+        RollingStockRegistry.fireChangeRollingStockEvents({ [HubCeTypes.RollingStockStatic] = true })
 
-        assert.is_not_nil(InternalDataStore.get("ce.hub.RollingStock", "RS1"))
-        assert.is_not_nil(InternalDataStore.get("ce.hub.RollingStock", "RS2"))
+        assert.is_not_nil(InternalDataStore.get(HubCeTypes.RollingStockStatic, "RS1"))
+        assert.is_not_nil(InternalDataStore.get(HubCeTypes.RollingStockStatic, "RS2"))
 
         rollingStock1:setTrainName("T1")
-        RollingStockRegistry.fireChangeRollingStockEvent({ [HubCeTypes.RollingStock] = true })
+        RollingStockRegistry.fireChangeRollingStockEvents({ [HubCeTypes.RollingStockStatic] = true })
 
-        assert.equals("T1", InternalDataStore.get("ce.hub.RollingStock", "RS1").trainName)
-        assert.is_not_nil(InternalDataStore.get("ce.hub.RollingStock", "RS2"))
-        local _ = rollingStock2
+        assert.equals("T1", InternalDataStore.get(HubCeTypes.RollingStockStatic, "RS1").trainName)
+        assert.is_not_nil(InternalDataStore.get(HubCeTypes.RollingStockStatic, "RS2"))
+    end)
+
+    it("sends rolling stock dynamic data only for selected ids", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
+        local InternalDataStore = require("ce.hub.publish.InternalDataStore")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+
+        EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
+        local rollingStock1 = RollingStockRegistry.forName("RS1")
+        RollingStockRegistry.forName("RS2")
+
+        DynamicUpdateRegistry.startUpdatesFor(HubCeTypes.RollingStockDynamic, "RS1")
+        RollingStockRegistry.fireChangeRollingStockEvents({ [HubCeTypes.RollingStockDynamic] = true })
+
+        assert.is_not_nil(InternalDataStore.get(HubCeTypes.RollingStockDynamic, "RS1"))
+        assert.is_nil(InternalDataStore.get(HubCeTypes.RollingStockDynamic, "RS2"))
+
+        rollingStock1:setMileage(1234)
+        RollingStockRegistry.fireChangeRollingStockEvents({ [HubCeTypes.RollingStockDynamic] = true })
+
+        assert.equals(1234, InternalDataStore.get(HubCeTypes.RollingStockDynamic, "RS1").mileage)
     end)
 
     it("emits texture and rotation updates as per-rolling-stock delta changes", function ()
@@ -82,7 +106,7 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
         rollingStock:setRotation(1.234, 2.345, 3.456)
         secondRollingStock:setRotation(4.444, 5.555, 6.666)
 
-        RollingStockRegistry.fireChangeRollingStockEvent({
+        RollingStockRegistry.fireChangeRollingStockEvents({
             [HubCeTypes.RollingStockTextures] = true,
             [HubCeTypes.RollingStockRotation] = true
         })
@@ -139,19 +163,21 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
                     }, changedByRoomAndKey["ce.hub.RollingStockRotation:RS2"])
 
         rollingStock:setRotation(1.23, 2.35, 3.46)
-        RollingStockRegistry.fireChangeRollingStockEvent({ [HubCeTypes.RollingStockRotation] = true })
+        RollingStockRegistry.fireChangeRollingStockEvents({ [HubCeTypes.RollingStockRotation] = true })
         assert.equals(4, #changed)
 
         RollingStockRegistry.rollingStockDisappeared("RS1")
 
         assert.same({
-                        "ce.hub.RollingStock",
+                        "ce.hub.RollingStockStatic",
+                        "ce.hub.RollingStockDynamic",
                         "ce.hub.RollingStockTextures",
                         "ce.hub.RollingStockRotation"
                     }, {
                         removed[1].ceType,
                         removed[2].ceType,
-                        removed[3].ceType
+                        removed[3].ceType,
+                        removed[4].ceType
                     })
     end)
 end)

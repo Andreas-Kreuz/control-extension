@@ -23,8 +23,10 @@ CeTypeRegistry.registerCeTypes(
     { ceType = CeHubModule.CeTypes.Switch, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.Structure, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.Time, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Train, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStock, keyId = "id", owner = CeHubModule.name },
+    { ceType = CeHubModule.CeTypes.TrainStatic, keyId = "id", owner = CeHubModule.name },
+    { ceType = CeHubModule.CeTypes.TrainDynamic, keyId = "id", owner = CeHubModule.name },
+    { ceType = CeHubModule.CeTypes.RollingStockStatic, keyId = "id", owner = CeHubModule.name },
+    { ceType = CeHubModule.CeTypes.RollingStockDynamic, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.RollingStockTextures, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.RollingStockRotation, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.AuxiliaryTrack, keyId = "id", owner = CeHubModule.name },
@@ -37,6 +39,7 @@ CeTypeRegistry.registerCeTypes(
 function CeHubModule.init()
     if not CeHubModule.enabled or initialized then return end
     HubBridgeConnector.registerStatePublishers()
+    HubBridgeConnector.registerFunctions()
     initialized = true
 end
 

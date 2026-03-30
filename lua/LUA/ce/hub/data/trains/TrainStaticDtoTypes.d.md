@@ -1,13 +1,14 @@
-# Train DTO-CeTypes
+# TrainStatic DTO-CeTypes
 
-## CeType `ce.hub.Train`
+## CeType `ce.hub.TrainStatic`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.ce.hub.Train.TrainDtoFactory`
+- DtoFactory: `ce.hub.data.trains.TrainStaticDtoFactory`
 
 | Name                | Typ           |
 | ------------------- | ------------- |
 | `id`                | `string`      |
+| `name`              | `string`      |
 | `route`             | `string`      |
 | `rollingStockCount` | `number`      |
 | `length`            | `number`      |
@@ -16,11 +17,3 @@
 | `direction`         | `string\|nil` |
 | `trackType`         | `string\|nil` |
 | `movesForward`      | `boolean`     |
-| `speed`             | `number`      |
-| `targetSpeed`       | `number`      |
-| `couplingFront`     | `number`      |
-| `couplingRear`      | `number`      |
-| `active`            | `boolean`     |
-| `trainyardId`       | `number\|nil` |
-| `inTrainyard`       | `boolean`     |
-| `occupiedTacks`     | `table`       |

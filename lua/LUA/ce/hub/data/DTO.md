@@ -56,8 +56,10 @@ Wichtig:
 | Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
 | Freie Datenslots                    | `ce.hub.FreeSlot`                       | `id`      |
 | Strukturen                          | `ce.hub.Structure`                      | `id`      |
-| Züge                                | `ce.hub.Train`                          | `id`      |
-| RollingStock                        | `ce.hub.RollingStock`                   | `id`      |
+| Züge, statisch                      | `ce.hub.TrainStatic`                    | `id`      |
+| Züge, dynamisch                     | `ce.hub.TrainDynamic`                   | `id`      |
+| RollingStock, statisch              | `ce.hub.RollingStockStatic`             | `id`      |
+| RollingStock, dynamisch             | `ce.hub.RollingStockDynamic`            | `id`      |
 | RollingStock-Textflächen            | `ce.hub.RollingStockTextures`           | `id`      |
 | RollingStock-Rotation               | `ce.hub.RollingStockRotation`           | `id`      |
 | Sonstige Gleise                     | `ce.hub.AuxiliaryTrack`                 | `id`      |
@@ -280,40 +282,28 @@ Vollständige Liste `modelType` für Strukturen laut `Lua_manual.pdf` und `EEPSt
 | `25` | Landschaftselemente Terra                             |
 | `38` | Landschaftselemente, Bodenmodelle zur 3D-Texturierung |
 
-### `ce.hub.Train`
+### `ce.hub.TrainStatic`
 
-Elementtyp: Zug / Fahrzeugverband
+Elementtyp: statische Zugdaten / selten geänderte Verbandsdaten
 
-| Name                | Typ                     | Wertebereich                                      | Beschreibung                                                                            |
-| ------------------- | ----------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `id`                | `string`                | Zugname, typ. `#...`                              | Name des Fahrzeugverbands                                                               |
-| `route`             | `string`                | Routenname, fallback `Alle`                       | Route aus `EEPGetTrainRoute`                                                            |
-| `rollingStockCount` | `integer`               | `>= 0`                                            | Anzahl Rollmaterialien aus `EEPGetRollingstockItemsCount`                               |
-| `length`            | `number`                | Meter, `>= 0`                                     | Zuglänge aus `EEPGetTrainLength`                                                        |
-| `line`              | `string` \| `nil`       | freier Text                                       | aus dem Tag-Modell der Bibliothek                                                       |
-| `destination`       | `string` \| `nil`       | freier Text                                       | aus dem Tag-Modell der Bibliothek                                                       |
-| `direction`         | `string` \| `nil`       | freier Text                                       | aus dem Tag-Modell der Bibliothek                                                       |
-| `trackType`         | `string` \| `nil`       | z. B. `rail`, `road`, `tram`, `auxiliary`         | Bibliotheksklassifikation, nicht direkt EEP                                             |
-| `movesForward`      | `boolean`               | `true`, `false`                                   | aus der Zuggeschwindigkeit abgeleitete Fahrtrichtung                                    |
-| `speed`             | `number`                | km/h; negativ für Rückwärtsfahrt möglich          | aktuelle Geschwindigkeit aus `EEPGetTrainSpeed(trainName)`                              |
-| `targetSpeed`       | `number`                | km/h                                              | Zielgeschwindigkeit aus `EEPGetTrainSpeed(trainName, true)`                             |
-| `couplingFront`     | `integer`               | Statuscode                                        | Zustand der vorderen Zugkupplung aus `EEPGetTrainCouplingFront()`                       |
-| `couplingRear`      | `integer`               | Statuscode                                        | Zustand der hinteren Zugkupplung aus `EEPGetTrainCouplingRear()`                        |
-| `active`            | `boolean`               | `true`, `false`                                   | ob der Zug aktuell in EEP ausgewählt ist, abgeleitet aus `EEPGetTrainActive()`          |
-| `trainyardId`       | `integer` \| `nil`      | Depot-ID                                          | ID des virtuellen Depots aus `EEPIsTrainInTrainyard()`                                  |
-| `inTrainyard`       | `boolean`               | `true`, `false`                                   | ob sich der Zug in einem virtuellen Depot befindet                                      |
-| `occupiedTacks`     | `table<string, number>` | Welche Track ID und Abstand `trackId -> distance` | durch die Bibliothek ermittelte belegte Tracks; Schreibweise ist im Code absichtlich so |
+| Name                | Typ                | Wertebereich                              | Beschreibung                                                 |
+| ------------------- | ------------------ | ----------------------------------------- | ------------------------------------------------------------ |
+| `id`                | `string`           | Zugname, typ. `#...`                      | Name des Fahrzeugverbands                                    |
+| `name`              | `string`           | Zugname                                   | Anzeigename; aktuell identisch zu `id`                       |
+| `route`             | `string`           | Routenname, fallback `Alle`               | Route aus `EEPGetTrainRoute`                                 |
+| `rollingStockCount` | `integer`          | `>= 0`                                    | Anzahl Rollmaterialien aus `EEPGetRollingstockItemsCount`    |
+| `length`            | `number`           | Meter, `>= 0`                             | Zuglänge aus `EEPGetTrainLength`                             |
+| `line`              | `string` \| `nil`  | freier Text                               | aus dem Tag-Modell der Bibliothek                            |
+| `destination`       | `string` \| `nil`  | freier Text                               | aus dem Tag-Modell der Bibliothek                            |
+| `direction`         | `string` \| `nil`  | freier Text                               | aus dem Tag-Modell der Bibliothek                            |
+| `trackType`         | `string` \| `nil`  | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                  |
+| `movesForward`      | `boolean`          | `true`, `false`                           | aus der Zuggeschwindigkeit abgeleitete Fahrtrichtung         |
 
 Abgeleitet aus:
 
 - `EEPGetTrainRoute(trainName)`
 - `EEPGetRollingstockItemsCount(trainName)`
 - `EEPGetTrainLength(trainName)`
-- `EEPGetTrainSpeed(trainName)`
-- `EEPGetTrainCouplingFront(trainName)`
-- `EEPGetTrainCouplingRear(trainName)`
-- `EEPGetTrainActive()`
-- `EEPIsTrainInTrainyard(trainName)`
 
 Vollständige Liste `trackType` laut `TrainDetection` / `TrackDetection`:
 
@@ -325,38 +315,50 @@ Vollständige Liste `trackType` laut `TrainDetection` / `TrackDetection`:
 | `auxiliary` | sonstige Splines / Wasserwege                                         |
 | `control`   | Steuerstrecken / nicht direkt einem der vier Track-Systeme zugeordnet |
 
-### `ce.hub.RollingStock`
+### `ce.hub.TrainDynamic`
 
-Elementtyp: RollingStock / Fahrzeug
+Elementtyp: häufig aktualisierte Zugdaten
 
-| Name                 | Typ                   | Wertebereich                              | Beschreibung                                                                                          |
-| -------------------- | --------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `id`                 | `string`              | Fahrzeugname                              | technischer Schlüssel; aktuell gleich `name`                                                          |
-| `name`               | `string`              | Fahrzeugname                              | Name des Rollmaterials                                                                                |
-| `trainName`          | `string`              | Zugname oder `""`                         | zugeordneter Fahrzeugverband                                                                          |
-| `positionInTrain`    | `integer`             | `0`-basiert, `-1` falls unbekannt         | Position im Zugverband                                                                                |
-| `couplingFront`      | `integer`             | Statuscode der vorderen Kupplung          | aus `EEPRollingstockGetCouplingFront`                                                                 |
-| `couplingRear`       | `integer`             | Statuscode der hinteren Kupplung          | aus `EEPRollingstockGetCouplingRear`                                                                  |
-| `length`             | `number`              | Meter                                     | Fahrzeuglänge aus `EEPRollingstockGetLength`                                                          |
-| `propelled`          | `boolean` \| `number` | im Projekt als "hat Antrieb" genutzt      | abgeleitet aus `EEPRollingstockGetMotor`; das Lua-Handbuch beschreibt hier die Motor-/Ganginformation |
-| `modelType`          | `integer`             | `1` bis `15`                              | Modelltyp aus `EEPRollingstockGetModelType`                                                           |
-| `modelTypeText`      | `string`              | feste Textmenge                           | lesbarer Modelltyptext aus lokalem Mapping                                                            |
-| `tag`                | `string`              | freier Text bis 1024 Zeichen              | Tag-Text aus `EEPRollingstockGetTagText`                                                              |
-| `orientationForward` | `boolean`             | `true`, `false`                           | relative Ausrichtung im Zugverband aus `EEPRollingstockGetOrientation()`                              |
-| `smoke`              | `number` \| `nil`     | Statuscode                                | Rauchzustand des Rollmaterials aus `EEPRollingstockGetSmoke()`                                        |
-| `hookStatus`         | `number` \| `nil`     | Statuscode                                | Hakenzustand aus `EEPRollingstockGetHook()`                                                           |
-| `hookGlueMode`       | `number` \| `nil`     | Statuscode                                | Haken-/Ladegutzustand aus `EEPRollingstockGetHookGlue()`                                              |
-| `active`             | `boolean`             | `true`, `false`                           | ob das Rollmaterial aktuell in EEP ausgewählt ist, abgeleitet aus `EEPRollingstockGetActive()`        |
-| `nr`                 | `string` \| `nil`     | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
-| `trackId`            | `integer`             | Track-ID                                  | aus `EEPRollingstockGetTrack`                                                                         |
-| `trackDistance`      | `number`              | Meter vom Gleisanfang                     | aus `EEPRollingstockGetTrack`                                                                         |
-| `trackDirection`     | `integer`             | `1` oder `0`                              | laut Lua-Handbuch: `1 = in Fahrtrichtung`, `0 = entgegen`                                             |
-| `trackSystem`        | `integer`             | `1` bis `4`                               | laut Lua-Handbuch: `1 = Bahngleise`, `2 = Straßen`, `3 = Tram`, `4 = sonstige Splines/Wasserwege`     |
-| `trackType`          | `string` \| `nil`     | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
-| `posX`               | `number`              | Anlagenkoordinate                         | X-Position aus `EEPRollingstockGetPosition`                                                           |
-| `posY`               | `number`              | Anlagenkoordinate                         | Y-Position aus `EEPRollingstockGetPosition`                                                           |
-| `posZ`               | `number`              | Anlagenkoordinate                         | Z-Position aus `EEPRollingstockGetPosition`                                                           |
-| `mileage`            | `number`              | Zahl                                      | Zurückgelegte Strecke in Metern seit Einsetzen des Modells aus `EEPRollingstockGetMileage`            |
+| Name            | Typ                | Wertebereich         | Beschreibung                                               |
+| --------------- | ------------------ | -------------------- | ---------------------------------------------------------- |
+| `id`            | `string`           | Zugname              | Referenz auf den Fahrzeugverband                           |
+| `speed`         | `number`           | km/h                 | aktuelle Geschwindigkeit aus `EEPGetTrainSpeed(trainName)` |
+| `targetSpeed`   | `number`           | km/h                 | Zielgeschwindigkeit aus `EEPGetTrainSpeed(trainName, true)`|
+| `couplingFront` | `integer`          | Statuscode           | Zustand der vorderen Zugkupplung                           |
+| `couplingRear`  | `integer`          | Statuscode           | Zustand der hinteren Zugkupplung                           |
+| `active`        | `boolean`          | `true`, `false`      | ob der Zug aktuell in EEP ausgewählt ist                   |
+| `trainyardId`   | `integer` \| `nil` | Depot-ID             | ID des virtuellen Depots aus `EEPIsTrainInTrainyard()`     |
+| `inTrainyard`   | `boolean`          | `true`, `false`      | ob sich der Zug in einem virtuellen Depot befindet         |
+
+Abgeleitet aus:
+
+- `EEPGetTrainSpeed(trainName)`
+- `EEPGetTrainCouplingFront(trainName)`
+- `EEPGetTrainCouplingRear(trainName)`
+- `EEPGetTrainActive()`
+- `EEPIsTrainInTrainyard(trainName)`
+
+### `ce.hub.RollingStockStatic`
+
+Elementtyp: statische RollingStock-Daten / selten geänderte Fahrzeugdaten
+
+| Name              | Typ                  | Wertebereich                              | Beschreibung                                                                                          |
+| ----------------- | -------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `id`              | `string`             | Fahrzeugname                              | technischer Schlüssel; aktuell gleich `name`                                                          |
+| `name`            | `string`             | Fahrzeugname                              | Name des Rollmaterials                                                                                |
+| `trainName`       | `string`             | Zugname oder `""`                         | zugeordneter Fahrzeugverband                                                                          |
+| `positionInTrain` | `integer`            | `0`-basiert, `-1` falls unbekannt         | Position im Zugverband                                                                                |
+| `couplingFront`   | `integer`            | Statuscode der vorderen Kupplung          | aus `EEPRollingstockGetCouplingFront`                                                                 |
+| `couplingRear`    | `integer`            | Statuscode der hinteren Kupplung          | aus `EEPRollingstockGetCouplingRear`                                                                  |
+| `length`          | `number`             | Meter                                     | Fahrzeuglänge aus `EEPRollingstockGetLength`                                                          |
+| `propelled`       | `boolean` \| `number`| im Projekt als "hat Antrieb" genutzt      | abgeleitet aus `EEPRollingstockGetMotor`; das Lua-Handbuch beschreibt hier die Motor-/Ganginformation |
+| `modelType`       | `integer`            | `1` bis `15`                              | Modelltyp aus `EEPRollingstockGetModelType`                                                           |
+| `modelTypeText`   | `string`             | feste Textmenge                           | lesbarer Modelltyptext aus lokalem Mapping                                                            |
+| `tag`             | `string`             | freier Text bis 1024 Zeichen              | Tag-Text aus `EEPRollingstockGetTagText`                                                              |
+| `nr`              | `string` \| `nil`    | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
+| `trackType`       | `string` \| `nil`    | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
+| `hookStatus`      | `number`             | Statuscode                                | Hakenzustand aus `EEPRollingstockGetHook()`                                                           |
+| `hookGlueMode`    | `number`             | Statuscode                                | Haken-/Ladegutzand aus `EEPRollingstockGetHookGlue()`                                                 |
 
 Abgeleitet aus:
 
@@ -364,10 +366,32 @@ Abgeleitet aus:
 - `EEPRollingstockGetMotor`
 - `EEPRollingstockGetModelType`
 - `EEPRollingstockGetTagText`
-- `EEPRollingstockGetOrientation`
-- `EEPRollingstockGetSmoke`
 - `EEPRollingstockGetHook`
 - `EEPRollingstockGetHookGlue`
+
+### `ce.hub.RollingStockDynamic`
+
+Elementtyp: häufig aktualisierte RollingStock-Daten
+
+| Name                 | Typ               | Wertebereich                          | Beschreibung                                                                                      |
+| -------------------- | ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `id`                 | `string`          | Fahrzeugname                          | Referenz auf das Rollmaterial                                                                     |
+| `trackId`            | `integer`         | Track-ID                              | aus `EEPRollingstockGetTrack`                                                                     |
+| `trackDistance`      | `number`          | Meter vom Gleisanfang                 | aus `EEPRollingstockGetTrack`                                                                     |
+| `trackDirection`     | `integer`         | `1` oder `0`                          | laut Lua-Handbuch: `1 = in Fahrtrichtung`, `0 = entgegen`                                         |
+| `trackSystem`        | `integer`         | `1` bis `4`                           | laut Lua-Handbuch: `1 = Bahngleise`, `2 = Straßen`, `3 = Tram`, `4 = sonstige Splines/Wasserwege`|
+| `posX`               | `number`          | Anlagenkoordinate                     | X-Position aus `EEPRollingstockGetPosition`                                                       |
+| `posY`               | `number`          | Anlagenkoordinate                     | Y-Position aus `EEPRollingstockGetPosition`                                                       |
+| `posZ`               | `number`          | Anlagenkoordinate                     | Z-Position aus `EEPRollingstockGetPosition`                                                       |
+| `mileage`            | `number`          | Zahl                                  | zurückgelegte Strecke in Metern seit Einsetzen des Modells                                        |
+| `orientationForward` | `boolean`         | `true`, `false`                       | relative Ausrichtung im Zugverband aus `EEPRollingstockGetOrientation()`                          |
+| `smoke`              | `number`          | Statuscode                            | Rauchzustand des Rollmaterials aus `EEPRollingstockGetSmoke()`                                    |
+| `active`             | `boolean`         | `true`, `false`                       | ob das Rollmaterial aktuell in EEP ausgewählt ist, abgeleitet aus `EEPRollingstockGetActive()`   |
+
+Abgeleitet aus:
+
+- `EEPRollingstockGetOrientation`
+- `EEPRollingstockGetSmoke`
 - `EEPRollingstockGetActive()`
 - `EEPRollingstockGetTrack`
 - `EEPRollingstockGetPosition`
@@ -375,7 +399,7 @@ Abgeleitet aus:
 
 Hinweis:
 
-- Textflächen und Rotation werden nicht mehr direkt in `ce.hub.RollingStock` transportiert, sondern separat in `ce.hub.RollingStockTextures` und `ce.hub.RollingStockRotation`.
+- Textflächen und Rotation werden nicht mehr direkt in den RollingStock-DTOs transportiert, sondern separat in `ce.hub.RollingStockTextures` und `ce.hub.RollingStockRotation`.
 
 ### `ce.hub.RollingStockTextures`
 

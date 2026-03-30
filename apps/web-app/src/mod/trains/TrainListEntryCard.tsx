@@ -35,7 +35,7 @@ const TrainListDtoCard = (props: { train: TrainListDto }) => {
       id={t.id}
       additionalChips={additionalChips}
       icon={getIconName(t.trainType)}
-      image={getImageName(t.trackType)}
+      image={getImageName(t.trackType ?? 'train')}
       //  to={`/train/${t.id}`}
       expanded={expanded}
       setExpanded={setExpanded}

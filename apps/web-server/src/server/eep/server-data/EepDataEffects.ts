@@ -51,6 +51,20 @@ export default class EepDataEffects {
         socket.emit(ServerStatusEvent.CounterUpdated, JSON.stringify(this.store.getEventCounter()));
       }
     });
+
+    socket.on(RoomEvent.LeaveRoom, (rooms: { room: string }) => {
+      if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
+      const room = rooms.room;
+      this.jsonApiController.onLeaveRoom(socket, room);
+      this.stateController.onLeaveRoom(socket, room);
+    });
+
+    socket.on('disconnect', () => {
+      this.jsonApiController.onSocketClose(socket);
+      this.stateController.onSocketClose(socket);
+    });
   }
 
   refreshStateIfRequired() {

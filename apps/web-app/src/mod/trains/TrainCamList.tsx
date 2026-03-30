@@ -1,4 +1,5 @@
 import useRollingStock from './useRollingStock';
+import useRollingStockDynamic from './useRollingStockDynamic';
 import useSetRollingStockCam from './useSetRollingStockCam';
 import useSetTrainCam from './useSetTrainCam';
 import CamIcon from '@mui/icons-material/Videocam';
@@ -20,6 +21,7 @@ const ListItem = styled('li')(({ theme }) => ({
 
 const TrainCamList = (props: { trainName: string; rollingStockName: string }) => {
   const rollingStock = useRollingStock(props.rollingStockName);
+  const rollingStockDynamic = useRollingStockDynamic(props.rollingStockName);
   const setRollingStockCam = useSetRollingStockCam();
   const setTrainCam = useSetTrainCam();
   const debug = useDebug();
@@ -31,6 +33,7 @@ const TrainCamList = (props: { trainName: string; rollingStockName: string }) =>
     { key: -2, label: 'Front 2' },
     { key: 10, label: 'Kabine' },
   ]);
+  void rollingStockDynamic;
 
   const changeCam = (key: number) => {
     switch (key) {

@@ -38,10 +38,10 @@ function TrainsAndTracksStatePublisher.syncState()
     if not initialized then TrainsAndTracksStatePublisher.initialize() end
     TrainDetection.update(selectedCeTypes)
 
-    if isSelected(HubCeTypes.Train) then
-        TrainRegistry.fireChangeTrainsEvent()
+    if isSelected(HubCeTypes.TrainStatic, HubCeTypes.TrainDynamic) then
+        TrainRegistry.fireChangeTrainEvents(selectedCeTypes)
     end
-    RollingStockRegistry.fireChangeRollingStockEvent(selectedCeTypes)
+    RollingStockRegistry.fireChangeRollingStockEvents(selectedCeTypes)
 
     return data
 end

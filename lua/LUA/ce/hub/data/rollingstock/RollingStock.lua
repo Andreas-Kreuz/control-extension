@@ -43,6 +43,16 @@ end
 
 local RollingStock = {}
 
+local function markStaticUpdated(rollingStock)
+    rollingStock.valuesUpdated = true
+    rollingStock.staticValuesUpdated = true
+end
+
+local function markDynamicUpdated(rollingStock)
+    rollingStock.dynamicValuesUpdated = true
+end
+
+
 ---Create a new RollingStock and init it
 ---@param o RollingStock
 ---@return RollingStock
@@ -109,6 +119,8 @@ function RollingStock:new(o)
     o.rotY = rotationOk and round2(rotY) or 0
     o.rotZ = rotationOk and round2(rotZ) or 0
     o.valuesUpdated = true
+    o.staticValuesUpdated = true
+    o.dynamicValuesUpdated = true
     o.textureTextsUpdated = true
     o.rotationUpdated = true
     return o
@@ -142,7 +154,7 @@ function RollingStock:save(clearCurrentInfo)
     local hresult = EEPRollingstockSetTagText(self.rollingStockName, newTag)
     assert(hresult)
     if oldTag ~= self.tag then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, tag = self.tag})
     end
 end
@@ -166,7 +178,7 @@ function RollingStock:setWagonNr(nr)
     self:setValue(TagKeys.RollingStock.wagonNumber, nr)
     self.model:setWagonNr(self.rollingStockName, nr)
     if oldNr ~= nr then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, nr = nr})
     end
 end
@@ -181,7 +193,7 @@ function RollingStock:setTrainName(trainName)
     local oldTrainName = self.trainName
     self.trainName = trainName
     if oldTrainName ~= trainName then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, trainName = trainName})
     end
 end
@@ -201,7 +213,7 @@ function RollingStock:setPositionInTrain(positionInTrain)
     local oldPositionInTrain = self.positionInTrain
     self.positionInTrain = positionInTrain
     if oldPositionInTrain ~= positionInTrain then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, positionInTrain = positionInTrain})
     end
 end
@@ -253,7 +265,7 @@ function RollingStock:setOrientationForward(orientationForward)
     assert(type(orientationForward) == "boolean", "Need 'orientationForward' as boolean")
     local oldOrientationForward = self.orientationForward
     self.orientationForward = orientationForward
-    if oldOrientationForward ~= orientationForward then self.valuesUpdated = true end
+    if oldOrientationForward ~= orientationForward then markDynamicUpdated(self) end
 end
 
 function RollingStock:getOrientationForward()
@@ -266,7 +278,7 @@ function RollingStock:setSmoke(smoke)
     assert(type(smoke) == "number", "Need 'smoke' as number")
     local oldSmoke = self.smoke
     self.smoke = smoke
-    if oldSmoke ~= smoke then self.valuesUpdated = true end
+    if oldSmoke ~= smoke then markDynamicUpdated(self) end
 end
 
 function RollingStock:getSmoke()
@@ -279,7 +291,7 @@ function RollingStock:setHookStatus(hookStatus)
     assert(type(hookStatus) == "number", "Need 'hookStatus' as number")
     local oldHookStatus = self.hookStatus
     self.hookStatus = hookStatus
-    if oldHookStatus ~= hookStatus then self.valuesUpdated = true end
+    if oldHookStatus ~= hookStatus then markStaticUpdated(self) end
 end
 
 function RollingStock:getHookStatus()
@@ -292,7 +304,7 @@ function RollingStock:setHookGlueMode(hookGlueMode)
     assert(type(hookGlueMode) == "number", "Need 'hookGlueMode' as number")
     local oldHookGlueMode = self.hookGlueMode
     self.hookGlueMode = hookGlueMode
-    if oldHookGlueMode ~= hookGlueMode then self.valuesUpdated = true end
+    if oldHookGlueMode ~= hookGlueMode then markStaticUpdated(self) end
 end
 
 function RollingStock:getHookGlueMode()
@@ -305,7 +317,7 @@ function RollingStock:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
-    if oldActive ~= active then self.valuesUpdated = true end
+    if oldActive ~= active then markDynamicUpdated(self) end
 end
 
 function RollingStock:getActive()
@@ -369,7 +381,7 @@ function RollingStock:setCouplingFront(couplingFront)
     local oldCoupling = self.couplingFront
     self.couplingFront = couplingFront
     if oldCoupling ~= couplingFront then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, couplingFront = couplingFront})
     end
 end
@@ -389,7 +401,7 @@ function RollingStock:setCouplingRear(couplingRear)
     local oldCoupling = self.couplingRear
     self.couplingRear = couplingRear
     if oldCoupling ~= couplingRear then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, couplingRear = couplingRear})
     end
 end
@@ -425,7 +437,7 @@ function RollingStock:setTrack(trackId, trackDistance, trackDirection, trackSyst
     self.trackDirection = trackDirection
     self.trackSystem = trackSystem
     if oldId ~= trackId or oldDist ~= trackDistance or oldDir ~= trackDirection or oldSys ~= trackSystem then
-        self.valuesUpdated = true
+        markDynamicUpdated(self)
         -- DataChangeBus.fireDataChanged("rollingStockInfo", "id", {
         --     id = self.id,
         --     trackId = trackId,
@@ -465,7 +477,7 @@ function RollingStock:setTrackType(trackType)
     local oldValue = self.trackType
     self.trackType = trackType
     if oldValue ~= trackType then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, trackType = trackType})
     end
 end
@@ -491,7 +503,7 @@ function RollingStock:setPosition(x, y, z)
     self.y = y
     self.z = z
     if oldX ~= x or oldY ~= y or oldZ ~= z then
-        self.valuesUpdated = true
+        markDynamicUpdated(self)
         -- DataChangeBus.fireDataChanged("rollingStockInfo", "id", {id = self.id, posX = x, posY = y, posZ = z})
     end
 end
@@ -525,7 +537,7 @@ function RollingStock:setMileage(mileage)
     local oldMileage = self.mileage
     self.mileage = mileage
     if oldMileage ~= mileage then
-        self.valuesUpdated = true
+        markDynamicUpdated(self)
         -- DataChangeBus.fireDataChanged("rollingStockInfo", "id", {id = self.id, mileage = mileage})
     end
 end

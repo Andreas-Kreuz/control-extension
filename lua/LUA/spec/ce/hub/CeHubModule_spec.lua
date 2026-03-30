@@ -36,7 +36,7 @@ insulate("CeHubModule", function ()
         assert.equals(CeHubModule, CeHubModule.setOptions({
             waitForServer = false,
             collectedCeTypes = {
-                CeHubModule.CeTypes.Train,
+                CeHubModule.CeTypes.TrainStatic,
             },
         }))
 
@@ -61,7 +61,7 @@ insulate("CeHubModule", function ()
             require("ce.mods.road.CeRoadModule"),
             CeHubModule.setOptions({
                 collectedCeTypes = {
-                    CeHubModule.CeTypes.Train,
+                    CeHubModule.CeTypes.TrainStatic,
                 },
             })
         )

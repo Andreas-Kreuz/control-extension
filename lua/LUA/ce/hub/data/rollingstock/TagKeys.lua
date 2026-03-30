@@ -1,6 +1,6 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.TagKeys ...") end
 
--- TODO: General rule: Saving and loading data in EEP from and into tables must not be part of ce/hub, but of the respective module. ce/hub should only provide the data structures and the logic to detect changes and fire events. The modules should decide what to do with the data and how to save and load it.
+-- TODO: Architecture and implementation plan for RollingStock tag ownership: see TODO.md in this directory.
 ---@class TagKeys
 local TagKeys = {}
 

@@ -9,6 +9,7 @@ export default class DynamicRoomManager {
   private debug = false;
   private updatePending = false;
   private dataUpdaters: DynamicDataUpdater[] = [];
+  private roomServices: DynamicRoomService[] = [];
   private roomMap: Map<
     DynamicRoom,
     {
@@ -23,6 +24,7 @@ export default class DynamicRoomManager {
   constructor(private io: Server) {}
 
   registerService(dynamicRoomService: DynamicRoomService) {
+    this.roomServices.push(dynamicRoomService);
     dynamicRoomService.getUpdaters().forEach((element: DynamicDataUpdater) => {
       this.dataUpdaters.push(element);
     });
@@ -97,6 +99,7 @@ export default class DynamicRoomManager {
           console.log(dynRoomSetting.id, ': sending event', eventName, ' to ', nameOfRoom, ' on socket ', socket.id);
       }
     });
+    this.roomServices.forEach((service) => service.onJoinRoom?.(socket, nameOfRoom));
   };
 
   onLeaveRoom = (socket: Socket, nameOfRoom: string): void => {
@@ -106,6 +109,7 @@ export default class DynamicRoomManager {
         if (this.debug) console.log(dynRoomSetting.id, ': disconnect ', nameOfRoom, ' from socket ', socket.id);
       }
     });
+    this.roomServices.forEach((service) => service.onLeaveRoom?.(socket, nameOfRoom));
   };
 
   onSocketClose = (socket: Socket): void => {
@@ -113,5 +117,6 @@ export default class DynamicRoomManager {
       dynRoomSetting.sockets.delete(socket);
       if (this.debug) console.log(dynRoomSetting.id, ': disconnect socket ', socket.id);
     });
+    this.roomServices.forEach((service) => service.onSocketClose?.(socket));
   };
 }
