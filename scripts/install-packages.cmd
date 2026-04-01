@@ -1,7 +1,7 @@
 @REM NOTE:
 @REM -----
-@REM The "npm" command must be in the PATH variable
-@REM Requires node.js to be installed (https://nodejs.org/en/).
+@REM This helper installs project dependencies via Yarn.
+@REM Requires Node.js and Yarn/Corepack to be available in PATH.
 
 setlocal
 SET oldDir=%CD%

@@ -16,3 +16,14 @@ Dieses Projekt enthält die optionale Web-Applikation der Control Extension für
 
 Mehr Informationen zur Control Extension für EEP:
 <https://github.com/Andreas-Kreuz/control-extension>
+
+## Wichtige Skripte
+
+- `yarn workspace @ak/web-app run storybook`
+  Startet Storybook für isolierte UI-Entwicklung und Dokumentation der Komponenten.
+
+- `yarn test-app`
+  Startet die interaktive E2E-Testumgebung mit Electron-Server, Web-App und Cypress UI.
+
+- `yarn workspace @ak/web-app run cy-tests-run-headless`
+  Führt die E2E-Tests headless aus und startet dafür den benötigten Testserver im Hintergrund.

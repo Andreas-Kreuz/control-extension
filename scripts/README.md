@@ -73,11 +73,14 @@ Nun kann das Verzeichnis `control-extension` in VS Code als Ordner geöffnet wer
 Für die Entwicklung der Web-Komponenten musst Du noch die notwendigen Pakete installieren:
 
 ```bash
-npm install -g corepack
+corepack enable
 yarn
 ```
 
-Wenn Du die Windows-Skripte verwenden willst, kannst Du alternativ `.\scripts\install-npms.cmd` benutzen.
+Falls `corepack` auf Deinem System noch nicht verfügbar ist, kannst Du es einmalig auch über Node.js bereitstellen.
+Wichtig für dieses Repository ist danach der eigentliche Projektworkflow mit `yarn`.
+
+Wenn Du die Windows-Skripte verwenden willst, kannst Du alternativ `.\scripts\install-packages.cmd` benutzen.
 
 ### Einmal komplett bauen
 

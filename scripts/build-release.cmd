@@ -1,8 +1,7 @@
 @REM -----
 @REM NOTE:
 @REM -----
-@REM The "npm" command must be in the PATH variable
-@REM Requires node.js to be installed (https://nodejs.org/en/).
+@REM Requires Node.js and Yarn/Corepack to be available in PATH.
 @REM
 @REM The "lua" command must be in the PATH variable
 @REM Requires Lua to be installed (http://luabinaries.sourceforge.net/download.html)

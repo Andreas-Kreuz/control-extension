@@ -9,9 +9,9 @@ img: '/docs/assets/headers/SourceCode.png'
 
 # Was ist `ce.hub.data`?
 
-Dieses Paket sammelt Daten aus EEP (Züge, Gleise, Signale, Weichen usw.), strukturiert sie in Räume mit DTOs und stellt sie über den Datenbus bereit, damit Server und Web App sie empfangen können.
+Dieses Paket sammelt Daten aus EEP (Züge, Gleise, Signale, Weichen usw.), strukturiert sie in CeTypes mit DTOs und stellt sie über den Datenbus bereit, damit Server und Web App sie empfangen können.
 
-## Datenräume
+## Datenbereiche und CeTypes
 
 Jeder Datentyp hat einen eigenen Unterordner mit den zugehörigen Collectors und DTO-Typen:
 
@@ -25,7 +25,7 @@ Jeder Datentyp hat einen eigenen Unterordner mit den zugehörigen Collectors und
 - [tracks/](tracks/) — Gleisinformationen
 - [store/](store/) — Materialisierter Snapshot
 
-Eine vollständige Übersicht aller Datenräume und DTO-Strukturen findest Du in [DTO.md](DTO.md).
+Eine vollständige Übersicht aller CeTypes und DTO-Strukturen findest Du in [DTO.md](DTO.md).
 
 ---
 

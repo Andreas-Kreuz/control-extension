@@ -15,6 +15,14 @@ Dieses Projekt enthält den optionalen Server der Control Extension für EEP.
 Mehr Informationen zur Control Extension für EEP:
 <https://github.com/Andreas-Kreuz/control-extension>
 
+## Wichtige Skripte
+
+- `yarn workspace @ak/web-server run lint`
+  Prüft den TypeScript-Code des Servers mit ESLint.
+
+- `yarn workspace @ak/web-server run start-headless`
+  Startet den Server ohne Electron-Oberfläche im Headless-Modus.
+
 ## Pairing und Zugriff
 
 Im regulären Betrieb gelten für Web-Clients folgende Regeln:

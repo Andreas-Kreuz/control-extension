@@ -10,7 +10,7 @@ Created with:
 If `yarn` is not available yet, set it up first as described in `scripts/README.md`:
 
 ```bash
-npm install -g corepack
+corepack enable
 yarn
 ```
 
