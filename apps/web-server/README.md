@@ -20,7 +20,7 @@ Mehr Informationen zur Control Extension für EEP:
 - `yarn workspace @ak/web-server run lint`
   Prüft den TypeScript-Code des Servers mit ESLint.
 
-- `yarn workspace @ak/web-server run start-headless`
+- `yarn workspace @ak/web-server run run:headless`
   Startet den Server ohne Electron-Oberfläche im Headless-Modus.
 
 ## Pairing und Zugriff

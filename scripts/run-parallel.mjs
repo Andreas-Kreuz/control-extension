@@ -18,7 +18,6 @@ let shutdownState = null;
 
 const killChild = (child) => {
   if (isWindows && child.pid) {
-    // On Windows, kill the entire process tree so orphaned node processes are cleaned up
     spawn('taskkill', ['/T', '/F', '/PID', String(child.pid)], { stdio: 'ignore' });
   } else {
     child.kill('SIGTERM');

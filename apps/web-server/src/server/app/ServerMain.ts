@@ -1,6 +1,5 @@
 import SocketService from '../clientio/SocketService';
 import AppEffects from './AppEffects';
-import CommandLineParser from './config/CommandLineParser';
 import TrustedServerAddressPolicy from './config/TrustedServerAddressPolicy';
 import * as cors from 'cors';
 import { EventEmitter } from 'events';
@@ -12,7 +11,6 @@ import { Server } from 'socket.io';
 interface ServerMainOptions {
   adminSessionValue?: string;
   allowOpenServerRoute?: boolean;
-  allowViteDevServerRoute?: boolean;
 }
 
 function dirPage(title: string, items: string): string {
@@ -43,7 +41,7 @@ export class ServerMain {
 
     this.configureProcessDefaults();
     this.configureApplication();
-    this.allowOpenServerRoute = this.resolveAllowOpenServerRoute();
+    this.allowOpenServerRoute = this.options.allowOpenServerRoute ?? false;
     this.trustedServerAddressPolicy = this.createTrustedServerAddressPolicy();
     this.io = this.createSocketIoServer();
     this.socketService = this.createSocketService();
@@ -71,15 +69,10 @@ export class ServerMain {
     this.app.use(cors(this.createCorsOptions()));
   }
 
-  private resolveAllowOpenServerRoute(): boolean {
-    const parsedCommandLineOptions = new CommandLineParser().parseOptions();
-    return this.options.allowOpenServerRoute ?? Boolean(parsedCommandLineOptions['testmode']);
-  }
-
   private createTrustedServerAddressPolicy(): TrustedServerAddressPolicy {
     return new TrustedServerAddressPolicy({
       serverPort: this.port,
-      allowDevServerOrigins: this.options.allowViteDevServerRoute || this.allowOpenServerRoute,
+      allowDevServerOrigins: this.allowOpenServerRoute,
     });
   }
 
@@ -95,9 +88,6 @@ export class ServerMain {
       adminCookieName: this.adminCookieName,
       allowOpenServerRoute: this.allowOpenServerRoute,
       ...(this.options.adminSessionValue !== undefined ? { adminSessionValue: this.options.adminSessionValue } : {}),
-      ...(this.options.allowViteDevServerRoute !== undefined
-        ? { allowViteDevServerRoute: this.options.allowViteDevServerRoute }
-        : {}),
       trustedServerAddressPolicy: this.trustedServerAddressPolicy,
     });
   }

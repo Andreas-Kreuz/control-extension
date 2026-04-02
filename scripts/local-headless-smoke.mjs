@@ -1,7 +1,10 @@
 import { spawn } from 'node:child_process';
+import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
-const appDir = process.cwd();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(__dirname, '..');
 const baseUrl = 'http://127.0.0.1:3000';
 const probeUrls = [
   `${baseUrl}/server`,
@@ -34,8 +37,8 @@ function terminate(child) {
   }
 }
 
-const server = spawn('yarn', ['run', 'start-server-headless'], {
-  cwd: appDir,
+const server = spawn('yarn', ['workspace', '@ak/web-server', 'run', 'run:test'], {
+  cwd: repoRoot,
   stdio: 'inherit',
   shell: process.platform === 'win32',
 });

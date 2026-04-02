@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint \"src/**/*.ts\"",
-    "watch": "tsc -w"
+    "dev": "tsc -w"
   },
   "keywords": [
     "Shared",

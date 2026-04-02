@@ -13,7 +13,6 @@ interface SocketServiceOptions {
   adminCookieName?: string | undefined;
   adminSessionValue?: string | undefined;
   allowOpenServerRoute?: boolean | undefined;
-  allowViteDevServerRoute?: boolean | undefined;
   trustedServerAddressPolicy?: TrustedServerAddressPolicy | undefined;
 }
 
@@ -27,7 +26,6 @@ export default class SocketService {
   private adminCookieName: string;
   private adminSessionValue: string | undefined;
   private allowOpenServerRoute: boolean;
-  private allowViteDevServerRoute: boolean;
   private trustedServerAddressPolicy: TrustedServerAddressPolicy | undefined;
 
   constructor(
@@ -37,7 +35,6 @@ export default class SocketService {
     this.adminCookieName = options.adminCookieName ?? 'ce-admin-session';
     this.adminSessionValue = options.adminSessionValue;
     this.allowOpenServerRoute = options.allowOpenServerRoute ?? false;
-    this.allowViteDevServerRoute = options.allowViteDevServerRoute ?? false;
     this.trustedServerAddressPolicy = options.trustedServerAddressPolicy;
     this.allowRoomJoining();
   }
@@ -188,16 +185,6 @@ export default class SocketService {
         hostHeader: socket.handshake.headers.host,
         remoteAddress: socket.handshake.address,
       })
-    ) {
-      return true;
-    }
-
-    if (
-      this.allowViteDevServerRoute &&
-      this.trustedServerAddressPolicy?.isLocalRequestAddress(socket.handshake.address) &&
-      this.trustedServerAddressPolicy?.isTrustedOrigin(
-        typeof socket.handshake.headers.origin === 'string' ? socket.handshake.headers.origin : undefined,
-      )
     ) {
       return true;
     }

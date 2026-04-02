@@ -127,7 +127,7 @@ with open('datei.lua', 'wb') as f:
   - Entwicklerdoku und typische Workflows: `README_DEV.md`
 - Wichtige Ergänzungen:
   - Storybook der Web-App: `yarn dev:storybook`
-  - Headless-Server direkt starten: `yarn workspace @ak/web-server run start-headless`
+  - Headless-Server direkt starten: `yarn workspace @ak/web-server run run:headless`
 - Lua prüfen, falls lokal installiert:
   - `luacheck --config .luacheckrc lua/LUA`
   - `busted --config-file .busted --verbose --`

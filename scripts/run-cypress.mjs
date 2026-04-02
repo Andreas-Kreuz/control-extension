@@ -8,7 +8,7 @@ delete env.ELECTRON_RUN_AS_NODE;
 
 const args = process.argv.slice(2);
 const scriptDir = fileURLToPath(new URL('.', import.meta.url));
-const cypressBin = resolve(scriptDir, '../../../node_modules/cypress/bin/cypress');
+const cypressBin = resolve(scriptDir, '../node_modules/cypress/bin/cypress');
 
 const child = spawn(process.execPath, [cypressBin, ...args], {
   cwd: process.cwd(),

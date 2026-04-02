@@ -23,7 +23,7 @@ Mehr Informationen zur Control Extension für EEP:
   Startet Storybook für isolierte UI-Entwicklung und Dokumentation der Komponenten.
 
 - `yarn test:app:ui`
-  Startet die interaktive E2E-Testumgebung mit Electron-Server, Web-App und Cypress UI.
+  Startet die interaktive E2E-Testumgebung mit Server, Web-App und Cypress UI.
 
 - `yarn test:app`
   Führt die E2E-Tests headless aus und startet dafür den benötigten Testserver im Hintergrund.

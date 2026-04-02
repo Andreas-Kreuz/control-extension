@@ -17,6 +17,11 @@ export default class CommandLineParser {
         description: 'If true, this app will go to TESTMODE.',
       },
       {
+        name: 'allow-dev-origins',
+        type: Boolean,
+        description: 'If true, this app will allow trusted dev and test origins.',
+      },
+      {
         name: 'help',
         alias: 'h',
         type: Boolean,
