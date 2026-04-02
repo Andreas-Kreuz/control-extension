@@ -30,7 +30,7 @@ import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
-import QRCode from 'react-qr-code';
+import { QRCode } from 'react-qr-code';
 
 function ServerHome() {
   const [serverHost, setServerHost] = useState<string>();
