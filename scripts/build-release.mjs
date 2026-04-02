@@ -10,8 +10,8 @@ function run(command, cwd = repoRoot) {
   execSync(command, { stdio: 'inherit', cwd });
 }
 
-// Build server + web-app + package as Windows exe
-run('yarn workspace @ak/web-server run package-win');
+// Build the Windows application artifact using the public root command.
+run('yarn run build:win');
 
 // Copy exe to lua directory
 cpSync(

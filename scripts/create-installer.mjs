@@ -162,16 +162,7 @@ function generateInstallIni(files, eepVersion) {
 function createZip(sourceDir, zipPath) {
   rmSync(zipPath, { force: true });
 
-  // Strategy 1: 7z from PATH
-  try {
-    execSync(`7z a "${zipPath}" "${sourceDir}\\*"`, { stdio: 'inherit' });
-    console.log(`[create-installer] ZIP created with 7z: ${zipPath}`);
-    return;
-  } catch {
-    console.log('[create-installer] 7z not available, falling back to PowerShell...');
-  }
-
-  // Strategy 2: PowerShell Compress-Archive (Windows built-in)
+  // Use the built-in PowerShell archive command on supported Windows systems.
   execSync(
     `powershell -NoProfile -Command "Compress-Archive -Path '${sourceDir}\\*' -DestinationPath '${zipPath}' -CompressionLevel Optimal -Force"`,
     { stdio: 'inherit' },

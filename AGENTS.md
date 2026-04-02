@@ -121,26 +121,19 @@ with open('datei.lua', 'wb') as f:
 
 ## Nützliche Kommandos
 
-- Root-Kommandos:
+- Root-Einstieg:
   - Abhängigkeiten installieren: `yarn`
   - Verfügbare Root-Skripte anzeigen: `yarn ce-help`
-  - Gesamtbuild: `yarn build`
-  - Repo formatieren: `yarn format`
-  - Nur Web-/TS-/JSON-/Markdown-Dateien formatieren: `yarn format-prettier`
-  - Lua formatieren: `yarn format-lua`
-  - Web-App + Server im Spielmodus: `yarn dev-app`
-  - Electron-Server mit eingebauter App starten: `yarn play`
-- Wichtige Workspace-Kommandos:
-  - Web-App Storybook: `yarn workspace @ak/web-app run storybook`
-  - Web-App E2E interaktiv: `yarn test-app`
-  - Web-App E2E headless: `yarn workspace @ak/web-app run cy-tests-run-headless`
-  - Web-Server linten: `yarn workspace @ak/web-server run lint`
-  - Headless-Server starten: `yarn workspace @ak/web-server run start-headless`
+  - Entwicklerdoku und typische Workflows: `README_DEV.md`
+- Wichtige Ergänzungen:
+  - Storybook der Web-App: `yarn dev:storybook`
+  - Headless-Server direkt starten: `yarn workspace @ak/web-server run start-headless`
 - Lua prüfen, falls lokal installiert:
   - `luacheck --config .luacheckrc lua/LUA`
+  - `busted --config-file .busted --verbose --`
   - `busted --config-file .busted --verbose --coverage --`
 - Lua formatieren:
-  - Standardweg im Repo ist `yarn format-lua`
+  - Standardweg im Repo ist `yarn format:lua`
   - `scripts/format-lua-with-sumneko.mjs` nutzt den lokal installierten VSCode Lua Language Server (`sumneko.lua`) und formatiert dadurch möglichst wie VSCode
   - das Skript schließt Verzeichnisse mit dem Segmentnamen `anlagen` oder `demo-anlagen` bewusst aus
   - wenn der VSCode-Extensions-Ordner nicht am Standardpfad liegt, kann `VSCODE_EXTENSIONS` gesetzt werden
@@ -153,12 +146,13 @@ with open('datei.lua', 'wb') as f:
 - Für Lua-Änderungen zuerst betroffene Specs unter `lua/LUA/spec` prüfen.
 - Nach Lua-Änderungen, wenn die Laufzeit lokal verfügbar ist, immer zusätzlich ausführen:
   - `luacheck --config .luacheckrc lua/LUA`
-  - `busted --config-file .busted --verbose --coverage --`
+  - `busted --config-file .busted --verbose --`
+  - bei Bedarf zusätzlich `busted --config-file .busted --verbose --coverage --`
 - Für Änderungen an Web-Typen oder Events mindestens `@ak/web-shared` und den betroffenen Consumer mitdenken.
 - Nach Änderungen nach Möglichkeit `yarn format` ausführen.
-  - `yarn format` ruft `format-prettier` und `format-lua` nacheinander auf.
-  - Wenn nur Nicht-Lua-Dateien betroffen sind, kann stattdessen gezielt `yarn format-prettier` verwendet werden.
-  - Wenn nur Lua-Dateien betroffen sind, kann stattdessen gezielt `yarn format-lua` verwendet werden.
+  - `yarn format` ruft `format:apps` und `format:lua` nacheinander auf.
+  - Wenn nur Nicht-Lua-Dateien betroffen sind, kann stattdessen gezielt `yarn format:apps` verwendet werden.
+  - Wenn nur Lua-Dateien betroffen sind, kann stattdessen gezielt `yarn format:lua` verwendet werden.
   - `yarn format` kann in diesem Repository an bereits vorhandenen Liquid-/HTML-Dateien unter `docs/` scheitern; solche Fehler getrennt von den gerade geänderten Dateien bewerten.
 - Wenn keine passende Laufzeit verfügbar ist, statisch prüfen und explizit benennen, was nicht ausgeführt werden konnte.
 

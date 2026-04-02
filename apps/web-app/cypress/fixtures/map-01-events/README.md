@@ -7,7 +7,7 @@ These files are input for the EEP-Webserver.
 
 Created with:
 
-If `yarn` is not available yet, set it up first as described in `scripts/README.md`:
+If `yarn` is not available yet, set it up first as described in `README_DEV.md`:
 
 ```bash
 corepack enable

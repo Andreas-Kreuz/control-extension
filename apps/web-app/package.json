@@ -8,6 +8,7 @@
     "build-shared": "yarn workspace @ak/web-shared run build",
     "dev": "yarn run build-shared && yarn vite --host --configLoader native",
     "build": "node ../../scripts/sync-control-extension-version.mjs && yarn run build-shared && yarn vite build --configLoader native",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "preview": "vite preview --configLoader native",
     "start-server-for-playing": "yarn workspace @ak/web-server run start",
     "start-playing": "node ./scripts/run-parallel.mjs \"yarn run start-server-for-playing\" \"yarn run dev\"",

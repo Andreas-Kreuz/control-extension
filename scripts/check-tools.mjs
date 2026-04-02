@@ -9,10 +9,18 @@ const __dirname = path.dirname(__filename);
 void __dirname;
 
 const tools = [
-  { name: 'lua', purpose: 'Lua runtime           — required for: build, release', args: '-v' },
-  { name: 'luacheck', purpose: 'Lua linter            — required for: check-lua, check, release' },
-  { name: 'busted', purpose: 'Lua test runner       — required for: check-lua, check, release' },
-  { name: 'bundle', purpose: 'Ruby Bundler / Jekyll — required for: dev-docs, check-doc, check, release' },
+  { name: 'lua', purpose: 'Lua runtime           — required for: build:release', args: '-v' },
+  { name: 'luacheck', purpose: 'Lua linter            — required for: lint:lua, check' },
+  { name: 'busted', purpose: 'Lua test runner       — required for: test:lua, check' },
+  {
+    name: 'bundle',
+    purpose: 'Ruby Bundler / Jekyll — required for: dev:docs, test:docs, check',
+  },
+  {
+    name: 'powershell',
+    purpose: 'Windows PowerShell     — required for: build:release',
+    args: '-NoProfile -Command "$PSVersionTable.PSVersion.ToString()"',
+  },
 ];
 
 function isAvailable(command, args = '--version') {

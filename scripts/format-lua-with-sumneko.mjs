@@ -12,8 +12,8 @@ function printHelp() {
 Formats Lua files with the locally installed VSCode formatter "sumneko.lua".
 
 Usage:
-  yarn format-lua
-  yarn format-lua -- <file-or-directory> [...]
+  yarn format:lua
+  yarn format:lua -- <file-or-directory> [...]
 
 Behavior:
   - Scans all .lua files below the current workspace when no paths are given
@@ -258,7 +258,7 @@ class LspClient {
     await this.request('initialize', {
       processId: process.pid,
       clientInfo: {
-        name: 'control-extension format-lua',
+        name: 'control-extension format:lua',
       },
       rootUri: this.workspaceUri,
       rootPath: this.workspaceRoot,
