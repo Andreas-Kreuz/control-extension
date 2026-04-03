@@ -71,7 +71,7 @@ function ModuleRegistry.unregisterModules(...)
     updateModuleOrder()
 end
 
--- Register the hub module (bootstraps scheduler, core publishers, and data publishers)
-ModuleRegistry.registerModules(require("ce.hub.CeHubModule"))
+-- Wrap require() so only the module table is passed here.
+ModuleRegistry.registerModules((require("ce.hub.CeHubModule")))
 
 return ModuleRegistry
