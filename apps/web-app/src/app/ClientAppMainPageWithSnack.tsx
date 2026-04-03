@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 const ClientAppMainPage = lazy(() => import('./ClientAppMainPage'));
-const StatusSnackBar = lazy(() => import('../status/StatusSnackBar'));
+const StatusSnackBar = lazy(() => import('../mod/status/StatusSnackBar'));
 import LogMod from '../mod/log/LogMod';
 
 function ClientAppMainPageWithSnack() {

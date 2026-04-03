@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDynamicRoomHandler } from '../../io/useRoomHandler';
+import { useDynamicRoomHandler } from '../../socket/useRoomHandler';
 import TimeDesc from './model/TimeDesc';
 import { RuntimeStatisticsDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeDto } from '@ce/web-shared';
 

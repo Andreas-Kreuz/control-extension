@@ -1,7 +1,7 @@
-import { useRoomHandler } from '../../io/useRoomHandler';
+import { useRoomHandler } from '../../socket/useRoomHandler';
 import { LogEvent } from '@ce/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
-import useDebug from '../../io/useDebug';
+import useDebug from '../../socket/useDebug';
 
 type LogState = {
   lines: { line: string; key: number }[];

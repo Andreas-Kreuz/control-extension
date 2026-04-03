@@ -1,5 +1,5 @@
 import { useState, SetStateAction } from 'react';
-import { useApiDataRoomHandler } from '../io/useRoomHandler';
+import { useApiDataRoomHandler } from '../../socket/useRoomHandler';
 import { CeTypes } from '@ce/web-shared';
 
 export function useServerStatus(): [SetStateAction<boolean>, SetStateAction<boolean>, SetStateAction<number>] {

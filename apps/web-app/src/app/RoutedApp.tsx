@@ -10,7 +10,7 @@ const MainMenu = lazy(() => import('../home/MainMenu'));
 const TransitOverview = lazy(() => import('../mod/lines/TransitOverview'));
 const Server = lazy(() => import('../server/Server'));
 const StatisticsOverview = lazy(() => import('../mod/statistics/StatisticsMod'));
-const StatusGrid = lazy(() => import('../status/StatusGrid'));
+const StatusGrid = lazy(() => import('../mod/status/StatusGrid'));
 const Trains = lazy(() => import('../mod/trains/TrainMod'));
 
 const homeRoutes = [

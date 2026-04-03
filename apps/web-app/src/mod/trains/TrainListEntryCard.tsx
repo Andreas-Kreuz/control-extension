@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
+const AppCardBg = lazy(() => import('../../components/AppCardBg'));
 import TrainDetails, { getTrainChips } from './TrainDetails';
 import { trainIconFor } from './trainIconFor';
 import { TrainListDto, TrainType } from '@ce/web-shared';

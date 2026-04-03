@@ -1,4 +1,4 @@
-import { useDynamicRoomHandler } from '../../io/useRoomHandler';
+import { useDynamicRoomHandler } from '../../socket/useRoomHandler';
 import { TrainDynamicDto, TrainDynamicRoom } from '@ce/web-shared';
 import { useState } from 'react';
 

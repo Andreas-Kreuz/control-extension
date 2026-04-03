@@ -1,4 +1,4 @@
-import { useSocket } from '../../io/SocketProvider';
+import { useSocket } from '../../socket/SocketProvider';
 import LogLines from './LogLines';
 import { useLog, useLogDispatch } from './LogProvider';
 import { LogEvent } from '@ce/web-shared';

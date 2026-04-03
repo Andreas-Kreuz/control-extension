@@ -1,11 +1,11 @@
 import { lazy } from 'react';
-import ModuleSettingsButton from '../../ui/ModuleSettingsButton';
+import ModuleSettingsButton from '../../components/ModuleSettingsButton';
 import useLines from './useLines';
 import useTransitSettings from './useTransitSettings';
 import Grid from '@mui/material/Grid';
-const AppCardGridContainer = lazy(() => import('../../ui/AppCardGridContainer'));
-const AppPage = lazy(() => import('../../ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../ui/AppPageHeadline'));
+const AppCardGridContainer = lazy(() => import('../../components/AppCardGridContainer'));
+const AppPage = lazy(() => import('../../components/AppPage'));
+const AppPageHeadline = lazy(() => import('../../components/AppPageHeadline'));
 const TransitLineCard = lazy(() => import('./TransitLineCard'));
 
 function TransitOverview() {

@@ -1,8 +1,8 @@
-import { useDynamicRoomHandler } from '../../io/useRoomHandler';
+import { useDynamicRoomHandler } from '../../socket/useRoomHandler';
 import { TrackType, TrainListRoom } from '@ce/web-shared';
 import { TrainListDto } from '@ce/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
-import useDebug from '../../io/useDebug';
+import useDebug from '../../socket/useDebug';
 
 export interface State {
   trackType: TrackType;

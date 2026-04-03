@@ -1,5 +1,5 @@
-import { useSocketUrl } from '../io/SocketProvider';
-import ConnectingScreen from '../ui/ConnectingScreen';
+import { useSocketUrl } from '../socket/SocketProvider';
+import ConnectingScreen from '../components/ConnectingScreen';
 
 function ConnectingScreenWrapper() {
   const socketUrl = useSocketUrl();

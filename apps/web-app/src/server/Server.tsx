@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box';
 import './Server.css';
 import ServerHome from './ServerHome';
-import ConnectingScreenWrapper from '../base/ConnectingScreenWrapper';
-import { useSocketIsAdmin, useSocketIsConnected, useSocketPairingStatus } from '../io/SocketProvider';
+import ConnectingScreenWrapper from '../app/ConnectingScreenWrapper';
+import { useSocketIsAdmin, useSocketIsConnected, useSocketPairingStatus } from '../socket/SocketProvider';
 import { PairingStatus } from '@ce/web-shared';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';

@@ -8,7 +8,7 @@ import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { useState } from 'react';
-import useDebug from '../../io/useDebug';
+import useDebug from '../../socket/useDebug';
 
 interface ChipData {
   key: number;

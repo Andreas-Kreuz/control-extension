@@ -1,10 +1,10 @@
 import { lazy } from 'react';
-const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
-const AppCardGrid = lazy(() => import('../../ui/AppCardGrid'));
-const AppCardGridContainer = lazy(() => import('../../ui/AppCardGridContainer'));
-const AppPage = lazy(() => import('../../ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../ui/AppPageHeadline'));
-const ModuleSettingsButton = lazy(() => import('../../ui/ModuleSettingsButton'));
+const AppCardBg = lazy(() => import('../../components/AppCardBg'));
+const AppCardGrid = lazy(() => import('../../components/AppCardGrid'));
+const AppCardGridContainer = lazy(() => import('../../components/AppCardGridContainer'));
+const AppPage = lazy(() => import('../../components/AppPage'));
+const AppPageHeadline = lazy(() => import('../../components/AppPageHeadline'));
+const ModuleSettingsButton = lazy(() => import('../../components/ModuleSettingsButton'));
 import useIntersectionSettings from './useIntersectionSettings';
 import useIntersections from './useIntersections';
 import Button from '@mui/material/Button';

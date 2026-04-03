@@ -1,6 +1,6 @@
-import { useSocket } from '../../io/SocketProvider';
+import { useSocket } from '../../socket/SocketProvider';
 import { CommandEvent } from '@ce/web-shared';
-import useDebug from '../../io/useDebug';
+import useDebug from '../../socket/useDebug';
 
 const useSetTrainCam = () => {
   const socket = useSocket();

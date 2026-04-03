@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import Grid from '@mui/material/Grid';
-const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
+const AppCardBg = lazy(() => import('../../components/AppCardBg'));
 import TimeDesc from './model/TimeDesc';
 import React from 'react';
 

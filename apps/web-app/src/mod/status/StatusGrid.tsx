@@ -1,4 +1,4 @@
-import { useSocketIsConnected } from '../io/SocketProvider';
+import { useSocketIsConnected } from '../../socket/SocketProvider';
 import StatusCard from './StatusCard';
 import { useServerStatus } from './useServerInfo';
 import Grid from '@mui/material/Grid';
