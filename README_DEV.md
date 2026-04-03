@@ -16,14 +16,14 @@ Dieses Dokument ist der zentrale Einstieg für die Entwicklungsumgebung und die 
 ### Erforderliche Werkzeuge
 
 - [Node.js](https://nodejs.org/en/) mit Corepack/Yarn
-- [Lua 5.3](http://luabinaries.sourceforge.net/download.html)
+- [Lua 5.3](http://luabinaries.sourceforge.net/download.html) mit einem `lua`-, `lua53`- oder `lua5.3`-Kommando in `PATH`
 - Windows PowerShell mit eingebautem `Compress-Archive` für `yarn build:release`
 
 ### Erforderlich je nach Aufgabe
 
-- [Ruby](https://rubyinstaller.org/) mit Bundler/Jekyll für `yarn dev:docs` und `yarn test:docs`
-- [`luacheck`](https://github.com/mpeterv/luacheck) fuer `yarn lint:lua`
-- [`busted`](https://github.com/lunarmodules/busted) für `yarn test:lua` und `yarn test:lua:coverage`
+- [Ruby](https://rubyinstaller.org/) `3.3.x` mit [Bundler](https://bundler.io/) `4.x` und Jekyll für `yarn dev:docs` und `yarn test:docs`; `ruby` und `bundle` müssen aus `PATH` kommen
+- [`luacheck`](https://github.com/mpeterv/luacheck) fuer `yarn lint:lua`; das `luacheck`-Kommando muss in `PATH` liegen
+- [`busted`](https://github.com/lunarmodules/busted) für `yarn test:lua` und `yarn test:lua:coverage`; das `busted`-Kommando muss in `PATH` liegen
 
 ### Empfohlene Werkzeuge
 
@@ -34,12 +34,43 @@ Dieses Dokument ist der zentrale Einstieg für die Entwicklungsumgebung und die 
 
 Unter PowerShell kann `yarn` an der lokalen Execution Policy scheitern. In diesem Fall ist `yarn.cmd` der robuste Aufruf für die gleiche Aktion.
 
+### Windows 11 Setup
+
+Für Windows 11 sollte die lokale Toolchain so eingerichtet sein, dass alle Werkzeuge direkt aus `PATH` kommen:
+
+- Ruby `3.3.x`
+- Bundler `4.x`
+- Lua `5.3`
+- `luacheck`
+- `busted`
+- Windows PowerShell
+
+Empfohlener Ablauf nach der Installation der Werkzeuge:
+
+```bash
+bundle install
+yarn tools:check
+yarn test:docs
+yarn check:lua
+```
+
+Wenn `yarn` in PowerShell an der Execution Policy scheitert, stattdessen `yarn.cmd` verwenden.
+
 ## Erste Schritte nach dem Klonen
 
 ```bash
 corepack enable
 yarn install
 yarn ce-help
+```
+
+### Jekyll/Bundler Setup für macOS und Windows
+
+Für die Doku verwendet dieses Repo Ruby `3.3.x` und Bundler `4.x`, damit die lokale Umgebung möglichst nahe an GitHub Pages bleibt. Nach einem Ruby- oder Bundler-Wechsel sollte `Gemfile.lock` mit dieser Bundler-Version neu erzeugt werden.
+
+```bash
+bundle _4.0.9_ lock --bundler 4.0.9
+bundle install
 ```
 
 ## Namensschema
@@ -58,7 +89,7 @@ yarn ce-help
 | --- | --- | --- |
 | `install` (builtin) | keine | Installiert alle Abhängigkeiten nach dem Klonen. |
 | `ce-help` | keine | Diese Übersicht anzeigen. |
-| `tools:check` | keine | Erforderliche externe Werkzeuge in `PATH` prüfen. |
+| `tools:check` | keine | Erforderliche externe Werkzeuge in `PATH` prüfen und bei Bedarf Install-Hinweise anzeigen. |
 | `dev:app` | keine | App und Server im Entwicklungsmodus starten (automatischer re-build). |
 | `dev:docs` | keine | Jekyll-Doku-Server mit Live-Reload starten. |
 | `dev:storybook` | keine | Storybook der Web-App für isolierte UI-Entwicklung starten. |

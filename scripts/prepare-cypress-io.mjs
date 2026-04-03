@@ -8,10 +8,7 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const cypressDir = path.join(repoRoot, 'apps', 'web-app', 'cypress');
 const ioExchangeDir = path.join(cypressDir, 'io', 'LUA', 'ce', 'databridge', 'exchange');
-const ioEmptyExchangeDir = path.join(cypressDir, 'io-empty', 'LUA', 'ce', 'databridge', 'exchange');
-
 mkdirSync(ioExchangeDir, { recursive: true });
-mkdirSync(ioEmptyExchangeDir, { recursive: true });
 
 const seededFiles = [
   ['commands-to-ce', ''],
@@ -20,11 +17,8 @@ const seededFiles = [
   ['server-state.json', '{}'],
 ];
 
-for (const exchangeDir of [ioExchangeDir, ioEmptyExchangeDir]) {
-  for (const [fileName, content] of seededFiles) {
-    writeFileSync(path.join(exchangeDir, fileName), content, 'latin1');
-  }
+for (const [fileName, content] of seededFiles) {
+  writeFileSync(path.join(ioExchangeDir, fileName), content, 'latin1');
 }
 
 console.log(`[prepare:cypress-io] ensured ${path.relative(repoRoot, ioExchangeDir)}`);
-console.log(`[prepare:cypress-io] ensured ${path.relative(repoRoot, ioEmptyExchangeDir)}`);
