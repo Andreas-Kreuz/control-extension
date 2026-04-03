@@ -38,6 +38,9 @@ function HubBridgeConnector.registerStatePublishers()
     if isSelected(HubCeTypes.Runtime) then
         StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.runtime.RuntimeStatePublisher"))
     end
+    if isSelected(HubCeTypes.FrameData) then
+        StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.framedata.FrameDataStatePublisher"))
+    end
     if isSelected(HubCeTypes.SaveSlot, HubCeTypes.FreeSlot) then
         StatePublisherRegistry.registerStatePublishers(require("ce.hub.data.slots.DataSlotsStatePublisher"))
     end

@@ -83,9 +83,6 @@ export default class EepDataSelector {
       count: dto.count,
       time: dto.time,
       lastTime: dto.lastTime,
-      ...optionalProperty('framesPerSecond', dto.framesPerSecond),
-      ...optionalProperty('currentFrame', dto.currentFrame),
-      ...optionalProperty('currentRenderFrame', dto.currentRenderFrame),
     }));
     this.updateRuntimeStatistics(state.eventCounter, this.runtime);
 
@@ -314,4 +311,3 @@ export default class EepDataSelector {
   getRollingStockTextures = (): Record<string, RollingStockTexturesDto> => this.rollingStockTextures;
   getRollingStockRotation = (): Record<string, RollingStockRotationDto> => this.rollingStockRotation;
 }
-

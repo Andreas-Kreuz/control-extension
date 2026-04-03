@@ -3,6 +3,7 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.HubCeTypes ...") end
 local HubCeTypes = {
     Module = "ce.hub.Module",
     Runtime = "ce.hub.Runtime",
+    FrameData = "ce.hub.FrameData",
     EepVersion = "ce.hub.EepVersion",
     Weather = "ce.hub.Weather",
     SaveSlot = "ce.hub.SaveSlot",

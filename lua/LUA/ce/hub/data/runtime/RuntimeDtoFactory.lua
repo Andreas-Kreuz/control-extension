@@ -13,10 +13,7 @@ local function toRuntimeDto(runtimeEntry)
         id = runtimeEntry.id,
         count = runtimeEntry.count,
         time = runtimeEntry.time,
-        lastTime = runtimeEntry.lastTime,
-        framesPerSecond = runtimeEntry.framesPerSecond,
-        currentFrame = runtimeEntry.currentFrame,
-        currentRenderFrame = runtimeEntry.currentRenderFrame
+        lastTime = runtimeEntry.lastTime
     }
 end
 

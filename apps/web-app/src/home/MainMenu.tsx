@@ -45,8 +45,8 @@ function MainMenu() {
           <Button variant="text" startIcon={<BarChartIcon />} onClick={() => navigate('statistics')}>
             Statistik
           </Button>
-          <Button variant="text" startIcon={<Inventory2Icon />} href="/api">
-            API
+          <Button variant="text" startIcon={<Inventory2Icon />} href="/data">
+            Daten
           </Button>
         </Grid>
       </AppPage>

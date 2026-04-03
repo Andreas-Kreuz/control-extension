@@ -26,6 +26,7 @@ export type { VersionDto } from './dtos/server/version/VersionDto';
 export type { WeatherDto } from './dtos/server/weather/WeatherDto';
 export type { TimeDto } from './dtos/server/time/TimeDto';
 export type { RuntimeDto } from './dtos/server/runtime/RuntimeDto';
+export type { FrameDataDto } from './dtos/server/framedata/FrameDataDto';
 export type {
   RuntimeStatisticsDto,
   RuntimeStatisticsHistoryDto,

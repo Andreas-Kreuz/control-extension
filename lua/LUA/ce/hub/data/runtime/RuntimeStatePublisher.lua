@@ -21,15 +21,6 @@ function RuntimeStatePublisher.syncState()
     local runtimeEntries = RuntimeDataCollector.collectRuntimeEntries()
     if not runtimeEntries then return {} end
 
-    local framesPerSecond = EEPGetFramesPerSecond and EEPGetFramesPerSecond() or nil
-    local currentFrame = EEPGetCurrentFrame and EEPGetCurrentFrame() or nil
-    local currentRenderFrame = EEPGetCurrentRenderFrame and EEPGetCurrentRenderFrame() or nil
-    for _, runtimeEntry in pairs(runtimeEntries) do
-        runtimeEntry.framesPerSecond = framesPerSecond
-        runtimeEntry.currentFrame = currentFrame
-        runtimeEntry.currentRenderFrame = currentRenderFrame
-    end
-
     DataChangeBus.fireListChange(RuntimeDtoFactory.createRuntimeDtoList(runtimeEntries))
     return {}
 end

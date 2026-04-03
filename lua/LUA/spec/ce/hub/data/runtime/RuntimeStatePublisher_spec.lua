@@ -56,9 +56,6 @@ insulate("RuntimeStatePublisher", function ()
                             count = 2,
                             time = 4,
                             lastTime = 1,
-                            framesPerSecond = 60,
-                            currentFrame = 15,
-                            currentRenderFrame = 15948
                         }
                     }, published[1].list)
 

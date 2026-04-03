@@ -4,6 +4,9 @@ import { Suspense, lazy } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 const ConnectionWrapper = lazy(() => import('./ConnectionWrapper'));
+const DataMod = lazy(() => import('../mod/data/DataMod'));
+const DataTypeEntriesMod = lazy(() => import('../mod/data/DataTypeEntriesMod'));
+const DataTypeEntryDetailMod = lazy(() => import('../mod/data/DataTypeEntryDetailMod'));
 const IntersectionDetails = lazy(() => import('../mod/road/IntersectionDetails'));
 const IntersectionOverview = lazy(() => import('../mod/road/IntersectionOverview'));
 const MainMenu = lazy(() => import('../home/MainMenu'));
@@ -20,6 +23,9 @@ const homeRoutes = [
   { path: '/road/:intersectionId', element: <IntersectionDetails /> },
   { path: '/statistics', element: <StatisticsOverview /> },
   { path: '/trains', element: <Trains /> },
+  { path: '/data', element: <DataMod /> },
+  { path: '/data/:ceType', element: <DataTypeEntriesMod /> },
+  { path: '/data/:ceType/:entryId', element: <DataTypeEntryDetailMod /> },
 ];
 
 export const router = createBrowserRouter([

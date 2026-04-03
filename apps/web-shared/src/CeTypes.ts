@@ -6,6 +6,7 @@ export const CeTypes = {
   ServerRuntimeStatistics: 'ce.server.RuntimeStatistics',
   HubModule: 'ce.hub.Module',
   HubRuntime: 'ce.hub.Runtime',
+  HubFrameData: 'ce.hub.FrameData',
   HubEepVersion: 'ce.hub.EepVersion',
   HubWeather: 'ce.hub.Weather',
   HubSaveSlot: 'ce.hub.SaveSlot',
