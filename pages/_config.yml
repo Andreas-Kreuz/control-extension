@@ -110,6 +110,8 @@ exclude:
   [
     'Gemfile',
     'Gemfile.lock',
+    '.ruby-version',
+    'docs/_site',
     'node_modules',
     'vendor/bundle/',
     'vendor/cache/',
@@ -134,6 +136,6 @@ exclude:
 
 defaults:
   - scope:
-      path: '../lua'
+      path: 'lua'
     values:
       layout: 'default'

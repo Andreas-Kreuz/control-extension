@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://andreas-kreuz.github.io/control-extension">
-    <img src="assets/img/ce-logo-72@2x.png" alt="" width=72 height=72>
+    <img src="pages/assets/img/ce-logo-72@2x.png" alt="" width=72 height=72>
   </a>
 
   <h3 align="center">Control Extension für EEP</h3>
@@ -39,14 +39,14 @@ Das Paket besteht aus vier Bausteinen:
 
 ## Ausführliche Dokumentation
 
-- Die Webseite enthält [Anleitungen und Dokumentation](https://andreas-kreuz.github.io/control-extension/lua/ce/) zur Verwendung der Control Extension für EEP.
-- [Architektur und Designprinzipien](ARCHITECTURE.md) der Control Extension.
+- Die Webseite enthält [Anleitungen und Dokumentation](https://andreas-kreuz.github.io/control-extension/lua/LUA/ce/) zur Verwendung der Control Extension für EEP.
+- [Architektur und Designprinzipien](project-docs/ARCHITECTURE.md) der Control Extension.
 
 ## Beiträge sind Willkommen
 
 - [Fehler gefunden, Verbesserungsvorschläge?](CONTRIBUTING.md) <br>So kannst Du zum Projekt beitragen
 
-- So kannst Du die [Entwicklungsumgebung einrichten](README_DEV.md)
+- So kannst Du die [Entwicklungsumgebung einrichten](project-docs/README_DEV.md)
 
 ## Was ist EEP
 

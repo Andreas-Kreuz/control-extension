@@ -8,6 +8,7 @@ feature-img: '/assets/headers/GitHub.png'
 date: 2017-09-03
 permalink: docs/anleitungen-entwickler/github-verwenden
 tags: [Fortgeschrittene, Entwickler]
+published: false
 ---
 
 # Bibliothek aus GitHub nutzen

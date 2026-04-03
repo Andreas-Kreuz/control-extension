@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Vorlagen für Dich
 subtitle: Nutze die Vorlagen um schneller mit EEP-Web zu starten.
-permalink: lua/ce/template/
+permalink: lua/LUA/ce/template/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

@@ -1,6 +1,6 @@
 # Entwicklerdokumentation
 
-Die kanonische Entwicklerdokumentation liegt jetzt im Root unter [README_DEV.md](../README_DEV.md).
+Die kanonische Entwicklerdokumentation liegt jetzt unter [project-docs/README_DEV.md](../project-docs/README_DEV.md).
 
 Dort findest Du:
 

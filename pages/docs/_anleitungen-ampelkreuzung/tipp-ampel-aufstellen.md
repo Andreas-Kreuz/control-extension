@@ -7,6 +7,7 @@ img: '/assets/thumbnails/ampel-aufstellen.jpg'
 date: 2017-09-30
 permalink: docs/anleitungen-ampelkreuzung/ampel-aufstellen
 tags: [Verwendung, Anleitung]
+published: false
 ---
 
 # "Alte Ampeln" im 1-spurigen System benutzen

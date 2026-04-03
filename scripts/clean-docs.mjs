@@ -6,9 +6,10 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..');
+const pagesRoot = path.join(repoRoot, 'pages');
 
 const jekyllClean = spawnSync('bundle', ['exec', 'jekyll', 'clean'], {
-  cwd: repoRoot,
+  cwd: pagesRoot,
   stdio: 'inherit',
 });
 
@@ -17,9 +18,11 @@ if (jekyllClean.error || jekyllClean.status !== 0) {
 }
 
 const docsArtifacts = [
-  '_site',
+  'pages/docs/_site',
+  'pages/.sass-cache',
   '.sass-cache',
   ...readdirSync(repoRoot).filter((entry) => entry.startsWith('.jekyll')),
+  ...readdirSync(pagesRoot).map((entry) => path.join('pages', entry)).filter((entry) => path.basename(entry).startsWith('.jekyll')),
 ];
 
 const uniqueArtifacts = [...new Set(docsArtifacts)];

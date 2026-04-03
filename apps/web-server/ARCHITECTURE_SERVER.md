@@ -1,7 +1,7 @@
 # Server-Architektur der Control Extension
 
 Dieses Dokument beschreibt die Architektur des Control Extension Servers.
-Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../ARCHITECTURE.md).
+Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../project-docs/ARCHITECTURE.md).
 
 ## Rolle des Servers
 

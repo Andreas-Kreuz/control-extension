@@ -1,7 +1,7 @@
 # Lua-Architektur der Control Extension
 
 Dieses Dokument beschreibt die Architektur des Lua-Teils der Control Extension.
-Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../../ARCHITECTURE.md).
+Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../../project-docs/ARCHITECTURE.md).
 
 ## Übersicht
 

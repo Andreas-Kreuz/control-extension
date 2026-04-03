@@ -30,7 +30,7 @@ from statistics import median
 ROOT = Path(__file__).resolve().parents[1]
 MANUAL = ROOT / "Lua_manual.pdf"
 OUTPUT = ROOT / "lua" / "LUA" / "ce" / "hub" / "eep" / "EepOriginalApi.d.lua"
-LUA_FORMAT_CONFIG = ROOT / "lua-format.conf"
+LUA_FORMAT_CONFIG = ROOT / "lua" / "lua-format.conf"
 PDFMINER_ROW_TOLERANCE = 4.0
 HEADER_BAND_Y_TOLERANCE = 3.0
 

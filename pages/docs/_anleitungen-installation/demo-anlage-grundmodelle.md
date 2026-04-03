@@ -6,6 +6,7 @@ type: Anlage
 img: '/assets/thumbnails/AmpelDemo.jpg'
 date: 2017-09-11
 permalink: docs/anleitungen-installation/demo-anlage-grundmodelle
+published: false
 ---
 
 # Beschreibung

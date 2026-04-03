@@ -5,9 +5,8 @@ import { findLuaCommand, REQUIRED_LUA_VERSION } from './lua-runtime.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// __dirname not required here, kept for style consistency with other scripts
-void __dirname;
+const repoRoot = path.resolve(__dirname, '..');
+const pagesRoot = path.join(repoRoot, 'pages');
 
 const REQUIRED_RUBY_VERSION = '3.3';
 const REQUIRED_BUNDLER_VERSION = '4';
@@ -39,13 +38,13 @@ const tools = [
     name: 'bundle',
     purpose: `Bundler ${REQUIRED_BUNDLER_VERSION}         — required for: dev:docs, test:docs, check`,
     check: () => matchesVersion('bundle', '--version', REQUIRED_BUNDLER_VERSION),
-    help: `Install Bundler ${REQUIRED_BUNDLER_VERSION}.x for the active Ruby in PATH and regenerate \`Gemfile.lock\` with that Bundler version.`,
+    help: `Install Bundler ${REQUIRED_BUNDLER_VERSION}.x for the active Ruby in PATH and regenerate \`pages/Gemfile.lock\` with that Bundler version.`,
   },
   {
     name: 'jekyll',
     purpose: 'Jekyll docs stack      — required for: dev:docs, test:docs, check',
-    check: () => isAvailable('bundle', `exec ruby -e "require 'jekyll'; require 'jemoji'"`),
-    help: 'Run `bundle install` with Ruby 3.3 and Bundler 4 from PATH so the Jekyll gems, including `jemoji`, load successfully.',
+    check: () => isAvailable('bundle', `exec ruby -e "require 'jekyll'; require 'jemoji'"`, pagesRoot),
+    help: 'Run `bundle install` in `pages/` with Ruby 3.3 and Bundler 4 from PATH so the Jekyll gems, including `jemoji`, load successfully.',
   },
 ];
 
@@ -57,20 +56,21 @@ if (process.platform === 'win32') {
   });
 }
 
-function isAvailable(command, args = '--version') {
+function isAvailable(command, args = '--version', cwd = repoRoot) {
   try {
-    execSync(`${command} ${args}`, { stdio: 'ignore' });
+    execSync(`${command} ${args}`, { stdio: 'ignore', cwd });
     return true;
   } catch {
     return false;
   }
 }
 
-function readStdout(command, args) {
+function readStdout(command, args, cwd = repoRoot) {
   try {
     return execSync(`${command} ${args}`, {
       stdio: ['ignore', 'pipe', 'ignore'],
       encoding: 'utf8',
+      cwd,
     }).trim();
   } catch {
     return null;

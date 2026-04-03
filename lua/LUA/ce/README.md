@@ -2,7 +2,7 @@
 layout: page_landing
 title: Control Extension
 subtitle: Hier findest du Informationen zur Control Extension
-permalink: lua/ce/
+permalink: lua/LUA/ce/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

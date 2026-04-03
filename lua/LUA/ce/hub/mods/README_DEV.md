@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: CeModule — Entwickler
 subtitle: Was ein CeModule ist, wie es sich verhält und wie man eines entwickelt
-permalink: lua/ce/hub/mods/dev/
+permalink: lua/LUA/ce/hub/mods/dev/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---
@@ -116,7 +116,7 @@ Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen �
 - [Öffentliche API von ce.ControlExtension](../README.md)
 - [Datenmodell und DTO-CeTypes](../data/DTO.md)
 - [StatePublisher-Muster und Laufzeitfluss](../README_DEV.md)
-- [Zielarchitektur](../docs/Architecture.md)
+- [Zielarchitektur](../docs/ARCHITECTURE.md)
 
 ---
 

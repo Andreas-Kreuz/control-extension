@@ -97,6 +97,17 @@ desktop.ini
 _site
 .sass-cache
 .jekyll*
+/pages/docs/_site
+/pages/.sass-cache
+/pages/.jekyll*
+/pages/AGENTS.md
+/pages/ARCHITECTURE.md
+/pages/CHANGELOG.md
+/pages/CONTRIBUTING.md
+/pages/GOALS.md
+/pages/README.md
+/pages/README_DEV.md
+/pages/lua
 .bundle/
 .bundle-user/
 /vendor/bundle/

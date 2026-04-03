@@ -114,6 +114,7 @@ jobs:
 
       - name: Install Ruby gems
         shell: bash
+        working-directory: pages
         run: bundle _4.0.9_ install
 
       - name: Check required tools

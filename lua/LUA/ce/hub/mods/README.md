@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Hub-Module
 subtitle: Definition des CeModule-Typs und die eingebauten Hub-Module
-permalink: lua/ce/hub/mods/
+permalink: lua/LUA/ce/hub/mods/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

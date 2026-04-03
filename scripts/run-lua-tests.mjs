@@ -17,7 +17,7 @@ function shouldUsePlainTerminalOutput() {
   return !process.env.PSModulePath
 }
 
-const args = ['--config-file', '.busted', '--verbose']
+const args = ['--config-file', 'lua/.busted', '--verbose']
 const luaCommand = findLuaCommand(REQUIRED_LUA_VERSION)
 
 if (!luaCommand) {

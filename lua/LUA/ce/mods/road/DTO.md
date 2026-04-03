@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Road-Datenmodell
 subtitle: JSON-Datenmodell der Ampel- und Kreuzungssteuerung
-permalink: lua/ce/mods/road/dto/
+permalink: lua/LUA/ce/mods/road/dto/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

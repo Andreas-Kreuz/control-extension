@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Hub — Entwickler
 subtitle: Interner Laufzeitfluss und StatePublisher-Muster des Lua-Hubs
-permalink: lua/ce/hub/dev/
+permalink: lua/LUA/ce/hub/dev/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

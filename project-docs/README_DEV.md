@@ -8,7 +8,7 @@ Dieses Dokument ist der zentrale Einstieg für die Entwicklungsumgebung und die 
 - `apps/web-app` enthaelt das React-/Vite-Frontend.
 - `apps/web-server` enthält den Electron- und Headless-Server in TypeScript.
 - `apps/web-shared` enthält gemeinsam genutzte TypeScript-Typen und Events.
-- `docs` enthält die statische Dokumentation.
+- `pages/docs` enthält die statische Dokumentation.
 - `scripts` enthält Hilfsskripte für Build, Tests und Werkzeugunterstützung. Die öffentlichen Einstiege liegen im Root-`package.json`.
 
 ## Voraussetzungen
@@ -48,7 +48,7 @@ Für Windows 11 sollte die lokale Toolchain so eingerichtet sein, dass alle Werk
 Empfohlener Ablauf nach der Installation der Werkzeuge:
 
 ```bash
-bundle install
+(cd pages && bundle install)
 yarn tools:check
 yarn test:docs
 yarn check:lua
@@ -66,11 +66,14 @@ yarn ce-help
 
 ### Jekyll/Bundler Setup für macOS und Windows
 
-Für die Doku verwendet dieses Repo Ruby `3.3.x` und Bundler `4.x`, damit die lokale Umgebung möglichst nahe an GitHub Pages bleibt. Nach einem Ruby- oder Bundler-Wechsel sollte `Gemfile.lock` mit dieser Bundler-Version neu erzeugt werden.
+Für die Doku verwendet dieses Repo Ruby `3.3.x` und Bundler `4.x`, damit die lokale Umgebung möglichst nahe an GitHub Pages bleibt. Nach einem Ruby- oder Bundler-Wechsel sollte `pages/Gemfile.lock` mit dieser Bundler-Version neu erzeugt werden.
 
 ```bash
-bundle _4.0.9_ lock --bundler 4.0.9
-bundle install
+(
+  cd pages
+  bundle _4.0.9_ lock --bundler 4.0.9
+  bundle install
+)
 ```
 
 ## Namensschema
