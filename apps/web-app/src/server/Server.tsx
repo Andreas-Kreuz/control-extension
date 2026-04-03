@@ -1,11 +1,27 @@
 import Box from '@mui/material/Box';
 import './Server.css';
 import ServerHome from './ServerHome';
+import ConnectingScreenWrapper from '../base/ConnectingScreenWrapper';
+import { useSocketIsAdmin, useSocketIsConnected, useSocketPairingStatus } from '../io/SocketProvider';
+import { PairingStatus } from '@ce/web-shared';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import { Navigate } from 'react-router-dom';
 
 function Server() {
+  const socketIsConnected = useSocketIsConnected();
+  const pairingStatus = useSocketPairingStatus();
+  const isAdmin = useSocketIsAdmin();
+
+  if (!socketIsConnected || pairingStatus === PairingStatus.Connecting) {
+    return <ConnectingScreenWrapper />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate replace to="/" />;
+  }
+
   return (
     <div className="Server">
       <Box sx={{ minHeight: '100vh' }}>
@@ -24,3 +40,4 @@ function Server() {
 }
 
 export default Server;
+

@@ -23,6 +23,7 @@ function TimeStatePublisher.syncState()
             id = "times",           -- EEP-Web requires that data entries have an id or name tag
             name = "times",         -- EEP-Web requires that data entries have an id or name tag
             timeComplete = EEPTime, -- seconds since midnight
+            timeLapse = EEPGetTimeLapse and EEPGetTimeLapse() or nil,
             timeH = EEPTimeH,
             timeM = EEPTimeM,
             timeS = EEPTimeS

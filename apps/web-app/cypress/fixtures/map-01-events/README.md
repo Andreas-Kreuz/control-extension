@@ -7,6 +7,13 @@ These files are input for the EEP-Webserver.
 
 Created with:
 
+If `yarn` is not available yet, set it up first as described in `README_DEV.md`:
+
+```bash
+corepack enable
+yarn
+```
+
 1. **Close EEP-Web-Server** if running
 
 2. **Create server indicator file** in the game folder of EEP to simulate the server  
@@ -16,8 +23,8 @@ Created with:
    so EEP can write the event file
 
 4. **Run Parser from the server directory**
-   `cd web-server`  
-   `npm run persist-eep-state`
+   `cd apps/web-server`  
+   `yarn persist-eep-state`
 
    This will read the file `events-from-ce` and write the output to the folder
    `../web-app/cypress/fixtures/from-eep`
@@ -27,6 +34,6 @@ Created with:
    2. Remove the file `events-from-ce.pending` in `lua\ce\databridge\exchange\`  
       (This will tell EEP to write events in the next cycle.)
    3. Let EEP run - so it can write the eventlog.
-   4. Run `npm run persist-eep-state` in the `web-server` directory.
+   4. Run `yarn persist-eep-state` in the `apps/web-server` directory.
 
 Finally all event files can be moved to a new map directory.

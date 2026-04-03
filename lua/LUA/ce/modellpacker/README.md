@@ -3,8 +3,8 @@ layout: page_with_toc
 title: EEP-Installer selbst gemacht
 subtitle: Baue eine eigene ZIP-Datei, die jeder mit EEP installieren kann.
 permalink: lua/ce/modellpacker/
-feature-img: "/docs/assets/headers/ModellPacker.png"
-img: "/docs/assets/headers/ModellPacker.png"
+feature-img: '/docs/assets/headers/ModellPacker.png'
+img: '/docs/assets/headers/ModellPacker.png'
 ---
 
 # Motivation
@@ -20,7 +20,6 @@ Dieses Paket hilft dabei Modell-Installer für EEP zu erzeugen.
 Das Skript liegt in `ce.modellpacker.AkModellPacker`.
 
 - Klasse `AkModellInstaller` - legt einen Modell-Installer an, welchem Modell-Pakete hinzugefügt werden können.
-
   - `AkModellInstaller:new(directoryName)` - Legt einen neuen Modell-Installer an. Der Modell-Installer kann mehrere Modell-Pakete enthalten. Der `directoryName` bestimmt, in welches Unterverzeichnis das Modellpaket installiert werden soll - dieses Verzeichnis wird new angelegt.
 
   - `AkModellInstaller:addModelPackage(paket)` - fügt dem Installer ein weiteres Paket hinzu
@@ -28,7 +27,6 @@ Das Skript liegt in `ce.modellpacker.AkModellPacker`.
   - `AkModellInstaller:generatePackage(outputDirectory)` - erstellt das Paket als Unterordner im Ausgabeverzeichnis.
 
 - Klasse `AkModellPaket` - legt ein Modell-Paket an, welches zum AkModellInstaller hinzugefügt wird.
-
   - `AkModellPaket:new(eepVersion, germanName, germanDescription)` - erzeugt ein neues Modell-Paket mit Mindest-EEP-Version, sowie einem deutschen Namen und einer deutschen Beschreibung.
 
   - `AkModellPaket:addFiles(baseDirectory, prefix, subdirectory)` - Fügt alle Dateien im Unterverzeichnis `baseDirectory\subdirectory` hinzu. Die Dateien werden mit dem Namen `prefix\subdirectory\...\fileName` erzeugt.

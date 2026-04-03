@@ -3,8 +3,8 @@ layout: page_with_toc
 title: CeModule — Entwickler
 subtitle: Was ein CeModule ist, wie es sich verhält und wie man eines entwickelt
 permalink: lua/ce/hub/mods/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Architektur von CeModule
@@ -21,7 +21,7 @@ Du bindest Module über `ControlExtension.addModules(...)` ein — der Hub über
 | Feld      | Typ       | Beschreibung                                                         |
 | --------- | --------- | -------------------------------------------------------------------- |
 | `id`      | `string`  | Eindeutige UUID des Moduls — darf sich nie ändern                    |
-| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.RoadCeModule"`      |
+| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.CeRoadModule"`      |
 | `enabled` | `boolean` | Kann gesetzt werden, um das Modul zu aktivieren oder zu deaktivieren |
 
 ## Pflichtmethoden
@@ -86,8 +86,7 @@ end
 `setOptions` wird nicht automatisch vom Hub aufgerufen — Du rufst es selbst auf, bevor `ControlExtension.runTasks()` startet:
 
 ```lua
-local modules = ControlExtension.addModules(require("ce.mods.mymod.MyCeModule"))
-modules["ce.mods.mymod.MyCeModule"].setOptions({ debug = true })
+ControlExtension.addModules(require("ce.mods.mymod.MyCeModule").setOptions({ debug = true }))
 ```
 
 ## Daten auf den Datenbus schreiben
@@ -100,22 +99,22 @@ Die Konvention der eingebauten Module:
 
 1. Ein `*StatePublisher` sammelt mit einem `*DataCollector` die aktuellen Zustände.
 2. Eine `*DtoFactory` wandelt die Zustände in Datentransferobjekte (DTOs) um.
-3. Die DTOs werden in Datenräume (`room`) einsortiert: `room:string` → `dtoId:string|number` → `dto:table`.
+3. Die DTOs werden nach `ceType` einsortiert: `ceType:string` → `dtoId:string|number` → `dto:table`.
 4. Änderungen werden über `DataChangeBus.fire*()` veröffentlicht.
 
 `StatePublisher` sind dabei keine einfachen Datenklassen, sondern zustandsbehaftete Adapter mit eigenem Lebenszyklus: registrieren, einmalig initialisieren, zyklisch synchronisieren. Mehr dazu in [hub/README_DEV.md](../README_DEV.md).
 
-Räume und DTO-Strukturen aller eingebauten Module sind in [hub/data/DTO.md](../data/DTO.md) dokumentiert.
+CeTypes und DTO-Strukturen aller eingebauten Module sind in [hub/data/DTO.md](../data/DTO.md) dokumentiert.
 
 ## Vorlagen
 
 Fertige Vorlagen findest Du in [`ce.template`](../../template/README.md).
-Bestehende Module wie `ce.mods.road.RoadCeModule` können als Referenz dienen — siehe [`ce.mods`](../../mods/README.md).
+Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen — siehe [`ce.mods`](../../mods/README.md).
 
 ## Weiterführende Dokumentation
 
 - [Öffentliche API von ce.ControlExtension](../README.md)
-- [Datenmodell und DTO-Räume](../data/DTO.md)
+- [Datenmodell und DTO-CeTypes](../data/DTO.md)
 - [StatePublisher-Muster und Laufzeitfluss](../README_DEV.md)
 - [Zielarchitektur](../docs/Architecture.md)
 

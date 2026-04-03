@@ -18,6 +18,8 @@ __pycache__
 /apps/*/build
 /apps/*/dist
 /apps/*/node_modules
+/apps/*/*.tsbuildinfo
+/apps/web-server/settings.json
 
 /packages/*/build
 /packages/*/dist
@@ -40,7 +42,7 @@ __pycache__
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/commands-to-ce
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-is-running
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-state.*
-/apps/web-app/cypress/io/ak*
+/apps/web-app/cypress/io/ce*
 /apps/web-app/cypress/screenshots
 /apps/web-app/cypress/videos
 /apps/web-app/dist
@@ -50,48 +52,6 @@ __pycache__
 
 # @ak/web-shared
 /apps/web-shared/resources/public
-
-# compiled output
-/web-app/cypress/io/LUA/ce/databridge/exchange/ce-*
-/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce
-/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce.pending
-/web-app/cypress/io/LUA/ce/databridge/exchange/log-from-ce
-/web-app/cypress/io/LUA/ce/databridge/exchange/commands-to-ce
-/web-app/cypress/io/LUA/ce/databridge/exchange/server-is-running
-/web-app/cypress/io/LUA/ce/databridge/exchange/server-state.*
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/ak*
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/ce-*
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/events-from-ce
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/events-from-ce.pending
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/log-from-ce
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/commands-to-ce
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-is-running
-/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-state.*
-/web-app/cypress/videos
-/web-app/cypress/screenshots
-/web-app/dist
-/web-app/tmp
-/web-app/out-tsc
-/web-app/.angular
-
-# Ressources
-/web-app/cypress/fixtures/from-eep
-
-# dependencies
-/web-app/node_modules
-
-# Andreas Kreuz's projects
-/server/target
-/server/node_modules
-/server/dist
-/web-server/node_modules
-/web-server/build
-/web-server/dist
-/web-server/resources/public
-/web-shared/node_modules
-/web-shared/build
-/web-shared/dist
-/web-shared/resources/public
 
 # Project based settings
 /lua/LUA/**/*.jar
@@ -135,7 +95,6 @@ desktop.ini
 
 # Jekyll documentation files
 _site
-Gemfile.lock
 .sass-cache
 .jekyll*
 .bundle/
@@ -188,3 +147,4 @@ luac.out
 web-app/src/app/client/modules/intersection/intersection-lane-display/example-svg.ts
 Lua_manual.pdf
 EEP18_Manual_GER.pdf
+package-lock.json

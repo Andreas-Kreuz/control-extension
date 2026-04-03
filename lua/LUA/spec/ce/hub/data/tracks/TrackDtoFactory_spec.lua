@@ -5,19 +5,30 @@ insulate("ce.hub.data.tracks.TrackDtoFactory", function ()
         clearModule("ce.hub.data.tracks.TrackDtoFactory")
     end)
 
-    it("provides room metadata for track DTOs", function ()
+    it("provides ceType metadata for track DTOs", function ()
         local TrackDtoFactory = require("ce.hub.data.tracks.TrackDtoFactory")
 
-        local room, keyId, key, trackDto = TrackDtoFactory.createTrackDto("rail", { id = 5, name = "ignored" })
+        local room, keyId, key, trackDto =
+            TrackDtoFactory.createTrackDto("rail",
+                                           {
+                                               id = 5,
+                                               name = "ignored",
+                                               reserved = true,
+                                               reservedByTrainName = "T1"
+                                           })
         local listRoom, listKeyId, trackDtos =
-            TrackDtoFactory.createTrackDtoList("rail", { ["5"] = { id = 5, name = "ignored" } })
+            TrackDtoFactory.createTrackDtoList("rail", {
+                ["5"] = { id = 5, name = "ignored", reserved = true, reservedByTrainName = "T1" }
+            })
 
-        assert.equals("rail-tracks", room)
+        assert.equals("ce.hub.RailTrack", room)
         assert.equals("id", keyId)
         assert.equals(5, key)
-        assert.same({ id = 5 }, trackDto)
-        assert.equals("rail-tracks", listRoom)
+        assert.same({ ceType = "ce.hub.RailTrack", id = 5, reserved = true, reservedByTrainName = "T1" }, trackDto)
+        assert.equals("ce.hub.RailTrack", listRoom)
         assert.equals("id", listKeyId)
-        assert.same({ ["5"] = { id = 5 } }, trackDtos)
+        assert.same({
+                        ["5"] = { ceType = "ce.hub.RailTrack", id = 5, reserved = true, reservedByTrainName = "T1" }
+                    }, trackDtos)
     end)
 end)

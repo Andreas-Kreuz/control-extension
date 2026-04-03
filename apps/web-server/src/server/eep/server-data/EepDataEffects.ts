@@ -5,7 +5,7 @@ import EepDataReducer from './EepDataStore';
 import DynamicRoomManager from './dynamic/DynamicRoomManager';
 import DynamicRoomService from './dynamic/DynamicRoomService';
 import JsonApiRoomObserver from './static/JsonApiUpdateService';
-import { RoomEvent, ServerStatusEvent } from '@ak/web-shared';
+import { RoomEvent, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
@@ -38,6 +38,9 @@ export default class EepDataEffects {
 
   private socketConnected(socket: Socket) {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
+      if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
       const room = rooms.room;
       this.jsonApiController.onJoinRoom(socket, room);
       this.stateController.onJoinRoom(socket, room);
@@ -47,6 +50,20 @@ export default class EepDataEffects {
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + ServerStatusEvent.CounterUpdated);
         socket.emit(ServerStatusEvent.CounterUpdated, JSON.stringify(this.store.getEventCounter()));
       }
+    });
+
+    socket.on(RoomEvent.LeaveRoom, (rooms: { room: string }) => {
+      if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {
+        return;
+      }
+      const room = rooms.room;
+      this.jsonApiController.onLeaveRoom(socket, room);
+      this.stateController.onLeaveRoom(socket, room);
+    });
+
+    socket.on('disconnect', () => {
+      this.jsonApiController.onSocketClose(socket);
+      this.stateController.onSocketClose(socket);
     });
   }
 
@@ -93,3 +110,4 @@ export default class EepDataEffects {
     }
   }
 }
+

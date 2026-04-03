@@ -1,5 +1,5 @@
 {
-  "name": "@ak/web-shared",
+  "name": "@ce/web-shared",
   "private": true,
   "version": "1.0.0",
   "description": "Shared code for Web Application",
@@ -8,7 +8,9 @@
   "type": "commonjs",
   "scripts": {
     "build": "tsc",
-    "watch": "tsc -w"
+    "clean": "node ../../scripts/clean-paths.mjs build dist",
+    "lint": "eslint \"src/**/*.ts\"",
+    "dev": "tsc -w"
   },
   "keywords": [
     "Shared",
@@ -16,7 +18,7 @@
     "App",
     "EEP"
   ],
-  "author": "Andreas_Kreuz",
+  "author": "Andreas-Kreuz",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.9.3"

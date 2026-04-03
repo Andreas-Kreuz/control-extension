@@ -1,7 +1,7 @@
-import { useState, SetStateAction } from 'react';
-import { useApiDataRoomHandler } from '../../io/useRoomHandler';
-import VersionInfo from './VersionInfo';
+import { useState } from 'react';
+import { useDynamicRoomHandler } from '../../io/useRoomHandler';
 import Versions from './Versions';
+import { VersionRoom, VersionDto } from '@ce/web-shared';
 
 function cutOutLua(versionString: string) {
   if (versionString && versionString.startsWith('Lua ')) {
@@ -17,15 +17,17 @@ export default function useVersionInfo(): Versions {
     luaVersion: '?',
   });
 
-  // Register for the rooms data
-  useApiDataRoomHandler('eep-version', (payload: string) => {
-    const data = JSON.parse(payload);
-    setVersions({
-      appVersion: data.versionInfo.singleVersion,
-      eepVersion: data.versionInfo.eepVersion,
-      luaVersion: cutOutLua(data.versionInfo.luaVersion),
-    });
+  useDynamicRoomHandler(VersionRoom, 'VersionRoom', (payload: string) => {
+    const data: Record<string, VersionDto> = JSON.parse(payload);
+    if (data.versionInfo) {
+      setVersions({
+        appVersion: data.versionInfo.singleVersion,
+        eepVersion: data.versionInfo.eepVersion,
+        luaVersion: cutOutLua(data.versionInfo.luaVersion),
+      });
+    }
   });
 
   return versions;
 }
+

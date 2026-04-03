@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Scheduler — Entwickler
 subtitle: Interner Aufbau und Design-Entscheidungen des Schedulers
 permalink: lua/ce/hub/scheduler/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Scheduler — Entwickler
@@ -31,7 +31,7 @@ Kapselt eine Funktion und einen Namen.
 Nimmt Aktionen entgegen und führt sie nach Ablauf einer Zeitspanne aus.
 
 - `Scheduler:scheduleTask(offsetInSeconds, newTask, precedingTask)` — plant eine Aktion ein
-- `Scheduler:runTasks()` — prüft die Zeit und führt fällige Aktionen aus; wird automatisch über `SchedulerCeModule` aufgerufen
+- `Scheduler:runTasks()` — prüft die Zeit und führt fällige Aktionen aus; wird automatisch über `CeHubModule` aufgerufen
 
 ## Design-Entscheidung
 

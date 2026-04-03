@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Hub — Entwickler
 subtitle: Interner Laufzeitfluss und StatePublisher-Muster des Lua-Hubs
 permalink: lua/ce/hub/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Hub — Entwickler

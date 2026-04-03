@@ -4,6 +4,6 @@ export class DataType {
     public checksum: string,
     public url: string,
     public count: number,
-    public updated: boolean
+    public updated: boolean,
   ) {}
 }

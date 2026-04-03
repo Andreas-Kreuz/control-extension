@@ -20,7 +20,7 @@ local function prepareCommandFile()
 
     if commandsToCeFile and commandsToCeFileName == nextCommandsToCeFileName then return commandsToCeFile end
 
-    if commandsToCeFile then pcall(function() commandsToCeFile:close() end) end
+    if commandsToCeFile then pcall(function () commandsToCeFile:close() end) end
     writeFile(nextCommandsToCeFileName, "")
     commandsToCeFile = io.open(nextCommandsToCeFileName, "r")
     assert(commandsToCeFile, nextCommandsToCeFileName)

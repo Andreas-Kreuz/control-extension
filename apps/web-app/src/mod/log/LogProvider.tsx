@@ -1,5 +1,5 @@
 import { useRoomHandler } from '../../io/useRoomHandler';
-import { LogEvent } from '@ak/web-shared';
+import { LogEvent } from '@ce/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
 import useDebug from '../../io/useDebug';
 
@@ -20,7 +20,8 @@ const reducer = (state: LogState, action: LogDispatch) => {
     case 'added': {
       const oldLines = state.lines;
       const newLines = [...oldLines];
-      var counter = state.lines.length > 0 ? state.lines[state.lines.length - 1].key : 0;
+      const lastLine = state.lines.length > 0 ? state.lines[state.lines.length - 1] : undefined;
+      let counter = lastLine?.key ?? 0;
       for (const l of action.fetchedLines) {
         if (l.length > 0) {
           newLines.push({ line: l, key: ++counter });
@@ -85,3 +86,4 @@ export function useLog() {
 export function useLogDispatch() {
   return useContext(LogDispatchContext);
 }
+

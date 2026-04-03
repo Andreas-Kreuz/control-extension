@@ -11,6 +11,16 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 
 local Train = {}
 
+local function markStaticUpdated(train)
+    train.valuesUpdated = true
+    train.staticValuesUpdated = true
+end
+
+local function markDynamicUpdated(train)
+    train.dynamicValuesUpdated = true
+end
+
+
 ---Create a new train with the given object
 ---@param o Train must contain a string o.name
 function Train:new(o)
@@ -23,6 +33,14 @@ function Train:new(o)
     local rollingStockCount = EEPGetRollingstockItemsCount(o.name)
     local _, length = EEPGetTrainLength(o.name)
     local _, speed = EEPGetTrainSpeed(o.name)
+    local _, targetSpeed = EEPGetTrainSpeed(o.name, true)
+    local _, couplingFront = false, nil
+    if EEPGetTrainCouplingFront then _, couplingFront = EEPGetTrainCouplingFront(o.name) end
+    local _, couplingRear = false, nil
+    if EEPGetTrainCouplingRear then _, couplingRear = EEPGetTrainCouplingRear(o.name) end
+    local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
+    local inTrainyard, trainyardId = false, nil
+    if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(o.name) end
     assert(haveTrain, o.name)
     self.__index = self
     setmetatable(o, self)
@@ -33,11 +51,19 @@ function Train:new(o)
     o.rollingStockCount = rollingStockCount
     o.length = tonumber(string.format("%.2f", length or 0)) or 0
     o.speed = speed
+    o.targetSpeed = targetSpeed or speed
+    o.couplingFront = couplingFront or 0
+    o.couplingRear = couplingRear or 0
+    o.active = activeTrain == o.name
+    o.inTrainyard = inTrainyard == true
+    o.trainyardId = inTrainyard and trainyardId or nil
     o.movesForward = speed >= 0
     o.trackType = nil
     o.onTracks = {}
     o.occupiedTracks = {}
     o.valuesUpdated = true
+    o.staticValuesUpdated = true
+    o.dynamicValuesUpdated = true
     return o
 end
 
@@ -86,7 +112,7 @@ function Train:setValue(key, value)
         local rs = RollingStockRegistry.forName(rollingStockName)
         rs:setValue(key, value)
     end
-    self.valuesUpdated = true
+    markStaticUpdated(self)
 end
 
 ---Get the current value for key
@@ -127,7 +153,7 @@ function Train:setRoute(routeName)
     self.route = routeName
     EEPSetTrainRoute(self.name, self.route)
     if oldRoute ~= routeName then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, route = route})
     end
 end
@@ -147,7 +173,7 @@ function Train:setRollingStockCount(count)
     local oldCount = self.rollingStockCount
     self.rollingStockCount = count
     if oldCount ~= count then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, rollingStockCount = count})
     end
 end
@@ -168,7 +194,7 @@ function Train:setSpeed(speed)
     local oldSpeed = self.speed
     self.speed = speed
     if oldSpeed ~= speed then
-        self.valuesUpdated = true
+        markDynamicUpdated(self)
 
         if (oldSpeed < 0 and speed > 0) then self:setMovesForward(true) end
         if (oldSpeed > 0 and speed < 0) then self:setMovesForward(false) end
@@ -183,6 +209,79 @@ function Train:getSpeed()
     return self.speed
 end
 
+function Train:setTargetSpeed(targetSpeed)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(targetSpeed) == "number", "Need 'targetSpeed' as number")
+    targetSpeed = tonumber(string.format("%1.1f", targetSpeed)) or 0
+    local oldTargetSpeed = self.targetSpeed
+    self.targetSpeed = targetSpeed
+    if oldTargetSpeed ~= targetSpeed then markDynamicUpdated(self) end
+end
+
+function Train:getTargetSpeed()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.targetSpeed
+end
+
+function Train:setCouplingFront(couplingFront)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(couplingFront) == "number", "Need 'couplingFront' as number")
+    local oldCouplingFront = self.couplingFront
+    self.couplingFront = couplingFront
+    if oldCouplingFront ~= couplingFront then markDynamicUpdated(self) end
+end
+
+function Train:getCouplingFront()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.couplingFront
+end
+
+function Train:setCouplingRear(couplingRear)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(couplingRear) == "number", "Need 'couplingRear' as number")
+    local oldCouplingRear = self.couplingRear
+    self.couplingRear = couplingRear
+    if oldCouplingRear ~= couplingRear then markDynamicUpdated(self) end
+end
+
+function Train:getCouplingRear()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.couplingRear
+end
+
+function Train:setActive(active)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(active) == "boolean", "Need 'active' as boolean")
+    local oldActive = self.active
+    self.active = active
+    if oldActive ~= active then markDynamicUpdated(self) end
+end
+
+function Train:getActive()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.active
+end
+
+function Train:setTrainyard(inTrainyard, trainyardId)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(inTrainyard) == "boolean", "Need 'inTrainyard' as boolean")
+    local oldInTrainyard = self.inTrainyard
+    local oldTrainyardId = self.trainyardId
+    self.inTrainyard = inTrainyard
+    self.trainyardId = inTrainyard and trainyardId or nil
+    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then markDynamicUpdated(self) end
+end
+
+function Train:getTrainyardId()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.trainyardId
+end
+
+function Train:getInTrainyard()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.inTrainyard
+end
+
 --- Updates the trains speed in km/h
 ---@param movesForward boolean indicates if the train moves forward or backward
 function Train:setMovesForward(movesForward)
@@ -191,7 +290,7 @@ function Train:setMovesForward(movesForward)
     local oldMovesForward = self.movesForward
     self.movesForward = movesForward
     if oldMovesForward ~= movesForward then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, speed = speed})
     end
 end
@@ -229,7 +328,7 @@ function Train:setTrackType(trackType)
     local oldTrackType = self.trackType
     self.trackType = trackType
     if oldTrackType ~= trackType then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, trackType = trackType})
     end
 end
@@ -242,7 +341,7 @@ function Train:setDirection(direction)
     local oldDirection = self:getDirection()
     self:setValue(TagKeys.Train.direction, direction)
     if oldDirection ~= direction then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, direction = direction})
     end
 end
@@ -254,7 +353,7 @@ function Train:setDestination(destination)
     local oldDestination = self:getDestination()
     self:setValue(TagKeys.Train.destination, destination)
     if oldDestination ~= destination then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, destination = destination})
     end
 end
@@ -271,7 +370,7 @@ function Train:setLine(line)
     local oldLine = self:getLine()
     self:setValue(TagKeys.Train.line, line)
     if oldLine ~= line then
-        self.valuesUpdated = true
+        markStaticUpdated(self)
         -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, line = line})
     end
 end
@@ -311,6 +410,12 @@ function Train:toJsonStatic()
         trackType = self:getTrackType(),
         movesForward = self:getMovesForward(),
         speed = self:getSpeed(),
+        targetSpeed = self:getTargetSpeed(),
+        couplingFront = self:getCouplingFront(),
+        couplingRear = self:getCouplingRear(),
+        active = self:getActive(),
+        inTrainyard = self:getInTrainyard(),
+        trainyardId = self:getTrainyardId(),
         occupiedTacks = self:getOnTrack()
     }
 end

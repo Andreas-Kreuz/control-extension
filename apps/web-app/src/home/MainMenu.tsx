@@ -29,9 +29,16 @@ function MainMenu() {
       <AppPage>
         <AppCardGridContainer>
           {trafficNav.map((card) => (
-            <AppCardGrid key={card.title}>
-              <AppCardImg title={card.title} subtitle={card.subtitle} image={'/assets/' + card.image} to={card.link} />
-            </AppCardGrid>
+            card.image && (
+              <AppCardGrid key={card.title}>
+                <AppCardImg
+                  title={card.title}
+                  image={'/assets/' + card.image}
+                  to={card.link}
+                  {...(card.subtitle !== undefined ? { subtitle: card.subtitle } : {})}
+                />
+              </AppCardGrid>
+            )
           ))}
         </AppCardGridContainer>
         <Grid container style={{ alignItems: 'flex-start' }} justifyContent={'flex-start'} spacing={2} mt={2}>

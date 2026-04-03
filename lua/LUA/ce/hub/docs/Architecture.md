@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Zielarchitektur
 subtitle: Angestrebte Aufteilung der Verantwortlichkeiten im Lua-Teil der Bibliothek
 permalink: lua/ce/hub/docs/architecture/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Zielarchitektur der Lua-Bibliothek
@@ -87,7 +87,7 @@ Unterbereiche des Zielbilds:
   - gemeinsame DTO-Definitionen wie `DtoTypes.d.lua` und `DtoTypes.d.md`
 - `slots`
   - Datenslot-Namen, Datenslot-DTOs und Datenslot-Publisher
-- `signals`
+- `signal-detection`
   - Signalerkennung, Signal-DTOs und Signal-Publisher
 - `switches`
   - Weichenerkennung, Weichen-DTOs und Weichen-Publisher
@@ -220,8 +220,7 @@ Die Zielstruktur soll in kompakter Form so aussehen:
 lua/LUA/ce/
   ControlExtension.lua
   hub/
-    CoreCeModule.lua
-    DataCeModule.lua
+    CeHubModule.lua
     MainLoopRunner.lua
     ModuleRegistry.lua
     StatePublisherRegistry.lua
@@ -230,7 +229,7 @@ lua/LUA/ce/
     data/
       contracts/
       slots/
-      signals/
+      signal-detection/
       switches/
       structures/
       time/
@@ -260,8 +259,8 @@ Diese Darstellung ist bewusst kompakt gehalten. Sie soll die Verantwortlichkeite
 Stabil gehalten werden sollen nur wenige öffentliche Einstiegspunkte:
 
 - `ce.ControlExtension`
-- `ce.modules.road.RoadCeModule`
-- `ce.modules.transit.TransitCeModule`
+- `ce.modules.road.CeRoadModule`
+- `ce.modules.transit.CeTransitModule`
 - perspektivisch weitere Einstiegspunkte unter `ce.modules.rail.*`
 
 Interne Pfade unter `ce.hub.*` und `ce.bridge.*` sind Infrastruktur und sollen nicht als stabile öffentliche API behandelt werden.

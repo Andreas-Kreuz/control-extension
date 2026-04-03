@@ -1,12 +1,12 @@
 .row.equal-height {
-    display: flex;
-    flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
 }
 .row.equal-height > [class*='col-'] {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
-    flex: 1;
+  flex: 1;
 }

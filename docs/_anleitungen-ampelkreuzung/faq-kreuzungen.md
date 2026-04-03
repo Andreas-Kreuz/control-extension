@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Lua in Kreuzungen
 type: Tipps & Tricks
 subtitle: ... in meiner Kreuzung dies oder jenes erreichen.
-img: "/assets/thumbnails/ampel-aufstellen.jpg"
+img: '/assets/thumbnails/ampel-aufstellen.jpg'
 date: 2017-09-04
 permalink: docs/anleitungen-ampelkreuzung/tipps-kreuzungen
 tags: [Verwendung, Anleitung]

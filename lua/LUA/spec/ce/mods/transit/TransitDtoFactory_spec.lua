@@ -30,11 +30,11 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
                 }
             }
         }
-        local room, keyId, key, lineDto = TransitDtoFactory.createTransitLineDto(line)
-        local stationRoom, stationKeyId, stationKey, stationDto =
-            TransitDtoFactory.createTransitStationDto({ id = "Station A", name = "ignored" })
-        local settingsRoom, settingsKeyId, settingsDtos =
-            TransitDtoFactory.createTransitModuleSettingDtoList({
+        local ceType, keyId, key, lineDto = TransitDtoFactory.createLineDto(line)
+        local stationCeType, stationKeyId, stationKey, stationDto =
+            TransitDtoFactory.createStationDto({ id = "Station A", name = "ignored" })
+        local settingsCeType, settingsKeyId, settingsDtos =
+            TransitDtoFactory.createModuleSettingDtoList({
                 {
                     category = "Display",
                     name = "Next",
@@ -49,43 +49,45 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
         line.nr = "11"
         line.lineSegments[1].stations[1].station.name = "Changed"
 
-        assert.equals("transit-lines", room)
+        assert.equals("ce.mods.transit.Line", ceType)
         assert.equals("id", keyId)
         assert.equals("10", key)
         assert.same({
-            id = "10",
-            nr = "10",
-            trafficType = "BUS",
-            lineSegments = {
-                {
-                    id = "route-10",
-                    destination = "Central",
-                    routeName = "Route 10",
-                    lineNr = "10",
-                    stations = {
-                        {
-                            station = { name = "Station A" },
-                            timeToStation = 3
+                        ceType = "ce.mods.transit.Line",
+                        id = "10",
+                        nr = "10",
+                        trafficType = "BUS",
+                        lineSegments = {
+                            {
+                                id = "route-10",
+                                destination = "Central",
+                                routeName = "Route 10",
+                                lineNr = "10",
+                                stations = {
+                                    {
+                                        station = { name = "Station A" },
+                                        timeToStation = 3
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        }, lineDto)
-        assert.equals("transit-stations", stationRoom)
+                    }, lineDto)
+        assert.equals("ce.mods.transit.Station", stationCeType)
         assert.equals("id", stationKeyId)
         assert.equals("Station A", stationKey)
-        assert.same({ id = "Station A" }, stationDto)
-        assert.equals("transit-module-settings", settingsRoom)
+        assert.same({ ceType = "ce.mods.transit.Station", id = "Station A" }, stationDto)
+        assert.equals("ce.mods.transit.ModuleSetting", settingsCeType)
         assert.equals("name", settingsKeyId)
         assert.same({
-            {
-                category = "Display",
-                name = "Next",
-                description = "Show next departures",
-                type = "boolean",
-                value = true,
-                eepFunction = "TransitSettings.setShowDepartureTippText"
-            }
-        }, settingsDtos)
+                        {
+                            ceType = "ce.mods.transit.ModuleSetting",
+                            category = "Display",
+                            name = "Next",
+                            description = "Show next departures",
+                            type = "boolean",
+                            value = true,
+                            eepFunction = "TransitSettings.setShowDepartureTippText"
+                        }
+                    }, settingsDtos)
     end)
 end)

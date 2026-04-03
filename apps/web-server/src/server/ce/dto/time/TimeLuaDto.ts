@@ -3,8 +3,9 @@
 export interface TimeLuaDto {
   id: string;
   name: string;
-  timeComplete: string;
+  timeComplete: number;
   timeH: number;
   timeM: number;
   timeS: number;
+  timeLapse?: number;
 }

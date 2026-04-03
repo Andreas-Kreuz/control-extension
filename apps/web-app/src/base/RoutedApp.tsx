@@ -1,4 +1,5 @@
 import ErrorBoundary from './ErrorBoundary';
+import PairingGate from './PairingGate';
 import { Suspense, lazy } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
@@ -29,7 +30,11 @@ export const router = createBrowserRouter([
       return { path: '/simple' + r.path, element: r.element };
     }),
   },
-  { path: '/', element: <ConnectionWrapper />, children: homeRoutes },
+  {
+    path: '/',
+    element: <ConnectionWrapper />,
+    children: homeRoutes,
+  },
   { path: '/status', element: <StatusGrid /> },
   { path: '/server', element: <Server /> },
   { path: '*', element: <div>Not Found: {window.location.pathname}</div> },
@@ -39,7 +44,9 @@ function RoutedApp() {
   return (
     <ErrorBoundary>
       <Suspense fallback={<div>Loading...</div>}>
-        <RouterProvider router={router} />
+        <PairingGate>
+          <RouterProvider router={router} />
+        </PairingGate>
       </Suspense>
     </ErrorBoundary>
   );

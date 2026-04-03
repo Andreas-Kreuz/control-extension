@@ -1,9 +1,9 @@
 ---
 layout: page_landing
-title : Anleitungen
+title: Anleitungen
 subtitle: Schrittweise Erklärungen helfen Dir bei der Verwendung der Lua-Bibliothek.
 permalink: docs/anleitungen/
-feature-img: "/assets/headers/Titelbild-Simulator.jpg"
+feature-img: '/assets/headers/Titelbild-Simulator.jpg'
 ---
 
 <div class="row">
@@ -12,14 +12,11 @@ feature-img: "/assets/headers/Titelbild-Simulator.jpg"
   </div>
 </div>
 <div class="row equal-height">
-  {% for item in site.anleitungen-installation %}
-  {% unless item.hide%}
+  {% for item in site.anleitungen-installation %} {% unless item.hide%}
   <div class="col-12 col-md-6 col-lg-4">
     <div class="card border-success mb-5 bg-light">
-      <img class="card-img-top" src="{{ site.baseurl }}{{ item.img }}" alt="{{ item.title }}">
-      <div class="card-header text-white bg-success">
-        Kennenlernen
-      </div>
+      <img class="card-img-top" src="{{ site.baseurl }}{{ item.img }}" alt="{{ item.title }}" />
+      <div class="card-header text-white bg-success">Kennenlernen</div>
       <div class="card-body">
         <h4 class="card-title">{{ item.title }}</h4>
         <h6 class="card-subtitle mb-2 text-muted">{{ item.type }}</h6>
@@ -30,8 +27,7 @@ feature-img: "/assets/headers/Titelbild-Simulator.jpg"
       </div>
     </div>
   </div>
-  {% endunless %}
-  {% endfor %}
+  {% endunless %} {% endfor %}
 </div>
 <div class="row">
   <div class="col-12">
@@ -39,14 +35,11 @@ feature-img: "/assets/headers/Titelbild-Simulator.jpg"
   </div>
 </div>
 <div class="row equal-height">
-  {% for item in site.anleitungen-ampelkreuzung %}
-  {% unless item.hide %}
+  {% for item in site.anleitungen-ampelkreuzung %} {% unless item.hide %}
   <div class="col-12 col-md-6 col-lg-4">
     <div class="card border-primary mb-5 bg-light">
-      <img class="card-img-top" src="{{ site.baseurl }}{{ item.img }}" alt="{{ item.title }}">
-      <div class="card-header text-white bg-primary">
-        Verwenden
-      </div>
+      <img class="card-img-top" src="{{ site.baseurl }}{{ item.img }}" alt="{{ item.title }}" />
+      <div class="card-header text-white bg-primary">Verwenden</div>
       <div class="card-body">
         <h4 class="card-title">{{ item.title }}</h4>
         <h6 class="card-subtitle mb-2 text-muted">{{ item.type }}</h6>
@@ -57,8 +50,7 @@ feature-img: "/assets/headers/Titelbild-Simulator.jpg"
       </div>
     </div>
   </div>
-  {% endunless %}
-  {% endfor %}
+  {% endunless %} {% endfor %}
 </div>
 <div class="row">
   <div class="col-12">
@@ -66,14 +58,11 @@ feature-img: "/assets/headers/Titelbild-Simulator.jpg"
   </div>
 </div>
 <div class="row equal-height">
-  {% for item in site.anleitungen-entwickler %}
-  {% unless item.hide %}
+  {% for item in site.anleitungen-entwickler %} {% unless item.hide %}
   <div class="col-12 col-md-6 col-lg-4">
     <div class="card border-warning mb-5 bg-light">
-      <img class="card-img-top" src="{{ site.baseurl }}{{ item.img }}" alt="{{ item.title }}">
-      <div class="card-header bg-warning">
-        Weiterentwickeln
-      </div>
+      <img class="card-img-top" src="{{ site.baseurl }}{{ item.img }}" alt="{{ item.title }}" />
+      <div class="card-header bg-warning">Weiterentwickeln</div>
       <div class="card-body">
         <h4 class="card-title">{{ item.title }}</h4>
         <h6 class="card-subtitle mb-2 text-muted">{{ item.type }}</h6>
@@ -84,6 +73,5 @@ feature-img: "/assets/headers/Titelbild-Simulator.jpg"
       </div>
     </div>
   </div>
-  {% endunless %}
-  {% endfor %}
+  {% endunless %} {% endfor %}
 </div>

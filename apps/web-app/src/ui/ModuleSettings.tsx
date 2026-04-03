@@ -1,5 +1,5 @@
 import ModuleSetting from './ModuleSetting';
-import { SettingsDto } from '@ak/web-shared';
+import { SettingsDto } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
@@ -49,3 +49,4 @@ const ModuleSettings = (props: { settings: SettingsDto }) => {
 };
 
 export default ModuleSettings;
+

@@ -3,15 +3,18 @@ root = true
 
 [*]
 charset = utf-8
+end_of_line = lf
 indent_style = space
-indent_size = 4
+indent_size = 2
 insert_final_newline = true
 trim_trailing_whitespace = true
 max_line_length = 120
+quote_type = single
+jsx_quote_type = double
 
 [*.lua]
 # https://github.com/CppCXY/EmmyLuaCodeStyle/blob/master/docs/format_config_EN.md
-charset = latin1
+charset = iso-8859-1
 # [basic]
 
 # optional space/tab
@@ -21,6 +24,7 @@ indent_size = 4
 # if indent_style is tab, this is valid
 tab_width = 4
 # none/single/double
+quote_type = double
 quote_style = double
 
 continuation_indent = 4
@@ -35,7 +39,7 @@ max_line_length = 120
 
 # optional crlf/lf/cr/auto, if it is 'auto', in windows it is crlf other platforms are lf
 # in neovim the value 'auto' is not a valid option, please use 'unset'
-end_of_line = auto
+#end_of_line = crlf
 
 #  none/ comma / semicolon / only_kv_colon
 table_separator_style = comma
@@ -194,15 +198,16 @@ indent_size = 2
 indent_size = 2
 
 [*.yml]
-indent_size = 4
+indent_size = 2
 
 [*.ts]
 indent_size = 2
-quote_type = single
 
 [*.tsx]
 indent_size = 2
-quote_type = single
+
+[*.mjs]
+indent_size = 2
 
 [*.md]
 indent_size = 2

@@ -1,3 +1,4 @@
+import { CeTypes } from '@ce/web-shared';
 import { useState } from 'react';
 import { useApiDataRoomHandler } from '../../io/useRoomHandler';
 import IntersectionSwitching from './model/IntersectionSwitching';
@@ -5,7 +6,7 @@ import IntersectionSwitching from './model/IntersectionSwitching';
 function useIntersectionSwitchings(): IntersectionSwitching[] {
   const [intersectionSwitchings, setIntersectionSwitchings] = useState<IntersectionSwitching[]>([]);
 
-  useApiDataRoomHandler('road-intersection-switchings', (payload: string) => {
+  useApiDataRoomHandler(CeTypes.RoadIntersectionSwitching, (payload: string) => {
     const data: Record<string, IntersectionSwitching> = JSON.parse(payload);
     setIntersectionSwitchings(Object.values(data));
   });
@@ -14,3 +15,4 @@ function useIntersectionSwitchings(): IntersectionSwitching[] {
 }
 
 export default useIntersectionSwitchings;
+

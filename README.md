@@ -36,12 +36,13 @@ Das Paket besteht aus vier Bausteinen:
 ## Ausführliche Dokumentation
 
 - Die Webseite enthält [Anleitungen und Dokumentation](https://andreas-kreuz.github.io/control-extension/lua/ce/) zur Verwendung der Control Extension für EEP.
+- [Architektur und Designprinzipien](ARCHITECTURE.md) der Control Extension.
 
 ## Beiträge sind Willkommen
 
 - [Fehler gefunden, Verbesserungsvorschläge?](CONTRIBUTING.md) <br>So kannst Du zum Projekt beitragen
 
-- So kannst Du die [Entwicklungsumgebung einrichten](scripts/README.md)
+- So kannst Du die [Entwicklungsumgebung einrichten](README_DEV.md)
 
 ## Was ist EEP
 

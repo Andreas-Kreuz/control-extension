@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Control Extension installieren
 subtitle: Hier erfährst Du, wie Du die Control Extension herunterladen und direkt in EEP installieren kannst.
 type: Anleitung
-img: "/assets/thumbnails/ModellPacker.png"
+img: '/assets/thumbnails/ModellPacker.png'
 date: 2017-09-01
 permalink: docs/anleitungen-installation/installation
 tags: [Installation]

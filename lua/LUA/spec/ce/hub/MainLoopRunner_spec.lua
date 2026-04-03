@@ -9,7 +9,7 @@ insulate("MainLoopRunner", function ()
         clearModule("ce.hub.ModuleRegistry")
         clearModule("ce.hub.MainLoopRunner")
         clearModule("ce.hub.StatePublisherRegistry")
-        clearModule("ce.hub.mods.HubCeModule")
+        clearModule("ce.hub.CeHubModule")
         clearModule("ce.hub.bridge.HubBridgeConnector")
         clearModule("ce.hub.data.modules.ModulesStatePublisher")
         clearModule("ce.hub.data.version.VersionStatePublisher")
@@ -77,8 +77,8 @@ insulate("MainLoopRunner", function ()
             end
         }
 
-        DataChangeBus.fireListChange = function (room, keyId, list)
-            if room ~= "runtime" then return end
+        DataChangeBus.fireListChange = function (ceType, keyId, list)
+            if ceType ~= "ce.hub.Runtime" then return end
             table.insert(capturedRuntimePublishes, {
                 keyId = keyId,
                 overallCount = list["MainLoopRunner.runCycle-OVERALL"] and

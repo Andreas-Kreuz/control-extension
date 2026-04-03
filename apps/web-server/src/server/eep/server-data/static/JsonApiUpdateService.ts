@@ -1,8 +1,7 @@
 import { CacheService } from '../CacheService';
 import EepDataStore, { State } from '../EepDataStore';
 import JsonApiReducer, { ServerData } from './ServerData';
-import { ServerStatusEvent } from '@ak/web-shared';
-import { ApiDataRoom } from '@ak/web-shared';
+import { ApiDataRoom, CeTypes, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
@@ -25,9 +24,13 @@ export default class JsonApiUpdateService {
           `</head><body><h1>/api/v1</h1><ul>${items}</ul></body></html>`,
       );
     });
-    this.router.get('/:room', (req, res) => {
+    this.router.get('/:room', (req, res, next?: express.NextFunction) => {
       const { room } = req.params;
       if (!this.reducer.roomAvailable(room)) {
+        if (next) {
+          next();
+          return;
+        }
         res.status(404).json({ error: 'not found' });
         return;
       }
@@ -125,15 +128,19 @@ export default class JsonApiUpdateService {
     this.io.to(ApiDataRoom.roomId(key)).emit(ApiDataRoom.eventId(key), '{}');
   }
 
-  private lastTimeOut: NodeJS.Timeout;
+  private lastTimeOut?: NodeJS.Timeout;
 
   private registerStatsTimeout(data: ServerData) {
     if (this.lastTimeOut) {
       clearTimeout(this.lastTimeOut);
     }
     this.lastTimeOut = setTimeout(() => {
-      const roomName = 'api-stats';
-      const currentStats = JSON.parse(data.roomToJson[roomName]);
+      const roomName = CeTypes.ServerStats;
+      const currentStatsJson = data.roomToJson[roomName];
+      if (!currentStatsJson) {
+        return;
+      }
+      const currentStats = JSON.parse(currentStatsJson);
       const newStats = { ...currentStats, eepDataUpToDate: false };
       const newStatsJsonString = JSON.stringify(newStats);
       data.roomToJson[roomName] = newStatsJsonString;
@@ -141,3 +148,4 @@ export default class JsonApiUpdateService {
     }, 1000);
   }
 }
+

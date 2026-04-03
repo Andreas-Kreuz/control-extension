@@ -5,13 +5,12 @@ require("ce.demo-anlagen.demo-linien.demo-linien-main")
 local ControlExtension = require("ce.ControlExtension")
 
 -- Diese Zeilen registrieren die folgenden Module
--- * Core (immer benötigt)
--- * Data (Export der Daten für EEP)
+-- * Hub (immer benötigt)
 -- * Intersection (für die Ampelsteuerung notwendig)
-ControlExtension.addModules(require("ce.hub.mods.CoreCeModule"),
-                               require("ce.hub.mods.DataCeModule"),
-                               require("ce.mods.road.RoadCeModule"),
-                               require("ce.mods.transit.TransitCeModule"))
+-- * Transit (für den ÖPNV notwendig)
+ControlExtension.addModules(require("ce.hub.CeHubModule"),
+                            require("ce.mods.road.CeRoadModule"),
+                            require("ce.mods.transit.CeTransitModule"))
 
 -- Die EEPMain Methode wird von EEP genutzt. Sie muss immer 1 zurückgeben.
 function EEPMain()

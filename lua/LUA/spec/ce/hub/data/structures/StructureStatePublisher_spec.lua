@@ -26,6 +26,15 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                 rot = { 4, 5, 6 },
                 modelType = 22,
                 tag = "shed"
+            },
+            ["#3"] = {
+                light = false,
+                smoke = false,
+                fire = false,
+                pos = { 7, 8, 9 },
+                rot = { 10, 11, 12 },
+                modelType = 23,
+                tag = "tree"
             }
         }
 
@@ -79,34 +88,53 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         _G.__structure_state_test_states = nil
     end)
 
-    it("fires initial room data and later only dirty room data", function ()
+    it("fires initial ceType data and later only dirty ceType data", function ()
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
         StructureStatePublisher.initialize()
 
         assert.same({
-            ["#2"] = {
-                id = "#2",
-                name = "#2",
-                pos_x = 1,
-                pos_y = 2,
-                pos_z = 3,
-                rot_x = 4,
-                rot_y = 5,
-                rot_z = 6,
-                modelType = 22,
-                modelTypeText = "Immobilie",
-                tag = "shed",
-                light = true,
-                smoke = false,
-                fire = false
-            }
-        }, DataStore.getRoom("structures"))
+                        ["#2"] = {
+                            ceType = "ce.hub.Structure",
+                            id = "#2",
+                            name = "#2",
+                            pos_x = 1,
+                            pos_y = 2,
+                            pos_z = 3,
+                            rot_x = 4,
+                            rot_y = 5,
+                            rot_z = 6,
+                            modelType = 22,
+                            modelTypeText = "Immobilie",
+                            tag = "shed",
+                            light = true,
+                            smoke = false,
+                            fire = false
+                        },
+                        ["#3"] = {
+                            ceType = "ce.hub.Structure",
+                            id = "#3",
+                            name = "#3",
+                            pos_x = 7,
+                            pos_y = 8,
+                            pos_z = 9,
+                            rot_x = 10,
+                            rot_y = 11,
+                            rot_z = 12,
+                            modelType = 23,
+                            modelTypeText = "Landschaftselement/Fauna",
+                            tag = "tree",
+                            light = false,
+                            smoke = false,
+                            fire = false
+                        }
+                    }, DataStore.getCeType("ce.hub.Structure"))
 
         _G.__structure_state_test_states["#2"].fire = true
         StructureStatePublisher.syncState()
 
-        assert.is_true(DataStore.get("structures", "#2").fire)
+        assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
+        assert.equals("tree", DataStore.get("ce.hub.Structure", "#3").tag)
     end)
 end)

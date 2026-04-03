@@ -1,7 +1,7 @@
 ---
 ---
 
-@import "my_pages";
+@import 'my_pages';
 .content img:not(.emoji),
 .container img:not(.emoji),
 .container-fluid img:not(.emoji) {
@@ -46,6 +46,7 @@ article table tbody tr:nth-child(2n) {
   background-color: #f9f9f9;
 }
 
-table ~ table, table ~ p {
+table ~ table,
+table ~ p {
   margin-top: 1em;
 }

@@ -10,7 +10,7 @@ function useIntersectionSwitching(id: string | undefined): IntersectionSwitching
     setSwitchings(
       allSwitchings
         .filter((is: IntersectionSwitching) => id === is.intersectionId)
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort((a, b) => a.name.localeCompare(b.name)),
     );
   }, [allSwitchings, id]);
 

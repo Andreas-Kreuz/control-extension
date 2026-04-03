@@ -1,18 +1,18 @@
-describe("ce.mods.transit.StationQueue", function()
+describe("ce.mods.transit.StationQueue", function ()
     local EepSimulator = require("ce.hub.eep.EepSimulator")
     EepSimulator.simulateAddTrain("train1", "RollingStock 1a", "RollingStock 2b")
     EepSimulator.simulateAddTrain("train2", "RollingStock 2a", "RollingStock 2b")
     EepSimulator.simulateAddTrain("train3", "RollingStock 3a", "RollingStock 3b")
 
-    insulate("new StationQueue is empty", function()
+    insulate("new StationQueue is empty", function ()
         local StationQueue = require("ce.mods.transit.StationQueue")
 
         local myQueue = StationQueue:new();
-        it("First is nil", function() assert.same({}, myQueue.entries) end)
-        it("First is nil", function() assert.same({}, myQueue.entriesByArrival) end)
+        it("First is nil", function () assert.same({}, myQueue.entries) end)
+        it("First is nil", function () assert.same({}, myQueue.entriesByArrival) end)
     end)
 
-    insulate("all in order", function()
+    insulate("all in order", function ()
         local StationQueue = require("ce.mods.transit.StationQueue")
 
         local myQueue = StationQueue:new()
@@ -21,10 +21,10 @@ describe("ce.mods.transit.StationQueue", function()
         myQueue:push("train3", "A", "1", 5)
 
         it("entriesByArrival",
-           function() assert.same({"1&A&train1", "1&A&train2", "1&A&train3"}, myQueue.entriesByArrival) end)
+           function () assert.same({ "1&A&train1", "1&A&train2", "1&A&train3" }, myQueue.entriesByArrival) end)
     end)
 
-    insulate("train3 before train2", function()
+    insulate("train3 before train2", function ()
         local StationQueue = require("ce.mods.transit.StationQueue")
 
         local myQueue = StationQueue:new()
@@ -33,10 +33,10 @@ describe("ce.mods.transit.StationQueue", function()
         myQueue:push("train3", "A", "1", 3, 3)
 
         it("entriesByArrival",
-           function() assert.same({"1&A&train1", "1&A&train3", "1&A&train2"}, myQueue.entriesByArrival) end)
+           function () assert.same({ "1&A&train1", "1&A&train3", "1&A&train2" }, myQueue.entriesByArrival) end)
     end)
 
-    insulate("station and platform trains", function()
+    insulate("station and platform trains", function ()
         local StationQueue = require("ce.mods.transit.StationQueue")
 
         local myQueue = StationQueue:new()
@@ -44,14 +44,14 @@ describe("ce.mods.transit.StationQueue", function()
         myQueue:push("train2", "A", "1", 5, 2)
         myQueue:push("train3", "A", "1", 5, "3")
 
-        it("All platforms 1st", function() assert.equals("train1", myQueue:getTrainEntries()[1].trainName) end)
-        it("All platforms 2nd", function() assert.equals("train2", myQueue:getTrainEntries()[2].trainName) end)
-        it("All platforms 3rd", function() assert.equals("train3", myQueue:getTrainEntries()[3].trainName) end)
-        it("Platform 1 - 1st", function() assert.equals("train1", myQueue:getTrainEntries(1)[1].trainName) end)
-        it("Platform 2 - 1st", function() assert.equals("train2", myQueue:getTrainEntries(2)[1].trainName) end)
-        it("Platform 3 - 1st", function() assert.equals("train3", myQueue:getTrainEntries(3)[1].trainName) end)
-        it("Platform \"1\"", function() assert.equals("train1", myQueue:getTrainEntries("1")[1].trainName) end)
-        it("Platform \"2\"", function() assert.equals("train2", myQueue:getTrainEntries("2")[1].trainName) end)
-        it("Platform \"3\"", function() assert.equals("train3", myQueue:getTrainEntries("3")[1].trainName) end)
+        it("All platforms 1st", function () assert.equals("train1", myQueue:getTrainEntries()[1].trainName) end)
+        it("All platforms 2nd", function () assert.equals("train2", myQueue:getTrainEntries()[2].trainName) end)
+        it("All platforms 3rd", function () assert.equals("train3", myQueue:getTrainEntries()[3].trainName) end)
+        it("Platform 1 - 1st", function () assert.equals("train1", myQueue:getTrainEntries(1)[1].trainName) end)
+        it("Platform 2 - 1st", function () assert.equals("train2", myQueue:getTrainEntries(2)[1].trainName) end)
+        it("Platform 3 - 1st", function () assert.equals("train3", myQueue:getTrainEntries(3)[1].trainName) end)
+        it("Platform \"1\"", function () assert.equals("train1", myQueue:getTrainEntries("1")[1].trainName) end)
+        it("Platform \"2\"", function () assert.equals("train2", myQueue:getTrainEntries("2")[1].trainName) end)
+        it("Platform \"3\"", function () assert.equals("train3", myQueue:getTrainEntries("3")[1].trainName) end)
     end)
 end)

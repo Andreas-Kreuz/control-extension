@@ -1,0 +1,93 @@
+name: check:web - Web linting and testing
+
+on: [push, pull_request]
+
+jobs:
+  lint-web:
+    name: lint:web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run lint:web
+        run: yarn lint:web
+
+  test-server:
+    name: test:server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run test:server
+        run: yarn test:server
+
+  test-app:
+    name: test:app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build web-shared
+        run: yarn workspace @ce/web-shared run build
+
+      - name: Build web-app
+        run: yarn workspace @ce/web-app run build
+
+      - name: Build web-server
+        run: yarn workspace @ce/web-server run build
+
+      - name: Build web-server app assets
+        run: yarn workspace @ce/web-server run build:app-assets
+
+      - name: Run test:app
+        uses: cypress-io/github-action@v7
+        with:
+          install: false
+          working-directory: apps/web-app
+          start: yarn workspace @ce/web-server run run:test
+          wait-on: 'http://localhost:3000/server'
+          record: false
+          command: yarn test:e2e
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

@@ -3,28 +3,29 @@ layout: page_with_toc
 title: Github verwenden
 type: Anleitung
 subtitle: Hier erfährst Du, wie Du die Lua-Bibliothek direkt aus GitHub verwenden kannst.
-img: "/assets/thumbnails/GitHub.png"
-feature-img: "/assets/headers/GitHub.png"
+img: '/assets/thumbnails/GitHub.png'
+feature-img: '/assets/headers/GitHub.png'
 date: 2017-09-03
 permalink: docs/anleitungen-entwickler/github-verwenden
 tags: [Fortgeschrittene, Entwickler]
 ---
+
 # Bibliothek aus GitHub nutzen
 
 ⭐ Für weniger versierte Anwender wird die Installation mit dem EEP-Installer empfohlen.
 
-* Melde Dich bei [GitHub](https://github.com/) an.
+- Melde Dich bei [GitHub](https://github.com/) an.
 
-* Erstelle Deinen eigenen Fork (eine Kopie auf GitHub) von [control-extension](https://github.com/Andreas-Kreuz/control-extension). Dazu drückst Du rechts oben in der Ecke auf "Fork".
+- Erstelle Deinen eigenen Fork (eine Kopie auf GitHub) von [control-extension](https://github.com/Andreas-Kreuz/control-extension). Dazu drückst Du rechts oben in der Ecke auf "Fork".
 
-* Lade Dir das Programm [GitHub Desktop](https://desktop.github.com/) herunter.
+- Lade Dir das Programm [GitHub Desktop](https://desktop.github.com/) herunter.
 
-* Erstelle mit _File_ - _Clone Repository_ eine Arbeitskopie auf der selben Festplatte, auf der auch EEP 14 liegt (dies ist für das Anlegen eines Verzeichnis-Links notwendig), z.B. in `C:\GitHub\control-extension`
+- Erstelle mit _File_ - _Clone Repository_ eine Arbeitskopie auf der selben Festplatte, auf der auch EEP 14 liegt (dies ist für das Anlegen eines Verzeichnis-Links notwendig), z.B. in `C:\GitHub\control-extension`
 
-* Starte die Kommandozeile als Administrator (`<Windows>`-Taste drücken, `cmd` eintippen, ein Rechtsklick auf `Eingabeaufforderung` und dann _Als Administrator ausführen_.
+- Starte die Kommandozeile als Administrator (`<Windows>`-Taste drücken, `cmd` eintippen, ein Rechtsklick auf `Eingabeaufforderung` und dann _Als Administrator ausführen_.
 
-* Erstelle nun einen Verzeichnis-Link (Verknüpfung) des `ce`-Verzeichnisses im Unterverzeichnis `LUA` Deiner EEP-Installation (z.B. in `C:\Trend\EEP14\LUA`):
+- Erstelle nun einen Verzeichnis-Link (Verknüpfung) des `ce`-Verzeichnisses im Unterverzeichnis `LUA` Deiner EEP-Installation (z.B. in `C:\Trend\EEP14\LUA`):
 
-    `mklink /D C:\Trend\EEP14\LUA\ce C:\GitHub\control-extension\lua\LUA\ce\`
+  `mklink /D C:\Trend\EEP14\LUA\ce C:\GitHub\control-extension\lua\LUA\ce\`
 
-* Fertig: Nun ist die Bibliothek im Ordner `ce` auch in EEP unter `ce` verfügbar und Du kannst nun eine Demo-Anlage aus `C:\GitHub\control-extension\lua\Resourcen\Anlagen\` öffnen. Wenn alles geklappt hat, wird die automatische Steuerung der Demo-Anlage funktionieren.
+- Fertig: Nun ist die Bibliothek im Ordner `ce` auch in EEP unter `ce` verfügbar und Du kannst nun eine Demo-Anlage aus `C:\GitHub\control-extension\lua\Resourcen\Anlagen\` öffnen. Wenn alles geklappt hat, wird die automatische Steuerung der Demo-Anlage funktionieren.

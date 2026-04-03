@@ -6,13 +6,17 @@ Dieser Observer wandelt die von EEP gesammelten Daten 1:1 in JSON-Daten um und s
 
 ## Bereitgestellte Daten
 
-- **`/api-entries`** enthält alle Einträge über die bekannten EEP-Daten.
+- **`/ce.server.ApiEntries`** enthält alle Einträge über die bekannten EEP-Daten.
   Dies ist ein zusätzlicher Knoten, der vom Server erzeugt wird und eine Übersicht über die API-Einträge enthält.
 
-- **`/xxx`** enthält den Key der eigentlichen von EEP eingesammelten Einträge, z.B. `structures` oder `signals`. Der Inhalt hängt vom geladenen Lua-Modul ab.
+- **`/ce.server.ServerStats`** enthält serverseitig abgeleitete Metadaten zum aktuellen Datenbestand.
+  Dieser Knoten kommt nicht aus Lua, sondern wird im Web-Server aus den aktuell bekannten API-Einträgen berechnet.
+  Aktuell enthält er die Felder `eepDataUpToDate`, `luaDataReceived` und `apiEntryCount`.
 
-- Der öffentliche Lua-Vertrag für diese Räume ist aktuell in den bereichsspezifischen Dateien `lua/LUA/ce/hub/data/**/*DtoTypes.d.lua` und `lua/LUA/ce/hub/data/**/*DtoTypes.d.md` dokumentiert.
-  Diese Dateien werden vom Server derzeit noch nicht zur Laufzeit eingelesen, sind aber die Soll-Quelle für Room-Namen, `keyId` und DTO-Formen.
+- **`/xxx`** enthält den Key der eigentlichen von EEP eingesammelten Einträge, z.B. `ce.hub.Structure` oder `ce.hub.Signal`. Der Inhalt hängt vom geladenen Lua-Modul ab.
+
+- Der öffentliche Lua-Vertrag für diese CeTypes ist aktuell in den bereichsspezifischen Dateien `lua/LUA/ce/hub/data/**/*DtoTypes.d.lua` und `lua/LUA/ce/hub/data/**/*DtoTypes.d.md` dokumentiert.
+  Diese Dateien werden vom Server derzeit noch nicht zur Laufzeit eingelesen, sind aber die Soll-Quelle für CeType-Namen, `keyId` und DTO-Formen.
 
 ### Zugriff über API
 

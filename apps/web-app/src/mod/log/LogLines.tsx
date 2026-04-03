@@ -1,7 +1,7 @@
-import { useLog, useLogDispatch } from './LogProvider';
+import { useLog } from './LogProvider';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 const List = styled('ul')({
   m: 0,
@@ -21,9 +21,7 @@ function LogLines() {
   const logState = useLog();
   const lines = logState?.lines;
   const autoScroll = logState?.autoScroll;
-  const logDispatch = useLogDispatch();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const listRef = useRef<HTMLUListElement>();
 
   const scrollToBottom = () => {
     if (autoScroll) {
@@ -37,7 +35,6 @@ function LogLines() {
 
   return (
     <Box
-      ref={listRef}
       height="14.2em"
       width="calc(100vw)"
       sx={{

@@ -25,9 +25,10 @@ function StatusSnackBar() {
   const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
 
   useEffect(() => {
-    if (snackPack.length && !messageInfo) {
+    const nextMessage = snackPack[0];
+    if (snackPack.length && !messageInfo && nextMessage) {
       // Set a new snack, when there is no message displayed
-      setMessageInfo({ ...snackPack[0] });
+      setMessageInfo(nextMessage);
       setSnackPack((prev) => prev.slice(1));
       setOpen(true);
     } else if (snackPack.length && messageInfo && open) {

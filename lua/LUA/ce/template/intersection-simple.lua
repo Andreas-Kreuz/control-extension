@@ -7,7 +7,7 @@
 -----------------------------------------------------------------------------------------------------------------------
 -- Diese Zeile lädt den Einstiegspunkt der Lua-Bibliothek
 local ControlExtension = require("ce.ControlExtension")
-local crossingCeModule = require("ce.mods.road.RoadCeModule")
+local crossingCeModule = require("ce.mods.road.CeRoadModule")
 
 ControlExtension.addModules(crossingCeModule)
 

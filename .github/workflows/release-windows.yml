@@ -1,0 +1,154 @@
+name: release - Manual Windows build and draft upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Git tag and release name to create or update
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build release on Windows and upload assets
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        shell: bash
+        run: corepack enable
+
+      - name: Setup MSVC developer command prompt
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+
+      - name: Setup Lua 5.3
+        uses: leafo/gh-actions-lua@v12
+        with:
+          luaVersion: '5.3'
+          buildCache: false
+
+      - name: Setup LuaRocks
+        shell: powershell
+        run: |
+          $version = '3.12.2'
+          $prefix = Join-Path $env:GITHUB_WORKSPACE '.luarocks'
+          $buildDir = Join-Path $env:RUNNER_TEMP 'luarocks-win32'
+          $zipPath = Join-Path $env:RUNNER_TEMP "luarocks-$version-win32.zip"
+          $luaDir = Join-Path $env:GITHUB_WORKSPACE '.lua'
+          $packageDir = Join-Path $buildDir "luarocks-$version-win32"
+          $installBat = Join-Path $packageDir 'install.bat'
+
+          if (Test-Path $buildDir) {
+            Remove-Item -LiteralPath $buildDir -Recurse -Force
+          }
+          if (Test-Path $prefix) {
+            Remove-Item -LiteralPath $prefix -Recurse -Force
+          }
+
+          Invoke-WebRequest -Uri "https://luarocks.github.io/luarocks/releases/luarocks-$version-win32.zip" -OutFile $zipPath
+          Expand-Archive -LiteralPath $zipPath -DestinationPath $buildDir
+
+          Push-Location $packageDir
+          & cmd.exe /d /c "`"$installBat`" /P `"$prefix`" /SELFCONTAINED /LV 5.3 /LUA `"$luaDir`" /FORCECONFIG /NOADMIN /Q"
+          $exitCode = $LASTEXITCODE
+          Pop-Location
+          if ($exitCode -ne 0) {
+            throw "LuaRocks install failed with exit code $exitCode"
+          }
+          $luarocksBat = Join-Path $prefix 'luarocks.bat'
+          if (-not (Test-Path $luarocksBat)) {
+            $luarocksBat = Join-Path (Join-Path $prefix 'bin') 'luarocks.bat'
+          }
+          if (-not (Test-Path $luarocksBat)) {
+            throw "LuaRocks installation did not produce luarocks.bat in $prefix or $prefix\\bin"
+          }
+
+          Add-Content -Path $env:GITHUB_PATH -Value $prefix
+          Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $prefix 'bin')
+          Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $prefix 'systree\bin')
+
+      - name: Setup Ruby 3.3
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Install Bundler 4.0.9
+        shell: bash
+        run: |
+          gem install bundler -v 4.0.9
+          bundle _4.0.9_ -v
+
+      - name: Install repository dependencies
+        shell: bash
+        run: yarn install --immutable
+
+      - name: Install Lua tools
+        shell: powershell
+        run: |
+          $luarocks = "$env:GITHUB_WORKSPACE\.luarocks\luarocks.bat"
+          if (-not (Test-Path $luarocks)) {
+            $luarocks = "$env:GITHUB_WORKSPACE\.luarocks\bin\luarocks.bat"
+          }
+          & $luarocks install luacheck
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to install luacheck"
+          }
+          & $luarocks install busted
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to install busted"
+          }
+
+      - name: Install Ruby gems
+        shell: bash
+        run: bundle _4.0.9_ install
+
+      - name: Check required tools
+        shell: bash
+        run: yarn tools:check
+
+      - name: Build release
+        shell: bash
+        run: yarn build:release
+
+      - name: Resolve release asset paths
+        id: assets
+        shell: bash
+        run: node ./scripts/find-release-assets.mjs
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-${{ inputs.release_tag }}
+          if-no-files-found: error
+          path: |
+            ${{ steps.assets.outputs.exe_path }}
+            ${{ steps.assets.outputs.eep_package_path }}
+
+      - name: Create or update draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.release_tag }}
+          draft: true
+          files: |
+            ${{ steps.assets.outputs.exe_path }}
+            ${{ steps.assets.outputs.eep_package_path }}
+          fail_on_unmatched_files: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

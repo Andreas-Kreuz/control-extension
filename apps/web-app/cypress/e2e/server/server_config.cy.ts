@@ -3,7 +3,7 @@ import EepSimulator from '../../test-helpers/eep-simulator';
 const simulator = new EepSimulator();
 
 describe('Server Tests "/server"', () => {
-  const pwd: { dir: string } = { dir: '-' };
+  const pwd: { dir: string; pairingRequired: boolean } = { dir: '-', pairingRequired: true };
 
   before(() => {
     // Remember the old server dir otherwise the following tests will not work!
@@ -16,12 +16,17 @@ describe('Server Tests "/server"', () => {
         .then((value) => {
           pwd.dir = value as string;
         });
+      cy.get('input#pairing-required-switch')
+        .invoke('prop', 'checked')
+        .then((value) => {
+          pwd.pairingRequired = Boolean(value);
+        });
     });
     simulator.reset();
     simulator.eepEvent('eep-version-complete.json');
     cy.wait(500).then(() => {
-      cy.contains('api-entries');
-      cy.contains('eep-version');
+      cy.contains('ce.server.ApiEntries');
+      cy.contains('ce.hub.EepVersion');
       cy.contains('aus 2 Events');
     });
   });
@@ -32,6 +37,16 @@ describe('Server Tests "/server"', () => {
       cy.log('RESET TO: ' + pwd.dir);
       cy.visit('/server');
       cy.wait(500);
+      cy.get('input#pairing-required-switch').then(($switch) => {
+        const currentValue = Boolean($switch.prop('checked'));
+        if (currentValue !== pwd.pairingRequired) {
+          if (pwd.pairingRequired) {
+            cy.wrap($switch).check({ force: true });
+          } else {
+            cy.wrap($switch).uncheck({ force: true });
+          }
+        }
+      });
       cy.get('#choose-dir-current-dir')
         .should('not.have.text', '-')
         .then(() => {
@@ -39,15 +54,8 @@ describe('Server Tests "/server"', () => {
             .should('be.enabled')
             .click()
             .then(() => {
-              cy.get('input#dir-dialog-dir')
-                .should('exist')
-                .should('be.visible')
-                .clear()
-                .type(pwd.dir)
-                .type('{esc}');
-              cy.get('#dir-dialog-choose')
-                .should('be.enabled')
-                .click();
+              cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(pwd.dir).type('{esc}');
+              cy.get('#dir-dialog-choose').should('be.enabled').click();
               cy.get('#responsive-dialog-title').should('not.exist');
             });
         });
@@ -64,13 +72,17 @@ describe('Server Tests "/server"', () => {
     cy.contains('aus 2 Events');
   });
 
+  it('allows toggling approval for new connections and keeps the setting on reload', () => {
+    cy.get('input#pairing-required-switch').should('be.checked').uncheck({ force: true });
+    cy.get('input#pairing-required-switch').should('not.be.checked');
+    cy.reload();
+    cy.get('input#pairing-required-switch').should('not.be.checked');
+  });
+
   describe('Changing the directory', () => {
     it('button "Wählen" is enabled', () => {
       cy.get('#choose-dir-button').click();
-      cy.get('input#dir-dialog-dir')
-        .should('exist')
-        .should('be.visible')
-        .should('contain.value', pwd.dir);
+      cy.get('input#dir-dialog-dir').should('exist').should('be.visible').should('contain.value', pwd.dir);
       cy.get('#dir-dialog-choose').should('be.enabled');
       cy.get('#dir-dialog-cancel').should('be.enabled');
       cy.get('input#dir-dialog-dir').type('{esc}');
@@ -140,15 +152,8 @@ describe('Server Tests "/server"', () => {
               .should('be.enabled')
               .click()
               .then(() => {
-                cy.get('input#dir-dialog-dir')
-                  .should('exist')
-                  .should('be.visible')
-                  .clear()
-                  .type(pwd.dir)
-                  .type('{esc}');
-                cy.get('#dir-dialog-choose')
-                  .should('be.enabled')
-                  .click();
+                cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(pwd.dir).type('{esc}');
+                cy.get('#dir-dialog-choose').should('be.enabled').click();
                 cy.get('#responsive-dialog-title').should('not.exist');
               });
           });

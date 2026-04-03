@@ -39,7 +39,7 @@ insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
         _G.__switch_state_test_states = nil
     end)
 
-    it("fires switches with the existing wire format", function ()
+    it("fires switch ceTypes with the existing wire format", function ()
         local SwitchStatePublisher = require("ce.hub.data.switches.SwitchStatePublisher")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
@@ -47,11 +47,12 @@ insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
         SwitchStatePublisher.syncState()
 
         assert.same({
-            ["8"] = {
-                id = 8,
-                position = 2,
-                tag = "South"
-            }
-        }, DataStore.getRoom("switches"))
+                        ["8"] = {
+                            ceType = "ce.hub.Switch",
+                            id = 8,
+                            position = 2,
+                            tag = "South"
+                        }
+                    }, DataStore.getCeType("ce.hub.Switch"))
     end)
 end)

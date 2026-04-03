@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Eigene Module entwickeln
 subtitle: Wie Du ein eigenes CeModule baust und in die Control Extension integrierst
 permalink: lua/ce/develop/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Eigene Module entwickeln
@@ -20,7 +20,7 @@ Ein `CeModule` ist ein Lua-Modul (eine Tabelle), das eine festgelegte Schnittste
 | Feld      | Typ       | Beschreibung                                                        |
 | --------- | --------- | ------------------------------------------------------------------- |
 | `id`      | `string`  | Eindeutige UUID des Moduls — darf sich nie ändern                   |
-| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.RoadCeModule"`     |
+| `name`    | `string`  | Lua-require-Name des Moduls, z.B. `"ce.mods.road.CeRoadModule"`     |
 | `enabled` | `boolean` | Kann gesetzt werden um das Modul zu aktivieren oder zu deaktivieren |
 
 ## Pflichtmethoden
@@ -73,9 +73,9 @@ Die Konvention der eingebauten Module:
 
 1. Ein `*StatePublisher` sammelt mit einem `*DataCollector` die aktuellen Zustände.
 2. Eine `*DtoFactory` wandelt die Zustände in Datentransferobjekte (DTOs) um.
-3. Die DTOs werden in Datenräume (`room`) einsortiert: `room:string` → `dtoId:string|number` → `dto:table`.
+3. Die DTOs werden nach `ceType` einsortiert: `ceType:string` → `dtoId:string|number` → `dto:table`.
 
-Räume und DTO-Strukturen aller eingebauten Module sind in [hub/data/DTO.md](hub/data/DTO.md) dokumentiert.
+CeTypes und DTO-Strukturen aller eingebauten Module sind in [hub/data/DTO.md](hub/data/DTO.md) dokumentiert.
 
 ## Optionale Methoden
 
@@ -90,17 +90,18 @@ end
 `setOptions` wird nicht automatisch vom Hub aufgerufen — Du rufst es selbst auf, bevor Du `ControlExtension.runTasks()` startest:
 
 ```lua
-local modules = ControlExtension.addModules(require("ce.mods.mymod.MyCeModule"))
-modules["ce.mods.mymod.MyCeModule"].setOptions({ debug = true })
+ControlExtension.addModules(require("ce.mods.mymod.MyCeModule").setOptions({ debug = true }))
 ```
 
 ## Vorlagen
 
 Fertige Vorlagen findest Du in [`ce.template`](template/README.md).
-Bestehende Module wie `ce.mods.road.RoadCeModule` können als Referenz dienen — siehe [`ce.mods`](mods/README.md).
+Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen — siehe [`ce.mods`](mods/README.md).
 
 ## Weiterführende Dokumentation
 
+- [Gesamtarchitektur der Control Extension](../../../../ARCHITECTURE.md)
+- [Lua-Architektur (Hub, CeModule, Data Bridge)](ARCHITECTURE_LUA.md)
 - [Öffentliche API von ce.ControlExtension](hub/README.md)
-- [Datenmodell und DTO-Räume](hub/data/DTO.md)
+- [Datenmodell und DTO-CeTypes](hub/data/DTO.md)
 - [StatePublisher-Muster](hub/StatePublishers.md)

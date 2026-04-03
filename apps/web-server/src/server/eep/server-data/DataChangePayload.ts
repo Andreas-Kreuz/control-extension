@@ -1,5 +1,5 @@
 export interface DataChangePayload<T> {
-  room: string;
+  ceType: string;
   keyId: string & keyof T;
   element: T;
 }

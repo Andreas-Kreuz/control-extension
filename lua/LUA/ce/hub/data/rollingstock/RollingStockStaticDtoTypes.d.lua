@@ -1,0 +1,22 @@
+---@meta
+
+---@class RollingStockStaticDto
+---@field id string
+---@field name string
+---@field trainName string
+---@field positionInTrain number
+---@field couplingFront number
+---@field couplingRear number
+---@field length number
+---@field propelled boolean
+---@field modelType number
+---@field modelTypeText string
+---@field tag string
+---@field nr string|nil
+---@field trackType string|nil
+---@field hookStatus number
+---@field hookGlueMode number
+
+---@class RollingStockStaticDtoFactory
+---@field createDto fun(stock: RollingStock|table):string,string,string|number,RollingStockStaticDto
+---@field createRefDto fun(stockId: string):string,string,string|number,RollingStockStaticDto

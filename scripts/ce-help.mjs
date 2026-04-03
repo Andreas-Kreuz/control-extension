@@ -1,34 +1,99 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, "..");
+const repoRoot = path.resolve(__dirname, '..');
 
-const packageJson = JSON.parse(readFileSync(path.join(repoRoot, "package.json"), "utf8"));
+const packageJson = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
 const version = packageJson.version;
 
-const targets = [
-    { name: "install", description: 'Install all dependencies (yarn built-in: run "yarn")' },
-    { name: "check-tools", description: "Verify that all required external tools are available in PATH" },
-    { name: "dev-app", description: "Start Vite dev server (port 5173) + Electron server with EEP data" },
-    { name: "test-app", description: "Start E2E test environment with Cypress interactive UI" },
-    { name: "dev-docs", description: "Start Jekyll documentation server with live reload (port 4000)" },
-    { name: "check-lua", description: "Run luacheck linter + busted unit tests on Lua code" },
-    { name: "check-e2e", description: "Run Cypress E2E tests headless" },
-    { name: "check-doc", description: "Build Jekyll docs to detect errors (no server started)" },
-    { name: "check", description: "Run all checks: check-lua + check-e2e + check-doc" },
-    { name: "build", description: "Run all checks, then build Windows .exe and create EEP release package" },
-    { name: "play", description: "Build and start Electron server for real-life testing with EEP" },
-    { name: "rebuild-server", description: "Build the web app and copy it into the server (no Electron restart)" },
-    { name: "ce-help", description: "Print this help message" },
+const groups = [
+  {
+    title: 'dev',
+    targets: [
+      { name: 'dev:app', description: 'App und Server im Entwicklungsmodus starten (automatischer re-build)' },
+      { name: 'dev:docs', description: 'Jekyll-Doku-Server mit Live-Reload starten' },
+      { name: 'dev:storybook', description: 'Storybook der Web-App für isolierte UI-Entwicklung starten' },
+    ],
+  },
+  {
+    title: 'run',
+    targets: [{ name: 'run:app', description: 'App und Server mit build bauen und starten (ohne re-build)' }],
+  },
+  {
+    title: 'build',
+    targets: [
+      { name: 'build', description: 'App und Server für den lokalen Einsatz bauen' },
+      { name: 'build:exe', description: 'Windows-EXE der App und des Servers bauen' },
+      { name: 'build:release', description: 'App und Server sowie Lua als Release für EEP bauen' },
+      { name: 'clean', description: 'Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen' },
+      { name: 'clean:docs', description: 'Jekyll-Build- und Cache-Artefakte der Doku entfernen' },
+      { name: 'clean:lua', description: 'Temporäre Lua-Coverage- und Testartefakte entfernen' },
+      { name: 'clean:web', description: 'Temporäre Artefakte der Web-Workspaces entfernen' },
+    ],
+  },
+  {
+    title: 'format',
+    targets: [
+      { name: 'format', description: 'Gesamtes Repository formatieren' },
+      { name: 'format:apps', description: 'App und Server sowie nicht-Lua-Dateien mit Prettier formatieren.' },
+      {
+        name: 'format:lua',
+        description: 'Lua-Dateien mit dem VSCode Lua Language Server formatieren',
+      },
+    ],
+  },
+  {
+    title: 'lint',
+    targets: [
+      { name: 'lint', description: 'Alle statischen Checks für Lua, App, Server und Shared ausführen' },
+      { name: 'lint:app', description: 'ESLint für die Web-App ausführen' },
+      { name: 'lint:lua', description: 'luacheck auf lua/LUA ausführen' },
+      { name: 'lint:server', description: 'ESLint für den Web-Server ausführen' },
+      { name: 'lint:shared', description: 'ESLint für web-shared ausführen' },
+      { name: 'lint:web', description: 'Alle statischen Checks für App, Server und Shared ausführen' },
+    ],
+  },
+  {
+    title: 'test',
+    targets: [
+      { name: 'test', description: 'Alle implementierten Tests und Validierungen ausführen' },
+      { name: 'test:lua', description: 'Lua-Tests mit busted schnell ohne Coverage ausführen' },
+      { name: 'test:lua:coverage', description: 'Lua-Tests mit busted und Coverage ausführen' },
+      { name: 'test:server', description: 'Server-Tests nach TypeScript-Build ausführen' },
+      { name: 'test:app', description: 'Web-App-E2E-Tests headless ausführen' },
+      { name: 'test:app:ui', description: 'Interaktive Cypress-E2E-Umgebung starten' },
+      { name: 'test:docs', description: 'Jekyll-Doku zur Validierung bauen' },
+      { name: 'test:web', description: 'Server-Tests und Web-App-E2E-Tests ausführen' },
+    ],
+  },
+  {
+    title: 'tools',
+    targets: [
+      { name: 'ce-help', description: 'Diese Übersicht anzeigen' },
+      { name: 'tools:check', description: 'Erforderliche externe Werkzeuge in PATH prüfen' },
+    ],
+  },
+  {
+    title: 'other',
+    targets: [
+      { name: 'check', description: 'Manuelle Vorabprüfung vor build:release (tools:check + lint + test)' },
+      { name: 'check:lua', description: 'Lua-Lint und Lua-Tests als Qualitätsgate ausführen' },
+      { name: 'check:web', description: 'Web-Lints sowie Server- und App-Tests als Qualitätsgate ausführen' },
+    ],
+  },
 ];
+const nameWidth = Math.max(...groups.flatMap((group) => group.targets.map((target) => target.name.length)));
 
-const nameWidth = Math.max(...targets.map((t) => t.name.length));
+console.log(`\nControl Extension v${version} — Root-Yarn-Kommandos\n`);
+console.log('Bootstrap nach dem Klonen: yarn install');
 
-console.log(`\nControl Extension v${version} — available yarn targets:\n`);
-for (const { name, description } of targets) {
+for (const { title, targets } of groups) {
+  console.log(`\n${title}`);
+  for (const { name, description } of targets) {
     console.log(`  yarn ${name.padEnd(nameWidth)}  ${description}`);
+  }
 }
-console.log("");
+console.log('');

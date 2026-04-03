@@ -28,28 +28,47 @@ local function round2(value)
     return value and tonumber(string.format("%.2f", value)) or 0
 end
 
-local function createStructure(name, light, smoke, fire)
+local function readDynamicStructureValues(name)
+    local hasLight, light = EEPStructureGetLight(name)
+    local hasSmoke, smoke = EEPStructureGetSmoke(name)
+    local hasFire, fire = EEPStructureGetFire(name)
+    local hasPosition, pos_x, pos_y, pos_z = EEPStructureGetPosition(name)
+    local hasRotation, rot_x, rot_y, rot_z = EEPStructureGetRotation(name)
+    local hasTag, tag = EEPStructureGetTagText(name)
+    return {
+        exists = hasLight or hasSmoke or hasFire or hasPosition or hasRotation or hasTag,
+        light = light,
+        smoke = smoke,
+        fire = fire,
+        pos_x = pos_x,
+        pos_y = pos_y,
+        pos_z = pos_z,
+        rot_x = rot_x,
+        rot_y = rot_y,
+        rot_z = rot_z,
+        tag = tag
+    }
+end
+
+local function createStructure(name, values)
     local structure = {}
     structure.id = name
     structure.name = name
 
-    local _, pos_x, pos_y, pos_z = EEPStructureGetPosition(name)
-    local _, rot_x, rot_y, rot_z = EEPStructureGetRotation(name)
     local _, modelType = EEPStructureGetModelType(name)
-    local _, tag = EEPStructureGetTagText(name)
 
-    structure.pos_x = round2(pos_x)
-    structure.pos_y = round2(pos_y)
-    structure.pos_z = round2(pos_z)
-    structure.rot_x = round2(rot_x)
-    structure.rot_y = round2(rot_y)
-    structure.rot_z = round2(rot_z)
+    structure.pos_x = round2(values.pos_x)
+    structure.pos_y = round2(values.pos_y)
+    structure.pos_z = round2(values.pos_z)
+    structure.rot_x = round2(values.rot_x)
+    structure.rot_y = round2(values.rot_y)
+    structure.rot_z = round2(values.rot_z)
     structure.modelType = modelType or 0
     structure.modelTypeText = EEPStructureModelTypeText[modelType] or ""
-    structure.tag = tag or ""
-    structure.light = light
-    structure.smoke = smoke
-    structure.fire = fire
+    structure.tag = values.tag or ""
+    structure.light = values.light
+    structure.smoke = values.smoke
+    structure.fire = values.fire
 
     return structure
 end
@@ -59,13 +78,11 @@ function StructureDataCollector.collectInitialStructures()
 
     for i = 0, MAX_STRUCTURES do
         local name = "#" .. tostring(i)
+        local values = readDynamicStructureValues(name)
+        local hasModelType = EEPStructureGetModelType(name)
 
-        local hasLight, light = EEPStructureGetLight(name)
-        local hasSmoke, smoke = EEPStructureGetSmoke(name)
-        local hasFire, fire = EEPStructureGetFire(name)
-
-        if hasLight or hasSmoke or hasFire then
-            table.insert(structures, createStructure(name, light, smoke, fire))
+        if values.exists or hasModelType then
+            table.insert(structures, createStructure(name, values))
         end
     end
 
@@ -78,15 +95,29 @@ function StructureDataCollector.refreshDirtyStructures(existingStructures)
 
     for i = 1, #existingStructures do
         local structure = existingStructures[i]
+        local values = readDynamicStructureValues(structure.name)
+        local pos_x = round2(values.pos_x)
+        local pos_y = round2(values.pos_y)
+        local pos_z = round2(values.pos_z)
+        local rot_x = round2(values.rot_x)
+        local rot_y = round2(values.rot_y)
+        local rot_z = round2(values.rot_z)
+        local tag = values.tag or ""
 
-        local _, light = EEPStructureGetLight(structure.name)
-        local _, smoke = EEPStructureGetSmoke(structure.name)
-        local _, fire = EEPStructureGetFire(structure.name)
-
-        if light ~= structure.light or fire ~= structure.fire or smoke ~= structure.smoke then
-            structure.light = light
-            structure.smoke = smoke
-            structure.fire = fire
+        if values.light ~= structure.light or values.fire ~= structure.fire or values.smoke ~= structure.smoke or
+            pos_x ~= structure.pos_x or pos_y ~= structure.pos_y or pos_z ~= structure.pos_z or
+            rot_x ~= structure.rot_x or rot_y ~= structure.rot_y or rot_z ~= structure.rot_z or
+            tag ~= structure.tag then
+            structure.light = values.light
+            structure.smoke = values.smoke
+            structure.fire = values.fire
+            structure.pos_x = pos_x
+            structure.pos_y = pos_y
+            structure.pos_z = pos_z
+            structure.rot_x = rot_x
+            structure.rot_y = rot_y
+            structure.rot_z = rot_z
+            structure.tag = tag
             table.insert(dirtyStructures, structure)
         end
     end

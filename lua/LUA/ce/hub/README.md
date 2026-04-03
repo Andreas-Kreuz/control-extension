@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Lua Hub
 subtitle: Das Herz von Control Extension für EEP
 permalink: lua/ce/hub/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Was ist der Lua Hub?
@@ -51,11 +51,11 @@ Registriert die CeModule, die später ausgeführt werden sollen.
 
 Beispiele für zulässige Module:
 
-- `require("ce.mods.road.RoadCeModule")`
-- `require("ce.hub.mods.DataCeModule")`
-- `require("ce.hub.mods.SchedulerCeModule")`
+- `require("ce.mods.road.CeRoadModule")`
+- `require("ce.mods.transit.CeTransitModule")`
+- `require("ce.hub.CeHubModule").setOptions({ ... })`
 
-Das Modul `ce.hub.mods.CoreCeModule` wird automatisch geladen und muss im Normalfall nicht explizit angegeben werden.
+Das Hub-Modul ist bereits eingebaut. Du musst es nur dann explizit an `addModules(...)` übergeben, wenn du seine Optionen direkt im Initialisierungscode setzen möchtest.
 
 ## `ControlExtension.initTasks()`
 
@@ -91,24 +91,34 @@ Schaltet Debug-Ausgaben für den Laufzeitablauf ein oder aus.
 
 Steuert, ob EEP während der ersten Initialisierung der Module kurz pausiert werden soll.
 
-## Beispiel
+## Kurzes Beispiel
 
 ```lua
 local ControlExtension = require("ce.ControlExtension")
 
-ControlExtension.setDebug(true)
-ControlExtension.setPauseEepDuringInitialization(true)
+function EEPMain()
+    ControlExtension.runTasks(1)
+    return 1
+end
+```
 
-local modules = ControlExtension.addModules(
-    require("ce.hub.mods.DataCeModule"),
-    require("ce.mods.road.RoadCeModule")
-)
+## Langes Beispiel
 
-modules["ce.hub.mods.DataCeModule"].setOptions({
-    activeCollectors = {
-        "ce.hub.data.trains.TrainsAndTracksStatePublisher",
-    },
-})
+```lua
+local ControlExtension = require("ce.ControlExtension")
+
+ControlExtension
+    .setDebug(true)
+    .activateServer()
+    .setPauseEepDuringInitialization(true)
+    .addModules(
+        require("ce.mods.road.CeRoadModule"),
+        require("ce.hub.CeHubModule").setOptions({
+            collectedCeTypes = {
+                require("ce.hub.CeHubModule").CeTypes.Train,
+            },
+        })
+    )
 
 function EEPMain()
     ControlExtension.runTasks(1)

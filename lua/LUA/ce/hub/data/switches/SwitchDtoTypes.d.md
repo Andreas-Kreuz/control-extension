@@ -1,12 +1,12 @@
-# Switch DTO-Räume
+# Switch DTO-CeTypes
 
-## Raum `switches`
+## CeType `ce.hub.Switch`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.switches.SwitchDtoFactory`
+- DtoFactory: `ce.hub.data.ce.hub.Switch.SwitchDtoFactory`
 
-| Name | Typ |
-| --- | --- |
-| `id` | `number` |
+| Name       | Typ      |
+| ---------- | -------- |
+| `id`       | `number` |
 | `position` | `number` |
-| `tag` | `string` |
+| `tag`      | `string` |

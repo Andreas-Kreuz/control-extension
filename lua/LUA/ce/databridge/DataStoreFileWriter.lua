@@ -5,17 +5,15 @@ local json = require("ce.third-party.json")
 
 local DataStoreFileWriter = {}
 
----Schreibt den Inhalt von InternalDataStore.rooms als JSON in eine Datei.
----@return string
 function DataStoreFileWriter.write()
-    local encodedRooms = json.encode(InternalDataStore.rooms)
+    local encodedCeTypes = json.encode(InternalDataStore.ceTypes)
     local fileName = ExchangeDirRegistry.getExchangeDirectory() .. "/ak-eep-lib-store.json"
     local file = io.open(fileName, "w")
     assert(file, fileName)
-    file:write(encodedRooms)
+    file:write(encodedCeTypes)
     file:flush()
     file:close()
-    return encodedRooms
+    return encodedCeTypes
 end
 
 return DataStoreFileWriter

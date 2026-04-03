@@ -12,6 +12,7 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulator ...") end
 
 --- Versionsnummer von EEP.
 EEPVer = 16.3
+EEPLng = "GER"
 
 local EepSimulator = {}
 EepSimulator.debug = false
@@ -221,6 +222,22 @@ end
 --- Ab: EEP 10.2 - Plugin 2.
 function EEPGetSignal(signalId) return Runtime.callEEPGetSignal(signalId) end
 
+--- Gibt den Haltabstand eines Signals zurueck.
+function EEPGetSignalStopDistance(signalId) return Runtime.callEEPGetSignalStopDistance(signalId) end
+
+--- Gibt den Namen des Signalartikels zurueck.
+function EEPGetSignalItemName(signalId, includeModelPath)
+    return Runtime.callEEPGetSignalItemName(signalId, includeModelPath)
+end
+
+--- Gibt die Anzahl der Signalfunktionen zurueck.
+function EEPGetSignalFunctions(signalId) return Runtime.callEEPGetSignalFunctions(signalId) end
+
+--- Gibt eine Signalfunktion zurueck.
+function EEPGetSignalFunction(signalId, selectionIndex)
+    return Runtime.callEEPGetSignalFunction(signalId, selectionIndex)
+end
+
 --- Schaltet eine Weiche.
 --- Ab: EEP 10.2 - Plugin 2.
 function EEPSetSwitch(switchId, switchPosition, activateEEPOnSwitch)
@@ -273,6 +290,18 @@ function EEPGetCurrentRenderFrame() return Runtime.callEEPGetCurrentRenderFrame(
 --- Ab: EEP 17.2 - Plugin 2.
 --- Im Simulator wird dafuer ein fester Rueckgabewert von 1 verwendet.
 function EEPGetTimeLapse() return Runtime.callEEPGetTimeLapse() end
+
+--- Gibt die Versionsnummer der geladenen Anlage zurueck.
+function EEPGetAnlVer() return Runtime.callEEPGetAnlVer() end
+
+--- Gibt die Sprache der geladenen Anlage zurueck.
+function EEPGetAnlLng() return Runtime.callEEPGetAnlLng() end
+
+--- Gibt den Namen der geladenen Anlage zurueck.
+function EEPGetAnlName() return Runtime.callEEPGetAnlName() end
+
+--- Gibt den Pfad der geladenen Anlage zurueck.
+function EEPGetAnlPath() return Runtime.callEEPGetAnlPath() end
 
 --- Setzt die Farbparameter voruebergehend.
 --- Ab: EEP 17.3 - Plugin 3.
@@ -329,7 +358,7 @@ function EEPRollingstockSetSlot(rsName, slot) return Runtime.callEEPRollingstock
 --- Ab: EEP 11.0.
 function EEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter)
     return Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName,
-                                                 axisPosition, useNameFilter)
+                                              axisPosition, useNameFilter)
 end
 
 --- Ermittelt die aktuelle Position einer mittels Achsnamen benannten Achse des benannten Rollmaterials.
@@ -799,6 +828,11 @@ function EEPRollingstockGetOrientation(rollingstockName)
         rollingstockName)
 end
 
+--- Ermittelt die aktuelle Ausrichtung eines Rollmaterials.
+function EEPRollingstockGetRotation(rollingstockName)
+    return Runtime.callEEPRollingstockGetRotation(rollingstockName)
+end
+
 ---------------------
 -- Neu ab EEP 16.1 --
 ---------------------
@@ -927,6 +961,12 @@ function EEPGetFogIntensity() return Runtime.callEEPGetFogIntensity() end
 --- Ermittelt den globalen Wolkenanteil (ausserhalb eventueller Wetterzonen).
 --- Ab: EEP 16.1 - Plugin 1.
 function EEPGetCloudsIntensity() return Runtime.callEEPGetCloudsIntensity() end
+
+--- Ermittelt die globale Wolkenart.
+function EEPGetCloudsMode() return Runtime.callEEPGetCloudsMode() end
+
+--- Ermittelt die Jahreszeit.
+function EEPGetSeason() return Runtime.callEEPGetSeason() end
 
 -- Rueckwaertskompatibel: alter Name.
 function EEPGetCloudIntensity() return Runtime.callEEPGetCloudIntensity() end

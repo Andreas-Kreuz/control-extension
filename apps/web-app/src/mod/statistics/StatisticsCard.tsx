@@ -2,15 +2,16 @@ import { lazy } from 'react';
 import Grid from '@mui/material/Grid';
 const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
 import TimeDesc from './model/TimeDesc';
-import useStatisticsData from './useStatisticsData';
-import React, { useState } from 'react';
+import React from 'react';
 
-const StatisticsOverview = (props: { title: string; times: TimeDesc[]; maxEntries?: number }) => {
-  const [maxEntries, setMaxEntries] = useState(props.maxEntries || 10);
-  const { max, list, ids } = useStatisticsData(props.times, maxEntries);
-  const [expanded, setExpanded] = useState(false);
+const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEntries?: number }) => {
+  const maxEntries = props.maxEntries || 10;
+  const list = props.samples;
+  const max = getMax(list);
+  const lastEntries = list.length > 0 ? list[list.length - 1] : undefined;
+  const ids = lastEntries?.map((entry: TimeDesc) => entry.id) ?? [];
   const title = props.title;
-  var items = Array(maxEntries)
+  const items = Array(maxEntries)
     .fill(30)
     .map((x, i) => i);
 
@@ -41,11 +42,6 @@ const StatisticsOverview = (props: { title: string; times: TimeDesc[]; maxEntrie
       default:
         return 'red';
     }
-  }
-
-  function scale(list: TimeDesc[][]) {
-    const max1 = getMax(list);
-    return Math.round(max1);
   }
 
   function getMax(list: TimeDesc[][]) {
@@ -94,7 +90,7 @@ const StatisticsOverview = (props: { title: string; times: TimeDesc[]; maxEntrie
   return (
     <Grid size={{ xs: 12 }}>
       <AppCardBg
-        title={title + (maxEntries > 1 ? ' (max: ' : ' (') + scale(list) + ' ms)'}
+        title={title + (maxEntries > 1 ? ' (max: ' : ' (') + Math.round(max) + ' ms)'}
         image={'/assets/title-image-simulator.jpg'}
       >
         <Grid paddingLeft={2} paddingRight={2}>
@@ -144,7 +140,7 @@ const StatisticsOverview = (props: { title: string; times: TimeDesc[]; maxEntrie
           </svg>
           <p style={{ marginTop: '1rem', marginBottom: '0.3rem' }}>Legende</p>
           <svg width="100%" height={legendSvgHeight} style={{ backgroundColor: 'white' }}>
-            {ids.map((id, j) => (
+            {ids.map((id: string, j: number) => (
               <React.Fragment key={'Legend' + j}>
                 <rect
                   x="0"

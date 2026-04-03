@@ -1,5 +1,6 @@
 import TrainCamList from './TrainCamList';
-import { TrainListDto } from '@ak/web-shared';
+import useTrainDynamic from './useTrainDynamic';
+import { TrainListDto } from '@ce/web-shared';
 import BadgeIcon from '@mui/icons-material/Badge';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -41,6 +42,10 @@ const TrainDetails = (props: { train: TrainListDto }) => {
   const [editMode, setEditMode] = useState(false);
   const t = props.train;
   const trainElements = getTrainElements(t);
+  const trainDynamic = useTrainDynamic(t.id);
+  void editMode;
+  void setEditMode;
+  void trainDynamic;
 
   return (
     <>
@@ -102,3 +107,4 @@ const TrainDetails = (props: { train: TrainListDto }) => {
 };
 
 export default TrainDetails;
+

@@ -25,8 +25,8 @@ function StructureStatePublisher.syncState()
 
     local dirtyStructures = StructureDataCollector.refreshDirtyStructures(structures)
 
-    if #dirtyStructures > 0 then
-        DataChangeBus.fireListChange(StructureDtoFactory.createStructureDtoList(dirtyStructures))
+    for i = 1, #dirtyStructures do
+        DataChangeBus.fireDataChanged(StructureDtoFactory.createStructureDto(dirtyStructures[i]))
     end
 
     return {}

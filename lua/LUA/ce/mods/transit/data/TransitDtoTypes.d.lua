@@ -29,11 +29,11 @@
 ---@field eepFunction string
 
 ---@class TransitDtoFactory
----@field createTransitStationDto fun(station: table):string,string,string|number,TransitStationDto
----@field createTransitStationDtoList fun(stations: table):string,string,table
----@field createTransitLineDto fun(line: Line|table):string,string,string|number,TransitLineDto
----@field createTransitLineDtoList fun(lines: table):string,string,table
----@field createTransitModuleSettingDto fun(setting: table):string,string,string|number,TransitModuleSettingDto
----@field createTransitModuleSettingDtoList fun(settings: table):string,string,table
----@field createTransitLineNameDto fun(line: Line|table):string,string,string|number,TransitLineDto
----@field createTransitLineNameDtoList fun(lines: table):string,string,table
+---@field createStationDto fun(station: table):string,string,string|number,TransitStationDto
+---@field createStationDtoList fun(stations: table):string,string,table
+---@field createLineDto fun(line: Line|table):string,string,string|number,TransitLineDto
+---@field createLineDtoList fun(lines: table):string,string,table
+---@field createModuleSettingDto fun(setting: table):string,string,string|number,TransitModuleSettingDto
+---@field createModuleSettingDtoList fun(settings: table):string,string,table
+---@field createLineNameDto fun(line: Line|table):string,string,string|number,TransitLineDto
+---@field createLineNameDtoList fun(lines: table):string,string,table

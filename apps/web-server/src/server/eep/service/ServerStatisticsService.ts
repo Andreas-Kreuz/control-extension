@@ -9,10 +9,10 @@ export class ServerStatisticsService {
   static readonly TimeForCacheFile = 'cache:file:writing';
   debug = true;
 
-  private lastStatisticsUpdate: number;
+  private lastStatisticsUpdate = 0;
   private lastTime: { [name: string]: { name: string; startTime: number; duration: number; diffToLast: number } } = {};
   private lastTimeOfStatistic = 0;
-  private lastEepUpdate: number;
+  private lastEepUpdate = 0;
 
   constructor(private nrOfHistoryEntries = NR_OF_UPDATES) {
     const obs = new PerformanceObserver((items) => {

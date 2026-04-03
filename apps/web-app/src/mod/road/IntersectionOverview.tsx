@@ -19,7 +19,11 @@ function IntersectionOverview() {
 
   return (
     <AppPage>
-      <AppPageHeadline rightSettings={<ModuleSettingsButton settings={settings} />}>Ampelkreuzungen</AppPageHeadline>
+      <AppPageHeadline
+        {...(settings !== undefined ? { rightSettings: <ModuleSettingsButton settings={settings} /> } : {})}
+      >
+        Ampelkreuzungen
+      </AppPageHeadline>
       <AppCardGridContainer>
         {intersections.map((i) => (
           <AppCardGrid key={i.id}>

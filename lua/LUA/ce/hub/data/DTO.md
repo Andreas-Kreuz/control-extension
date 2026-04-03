@@ -1,10 +1,10 @@
 ---
 layout: page_with_toc
 title: Datenmodell
-subtitle: Alle Räume und Datentypen der Control Extension im Überblick
+subtitle: Alle CeTypes und Datentypen der Control Extension im Überblick
 permalink: lua/ce/hub/data/dto/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Datenmodell der `*StatePublisher.lua`
@@ -25,49 +25,62 @@ Wichtig:
 
 ## Überblick
 
-| Collector                        | Datei                                                          | Effektive Ausgabe                                                                |
-| -------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `ModulesStatePublisher`           | `lua/LUA/ce/hub/data/modules/ModulesStatePublisher.lua`               | direkte Rückgabe; zusätzlich `DataAdded`/`DataChanged` für `modules`             |
-| `VersionStatePublisher`           | `lua/LUA/ce/hub/data/version/VersionStatePublisher.lua`               | `ListChanged` für `eep-version`; Rückgabe leer                                   |
-| `SignalStatePublisher`            | `lua/LUA/ce/hub/data/signals/SignalStatePublisher.lua`                | `ListChanged` für `signals` und `waiting-on-signals`; Rückgabe leer              |
-| `SwitchStatePublisher`            | `lua/LUA/ce/hub/data/switches/SwitchStatePublisher.lua`               | `ListChanged` für `switches`; Rückgabe leer                                      |
-| `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`                     | `ListChanged` für `times`; Rückgabe leer                                         |
-| `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`               | `ListChanged` für `save-slots` und `free-slots`; Rückgabe leer                   |
-| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`          | `ListChanged` für `structures`; Rückgabe leer                                    |
-| `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`        | indirekte Events für `trains` und `rolling-stocks`; Rückgabe leer                |
-| `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua`       | `ListChanged` für `signal-type-definitions`; Rückgabe leer                       |
-| `RoadStatePublisher`          | `lua/LUA/ce/mods/road/data/RoadStatePublisher.lua`                | Events für Kreuzungsdaten; internes Datenobjekt wird derzeit nicht zurückgegeben |
-| `TransitStatePublisher`   | `lua/LUA/ce/mods/transit/data/TransitStatePublisher.lua` | Events für ÖPNV-Daten; internes Datenobjekt wird derzeit nicht zurückgegeben     |
+| Collector                         | Datei                                                           | Effektive Ausgabe                                                                |
+| --------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `ModulesStatePublisher`           | `lua/LUA/ce/hub/data/modules/ModulesStatePublisher.lua`         | direkte Rückgabe; zusätzlich `DataAdded`/`DataChanged` für `ce.hub.Module`       |
+| `RuntimeStatePublisher`           | `lua/LUA/ce/hub/data/runtime/RuntimeStatePublisher.lua`         | `ListChanged` für `ce.hub.Runtime`; Rückgabe leer                                |
+| `VersionStatePublisher`           | `lua/LUA/ce/hub/data/version/VersionStatePublisher.lua`         | `ListChanged` für `ce.hub.EepVersion`; Rückgabe leer                             |
+| `SignalStatePublisher`            | `lua/LUA/ce/hub/data/signals/SignalStatePublisher.lua`          | `ListChanged` für `ce.hub.Signal` und `ce.hub.WaitingOnSignal`; Rückgabe leer    |
+| `SwitchStatePublisher`            | `lua/LUA/ce/hub/data/switches/SwitchStatePublisher.lua`         | `ListChanged` für `ce.hub.Switch`; Rückgabe leer                                 |
+| `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`               | `ListChanged` für `ce.hub.Time`; Rückgabe leer                                   |
+| `WeatherStatePublisher`           | `lua/LUA/ce/hub/data/weather/WeatherStatePublisher.lua`         | `ListChanged` für `ce.hub.Weather`; Rückgabe leer                                |
+| `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`         | `ListChanged` für `ce.hub.SaveSlot` und `ce.hub.FreeSlot`; Rückgabe leer         |
+| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`    | `ListChanged` für `ce.hub.Structure`; Rückgabe leer                              |
+| `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`  | indirekte Events für Züge, Rollmaterial, RollingStock-Nebenströme und Tracks     |
+| `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua` | `ListChanged` für `ce.mods.road.SignalTypeDefinition`; Rückgabe leer             |
+| `RoadStatePublisher`              | `lua/LUA/ce/mods/road/data/RoadStatePublisher.lua`              | Events für Kreuzungsdaten; internes Datenobjekt wird derzeit nicht zurückgegeben |
+| `TransitStatePublisher`           | `lua/LUA/ce/mods/transit/data/TransitStatePublisher.lua`        | Events für ÖPNV-Daten; internes Datenobjekt wird derzeit nicht zurückgegeben     |
 
 ## Transportform
 
-| Thema                               | Event-Raum                         | Schlüssel |
-| ----------------------------------- | ---------------------------------- | --------- |
-| Module                              | `modules`                          | `id`      |
-| Version                             | `eep-version`                      | `id`      |
-| Signale                             | `signals`                          | `id`      |
-| Wartende Fahrzeuge an Signalen      | `waiting-on-signals`               | `id`      |
-| Weichen                             | `switches`                         | `id`      |
-| Zeit                                | `times`                            | `id`      |
-| Belegte Datenslots                  | `save-slots`                       | `id`      |
-| Freie Datenslots                    | `free-slots`                       | `id`      |
-| Strukturen                          | `structures`                       | `id`      |
-| Züge                                | `trains`                           | `id`      |
-| RollingStock                        | `rolling-stocks`                   | `id`      |
-| Ampelmodell-Definitionen            | `signal-type-definitions`          | `id`      |
-| Kreuzungen                          | `road-intersections`                    | `id`      |
-| Kreuzungs-Fahrspuren                | `road-intersection-lanes`               | `id`      |
-| Kreuzungs-Schaltungen               | `road-intersection-switchings`          | `id`      |
-| Kreuzungs-Ampeln                    | `road-intersection-traffic-lights`      | `id`      |
-| Kreuzungs-Moduleinstellungen        | `road-module-settings`     | `name`    |
-| ÖPNV-Linien                         | `transit-lines`           | `id`      |
-| ÖPNV-Stationen                      | `transit-stations`        | `id`      |
-| ÖPNV-Moduleinstellungen             | `transit-module-settings` | `name`    |
-| Änderungsereignisse für Liniennamen | `transit-line-names`      | `id`      |
+| Thema                               | CeType                                  | Schlüssel |
+| ----------------------------------- | --------------------------------------- | --------- |
+| Module                              | `ce.hub.Module`                         | `id`      |
+| Laufzeit                            | `ce.hub.Runtime`                        | `id`      |
+| Version                             | `ce.hub.EepVersion`                     | `id`      |
+| Signale                             | `ce.hub.Signal`                         | `id`      |
+| Wartende Fahrzeuge an Signalen      | `ce.hub.WaitingOnSignal`                | `id`      |
+| Weichen                             | `ce.hub.Switch`                         | `id`      |
+| Zeit                                | `ce.hub.Time`                           | `id`      |
+| Wetter                              | `ce.hub.Weather`                        | `id`      |
+| Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
+| Freie Datenslots                    | `ce.hub.FreeSlot`                       | `id`      |
+| Strukturen                          | `ce.hub.Structure`                      | `id`      |
+| Züge, statisch                      | `ce.hub.TrainStatic`                    | `id`      |
+| Züge, dynamisch                     | `ce.hub.TrainDynamic`                   | `id`      |
+| RollingStock, statisch              | `ce.hub.RollingStockStatic`             | `id`      |
+| RollingStock, dynamisch             | `ce.hub.RollingStockDynamic`            | `id`      |
+| RollingStock-Textflächen            | `ce.hub.RollingStockTextures`           | `id`      |
+| RollingStock-Rotation               | `ce.hub.RollingStockRotation`           | `id`      |
+| Sonstige Gleise                     | `ce.hub.AuxiliaryTrack`                 | `id`      |
+| Steuerstrecken                      | `ce.hub.ControlTrack`                   | `id`      |
+| Straßen                             | `ce.hub.RoadTrack`                      | `id`      |
+| Bahngleise                          | `ce.hub.RailTrack`                      | `id`      |
+| Straßenbahngleise                   | `ce.hub.TramTrack`                      | `id`      |
+| Ampelmodell-Definitionen            | `ce.mods.road.SignalTypeDefinition`     | `id`      |
+| Kreuzungen                          | `ce.mods.road.Intersection`             | `id`      |
+| Kreuzungs-Fahrspuren                | `ce.mods.road.IntersectionLane`         | `id`      |
+| Kreuzungs-Schaltungen               | `ce.mods.road.IntersectionSwitching`    | `id`      |
+| Kreuzungs-Ampeln                    | `ce.mods.road.IntersectionTrafficLight` | `id`      |
+| Kreuzungs-Moduleinstellungen        | `ce.mods.road.ModuleSetting`            | `name`    |
+| ÖPNV-Linien                         | `ce.mods.transit.Line`                  | `id`      |
+| ÖPNV-Stationen                      | `ce.mods.transit.Station`               | `id`      |
+| ÖPNV-Moduleinstellungen             | `ce.mods.transit.ModuleSetting`         | `name`    |
+| Änderungsereignisse für Liniennamen | `ce.mods.transit.LineName`              | `id`      |
 
 ## Datenschemata
 
-### `modules`
+### `ce.hub.Module`
 
 Elementtyp: Modulstatus
 
@@ -79,37 +92,65 @@ Elementtyp: Modulstatus
 
 Hinweis:
 
-- `syncState()` liefert aktuell kein Listenobjekt, sondern ein Root-Objekt mit leeren `modules = {}` plus Einträgen unter `root[module.id]`.
+- `syncState()` liefert aktuell kein Listenobjekt, sondern ein Root-Objekt mit leeren `ceTypes = {}` plus Einträgen unter `root[module.id]`.
 
-### `eep-version`
+### `ce.hub.EepVersion`
 
 Elementtyp: Versionsinfo
 
-| Name            | Typ      | Wertebereich       | Beschreibung                                                         |
-| --------------- | -------- | ------------------ | -------------------------------------------------------------------- |
-| `id`            | `string` | fest `versionInfo` | technischer Schlüssel                                                |
-| `name`          | `string` | fest `versionInfo` | Anzeigename                                                          |
-| `eepVersion`    | `string` | z. B. `16.3`       | EEP-Version aus `EEPVer`; im Collector bewusst als String formatiert |
-| `luaVersion`    | `string` | Lua-Versionsstring | `_VERSION` des eingebetteten Lua                                     |
-| `singleVersion` | `string` | Versionsstring     | Programmversion des Web-/Single-Prozesses                            |
+| Name             | Typ               | Wertebereich       | Beschreibung                                                         |
+| ---------------- | ----------------- | ------------------ | -------------------------------------------------------------------- |
+| `id`             | `string`          | fest `versionInfo` | technischer Schlüssel                                                |
+| `name`           | `string`          | fest `versionInfo` | Anzeigename                                                          |
+| `eepVersion`     | `string`          | z. B. `16.3`       | EEP-Version aus `EEPVer`; im Collector bewusst als String formatiert |
+| `luaVersion`     | `string`          | Lua-Versionsstring | `_VERSION` des eingebetteten Lua                                     |
+| `singleVersion`  | `string`          | Versionsstring     | Programmversion des Web-/Single-Prozesses                            |
+| `eepLanguage`    | `string` \| `nil` | Sprachkennung      | Sprache der laufenden EEP-Instanz aus `EEPLng`                       |
+| `layoutVersion`  | `number` \| `nil` | Versionsnummer     | Versionsnummer der geladenen Anlage aus `EEPGetAnlVer()`             |
+| `layoutLanguage` | `string` \| `nil` | Sprachkennung      | Sprache der geladenen Anlage aus `EEPGetAnlLng()`                    |
+| `layoutName`     | `string` \| `nil` | freier Text        | Name der geladenen Anlage aus `EEPGetAnlName()`                      |
+| `layoutPath`     | `string` \| `nil` | Pfad               | Dateipfad der geladenen Anlage aus `EEPGetAnlPath()`                 |
 
-### `signals`
+### `ce.hub.Runtime`
+
+Elementtyp: Laufzeitmetrik
+
+| Name                 | Typ               | Wertebereich | Beschreibung                                          |
+| -------------------- | ----------------- | ------------ | ----------------------------------------------------- |
+| `id`                 | `string`          | Metrikname   | technischer Schlüssel der Laufzeitgruppe              |
+| `count`              | `integer`         | `>= 0`       | Anzahl gemessener Aufrufe                             |
+| `time`               | `number`          | Sekunden     | akkumulierte Laufzeit der Gruppe                      |
+| `lastTime`           | `number`          | Sekunden     | zuletzt gemessene Laufzeit                            |
+| `framesPerSecond`    | `number` \| `nil` | fps          | aktuelle Bildrate aus `EEPGetFramesPerSecond()`       |
+| `currentFrame`       | `number` \| `nil` | Framezähler  | aktueller Framezähler aus `EEPGetCurrentFrame()`      |
+| `currentRenderFrame` | `number` \| `nil` | Framezähler  | gesamter Framezähler aus `EEPGetCurrentRenderFrame()` |
+
+### `ce.hub.Signal`
 
 Elementtyp: Signal
 
-| Name                   | Typ       | Wertebereich                      | Beschreibung                                                                                          |
-| ---------------------- | --------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `id`                   | `integer` | `> 0`                             | Signal-ID aus EEP                                                                                     |
-| `position`             | `integer` | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal       |
-| `tag`                  | `string`  | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist |
-| `waitingVehiclesCount` | `integer` | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`                         |
+| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                          |
+| ----------------------- | ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                     |
+| `position`              | `integer`           | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal       |
+| `tag`                   | `string`            | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist |
+| `waitingVehiclesCount`  | `integer`           | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`                         |
+| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                             |
+| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                   |
+| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                  |
+| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                               |
+| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                      |
 
 Abgeleitet aus:
 
 - `EEPGetSignal(signalId)`
 - `EEPGetSignalTrainsCount(signalId)`
+- `EEPGetSignalStopDistance(signalId)`
+- `EEPGetSignalItemName(signalId, includeModelPath)`
+- `EEPGetSignalFunctions(signalId)`
+- `EEPGetSignalFunction(signalId, selectionIndex)`
 
-### `waiting-on-signals`
+### `ce.hub.WaitingOnSignal`
 
 Elementtyp: Wartender Fahrzeugverband an einem Signal
 
@@ -125,7 +166,7 @@ Abgeleitet aus:
 
 - `EEPGetSignalTrainName(signalId, position)`
 
-### `switches`
+### `ce.hub.Switch`
 
 Elementtyp: Weiche
 
@@ -139,27 +180,46 @@ Abgeleitet aus:
 
 - `EEPGetSwitch(switchId)`
 
-### `times`
+### `ce.hub.Time`
 
 Elementtyp: EEP-Zeit
 
-| Name           | Typ       | Wertebereich    | Beschreibung                            |
-| -------------- | --------- | --------------- | --------------------------------------- |
-| `id`           | `string`  | fest `times`    | technischer Schlüssel                   |
-| `name`         | `string`  | fest `times`    | Anzeigename                             |
-| `timeComplete` | `integer` | `0` bis `86399` | Sekunden seit Mitternacht aus `EEPTime` |
-| `timeH`        | `integer` | `0` bis `23`    | Stundenanteil aus `EEPTimeH`            |
-| `timeM`        | `integer` | `0` bis `59`    | Minutenanteil aus `EEPTimeM`            |
-| `timeS`        | `integer` | `0` bis `59`    | Sekundenanteil aus `EEPTimeS`           |
+| Name           | Typ               | Wertebereich    | Beschreibung                                       |
+| -------------- | ----------------- | --------------- | -------------------------------------------------- |
+| `id`           | `string`          | fest `times`    | technischer Schlüssel                              |
+| `name`         | `string`          | fest `times`    | Anzeigename                                        |
+| `timeComplete` | `integer`         | `0` bis `86399` | Sekunden seit Mitternacht aus `EEPTime`            |
+| `timeLapse`    | `number` \| `nil` | Zeitraffer      | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()` |
+| `timeH`        | `integer`         | `0` bis `23`    | Stundenanteil aus `EEPTimeH`                       |
+| `timeM`        | `integer`         | `0` bis `59`    | Minutenanteil aus `EEPTimeM`                       |
+| `timeS`        | `integer`         | `0` bis `59`    | Sekundenanteil aus `EEPTimeS`                      |
 
 Abgeleitet aus:
 
 - `EEPTime`
+- `EEPGetTimeLapse()`
 - `EEPTimeH`
 - `EEPTimeM`
 - `EEPTimeS`
 
-### `save-slots`
+### `ce.hub.Weather`
+
+Elementtyp: globaler Wetterzustand
+
+| Name              | Typ               | Wertebereich       | Beschreibung                                             |
+| ----------------- | ----------------- | ------------------ | -------------------------------------------------------- |
+| `id`              | `string`          | fest `weather`     | technischer Schlüssel                                    |
+| `name`            | `string`          | fest `weather`     | Anzeigename                                              |
+| `season`          | `number` \| `nil` | EEP-spezifisch     | Jahreszeit aus `EEPGetSeason()`                          |
+| `cloudsIntensity` | `number` \| `nil` | Prozent / EEP-Wert | globaler Wolkenanteil aus `EEPGetCloudsIntensity()`      |
+| `cloudsMode`      | `number` \| `nil` | EEP-spezifisch     | Wolkenmodus aus `EEPGetCloudsMode()`                     |
+| `windIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Windstärke aus `EEPGetWindIntensity()`           |
+| `rainIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Regenintensität aus `EEPGetRainIntensity()`      |
+| `snowIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Schneefallintensität aus `EEPGetSnowIntensity()` |
+| `hailIntensity`   | `number` \| `nil` | Prozent / EEP-Wert | globale Hagelintensität aus `EEPGetHailIntensity()`      |
+| `fogIntensity`    | `number` \| `nil` | Prozent / EEP-Wert | globale Nebeldichte aus `EEPGetFogIntensity()`           |
+
+### `ce.hub.SaveSlot`
 
 Elementtyp: belegter Datenslot
 
@@ -173,7 +233,7 @@ Abgeleitet aus:
 
 - `EEPLoadData(slot)`
 
-### `free-slots`
+### `ce.hub.FreeSlot`
 
 Elementtyp: freier Datenslot
 
@@ -222,30 +282,28 @@ Vollständige Liste `modelType` für Strukturen laut `Lua_manual.pdf` und `EEPSt
 | `25` | Landschaftselemente Terra                             |
 | `38` | Landschaftselemente, Bodenmodelle zur 3D-Texturierung |
 
-### `trains`
+### `ce.hub.TrainStatic`
 
-Elementtyp: Zug / Fahrzeugverband
+Elementtyp: statische Zugdaten / selten geänderte Verbandsdaten
 
-| Name                | Typ                     | Wertebereich                                      | Beschreibung                                                                            |
-| ------------------- | ----------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `id`                | `string`                | Zugname, typ. `#...`                              | Name des Fahrzeugverbands                                                               |
-| `route`             | `string`                | Routenname, fallback `Alle`                       | Route aus `EEPGetTrainRoute`                                                            |
-| `rollingStockCount` | `integer`               | `>= 0`                                            | Anzahl Rollmaterialien aus `EEPGetRollingstockItemsCount`                               |
-| `length`            | `number`                | Meter, `>= 0`                                     | Zuglänge aus `EEPGetTrainLength`                                                        |
-| `line`              | `string` \| `nil`       | freier Text                                       | aus dem Tag-Modell der Bibliothek                                                       |
-| `destination`       | `string` \| `nil`       | freier Text                                       | aus dem Tag-Modell der Bibliothek                                                       |
-| `direction`         | `string` \| `nil`       | freier Text                                       | aus dem Tag-Modell der Bibliothek                                                       |
-| `trackType`         | `string` \| `nil`       | z. B. `rail`, `road`, `tram`, `auxiliary`         | Bibliotheksklassifikation, nicht direkt EEP                                             |
-| `movesForward`      | `boolean`               | `true`, `false`                                   | aus der Zuggeschwindigkeit abgeleitete Fahrtrichtung                                    |
-| `speed`             | `number`                | km/h; negativ für Rückwärtsfahrt möglich          | aktuelle Geschwindigkeit aus `EEPGetTrainSpeed`                                         |
-| `occupiedTacks`     | `table<string, number>` | Welche Track ID und Abstand `trackId -> distance` | durch die Bibliothek ermittelte belegte Tracks; Schreibweise ist im Code absichtlich so |
+| Name                | Typ                | Wertebereich                              | Beschreibung                                                 |
+| ------------------- | ------------------ | ----------------------------------------- | ------------------------------------------------------------ |
+| `id`                | `string`           | Zugname, typ. `#...`                      | Name des Fahrzeugverbands                                    |
+| `name`              | `string`           | Zugname                                   | Anzeigename; aktuell identisch zu `id`                       |
+| `route`             | `string`           | Routenname, fallback `Alle`               | Route aus `EEPGetTrainRoute`                                 |
+| `rollingStockCount` | `integer`          | `>= 0`                                    | Anzahl Rollmaterialien aus `EEPGetRollingstockItemsCount`    |
+| `length`            | `number`           | Meter, `>= 0`                             | Zuglänge aus `EEPGetTrainLength`                             |
+| `line`              | `string` \| `nil`  | freier Text                               | aus dem Tag-Modell der Bibliothek                            |
+| `destination`       | `string` \| `nil`  | freier Text                               | aus dem Tag-Modell der Bibliothek                            |
+| `direction`         | `string` \| `nil`  | freier Text                               | aus dem Tag-Modell der Bibliothek                            |
+| `trackType`         | `string` \| `nil`  | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                  |
+| `movesForward`      | `boolean`          | `true`, `false`                           | aus der Zuggeschwindigkeit abgeleitete Fahrtrichtung         |
 
 Abgeleitet aus:
 
 - `EEPGetTrainRoute(trainName)`
 - `EEPGetRollingstockItemsCount(trainName)`
 - `EEPGetTrainLength(trainName)`
-- `EEPGetTrainSpeed(trainName)`
 
 Vollständige Liste `trackType` laut `TrainDetection` / `TrackDetection`:
 
@@ -257,33 +315,50 @@ Vollständige Liste `trackType` laut `TrainDetection` / `TrackDetection`:
 | `auxiliary` | sonstige Splines / Wasserwege                                         |
 | `control`   | Steuerstrecken / nicht direkt einem der vier Track-Systeme zugeordnet |
 
-### `rolling-stocks`
+### `ce.hub.TrainDynamic`
 
-Elementtyp: RollingStock / Fahrzeug
+Elementtyp: häufig aktualisierte Zugdaten
 
-| Name              | Typ                   | Wertebereich                              | Beschreibung                                                                                          |
-| ----------------- | --------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `id`              | `string`              | Fahrzeugname                              | technischer Schlüssel; aktuell gleich `name`                                                          |
-| `name`            | `string`              | Fahrzeugname                              | Name des Rollmaterials                                                                                |
-| `trainName`       | `string`              | Zugname oder `""`                         | zugeordneter Fahrzeugverband                                                                          |
-| `positionInTrain` | `integer`             | `0`-basiert, `-1` falls unbekannt         | Position im Zugverband                                                                                |
-| `couplingFront`   | `integer`             | Statuscode der vorderen Kupplung          | aus `EEPRollingstockGetCouplingFront`                                                                 |
-| `couplingRear`    | `integer`             | Statuscode der hinteren Kupplung          | aus `EEPRollingstockGetCouplingRear`                                                                  |
-| `length`          | `number`              | Meter                                     | Fahrzeuglänge aus `EEPRollingstockGetLength`                                                          |
-| `propelled`       | `boolean` \| `number` | im Projekt als "hat Antrieb" genutzt      | abgeleitet aus `EEPRollingstockGetMotor`; das Lua-Handbuch beschreibt hier die Motor-/Ganginformation |
-| `modelType`       | `integer`             | `1` bis `15`                              | Modelltyp aus `EEPRollingstockGetModelType`                                                           |
-| `modelTypeText`   | `string`              | feste Textmenge                           | lesbarer Modelltyptext aus lokalem Mapping                                                            |
-| `tag`             | `string`              | freier Text bis 1024 Zeichen              | Tag-Text aus `EEPRollingstockGetTagText`                                                              |
-| `nr`              | `string` \| `nil`     | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
-| `trackId`         | `integer`             | Track-ID                                  | aus `EEPRollingstockGetTrack`                                                                         |
-| `trackDistance`   | `number`              | Meter vom Gleisanfang                     | aus `EEPRollingstockGetTrack`                                                                         |
-| `trackDirection`  | `integer`             | `1` oder `0`                              | laut Lua-Handbuch: `1 = in Fahrtrichtung`, `0 = entgegen`                                             |
-| `trackSystem`     | `integer`             | `1` bis `4`                               | laut Lua-Handbuch: `1 = Bahngleise`, `2 = Straßen`, `3 = Tram`, `4 = sonstige Splines/Wasserwege`     |
-| `trackType`       | `string` \| `nil`     | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
-| `posX`            | `number`              | Anlagenkoordinate                         | X-Position aus `EEPRollingstockGetPosition`                                                           |
-| `posY`            | `number`              | Anlagenkoordinate                         | Y-Position aus `EEPRollingstockGetPosition`                                                           |
-| `posZ`            | `number`              | Anlagenkoordinate                         | Z-Position aus `EEPRollingstockGetPosition`                                                           |
-| `mileage`         | `number`              | Zahl                                      | Zurückgelegte Strecke in Metern seit Einsetzen des Modells aus `EEPRollingstockGetMileage`            |
+| Name            | Typ                | Wertebereich         | Beschreibung                                               |
+| --------------- | ------------------ | -------------------- | ---------------------------------------------------------- |
+| `id`            | `string`           | Zugname              | Referenz auf den Fahrzeugverband                           |
+| `speed`         | `number`           | km/h                 | aktuelle Geschwindigkeit aus `EEPGetTrainSpeed(trainName)` |
+| `targetSpeed`   | `number`           | km/h                 | Zielgeschwindigkeit aus `EEPGetTrainSpeed(trainName, true)`|
+| `couplingFront` | `integer`          | Statuscode           | Zustand der vorderen Zugkupplung                           |
+| `couplingRear`  | `integer`          | Statuscode           | Zustand der hinteren Zugkupplung                           |
+| `active`        | `boolean`          | `true`, `false`      | ob der Zug aktuell in EEP ausgewählt ist                   |
+| `trainyardId`   | `integer` \| `nil` | Depot-ID             | ID des virtuellen Depots aus `EEPIsTrainInTrainyard()`     |
+| `inTrainyard`   | `boolean`          | `true`, `false`      | ob sich der Zug in einem virtuellen Depot befindet         |
+
+Abgeleitet aus:
+
+- `EEPGetTrainSpeed(trainName)`
+- `EEPGetTrainCouplingFront(trainName)`
+- `EEPGetTrainCouplingRear(trainName)`
+- `EEPGetTrainActive()`
+- `EEPIsTrainInTrainyard(trainName)`
+
+### `ce.hub.RollingStockStatic`
+
+Elementtyp: statische RollingStock-Daten / selten geänderte Fahrzeugdaten
+
+| Name              | Typ                  | Wertebereich                              | Beschreibung                                                                                          |
+| ----------------- | -------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `id`              | `string`             | Fahrzeugname                              | technischer Schlüssel; aktuell gleich `name`                                                          |
+| `name`            | `string`             | Fahrzeugname                              | Name des Rollmaterials                                                                                |
+| `trainName`       | `string`             | Zugname oder `""`                         | zugeordneter Fahrzeugverband                                                                          |
+| `positionInTrain` | `integer`            | `0`-basiert, `-1` falls unbekannt         | Position im Zugverband                                                                                |
+| `couplingFront`   | `integer`            | Statuscode der vorderen Kupplung          | aus `EEPRollingstockGetCouplingFront`                                                                 |
+| `couplingRear`    | `integer`            | Statuscode der hinteren Kupplung          | aus `EEPRollingstockGetCouplingRear`                                                                  |
+| `length`          | `number`             | Meter                                     | Fahrzeuglänge aus `EEPRollingstockGetLength`                                                          |
+| `propelled`       | `boolean` \| `number`| im Projekt als "hat Antrieb" genutzt      | abgeleitet aus `EEPRollingstockGetMotor`; das Lua-Handbuch beschreibt hier die Motor-/Ganginformation |
+| `modelType`       | `integer`            | `1` bis `15`                              | Modelltyp aus `EEPRollingstockGetModelType`                                                           |
+| `modelTypeText`   | `string`             | feste Textmenge                           | lesbarer Modelltyptext aus lokalem Mapping                                                            |
+| `tag`             | `string`             | freier Text bis 1024 Zeichen              | Tag-Text aus `EEPRollingstockGetTagText`                                                              |
+| `nr`              | `string` \| `nil`    | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
+| `trackType`       | `string` \| `nil`    | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
+| `hookStatus`      | `number`             | Statuscode                                | Hakenzustand aus `EEPRollingstockGetHook()`                                                           |
+| `hookGlueMode`    | `number`             | Statuscode                                | Haken-/Ladegutzand aus `EEPRollingstockGetHookGlue()`                                                 |
 
 Abgeleitet aus:
 
@@ -291,10 +366,80 @@ Abgeleitet aus:
 - `EEPRollingstockGetMotor`
 - `EEPRollingstockGetModelType`
 - `EEPRollingstockGetTagText`
-- `EEPRollingstockGetTextureText` nur intern; nicht im JSON exportiert
+- `EEPRollingstockGetHook`
+- `EEPRollingstockGetHookGlue`
+
+### `ce.hub.RollingStockDynamic`
+
+Elementtyp: häufig aktualisierte RollingStock-Daten
+
+| Name                 | Typ               | Wertebereich                          | Beschreibung                                                                                      |
+| -------------------- | ----------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `id`                 | `string`          | Fahrzeugname                          | Referenz auf das Rollmaterial                                                                     |
+| `trackId`            | `integer`         | Track-ID                              | aus `EEPRollingstockGetTrack`                                                                     |
+| `trackDistance`      | `number`          | Meter vom Gleisanfang                 | aus `EEPRollingstockGetTrack`                                                                     |
+| `trackDirection`     | `integer`         | `1` oder `0`                          | laut Lua-Handbuch: `1 = in Fahrtrichtung`, `0 = entgegen`                                         |
+| `trackSystem`        | `integer`         | `1` bis `4`                           | laut Lua-Handbuch: `1 = Bahngleise`, `2 = Straßen`, `3 = Tram`, `4 = sonstige Splines/Wasserwege`|
+| `posX`               | `number`          | Anlagenkoordinate                     | X-Position aus `EEPRollingstockGetPosition`                                                       |
+| `posY`               | `number`          | Anlagenkoordinate                     | Y-Position aus `EEPRollingstockGetPosition`                                                       |
+| `posZ`               | `number`          | Anlagenkoordinate                     | Z-Position aus `EEPRollingstockGetPosition`                                                       |
+| `mileage`            | `number`          | Zahl                                  | zurückgelegte Strecke in Metern seit Einsetzen des Modells                                        |
+| `orientationForward` | `boolean`         | `true`, `false`                       | relative Ausrichtung im Zugverband aus `EEPRollingstockGetOrientation()`                          |
+| `smoke`              | `number`          | Statuscode                            | Rauchzustand des Rollmaterials aus `EEPRollingstockGetSmoke()`                                    |
+| `active`             | `boolean`         | `true`, `false`                       | ob das Rollmaterial aktuell in EEP ausgewählt ist, abgeleitet aus `EEPRollingstockGetActive()`   |
+
+Abgeleitet aus:
+
+- `EEPRollingstockGetOrientation`
+- `EEPRollingstockGetSmoke`
+- `EEPRollingstockGetActive()`
 - `EEPRollingstockGetTrack`
 - `EEPRollingstockGetPosition`
 - `EEPRollingstockGetMileage`
+
+Hinweis:
+
+- Textflächen und Rotation werden nicht mehr direkt in den RollingStock-DTOs transportiert, sondern separat in `ce.hub.RollingStockTextures` und `ce.hub.RollingStockRotation`.
+
+### `ce.hub.RollingStockTextures`
+
+Elementtyp: beschreibbare Textflächen eines Rollmaterials
+
+| Name           | Typ                    | Wertebereich                  | Beschreibung                                                                   |
+| -------------- | ---------------------- | ----------------------------- | ------------------------------------------------------------------------------ |
+| `id`           | `string`               | Fahrzeugname                  | technischer Schlüssel des Rollmaterials                                        |
+| `surfaceTexts` | `table<string,string>` | Surface-ID als String -> Text | alle fortlaufend auslesbaren Textflächen aus `EEPRollingstockGetTextureText()` |
+
+Hinweis:
+
+- Die Flächen werden sequentiell ab Oberfläche `1` gelesen.
+- Eine leere Zeichenkette ist ein gültiger, exportierter Textwert.
+- Der Lesevorgang endet bei der ersten Oberfläche mit `ok = false`.
+
+### `ce.hub.RollingStockRotation`
+
+Elementtyp: Rotation eines Rollmaterials
+
+| Name   | Typ      | Wertebereich   | Beschreibung                                               |
+| ------ | -------- | -------------- | ---------------------------------------------------------- |
+| `id`   | `string` | Fahrzeugname   | technischer Schlüssel des Rollmaterials                    |
+| `rotX` | `number` | Winkel in Grad | Rotation um die X-Achse aus `EEPRollingstockGetRotation()` |
+| `rotY` | `number` | Winkel in Grad | Rotation um die Y-Achse aus `EEPRollingstockGetRotation()` |
+| `rotZ` | `number` | Winkel in Grad | Rotation um die Z-Achse aus `EEPRollingstockGetRotation()` |
+
+Hinweis:
+
+- Die Werte werden vor Vergleich und Export auf zwei Nachkommastellen gerundet, um Event-Rauschen zu reduzieren.
+
+### `ce.hub.*Track`
+
+Elementtyp: Track-Eintrag für `ce.hub.AuxiliaryTrack`, `ce.hub.ControlTrack`, `ce.hub.RoadTrack`, `ce.hub.RailTrack`, `ce.hub.TramTrack`
+
+| Name                  | Typ                | Wertebereich       | Beschreibung                                                      |
+| --------------------- | ------------------ | ------------------ | ----------------------------------------------------------------- |
+| `id`                  | `integer`          | Track-ID           | technische ID des Tracks                                          |
+| `reserved`            | `boolean` \| `nil` | `true`, `false`    | ob der Track aktuell reserviert ist                               |
+| `reservedByTrainName` | `string` \| `nil`  | Zugname oder `nil` | Name des reservierenden Zugs aus `EEPIs*TrackReserved(..., true)` |
 
 Vollständige Liste `trackType` laut `TrainDetection` / `TrackDetection`:
 
@@ -326,7 +471,7 @@ Vollständige Liste `modelType` für RollingStock laut `Lua_manual.pdf` und `EEP
 | `14` | LKW                  |
 | `15` | PKW                  |
 
-### `signal-type-definitions`
+### `ce.mods.road.SignalTypeDefinition`
 
 Elementtyp: Ampelmodell-Definition
 
@@ -343,7 +488,7 @@ Elementtyp: Ampelmodell-Definition
 | `positions.positionOff`         | `integer` \| `nil` | Signalzustandsindex | ausgeschaltet                          |
 | `positions.positionOffBlinking` | `integer` \| `nil` | Signalzustandsindex | Blinkbetrieb                           |
 
-### `road-intersections`
+### `ce.mods.road.Intersection`
 
 Elementtyp: Kreuzung
 
@@ -358,14 +503,14 @@ Elementtyp: Kreuzung
 | `timeForGreen`     | `number`          | Sekunden               | Grünphasenlänge                                |
 | `staticCams`       | `string[]`        | Kameranamen            | Liste statischer Kameras der Kreuzung          |
 
-### `road-intersection-lanes`
+### `ce.mods.road.IntersectionLane`
 
 Elementtyp: Fahrspur einer Kreuzung
 
 | Name                         | Typ                | Wertebereich                                                 | Beschreibung                                     |
 | ---------------------------- | ------------------ | ------------------------------------------------------------ | ------------------------------------------------ |
 | `id`                         | `string`           | `<intersectionId>-<laneName>`                                | technischer Schlüssel                            |
-| `intersectionId`             | `integer`          | referenziert `road-intersections.id`                              | zugehörige Kreuzung                              |
+| `intersectionId`             | `integer`          | referenziert `ce.mods.road.Intersection.id`                  | zugehörige Kreuzung                              |
 | `name`                       | `string`           | freier Text                                                  | Fahrspurname                                     |
 | `phase`                      | `string`           | `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN` | aus der Ampelphasenlogik der Bibliothek          |
 | `vehicleMultiplier`          | `number`           | projektabhängig                                              | Gewichtungsfaktor für Zähler                     |
@@ -378,30 +523,30 @@ Elementtyp: Fahrspur einer Kreuzung
 | `switchings`                 | `string[]`         | Sequenznamen                                                 | Schaltungen, die diese Fahrspur freigeben        |
 | `tracks`                     | `table`            | Track-IDs oder Highlight-Daten                               | für Hervorhebung genutzte Tracks                 |
 
-### `road-intersection-switchings`
+### `ce.mods.road.IntersectionSwitching`
 
 Elementtyp: Kreuzungs-Schaltung
 
-| Name             | Typ             | Wertebereich                    | Beschreibung                                                                     |
-| ---------------- | --------------- | ------------------------------- | -------------------------------------------------------------------------------- |
-| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                            |
-| `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `road-intersections.id` |
-| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                               |
-| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                          |
+| Name             | Typ             | Wertebereich                    | Beschreibung                                                                                 |
+| ---------------- | --------------- | ------------------------------- | -------------------------------------------------------------------------------------------- |
+| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                                        |
+| `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `ce.mods.road.Intersection.id` |
+| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                                           |
+| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                                      |
 
-### `road-intersection-traffic-lights`
+### `ce.mods.road.IntersectionTrafficLight`
 
 Elementtyp: Ampel innerhalb einer Kreuzung
 
-| Name              | Typ                           | Wertebereich                    | Beschreibung                |
-| ----------------- | ----------------------------- | ------------------------------- | --------------------------- |
-| `id`              | `integer \| string`           | Signal-ID                       | technischer Schlüssel       |
-| `signalId`        | `integer`                     | Signal-ID                       | referenziertes EEP-Signal   |
-| `modelId`         | `string`                      | Modellname                      | referenziertes Ampelmodell  |
-| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                 | aktuelle interne Ampelphase |
-| `intersectionId`  | `integer`                     | referenziert `road-intersections.id` | zugehörige Kreuzung         |
-| `lightStructures` | `table<string, object>`       | indexierte Map                  | zugehörige Lichtstrukturen  |
-| `axisStructures`  | `object[]`                    | Liste                           | zugehörige Achsstrukturen   |
+| Name              | Typ                           | Wertebereich                                | Beschreibung                |
+| ----------------- | ----------------------------- | ------------------------------------------- | --------------------------- |
+| `id`              | `integer \| string`           | Signal-ID                                   | technischer Schlüssel       |
+| `signalId`        | `integer`                     | Signal-ID                                   | referenziertes EEP-Signal   |
+| `modelId`         | `string`                      | Modellname                                  | referenziertes Ampelmodell  |
+| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                             | aktuelle interne Ampelphase |
+| `intersectionId`  | `integer`                     | referenziert `ce.mods.road.Intersection.id` | zugehörige Kreuzung         |
+| `lightStructures` | `table<string, object>`       | indexierte Map                              | zugehörige Lichtstrukturen  |
+| `axisStructures`  | `object[]`                    | Liste                                       | zugehörige Achsstrukturen   |
 
 Unterobjekt `lightStructures[*]`:
 
@@ -425,7 +570,7 @@ Unterobjekt `axisStructures[*]`:
 | `positionPedestrian` | `number \| nil` | projektabhängig | Position bei Fußgängerphase |
 | `positionRedYellow`  | `number \| nil` | projektabhängig | Position bei Rot-Gelb       |
 
-### `road-module-settings`
+### `ce.mods.road.ModuleSetting`
 
 Elementtyp: Kreuzungs-Moduloption
 
@@ -438,7 +583,7 @@ Elementtyp: Kreuzungs-Moduloption
 | `value`       | `boolean` | `true`, `false`      | aktueller Wert                 |
 | `eepFunction` | `string`  | Lua-Funktionsname    | Setter-Funktion für die Option |
 
-### `transit-lines`
+### `ce.mods.transit.Line`
 
 Elementtyp: ÖPNV-Linie
 
@@ -466,7 +611,7 @@ Unterobjekt `stations[*]`:
 | `station.name`  | `string` | Stationsname    | Name der Zielstation     |
 | `timeToStation` | `number` | Minuten, `>= 0` | Fahrzeit bis zur Station |
 
-### `transit-stations`
+### `ce.mods.transit.Station`
 
 Elementtyp: ÖPNV-Station
 
@@ -475,7 +620,7 @@ Aktueller Stand:
 - Der Collector erzeugt derzeit immer eine leere Liste.
 - Es gibt aktuell kein JSON-Schema, weil noch keine Stationseinträge erzeugt werden.
 
-### `transit-module-settings`
+### `ce.mods.transit.ModuleSetting`
 
 Elementtyp: ÖPNV-Moduloption
 
@@ -488,41 +633,47 @@ Elementtyp: ÖPNV-Moduloption
 | `value`       | `boolean` | `true`, `false`      | aktueller Wert                 |
 | `eepFunction` | `string`  | Lua-Funktionsname    | Setter-Funktion für die Option |
 
-### `transit-line-names`
+### `ce.mods.transit.LineName`
 
 Elementtyp: Änderungsereignis für Linien
 
 Schema:
 
-- identisch zu `transit-lines`
+- identisch zu `ce.mods.transit.Line`
 - wird von `LineRegistry.fireChangeLinesEvent()` gesendet
 
 ## Rückgabewerte der `syncState()`-Funktionen
 
-| Collector                                      | Rückgabe heute             | Bemerkung                               |
-| ---------------------------------------------- | -------------------------- | --------------------------------------- |
+| Collector                                     | Rückgabe heute             | Bemerkung                               |
+| --------------------------------------------- | -------------------------- | --------------------------------------- |
 | `ModulesStatePublisher.syncState()`           | Objekt mit Modulen nach ID | einzig relevanter direkter Rückgabewert |
+| `RuntimeStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
 | `VersionStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
 | `SignalStatePublisher.syncState()`            | `{}`                       | Nutzdaten nur im Event                  |
 | `SwitchStatePublisher.syncState()`            | `{}`                       | Nutzdaten nur im Event                  |
 | `TimeStatePublisher.syncState()`              | `{}`                       | Nutzdaten nur im Event                  |
+| `WeatherStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
 | `DataSlotsStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
 | `StructureStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
 | `TrainsAndTracksStatePublisher.syncState()`   | leeres `data`              | Nutzdaten über Registries               |
 | `TrafficLightModelStatePublisher.syncState()` | `{}`                       | Nutzdaten nur im Event                  |
-| `RoadStatePublisher.syncState()`          | `{}`                       | internes Datenobjekt wird verworfen     |
-| `TransitStatePublisher.syncState()`   | `{}`                       | internes Datenobjekt wird verworfen     |
+| `RoadStatePublisher.syncState()`              | `{}`                       | internes Datenobjekt wird verworfen     |
+| `TransitStatePublisher.syncState()`           | `{}`                       | internes Datenobjekt wird verworfen     |
 
 ## Verwendete EEP-Funktionen und Handbuchbezug
 
 Die wichtigsten direkt genutzten EEP-Funktionen für das Datenmodell sind:
 
-- `EEPGetSignal`, `EEPGetSignalTrainsCount`, `EEPGetSignalTrainName`
+- `EEPGetFramesPerSecond`, `EEPGetCurrentFrame`, `EEPGetCurrentRenderFrame`
+- `EEPGetSignal`, `EEPGetSignalTrainsCount`, `EEPGetSignalTrainName`, `EEPGetSignalStopDistance`, `EEPGetSignalItemName`, `EEPGetSignalFunctions`, `EEPGetSignalFunction`
 - `EEPGetSwitch`
 - `EEPLoadData`
 - `EEPStructureGetPosition`, `EEPStructureGetRotation`, `EEPStructureGetModelType`, `EEPStructureGetTagText`
-- `EEPGetTrainRoute`, `EEPGetTrainLength`, `EEPGetTrainSpeed`
-- `EEPRollingstockGetLength`, `EEPRollingstockGetMotor`, `EEPRollingstockGetModelType`, `EEPRollingstockGetTagText`, `EEPRollingstockGetTextureText`, `EEPRollingstockGetTrack`, `EEPRollingstockGetPosition`, `EEPRollingstockGetMileage`
-- die Zeitvariablen `EEPTime`, `EEPTimeH`, `EEPTimeM`, `EEPTimeS`
+- `EEPGetTrainRoute`, `EEPGetTrainLength`, `EEPGetTrainSpeed`, `EEPGetTrainCouplingFront`, `EEPGetTrainCouplingRear`, `EEPGetTrainActive`, `EEPIsTrainInTrainyard`
+- `EEPRollingstockGetLength`, `EEPRollingstockGetMotor`, `EEPRollingstockGetModelType`, `EEPRollingstockGetTagText`, `EEPRollingstockGetOrientation`, `EEPRollingstockGetSmoke`, `EEPRollingstockGetHook`, `EEPRollingstockGetHookGlue`, `EEPRollingstockGetActive`, `EEPRollingstockGetTextureText`, `EEPRollingstockGetRotation`, `EEPRollingstockGetTrack`, `EEPRollingstockGetPosition`, `EEPRollingstockGetMileage`
+- `EEPIsAuxiliaryTrackReserved`, `EEPIsControlTrackReserved`, `EEPIsRoadTrackReserved`, `EEPIsRailTrackReserved`, `EEPIsTramTrackReserved`
+- `EEPGetAnlVer`, `EEPGetAnlLng`, `EEPGetAnlName`, `EEPGetAnlPath`
+- `EEPGetSeason`, `EEPGetCloudsIntensity`, `EEPGetCloudsMode`, `EEPGetWindIntensity`, `EEPGetRainIntensity`, `EEPGetSnowIntensity`, `EEPGetHailIntensity`, `EEPGetFogIntensity`
+- die Zeitvariablen `EEPTime`, `EEPTimeH`, `EEPTimeM`, `EEPTimeS` sowie `EEPGetTimeLapse`
 
 Beschreibungen, Typen und Wertebereiche wurden, soweit vorhanden, aus `Lua_manual.pdf` übernommen oder daraus abgeleitet. Für fachliche Objekte der Bibliothek wie Kreuzungen, Fahrspuren, Linien und Moduloptionen stammt die Beschreibung aus dem Projektcode selbst.

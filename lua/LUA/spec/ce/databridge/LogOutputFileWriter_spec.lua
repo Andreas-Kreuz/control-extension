@@ -1,4 +1,4 @@
-insulate("ce.databridge.LogOutputFileWriter", function()
+insulate("ce.databridge.LogOutputFileWriter", function ()
     require("ce.hub.eep.EepSimulator")
 
     local function clearModule(name) package.loaded[name] = nil end
@@ -12,17 +12,17 @@ insulate("ce.databridge.LogOutputFileWriter", function()
     local originalOsDate = os.date
 
     local function installSimpleGlobals()
-        assert = function(v, message)
+        assert = function (v, message)
             if not v then originalError(message and message or "Assertion failed.", 0) end
             return v
         end
-        error = function(message, level) originalError(message, level and level or 1) end
-        print = function() end
-        warn = function() end
-        clearlog = function() end
+        error = function (message, level) originalError(message, level and level or 1) end
+        print = function () end
+        warn = function () end
+        clearlog = function () end
     end
 
-    before_each(function()
+    before_each(function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.IncomingCommandExecutor")
         clearModule("ce.databridge.LogOutputFileWriter")
@@ -35,7 +35,7 @@ insulate("ce.databridge.LogOutputFileWriter", function()
         os.date = originalOsDate
     end)
 
-    after_each(function()
+    after_each(function ()
         io.open = originalIoOpen
         assert = originalAssert
         error = originalError
@@ -45,16 +45,16 @@ insulate("ce.databridge.LogOutputFileWriter", function()
         os.date = originalOsDate
     end)
 
-    it("writes newline-terminated log entries and reset markers", function()
+    it("writes newline-terminated log entries and reset markers", function ()
         local logWrites = {}
         local logOpenModes = {}
 
         installSimpleGlobals()
-        os.date = function() return "" end
-        io.open = function(name, mode)
+        os.date = function () return "" end
+        io.open = function (name, mode)
             if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
-               name ~= "exchange-dir/ce-version.txt" and
-               name ~= "exchange-dir/log-from-ce" then
+                name ~= "exchange-dir/ce-version.txt" and
+                name ~= "exchange-dir/log-from-ce" then
                 return originalIoOpen(name, mode)
             end
 
@@ -63,11 +63,11 @@ insulate("ce.databridge.LogOutputFileWriter", function()
             end
 
             return {
-                write = function(_, content)
+                write = function (_, content)
                     if name == "exchange-dir/log-from-ce" then table.insert(logWrites, content) end
                 end,
-                flush = function() end,
-                close = function() end
+                flush = function () end,
+                close = function () end
             }
         end
 
@@ -80,26 +80,26 @@ insulate("ce.databridge.LogOutputFileWriter", function()
         _G.print("Line 1\nLine 2")
         _G.clearlog()
 
-        originalAssert.same({"w+", "a", "a"}, logOpenModes)
-        originalAssert.same({"Line 1\n       . Line 2\n", "@@CE_LOG_RESET@@\n"}, logWrites)
+        originalAssert.same({ "w+", "a", "a" }, logOpenModes)
+        originalAssert.same({ "Line 1\n       . Line 2\n", "@@CE_LOG_RESET@@\n" }, logWrites)
         for _, content in ipairs(logWrites) do
             originalAssert.equals("\n", content:sub(-1))
         end
     end)
 
-    it("registers wrapped print and keeps assert fail-loud", function()
+    it("registers wrapped print and keeps assert fail-loud", function ()
         local openCalls = {}
 
         installSimpleGlobals()
-        io.open = function(name, mode)
+        io.open = function (name, mode)
             if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
-               name ~= "exchange-dir/ce-version.txt" and
-               name ~= "exchange-dir/log-from-ce" then
+                name ~= "exchange-dir/ce-version.txt" and
+                name ~= "exchange-dir/log-from-ce" then
                 return originalIoOpen(name, mode)
             end
 
-            table.insert(openCalls, {name = name, mode = mode})
-            return {write = function() end, flush = function() end, close = function() end}
+            table.insert(openCalls, { name = name, mode = mode })
+            return { write = function () end, flush = function () end, close = function () end }
         end
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
@@ -116,7 +116,7 @@ insulate("ce.databridge.LogOutputFileWriter", function()
 
         originalAssert.is_true(#openCalls >= 2)
         for _, openCall in ipairs(openCalls) do
-            originalAssert.same({name = "exchange-dir/log-from-ce", mode = "a"}, openCall)
+            originalAssert.same({ name = "exchange-dir/log-from-ce", mode = "a" }, openCall)
         end
         originalAssert.is_false(ok)
         originalAssert.is_not_nil(string.find(err, "boom", 1, true))

@@ -9,13 +9,14 @@ type LogFileMonitorCallbacks = {
 const resetMarker = '@@CE_LOG_RESET@@';
 
 export class LogFileMonitor {
-  private logFileWatcher: fs.FSWatcher;
-  private pollTimer: NodeJS.Timeout;
-  private logFilePath: string;
+  private logFileWatcher: fs.FSWatcher | undefined = undefined;
+  private pollTimer: NodeJS.Timeout | undefined = undefined;
+  private logFilePath: string | undefined = undefined;
   private readOffset = 0;
   private pendingFragment = '';
   private currentLogLines = '';
   private initialScanCompleted = false;
+  private logFileMissing = false;
   private suppressResetCallbackOnce = false;
 
   constructor(
@@ -28,9 +29,19 @@ export class LogFileMonitor {
     this.detach();
 
     this.logFilePath = logFilePath;
-    this.logFileWatcher = fs.watch(path.dirname(this.logFilePath), {}, () => {
-      this.reconcile();
-    });
+    try {
+      this.logFileWatcher = fs.watch(path.dirname(this.logFilePath), {}, () => {
+        this.reconcile();
+      });
+      this.logFileWatcher.on('error', (error) => {
+        if (this.debug) console.log(error);
+        this.logFileWatcher?.close();
+        this.logFileWatcher = undefined;
+      });
+    } catch (error) {
+      if (this.debug) console.log(error);
+      this.logFileWatcher = undefined;
+    }
     this.pollTimer = setInterval(() => this.reconcile(), this.pollIntervalMs);
     this.reconcile();
   }
@@ -38,18 +49,19 @@ export class LogFileMonitor {
   public detach(): void {
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
-      this.pollTimer = null;
+      this.pollTimer = undefined;
     }
     if (this.logFileWatcher) {
       this.logFileWatcher.close();
-      this.logFileWatcher = null;
+      this.logFileWatcher = undefined;
     }
 
-    this.logFilePath = null;
+    this.logFilePath = undefined;
     this.readOffset = 0;
     this.pendingFragment = '';
     this.currentLogLines = '';
     this.initialScanCompleted = false;
+    this.logFileMissing = false;
     this.suppressResetCallbackOnce = false;
   }
 
@@ -64,8 +76,17 @@ export class LogFileMonitor {
 
     const logFileSize = this.readLogFileSize();
     if (logFileSize === null) {
+      if (!this.logFileMissing) {
+        this.readOffset = 0;
+        this.pendingFragment = '';
+        this.currentLogLines = '';
+        this.initialScanCompleted = false;
+        this.suppressResetCallbackOnce = true;
+        this.logFileMissing = true;
+      }
       return;
     }
+    this.logFileMissing = false;
 
     const fileShrank = logFileSize < this.readOffset;
     if (fileShrank) {
@@ -97,14 +118,14 @@ export class LogFileMonitor {
 
   private readLogFileSize(): number | null {
     try {
-      return fs.statSync(this.logFilePath).size;
+      return fs.statSync(this.requireLogFilePath()).size;
     } catch (_error) {
       return null;
     }
   }
 
   private readRange(offset: number, length: number): { content: string; bytesRead: number } {
-    const fd = fs.openSync(this.logFilePath, 'r');
+    const fd = fs.openSync(this.requireLogFilePath(), 'r');
     try {
       const buffer = Buffer.alloc(length);
       const bytesRead = fs.readSync(fd, buffer, 0, length, offset);
@@ -152,9 +173,15 @@ export class LogFileMonitor {
     }
 
     const newLines = visibleLines.join('\n');
-    this.currentLogLines = this.currentLogLines.length > 0
-      ? this.currentLogLines + '\n' + newLines
-      : newLines;
+    this.currentLogLines = this.currentLogLines.length > 0 ? this.currentLogLines + '\n' + newLines : newLines;
     this.callbacks.onLinesAppeared(newLines);
+  }
+
+  private requireLogFilePath(): string {
+    if (!this.logFilePath) {
+      throw new Error('Log file path is not initialized');
+    }
+
+    return this.logFilePath;
   }
 }

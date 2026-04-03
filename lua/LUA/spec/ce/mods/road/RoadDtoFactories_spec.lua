@@ -77,15 +77,15 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             eepFunction = "IntersectionSettings.setShowRequestsOnSignal",
             hidden = true
         }
-        local room, keyId, key, intersectionDto = RoadDtoFactory.createRoadIntersectionDto(intersection)
-        local laneRoom, laneKeyId, laneKey, laneDto = RoadDtoFactory.createRoadIntersectionLaneDto(lane)
-        local switchingRoom, switchingKeyId, switchingKey, switchingDto =
-            RoadDtoFactory.createRoadIntersectionSwitchingDto(switching)
-        local tlRoom, tlKeyId, tlKey, trafficLightDto =
-            RoadDtoFactory.createRoadIntersectionTrafficLightDto(trafficLight)
-        local moduleRoom, moduleKeyId, moduleKey, moduleDto =
-            RoadDtoFactory.createRoadIntersectionModuleSettingDto(moduleSetting)
-        local defsRoom, defsKeyId, defs =
+        local ceType, keyId, key, intersectionDto = RoadDtoFactory.createIntersectionDto(intersection)
+        local laneCeType, laneKeyId, laneKey, laneDto = RoadDtoFactory.createIntersectionLaneDto(lane)
+        local switchingCeType, switchingKeyId, switchingKey, switchingDto =
+            RoadDtoFactory.createIntersectionSwitchingDto(switching)
+        local tlCeType, tlKeyId, tlKey, trafficLightDto =
+            RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight)
+        local moduleCeType, moduleKeyId, moduleKey, moduleDto =
+            RoadDtoFactory.createIntersectionModuleSettingDto(moduleSetting)
+        local defsCeType, defsKeyId, defs =
             TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList({
                 {
                     id = "road",
@@ -108,99 +108,117 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         intersection.name = "B"
         intersection.staticCams[2] = "Cam 2"
 
-        assert.equals("road-intersections", room)
+        assert.equals("ce.mods.road.Intersection", ceType)
         assert.equals("id", keyId)
         assert.equals(1, key)
         assert.same({
-            id = 1,
-            name = "A",
-            currentSwitching = "S1",
-            manualSwitching = "S2",
-            nextSwitching = "S3",
-            ready = true,
-            timeForGreen = 15,
-            staticCams = { "Cam 1" }
-        }, intersectionDto)
-        assert.equals("road-intersection-lanes", laneRoom)
+                        ceType = "ce.mods.road.Intersection",
+                        id = 1,
+                        name = "A",
+                        currentSwitching = "S1",
+                        manualSwitching = "S2",
+                        nextSwitching = "S3",
+                        ready = true,
+                        timeForGreen = 15,
+                        staticCams = { "Cam 1" }
+                    }, intersectionDto)
+        assert.equals("ce.mods.road.IntersectionLane", laneCeType)
         assert.equals("id", laneKeyId)
         assert.equals("1-L1", laneKey)
         assert.same({
-            id = "1-L1",
-            intersectionId = 1,
-            name = "L1",
-            phase = "GREEN",
-            vehicleMultiplier = 2,
-            eepSaveId = 5,
-            type = "NORMAL",
-            countType = "TRACKS",
-            waitingTrains = { "T1" },
-            waitingForGreenCyclesCount = 4,
-            directions = { "LEFT" },
-            switchings = { "S1" },
-            tracks = { 10 }
-        }, laneDto)
-        assert.equals("road-intersection-switchings", switchingRoom)
+                        ceType = "ce.mods.road.IntersectionLane",
+                        id = "1-L1",
+                        intersectionId = 1,
+                        name = "L1",
+                        phase = "GREEN",
+                        vehicleMultiplier = 2,
+                        eepSaveId = 5,
+                        type = "NORMAL",
+                        countType = "TRACKS",
+                        waitingTrains = { "T1" },
+                        waitingForGreenCyclesCount = 4,
+                        directions = { "LEFT" },
+                        switchings = { "S1" },
+                        tracks = { 10 }
+                    }, laneDto)
+        assert.equals("ce.mods.road.IntersectionSwitching", switchingCeType)
         assert.equals("id", switchingKeyId)
         assert.equals("A-S1", switchingKey)
-        assert.same({ id = "A-S1", intersectionId = "A", name = "S1", prio = 1 }, switchingDto)
-        assert.equals("road-intersection-traffic-lights", tlRoom)
+        assert.same({
+                        ceType = "ce.mods.road.IntersectionSwitching",
+                        id = "A-S1",
+                        intersectionId = "A",
+                        name = "S1",
+                        prio = 1
+                    }, switchingDto)
+        assert.equals("ce.mods.road.IntersectionTrafficLight", tlCeType)
         assert.equals("id", tlKeyId)
         assert.equals(2, tlKey)
         assert.same({
-            id = 2,
-            signalId = 2,
-            modelId = "road",
-            currentPhase = "GREEN",
-            intersectionId = 1,
-            lightStructures = {
-                ["0"] = {
-                    structureRed = "Red",
-                    structureGreen = "Green",
-                    structureYellow = "Yellow",
-                    structureRequest = "Request"
-                }
-            },
-            axisStructures = {
-                {
-                    structureName = "Axis",
-                    axisName = "Signal",
-                    positionDefault = 0,
-                    positionRed = 1,
-                    positionGreen = 2,
-                    positionYellow = 3,
-                    positionPedestrian = 4,
-                    positionRedYellow = 5
-                }
-            }
-        }, trafficLightDto)
-        assert.equals("road-module-settings", moduleRoom)
+                        ceType = "ce.mods.road.IntersectionTrafficLight",
+                        id = 2,
+                        signalId = 2,
+                        modelId = "road",
+                        currentPhase = "GREEN",
+                        intersectionId = 1,
+                        lightStructures = {
+                            ["0"] = {
+                                structureRed = "Red",
+                                structureGreen = "Green",
+                                structureYellow = "Yellow",
+                                structureRequest = "Request"
+                            }
+                        },
+                        axisStructures = {
+                            {
+                                structureName = "Axis",
+                                axisName = "Signal",
+                                positionDefault = 0,
+                                positionRed = 1,
+                                positionGreen = 2,
+                                positionYellow = 3,
+                                positionPedestrian = 4,
+                                positionRedYellow = 5
+                            }
+                        }
+                    }, trafficLightDto)
+        assert.equals("ce.mods.road.ModuleSetting", moduleCeType)
         assert.equals("name", moduleKeyId)
         assert.equals("Show", moduleKey)
         assert.same({
-            category = "Display",
-            name = "Show",
-            description = "Show requests",
-            type = "boolean",
-            value = true,
-            eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
-        }, moduleDto)
-        assert.equals("signal-type-definitions", defsRoom)
+                        ceType = "ce.mods.road.ModuleSetting",
+                        category = "Display",
+                        name = "Show",
+                        description = "Show requests",
+                        type = "boolean",
+                        value = true,
+                        eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
+                    }, moduleDto)
+        assert.equals("ce.mods.road.SignalTypeDefinition", defsCeType)
         assert.equals("id", defsKeyId)
         assert.same({
-            {
-                id = "road",
-                name = "road",
-                type = "road",
-                positions = {
-                    positionRed = 1,
-                    positionGreen = 2,
-                    positionYellow = 3,
-                    positionRedYellow = 4,
-                    positionPedestrians = 5,
-                    positionOff = 6,
-                    positionOffBlinking = 7
-                }
-            }
-        }, defs)
+                        {
+                            ceType = "ce.mods.road.SignalTypeDefinition",
+                            id = "road",
+                            name = "road",
+                            type = "road",
+                            positionRed = 1,
+                            positionGreen = 2,
+                            positionYellow = 3,
+                            positionRedYellow = 4,
+                            positionPedestrians = 5,
+                            positionOff = 6,
+                            positionOffBlinking = 7,
+                            positions = {
+                                positionRed = 1,
+                                positionGreen = 2,
+                                positionYellow = 3,
+                                positionRedYellow = 4,
+                                positionPedestrians = 5,
+                                positionOff = 6,
+                                positionOffBlinking = 7
+                            }
+                        }
+                    }, defs)
     end)
 end)

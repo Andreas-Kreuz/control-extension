@@ -3,8 +3,8 @@ layout: page_with_toc
 title: DataChangeBus — Entwickler
 subtitle: Interne Architektur und Design-Entscheidungen des Publish-Pakets
 permalink: lua/ce/hub/publish/dev/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # DataChangeBus — Entwickler
@@ -50,7 +50,7 @@ Verantwortlichkeiten:
 
 Wichtig:
 
-- `DataChangeBus` soll die Inhalte von `room`, `keyId`, `element` oder `list` nicht fachlich kennen oder interpretieren
+- `DataChangeBus` soll die Inhalte von `ceType`, `keyId`, `element` oder `list` nicht fachlich kennen oder interpretieren
 - diese Felder werden nur validiert und an Listener weitergereicht
 - der einzige Eventtyp, dessen Bedeutung und Payload hier bewusst bekannt sind, ist `CompleteReset`
 
@@ -89,7 +89,7 @@ Ein fehlerhafter oder langsamer Listener kann den gesamten Änderungsfluss beein
 
 - Listener müssen eine Methode `fireEvent(event)` besitzen.
 - `eventCounter` muss pro erzeugtem Event genau einmal erhöht werden.
-- `room`, `keyId`, `element` und `list` bleiben fachlich opaque.
+- `ceType`, `keyId`, `element` und `list` bleiben fachlich opaque.
 - `ce.hub.publish` verteilt Ereignisse nur weiter; Aufzeichnung und Ausgabe liegen außerhalb.
 
 ## Relevante Nachbarn

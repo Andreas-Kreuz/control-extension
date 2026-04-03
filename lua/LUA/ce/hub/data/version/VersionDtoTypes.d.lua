@@ -6,8 +6,12 @@
 ---@field eepVersion string
 ---@field luaVersion string
 ---@field singleVersion string
+---@field eepLanguage string|nil
+---@field layoutVersion number|nil
+---@field layoutLanguage string|nil
+---@field layoutName string|nil
+---@field layoutPath string|nil
 
 ---@class VersionDtoFactory
----@field createVersionDto fun(
----eepVersion: string, luaVersion: string, singleVersion: string):string,string,string|number,VersionDto
----@field createVersionDtoList fun(eepVersion: string, luaVersion: string, singleVersion: string):string,string,table
+---@field createVersionDto fun(versionInfo: table):string,string,string|number,VersionDto
+---@field createVersionDtoList fun(versionInfo: table):string,string,table

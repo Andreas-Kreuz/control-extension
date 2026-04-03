@@ -1,48 +1,48 @@
-# Public-Transport DTO-Räume
+# Public-Transport DTO-CeTypes
 
-## Raum `transit-stations`
+## CeType `ce.mods.transit.Station`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitStationDto`
 
-| Name | Typ |
-| --- | --- |
+| Name | Typ      |
+| ---- | -------- |
 | `id` | `string` |
 
-## Raum `transit-lines`
+## CeType `ce.mods.transit.Line`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitLineDto`
 
-| Name | Typ |
-| --- | --- |
-| `id` | `string` |
-| `nr` | `string` |
-| `trafficType` | `string` |
+| Name           | Typ                       |
+| -------------- | ------------------------- |
+| `id`           | `string`                  |
+| `nr`           | `string`                  |
+| `trafficType`  | `string`                  |
 | `lineSegments` | `TransitLineSegmentDto[]` |
 
-## Raum `transit-module-settings`
+## CeType `ce.mods.transit.ModuleSetting`
 
 - Key-ID: `name`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitModuleSettingDto`
 
-| Name | Typ |
-| --- | --- |
-| `category` | `string` |
-| `name` | `string` |
-| `description` | `string` |
-| `type` | `string` |
-| `value` | `boolean` |
-| `eepFunction` | `string` |
+| Name          | Typ       |
+| ------------- | --------- |
+| `category`    | `string`  |
+| `name`        | `string`  |
+| `description` | `string`  |
+| `type`        | `string`  |
+| `value`       | `boolean` |
+| `eepFunction` | `string`  |
 
-## Raum `transit-line-names`
+## CeType `ce.mods.transit.LineName`
 
 - Key-ID: `id`
 - DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitLineNameDto`
 
-| Name | Typ |
-| --- | --- |
-| `id` | `string` |
-| `nr` | `string` |
-| `trafficType` | `string` |
+| Name           | Typ                       |
+| -------------- | ------------------------- |
+| `id`           | `string`                  |
+| `nr`           | `string`                  |
+| `trafficType`  | `string`                  |
 | `lineSegments` | `TransitLineSegmentDto[]` |

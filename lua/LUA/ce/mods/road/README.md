@@ -3,8 +3,8 @@ layout: page_with_toc
 title: Ampeln? Automatisch!
 subtitle: Du willst Dich nicht mehr um die Steuerung Deiner Ampeln kümmern? - Dann beschreibe in Lua, wie Deine Kreuzung aussieht und das Skript Intersection übernimmt für Dich den Rest.
 permalink: lua/ce/mods/road/
-feature-img: "/docs/assets/headers/SourceCode.png"
-img: "/docs/assets/headers/SourceCode.png"
+feature-img: '/docs/assets/headers/SourceCode.png'
+img: '/docs/assets/headers/SourceCode.png'
 ---
 
 # Motivation
@@ -266,8 +266,8 @@ Wird dazu verwendet, mehrere Fahrspuren gleichzeitig zu schalten. Es muss sicher
 
 ### `IntersectionSequence:addCarLights()` - Ampeln für Kfz hinzufügen
 
-| Aufruf                               |
-| ------------------------------------ |
+| Aufruf                                   |
+| ---------------------------------------- |
 | `IntersectionSequence:addCarLights(...)` |
 
 Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Kfz-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "Rot-Gelb", "Grün", "Gelb", "Rot"
@@ -276,8 +276,8 @@ Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Kfz-Ampeln zur Kreuzun
 | --------- | ------------------- | ------------------------------------------------------------ |
 | `...`     | `TrafficLight`, ... | Eine oder mehrere Ampeln (kommasepariert, nicht als Tabelle) |
 
-| Rückgabewert                                        |
-| --------------------------------------------------- |
+| Rückgabewert                                            |
+| ------------------------------------------------------- |
 | `IntersectionSequence`, der die Ampel hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addCarLights()` statt `.addCarLights()` aufgerufen werden -
@@ -285,8 +285,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 ### `IntersectionSequence:addPedestrianLights()` - Ampeln für Fußgänger hinzufügen
 
-| Aufruf                                      |
-| ------------------------------------------- |
+| Aufruf                                          |
+| ----------------------------------------------- |
 | `IntersectionSequence:addPedestrianLights(...)` |
 
 Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Kfz-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "Grün Fußgänger", "Rot"
@@ -295,8 +295,8 @@ Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Kfz-Ampeln zur Kreuzun
 | --------- | ------------------- | ------------------------------------------------------------ |
 | `...`     | `TrafficLight`, ... | Eine oder mehrere Ampeln (kommasepariert, nicht als Tabelle) |
 
-| Rückgabewert                                        |
-| --------------------------------------------------- |
+| Rückgabewert                                            |
+| ------------------------------------------------------- |
 | `IntersectionSequence`, der die Ampel hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addPedestrianLights()` statt `.addPedestrianLights()` aufgerufen werden -
@@ -304,8 +304,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 ### `IntersectionSequence:addTramLights()` - Ampeln für Trams hinzufügen
 
-| Aufruf                                |
-| ------------------------------------- |
+| Aufruf                                    |
+| ----------------------------------------- |
 | `IntersectionSequence:addTramLights(...)` |
 
 Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "Grün", "Gelb", "Rot"
@@ -314,8 +314,8 @@ Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzu
 | --------- | ------------------- | ------------------------------------------------------------ |
 | `...`     | `TrafficLight`, ... | Eine oder mehrere Ampeln (kommasepariert, nicht als Tabelle) |
 
-| Rückgabewert                                        |
-| --------------------------------------------------- |
+| Rückgabewert                                            |
+| ------------------------------------------------------- |
 | `IntersectionSequence`, der die Ampel hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addTramLights()` statt `.addTramLights()` aufgerufen werden -
@@ -327,8 +327,8 @@ Laden mit: `local Intersection = require("ce.mods.road.Intersection")`
 
 ### `Intersection:new()` - neue Kreuzung anlegen
 
-| Aufruf                                  |
-| --------------------------------------- |
+| Aufruf                                      |
+| ------------------------------------------- |
 | `Intersection:new(name, greenPhaseSeconds)` |
 
 Legt eine neue Kreuzung an und registriert diese im Modul Kreuzungen. Nachdem Schaltungen zur Kreuzung hinzugefügt wurden, funktioniert diese automatisch.
@@ -338,8 +338,8 @@ Legt eine neue Kreuzung an und registriert diese im Modul Kreuzungen. Nachdem Sc
 | `name`                | `string` | Name der Kreuzung, z.B. "Bahnshofsstr. / Hauptstr." oder "Kreuzung 1" |
 | _`greenPhaseSeconds`_ | `number` | Länge einer Grünphase                                                 |
 
-| Rückgabewert                                   |
-| ---------------------------------------------- |
+| Rückgabewert                                       |
+| -------------------------------------------------- |
 | `Intersection` (neu erstellte Tabelle bzw. Objekt) |
 
 **Beachte**: Die Funktion musst mit `:new()` statt `.new()` aufgerufen werden -
@@ -347,8 +347,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 ### `Intersection:newSequence()` - Eine Schaltung in einer Kreuzung erstellen
 
-| Aufruf                       |
-| ---------------------------- |
+| Aufruf                           |
+| -------------------------------- |
 | `Intersection:newSequence(name)` |
 
 Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "Grün", "Gelb", "Rot"
@@ -357,8 +357,8 @@ Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzu
 | --------- | -------- | ------------------------------------------------ |
 | `name`    | `string` | Name der Schaltung, z.B. "S1" oder "Schaltung A" |
 
-| Rückgabewert                                           |
-| ------------------------------------------------------ |
+| Rückgabewert                                               |
+| ---------------------------------------------------------- |
 | `IntersectionSequence`, die der Kreuzung hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addSequence()` statt `.addSequence()` aufgerufen werden -
@@ -366,8 +366,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 ### `Intersection:addStaticCam()` - Eine Kamera zu dieser Kreuzung hinzufügen
 
-| Aufruf                        |
-| ----------------------------- |
+| Aufruf                            |
+| --------------------------------- |
 | `Intersection:addStaticCam(name)` |
 
 Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "Grün", "Gelb", "Rot"
@@ -390,8 +390,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
   ```lua
   local ControlExtension = require("ce.ControlExtension")
   ControlExtension.addModules(
-      require("ce.hub.mods.CoreCeModule"),
-      require("ce.mods.road.RoadCeModule") -- Registriert das Kreuzungsmodul
+      require("ce.hub.CeHubModule"),
+      require("ce.mods.road.CeRoadModule") -- Registriert das Kreuzungsmodul
   )
 
   function EEPMain()
@@ -401,7 +401,6 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
   ```
 
 - **Fahrspuren mit Anforderungen und Fahrspuren die durch unterschiedliche Ampeln gesteuert werden benötigen zwingend Zählfunktionen** für die Fahrzeuge dieser Fahrspur. Für andere Fahrspuren ist dies optional.
-
   - `lane:vehicleEntered(Zugname)` - im Kontaktpunkt aufrufen, wenn eine Fahrspur betreten wird (z.B. 50m vor der Ampel; aber nur auf dieser Fahrspursfahrbahn)
 
   - `lane:vehicleLeft(Zugname)` - im Kontaktpunkt aufrufen, wenn eine Fahrspur verlassen wird (hinter der Ampel)

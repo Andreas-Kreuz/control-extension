@@ -1,5 +1,5 @@
 import { useSocket } from '../io/SocketProvider';
-import { CommandEvent, SettingDto } from '@ak/web-shared';
+import { CommandEvent, SettingDto } from '@ce/web-shared';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -33,3 +33,4 @@ const ModuleSetting = (props: { setting: SettingDto<unknown> }) => {
 };
 
 export default ModuleSetting;
+

@@ -7,17 +7,13 @@
       "type": "npm",
       "script": "start",
       "path": "web-app/",
-      "problemMatcher": [
-        "$eslint-compact"
-      ]
+      "problemMatcher": ["$eslint-compact"]
     },
     {
       "type": "npm",
       "script": "build",
       "path": "web-app/",
-      "problemMatcher": [
-        "$eslint-compact"
-      ]
+      "problemMatcher": ["$eslint-compact"]
     },
     {
       "type": "shell",
@@ -29,7 +25,7 @@
       "type": "npm",
       "script": "lint",
       "path": "web-server/",
-      "problemMatcher": [ "$eslint-stylish" ],
+      "problemMatcher": ["$eslint-stylish"],
       "label": "npm: lint - web-server",
       "detail": "eslint -c .eslintrc.json --ext .ts src"
     },
@@ -37,7 +33,7 @@
       "type": "npm",
       "script": "lint",
       "path": "web-app/",
-      "problemMatcher": [ "$eslint-stylish" ],
+      "problemMatcher": ["$eslint-stylish"],
       "label": "npm: lint - web-app",
       "detail": "ng lint"
     }

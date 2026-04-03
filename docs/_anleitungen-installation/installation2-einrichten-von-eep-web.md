@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Web-App einrichten
 type: Tutorial
 subtitle: Erfahre wie Du Control Extension Server und Control Extension Web App einrichtest und benutzt.
-img: "/assets/thumbnails/eep-web-startseite.png"
+img: '/assets/thumbnails/eep-web-startseite.png'
 permalink: docs/anleitungen-installation/einrichten-von-eep-web
 hide: false
 date: 2017-09-08
@@ -27,8 +27,8 @@ date: 2017-09-08
    ```lua
    local ControlExtension = require("ce.ControlExtension")
    ControlExtension.addModules(
-       require("ce.hub.mods.CoreCeModule"),
-       require("ce.mods.road.RoadCeModule")
+       require("ce.hub.CeHubModule"),
+       require("ce.mods.road.CeRoadModule")
    )
 
    function EEPMain()
@@ -61,4 +61,4 @@ date: 2017-09-08
    🍀 Du hast es bis hierhin geschafft, nun wünsche ich viel Spaß beim Benutzen von `http://localhost:3000`.
 
    ⭐ Wenn Du den Control Extension Server von einem anderen PC erreichen möchtest, benutze statt `localhost` Deine IP-Addresse
-z.B. `http://192.168.0.99:3000` oder Deinen Rechnernmamen, z.B. `http://deinrechnername:3000`.
+   z.B. `http://192.168.0.99:3000` oder Deinen Rechnernmamen, z.B. `http://deinrechnername:3000`.

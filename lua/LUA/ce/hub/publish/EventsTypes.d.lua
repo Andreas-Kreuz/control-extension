@@ -11,12 +11,12 @@
 ---@field info string
 
 ---@class DataElementPayload
----@field room string
+---@field ceType string
 ---@field keyId string
 ---@field element table
 
 ---@class DataListPayload
----@field room string
+---@field ceType string
 ---@field keyId string
 ---@field list table
 
@@ -59,8 +59,8 @@
 ---@field addListener fun(listener: EventListener):nil
 ---@field initialize fun():nil
 ---@field printEventCounter fun():nil
----@field fireDataChanged fun(room: string, keyId: string, keyOrElement: string|number|table, element?: table):nil
----@field fireDataAdded fun(room: string, keyId: string, keyOrElement: string|number|table, element?: table):nil
----@field fireDataRemoved fun(room: string, keyId: string, keyOrElement: string|number|table, element?: table):nil
----@field fireListChange fun(room: string, keyId: string, list: table):nil
+---@field fireDataChanged fun(ceType: string, keyId: string, keyOrElement: string|number|table, element?: table):nil
+---@field fireDataAdded fun(ceType: string, keyId: string, keyOrElement: string|number|table, element?: table):nil
+---@field fireDataRemoved fun(ceType: string, keyId: string, keyOrElement: string|number|table, element?: table):nil
+---@field fireListChange fun(ceType: string, keyId: string, list: table):nil
 ---@field fireCompleteReset fun():nil

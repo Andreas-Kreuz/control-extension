@@ -6,7 +6,7 @@ const AppPaper = lazy(() => import('../../ui/AppPaper'));
 import { useSocket } from '../../io/SocketProvider';
 import useIntersection from './useIntersection';
 import useIntersectionSwitching from './useIntersectionSwitching';
-import { CommandEvent, RoadEvent } from '@ak/web-shared';
+import { CommandEvent, RoadEvent } from '@ce/web-shared';
 import CamIcon from '@mui/icons-material/Videocam';
 import Alert from '@mui/material/Alert';
 import Chip from '@mui/material/Chip';
@@ -177,3 +177,4 @@ function IntersectionDetails() {
 }
 
 export default IntersectionDetails;
+

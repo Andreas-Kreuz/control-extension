@@ -1,6 +1,4 @@
-import MyTransitLineCard, {
-  TransitLineCardProps as MyTransitLineCardProps,
-} from '../../../mod/lines/TransitLineCard';
+import MyTransitLineCard, { TransitLineCardProps as MyTransitLineCardProps } from '../../../mod/lines/TransitLineCard';
 import { Box } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 

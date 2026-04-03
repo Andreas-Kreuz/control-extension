@@ -39,23 +39,25 @@ View models  [web-app/src/.../model/]          UI-specific
 In TypeScript:
 
 ```typescript
-// Lua DtoFactory: lua/LUA/ce/hub/data/trains/TrainDtoFactory.lua
-export interface TrainLuaDto { ... }
+// Lua DtoFactory: lua/LUA/ce/hub/data/trains/TrainStaticDtoFactory.lua
+export interface TrainStaticLuaDto { ... }
 ```
 
 In Lua:
 
 ```lua
--- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
-local TrainDtoFactory = {}
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainStaticLuaDto.ts
+local TrainStaticDtoFactory = {}
 ```
 
 ## Directory structure
 
 ```text
 ce/dto/
-  trains/           TrainLuaDto          <- lua/LUA/ce/hub/data/trains/TrainDtoFactory.lua
-  rolling-stocks/   RollingStockLuaDto   <- lua/LUA/ce/hub/data/rollingstock/RollingStockDtoFactory.lua
+  trains/           TrainStaticLuaDto    <- lua/LUA/ce/hub/data/trains/TrainStaticDtoFactory.lua
+                    TrainDynamicLuaDto   <- lua/LUA/ce/hub/data/trains/TrainDynamicDtoFactory.lua
+  rolling-stocks/   RollingStockStaticLuaDto  <- lua/LUA/ce/hub/data/rollingstock/RollingStockStaticDtoFactory.lua
+                    RollingStockDynamicLuaDto <- lua/LUA/ce/hub/data/rollingstock/RollingStockDynamicDtoFactory.lua
   modules/          ModuleLuaDto         <- lua/LUA/ce/hub/data/modules/ModuleDtoFactory.lua
   runtime/          RuntimeLuaDto        <- lua/LUA/ce/hub/data/runtime/RuntimeDtoFactory.lua
   signals/          SignalLuaDto         <- lua/LUA/ce/hub/data/signals/SignalDtoFactory.lua

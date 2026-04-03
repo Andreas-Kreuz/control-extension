@@ -50,7 +50,10 @@ function IncomingCommandExecutor.executeCommandSafely(functionAndArgs)
 
     local f = allowedCommands[fName]
 
-    assert(f, fName)
+    if not f then
+        print(string.format("[#IncomingCommandExecutor] Command '%s' is not allowed", fName))
+        return
+    end
     local status, error = pcall(f, table.unpack(args))
     if not status then print(error) end
 end

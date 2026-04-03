@@ -2,48 +2,44 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotDtoFactory ...") end
 
 local TableUtils = require("ce.hub.util.TableUtils")
-
+local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local DataSlotDtoFactory = {}
 
 local KEY_ID = "id"
-local FILLED_ROOM = "save-slots"
-local EMPTY_ROOM = "free-slots"
+local FILLED_CE_TYPE = HubCeTypes.SaveSlot
+local EMPTY_CE_TYPE = HubCeTypes.FreeSlot
 
-local function toDataSlotDto(slot)
+local function toDataSlotDto(ceType, slot)
     return {
+        ceType = ceType,
         id = slot.id,
         name = slot.name,
         data = slot.data
     }
 end
 
-local function createDataSlotDtoList(room, slots)
+local function createDataSlotDtoList(ceType, slots)
     local dataSlotDtos = {}
-
-    for _, slot in pairs(slots) do
-        local dto = toDataSlotDto(slot)
-        table.insert(dataSlotDtos, dto)
-    end
-
-    return room, KEY_ID, dataSlotDtos
+    for _, slot in pairs(slots) do table.insert(dataSlotDtos, toDataSlotDto(ceType, slot)) end
+    return ceType, KEY_ID, dataSlotDtos
 end
 
 function DataSlotDtoFactory.createFilledDataSlotDto(slot)
-    local dto = toDataSlotDto(slot)
-    return FILLED_ROOM, KEY_ID, dto[KEY_ID], dto
+    local dto = toDataSlotDto(FILLED_CE_TYPE, slot)
+    return FILLED_CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
 function DataSlotDtoFactory.createFilledDataSlotDtoList(filledSlots)
-    return createDataSlotDtoList(FILLED_ROOM, TableUtils.valuesOfDict(filledSlots))
+    return createDataSlotDtoList(FILLED_CE_TYPE, TableUtils.valuesOfDict(filledSlots))
 end
 
 function DataSlotDtoFactory.createEmptyDataSlotDto(slot)
-    local dto = toDataSlotDto(slot)
-    return EMPTY_ROOM, KEY_ID, dto[KEY_ID], dto
+    local dto = toDataSlotDto(EMPTY_CE_TYPE, slot)
+    return EMPTY_CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
 function DataSlotDtoFactory.createEmptyDataSlotDtoList(emptySlots)
-    return createDataSlotDtoList(EMPTY_ROOM, TableUtils.valuesOfDict(emptySlots))
+    return createDataSlotDtoList(EMPTY_CE_TYPE, TableUtils.valuesOfDict(emptySlots))
 end
 
 return DataSlotDtoFactory
