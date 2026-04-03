@@ -8,7 +8,7 @@ description: 'Control Extension für EEP mit Lua-Hub, Data Bridge, optionalem Se
 theme_settings:
   # Meta
   title: Control Extension für EEP
-  avatar: assets/img/ce-logo-simple.png
+  avatar: assets/img/ce-logo.svg
   favicon: assets/favicon.ico
   gravatar: b3d6b9ea43f1401c06bf20a38fa3ba91 # Email MD5 hash
   description: 'Control Extension für EEP - Verkehrssteuerung und mehr' # used by search engines

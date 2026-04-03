@@ -149,7 +149,7 @@ Die Web-App laeuft dabei typischerweise unter <http://localhost:5173/>.
 yarn dev:storybook
 ```
 
-### Realistische lokale Laufzeit
+### Startet den gebauten Server
 
 ```bash
 yarn run:app
@@ -244,5 +244,5 @@ powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\latin1_t
 Wenn Du das Lua-Verzeichnis direkt aus dem Git-Checkout in EEP nutzen willst, kannst Du einen Link anlegen:
 
 ```cmd
-mklink /D C:\Trend\EEP15\LUA\ce C:\GitHub\control-extension\lua\LUA\ce
+mklink /D C:\Trend\EEP18\LUA\ce C:\GitHub\control-extension\lua\LUA\ce
 ```
