@@ -5,6 +5,7 @@
   "type": "module",
   "homepage": ".",
   "scripts": {
+    "clean": "node ../../scripts/clean-paths.mjs dist cypress/screenshots cypress/videos cypress/io cypress/io-empty coverage storybook-static",
     "dev": "yarn vite --host --configLoader native",
     "build": "yarn vite build --configLoader native",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",

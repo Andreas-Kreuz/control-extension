@@ -66,6 +66,10 @@ yarn ce-help
 | `build` | keine | App und Server für den lokalen Einsatz bauen. |
 | `build:win` | keine | App und Server als Windows-Artefakt bauen. |
 | `build:release` | `check`, `build:win` | App und Server sowie Lua als Release für EEP bauen. |
+| `clean` | keine | Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen. |
+| `clean:docs` | keine | Jekyll-Build- und Cache-Artefakte der Doku entfernen. |
+| `clean:lua` | keine | Temporäre Lua-Coverage- und Testartefakte entfernen. |
+| `clean:web` | keine | Temporäre Artefakte von Web-App, Web-Server und `web-shared` entfernen. |
 | `format` | `format:apps`, `format:lua` | Gesamtes Repository formatieren. |
 | `format:apps` | keine | App und Server sowie nicht-Lua-Dateien mit Prettier formatieren. |
 | `format:lua` | keine | Lua-Dateien mit dem VSCode Lua Language Server formatieren. |
@@ -125,6 +129,7 @@ yarn format:lua
 ### Tests und Checks vor einem Release
 
 ```bash
+yarn clean
 yarn check
 ```
 

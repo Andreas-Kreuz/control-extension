@@ -16,6 +16,7 @@ export class LogFileMonitor {
   private pendingFragment = '';
   private currentLogLines = '';
   private initialScanCompleted = false;
+  private logFileMissing = false;
   private suppressResetCallbackOnce = false;
 
   constructor(
@@ -28,9 +29,19 @@ export class LogFileMonitor {
     this.detach();
 
     this.logFilePath = logFilePath;
-    this.logFileWatcher = fs.watch(path.dirname(this.logFilePath), {}, () => {
-      this.reconcile();
-    });
+    try {
+      this.logFileWatcher = fs.watch(path.dirname(this.logFilePath), {}, () => {
+        this.reconcile();
+      });
+      this.logFileWatcher.on('error', (error) => {
+        if (this.debug) console.log(error);
+        this.logFileWatcher?.close();
+        this.logFileWatcher = undefined;
+      });
+    } catch (error) {
+      if (this.debug) console.log(error);
+      this.logFileWatcher = undefined;
+    }
     this.pollTimer = setInterval(() => this.reconcile(), this.pollIntervalMs);
     this.reconcile();
   }
@@ -50,6 +61,7 @@ export class LogFileMonitor {
     this.pendingFragment = '';
     this.currentLogLines = '';
     this.initialScanCompleted = false;
+    this.logFileMissing = false;
     this.suppressResetCallbackOnce = false;
   }
 
@@ -64,8 +76,17 @@ export class LogFileMonitor {
 
     const logFileSize = this.readLogFileSize();
     if (logFileSize === null) {
+      if (!this.logFileMissing) {
+        this.readOffset = 0;
+        this.pendingFragment = '';
+        this.currentLogLines = '';
+        this.initialScanCompleted = false;
+        this.suppressResetCallbackOnce = true;
+        this.logFileMissing = true;
+      }
       return;
     }
+    this.logFileMissing = false;
 
     const fileShrank = logFileSize < this.readOffset;
     if (fileShrank) {
