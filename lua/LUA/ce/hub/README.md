@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Lua Hub
 subtitle: Das Herz von Control Extension für EEP
-permalink: lua/ce/hub/
+permalink: lua/LUA/ce/hub/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

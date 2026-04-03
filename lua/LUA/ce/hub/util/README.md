@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Einfacheres Speichern
 subtitle: Packe mehrere Daten in EEPData und erkenne doppelt belegte Speicher-IDs.
-permalink: lua/ce/hub/util/
+permalink: lua/LUA/ce/hub/util/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

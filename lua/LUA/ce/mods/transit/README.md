@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Linien für den Nahverkehr
 subtitle: Die Dateien in diesem Verzeichnis dienenen dazu Linien und Haltestellen zu verwalten
-permalink: lua/ce/mods/transit/
+permalink: lua/LUA/ce/mods/transit/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Demo-Anlagen
 subtitle: Fertige Beispielanlagen zum Ausprobieren der Control Extension
-permalink: lua/ce/demo-anlagen/
+permalink: lua/LUA/ce/demo-anlagen/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

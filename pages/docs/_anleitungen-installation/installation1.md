@@ -7,13 +7,14 @@ img: '/assets/thumbnails/ModellPacker.png'
 date: 2017-09-01
 permalink: docs/anleitungen-installation/installation
 tags: [Installation]
+published: false
 ---
 
 # Installieren der Control Extension
 
 ## Herunterladen
 
-- Lade Dir die Datei [`control-extension-for-eep-*.zip`]({{ site.github.latest_release.assets[0].browser_download_url }}) herunter.
+- Lade Dir die aktuelle Datei [`control-extension-for-eep-*.zip`](https://github.com/Andreas-Kreuz/control-extension/releases/latest) herunter.
 
 ## Installieren
 
@@ -43,4 +44,4 @@ Jetzt kannst Du:
 
 - [EEP-Web einrichten](../anleitungen-installation/einrichten-von-eep-web)
 - die [Anleitung für eine automatische Ampelkreuzung](../anleitungen-ampelkreuzung/ampelkreuzung) starten
-- die [Dokumentation der Bibliothek](../lua/ce/) lesen.
+- die [Dokumentation der Bibliothek](../lua/LUA/ce/) lesen.

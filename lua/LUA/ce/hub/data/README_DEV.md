@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Hub-Daten — Entwickler
 subtitle: Wie DTOs aufgebaut werden und warum die Struktur wichtig ist
-permalink: lua/ce/hub/data/dev/
+permalink: lua/LUA/ce/hub/data/dev/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

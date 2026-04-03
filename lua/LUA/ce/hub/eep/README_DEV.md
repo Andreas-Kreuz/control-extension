@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: EEP-Paket — Entwickler
 subtitle: Interner Aufbau des EepSimulators und Design-Entscheidungen
-permalink: lua/ce/hub/eep/dev/
+permalink: lua/LUA/ce/hub/eep/dev/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

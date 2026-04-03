@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Ampeln? Automatisch!
 subtitle: Du willst Dich nicht mehr um die Steuerung Deiner Ampeln kümmern? - Dann beschreibe in Lua, wie Deine Kreuzung aussieht und das Skript Intersection übernimmt für Dich den Rest.
-permalink: lua/ce/mods/road/
+permalink: lua/LUA/ce/mods/road/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

@@ -172,7 +172,7 @@ von der Data Bridge ignoriert.
 
 | Bereich                              | Datei                                                                            |
 | ------------------------------------ | -------------------------------------------------------------------------------- |
-| Lua Hub, CeModule, Data Bridge       | [lua/LUA/ce/ARCHITECTURE_LUA.md](lua/LUA/ce/ARCHITECTURE_LUA.md)                 |
-| Control Extension Server             | [apps/web-server/ARCHITECTURE_SERVER.md](apps/web-server/ARCHITECTURE_SERVER.md) |
-| Gemeinsames Datenmodell (web-shared) | [apps/web-shared/ARCHITECTURE_SHARED.md](apps/web-shared/ARCHITECTURE_SHARED.md) |
-| Control Extension Web App            | [apps/web-app/ARCHITECTURE_APP.md](apps/web-app/ARCHITECTURE_APP.md)             |
+| Lua Hub, CeModule, Data Bridge       | [lua/LUA/ce/ARCHITECTURE_LUA.md](../lua/LUA/ce/ARCHITECTURE_LUA.md)                 |
+| Control Extension Server             | [apps/web-server/ARCHITECTURE_SERVER.md](../apps/web-server/ARCHITECTURE_SERVER.md) |
+| Gemeinsames Datenmodell (web-shared) | [apps/web-shared/ARCHITECTURE_SHARED.md](../apps/web-shared/ARCHITECTURE_SHARED.md) |
+| Control Extension Web App            | [apps/web-app/ARCHITECTURE_APP.md](../apps/web-app/ARCHITECTURE_APP.md)             |

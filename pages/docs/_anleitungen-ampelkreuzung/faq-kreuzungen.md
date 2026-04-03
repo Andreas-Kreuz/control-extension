@@ -7,6 +7,7 @@ img: '/assets/thumbnails/ampel-aufstellen.jpg'
 date: 2017-09-04
 permalink: docs/anleitungen-ampelkreuzung/tipps-kreuzungen
 tags: [Verwendung, Anleitung]
+published: false
 ---
 
 # Allgemeines

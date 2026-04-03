@@ -7,6 +7,7 @@ img: '/assets/thumbnails/tutorial1-ampel.jpg'
 date: 2017-09-01
 permalink: docs/anleitungen-ampelkreuzung/ampelkreuzung
 tags: [Verwendung, Anleitung]
+published: false
 ---
 
 # Ampelkreuzung automatisch steuern
@@ -162,7 +163,7 @@ Erst im nächsten Schritt werden mehrere Ampeln der _Fahrspuren_ in Schaltungen 
 
 ## Schreibe die Ampeln und Fahrspuren in das Haupt-Skript
 
-⭐ _**Tipp:** In EEP sind viele Signalmodelle "Ampel" unterschiedlich gesteuert, was die Rot-, Grün- und Gelb-Schaltung angeht. Damit jede Ampel Deiner Kreuzung verwendet werden kann und automatisch funktioniert, gibt es_ `TrafficLightModel` _. In diesem Lua-Skript sind die Signalstellungen der Ampeln hinterlegt. Weitere Informationen findest Du unter: [Unterstütze weitere Ampeln in TrafficLightModel](../lua/ce/mods/road/)_
+⭐ _**Tipp:** In EEP sind viele Signalmodelle "Ampel" unterschiedlich gesteuert, was die Rot-, Grün- und Gelb-Schaltung angeht. Damit jede Ampel Deiner Kreuzung verwendet werden kann und automatisch funktioniert, gibt es_ `TrafficLightModel` _. In diesem Lua-Skript sind die Signalstellungen der Ampeln hinterlegt. Weitere Informationen findest Du unter: [Unterstütze weitere Ampeln in TrafficLightModel](../lua/LUA/ce/mods/road/)_
 
 Schreibe nun die Ampeln in das Haupt-Skript.
 

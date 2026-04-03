@@ -7,6 +7,7 @@ img: '/assets/thumbnails/eep-web-startseite.png'
 permalink: docs/anleitungen-installation/einrichten-von-eep-web
 hide: false
 date: 2017-09-08
+published: false
 ---
 
 # Grundprinzip

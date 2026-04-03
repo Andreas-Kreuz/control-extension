@@ -3,16 +3,16 @@
 ## Ziele für Lua Hub `lua/LUA/ce/hub`
 
 - [x] Prinzipieller Aufbau und Ablaufsteuerung \
-       siehe [lua/LUA/ce/README.md](lua/LUA/ce/README.md)
+       siehe [lua/LUA/ce/README.md](../lua/LUA/ce/README.md)
 
 - [x] Erfassung von Daten aus EEP-Lua-Funktionen \
-       siehe [lua/LUA/ce/hub/data/README.md](lua/LUA/ce/hub/data/README.md)
+       siehe [lua/LUA/ce/hub/data/README.md](../lua/LUA/ce/hub/data/README.md)
 
 - [x] Einfaches Einbinden der Control Extension \
-       Funktioniert mit minimalem Code: [lua/LUA/ce/README.md](lua/LUA/ce/README.md)
+       Funktioniert mit minimalem Code: [lua/LUA/ce/README.md](../lua/LUA/ce/README.md)
 
 - [ ] TODO: Internes Halten der kompletten erfassten Daten \
-       geplant mit [lua/LUA/ce/hub/publish/InternalDataStore.lua](lua/LUA/ce/hub/publish/InternalDataStore.lua)
+       geplant mit [lua/LUA/ce/hub/publish/InternalDataStore.lua](../lua/LUA/ce/hub/publish/InternalDataStore.lua)
 
 - [ ] TODO: Erfassung weiterer Daten mit Lua-Funktionen \
        Prüfen von Daten für Signale, Weichen, Züge, Rollmaterial, usw.
@@ -22,7 +22,7 @@
 
 ## Ziele für Data Bridge `lua/LUA/ce/databridge`
 
-siehe [lua/LUA/ce/hub/databridge/README.md](lua/LUA/ce/databridge/README.md)
+siehe [lua/LUA/ce/hub/databridge/README.md](../lua/LUA/ce/databridge/README.md)
 
 - [x] Eventbasierte Bereitstellung der Daten an den EEP-Webserver
 - [x] Log-Ausgabe aus EEP als Datei
@@ -31,7 +31,7 @@ siehe [lua/LUA/ce/hub/databridge/README.md](lua/LUA/ce/databridge/README.md)
 
 ## Ziele für Web-Server
 
-siehe [apps/web-server/README.md](apps/web-server/README.md)
+siehe [apps/web-server/README.md](../apps/web-server/README.md)
 
 - [x] TODO: Bereitstellung DTOs als TypeScript und Abgleich mit LUA
 - [x] TODO: Bereitstellung der Daten über eine Web-API
@@ -39,7 +39,7 @@ siehe [apps/web-server/README.md](apps/web-server/README.md)
 
 ## Ziele für Web-App
 
-siehe [apps/web-app/README.md](apps/web-app/README.md)
+siehe [apps/web-app/README.md](../apps/web-app/README.md)
 
 - [ ] TODO: Anzeige und durchsuchen der Web-API
 - [x] Anzeige der Züge
@@ -55,7 +55,7 @@ siehe [apps/web-app/README.md](apps/web-app/README.md)
 
 ## Ziele für das Eisenbahnmodul `ce/rail`
 
-siehe [lua/LUA/ce/rail/README.md](lua/LUA/ce/rail/README.md)
+siehe [lua/LUA/ce/rail/README.md](../lua/LUA/ce/rail/README.md)
 
 - [ ] TODO: RailCeModule einführen
 - [ ] TODO: Moduloptionen speichern und im GUI steuern
@@ -65,7 +65,7 @@ siehe [lua/LUA/ce/rail/README.md](lua/LUA/ce/rail/README.md)
 
 ## Ziele für das Straßenmodul `ce/road`
 
-siehe [lua/LUA/ce/mods/road/README.md](lua/LUA/ce/mods/road/README.md)
+siehe [lua/LUA/ce/mods/road/README.md](../lua/LUA/ce/mods/road/README.md)
 
 - [x] Ampelsteuerung
 - [x] Moduloptionen speichern in der Web App
@@ -74,7 +74,7 @@ siehe [lua/LUA/ce/mods/road/README.md](lua/LUA/ce/mods/road/README.md)
 
 ## Ziele für das ÖPNV-Modul `ce/transit`
 
-siehe [lua/LUA/ce/mods/transit/README.md](lua/LUA/ce/mods/transit/README.md)
+siehe [lua/LUA/ce/mods/transit/README.md](../lua/LUA/ce/mods/transit/README.md)
 
 - [x] Moduloptionen speichern und im GUI steuern
 - [x] Routen und Stationen setzen

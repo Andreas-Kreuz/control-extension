@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Util — Entwickler
 subtitle: Interner Aufbau und Design-Entscheidungen des util-Pakets
-permalink: lua/ce/hub/util/dev/
+permalink: lua/LUA/ce/hub/util/dev/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

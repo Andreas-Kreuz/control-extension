@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Eigene Module entwickeln
 subtitle: Wie Du ein eigenes CeModule baust und in die Control Extension integrierst
-permalink: lua/ce/develop/
+permalink: lua/LUA/ce/develop/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---
@@ -100,7 +100,7 @@ Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen �
 
 ## Weiterführende Dokumentation
 
-- [Gesamtarchitektur der Control Extension](../../../../ARCHITECTURE.md)
+- [Gesamtarchitektur der Control Extension](../../../../project-docs/ARCHITECTURE.md)
 - [Lua-Architektur (Hub, CeModule, Data Bridge)](ARCHITECTURE_LUA.md)
 - [Öffentliche API von ce.ControlExtension](hub/README.md)
 - [Datenmodell und DTO-CeTypes](hub/data/DTO.md)

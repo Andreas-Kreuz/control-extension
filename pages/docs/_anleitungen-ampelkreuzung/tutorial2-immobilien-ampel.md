@@ -7,6 +7,7 @@ img: '/assets/thumbnails/tutorial2-immo-ampel.jpg'
 permalink: docs/anleitungen-ampelkreuzung/tutorial2-immobilien-ampel
 hide: false
 date: 2017-09-02
+published: false
 ---
 
 # Immobilien mit Lichtfunktion als Ampel

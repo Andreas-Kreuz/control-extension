@@ -8,6 +8,7 @@ feature-img: '/assets/headers/intellij.png'
 date: 2017-09-07
 permalink: docs/anleitungen-entwickler/intellij-verwenden
 tags: [Fortgeschrittene, Entwickler]
+published: false
 ---
 
 # IntelliJ verwenden

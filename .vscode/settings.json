@@ -163,7 +163,7 @@
   "js/ts.tsdk.path": ".yarn/sdks/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "npm.packageManager": "yarn",
-  "vscode-lua-format.configPath": "lua-format.conf",
+  "vscode-lua-format.configPath": "lua/lua-format.conf",
   "editor.fontVariations": false,
   "terminal.integrated.profiles.windows": {
     "PowerShell (UTF-8)": {

@@ -59,7 +59,7 @@ hide: true
       {% endif %} {% endfor %}
 
       <!-- Portfolio -->
-      {% for note in site.anleitungen-installation %} {% if note.tags contains tag %}
+      {% for note in site.anleitungen-installation %} {% if note.tags contains tag and note.published != false %}
       <h5 class="tag-title">
         <a href="{{ site.baseurl }}{{ note.url }}">
           <i class="fa fa-file-o" aria-hidden="true"></i>
@@ -71,7 +71,7 @@ hide: true
       {% endif %} {% endfor %}
 
       <!-- Portfolio -->
-      {% for note in site.anleitungen-ampelkreuzung %} {% if note.tags contains tag %}
+      {% for note in site.anleitungen-ampelkreuzung %} {% if note.tags contains tag and note.published != false %}
       <h5 class="tag-title">
         <a href="{{ site.baseurl }}{{ note.url }}">
           <i class="fa fa-file-o" aria-hidden="true"></i>
@@ -83,7 +83,7 @@ hide: true
       {% endif %} {% endfor %}
 
       <!-- Portfolio -->
-      {% for note in site.anleitungen-entwickler %} {% if note.tags contains tag %}
+      {% for note in site.anleitungen-entwickler %} {% if note.tags contains tag and note.published != false %}
       <h5 class="tag-title">
         <a href="{{ site.baseurl }}{{ note.url }}">
           <i class="fa fa-file-o" aria-hidden="true"></i>

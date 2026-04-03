@@ -27,7 +27,7 @@ jobs:
       - name: Run lint:lua
         run: |
           # Entspricht lokal: yarn lint:lua
-          luacheck --config .luacheckrc lua/LUA
+          luacheck --config lua/.luacheckrc lua/LUA
 
   test-lua:
     name: test:lua
@@ -53,4 +53,4 @@ jobs:
       - name: Run test:lua
         run: |
           # Entspricht lokal: yarn test:lua
-          busted --config-file .busted --output=plainTerminal --verbose --
+          busted --config-file lua/.busted --output=plainTerminal --verbose --

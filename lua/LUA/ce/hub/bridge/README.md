@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Bridge-Anbindung
 subtitle: Lua-seitige Anbindung der Control Extension an den Web-Server
-permalink: lua/ce/hub/bridge/
+permalink: lua/LUA/ce/hub/bridge/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

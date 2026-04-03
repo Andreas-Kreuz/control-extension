@@ -6,6 +6,7 @@ subtitle: Hier erfährst Du, wie Du Deine Lua-Skripte testen kannst, ohne EEP zu
 img: '/assets/thumbnails/test-demo.png'
 permalink: docs/anleitungen-ampelkreuzung/demo-anlage-testen
 date: 2017-09-06
+published: false
 ---
 
 # Motivation

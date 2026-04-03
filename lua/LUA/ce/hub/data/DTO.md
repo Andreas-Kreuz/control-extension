@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Datenmodell
 subtitle: Alle CeTypes und Datentypen der Control Extension im Überblick
-permalink: lua/ce/hub/data/dto/
+permalink: lua/LUA/ce/hub/data/dto/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

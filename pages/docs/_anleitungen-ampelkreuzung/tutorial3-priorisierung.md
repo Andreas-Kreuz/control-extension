@@ -7,6 +7,7 @@ img: '/assets/thumbnails/tutorial3-verkehr-erkennen.jpg'
 permalink: docs/anleitungen-ampelkreuzung/tutorial3-priorisierung
 hide: false
 date: 2017-09-03
+published: false
 ---
 
 # Priorisierung an der Ampel

@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Hub-Daten
 subtitle: Einsammeln, Strukturieren und Bereitstellen von EEP-Daten über den Datenbus
-permalink: lua/ce/hub/data/
+permalink: lua/LUA/ce/hub/data/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

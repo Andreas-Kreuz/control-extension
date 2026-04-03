@@ -1,7 +1,7 @@
 # Gemeinsames Datenmodell — web-shared
 
 Dieses Dokument beschreibt die Rolle von `apps/web-shared` in der Control Extension Architektur.
-Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../ARCHITECTURE.md).
+Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../project-docs/ARCHITECTURE.md).
 
 ## Zweck
 

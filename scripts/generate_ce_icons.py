@@ -4,13 +4,13 @@ from __future__ import annotations
 """
 Generiert die modernisierte Iconfamilie der Control Extension.
 
-Favicons werden aus `assets/img/ce-logo-simple.svg` erzeugt.
-App- und Server-Icons werden aus `assets/img/ce-logo.svg` erzeugt.
+Favicons werden aus `pages/assets/img/ce-logo-simple.svg` erzeugt.
+App- und Server-Icons werden aus `pages/assets/img/ce-logo.svg` erzeugt.
 
 Ausgabedateien:
-- `assets/favicon.ico`
-- `assets/img/ce-logo-72.png`
-- `assets/img/ce-logo-144.png`
+- `pages/assets/favicon.ico`
+- `pages/assets/img/ce-logo-72.png`
+- `pages/assets/img/ce-logo-144.png`
 - `apps/web-app/public/favicon.svg`
 - `apps/web-app/public/favicon.ico`
 - `apps/web-app/public/apple-touch-icon.png`
@@ -38,12 +38,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-APP_ICON_SOURCE_SVG = ROOT / "assets" / "img" / "ce-logo.svg"
-FAVICON_SOURCE_SVG = ROOT / "assets" / "img" / "ce-logo-simple.svg"
+FAVICON_SOURCE_SVG = ROOT / "pages" / "assets" / "img" / "ce-logo-simple.svg"
+APP_ICON_SOURCE_SVG = ROOT / "pages" / "assets" / "img" / "ce-logo.svg"
 
 PNG_OUTPUTS: list[tuple[Path, int]] = [
-    (ROOT / "assets" / "img" / "ce-logo-72.png", 72),
-    (ROOT / "assets" / "img" / "ce-logo-144.png", 144),
+    (ROOT / "pages" / "assets" / "img" / "ce-logo-72.png", 72),
+    (ROOT / "pages" / "assets" / "img" / "ce-logo-144.png", 144),
     (ROOT / "apps" / "web-app" / "public" / "apple-touch-icon.png", 180),
     (ROOT / "apps" / "web-app" / "public" / "icon-192.png", 192),
     (ROOT / "apps" / "web-app" / "public" / "icon-512.png", 512),
@@ -51,7 +51,7 @@ PNG_OUTPUTS: list[tuple[Path, int]] = [
 ]
 
 FAVICON_ICO_OUTPUTS: list[tuple[Path, list[int]]] = [
-    (ROOT / "assets" / "favicon.ico", [16, 24, 32, 48]),
+    (ROOT / "pages" / "assets" / "favicon.ico", [16, 24, 32, 48]),
     (ROOT / "apps" / "web-app" / "public" / "favicon.ico", [16, 24, 32, 48]),
 ]
 
@@ -72,13 +72,13 @@ def parse_args() -> argparse.Namespace:
         "--app-icon-source",
         type=Path,
         default=APP_ICON_SOURCE_SVG,
-        help="Quelldatei fuer App- und Server-Icons. Standard: assets/img/ce-logo.svg",
+        help="Quelldatei fuer App- und Server-Icons. Standard: pages/assets/img/ce-logo.svg",
     )
     parser.add_argument(
         "--favicon-source",
         type=Path,
         default=FAVICON_SOURCE_SVG,
-        help="Quelldatei fuer Favicons. Standard: assets/img/ce-logo-simple.svg",
+        help="Quelldatei fuer Favicons. Standard: pages/assets/img/ce-logo-simple.svg",
     )
     parser.add_argument(
         "--skip-icns",

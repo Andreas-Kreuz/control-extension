@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Kommunikation mit dem Server
 subtitle: Die Dateien in diesem Paket dienen dazu, mit dem EEP-Web-Server zu kommunizieren.
-permalink: lua/ce/databridge/
+permalink: lua/LUA/ce/databridge/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---

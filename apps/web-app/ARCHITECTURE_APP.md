@@ -1,7 +1,7 @@
 # Web-App-Architektur der Control Extension
 
 Dieses Dokument beschreibt die Architektur der Control Extension Web App.
-Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../ARCHITECTURE.md).
+Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../../project-docs/ARCHITECTURE.md).
 
 ## Rolle der Web App
 

@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Hub-Dokumentation
 subtitle: Übersicht der Dokumente zu Architektur und Entwicklung des Lua-Hubs
-permalink: lua/ce/hub/docs/
+permalink: lua/LUA/ce/hub/docs/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---
@@ -13,4 +13,4 @@ Dieses Verzeichnis enthält technische Dokumente zum Lua-Hub der Control Extensi
 
 ## Dokumente
 
-- [Architecture.md](Architecture.md) — Zielarchitektur des Lua-Teils der Bibliothek. Beschreibt die angestrebte Aufteilung in `hub`, `bridge` und `modules` und die Verantwortlichkeiten der einzelnen Bereiche.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Zielarchitektur des Lua-Teils der Bibliothek. Beschreibt die angestrebte Aufteilung in `hub`, `bridge` und `modules` und die Verantwortlichkeiten der einzelnen Bereiche.
