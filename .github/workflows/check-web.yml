@@ -1,4 +1,4 @@
-name: check:web
+name: check:web - Web linting and testing
 
 on: [push, pull_request]
 
