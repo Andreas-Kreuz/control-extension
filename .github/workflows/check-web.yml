@@ -1,4 +1,4 @@
-name: check:web - Web linting and testing
+name: check:web
 
 on: [push, pull_request]
 
@@ -75,15 +75,18 @@ jobs:
       - name: Build web-server
         run: yarn workspace @ak/web-server run build
 
+      - name: Build web-server app assets
+        run: yarn workspace @ak/web-server run build:app-assets
+
       - name: Run test:app
         uses: cypress-io/github-action@v7
         with:
           install: false
-          working-directory: .
-          start: node ./scripts/run-parallel.mjs "corepack yarn workspace @ak/web-server run run:test" "corepack yarn workspace @ak/web-app run run"
+          working-directory: apps/web-app
+          start: yarn workspace @ak/web-server run run:test
           wait-on: 'http://localhost:3000/server'
           record: false
-          command: corepack yarn workspace @ak/web-app run test:e2e
+          command: yarn test:e2e
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
