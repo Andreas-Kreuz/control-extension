@@ -1,7 +1,3 @@
-<div style="background:#fff3cd; border:1px solid #ffec99; padding: 0.5rem 1rem; margin:16px 0; color:#664d03;">
-  <strong>Achtung:</strong> Dieses Projekt befindet sich im Aufbau und die Struktur ändert sich noch sehr stark. Von einem produktiven Einsatz wird abgeraten.
-</div>
-
 <p align="center">
   <a href="https://andreas-kreuz.github.io/control-extension">
     <img src="pages/assets/img/ce-logo-72@2x.png" alt="" width=72 height=72>
@@ -18,6 +14,10 @@
   </p>
 </p>
 <br>
+<hr>
+<div style="background:#fff3cd; border:1px solid #ffec99; padding: 0.5rem 1rem; margin: 0; color:#664d03;">
+  <strong>⚠️⚠️⚠️ Achtung:</strong> Dieses Projekt befindet sich im Aufbau und die Struktur ändert sich noch sehr stark. Von einem produktiven Einsatz wird abgeraten.
+</div>
 <hr>
 
 # Überblick
