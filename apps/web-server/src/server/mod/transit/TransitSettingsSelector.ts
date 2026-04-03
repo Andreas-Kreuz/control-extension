@@ -1,6 +1,6 @@
 import { SettingLuaDto } from '../../ce/dto/settings/SettingLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, SettingDto, SettingsDto } from '@ak/web-shared';
+import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
 
 export default class TransitSettingsSelector {
   private lastState?: fromEepData.State;
@@ -33,3 +33,4 @@ export default class TransitSettingsSelector {
 
   getSettings = () => this.settings;
 }
+

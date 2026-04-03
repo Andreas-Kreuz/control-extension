@@ -6,13 +6,14 @@ export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
     // We need to include all libraries manually
-    include: ['@ak/web-shared'],
+    include: ['@ce/web-shared'],
     // exclude: [],
   },
   build: {
     commonjsOptions: {
-      include: ['@ak/web-shared'],
+      include: ['@ce/web-shared'],
       // exclude: [],
     },
   },
 });
+

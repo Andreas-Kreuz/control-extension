@@ -1,5 +1,5 @@
 import { useTrain } from './TrainProvider';
-import { TrackType } from '@ak/web-shared';
+import { TrackType } from '@ce/web-shared';
 
 function useTrackType(): TrackType {
   const trainStore = useTrain();
@@ -7,3 +7,4 @@ function useTrackType(): TrackType {
 }
 
 export default useTrackType;
+

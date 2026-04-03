@@ -1,7 +1,7 @@
 import { CacheService } from '../CacheService';
 import EepDataStore, { State } from '../EepDataStore';
 import JsonApiReducer, { ServerData } from './ServerData';
-import { ApiDataRoom, CeTypes, ServerStatusEvent } from '@ak/web-shared';
+import { ApiDataRoom, CeTypes, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
@@ -148,3 +148,4 @@ export default class JsonApiUpdateService {
     }, 1000);
   }
 }
+

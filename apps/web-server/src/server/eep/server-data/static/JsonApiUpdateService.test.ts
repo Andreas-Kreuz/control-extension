@@ -1,5 +1,5 @@
 import * as assert from 'node:assert/strict';
-import { CeTypes } from '@ak/web-shared';
+import { CeTypes } from '@ce/web-shared';
 import type EepDataStore from '../EepDataStore';
 import type { CacheService } from '../CacheService';
 import type { State } from '../EepDataStore';
@@ -230,3 +230,4 @@ if (require.main === module) {
     process.exit(1);
   });
 }
+

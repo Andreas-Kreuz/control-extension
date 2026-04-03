@@ -37,7 +37,7 @@ function terminate(child) {
   }
 }
 
-const server = spawn('yarn', ['workspace', '@ak/web-server', 'run', 'run:test'], {
+const server = spawn('yarn', ['workspace', '@ce/web-server', 'run', 'run:test'], {
   cwd: repoRoot,
   stdio: 'inherit',
   shell: process.platform === 'win32',
@@ -54,3 +54,4 @@ try {
 }
 
 terminate(server);
+

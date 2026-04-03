@@ -1,6 +1,6 @@
 import { useState, SetStateAction } from 'react';
 import { useApiDataRoomHandler } from '../io/useRoomHandler';
-import { CeTypes } from '@ak/web-shared';
+import { CeTypes } from '@ce/web-shared';
 
 export function useServerStatus(): [SetStateAction<boolean>, SetStateAction<boolean>, SetStateAction<number>] {
   const [eepDataUpToDate, setEepDataUpToDate] = useState(false);
@@ -17,3 +17,4 @@ export function useServerStatus(): [SetStateAction<boolean>, SetStateAction<bool
 
   return [eepDataUpToDate, luaDataReceived, apiEntryCount];
 }
+

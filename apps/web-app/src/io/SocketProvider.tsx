@@ -1,4 +1,4 @@
-import { PairingEvent, PairingStatus, PairingStatusPayload } from '@ak/web-shared';
+import { PairingEvent, PairingStatus, PairingStatusPayload } from '@ce/web-shared';
 import { createContext, ReactNode, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useContext } from 'react';
@@ -135,3 +135,4 @@ export function useSocketPairingCode() {
 export function useSocketIsAdmin() {
   return useContext(SocketAdminContext);
 }
+

@@ -16,7 +16,7 @@ import RoadDataService from '../mod/road/RoadDataService';
 import AppConfig from './config/AppConfig';
 import AppReducer from './config/AppData';
 import CommandLineParser from './config/CommandLineParser';
-import { RoomEvent, ServerInfoEvent, SettingsEvent } from '@ak/web-shared';
+import { RoomEvent, ServerInfoEvent, SettingsEvent } from '@ce/web-shared';
 import * as express from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -224,3 +224,4 @@ export default class AppEffects {
     registerRoadMod(this.io, this.socketService, eepService, this.debug);
   }
 }
+

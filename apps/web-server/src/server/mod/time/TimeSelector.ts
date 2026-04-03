@@ -1,7 +1,7 @@
 import { TimeLuaDto } from '../../ce/dto/time/TimeLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
-import { CeTypes, TimeDto } from '@ak/web-shared';
+import { CeTypes, TimeDto } from '@ce/web-shared';
 
 export default class TimeSelector {
   private lastState?: fromEepData.State;
@@ -29,3 +29,4 @@ export default class TimeSelector {
 
   getTimes = (): Record<string, TimeDto> => this.times;
 }
+

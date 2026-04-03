@@ -1,6 +1,6 @@
 import { useSocket, useSocketIsConnected, useSocketPairingStatus } from './SocketProvider';
-import { ApiDataRoom, PairingStatus, RoomEvent } from '@ak/web-shared';
-import { DynamicRoom } from '@ak/web-shared';
+import { ApiDataRoom, PairingStatus, RoomEvent } from '@ce/web-shared';
+import { DynamicRoom } from '@ce/web-shared';
 import { useEffect, useRef, useState } from 'react';
 import useDebug from './useDebug';
 
@@ -68,3 +68,4 @@ export function useRoomHandler(
     socket.emit(RoomEvent.JoinRoom, { room: roomName });
   }, [canJoinRoom, roomName, socket]);
 }
+

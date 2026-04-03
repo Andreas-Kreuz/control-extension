@@ -1,7 +1,7 @@
 import { useSocket } from '../../io/SocketProvider';
 import LogLines from './LogLines';
 import { useLog, useLogDispatch } from './LogProvider';
-import { LogEvent } from '@ak/web-shared';
+import { LogEvent } from '@ce/web-shared';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -134,3 +134,4 @@ function LogPanel() {
 }
 
 export default LogPanel;
+

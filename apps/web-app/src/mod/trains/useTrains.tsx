@@ -1,5 +1,5 @@
 import { useTrain } from './TrainProvider';
-import { TrainListDto } from '@ak/web-shared';
+import { TrainListDto } from '@ce/web-shared';
 
 function useTrains(): TrainListDto[] {
   const trainStore = useTrain();
@@ -7,3 +7,4 @@ function useTrains(): TrainListDto[] {
 }
 
 export default useTrains;
+

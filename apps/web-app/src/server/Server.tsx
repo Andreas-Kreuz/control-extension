@@ -3,7 +3,7 @@ import './Server.css';
 import ServerHome from './ServerHome';
 import ConnectingScreenWrapper from '../base/ConnectingScreenWrapper';
 import { useSocketIsAdmin, useSocketIsConnected, useSocketPairingStatus } from '../io/SocketProvider';
-import { PairingStatus } from '@ak/web-shared';
+import { PairingStatus } from '@ce/web-shared';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -40,3 +40,4 @@ function Server() {
 }
 
 export default Server;
+

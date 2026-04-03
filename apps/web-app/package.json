@@ -1,5 +1,5 @@
 {
-  "name": "@ak/web-app",
+  "name": "@ce/web-app",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -21,7 +21,7 @@
     "tools:sync-version": "node ../../scripts/sync-control-extension-version.mjs"
   },
   "dependencies": {
-    "@ak/web-shared": "workspace:*",
+    "@ce/web-shared": "workspace:*",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fontsource/anek-latin": "^5.2.7",

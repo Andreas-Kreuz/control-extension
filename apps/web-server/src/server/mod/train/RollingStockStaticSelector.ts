@@ -1,6 +1,6 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { RollingStockStaticLuaDto } from '../../ce/dto/rolling-stocks/RollingStockStaticLuaDto';
-import { CeTypes, RollingStockStaticDto } from '@ak/web-shared';
+import { CeTypes, RollingStockStaticDto } from '@ce/web-shared';
 
 export class RollingStockStaticSelector {
   private lastState: Record<string, unknown> | undefined;
@@ -74,3 +74,4 @@ export class RollingStockStaticSelector {
     return Object.fromEntries(this.allRollingStock.entries());
   }
 }
+

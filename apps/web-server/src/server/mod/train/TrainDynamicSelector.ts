@@ -1,6 +1,6 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainDynamicLuaDto } from '../../ce/dto/trains/TrainDynamicLuaDto';
-import { CeTypes, TrainDynamicDto } from '@ak/web-shared';
+import { CeTypes, TrainDynamicDto } from '@ce/web-shared';
 
 export class TrainDynamicSelector {
   private lastState: Record<string, unknown> | undefined;
@@ -40,3 +40,4 @@ export class TrainDynamicSelector {
     return this.trainMap.get(id);
   }
 }
+

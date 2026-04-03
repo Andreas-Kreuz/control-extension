@@ -2,7 +2,7 @@ import { lazy } from 'react';
 import setTrackType from './useSetTrackType';
 import useTrackType from './useTrackType';
 import useTrains from './useTrains';
-import { TrackType } from '@ak/web-shared';
+import { TrackType } from '@ce/web-shared';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
@@ -118,3 +118,4 @@ const Trains = () => {
 };
 
 export default Trains;
+

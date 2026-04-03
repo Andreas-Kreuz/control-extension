@@ -67,26 +67,27 @@ jobs:
         run: yarn install --immutable
 
       - name: Build web-shared
-        run: yarn workspace @ak/web-shared run build
+        run: yarn workspace @ce/web-shared run build
 
       - name: Build web-app
-        run: yarn workspace @ak/web-app run build
+        run: yarn workspace @ce/web-app run build
 
       - name: Build web-server
-        run: yarn workspace @ak/web-server run build
+        run: yarn workspace @ce/web-server run build
 
       - name: Build web-server app assets
-        run: yarn workspace @ak/web-server run build:app-assets
+        run: yarn workspace @ce/web-server run build:app-assets
 
       - name: Run test:app
         uses: cypress-io/github-action@v7
         with:
           install: false
           working-directory: apps/web-app
-          start: yarn workspace @ak/web-server run run:test
+          start: yarn workspace @ce/web-server run run:test
           wait-on: 'http://localhost:3000/server'
           record: false
           command: yarn test:e2e
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

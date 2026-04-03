@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDynamicRoomHandler } from '../../io/useRoomHandler';
 import TimeDesc from './model/TimeDesc';
-import { RuntimeStatisticsDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeDto } from '@ak/web-shared';
+import { RuntimeStatisticsDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeDto } from '@ce/web-shared';
 
 function toTimeDescList(entries: RuntimeStatisticsTimeDto[] = []): TimeDesc[] {
   return entries.map((entry) => new TimeDesc(entry.id, entry.ms));
@@ -49,3 +49,4 @@ function useStatistics() {
 }
 
 export default useStatistics;
+

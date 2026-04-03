@@ -1,5 +1,5 @@
 import { useSocket } from '../../io/SocketProvider';
-import { CommandEvent, RollingStockStaticDto } from '@ak/web-shared';
+import { CommandEvent, RollingStockStaticDto } from '@ce/web-shared';
 import useDebug from '../../io/useDebug';
 
 const useSetRollingStockCam = () => {
@@ -43,3 +43,4 @@ const useSetRollingStockCam = () => {
 };
 
 export default useSetRollingStockCam;
+

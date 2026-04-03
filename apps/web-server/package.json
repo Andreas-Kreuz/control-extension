@@ -1,5 +1,5 @@
 {
-  "name": "@ak/web-server",
+  "name": "@ce/web-server",
   "version": "0.0.1",
   "description": "Control Extension Server für EEP",
   "type": "commonjs",
@@ -79,7 +79,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@ak/web-shared": "workspace:^",
+    "@ce/web-shared": "workspace:^",
     "@electron/typescript-definitions": "^9.1.5",
     "command-line-args": "^6.0.1",
     "command-line-usage": "^7.0.4",

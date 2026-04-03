@@ -1,6 +1,6 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { RollingStockDynamicLuaDto } from '../../ce/dto/rolling-stocks/RollingStockDynamicLuaDto';
-import { CeTypes, RollingStockDynamicDto } from '@ak/web-shared';
+import { CeTypes, RollingStockDynamicDto } from '@ce/web-shared';
 
 export class RollingStockDynamicSelector {
   private lastState: Record<string, unknown> | undefined;
@@ -44,3 +44,4 @@ export class RollingStockDynamicSelector {
     return this.dynamicRollingStock.get(id);
   }
 }
+

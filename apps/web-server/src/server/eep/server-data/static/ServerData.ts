@@ -1,6 +1,6 @@
 import { alphabeticalSort } from '../../../clientio/alphabeticalSort';
 import * as fromEepStore from '../EepDataStore';
-import { CeTypes, DataType } from '@ak/web-shared';
+import { CeTypes, DataType } from '@ce/web-shared';
 
 export interface ServerData {
   rooms: Record<string, unknown>;
@@ -111,3 +111,4 @@ export default class JsonApiReducer {
     return this.data.urls;
   }
 }
+

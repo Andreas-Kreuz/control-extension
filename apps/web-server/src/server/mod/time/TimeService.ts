@@ -2,7 +2,7 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { DynamicDataProvider } from '../../eep/server-data/dynamic/DynamicDataProvider';
 import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService';
 import TimeSelector from './TimeSelector';
-import { TimeRoom } from '@ak/web-shared';
+import { TimeRoom } from '@ce/web-shared';
 import { Server } from 'socket.io';
 
 export default class TimeService implements DynamicRoomService {
@@ -29,3 +29,4 @@ export default class TimeService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
+

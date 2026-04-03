@@ -1,5 +1,5 @@
 import { useDynamicRoomHandler } from '../../io/useRoomHandler';
-import { RollingStockStaticDto, RollingStockStaticRoom } from '@ak/web-shared';
+import { RollingStockStaticDto, RollingStockStaticRoom } from '@ce/web-shared';
 import { useState } from 'react';
 
 function useRollingStock(name: string): RollingStockStaticDto | undefined {
@@ -19,3 +19,4 @@ function useRollingStock(name: string): RollingStockStaticDto | undefined {
 }
 
 export default useRollingStock;
+

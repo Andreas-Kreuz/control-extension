@@ -1,5 +1,5 @@
 import { useDynamicRoomHandler } from '../../io/useRoomHandler';
-import { TrainDynamicDto, TrainDynamicRoom } from '@ak/web-shared';
+import { TrainDynamicDto, TrainDynamicRoom } from '@ce/web-shared';
 import { useState } from 'react';
 
 function useTrainDynamic(trainId: string): TrainDynamicDto | undefined {
@@ -19,3 +19,4 @@ function useTrainDynamic(trainId: string): TrainDynamicDto | undefined {
 }
 
 export default useTrainDynamic;
+

@@ -14,7 +14,7 @@ import {
   TrainDynamicRoom,
   TrainListRoom,
   TrainStaticRoom,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
@@ -237,3 +237,4 @@ export default class TrainUpdateService implements DynamicRoomService {
     });
   }
 }
+

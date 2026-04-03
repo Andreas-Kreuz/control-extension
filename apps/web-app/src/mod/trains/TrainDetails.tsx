@@ -1,6 +1,6 @@
 import TrainCamList from './TrainCamList';
 import useTrainDynamic from './useTrainDynamic';
-import { TrainListDto } from '@ak/web-shared';
+import { TrainListDto } from '@ce/web-shared';
 import BadgeIcon from '@mui/icons-material/Badge';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -107,3 +107,4 @@ const TrainDetails = (props: { train: TrainListDto }) => {
 };
 
 export default TrainDetails;
+

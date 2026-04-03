@@ -1,5 +1,5 @@
 {
-  "name": "@ak/web-shared",
+  "name": "@ce/web-shared",
   "private": true,
   "version": "1.0.0",
   "description": "Shared code for Web Application",
@@ -17,7 +17,7 @@
     "App",
     "EEP"
   ],
-  "author": "Andreas_Kreuz",
+  "author": "Andreas-Kreuz",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.9.3"

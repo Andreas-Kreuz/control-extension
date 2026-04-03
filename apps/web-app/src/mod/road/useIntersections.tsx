@@ -1,4 +1,4 @@
-import { CeTypes } from '@ak/web-shared';
+import { CeTypes } from '@ce/web-shared';
 import { useState } from 'react';
 import { useApiDataRoomHandler } from '../../io/useRoomHandler';
 import Intersection from './model/Intersection';
@@ -15,3 +15,4 @@ function useIntersections(): Intersection[] {
 }
 
 export default useIntersections;
+

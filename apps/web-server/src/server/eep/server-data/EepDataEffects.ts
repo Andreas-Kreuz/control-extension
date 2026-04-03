@@ -5,7 +5,7 @@ import EepDataReducer from './EepDataStore';
 import DynamicRoomManager from './dynamic/DynamicRoomManager';
 import DynamicRoomService from './dynamic/DynamicRoomService';
 import JsonApiRoomObserver from './static/JsonApiUpdateService';
-import { RoomEvent, ServerStatusEvent } from '@ak/web-shared';
+import { RoomEvent, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
@@ -110,3 +110,4 @@ export default class EepDataEffects {
     }
   }
 }
+

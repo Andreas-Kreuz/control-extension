@@ -2,7 +2,7 @@ import EepDataStore from '../EepDataStore';
 import { DynamicDataProvider } from './DynamicDataProvider';
 import { DynamicDataUpdater } from './DynamicDataUpdater';
 import DynamicRoomService from './DynamicRoomService';
-import { DynamicRoom } from '@ak/web-shared';
+import { DynamicRoom } from '@ce/web-shared';
 import { Server, Socket } from 'socket.io';
 
 export default class DynamicRoomManager {
@@ -120,3 +120,4 @@ export default class DynamicRoomManager {
     this.roomServices.forEach((service) => service.onSocketClose?.(socket));
   };
 }
+

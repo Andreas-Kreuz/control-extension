@@ -9,7 +9,7 @@ import {
   TransitStationListRoom,
   TransitStationDetailsRoom,
   TransitSettingsRoom,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 import { Server } from 'socket.io';
 
 export default class TransitService implements DynamicRoomService {
@@ -68,3 +68,4 @@ export default class TransitService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
+

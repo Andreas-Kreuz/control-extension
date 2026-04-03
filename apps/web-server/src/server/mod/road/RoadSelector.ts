@@ -11,7 +11,7 @@ import {
   IntersectionSwitchingDto,
   IntersectionTrafficLightDto,
   TrafficLightModelDto,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 
 export default class RoadSelector {
   private lastState?: fromEepData.State;
@@ -126,3 +126,4 @@ export default class RoadSelector {
   getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightDto> => this.intersectionTrafficLights;
   getTrafficLightModels = (): Record<string, TrafficLightModelDto> => this.trafficLightModels;
 }
+

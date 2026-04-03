@@ -1,7 +1,7 @@
 import { VersionLuaDto } from '../../ce/dto/version/VersionLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
-import { CeTypes, VersionDto } from '@ak/web-shared';
+import { CeTypes, VersionDto } from '@ce/web-shared';
 
 export default class VersionSelector {
   private lastState?: fromEepData.State;
@@ -32,3 +32,4 @@ export default class VersionSelector {
 
   getVersions = (): Record<string, VersionDto> => this.versions;
 }
+

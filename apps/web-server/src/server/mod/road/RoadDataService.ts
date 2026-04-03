@@ -8,7 +8,7 @@ import {
   IntersectionSwitchingRoom,
   IntersectionTrafficLightRoom,
   TrafficLightModelRoom,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 import { Server } from 'socket.io';
 
 export default class RoadDataService implements DynamicRoomService {
@@ -53,3 +53,4 @@ export default class RoadDataService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
+

@@ -1,7 +1,7 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainStaticLuaDto } from '../../ce/dto/trains/TrainStaticLuaDto';
 import { RollingStockStaticSelector } from './RollingStockStaticSelector';
-import { calcTrainType, CeTypes, TrainListDto, TrainStaticDto, TrainType } from '@ak/web-shared';
+import { calcTrainType, CeTypes, TrainListDto, TrainStaticDto, TrainType } from '@ce/web-shared';
 
 export class TrainStaticSelector {
   private trainState: Record<string, unknown> | undefined;
@@ -84,3 +84,4 @@ export class TrainStaticSelector {
     return TrainType.TrainElectric;
   }
 }
+

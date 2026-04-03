@@ -1,5 +1,5 @@
 import { useRoomHandler } from '../../io/useRoomHandler';
-import { LogEvent } from '@ak/web-shared';
+import { LogEvent } from '@ce/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
 import useDebug from '../../io/useDebug';
 
@@ -86,3 +86,4 @@ export function useLog() {
 export function useLogDispatch() {
   return useContext(LogDispatchContext);
 }
+

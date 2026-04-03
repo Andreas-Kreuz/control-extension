@@ -5,7 +5,7 @@ import {
   PairingStatusPayload,
   PendingPairingClient,
   RoomEvent,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 import { Server, Socket } from 'socket.io';
 import TrustedServerAddressPolicy from '../app/config/TrustedServerAddressPolicy';
 
@@ -344,3 +344,4 @@ export default class SocketService {
     this.emitPendingClientsToAdmins();
   }
 }
+

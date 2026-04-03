@@ -1,4 +1,4 @@
-import { CeTypes, SettingDto, SettingsDto } from '@ak/web-shared';
+import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
 import useDebug from '../../io/useDebug';
 import { useApiDataRoomHandler } from '../../io/useRoomHandler';
 import Intersection from './model/Intersection';
@@ -22,3 +22,4 @@ function useIntersectionSettings(): SettingsDto | undefined {
 }
 
 export default useIntersectionSettings;
+

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { PairingStatus } from '@ak/web-shared';
+import { PairingStatus } from '@ce/web-shared';
 import ConnectingScreen from '../ui/ConnectingScreen';
 import PairingScreen from '../ui/PairingScreen';
 import { useSocketIsConnected, useSocketPairingCode, useSocketPairingStatus, useSocketUrl } from '../io/SocketProvider';
@@ -30,3 +30,4 @@ function PairingGate(props: { children: ReactNode }) {
 }
 
 export default PairingGate;
+

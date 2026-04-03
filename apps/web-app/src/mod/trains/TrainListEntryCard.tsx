@@ -2,7 +2,7 @@ import { lazy } from 'react';
 const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
 import TrainDetails, { getTrainChips } from './TrainDetails';
 import { trainIconFor } from './trainIconFor';
-import { TrainListDto, TrainType } from '@ak/web-shared';
+import { TrainListDto, TrainType } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
@@ -51,3 +51,4 @@ const TrainListDtoCard = (props: { train: TrainListDto }) => {
 };
 
 export default TrainListDtoCard;
+

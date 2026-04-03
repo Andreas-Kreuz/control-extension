@@ -1,7 +1,7 @@
 import { TransitLineLuaDto } from '../../ce/dto/transit/TransitLineLuaDto';
 import { TransitStationLuaDto } from '../../ce/dto/transit/TransitStationLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, TransitLineDto, TransitStationDto } from '@ak/web-shared';
+import { CeTypes, TransitLineDto, TransitStationDto } from '@ce/web-shared';
 
 export default class TransitSelector {
   private lastState?: fromEepData.State;
@@ -48,3 +48,4 @@ export default class TransitSelector {
   getTransitLines = (): Record<string, TransitLineDto> => this.transitLines;
   getTransitStations = (): Record<string, TransitStationDto> => this.transitStations;
 }
+

@@ -15,7 +15,7 @@ import {
   RollingStockTexturesRoom,
   RollingStockRotationRoom,
   TrackRoom,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 import { Server } from 'socket.io';
 
 export default class EepDataService implements DynamicRoomService {
@@ -98,3 +98,4 @@ export default class EepDataService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
+

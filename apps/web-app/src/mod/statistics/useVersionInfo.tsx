@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDynamicRoomHandler } from '../../io/useRoomHandler';
 import Versions from './Versions';
-import { VersionRoom, VersionDto } from '@ak/web-shared';
+import { VersionRoom, VersionDto } from '@ce/web-shared';
 
 function cutOutLua(versionString: string) {
   if (versionString && versionString.startsWith('Lua ')) {
@@ -30,3 +30,4 @@ export default function useVersionInfo(): Versions {
 
   return versions;
 }
+

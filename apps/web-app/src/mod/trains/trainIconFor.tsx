@@ -1,4 +1,4 @@
-import { TrainType } from '@ak/web-shared';
+import { TrainType } from '@ce/web-shared';
 
 export const trainIconFor = (trainType: TrainType) => {
   switch (trainType) {
@@ -28,3 +28,4 @@ export const trainIconFor = (trainType: TrainType) => {
       return 'sign-train';
   }
 };
+

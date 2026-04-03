@@ -1,6 +1,6 @@
 import SocketService from '../../clientio/SocketService';
 import EepService from '../../eep/service/EepService';
-import { LogEvent, RoomEvent } from '@ak/web-shared';
+import { LogEvent, RoomEvent } from '@ce/web-shared';
 import { bufferTime, Subject } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 
@@ -99,3 +99,4 @@ export const registerLogMod = (io: Server, socketService: SocketService, eepServ
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));
 };
+

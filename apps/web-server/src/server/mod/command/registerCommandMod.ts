@@ -1,6 +1,6 @@
 import SocketService from '../../clientio/SocketService';
 import EepService from '../../eep/service/EepService';
-import { CommandEvent, RoomEvent } from '@ak/web-shared';
+import { CommandEvent, RoomEvent } from '@ce/web-shared';
 import { Server, Socket } from 'socket.io';
 
 export const registerCommandMod = (
@@ -86,3 +86,4 @@ export const registerCommandMod = (
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));
 };
+

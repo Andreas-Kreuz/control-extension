@@ -1,5 +1,5 @@
 import * as assert from 'node:assert/strict';
-import { CeTypes } from '@ak/web-shared';
+import { CeTypes } from '@ce/web-shared';
 import type { State } from '../../eep/server-data/EepDataStore';
 import EepDataSelector from './EepDataSelector';
 
@@ -126,3 +126,4 @@ if (require.main === module) {
     process.exit(1);
   });
 }
+

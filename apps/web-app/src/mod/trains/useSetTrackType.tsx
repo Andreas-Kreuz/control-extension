@@ -1,5 +1,5 @@
 import { useTrain, useTrainDispatch } from './TrainProvider';
-import { TrackType } from '@ak/web-shared';
+import { TrackType } from '@ce/web-shared';
 
 function setTrackType(): (trackType: TrackType) => void {
   const trainDispatch = useTrainDispatch();
@@ -10,3 +10,4 @@ function setTrackType(): (trackType: TrackType) => void {
 }
 
 export default setTrackType;
+

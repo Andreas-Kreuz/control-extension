@@ -1,7 +1,7 @@
 import { WeatherLuaDto } from '../../ce/dto/weather/WeatherLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
-import { CeTypes, WeatherDto } from '@ak/web-shared';
+import { CeTypes, WeatherDto } from '@ce/web-shared';
 
 export default class WeatherSelector {
   private lastState?: fromEepData.State;
@@ -32,3 +32,4 @@ export default class WeatherSelector {
 
   getWeather = (): Record<string, WeatherDto> => this.weather;
 }
+

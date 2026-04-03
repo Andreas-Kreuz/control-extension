@@ -127,7 +127,7 @@ with open('datei.lua', 'wb') as f:
   - Entwicklerdoku und typische Workflows: `README_DEV.md`
 - Wichtige Ergänzungen:
   - Storybook der Web-App: `yarn dev:storybook`
-  - Headless-Server direkt starten: `yarn workspace @ak/web-server run run:headless`
+  - Headless-Server direkt starten: `yarn workspace @ce/web-server run run:headless`
 - Lua prüfen, falls lokal installiert:
   - `luacheck --config .luacheckrc lua/LUA`
   - `busted --config-file .busted --verbose --`
@@ -148,7 +148,7 @@ with open('datei.lua', 'wb') as f:
   - `luacheck --config .luacheckrc lua/LUA`
   - `busted --config-file .busted --verbose --`
   - bei Bedarf zusätzlich `busted --config-file .busted --verbose --coverage --`
-- Für Änderungen an Web-Typen oder Events mindestens `@ak/web-shared` und den betroffenen Consumer mitdenken.
+- Für Änderungen an Web-Typen oder Events mindestens `@ce/web-shared` und den betroffenen Consumer mitdenken.
 - Nach Änderungen nach Möglichkeit `yarn format` ausführen.
   - `yarn format` ruft `format:apps` und `format:lua` nacheinander auf.
   - Wenn nur Nicht-Lua-Dateien betroffen sind, kann stattdessen gezielt `yarn format:apps` verwendet werden.
@@ -169,3 +169,4 @@ with open('datei.lua', 'wb') as f:
   - fehlende Tests
 - Gegencheck der Architekturdokumentationen in [ARCHITECTURE.md](ARCHITECTURE.md) und den jeweiligen Teilarchitekturen (`ARCHITECTURE_LUA.md`, `ARCHITECTURE_SERVER.md`, `ARCHITECTURE_SHARED.md`, `ARCHITECTURE_APP.md`)
 - Gegencheck der Readmes in [README\*.md](README*.md)
+

@@ -1,6 +1,6 @@
 import SocketService from '../../clientio/SocketService';
 import EepService from '../../eep/service/EepService';
-import { RoadEvent, RoomEvent } from '@ak/web-shared';
+import { RoadEvent, RoomEvent } from '@ce/web-shared';
 import { Socket, Server } from 'socket.io';
 
 export const registerRoadMod = (_io: Server, socketService: SocketService, eepService: EepService, _debug: boolean) => {
@@ -34,3 +34,4 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));
 };
+

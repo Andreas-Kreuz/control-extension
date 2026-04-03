@@ -25,7 +25,7 @@ import {
   RollingStockTexturesDto,
   RollingStockRotationDto,
   trackTypeForCeType,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 
 const publisherCollectors = [
   'ce.hub.ModulesStatePublisher',
@@ -314,3 +314,4 @@ export default class EepDataSelector {
   getRollingStockTextures = (): Record<string, RollingStockTexturesDto> => this.rollingStockTextures;
   getRollingStockRotation = (): Record<string, RollingStockRotationDto> => this.rollingStockRotation;
 }
+

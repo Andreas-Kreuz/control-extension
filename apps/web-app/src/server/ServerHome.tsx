@@ -7,7 +7,7 @@ import {
   PendingPairingClient,
   ServerStatusEvent,
   SettingsEvent,
-} from '@ak/web-shared';
+} from '@ce/web-shared';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
 import Alert from '@mui/material/Alert';
@@ -415,3 +415,4 @@ end`;
 }
 
 export default ServerHome;
+

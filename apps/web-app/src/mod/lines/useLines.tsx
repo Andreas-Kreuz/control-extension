@@ -1,4 +1,4 @@
-import { CeTypes } from '@ak/web-shared';
+import { CeTypes } from '@ce/web-shared';
 import { useApiDataRoomHandler } from '../../io/useRoomHandler';
 import Line from './model/Line';
 import { useState } from 'react';
@@ -15,3 +15,4 @@ function useLines(): Line[] {
 }
 
 export default useLines;
+

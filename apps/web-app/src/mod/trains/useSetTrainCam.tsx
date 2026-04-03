@@ -1,5 +1,5 @@
 import { useSocket } from '../../io/SocketProvider';
-import { CommandEvent } from '@ak/web-shared';
+import { CommandEvent } from '@ce/web-shared';
 import useDebug from '../../io/useDebug';
 
 const useSetTrainCam = () => {
@@ -13,3 +13,4 @@ const useSetTrainCam = () => {
 };
 
 export default useSetTrainCam;
+
