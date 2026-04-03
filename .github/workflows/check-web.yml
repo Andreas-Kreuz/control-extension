@@ -80,10 +80,10 @@ jobs:
         with:
           install: false
           working-directory: .
-          start: node ./scripts/run-parallel.mjs "yarn workspace @ak/web-server run run:test" "yarn workspace @ak/web-app run run"
+          start: node ./scripts/run-parallel.mjs "corepack yarn workspace @ak/web-server run run:test" "corepack yarn workspace @ak/web-app run run"
           wait-on: 'http://localhost:3000/server'
           record: false
-          command: yarn workspace @ak/web-app run test:e2e
+          command: corepack yarn workspace @ak/web-app run test:e2e
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
