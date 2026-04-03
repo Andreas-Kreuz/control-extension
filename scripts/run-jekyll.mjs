@@ -16,7 +16,6 @@ const stagedRootMarkdown = [
   { source: 'CONTRIBUTING.md', target: 'CONTRIBUTING.md' },
   { source: 'project-docs/GOALS.md', target: 'GOALS.md' },
   { source: 'README.md', target: 'README.md' },
-  { source: 'project-docs/README_DEV.md', target: 'README_DEV.md' },
 ];
 const stagedPaths = [];
 

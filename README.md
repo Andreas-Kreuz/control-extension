@@ -46,7 +46,7 @@ Das Paket besteht aus vier Bausteinen:
 
 - [Fehler gefunden, Verbesserungsvorschläge?](CONTRIBUTING.md) <br>So kannst Du zum Projekt beitragen
 
-- So kannst Du die [Entwicklungsumgebung einrichten](project-docs/README_DEV.md)
+- So kannst Du die [Entwicklungsumgebung einrichten](pages/docs/_anleitungen-entwickler/Aufbau_des_Projektes.md)
 
 ## Was ist EEP
 

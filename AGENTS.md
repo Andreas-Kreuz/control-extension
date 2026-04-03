@@ -124,7 +124,7 @@ with open('datei.lua', 'wb') as f:
 - Root-Einstieg:
   - Abhängigkeiten installieren: `yarn`
   - Verfügbare Root-Skripte anzeigen: `yarn ce-help`
-  - Entwicklerdoku und typische Workflows: `project-docs/README_DEV.md`
+  - Entwicklerdoku und typische Workflows: `pages/docs/_anleitungen-entwickler/Aufbau_des_Projektes.md`
 - Wichtige Ergänzungen:
   - Storybook der Web-App: `yarn dev:storybook`
   - Headless-Server direkt starten: `yarn workspace @ce/web-server run run:headless`
