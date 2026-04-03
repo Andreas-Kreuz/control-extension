@@ -8,7 +8,7 @@
     "build": "tsc --build",
     "build:app-assets": "node ../../scripts/copy-web-app.mjs",
     "clean": "node ../../scripts/clean-paths.mjs build dist target",
-    "build:win": "electron-builder build --win --x64",
+    "build:exe": "node ../../scripts/assert-build-win-supported.mjs && electron-builder build --win --x64",
     "build:dir": "electron-builder --dir",
     "build:dist": "electron-builder",
     "dev": "tsc && node ./build/server/app/HeadlessStart.js --allow-dev-origins",

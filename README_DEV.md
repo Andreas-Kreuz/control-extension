@@ -95,8 +95,8 @@ bundle install
 | `dev:storybook` | keine | Storybook der Web-App für isolierte UI-Entwicklung starten. |
 | `run:app` | `build` | App und Server mit `build` bauen und starten (ohne re-build). |
 | `build` | keine | App und Server für den lokalen Einsatz bauen. |
-| `build:win` | keine | App und Server als Windows-Artefakt bauen. |
-| `build:release` | `check`, `build:win` | App und Server sowie Lua als Release für EEP bauen. |
+| `build:exe` | keine | Windows-EXE von App und Server bauen; auf macOS bewusst nicht unterstützt. |
+| `build:release` | `check`, `build:exe` | App und Server sowie Lua als Release für EEP bauen; Windows-Paketierung nur unter Windows. |
 | `clean` | keine | Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen. |
 | `clean:docs` | keine | Jekyll-Build- und Cache-Artefakte der Doku entfernen. |
 | `clean:lua` | keine | Temporäre Lua-Coverage- und Testartefakte entfernen. |

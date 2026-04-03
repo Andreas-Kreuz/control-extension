@@ -10,7 +10,7 @@
   "scripts": {
     "build": "yarn run sync-control-extension-version && yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run build && yarn workspace @ce/web-server run build && yarn workspace @ce/web-server run build:app-assets",
     "build:release": "yarn run check && node ./scripts/build-release.mjs",
-    "build:win": "yarn run build && yarn workspace @ce/web-server run build:win",
+    "build:exe": "node ./scripts/assert-build-win-supported.mjs && yarn run build && yarn workspace @ce/web-server run build:exe",
     "ce-help": "node ./scripts/ce-help.mjs",
     "check": "yarn run tools:check && yarn run lint && yarn run test",
     "check:lua": "yarn run lint:lua && yarn run test:lua",

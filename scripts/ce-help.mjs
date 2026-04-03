@@ -26,7 +26,7 @@ const groups = [
     title: 'build',
     targets: [
       { name: 'build', description: 'App und Server für den lokalen Einsatz bauen' },
-      { name: 'build:win', description: 'App und Server als Windows-Artefakt bauen' },
+      { name: 'build:exe', description: 'Windows-EXE der App und des Servers bauen' },
       { name: 'build:release', description: 'App und Server sowie Lua als Release für EEP bauen' },
       { name: 'clean', description: 'Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen' },
       { name: 'clean:docs', description: 'Jekyll-Build- und Cache-Artefakte der Doku entfernen' },
