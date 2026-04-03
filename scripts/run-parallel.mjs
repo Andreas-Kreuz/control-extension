@@ -9,8 +9,6 @@ if (commands.length === 0) {
 }
 
 const isWindows = process.platform === 'win32';
-const shellCommand = isWindows ? process.env.ComSpec || 'cmd.exe' : '/bin/sh';
-const shellArgs = (command) => (isWindows ? ['/d', '/s', '/c', command] : ['-lc', command]);
 
 const children = new Set();
 let completedChildren = 0;
@@ -46,10 +44,12 @@ const startShutdown = (currentChild, code) => {
 };
 
 for (const command of commands) {
-  const child = spawn(shellCommand, shellArgs(command), {
+  const child = spawn(command, {
     cwd: process.cwd(),
     env: process.env,
+    shell: true,
     stdio: 'inherit',
+    windowsHide: true,
   });
 
   children.add(child);
