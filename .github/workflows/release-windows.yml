@@ -1,0 +1,102 @@
+name: release - Manual Windows build and draft upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Git tag and release name to create or update
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build release on Windows and upload assets
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        shell: bash
+        run: corepack enable
+
+      - name: Setup Ruby 3.3
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Install Bundler 4.0.9
+        shell: bash
+        run: |
+          gem install bundler -v 4.0.9
+          bundle _4.0.9_ -v
+
+      - name: Setup Lua 5.3
+        uses: leafo/gh-actions-lua@v12
+        with:
+          luaVersion: '5.3'
+          buildCache: false
+
+      - name: Setup LuaRocks
+        uses: leafo/gh-actions-luarocks@v5
+
+      - name: Install repository dependencies
+        shell: bash
+        run: yarn install --immutable
+
+      - name: Install Lua tools
+        shell: bash
+        run: |
+          luarocks install luacheck
+          luarocks install busted
+
+      - name: Install Ruby gems
+        shell: bash
+        run: bundle _4.0.9_ install
+
+      - name: Check required tools
+        shell: bash
+        run: yarn tools:check
+
+      - name: Build release
+        shell: bash
+        run: yarn build:release
+
+      - name: Resolve release asset paths
+        id: assets
+        shell: bash
+        run: node ./scripts/find-release-assets.mjs
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ inputs.release_tag }}
+          if-no-files-found: error
+          path: |
+            ${{ steps.assets.outputs.exe_path }}
+            ${{ steps.assets.outputs.eep_package_path }}
+
+      - name: Create or update draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.release_tag }}
+          draft: true
+          files: |
+            ${{ steps.assets.outputs.exe_path }}
+            ${{ steps.assets.outputs.eep_package_path }}
+          fail_on_unmatched_files: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

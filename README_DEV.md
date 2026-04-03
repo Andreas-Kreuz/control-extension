@@ -190,6 +190,8 @@ Für den Alltag ist `yarn test:lua` der schnelle Standardlauf. `yarn test:lua:co
 yarn build:release
 ```
 
+Für das native Windows-Release ohne Wine oder Rosetta gibt es zusätzlich einen manuellen GitHub-Actions-Workflow unter `.github/workflows/release-windows.yml`. Dieser baut auf einem Windows-Runner und lädt die `.exe` sowie das EEP-Paket als Draft Release hoch.
+
 ## Latin1-Hinweis fuer Lua-Dateien
 
 Bestehende `.lua`-Dateien im Repository müssen als `ISO-8859-1` behandelt werden. Für sicheres Lesen und Schreiben steht `scripts/latin1_tool.ps1` bereit.
