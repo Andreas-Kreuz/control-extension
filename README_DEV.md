@@ -50,7 +50,7 @@ yarn ce-help
 - `format:*` fuer automatische Formatierung
 - `lint:*` fuer statische Checks
 - `test:*` für Tests und Validierungen
-- `check` als manuelle Vorabpruefung vor `build:release`
+- `check:*` fuer bereichsspezifische Qualitätsgates und `check` als globale Vorabpruefung vor `build:release`
 
 ## Root-Yarn-Kommandos
 
@@ -74,6 +74,7 @@ yarn ce-help
 | `lint:lua` | keine | `luacheck` auf `lua/LUA` ausführen. |
 | `lint:server` | keine | ESLint für den Web-Server ausführen. |
 | `lint:shared` | keine | ESLint für `web-shared` ausführen. |
+| `lint:web` | keine | Alle statischen Checks für Web-App, Web-Server und `web-shared` ausführen. |
 | `test` | `test:lua`, `test:server`, `test:app`, `test:docs` | Alle implementierten Tests und Validierungen ausführen. |
 | `test:lua` | keine | Lua-Tests mit `busted` schnell ohne Coverage ausführen. |
 | `test:lua:coverage` | keine | Lua-Tests mit `busted` und Coverage ausführen. |
@@ -81,6 +82,9 @@ yarn ce-help
 | `test:app` | keine | Web-App-E2E-Tests headless ausführen. |
 | `test:app:ui` | keine | Interaktive Cypress-E2E-Umgebung starten. |
 | `test:docs` | keine | Jekyll-Doku zur Validierung bauen. |
+| `test:web` | keine | Server-Tests und Web-App-E2E-Tests ausführen. |
+| `check:lua` | `lint:lua`, `test:lua` | Lua-Lint und Lua-Tests als Qualitätsgate ausführen. |
+| `check:web` | `lint:web`, `test:web` | Web-Lints sowie Server- und App-Tests als Qualitätsgate ausführen. |
 | `check` | `tools:check`, `lint`, `test` | Manuelle Vorabprüfung vor `build:release` (`tools:check` + `lint` + `test`). |
 
 ## Typische Workflows
@@ -131,11 +135,15 @@ yarn lint:lua
 yarn lint:server
 yarn lint:app
 yarn lint:shared
+yarn lint:web
+yarn check:lua
+yarn check:web
 yarn test:lua
 yarn test:lua:coverage
 yarn test:server
 yarn test:app
 yarn test:docs
+yarn test:web
 ```
 
 Für den Alltag ist `yarn test:lua` der schnelle Standardlauf. `yarn test:lua:coverage` ist der langsamere Vollständigkeitslauf mit Coverage.

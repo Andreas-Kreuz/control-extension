@@ -49,6 +49,7 @@ const groups = [
       { name: 'lint:lua', description: 'luacheck auf lua/LUA ausführen' },
       { name: 'lint:server', description: 'ESLint für den Web-Server ausführen' },
       { name: 'lint:shared', description: 'ESLint für web-shared ausführen' },
+      { name: 'lint:web', description: 'Alle statischen Checks für App, Server und Shared ausführen' },
     ],
   },
   {
@@ -61,6 +62,7 @@ const groups = [
       { name: 'test:app', description: 'Web-App-E2E-Tests headless ausführen' },
       { name: 'test:app:ui', description: 'Interaktive Cypress-E2E-Umgebung starten' },
       { name: 'test:docs', description: 'Jekyll-Doku zur Validierung bauen' },
+      { name: 'test:web', description: 'Server-Tests und Web-App-E2E-Tests ausführen' },
     ],
   },
   {
@@ -74,6 +76,8 @@ const groups = [
     title: 'other',
     targets: [
       { name: 'check', description: 'Manuelle Vorabprüfung vor build:release (tools:check + lint + test)' },
+      { name: 'check:lua', description: 'Lua-Lint und Lua-Tests als Qualitätsgate ausführen' },
+      { name: 'check:web', description: 'Web-Lints sowie Server- und App-Tests als Qualitätsgate ausführen' },
     ],
   },
 ];

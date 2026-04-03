@@ -25,6 +25,8 @@ __metadata:
   dependencies:
     "@types/eslint": "npm:^9.6.1"
     "@types/prettier": "npm:^3.0.0"
+    "@typescript-eslint/eslint-plugin": "npm:^8.57.1"
+    "@typescript-eslint/parser": "npm:^8.57.1"
     eslint: "npm:^10.0.3"
     prettier: "npm:^3.8.1"
     typescript: "npm:^5.9.3"
