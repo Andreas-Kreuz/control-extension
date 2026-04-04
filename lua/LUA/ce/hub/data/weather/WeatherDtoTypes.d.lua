@@ -1,16 +1,18 @@
 ---@meta
 
+-- Field policies: all fields always
+
 ---@class WeatherDto
----@field id string
----@field name string
----@field season number|nil
----@field cloudsIntensity number|nil
----@field cloudsMode number|nil
----@field windIntensity number|nil
----@field rainIntensity number|nil
----@field snowIntensity number|nil
----@field hailIntensity number|nil
----@field fogIntensity number|nil
+---@field id string              -- Policy: always
+---@field name string            -- Policy: always
+---@field season number|nil      -- Policy: always
+---@field cloudsIntensity number|nil -- Policy: always
+---@field cloudsMode number|nil      -- Policy: always
+---@field windIntensity number|nil   -- Policy: always
+---@field rainIntensity number|nil   -- Policy: always
+---@field snowIntensity number|nil   -- Policy: always
+---@field hailIntensity number|nil   -- Policy: always
+---@field fogIntensity number|nil    -- Policy: always
 
 ---@class WeatherDtoFactory
 ---@field createWeatherDto fun(weather: table):string,string,string|number,WeatherDto

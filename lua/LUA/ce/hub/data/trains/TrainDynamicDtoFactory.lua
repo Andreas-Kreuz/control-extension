@@ -7,22 +7,24 @@ local TrainDynamicDtoFactory = {}
 local CE_TYPE = HubCeTypes.TrainDynamic
 local KEY_ID = "id"
 
-local function toTrainDynamicDto(train)
+-- ondemand fields use typed zero-value placeholders when isSubscribed is false
+local function toTrainDynamicDto(train, isSubscribed)
     return {
         ceType = CE_TYPE,
         id = train:getName(),
-        speed = train:getSpeed(),
-        targetSpeed = train:getTargetSpeed(),
-        couplingFront = train:getCouplingFront(),
-        couplingRear = train:getCouplingRear(),
-        active = train:getActive(),
-        trainyardId = train:getTrainyardId(),
-        inTrainyard = train:getInTrainyard()
+        speed = isSubscribed and train:getSpeed() or 0,
+        targetSpeed = isSubscribed and train:getTargetSpeed() or 0,
+        couplingFront = isSubscribed and train:getCouplingFront() or 0,
+        couplingRear = isSubscribed and train:getCouplingRear() or 0,
+        active = isSubscribed and train:getActive() or false,
+        inTrainyard = isSubscribed and train:getInTrainyard() or false,
+        trainyardId = isSubscribed and train:getTrainyardId() or "",
     }
 end
 
-function TrainDynamicDtoFactory.createDto(train)
-    local dto = toTrainDynamicDto(train)
+function TrainDynamicDtoFactory.createDto(train, isSubscribed)
+    if isSubscribed == nil then isSubscribed = true end
+    local dto = toTrainDynamicDto(train, isSubscribed)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 

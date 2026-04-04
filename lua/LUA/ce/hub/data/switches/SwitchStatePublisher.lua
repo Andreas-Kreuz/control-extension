@@ -1,19 +1,26 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchStatePublisher ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local SwitchDataCollector = require("ce.hub.data.switches.SwitchDataCollector")
+local Switch = require("ce.hub.data.switches.Switch")
 local SwitchDtoFactory = require("ce.hub.data.switches.SwitchDtoFactory")
-require("ce.hub.eep.EepFunctionWrapper")
 SwitchStatePublisher = {}
 local enabled = true
 local initialized = false
 SwitchStatePublisher.name = "ce.hub.data.switches.SwitchStatePublisher"
 
-local switches = {}
+local MAX_SWITCHES = 1000
+local EEPGetSwitch = _G.EEPGetSwitch or function() return 0 end
+
+---@type table<number, Switch>
+local allSwitches = {}
 
 function SwitchStatePublisher.initialize()
     if not enabled or initialized then return end
 
-    switches = SwitchDataCollector.collectInitialSwitches()
+    for i = 1, MAX_SWITCHES do
+        if EEPGetSwitch(i) > 0 then
+            allSwitches[i] = Switch:new(i)
+        end
+    end
 
     initialized = true
 end
@@ -23,14 +30,15 @@ function SwitchStatePublisher.syncState()
 
     if not initialized then SwitchStatePublisher.initialize() end
 
-    SwitchDataCollector.refreshSwitches(switches)
+    for _, switch in pairs(allSwitches) do
+        switch:refresh()
+        if switch.valuesUpdated then
+            switch.valuesUpdated = false
+            DataChangeBus.fireDataChanged(SwitchDtoFactory.createSwitchDto(switch))
+        end
+    end
 
-    -- TODO: Send event only with detected changes
-    DataChangeBus.fireListChange(SwitchDtoFactory.createSwitchDtoList(switches))
-
-    return {
-        -- ["switches"] = switches
-    }
+    return {}
 end
 
 return SwitchStatePublisher

@@ -87,8 +87,9 @@ function TrainRegistry.fireChangeTrainEvents(selectedCeTypes)
         DataChangeBus.fireDataChanged(TrainStaticDtoFactory.createDto(train))
     end
     for _, train in pairs(modifiedDynamicTrains) do
-        DataChangeBus.fireDataChanged(TrainDynamicDtoFactory.createDto(train))
-        DynamicUpdateRegistry.markSent(HubCeTypes.TrainDynamic, train.id)
+        local isSubscribed = DynamicUpdateRegistry.isSelected(HubCeTypes.TrainDynamic, train.id)
+        DataChangeBus.fireDataChanged(TrainDynamicDtoFactory.createDto(train, isSubscribed))
+        if isSubscribed then DynamicUpdateRegistry.markSent(HubCeTypes.TrainDynamic, train.id) end
     end
 end
 

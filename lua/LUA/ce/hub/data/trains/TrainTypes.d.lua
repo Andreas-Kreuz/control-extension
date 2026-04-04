@@ -20,6 +20,8 @@
 ---@field onTracks table<string, number>
 ---@field occupiedTracks table
 ---@field valuesUpdated boolean
+---@field staticValuesUpdated boolean
+---@field dynamicValuesUpdated boolean
 ---@field new fun(self: Train, o: Train):Train
 ---@field load fun(self: Train):table<string, string>
 ---@field save fun(self: Train, clearCurrentInfo?: boolean):nil
@@ -99,6 +101,8 @@
 ---@field hookGlueMode number
 ---@field active boolean
 ---@field textureTexts table<string, string>
+---@field staticValuesUpdated boolean
+---@field dynamicValuesUpdated boolean
 ---@field textureTextsUpdated boolean
 ---@field rotationUpdated boolean
 ---@field rotX number|nil

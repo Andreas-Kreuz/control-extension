@@ -72,8 +72,9 @@ function RollingStockRegistry.fireChangeRollingStockEvents(selectedCeTypes)
         DataChangeBus.fireDataChanged(RollingStockStaticDtoFactory.createDto(stock))
     end
     for _, stock in pairs(modifiedDynamicStocks) do
-        DataChangeBus.fireDataChanged(RollingStockDynamicDtoFactory.createDto(stock))
-        DynamicUpdateRegistry.markSent(HubCeTypes.RollingStockDynamic, stock.id)
+        local isSubscribed = DynamicUpdateRegistry.isSelected(HubCeTypes.RollingStockDynamic, stock.id)
+        DataChangeBus.fireDataChanged(RollingStockDynamicDtoFactory.createDto(stock, isSubscribed))
+        if isSubscribed then DynamicUpdateRegistry.markSent(HubCeTypes.RollingStockDynamic, stock.id) end
     end
     for _, stock in pairs(modifiedTextures) do
         DataChangeBus.fireDataChanged(TexturesDtoFactory.createDto(stock))

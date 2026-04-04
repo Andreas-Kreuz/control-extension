@@ -8,7 +8,8 @@ local function copyDefinition(def)
         ceType = def.ceType,
         keyId = def.keyId,
         owner = def.owner,
-        publisher = def.publisher
+        publisher = def.publisher,
+        isDynamic = def.isDynamic or false
     }
 end
 

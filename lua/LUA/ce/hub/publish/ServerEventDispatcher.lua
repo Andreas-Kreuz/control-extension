@@ -2,6 +2,7 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.publish.ServerEventDispatcher
 
 local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local ServerEventBuffer = require("ce.databridge.ServerEventBuffer")
+local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
 
 local ServerEventDispatcher = {}
 local allowedHubCeTypes = {}
@@ -35,7 +36,15 @@ function ServerEventDispatcher.fireEvent(event)
         return
     end
 
-    if shouldForwardHubCeType(ceType) then ServerEventBuffer.fireEvent(event) end
+    if not shouldForwardHubCeType(ceType) then return end
+
+    if ceTypeDef.isDynamic then
+        local element = payload.element or {}
+        local entryId = element[ceTypeDef.keyId]
+        if not DynamicUpdateRegistry.isSelected(ceType, tostring(entryId or "")) then return end
+    end
+
+    ServerEventBuffer.fireEvent(event)
 end
 
 return ServerEventDispatcher

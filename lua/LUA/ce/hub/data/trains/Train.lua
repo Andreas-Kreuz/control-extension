@@ -11,6 +11,11 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 
 local Train = {}
 
+-- Field update policies (see TrainStaticDtoTypes.d.lua / TrainDynamicDtoTypes.d.lua):
+--   always   — real value always included in DTO
+--   ondemand — real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
+--   never    — always placeholder, never sent to clients
+
 local function markStaticUpdated(train)
     train.valuesUpdated = true
     train.staticValuesUpdated = true

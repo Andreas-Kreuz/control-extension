@@ -1,14 +1,16 @@
 ---@meta
 
+-- Field policies: always | ondemand | never
+
 ---@class TrainDynamicDto
----@field id string
----@field speed number
----@field targetSpeed number
----@field couplingFront number
----@field couplingRear number
----@field active boolean
----@field trainyardId number|nil
----@field inTrainyard boolean
+---@field id string           -- Policy: always
+---@field speed number        -- Policy: ondemand
+---@field targetSpeed number  -- Policy: ondemand
+---@field couplingFront number -- Policy: ondemand
+---@field couplingRear number  -- Policy: ondemand
+---@field active boolean      -- Policy: ondemand
+---@field trainyardId number|nil -- Policy: ondemand
+---@field inTrainyard boolean -- Policy: ondemand
 
 ---@class TrainDynamicDtoFactory
 ---@field createDto fun(train: Train|table):string,string,string|number,TrainDynamicDto

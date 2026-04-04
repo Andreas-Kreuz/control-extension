@@ -1,10 +1,12 @@
 ---@meta
 
+-- Field policies: all fields always
+
 ---@class RuntimeDto
----@field id string
----@field count number
----@field time number
----@field lastTime number
+---@field id string      -- Policy: always
+---@field count number   -- Policy: always
+---@field time number    -- Policy: always
+---@field lastTime number -- Policy: always
 
 ---@class RuntimeDtoFactory
 ---@field createRuntimeDto fun(runtimeEntry: table):string,string,string|number,RuntimeDto

@@ -1,16 +1,18 @@
 ---@meta
 
+-- Field policies: all fields always
+
 ---@class VersionDto
----@field id string
----@field name string
----@field eepVersion string
----@field luaVersion string
----@field singleVersion string
----@field eepLanguage string|nil
----@field layoutVersion number|nil
----@field layoutLanguage string|nil
----@field layoutName string|nil
----@field layoutPath string|nil
+---@field id string              -- Policy: always
+---@field name string            -- Policy: always
+---@field eepVersion string      -- Policy: always
+---@field luaVersion string      -- Policy: always
+---@field singleVersion string   -- Policy: always
+---@field eepLanguage string|nil     -- Policy: always
+---@field layoutVersion number|nil   -- Policy: always
+---@field layoutLanguage string|nil  -- Policy: always
+---@field layoutName string|nil      -- Policy: always
+---@field layoutPath string|nil      -- Policy: always
 
 ---@class VersionDtoFactory
 ---@field createVersionDto fun(versionInfo: table):string,string,string|number,VersionDto
