@@ -1,8 +1,5 @@
 insulate("RuntimeStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
-    local originalEEPGetFramesPerSecond = _G.EEPGetFramesPerSecond
-    local originalEEPGetCurrentFrame = _G.EEPGetCurrentFrame
-    local originalEEPGetCurrentRenderFrame = _G.EEPGetCurrentRenderFrame
 
     before_each(function ()
         clearModule("ce.hub.data.runtime.RuntimeDataCollector")
@@ -10,15 +7,15 @@ insulate("RuntimeStatePublisher", function ()
         clearModule("ce.hub.data.runtime.RuntimeStatePublisher")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        _G.EEPGetFramesPerSecond = function () return 60 end
-        _G.EEPGetCurrentFrame = function () return 15 end
-        _G.EEPGetCurrentRenderFrame = function () return 15948 end
+        stub(_G, "EEPGetFramesPerSecond", function () return 60 end)
+        stub(_G, "EEPGetCurrentFrame", function () return 15 end)
+        stub(_G, "EEPGetCurrentRenderFrame", function () return 15948 end)
     end)
 
     after_each(function ()
-        _G.EEPGetFramesPerSecond = originalEEPGetFramesPerSecond
-        _G.EEPGetCurrentFrame = originalEEPGetCurrentFrame
-        _G.EEPGetCurrentRenderFrame = originalEEPGetCurrentRenderFrame
+        _G.EEPGetFramesPerSecond:revert()
+        _G.EEPGetCurrentFrame:revert()
+        _G.EEPGetCurrentRenderFrame:revert()
     end)
 
     it("publishes the last completed runtime snapshot only once", function ()

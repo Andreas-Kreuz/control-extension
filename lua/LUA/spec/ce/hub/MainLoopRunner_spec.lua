@@ -43,7 +43,7 @@ insulate("MainLoopRunner", function ()
     end)
 
     it("runs modules, state publishers and io on every ControlExtension cycle", function ()
-        _G.print = function () end -- suppress print output for this test
+        stub(_G, "print") -- suppress print output for this test
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local ControlExtension = require("ce.ControlExtension")
         local ModuleRegistry = require("ce.hub.ModuleRegistry")
@@ -217,22 +217,21 @@ insulate("MainLoopRunner", function ()
         local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
         local DataStoreFileWriter = require("ce.databridge.DataStoreFileWriter")
         local printedMessages = {}
-        local originalPrint = print
 
         DataChangeBus.fireListChange = function () end
         DataChangeBus.printEventCounter = function () end
         IncomingCommandFileReader.readAndExecuteIncomingCommands = function () end
         DataStoreFileWriter.write = function () end
 
-        _G.print = function (message)
+        local printStub = stub(_G, "print", function (message)
             table.insert(printedMessages, tostring(message))
-        end
+        end)
 
         local ok, err = pcall(function ()
             MainLoopRunner.runCycle(5, {}, {}, { debug = true, enableServer = false, enableDataStoreJson = true })
         end)
 
-        _G.print = originalPrint
+        printStub:revert()
         if not ok then error(err) end
 
         local runCycleLog
@@ -271,9 +270,9 @@ insulate("MainLoopRunner", function ()
             assert.equals(1, pauseCalls[1])
             return 0
         end
-        _G.EEPPause = function (value)
+        stub(_G, "EEPPause", function (value)
             table.insert(pauseCalls, value)
-        end
+        end)
 
         ControlExtension.runTasks(5)
 

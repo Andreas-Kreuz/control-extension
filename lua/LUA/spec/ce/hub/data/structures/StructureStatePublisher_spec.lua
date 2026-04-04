@@ -1,13 +1,7 @@
 insulate("ce.hub.data.structures.StructureStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originalStructureGetLight = _G.EEPStructureGetLight
-    local originalStructureGetSmoke = _G.EEPStructureGetSmoke
-    local originalStructureGetFire = _G.EEPStructureGetFire
-    local originalStructureGetPosition = _G.EEPStructureGetPosition
-    local originalStructureGetRotation = _G.EEPStructureGetRotation
-    local originalStructureGetModelType = _G.EEPStructureGetModelType
-    local originalStructureGetTagText = _G.EEPStructureGetTagText
+    local states
 
     before_each(function ()
         clearModule("ce.hub.data.structures.StructureStatePublisher")
@@ -17,7 +11,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        local states = {
+        states = {
             ["#2"] = {
                 light = true,
                 smoke = false,
@@ -38,54 +32,51 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
             }
         }
 
-        rawset(_G, "EEPStructureGetLight", function (name)
+        stub(_G, "EEPStructureGetLight", function (name)
             local entry = states[name]
             if not entry then return false, false end
             return true, entry.light
         end)
-        rawset(_G, "EEPStructureGetSmoke", function (name)
+        stub(_G, "EEPStructureGetSmoke", function (name)
             local entry = states[name]
             if not entry then return false, false end
             return true, entry.smoke
         end)
-        rawset(_G, "EEPStructureGetFire", function (name)
+        stub(_G, "EEPStructureGetFire", function (name)
             local entry = states[name]
             if not entry then return false, false end
             return true, entry.fire
         end)
-        rawset(_G, "EEPStructureGetPosition", function (name)
+        stub(_G, "EEPStructureGetPosition", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.pos[1], entry.pos[2], entry.pos[3]
         end)
-        rawset(_G, "EEPStructureGetRotation", function (name)
+        stub(_G, "EEPStructureGetRotation", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.rot[1], entry.rot[2], entry.rot[3]
         end)
-        rawset(_G, "EEPStructureGetModelType", function (name)
+        stub(_G, "EEPStructureGetModelType", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.modelType
         end)
-        rawset(_G, "EEPStructureGetTagText", function (name)
+        stub(_G, "EEPStructureGetTagText", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.tag
         end)
-
-        _G.__structure_state_test_states = states
     end)
 
     after_each(function ()
-        rawset(_G, "EEPStructureGetLight", originalStructureGetLight)
-        rawset(_G, "EEPStructureGetSmoke", originalStructureGetSmoke)
-        rawset(_G, "EEPStructureGetFire", originalStructureGetFire)
-        rawset(_G, "EEPStructureGetPosition", originalStructureGetPosition)
-        rawset(_G, "EEPStructureGetRotation", originalStructureGetRotation)
-        rawset(_G, "EEPStructureGetModelType", originalStructureGetModelType)
-        rawset(_G, "EEPStructureGetTagText", originalStructureGetTagText)
-        _G.__structure_state_test_states = nil
+        _G.EEPStructureGetLight:revert()
+        _G.EEPStructureGetSmoke:revert()
+        _G.EEPStructureGetFire:revert()
+        _G.EEPStructureGetPosition:revert()
+        _G.EEPStructureGetRotation:revert()
+        _G.EEPStructureGetModelType:revert()
+        _G.EEPStructureGetTagText:revert()
     end)
 
     it("fires initial ceType data and later only dirty ceType data", function ()
@@ -131,7 +122,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                         }
                     }, DataStore.getCeType("ce.hub.Structure"))
 
-        _G.__structure_state_test_states["#2"].fire = true
+        states["#2"].fire = true
         StructureStatePublisher.syncState()
 
         assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)

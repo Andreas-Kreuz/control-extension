@@ -3,10 +3,8 @@ insulate("CeHubModule", function ()
         package.loaded[name] = nil
     end
 
-    local originalPrint = print
-
     before_each(function ()
-        _G.print = function () end
+        stub(_G, "print")
         clearModule("ce.ControlExtension")
         clearModule("ce.hub.ControlExtensionHub")
         clearModule("ce.hub.ModuleRegistry")
@@ -23,7 +21,7 @@ insulate("CeHubModule", function ()
     end)
 
     after_each(function ()
-        _G.print = originalPrint
+        _G.print:revert()
     end)
 
     it("returns CeHubModule from setOptions and applies hub options", function ()

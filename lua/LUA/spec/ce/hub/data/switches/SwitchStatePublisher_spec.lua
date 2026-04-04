@@ -1,9 +1,6 @@
 insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originalGetSwitch = _G.EEPGetSwitch
-    local originalSwitchGetTagText = _G.EEPSwitchGetTagText
-
     before_each(function ()
         clearModule("ce.hub.data.switches.SwitchStatePublisher")
         clearModule("ce.hub.data.switches.SwitchDataCollector")
@@ -19,24 +16,21 @@ insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
             }
         }
 
-        rawset(_G, "EEPGetSwitch", function (id)
+        stub(_G, "EEPGetSwitch", function (id)
             local entry = states[id]
             if not entry then return 0 end
             return entry.position
         end)
-        rawset(_G, "EEPSwitchGetTagText", function (id)
+        stub(_G, "EEPSwitchGetTagText", function (id)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.tag
         end)
-
-        _G.__switch_state_test_states = states
     end)
 
     after_each(function ()
-        rawset(_G, "EEPGetSwitch", originalGetSwitch)
-        rawset(_G, "EEPSwitchGetTagText", originalSwitchGetTagText)
-        _G.__switch_state_test_states = nil
+        _G.EEPGetSwitch:revert()
+        _G.EEPSwitchGetTagText:revert()
     end)
 
     it("fires switch ceTypes with the existing wire format", function ()

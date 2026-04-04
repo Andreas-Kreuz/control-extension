@@ -1,12 +1,6 @@
 insulate("ce.hub.data.time.TimeStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originalEEPTime = _G.EEPTime
-    local originalEEPTimeH = _G.EEPTimeH
-    local originalEEPTimeM = _G.EEPTimeM
-    local originalEEPTimeS = _G.EEPTimeS
-    local originalEEPGetTimeLapse = _G.EEPGetTimeLapse
-
     before_each(function ()
         clearModule("ce.hub.data.time.TimeStatePublisher")
         clearModule("ce.hub.data.time.TimeDtoFactory")
@@ -14,19 +8,19 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        _G.EEPTime = 3723
-        _G.EEPTimeH = 1
-        _G.EEPTimeM = 2
-        _G.EEPTimeS = 3
-        _G.EEPGetTimeLapse = function () return 4 end
+        rawset(_G, "EEPTime", 3723)
+        rawset(_G, "EEPTimeH", 1)
+        rawset(_G, "EEPTimeM", 2)
+        rawset(_G, "EEPTimeS", 3)
+        stub(_G, "EEPGetTimeLapse", function () return 4 end)
     end)
 
     after_each(function ()
-        _G.EEPTime = originalEEPTime
-        _G.EEPTimeH = originalEEPTimeH
-        _G.EEPTimeM = originalEEPTimeM
-        _G.EEPTimeS = originalEEPTimeS
-        _G.EEPGetTimeLapse = originalEEPGetTimeLapse
+        rawset(_G, "EEPTime", nil)
+        rawset(_G, "EEPTimeH", nil)
+        rawset(_G, "EEPTimeM", nil)
+        rawset(_G, "EEPTimeS", nil)
+        _G.EEPGetTimeLapse:revert()
     end)
 
     it("fires time ceTypes with the existing wire format", function ()

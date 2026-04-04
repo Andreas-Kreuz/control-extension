@@ -1,23 +1,21 @@
 insulate("FrameDataStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
-    local originalEEPGetFramesPerSecond = _G.EEPGetFramesPerSecond
-    local originalEEPGetCurrentFrame = _G.EEPGetCurrentFrame
-    local originalEEPGetCurrentRenderFrame = _G.EEPGetCurrentRenderFrame
+    local stubFPS, stubFrame, stubRenderFrame
 
     before_each(function ()
         clearModule("ce.hub.data.framedata.FrameDataDtoFactory")
         clearModule("ce.hub.data.framedata.FrameDataStatePublisher")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        _G.EEPGetFramesPerSecond = function () return 60 end
-        _G.EEPGetCurrentFrame = function () return 15 end
-        _G.EEPGetCurrentRenderFrame = function () return 15948 end
+        stubFPS = stub(_G, "EEPGetFramesPerSecond", function () return 60 end)
+        stubFrame = stub(_G, "EEPGetCurrentFrame", function () return 15 end)
+        stubRenderFrame = stub(_G, "EEPGetCurrentRenderFrame", function () return 15948 end)
     end)
 
     after_each(function ()
-        _G.EEPGetFramesPerSecond = originalEEPGetFramesPerSecond
-        _G.EEPGetCurrentFrame = originalEEPGetCurrentFrame
-        _G.EEPGetCurrentRenderFrame = originalEEPGetCurrentRenderFrame
+        stubFPS:revert()
+        stubFrame:revert()
+        stubRenderFrame:revert()
     end)
 
     it("publishes frame data as a single entry", function ()
@@ -45,9 +43,9 @@ insulate("FrameDataStatePublisher", function ()
     end)
 
     it("publishes nil values when EEP functions are not available", function ()
-        _G.EEPGetFramesPerSecond = nil
-        _G.EEPGetCurrentFrame = nil
-        _G.EEPGetCurrentRenderFrame = nil
+        rawset(_G, "EEPGetFramesPerSecond", nil)
+        rawset(_G, "EEPGetCurrentFrame", nil)
+        rawset(_G, "EEPGetCurrentRenderFrame", nil)
 
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")

@@ -1,15 +1,6 @@
 insulate("ce.hub.data.signals.SignalDataCollector", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originalGetSignal = _G.EEPGetSignal
-    local originalSignalGetTagText = _G.EEPSignalGetTagText
-    local originalGetSignalTrainsCount = _G.EEPGetSignalTrainsCount
-    local originalGetSignalTrainName = _G.EEPGetSignalTrainName
-    local originalGetSignalStopDistance = _G.EEPGetSignalStopDistance
-    local originalGetSignalItemName = _G.EEPGetSignalItemName
-    local originalGetSignalFunctions = _G.EEPGetSignalFunctions
-    local originalGetSignalFunction = _G.EEPGetSignalFunction
-
     before_each(function ()
         clearModule("ce.hub.data.signals.SignalDataCollector")
 
@@ -26,60 +17,57 @@ insulate("ce.hub.data.signals.SignalDataCollector", function ()
             }
         }
 
-        rawset(_G, "EEPGetSignal", function (id)
+        stub(_G, "EEPGetSignal", function (id)
             local entry = states[id]
             if not entry then return 0 end
             return entry.position
         end)
-        rawset(_G, "EEPSignalGetTagText", function (id)
+        stub(_G, "EEPSignalGetTagText", function (id)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.tag
         end)
-        rawset(_G, "EEPGetSignalTrainsCount", function (id)
+        stub(_G, "EEPGetSignalTrainsCount", function (id)
             local entry = states[id]
             if not entry then return nil end
             return entry.waitingCount
         end)
-        rawset(_G, "EEPGetSignalTrainName", function (id, position)
+        stub(_G, "EEPGetSignalTrainName", function (id, position)
             local entry = states[id]
             if not entry then return nil end
             return entry.vehicles[position]
         end)
-        rawset(_G, "EEPGetSignalStopDistance", function (id)
+        stub(_G, "EEPGetSignalStopDistance", function (id)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.stopDistance
         end)
-        rawset(_G, "EEPGetSignalItemName", function (id, includeModelPath)
+        stub(_G, "EEPGetSignalItemName", function (id, includeModelPath)
             local entry = states[id]
             if not entry then return false, nil end
             return true, includeModelPath and entry.itemNameWithModelPath or entry.itemName
         end)
-        rawset(_G, "EEPGetSignalFunctions", function (id)
+        stub(_G, "EEPGetSignalFunctions", function (id)
             local entry = states[id]
             if not entry then return false, 0 end
             return true, #entry.functions
         end)
-        rawset(_G, "EEPGetSignalFunction", function (id, selectionIndex)
+        stub(_G, "EEPGetSignalFunction", function (id, selectionIndex)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.functions[selectionIndex]
         end)
-
-        _G.__signal_test_states = states
     end)
 
     after_each(function ()
-        rawset(_G, "EEPGetSignal", originalGetSignal)
-        rawset(_G, "EEPSignalGetTagText", originalSignalGetTagText)
-        rawset(_G, "EEPGetSignalTrainsCount", originalGetSignalTrainsCount)
-        rawset(_G, "EEPGetSignalTrainName", originalGetSignalTrainName)
-        rawset(_G, "EEPGetSignalStopDistance", originalGetSignalStopDistance)
-        rawset(_G, "EEPGetSignalItemName", originalGetSignalItemName)
-        rawset(_G, "EEPGetSignalFunctions", originalGetSignalFunctions)
-        rawset(_G, "EEPGetSignalFunction", originalGetSignalFunction)
-        _G.__signal_test_states = nil
+        _G.EEPGetSignal:revert()
+        _G.EEPSignalGetTagText:revert()
+        _G.EEPGetSignalTrainsCount:revert()
+        _G.EEPGetSignalTrainName:revert()
+        _G.EEPGetSignalStopDistance:revert()
+        _G.EEPGetSignalItemName:revert()
+        _G.EEPGetSignalFunctions:revert()
+        _G.EEPGetSignalFunction:revert()
     end)
 
     it("collects initial signals by id", function ()

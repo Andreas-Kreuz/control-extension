@@ -1,8 +1,6 @@
 insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originals = {}
-
     before_each(function ()
         clearModule("ce.hub.data.weather.WeatherStatePublisher")
         clearModule("ce.hub.data.weather.WeatherDtoFactory")
@@ -10,27 +8,25 @@ insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        originals.EEPGetSeason = _G.EEPGetSeason
-        originals.EEPGetCloudsIntensity = _G.EEPGetCloudsIntensity
-        originals.EEPGetCloudsMode = _G.EEPGetCloudsMode
-        originals.EEPGetWindIntensity = _G.EEPGetWindIntensity
-        originals.EEPGetRainIntensity = _G.EEPGetRainIntensity
-        originals.EEPGetSnowIntensity = _G.EEPGetSnowIntensity
-        originals.EEPGetHailIntensity = _G.EEPGetHailIntensity
-        originals.EEPGetFogIntensity = _G.EEPGetFogIntensity
-
-        _G.EEPGetSeason = function () return 2 end
-        _G.EEPGetCloudsIntensity = function () return true, 30 end
-        _G.EEPGetCloudsMode = function () return 1 end
-        _G.EEPGetWindIntensity = function () return true, 40 end
-        _G.EEPGetRainIntensity = function () return true, 50 end
-        _G.EEPGetSnowIntensity = function () return true, 60 end
-        _G.EEPGetHailIntensity = function () return true, 70 end
-        _G.EEPGetFogIntensity = function () return true, 80 end
+        rawset(_G, "EEPGetSeason", function () return 2 end)
+        rawset(_G, "EEPGetCloudsIntensity", function () return true, 30 end)
+        rawset(_G, "EEPGetCloudsMode", function () return 1 end)
+        rawset(_G, "EEPGetWindIntensity", function () return true, 40 end)
+        rawset(_G, "EEPGetRainIntensity", function () return true, 50 end)
+        rawset(_G, "EEPGetSnowIntensity", function () return true, 60 end)
+        rawset(_G, "EEPGetHailIntensity", function () return true, 70 end)
+        rawset(_G, "EEPGetFogIntensity", function () return true, 80 end)
     end)
 
     after_each(function ()
-        for key, value in pairs(originals) do rawset(_G, key, value) end
+        rawset(_G, "EEPGetSeason", nil)
+        rawset(_G, "EEPGetCloudsIntensity", nil)
+        rawset(_G, "EEPGetCloudsMode", nil)
+        rawset(_G, "EEPGetWindIntensity", nil)
+        rawset(_G, "EEPGetRainIntensity", nil)
+        rawset(_G, "EEPGetSnowIntensity", nil)
+        rawset(_G, "EEPGetHailIntensity", nil)
+        rawset(_G, "EEPGetFogIntensity", nil)
     end)
 
     it("publishes global weather data as ce.hub.Weather", function ()
