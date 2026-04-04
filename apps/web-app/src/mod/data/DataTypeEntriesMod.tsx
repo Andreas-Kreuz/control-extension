@@ -19,7 +19,13 @@ function DataTypeEntriesMod() {
   const entriesMap = useTypeEntries(ceType);
   const [filter, setFilter] = useState('');
 
-  const allKeys = Array.from(new Set(Object.values(entriesMap).flatMap((entry) => Object.keys(entry))));
+  const allKeys = useMemo(
+    () =>
+      Array.from(new Set(Object.values(entriesMap).flatMap((entry) => Object.keys(entry))))
+        .filter((key) => key !== 'id')
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
+    [entriesMap],
+  );
 
   const rows = useMemo(() => {
     const lower = filter.toLowerCase();
