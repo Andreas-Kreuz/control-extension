@@ -7,6 +7,10 @@ local enabled = true
 local initialized = false
 WeatherStatePublisher.name = "ce.hub.data.weather.WeatherStatePublisher"
 
+WeatherStatePublisher.options = {
+    sendWeather = true
+}
+
 local function unwrapNumeric(getter)
     if type(getter) ~= "function" then return nil end
 

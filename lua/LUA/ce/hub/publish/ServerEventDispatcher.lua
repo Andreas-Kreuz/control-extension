@@ -6,6 +6,7 @@ local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry
 
 local ServerEventDispatcher = {}
 local allowedHubCeTypes = {}
+local sendChecks = {}
 
 local function toLookup(list)
     local lookup = {}
@@ -20,6 +21,10 @@ end
 
 function ServerEventDispatcher.setAllowedHubCeTypes(list)
     allowedHubCeTypes = toLookup(list)
+end
+
+function ServerEventDispatcher.registerSendCheck(ceType, fn)
+    sendChecks[ceType] = fn
 end
 
 function ServerEventDispatcher.fireEvent(event)
@@ -37,6 +42,9 @@ function ServerEventDispatcher.fireEvent(event)
     end
 
     if not shouldForwardHubCeType(ceType) then return end
+
+    local sendCheck = sendChecks[ceType]
+    if sendCheck ~= nil and not sendCheck() then return end
 
     if ceTypeDef.isDynamic then
         local element = payload.element or {}

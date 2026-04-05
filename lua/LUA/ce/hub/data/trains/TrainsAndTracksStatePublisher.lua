@@ -10,6 +10,20 @@ local enabled = true
 local initialized = false
 TrainsAndTracksStatePublisher.name = "ce.hub.data.trains.TrainsAndTracksStatePublisher"
 
+TrainsAndTracksStatePublisher.options = {
+    sendTrainStatic = true,
+    sendTrainDynamic = true,
+    sendRollingStockStatic = true,
+    sendRollingStockDynamic = true,
+    sendRollingStockTextures = true,
+    sendRollingStockRotation = true,
+    sendAuxiliaryTrack = true,
+    sendControlTrack = true,
+    sendRoadTrack = true,
+    sendRailTrack = true,
+    sendTramTrack = true
+}
+
 local data = {}
 local selectedCeTypes = {}
 

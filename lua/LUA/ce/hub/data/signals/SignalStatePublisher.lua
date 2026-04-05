@@ -7,6 +7,16 @@ local enabled = true
 local initialized = false
 SignalStatePublisher.name = "ce.hub.data.signals.SignalStatePublisher"
 
+SignalStatePublisher.options = {
+    fetchTag = true,
+    fetchStopDistance = true,
+    fetchItemName = true,
+    fetchFunctions = true,
+    fetchWaitingTrains = true,
+    sendSignal = true,
+    sendWaitingOnSignal = true
+}
+
 local MAX_SIGNALS = 1000
 local EEPGetSignal = _G.EEPGetSignal or function() return 0 end
 local EEPGetSignalTrainName = _G.EEPGetSignalTrainName or function() return nil end
@@ -19,7 +29,7 @@ function SignalStatePublisher.initialize()
 
     for i = 1, MAX_SIGNALS do
         if EEPGetSignal(i) > 0 then
-            allSignals[i] = Signal:new(i)
+            allSignals[i] = Signal:new(i, SignalStatePublisher.options)
         end
     end
 
@@ -52,15 +62,17 @@ function SignalStatePublisher.syncState()
     if not initialized then SignalStatePublisher.initialize() end
 
     for _, signal in pairs(allSignals) do
-        signal:refresh()
+        signal:refresh(SignalStatePublisher.options)
         if signal.valuesUpdated then
             signal.valuesUpdated = false
             DataChangeBus.fireDataChanged(SignalDtoFactory.createSignalDto(signal))
         end
     end
 
-    local waitingOnSignals = collectWaitingOnSignals()
-    DataChangeBus.fireListChange(SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals))
+    if SignalStatePublisher.options.fetchWaitingTrains ~= false then
+        local waitingOnSignals = collectWaitingOnSignals()
+        DataChangeBus.fireListChange(SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals))
+    end
 
     return {}
 end

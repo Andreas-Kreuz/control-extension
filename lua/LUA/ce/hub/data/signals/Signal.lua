@@ -40,27 +40,53 @@ local function readFunctions(id, position)
     return #fns > 0 and fns or nil, activeFunction
 end
 
+function Signal:getTag() return self.tag end
+function Signal:getStopDistance() return self.stopDistance end
+function Signal:getItemName() return self.itemName end
+function Signal:getItemNameWithModelPath() return self.itemNameWithModelPath end
+function Signal:getSignalFunctions() return self.signalFunctions end
+function Signal:getActiveFunction() return self.activeFunction end
+
 ---@param id number
+---@param options table|nil
 ---@return Signal
-function Signal:new(id)
+function Signal:new(id, options)
     local o = { id = id }
     self.__index = self
     setmetatable(o, self)
-    o:refresh()
+    o:refresh(options)
     return o
 end
 
-function Signal:refresh()
+function Signal:refresh(options)
+    local opts = options or {}
     local position = EEPGetSignal(self.id)
-    local _, tag = EEPSignalGetTagText(self.id)
     local waitingVehiclesCount = EEPGetSignalTrainsCount(self.id) or 0
-    local stopDistanceOk, stopDistance = EEPGetSignalStopDistance(self.id)
-    local itemNameOk, itemName = EEPGetSignalItemName(self.id, false)
-    local itemNameWithModelPathOk, itemNameWithModelPath = EEPGetSignalItemName(self.id, true)
-    local signalFunctions, activeFunction = readFunctions(self.id, position)
-    local tagStr = tag or ""
-    local stopDistanceVal = stopDistanceOk and stopDistance or nil
-    local itemNameVal = itemNameOk and itemName or nil
+
+    local tagStr = self.tag or ""
+    local stopDistanceVal = self.stopDistance
+    local itemNameVal = self.itemName
+    local itemNameWithModelPath = self.itemNameWithModelPath
+    local signalFunctions = self.signalFunctions
+    local activeFunction = self.activeFunction
+
+    if opts.fetchTag ~= false then
+        local _, tag = EEPSignalGetTagText(self.id)
+        tagStr = tag or ""
+    end
+    if opts.fetchStopDistance ~= false then
+        local ok, sd = EEPGetSignalStopDistance(self.id)
+        stopDistanceVal = ok and sd or nil
+    end
+    if opts.fetchItemName ~= false then
+        local ok, name = EEPGetSignalItemName(self.id, false)
+        itemNameVal = ok and name or nil
+        local okPath, namePath = EEPGetSignalItemName(self.id, true)
+        itemNameWithModelPath = okPath and namePath or nil
+    end
+    if opts.fetchFunctions ~= false then
+        signalFunctions, activeFunction = readFunctions(self.id, position)
+    end
 
     local changed = not self.isInitialized
         or position ~= self.position
@@ -78,7 +104,7 @@ function Signal:refresh()
         self.waitingVehiclesCount = waitingVehiclesCount
         self.stopDistance = stopDistanceVal
         self.itemName = itemNameVal
-        self.itemNameWithModelPath = itemNameWithModelPathOk and itemNameWithModelPath or nil
+        self.itemNameWithModelPath = itemNameWithModelPath
         self.signalFunctions = signalFunctions
         self.activeFunction = activeFunction
     end

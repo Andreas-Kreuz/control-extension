@@ -8,6 +8,10 @@ local enabled = true
 local initialized = false
 RuntimeStatePublisher.name = "ce.hub.data.runtime.RuntimeStatePublisher"
 
+RuntimeStatePublisher.options = {
+    sendRuntime = true
+}
+
 function RuntimeStatePublisher.initialize()
     if not enabled or initialized then return end
 

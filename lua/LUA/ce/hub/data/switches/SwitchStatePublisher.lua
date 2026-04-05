@@ -7,6 +7,10 @@ local enabled = true
 local initialized = false
 SwitchStatePublisher.name = "ce.hub.data.switches.SwitchStatePublisher"
 
+SwitchStatePublisher.options = {
+    sendSwitch = true
+}
+
 local MAX_SWITCHES = 1000
 local EEPGetSwitch = _G.EEPGetSwitch or function() return 0 end
 

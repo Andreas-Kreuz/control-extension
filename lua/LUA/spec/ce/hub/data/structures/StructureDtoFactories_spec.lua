@@ -23,7 +23,11 @@ insulate("ce.hub.data.structures.StructureDtoFactories", function ()
             tag = "alpha",
             light = true,
             smoke = false,
-            fire = true
+            fire = true,
+            getTag = function(self) return self.tag end,
+            getLight = function(self) return self.light end,
+            getSmoke = function(self) return self.smoke end,
+            getFire = function(self) return self.fire end
         }
 
         local staticCeType, staticKeyId, staticKey, staticDto = StructureStaticDtoFactory.createDto(structure)

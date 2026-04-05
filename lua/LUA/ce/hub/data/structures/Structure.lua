@@ -20,13 +20,6 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...
 ---@field isInitialized boolean
 local Structure = {}
 
-Structure.options = {
-    fetchLight = true,
-    fetchSmoke = true,
-    fetchFire = true,
-    fetchTag = true
-}
-
 local EEPStructureGetLight = _G.EEPStructureGetLight or function() end
 local EEPStructureGetSmoke = _G.EEPStructureGetSmoke or function() end
 local EEPStructureGetFire = _G.EEPStructureGetFire or function() end
@@ -68,44 +61,16 @@ local function readStaticValues(name)
     }
 end
 
-local function readDynamicValues(structure)
-    local options = structure.options or Structure.options
-    local tag = structure.tag or ""
-    local light = structure.light
-    local smoke = structure.smoke
-    local fire = structure.fire
 
-    if options.fetchTag then
-        local _, fetchedTag = EEPStructureGetTagText(structure.name)
-        tag = fetchedTag or ""
-    end
-
-    if options.fetchLight then
-        local _, fetchedLight = EEPStructureGetLight(structure.name)
-        light = fetchedLight or false
-    end
-
-    if options.fetchSmoke then
-        local _, fetchedSmoke = EEPStructureGetSmoke(structure.name)
-        smoke = fetchedSmoke or false
-    end
-
-    if options.fetchFire then
-        local _, fetchedFire = EEPStructureGetFire(structure.name)
-        fire = fetchedFire or false
-    end
-
-    return {
-        tag = tag,
-        light = light,
-        smoke = smoke,
-        fire = fire
-    }
-end
+function Structure:getTag() return self.tag end
+function Structure:getLight() return self.light end
+function Structure:getSmoke() return self.smoke end
+function Structure:getFire() return self.fire end
 
 ---@param name string
+---@param options table|nil
 ---@return Structure
-function Structure:new(name)
+function Structure:new(name, options)
     local o = {
         id = name,
         name = name,
@@ -127,31 +92,53 @@ function Structure:new(name)
     o.rot_y = staticValues.rot_y
     o.rot_z = staticValues.rot_z
 
-    o:refresh()
+    o:refresh(options)
     return o
 end
 
-function Structure:refresh()
-    local dynamicValues = readDynamicValues(self)
+function Structure:refresh(options)
+    local opts = options or {}
+    local tag = self.tag or ""
+    local light = self.light
+    local smoke = self.smoke
+    local fire = self.fire
+
+    if opts.fetchTag ~= false then
+        local _, fetchedTag = EEPStructureGetTagText(self.name)
+        tag = fetchedTag or ""
+    end
+    if opts.fetchLight ~= false then
+        local _, fetchedLight = EEPStructureGetLight(self.name)
+        light = fetchedLight or false
+    end
+    if opts.fetchSmoke ~= false then
+        local _, fetchedSmoke = EEPStructureGetSmoke(self.name)
+        smoke = fetchedSmoke or false
+    end
+    if opts.fetchFire ~= false then
+        local _, fetchedFire = EEPStructureGetFire(self.name)
+        fire = fetchedFire or false
+    end
+
     local staticChanged = not self.isInitialized
-        or dynamicValues.tag ~= (self.tag or "")
+        or tag ~= (self.tag or "")
 
     local dynamicChanged = not self.isInitialized
-        or dynamicValues.light ~= self.light
-        or dynamicValues.smoke ~= self.smoke
-        or dynamicValues.fire ~= self.fire
+        or light ~= self.light
+        or smoke ~= self.smoke
+        or fire ~= self.fire
 
     self.staticValuesUpdated = staticChanged
     self.dynamicValuesUpdated = dynamicChanged
 
     if staticChanged then
-        self.tag = dynamicValues.tag
+        self.tag = tag
     end
 
     if dynamicChanged then
-        self.light = dynamicValues.light
-        self.smoke = dynamicValues.smoke
-        self.fire = dynamicValues.fire
+        self.light = light
+        self.smoke = smoke
+        self.fire = fire
     end
 
     self.isInitialized = true

@@ -13,13 +13,13 @@ local function toSignalDto(signal)
         ceType = SIGNAL_CE_TYPE,
         id = signal.id,
         position = signal.position,
-        tag = signal.tag,
+        tag = signal:getTag(),
         waitingVehiclesCount = signal.waitingVehiclesCount,
-        stopDistance = signal.stopDistance,
-        itemName = signal.itemName,
-        itemNameWithModelPath = signal.itemNameWithModelPath,
-        signalFunctions = signal.signalFunctions,
-        activeFunction = signal.activeFunction
+        stopDistance = signal:getStopDistance(),
+        itemName = signal:getItemName(),
+        itemNameWithModelPath = signal:getItemNameWithModelPath(),
+        signalFunctions = signal:getSignalFunctions(),
+        activeFunction = signal:getActiveFunction()
     }
 end
 

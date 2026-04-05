@@ -56,12 +56,6 @@ insulate("ce.hub.data.structures.Structure", function ()
         _G.EEPStructureGetRotation:revert()
         _G.EEPStructureGetModelType:revert()
         _G.EEPStructureGetTagText:revert()
-
-        local Structure = require("ce.hub.data.structures.Structure")
-        Structure.options.fetchLight = true
-        Structure.options.fetchSmoke = true
-        Structure.options.fetchFire = true
-        Structure.options.fetchTag = true
     end)
 
     it("reads static values during init and only refreshes dynamic values later", function ()
@@ -91,12 +85,9 @@ insulate("ce.hub.data.structures.Structure", function ()
 
     it("skips disabled dynamic fetchers and keeps existing values", function ()
         local Structure = require("ce.hub.data.structures.Structure")
-        Structure.options.fetchLight = false
-        Structure.options.fetchSmoke = false
-        Structure.options.fetchFire = false
-        Structure.options.fetchTag = false
+        local disabledOptions = { fetchLight = false, fetchSmoke = false, fetchFire = false, fetchTag = false }
 
-        local structure = Structure:new("#4")
+        local structure = Structure:new("#4", disabledOptions)
         structure.staticValuesUpdated = false
         structure.dynamicValuesUpdated = false
         structure.light = true
@@ -104,7 +95,7 @@ insulate("ce.hub.data.structures.Structure", function ()
         structure.fire = true
         structure.tag = "Manual"
 
-        structure:refresh()
+        structure:refresh(disabledOptions)
 
         assert.same(0, lightCalls)
         assert.same(0, smokeCalls)

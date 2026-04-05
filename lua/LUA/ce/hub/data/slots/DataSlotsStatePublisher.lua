@@ -6,6 +6,11 @@ local DataSlotsStatePublisher = {}
 DataSlotsStatePublisher.name = "ce.hub.data.slots.DataSlotsStatePublisher"
 local enabled = true
 local initialized = false
+
+DataSlotsStatePublisher.options = {
+    sendSaveSlot = true,
+    sendFreeSlot = true
+}
 local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local lastSlots = {}

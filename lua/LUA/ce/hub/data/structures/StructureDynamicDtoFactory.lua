@@ -11,9 +11,9 @@ local function toStructureDynamicDto(structure)
     return {
         ceType = CE_TYPE,
         id = structure.id,
-        light = structure.light,
-        smoke = structure.smoke,
-        fire = structure.fire
+        light = structure:getLight(),
+        smoke = structure:getSmoke(),
+        fire = structure:getFire()
     }
 end
 

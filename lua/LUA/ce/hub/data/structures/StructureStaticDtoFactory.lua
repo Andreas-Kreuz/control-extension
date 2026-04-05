@@ -20,7 +20,7 @@ local function toStructureStaticDto(structure)
         rot_z = structure.rot_z,
         modelType = structure.modelType,
         modelTypeText = structure.modelTypeText,
-        tag = structure.tag
+        tag = structure:getTag()
     }
 end
 

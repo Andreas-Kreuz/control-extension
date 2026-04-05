@@ -12,6 +12,10 @@ local enabled = true
 local initialized = false
 ModulesStatePublisher.name = "ce.hub.ModulesStatePublisher"
 
+ModulesStatePublisher.options = {
+    sendModule = true
+}
+
 ---@type table<string,ModuleDto>
 local knownModInfos = {}
 local function checkModule(moduleName, module)

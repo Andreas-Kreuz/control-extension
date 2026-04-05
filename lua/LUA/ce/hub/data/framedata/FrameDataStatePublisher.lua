@@ -7,6 +7,10 @@ local enabled = true
 local initialized = false
 FrameDataStatePublisher.name = "ce.hub.data.framedata.FrameDataStatePublisher"
 
+FrameDataStatePublisher.options = {
+    sendFrameData = true
+}
+
 function FrameDataStatePublisher.initialize()
     if not enabled or initialized then return end
 

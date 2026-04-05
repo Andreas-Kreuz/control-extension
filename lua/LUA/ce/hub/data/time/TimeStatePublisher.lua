@@ -7,6 +7,10 @@ local enabled = true
 local initialized = false
 TimeStatePublisher.name = "ce.hub.data.time.TimeStatePublisher"
 
+TimeStatePublisher.options = {
+    sendTime = true
+}
+
 function TimeStatePublisher.initialize()
     if not enabled or initialized then return end
 

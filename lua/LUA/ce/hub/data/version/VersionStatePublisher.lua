@@ -8,6 +8,10 @@ local data = {}
 local initialized = false
 VersionStatePublisher.name = "ce.hub.VersionStatePublisher"
 
+VersionStatePublisher.options = {
+    sendEepVersion = true
+}
+
 function VersionStatePublisher.initialize()
     if not enabled or initialized then return end
 

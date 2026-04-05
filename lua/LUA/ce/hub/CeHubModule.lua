@@ -48,6 +48,20 @@ function CeHubModule.run()
     Scheduler:runTasks()
 end
 
+local publisherAliases = {
+    modules  = "ce.hub.data.modules.ModulesStatePublisher",
+    version  = "ce.hub.data.version.VersionStatePublisher",
+    runtime  = "ce.hub.data.runtime.RuntimeStatePublisher",
+    frameData = "ce.hub.data.framedata.FrameDataStatePublisher",
+    slots    = "ce.hub.data.slots.DataSlotsStatePublisher",
+    signal   = "ce.hub.data.signals.SignalStatePublisher",
+    switch   = "ce.hub.data.switches.SwitchStatePublisher",
+    structure = "ce.hub.data.structures.StructureStatePublisher",
+    time     = "ce.hub.data.time.TimeStatePublisher",
+    weather  = "ce.hub.data.weather.WeatherStatePublisher",
+    trains   = "ce.hub.data.trains.TrainsAndTracksStatePublisher"
+}
+
 function CeHubModule.setOptions(options)
     options = options or {}
 
@@ -60,6 +74,17 @@ function CeHubModule.setOptions(options)
     end
     if options.serverCeTypes then
         require("ce.hub.publish.ServerEventDispatcher").setAllowedHubCeTypes(options.serverCeTypes)
+    end
+    if options.publisherOptions then
+        for alias, pubOptions in pairs(options.publisherOptions) do
+            local modulePath = publisherAliases[alias]
+            if modulePath then
+                local pub = require(modulePath)
+                for k, v in pairs(pubOptions) do
+                    pub.options[k] = v
+                end
+            end
+        end
     end
 
     return CeHubModule
