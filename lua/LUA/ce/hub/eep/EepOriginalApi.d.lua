@@ -1,6 +1,6 @@
 ---@meta
 
--- Automatisch erzeugt mit scripts/generate_eep_original_api.py aus Lua_manual.pdf
+-- Automatisch erzeugt mit scripts/generate_eep_original_api.py
 
 -- === EEPVer =======================================================================================================
 ---Liefert die Versionsnummer der installierten EEP-Version.
