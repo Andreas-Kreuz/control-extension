@@ -189,3 +189,26 @@ Aus dem Aufbau folgen diese Regeln für die Extraktion:
 5. Der weiße Beispielblock in Spalte 3 über `Parameter`, `Rückgabewerte` und `Voraussetzung` wird als zusammenhängende Zelle behandelt.
 6. `Zweck` wird aus dem linken und mittleren Tabellenbereich gelesen, nicht als Beispielcode.
 7. `Bemerkungen` wird als eigener Block mit eigener Farbe und eigener Feldlogik behandelt.
+
+## Schreibfehler-Aliase
+
+Das PDF enthält Funktionsnamen mit Schreibfehlern, die trotzdem in der EEP-API funktionieren.
+Der Generator erkennt solche Duplikate automatisch über Namensähnlichkeit (>= 85%) und
+dedupliziert sie. Die verworfenen Schreibfehler-Namen werden am Ende der generierten Datei
+als Aliase auf die kanonische Funktion ausgegeben:
+
+```lua
+EEPAuxiliaryTackSetTextureText = EEPAuxiliaryTrackSetTextureText  -- Tack vs Track
+```
+
+Bekannte Schreibfehler im Handbuch (Stand: EEP 18.1 Plugin 1):
+
+| Schreibfehler im Handbuch            | Kanonischer Name                      | Fehler       |
+|---------------------------------------|---------------------------------------|--------------|
+| `EEPAuxiliaryTackGetTextureText`      | `EEPAuxiliaryTrackGetTextureText`     | Tack / Track |
+| `EEPAuxiliaryTackSetTextureText`      | `EEPAuxiliaryTrackSetTextureText`     | Tack / Track |
+| `EEPTramTackGetTextureText`           | `EEPTramTrackGetTextureText`          | Tack / Track |
+| `EEPTramTackSetTextureText`           | `EEPTramTrackSetTextureText`          | Tack / Track |
+| `EEPGoodsSetAxisByNumer`              | `EEPGoodsSetAxisByNumber`             | Numer / Number |
+| `EEPSructureSetAxisByNumer`           | `EEPStructureSetAxisByNumber`         | Sructure + Numer |
+| `EEPStructureSetLightingColour`       | `EEPStructureSetLightningColour`      | Lighting / Lightning |

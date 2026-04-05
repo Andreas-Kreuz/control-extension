@@ -4102,3 +4102,28 @@ function EEPActivateCtrlDesk(ctrlDeskName) end
 -- Beispielaufrufe:
 --   EEPActivateCtrlDesk("Stellpult-Name")
 --   ok = EEPActivateCtrlDesk("Wildungen")
+
+-- === Bekannte Schreibfehler ======================================================================================
+-- Die folgenden Funktionsnamen sind Schreibfehler in der EEP-API,
+-- die aber trotzdem funktionieren.
+
+---@type fun(...): any
+EEPAuxiliaryTackGetTextureText = EEPAuxiliaryTrackGetTextureText
+
+---@type fun(...): any
+EEPAuxiliaryTackSetTextureText = EEPAuxiliaryTrackSetTextureText
+
+---@type fun(...): any
+EEPGoodsSetAxisByNumer = EEPGoodsSetAxisByNumber
+
+---@type fun(...): any
+EEPSructureSetAxisByNumer = EEPStructureSetAxisByNumber
+
+---@type fun(...): any
+EEPStructureSetLightingColour = EEPStructureSetLightningColour
+
+---@type fun(...): any
+EEPTramTackGetTextureText = EEPTramTrackGetTextureText
+
+---@type fun(...): any
+EEPTramTackSetTextureText = EEPTramTrackSetTextureText
