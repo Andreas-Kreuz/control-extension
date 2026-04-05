@@ -10,7 +10,6 @@ const pagesRoot = path.join(repoRoot, 'pages');
 const luaDocsSourceRoot = path.join(repoRoot, 'lua');
 const luaDocsTargetRoot = path.join(pagesRoot, 'lua');
 const stagedRootMarkdown = [
-  { source: 'AGENTS.md', target: 'AGENTS.md' },
   { source: 'project-docs/ARCHITECTURE.md', target: 'ARCHITECTURE.md' },
   { source: 'project-docs/CHANGELOG.md', target: 'CHANGELOG.md' },
   { source: 'CONTRIBUTING.md', target: 'CONTRIBUTING.md' },

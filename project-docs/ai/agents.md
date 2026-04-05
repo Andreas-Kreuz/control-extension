@@ -1,5 +1,10 @@
 # Control Extension AI Reference
 
+Project:
+
+- [overview.md](overview.md): what this project is — stack, layers, monorepo structure
+- [guides/commands.md](guides/commands.md): yarn commands — build, test, lint, format, dev
+
 Lua guides:
 
 - [guides/lua-runtime.md](guides/lua-runtime.md): pure Lua/EEP — runtime, EepOriginalApi, state, error handling, commands, testing
