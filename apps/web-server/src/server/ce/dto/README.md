@@ -63,7 +63,9 @@ ce/dto/
   signals/          SignalLuaDto         <- lua/LUA/ce/hub/data/signals/SignalDtoFactory.lua
                     WaitingOnSignalLuaDto
   data-slots/       DataSlotLuaDto       <- lua/LUA/ce/hub/data/slots/DataSlotDtoFactory.lua
-  structures/       StructureLuaDto      <- lua/LUA/ce/hub/data/structures/StructureDtoFactory.lua
+  structures/       StructureLuaDto      <- legacy combined structure DTO shape
+                    StructureStaticLuaDto <- lua/LUA/ce/hub/data/structures/StructureStaticDtoFactory.lua
+                    StructureDynamicLuaDto <- lua/LUA/ce/hub/data/structures/StructureDynamicDtoFactory.lua
   switches/         SwitchLuaDto         <- lua/LUA/ce/hub/data/switches/SwitchDtoFactory.lua
   time/             TimeLuaDto           <- lua/LUA/ce/hub/data/time/TimeDtoFactory.lua
   tracks/           TrackLuaDto          <- lua/LUA/ce/hub/data/tracks/TrackDtoFactory.lua

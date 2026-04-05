@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import {
   CeTypes,
   DynamicRoom,
+  StructureDynamicRoom,
   TrainDynamicRoom,
   RollingStockDynamicRoom,
 } from '@ce/web-shared';
@@ -20,6 +21,7 @@ const AppPage = lazy(() => import('../../components/AppPage'));
 const AppPageHeadline = lazy(() => import('../../components/AppPageHeadline'));
 
 const companionRooms: Record<string, DynamicRoom> = {
+  [CeTypes.HubStructureStatic]: StructureDynamicRoom,
   [CeTypes.HubTrainStatic]: TrainDynamicRoom,
   [CeTypes.HubRollingStockStatic]: RollingStockDynamicRoom,
 };

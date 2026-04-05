@@ -1,5 +1,6 @@
-// Legacy combined structure DTO retained for compatibility with older event fixtures.
-export interface StructureLuaDto {
+// Lua DtoFactory: lua/LUA/ce/hub/data/structures/StructureStaticDtoFactory.lua
+// Room: structures static
+export interface StructureStaticLuaDto {
   id: string;
   name: string;
   pos_x: number;
@@ -11,7 +12,4 @@ export interface StructureLuaDto {
   modelType: number;
   modelTypeText: string;
   tag: string;
-  light: boolean;
-  smoke: boolean;
-  fire: boolean;
 }

@@ -35,7 +35,7 @@ Wichtig:
 | `TimeStatePublisher`              | `lua/LUA/ce/hub/data/time/TimeStatePublisher.lua`               | `ListChanged` für `ce.hub.Time`; Rückgabe leer                                   |
 | `WeatherStatePublisher`           | `lua/LUA/ce/hub/data/weather/WeatherStatePublisher.lua`         | `ListChanged` für `ce.hub.Weather`; Rückgabe leer                                |
 | `DataSlotsStatePublisher`         | `lua/LUA/ce/hub/data/slots/DataSlotsStatePublisher.lua`         | `ListChanged` für `ce.hub.SaveSlot` und `ce.hub.FreeSlot`; Rückgabe leer         |
-| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`    | `ListChanged` für `ce.hub.Structure`; Rückgabe leer                              |
+| `StructureStatePublisher`         | `lua/LUA/ce/hub/data/structures/StructureStatePublisher.lua`    | `DataAdded`/`DataChanged` für `ce.hub.StructureStatic` und `ce.hub.StructureDynamic`; Rückgabe leer |
 | `TrainsAndTracksStatePublisher`   | `lua/LUA/ce/hub/data/trains/TrainsAndTracksStatePublisher.lua`  | indirekte Events für Züge, Rollmaterial, RollingStock-Nebenströme und Tracks     |
 | `TrafficLightModelStatePublisher` | `lua/LUA/ce/mods/road/data/TrafficLightModelStatePublisher.lua` | `ListChanged` für `ce.mods.road.SignalTypeDefinition`; Rückgabe leer             |
 | `RoadStatePublisher`              | `lua/LUA/ce/mods/road/data/RoadStatePublisher.lua`              | Events für Kreuzungsdaten; internes Datenobjekt wird derzeit nicht zurückgegeben |
@@ -55,7 +55,8 @@ Wichtig:
 | Wetter                              | `ce.hub.Weather`                        | `id`      |
 | Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
 | Freie Datenslots                    | `ce.hub.FreeSlot`                       | `id`      |
-| Strukturen                          | `ce.hub.Structure`                      | `id`      |
+| Strukturen, statisch                | `ce.hub.StructureStatic`                | `id`      |
+| Strukturen, dynamisch               | `ce.hub.StructureDynamic`               | `id`      |
 | Züge, statisch                      | `ce.hub.TrainStatic`                    | `id`      |
 | Züge, dynamisch                     | `ce.hub.TrainDynamic`                   | `id`      |
 | RollingStock, statisch              | `ce.hub.RollingStockStatic`             | `id`      |

@@ -15,6 +15,8 @@ export const CeTypes = {
   HubWaitingOnSignal: 'ce.hub.WaitingOnSignal',
   HubSwitch: 'ce.hub.Switch',
   HubStructure: 'ce.hub.Structure',
+  HubStructureStatic: 'ce.hub.StructureStatic',
+  HubStructureDynamic: 'ce.hub.StructureDynamic',
   HubTime: 'ce.hub.Time',
   HubTrainStatic: 'ce.hub.TrainStatic',
   HubTrainDynamic: 'ce.hub.TrainDynamic',

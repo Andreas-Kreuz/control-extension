@@ -6,7 +6,8 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
     before_each(function ()
         clearModule("ce.hub.data.structures.StructureStatePublisher")
         clearModule("ce.hub.data.structures.StructureDataCollector")
-        clearModule("ce.hub.data.structures.StructureDtoFactory")
+        clearModule("ce.hub.data.structures.StructureStaticDtoFactory")
+        clearModule("ce.hub.data.structures.StructureDynamicDtoFactory")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -87,7 +88,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
         assert.same({
                         ["#2"] = {
-                            ceType = "ce.hub.Structure",
+                            ceType = "ce.hub.StructureStatic",
                             id = "#2",
                             name = "#2",
                             pos_x = 1,
@@ -98,13 +99,10 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                             rot_z = 6,
                             modelType = 22,
                             modelTypeText = "Immobilie",
-                            tag = "shed",
-                            light = true,
-                            smoke = false,
-                            fire = false
+                            tag = "shed"
                         },
                         ["#3"] = {
-                            ceType = "ce.hub.Structure",
+                            ceType = "ce.hub.StructureStatic",
                             id = "#3",
                             name = "#3",
                             pos_x = 7,
@@ -115,17 +113,32 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                             rot_z = 12,
                             modelType = 23,
                             modelTypeText = "Landschaftselement/Fauna",
-                            tag = "tree",
+                            tag = "tree"
+                        }
+                    }, DataStore.getCeType("ce.hub.StructureStatic"))
+        assert.same({
+                        ["#2"] = {
+                            ceType = "ce.hub.StructureDynamic",
+                            id = "#2",
+                            light = true,
+                            smoke = false,
+                            fire = false
+                        },
+                        ["#3"] = {
+                            ceType = "ce.hub.StructureDynamic",
+                            id = "#3",
                             light = false,
                             smoke = false,
                             fire = false
                         }
-                    }, DataStore.getCeType("ce.hub.Structure"))
+                    }, DataStore.getCeType("ce.hub.StructureDynamic"))
 
         states["#2"].fire = true
+        states["#3"].tag = "tree-north"
         StructureStatePublisher.syncState()
 
-        assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
-        assert.equals("tree", DataStore.get("ce.hub.Structure", "#3").tag)
+        assert.is_true(DataStore.get("ce.hub.StructureDynamic", "#2").fire)
+        assert.equals("tree-north", DataStore.get("ce.hub.StructureStatic", "#3").tag)
+        assert.same(22, DataStore.get("ce.hub.StructureStatic", "#2").modelType)
     end)
 end)

@@ -67,6 +67,8 @@ export { SaveSlotRoom } from './rooms/DynamicRooms';
 export { ServerStatsRoom } from './rooms/DynamicRooms';
 export { SignalRoom } from './rooms/DynamicRooms';
 export { StructureRoom } from './rooms/DynamicRooms';
+export { StructureStaticRoom } from './rooms/DynamicRooms';
+export { StructureDynamicRoom } from './rooms/DynamicRooms';
 export { SwitchRoom } from './rooms/DynamicRooms';
 export { TimeRoom } from './rooms/DynamicRooms';
 export { TrackRoom } from './rooms/DynamicRooms';

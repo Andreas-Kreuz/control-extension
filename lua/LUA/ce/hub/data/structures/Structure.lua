@@ -1,7 +1,5 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...") end
 
--- Field update policies (see StructureDtoTypes.d.lua): all fields always
-
 ---@class Structure
 ---@field id string
 ---@field name string
@@ -17,9 +15,17 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...
 ---@field light boolean|nil
 ---@field smoke boolean|nil
 ---@field fire boolean|nil
----@field valuesUpdated boolean
+---@field staticValuesUpdated boolean
+---@field dynamicValuesUpdated boolean
 ---@field isInitialized boolean
 local Structure = {}
+
+Structure.options = {
+    fetchLight = true,
+    fetchSmoke = true,
+    fetchFire = true,
+    fetchTag = true
+}
 
 local EEPStructureGetLight = _G.EEPStructureGetLight or function() end
 local EEPStructureGetSmoke = _G.EEPStructureGetSmoke or function() end
@@ -45,57 +51,110 @@ local function round2(value)
     return value and tonumber(string.format("%.2f", value)) or 0
 end
 
+local function readStaticValues(name)
+    local _, modelType = EEPStructureGetModelType(name)
+    local _, pos_x, pos_y, pos_z = EEPStructureGetPosition(name)
+    local _, rot_x, rot_y, rot_z = EEPStructureGetRotation(name)
+
+    return {
+        modelType = modelType or 0,
+        modelTypeText = EEPStructureModelTypeText[modelType] or "",
+        pos_x = round2(pos_x),
+        pos_y = round2(pos_y),
+        pos_z = round2(pos_z),
+        rot_x = round2(rot_x),
+        rot_y = round2(rot_y),
+        rot_z = round2(rot_z)
+    }
+end
+
+local function readDynamicValues(structure)
+    local options = structure.options or Structure.options
+    local tag = structure.tag or ""
+    local light = structure.light
+    local smoke = structure.smoke
+    local fire = structure.fire
+
+    if options.fetchTag then
+        local _, fetchedTag = EEPStructureGetTagText(structure.name)
+        tag = fetchedTag or ""
+    end
+
+    if options.fetchLight then
+        local _, fetchedLight = EEPStructureGetLight(structure.name)
+        light = fetchedLight or false
+    end
+
+    if options.fetchSmoke then
+        local _, fetchedSmoke = EEPStructureGetSmoke(structure.name)
+        smoke = fetchedSmoke or false
+    end
+
+    if options.fetchFire then
+        local _, fetchedFire = EEPStructureGetFire(structure.name)
+        fire = fetchedFire or false
+    end
+
+    return {
+        tag = tag,
+        light = light,
+        smoke = smoke,
+        fire = fire
+    }
+end
+
 ---@param name string
 ---@return Structure
 function Structure:new(name)
-    local o = { id = name, name = name }
+    local o = {
+        id = name,
+        name = name,
+        light = false,
+        smoke = false,
+        fire = false,
+        tag = ""
+    }
     self.__index = self
     setmetatable(o, self)
-    local _, modelType = EEPStructureGetModelType(name)
-    o.modelType = modelType or 0
-    o.modelTypeText = EEPStructureModelTypeText[modelType] or ""
+
+    local staticValues = readStaticValues(name)
+    o.modelType = staticValues.modelType
+    o.modelTypeText = staticValues.modelTypeText
+    o.pos_x = staticValues.pos_x
+    o.pos_y = staticValues.pos_y
+    o.pos_z = staticValues.pos_z
+    o.rot_x = staticValues.rot_x
+    o.rot_y = staticValues.rot_y
+    o.rot_z = staticValues.rot_z
+
     o:refresh()
     return o
 end
 
 function Structure:refresh()
-    local _, light = EEPStructureGetLight(self.name)
-    local _, smoke = EEPStructureGetSmoke(self.name)
-    local _, fire = EEPStructureGetFire(self.name)
-    local _, pos_x, pos_y, pos_z = EEPStructureGetPosition(self.name)
-    local _, rot_x, rot_y, rot_z = EEPStructureGetRotation(self.name)
-    local _, tag = EEPStructureGetTagText(self.name)
+    local dynamicValues = readDynamicValues(self)
+    local staticChanged = not self.isInitialized
+        or dynamicValues.tag ~= (self.tag or "")
 
-    local px = round2(pos_x)
-    local py = round2(pos_y)
-    local pz = round2(pos_z)
-    local rx = round2(rot_x)
-    local ry = round2(rot_y)
-    local rz = round2(rot_z)
-    local tagStr = tag or ""
+    local dynamicChanged = not self.isInitialized
+        or dynamicValues.light ~= self.light
+        or dynamicValues.smoke ~= self.smoke
+        or dynamicValues.fire ~= self.fire
 
-    local changed = not self.isInitialized
-        or light ~= self.light
-        or smoke ~= self.smoke
-        or fire ~= self.fire
-        or px ~= self.pos_x or py ~= self.pos_y or pz ~= self.pos_z
-        or rx ~= self.rot_x or ry ~= self.rot_y or rz ~= self.rot_z
-        or tagStr ~= (self.tag or "")
+    self.staticValuesUpdated = staticChanged
+    self.dynamicValuesUpdated = dynamicChanged
 
-    if changed then
-        self.valuesUpdated = true
-        self.isInitialized = true
-        self.light = light
-        self.smoke = smoke
-        self.fire = fire
-        self.pos_x = px
-        self.pos_y = py
-        self.pos_z = pz
-        self.rot_x = rx
-        self.rot_y = ry
-        self.rot_z = rz
-        self.tag = tagStr
+    if staticChanged then
+        self.tag = dynamicValues.tag
     end
+
+    if dynamicChanged then
+        self.light = dynamicValues.light
+        self.smoke = dynamicValues.smoke
+        self.fire = dynamicValues.fire
+    end
+
+    self.isInitialized = true
 end
 
 return Structure

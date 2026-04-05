@@ -109,6 +109,96 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
   assert.deepEqual(resetStatistics.initialization.moduleInitTimes, []);
 }
 
+function testStructureDtosMergeStaticAndDynamicCeTypes(): void {
+  const selector = new EepDataSelector();
+
+  selector.updateFromState({
+    eventCounter: 1,
+    ceTypes: {
+      [CeTypes.HubStructureStatic]: {
+        '#7': {
+          id: '#7',
+          name: '#7',
+          pos_x: 1,
+          pos_y: 2,
+          pos_z: 3,
+          rot_x: 4,
+          rot_y: 5,
+          rot_z: 6,
+          modelType: 22,
+          modelTypeText: 'Immobilie',
+          tag: 'Depot',
+        },
+      },
+      [CeTypes.HubStructureDynamic]: {
+        '#7': {
+          id: '#7',
+          light: true,
+          smoke: false,
+          fire: true,
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(selector.getStructures(), {
+    '#7': {
+      id: '#7',
+      name: '#7',
+      pos_x: 1,
+      pos_y: 2,
+      pos_z: 3,
+      rot_x: 4,
+      rot_y: 5,
+      rot_z: 6,
+      modelType: 22,
+      modelTypeText: 'Immobilie',
+      tag: 'Depot',
+      light: true,
+      smoke: false,
+      fire: true,
+    },
+  });
+}
+
+function testStructureDtosRemainStableWhenOnlyOneSplitSideIsPresent(): void {
+  const selector = new EepDataSelector();
+
+  selector.updateFromState({
+    eventCounter: 1,
+    ceTypes: {
+      [CeTypes.HubStructureDynamic]: {
+        '#8': {
+          id: '#8',
+          tag: 'Tree',
+          light: false,
+          smoke: true,
+          fire: false,
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(selector.getStructures(), {
+    '#8': {
+      id: '#8',
+      name: '#8',
+      pos_x: 0,
+      pos_y: 0,
+      pos_z: 0,
+      rot_x: 0,
+      rot_y: 0,
+      rot_z: 0,
+      modelType: 0,
+      modelTypeText: '',
+      tag: '',
+      light: false,
+      smoke: true,
+      fire: false,
+    },
+  });
+}
+
 export async function run(): Promise<void> {
   await runTest(
     'EepDataSelector caches only changed runtime statistics samples and keeps the last ten',
@@ -118,6 +208,11 @@ export async function run(): Promise<void> {
     'EepDataSelector keeps initialization statistics separate and resets them without runtime data',
     testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRuntime,
   );
+  await runTest('EepDataSelector merges structure static and dynamic ceTypes', testStructureDtosMergeStaticAndDynamicCeTypes);
+  await runTest(
+    'EepDataSelector keeps merged structures stable when only one split ceType is present',
+    testStructureDtosRemainStableWhenOnlyOneSplitSideIsPresent,
+  );
 }
 
 if (require.main === module) {
@@ -126,4 +221,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-
