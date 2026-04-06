@@ -171,5 +171,6 @@
       "args": ["-NoExit", "/c", "chcp.com 65001"]
     }
   },
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "stylua.targetReleaseVersion": "latest"
 }

@@ -10,6 +10,7 @@ import {
 
 export class RollingStockSelector {
   private lastState: Record<string, unknown> | undefined;
+  private rollingStockEntryMap = new Map<string, Record<string, unknown>>();
   private allRollingStock = new Map<string, RollingStockStaticDto>();
   private trainRollingStock = new Map<string, Map<number, RollingStockStaticDto>>();
   private dynamicRollingStock = new Map<string, RollingStockDynamicDto>();
@@ -22,6 +23,7 @@ export class RollingStockSelector {
       return;
     }
 
+    this.rollingStockEntryMap.clear();
     this.allRollingStock.clear();
     this.trainRollingStock.clear();
     this.dynamicRollingStock.clear();
@@ -35,6 +37,8 @@ export class RollingStockSelector {
 
     const rollingStockDict = rollingStockState as Record<string, RollingStockLuaDto>;
     Object.values(rollingStockDict).forEach((rsDto) => {
+      this.rollingStockEntryMap.set(rsDto.id, rsDto as unknown as Record<string, unknown>);
+
       const rollingStock: RollingStockStaticDto = {
         id: rsDto.id,
         name: rsDto.name ?? rsDto.id,
@@ -98,6 +102,10 @@ export class RollingStockSelector {
 
   getRollingStockDynamic(id: string): RollingStockDynamicDto | undefined {
     return this.dynamicRollingStock.get(id);
+  }
+
+  getRollingStockEntry(id: string): Record<string, unknown> | undefined {
+    return this.rollingStockEntryMap.get(id);
   }
 
   rollingStockListOfTrain(trainId: string): RollingStockStaticDto[] {

@@ -86,6 +86,7 @@ export { RollingStockStaticRoom } from './rooms/DynamicRooms';
 export { RollingStockDynamicRoom } from './rooms/DynamicRooms';
 export { RollingStockTexturesRoom } from './rooms/DynamicRooms';
 export { RollingStockRotationRoom } from './rooms/DynamicRooms';
+export { detailRoomForCeType } from './rooms/DynamicRooms';
 
 export type { ApprovePairingClientPayload } from './PairingEvent';
 export type { PairingStatusPayload } from './PairingEvent';

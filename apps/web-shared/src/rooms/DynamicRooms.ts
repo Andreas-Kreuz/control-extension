@@ -35,6 +35,15 @@ const IntersectionLaneRoom = new DynamicRoom(CeTypes.RoadIntersectionLane);
 const IntersectionSwitchingRoom = new DynamicRoom(CeTypes.RoadIntersectionSwitching);
 const IntersectionTrafficLightRoom = new DynamicRoom(CeTypes.RoadIntersectionTrafficLight);
 const TrafficLightModelRoom = new DynamicRoom(CeTypes.RoadSignalTypeDefinition);
+const DetailRoomByCeType: Partial<Record<string, DynamicRoom>> = {
+  [CeTypes.HubTrain]: new DynamicRoom(CeTypes.HubTrain),
+  [CeTypes.HubRollingStock]: new DynamicRoom(CeTypes.HubRollingStock),
+  [CeTypes.HubStructure]: new DynamicRoom(CeTypes.HubStructure),
+};
+
+function detailRoomForCeType(ceType: string): DynamicRoom | undefined {
+  return DetailRoomByCeType[ceType];
+}
 
 export { ApiDataRoom };
 export { ApiEntriesRoom };
@@ -69,3 +78,4 @@ export { IntersectionLaneRoom };
 export { IntersectionSwitchingRoom };
 export { IntersectionTrafficLightRoom };
 export { TrafficLightModelRoom };
+export { detailRoomForCeType };

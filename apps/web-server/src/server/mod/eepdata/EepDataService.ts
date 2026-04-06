@@ -64,7 +64,10 @@ export default class EepDataService implements DynamicRoomService {
     this.roomDataProviders.push({
       roomType: StructureRoom,
       id: 'StructureRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getStructures()),
+      jsonCreator: (room: string) => {
+        const structureId = StructureRoom.idOfRoom(room);
+        return JSON.stringify(this.selector.getStructure(structureId) ?? null);
+      },
     });
     this.roomDataProviders.push({
       roomType: TrackRoom,
@@ -86,4 +89,3 @@ export default class EepDataService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
-

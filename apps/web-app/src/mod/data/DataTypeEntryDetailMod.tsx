@@ -7,6 +7,8 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import { detailRoomForCeType } from '@ce/web-shared';
+import useDynamicEntry from './useDynamicEntry';
 import useTypeEntries from './useTypeEntries';
 
 const AppPage = lazy(() => import('../../components/AppPage'));
@@ -20,8 +22,9 @@ function formatValue(value: unknown): string {
 function DataTypeEntryDetailMod() {
   const { ceType = '', entryId = '' } = useParams<{ ceType: string; entryId: string }>();
   const entriesMap = useTypeEntries(ceType);
+  const dynamicEntry = useDynamicEntry(detailRoomForCeType(ceType), entryId);
 
-  const entry = entriesMap[entryId];
+  const entry = dynamicEntry ?? entriesMap[entryId];
 
   const fields = useMemo(() => {
     if (!entry) return [];

@@ -6,6 +6,7 @@ import { calcTrainType, CeTypes, TrainDynamicDto, TrainListDto, TrainStaticDto, 
 export class TrainSelector {
   private lastState: Record<string, unknown> | undefined;
   private rollingStockState: Record<string, unknown> | undefined;
+  private trainEntryMap = new Map<string, Record<string, unknown>>();
   private trainMap = new Map<string, TrainStaticDto>();
   private trainListMap = new Map<string, TrainListDto>();
   private trainDynamicMap = new Map<string, TrainDynamicDto>();
@@ -20,6 +21,7 @@ export class TrainSelector {
     }
 
     this.rollingStockSelector.updateFromState(state);
+    this.trainEntryMap.clear();
     this.trainMap.clear();
     this.trainListMap.clear();
     this.trainDynamicMap.clear();
@@ -32,6 +34,8 @@ export class TrainSelector {
 
     const trainDict = nextTrainState as Record<string, TrainLuaDto>;
     Object.values(trainDict).forEach((trainDto) => {
+      this.trainEntryMap.set(trainDto.id, trainDto as unknown as Record<string, unknown>);
+
       const rollingStock = this.rollingStockSelector.rollingStockListOfTrain(trainDto.id);
       const trainType: TrainType = this.getTrainType(trainDto);
       const movesForward = trainDto.movesForward ?? true;
@@ -87,6 +91,10 @@ export class TrainSelector {
 
   getTrainDynamic(id: string): TrainDynamicDto | undefined {
     return this.trainDynamicMap.get(id);
+  }
+
+  getTrainEntry(id: string): Record<string, unknown> | undefined {
+    return this.trainEntryMap.get(id);
   }
 
   getAllTrains(): Record<string, TrainStaticDto> {

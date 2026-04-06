@@ -281,6 +281,7 @@ export default class EepDataSelector {
   getWaitingOnSignals = (): Record<string, WaitingOnSignalDto> => this.waitingOnSignals;
   getSwitches = (): Record<string, SwitchDto> => this.switches;
   getStructures = (): Record<string, StructureDto> => this.structures;
+  getStructure = (id: string): StructureDto | undefined => this.structures[id];
   getTracksForRoom = (trackType: string): Record<string, TrackDto> => this.tracks[trackType] ?? {};
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);
 }

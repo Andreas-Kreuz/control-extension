@@ -7,6 +7,7 @@ import EepService from '../../eep/service/EepService';
 import { State } from '../../eep/server-data/EepDataStore';
 import {
   CeTypes,
+  DynamicRoom,
   RollingStockDynamicRoom,
   RollingStockStaticRoom,
   RollingStockTexturesRoom,
@@ -21,6 +22,8 @@ import { Server, Socket } from 'socket.io';
 const jsonInterestTtlMs = 5000;
 const jsonDataTimeoutMs = 1000;
 const waitForDynamicDataPollMs = 25;
+const TrainEntryRoom = new DynamicRoom(CeTypes.HubTrain);
+const RollingStockEntryRoom = new DynamicRoom(CeTypes.HubRollingStock);
 
 function roomToken(socket: Socket, roomName: string): string {
   return 'socket:' + socket.id + '|room:' + roomName;
@@ -65,6 +68,14 @@ export default class TrainUpdateService implements DynamicRoomService {
       },
     });
     this.roomDataProviders.push({
+      roomType: TrainEntryRoom,
+      id: 'TrainEntryRoom',
+      jsonCreator: (room: string): string => {
+        const trainId = TrainEntryRoom.idOfRoom(room);
+        return JSON.stringify(this.trainSelector.getTrainEntry(trainId) ?? null);
+      },
+    });
+    this.roomDataProviders.push({
       roomType: RollingStockStaticRoom,
       id: 'RollingStockStaticRoom',
       jsonCreator: (room: string): string => {
@@ -78,6 +89,14 @@ export default class TrainUpdateService implements DynamicRoomService {
       jsonCreator: (room: string): string => {
         const rollingStockId = RollingStockDynamicRoom.idOfRoom(room);
         return JSON.stringify(this.rollingStockSelector.getRollingStockDynamic(rollingStockId) ?? null);
+      },
+    });
+    this.roomDataProviders.push({
+      roomType: RollingStockEntryRoom,
+      id: 'RollingStockEntryRoom',
+      jsonCreator: (room: string): string => {
+        const rollingStockId = RollingStockEntryRoom.idOfRoom(room);
+        return JSON.stringify(this.rollingStockSelector.getRollingStockEntry(rollingStockId) ?? null);
       },
     });
     this.roomDataProviders.push({
@@ -108,20 +127,29 @@ export default class TrainUpdateService implements DynamicRoomService {
   getDataProviders = () => this.roomDataProviders;
 
   onJoinRoom(socket: Socket, roomName: string): void {
-    if (TrainDynamicRoom.matchesRoom(roomName)) {
-      const trainId = TrainDynamicRoom.idOfRoom(roomName);
+    if (TrainDynamicRoom.matchesRoom(roomName) || TrainEntryRoom.matchesRoom(roomName)) {
+      const trainId = TrainDynamicRoom.matchesRoom(roomName)
+        ? TrainDynamicRoom.idOfRoom(roomName)
+        : TrainEntryRoom.idOfRoom(roomName);
       this.retainSocketRoomInterest(socket, roomName, CeTypes.HubTrain, trainId);
       return;
     }
 
-    if (RollingStockDynamicRoom.matchesRoom(roomName)) {
-      const rollingStockId = RollingStockDynamicRoom.idOfRoom(roomName);
+    if (RollingStockDynamicRoom.matchesRoom(roomName) || RollingStockEntryRoom.matchesRoom(roomName)) {
+      const rollingStockId = RollingStockDynamicRoom.matchesRoom(roomName)
+        ? RollingStockDynamicRoom.idOfRoom(roomName)
+        : RollingStockEntryRoom.idOfRoom(roomName);
       this.retainSocketRoomInterest(socket, roomName, CeTypes.HubRollingStock, rollingStockId);
     }
   }
 
   onLeaveRoom(socket: Socket, roomName: string): void {
-    if (TrainDynamicRoom.matchesRoom(roomName) || RollingStockDynamicRoom.matchesRoom(roomName)) {
+    if (
+      TrainDynamicRoom.matchesRoom(roomName) ||
+      TrainEntryRoom.matchesRoom(roomName) ||
+      RollingStockDynamicRoom.matchesRoom(roomName) ||
+      RollingStockEntryRoom.matchesRoom(roomName)
+    ) {
       this.releaseSocketRoomInterest(socket, roomName);
     }
   }
