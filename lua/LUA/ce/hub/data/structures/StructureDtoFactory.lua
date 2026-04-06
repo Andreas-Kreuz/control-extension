@@ -7,7 +7,13 @@ local StructureDtoFactory = {}
 local CE_TYPE = HubCeTypes.Structure
 local KEY_ID = "id"
 
-local function toFullDto(structure)
+local placeHolders = {
+    light = false,
+    smoke = false,
+    fire = false,
+}
+
+local function toFullDto(structure, isSelected)
     return {
         ceType = CE_TYPE,
         id = structure.id,
@@ -21,9 +27,9 @@ local function toFullDto(structure)
         modelType = structure.modelType,
         modelTypeText = structure.modelTypeText,
         tag = structure:getTag(),
-        light = structure:getLight(),
-        smoke = structure:getSmoke(),
-        fire = structure:getFire()
+        light = isSelected and structure:getLight() or placeHolders.light,
+        smoke = isSelected and structure:getSmoke() or placeHolders.smoke,
+        fire = isSelected and structure:getFire() or placeHolders.fire
     }
 end
 
@@ -34,7 +40,7 @@ local fieldGetters = {
     fire = function(s) return s:getFire() end,
 }
 
-local function toPatchDto(structure, dirtyFields)
+local function toPatchDto(structure, dirtyFields, isSelected)
     local dto = {
         ceType = CE_TYPE,
         id = structure.id,
@@ -42,19 +48,25 @@ local function toPatchDto(structure, dirtyFields)
     for field in pairs(dirtyFields) do
         local getter = fieldGetters[field]
         if getter then
-            dto[field] = getter(structure)
+            if placeHolders[field] ~= nil then
+                dto[field] = isSelected and getter(structure) or placeHolders[field]
+            else
+                dto[field] = getter(structure)
+            end
         end
     end
     return dto
 end
 
-function StructureDtoFactory.createFullDto(structure)
-    local dto = toFullDto(structure)
+function StructureDtoFactory.createFullDto(structure, isSelected)
+    if isSelected == nil then isSelected = true end
+    local dto = toFullDto(structure, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function StructureDtoFactory.createPatchDto(structure, dirtyFields)
-    local dto = toPatchDto(structure, dirtyFields)
+function StructureDtoFactory.createPatchDto(structure, dirtyFields, isSelected)
+    if isSelected == nil then isSelected = true end
+    local dto = toPatchDto(structure, dirtyFields, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 

@@ -6,10 +6,8 @@ const ApiEntriesRoom = new DynamicRoom(CeTypes.ServerApiEntries);
 const ServerStatsRoom = new DynamicRoom(CeTypes.ServerStats);
 const RuntimeStatisticsRoom = new DynamicRoom(CeTypes.ServerRuntimeStatistics);
 const TrainListRoom = new DynamicRoom('TrainList');
-const TrainStaticRoom = new DynamicRoom('TrainStatic');
-const TrainDynamicRoom = new DynamicRoom('TrainDynamic');
-const RollingStockStaticRoom = new DynamicRoom('RollingStockStatic');
-const RollingStockDynamicRoom = new DynamicRoom('RollingStockDynamic');
+const TrainRoom = new DynamicRoom(CeTypes.HubTrain);
+const RollingStockRoom = new DynamicRoom(CeTypes.HubRollingStock);
 const TransitLineListRoom = new DynamicRoom('Transit List of Lines');
 const TransitLineDetailsRoom = new DynamicRoom('Transit Details of Line');
 const TransitStationListRoom = new DynamicRoom('Transit List of Stations');
@@ -36,9 +34,9 @@ const IntersectionSwitchingRoom = new DynamicRoom(CeTypes.RoadIntersectionSwitch
 const IntersectionTrafficLightRoom = new DynamicRoom(CeTypes.RoadIntersectionTrafficLight);
 const TrafficLightModelRoom = new DynamicRoom(CeTypes.RoadSignalTypeDefinition);
 const DetailRoomByCeType: Partial<Record<string, DynamicRoom>> = {
-  [CeTypes.HubTrain]: new DynamicRoom(CeTypes.HubTrain),
-  [CeTypes.HubRollingStock]: new DynamicRoom(CeTypes.HubRollingStock),
-  [CeTypes.HubStructure]: new DynamicRoom(CeTypes.HubStructure),
+  [CeTypes.HubTrain]: TrainRoom,
+  [CeTypes.HubRollingStock]: RollingStockRoom,
+  [CeTypes.HubStructure]: StructureRoom,
 };
 
 function detailRoomForCeType(ceType: string): DynamicRoom | undefined {
@@ -50,8 +48,7 @@ export { ApiEntriesRoom };
 export { ServerStatsRoom };
 export { RuntimeStatisticsRoom };
 export { TrainListRoom };
-export { TrainStaticRoom };
-export { TrainDynamicRoom };
+export { TrainRoom };
 export { TransitLineListRoom };
 export { TransitLineDetailsRoom };
 export { TransitStationListRoom };
@@ -68,8 +65,7 @@ export { SignalRoom };
 export { WaitingOnSignalRoom };
 export { SwitchRoom };
 export { StructureRoom };
-export { RollingStockStaticRoom };
-export { RollingStockDynamicRoom };
+export { RollingStockRoom };
 export { RollingStockTexturesRoom };
 export { RollingStockRotationRoom };
 export { TrackRoom };

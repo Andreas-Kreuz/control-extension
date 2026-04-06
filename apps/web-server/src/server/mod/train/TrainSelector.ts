@@ -1,15 +1,13 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainLuaDto } from '../../ce/dto/trains/TrainLuaDto';
 import { RollingStockSelector } from './RollingStockSelector';
-import { calcTrainType, CeTypes, TrainDynamicDto, TrainListDto, TrainStaticDto, TrainType } from '@ce/web-shared';
+import { calcTrainType, CeTypes, TrainDto, TrainListDto, TrainType } from '@ce/web-shared';
 
 export class TrainSelector {
   private lastState: Record<string, unknown> | undefined;
   private rollingStockState: Record<string, unknown> | undefined;
-  private trainEntryMap = new Map<string, Record<string, unknown>>();
-  private trainMap = new Map<string, TrainStaticDto>();
+  private trainMap = new Map<string, TrainDto>();
   private trainListMap = new Map<string, TrainListDto>();
-  private trainDynamicMap = new Map<string, TrainDynamicDto>();
 
   constructor(private rollingStockSelector: RollingStockSelector) {}
 
@@ -21,10 +19,8 @@ export class TrainSelector {
     }
 
     this.rollingStockSelector.updateFromState(state);
-    this.trainEntryMap.clear();
     this.trainMap.clear();
     this.trainListMap.clear();
-    this.trainDynamicMap.clear();
 
     if (!nextTrainState) {
       this.lastState = nextTrainState;
@@ -34,8 +30,6 @@ export class TrainSelector {
 
     const trainDict = nextTrainState as Record<string, TrainLuaDto>;
     Object.values(trainDict).forEach((trainDto) => {
-      this.trainEntryMap.set(trainDto.id, trainDto as unknown as Record<string, unknown>);
-
       const rollingStock = this.rollingStockSelector.rollingStockListOfTrain(trainDto.id);
       const trainType: TrainType = this.getTrainType(trainDto);
       const movesForward = trainDto.movesForward ?? true;
@@ -56,23 +50,28 @@ export class TrainSelector {
       };
       this.trainListMap.set(trainListDto.id, trainListDto);
 
-      const train: TrainStaticDto = {
-        ...trainListDto,
-        length: trainDto.length ?? 0,
-        ...(trainDto.direction !== undefined ? { direction: trainDto.direction } : {}),
-      };
-      this.trainMap.set(train.id, train);
-
-      this.trainDynamicMap.set(trainDto.id, {
+      const train: TrainDto = {
         id: trainDto.id,
+        name: trainDto.name ?? trainDto.id,
+        route: trainDto.route ?? '',
+        rollingStockCount: trainDto.rollingStockCount ?? 0,
+        length: trainDto.length ?? 0,
         speed: trainDto.speed ?? 0,
         targetSpeed: trainDto.targetSpeed ?? 0,
         couplingFront: trainDto.couplingFront ?? 0,
         couplingRear: trainDto.couplingRear ?? 0,
         active: trainDto.active ?? false,
         inTrainyard: trainDto.inTrainyard ?? false,
-        ...(trainDto.trainyardId !== undefined && trainDto.trainyardId !== '' ? { trainyardId: Number(trainDto.trainyardId) } : {}),
-      });
+        movesForward,
+        ...(trainDto.line !== undefined ? { line: trainDto.line } : {}),
+        ...(trainDto.destination !== undefined ? { destination: trainDto.destination } : {}),
+        ...(trainDto.direction !== undefined ? { direction: trainDto.direction } : {}),
+        ...(trainDto.trackType !== undefined ? { trackType: trainDto.trackType } : {}),
+        ...(trainDto.trainyardId !== undefined && trainDto.trainyardId !== ''
+          ? { trainyardId: Number(trainDto.trainyardId) }
+          : {}),
+      };
+      this.trainMap.set(train.id, train);
     });
 
     this.lastState = nextTrainState;
@@ -85,19 +84,11 @@ export class TrainSelector {
       .sort((left, right) => left.id.localeCompare(right.id, 'de'));
   }
 
-  getTrain(id: string): TrainStaticDto | undefined {
+  getTrain(id: string): TrainDto | undefined {
     return this.trainMap.get(id);
   }
 
-  getTrainDynamic(id: string): TrainDynamicDto | undefined {
-    return this.trainDynamicMap.get(id);
-  }
-
-  getTrainEntry(id: string): Record<string, unknown> | undefined {
-    return this.trainEntryMap.get(id);
-  }
-
-  getAllTrains(): Record<string, TrainStaticDto> {
+  getAllTrains(): Record<string, TrainDto> {
     return Object.fromEntries(this.trainMap.entries());
   }
 

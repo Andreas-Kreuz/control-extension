@@ -31,7 +31,7 @@ local function toFullDto(train, isSubscribed)
     }
 end
 
-local ondemandFields = {
+local placeHolders = {
     speed = 0,
     targetSpeed = 0,
     couplingFront = 0,
@@ -68,8 +68,8 @@ local function toPatchDto(train, dirtyFields, isSubscribed)
     for field in pairs(dirtyFields) do
         local getter = fieldGetters[field]
         if getter then
-            if ondemandFields[field] ~= nil then
-                dto[field] = isSubscribed and getter(train) or ondemandFields[field]
+            if placeHolders[field] ~= nil then
+                dto[field] = isSubscribed and getter(train) or placeHolders[field]
             else
                 dto[field] = getter(train)
             end
@@ -95,7 +95,7 @@ function TrainDtoFactory.createOndemandPlaceholderPatch(train)
         ceType = CE_TYPE,
         id = train:getName(),
     }
-    for field, placeholder in pairs(ondemandFields) do
+    for field, placeholder in pairs(placeHolders) do
         dto[field] = placeholder
     end
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto

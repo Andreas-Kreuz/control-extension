@@ -2,18 +2,15 @@ import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { RollingStockLuaDto } from '../../ce/dto/rolling-stocks/RollingStockLuaDto';
 import {
   CeTypes,
-  RollingStockDynamicDto,
+  RollingStockDto,
   RollingStockRotationDto,
-  RollingStockStaticDto,
   RollingStockTexturesDto,
 } from '@ce/web-shared';
 
 export class RollingStockSelector {
   private lastState: Record<string, unknown> | undefined;
-  private rollingStockEntryMap = new Map<string, Record<string, unknown>>();
-  private allRollingStock = new Map<string, RollingStockStaticDto>();
-  private trainRollingStock = new Map<string, Map<number, RollingStockStaticDto>>();
-  private dynamicRollingStock = new Map<string, RollingStockDynamicDto>();
+  private allRollingStock = new Map<string, RollingStockDto>();
+  private trainRollingStock = new Map<string, Map<number, RollingStockDto>>();
   private rollingStockTexturesMap = new Map<string, RollingStockTexturesDto>();
   private rollingStockRotationMap = new Map<string, RollingStockRotationDto>();
 
@@ -23,10 +20,8 @@ export class RollingStockSelector {
       return;
     }
 
-    this.rollingStockEntryMap.clear();
     this.allRollingStock.clear();
     this.trainRollingStock.clear();
-    this.dynamicRollingStock.clear();
     this.rollingStockTexturesMap.clear();
     this.rollingStockRotationMap.clear();
 
@@ -37,9 +32,7 @@ export class RollingStockSelector {
 
     const rollingStockDict = rollingStockState as Record<string, RollingStockLuaDto>;
     Object.values(rollingStockDict).forEach((rsDto) => {
-      this.rollingStockEntryMap.set(rsDto.id, rsDto as unknown as Record<string, unknown>);
-
-      const rollingStock: RollingStockStaticDto = {
+      const rollingStock: RollingStockDto = {
         id: rsDto.id,
         name: rsDto.name ?? rsDto.id,
         trainName: rsDto.trainName ?? '',
@@ -55,14 +48,6 @@ export class RollingStockSelector {
         hookGlueMode: rsDto.hookGlueMode ?? 0,
         ...(rsDto.nr !== undefined ? { nr: rsDto.nr } : {}),
         ...(rsDto.trackType !== undefined ? { trackType: rsDto.trackType } : {}),
-      };
-      const trainRs = this.trainRollingStock.get(rollingStock.trainName) ?? new Map<number, RollingStockStaticDto>();
-      trainRs.set(rollingStock.positionInTrain, rollingStock);
-      this.trainRollingStock.set(rollingStock.trainName, trainRs);
-      this.allRollingStock.set(rollingStock.id, rollingStock);
-
-      this.dynamicRollingStock.set(rsDto.id, {
-        id: rsDto.id,
         trackSystem: rsDto.trackSystem ?? 0,
         trackId: rsDto.trackId ?? 0,
         trackDistance: rsDto.trackDistance ?? 0,
@@ -74,7 +59,15 @@ export class RollingStockSelector {
         orientationForward: rsDto.orientationForward ?? true,
         smoke: rsDto.smoke ?? 0,
         active: rsDto.active ?? false,
-      });
+        surfaceTexts: { ...(rsDto.surfaceTexts ?? {}) },
+        rotX: rsDto.rotX ?? 0,
+        rotY: rsDto.rotY ?? 0,
+        rotZ: rsDto.rotZ ?? 0,
+      };
+      const trainRs = this.trainRollingStock.get(rollingStock.trainName) ?? new Map<number, RollingStockDto>();
+      trainRs.set(rollingStock.positionInTrain, rollingStock);
+      this.trainRollingStock.set(rollingStock.trainName, trainRs);
+      this.allRollingStock.set(rollingStock.id, rollingStock);
 
       if (rsDto.surfaceTexts !== undefined) {
         this.rollingStockTexturesMap.set(rsDto.id, {
@@ -96,21 +89,13 @@ export class RollingStockSelector {
     this.lastState = rollingStockState;
   }
 
-  getRollingStock(id: string): RollingStockStaticDto | undefined {
+  getRollingStock(id: string): RollingStockDto | undefined {
     return this.allRollingStock.get(id);
   }
 
-  getRollingStockDynamic(id: string): RollingStockDynamicDto | undefined {
-    return this.dynamicRollingStock.get(id);
-  }
-
-  getRollingStockEntry(id: string): Record<string, unknown> | undefined {
-    return this.rollingStockEntryMap.get(id);
-  }
-
-  rollingStockListOfTrain(trainId: string): RollingStockStaticDto[] {
-    const rsList: RollingStockStaticDto[] = [];
-    const trainRollingStock = this.trainRollingStock.get(trainId) ?? new Map<number, RollingStockStaticDto>();
+  rollingStockListOfTrain(trainId: string): RollingStockDto[] {
+    const rsList: RollingStockDto[] = [];
+    const trainRollingStock = this.trainRollingStock.get(trainId) ?? new Map<number, RollingStockDto>();
     const sortedKeys = Array.from(trainRollingStock.keys()).sort((a, b) => a - b);
     for (const key of sortedKeys) {
       const rollingStock = trainRollingStock.get(key);
@@ -121,11 +106,11 @@ export class RollingStockSelector {
     return rsList;
   }
 
-  rollingStockInTrain(trainId: string, positionOfRollingStock: number): RollingStockStaticDto | undefined {
+  rollingStockInTrain(trainId: string, positionOfRollingStock: number): RollingStockDto | undefined {
     return this.trainRollingStock.get(trainId)?.get(positionOfRollingStock);
   }
 
-  getAllRollingStock(): Record<string, RollingStockStaticDto> {
+  getAllRollingStock(): Record<string, RollingStockDto> {
     return Object.fromEntries(this.allRollingStock.entries());
   }
 

@@ -3,7 +3,6 @@ import useTrainDynamic from './useTrainDynamic';
 import { TrainListDto } from '@ce/web-shared';
 import BadgeIcon from '@mui/icons-material/Badge';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import LabelIcon from '@mui/icons-material/Label';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RouteIcon from '@mui/icons-material/Route';
@@ -107,4 +106,3 @@ const TrainDetails = (props: { train: TrainListDto }) => {
 };
 
 export default TrainDetails;
-

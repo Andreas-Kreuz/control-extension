@@ -2,6 +2,8 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureStat
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local Structure = require("ce.hub.data.structures.Structure")
 local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
+local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
+local HubCeTypes = require("ce.hub.data.HubCeTypes")
 StructureStatePublisher = {}
 StructureStatePublisher.enabled = true
 local initialized = false
@@ -38,7 +40,8 @@ function StructureStatePublisher.initialize()
         if structureExists(name) then
             local structure = Structure:new(name, StructureStatePublisher.options)
             allStructures[name] = structure
-            DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure))
+            local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure, structure.id)
+            DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure, isSelected))
             structure:resetDirty()
         end
     end
@@ -54,7 +57,8 @@ function StructureStatePublisher.syncState()
     for _, structure in pairs(allStructures) do
         structure:refresh(StructureStatePublisher.options)
         if structure:hasDirtyFields() then
-            DataChangeBus.fireDataChanged(StructureDtoFactory.createPatchDto(structure, structure.dirtyFields))
+            local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure, structure.id)
+            DataChangeBus.fireDataChanged(StructureDtoFactory.createPatchDto(structure, structure.dirtyFields, isSelected))
             structure:resetDirty()
         end
     end

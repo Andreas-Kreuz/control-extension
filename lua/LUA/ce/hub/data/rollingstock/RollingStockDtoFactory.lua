@@ -14,7 +14,7 @@ local function copyTable(values)
 end
 
 -- ondemand fields use typed zero-value placeholders when isSubscribed is false
-local ondemandFields = {
+local placeHolders = {
     trackId = 0,
     trackDistance = 0,
     trackDirection = 0,
@@ -107,8 +107,8 @@ local function toPatchDto(stock, dirtyFields, isSubscribed)
     for field in pairs(dirtyFields) do
         local getter = fieldGetters[field]
         if getter then
-            if ondemandFields[field] ~= nil then
-                dto[field] = isSubscribed and getter(stock) or ondemandFields[field]
+            if placeHolders[field] ~= nil then
+                dto[field] = isSubscribed and getter(stock) or placeHolders[field]
             else
                 dto[field] = getter(stock)
             end
@@ -134,7 +134,7 @@ function RollingStockDtoFactory.createOndemandPlaceholderPatch(stock)
         ceType = CE_TYPE,
         id = stock.rollingStockName,
     }
-    for field, placeholder in pairs(ondemandFields) do
+    for field, placeholder in pairs(placeHolders) do
         dto[field] = placeholder
     end
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
