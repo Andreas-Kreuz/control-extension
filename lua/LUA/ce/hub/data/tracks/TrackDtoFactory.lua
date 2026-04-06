@@ -1,4 +1,4 @@
--- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
+﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
@@ -13,30 +13,36 @@ local TRACK_CE_TYPES = {
     tram = HubCeTypes.TramTrack
 }
 
+local function shouldInclude(fieldOptions, fieldName)
+    local field = fieldOptions and fieldOptions[fieldName] or nil
+    return field == nil or field.collect ~= false
+end
+
 local function ceTypeForTrackType(trackType)
     local ceType = TRACK_CE_TYPES[trackType]
     assert(ceType, "unknown trackType: " .. tostring(trackType))
     return ceType
 end
 
-local function toTrackDto(trackType, track)
-    return {
+local function toTrackDto(trackType, track, fieldOptions)
+    local dto = {
         ceType = ceTypeForTrackType(trackType),
         id = track.id,
-        reserved = track.reserved,
-        reservedByTrainName = track.reservedByTrainName
     }
+    if shouldInclude(fieldOptions, "reserved") then dto.reserved = track.reserved end
+    if shouldInclude(fieldOptions, "reservedByTrainName") then dto.reservedByTrainName = track.reservedByTrainName end
+    return dto
 end
 
-function TrackDtoFactory.createTrackDto(trackType, track)
-    local dto = toTrackDto(trackType, track)
+function TrackDtoFactory.createTrackDto(trackType, track, fieldOptions)
+    local dto = toTrackDto(trackType, track, fieldOptions)
     return dto.ceType, KEY_ID, dto[KEY_ID], dto
 end
 
-function TrackDtoFactory.createTrackDtoList(trackType, tracks)
+function TrackDtoFactory.createTrackDtoList(trackType, tracks, fieldOptions)
     local trackDtos = {}
     for trackId, track in pairs(tracks) do
-        local _, _, _, dto = TrackDtoFactory.createTrackDto(trackType, track)
+        local _, _, _, dto = TrackDtoFactory.createTrackDto(trackType, track, fieldOptions)
         trackDtos[trackId] = dto
     end
     return ceTypeForTrackType(trackType), KEY_ID, trackDtos

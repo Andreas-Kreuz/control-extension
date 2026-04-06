@@ -1,4 +1,4 @@
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+﻿local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
 local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
@@ -30,7 +30,7 @@ function RollingStockRegistry.rollingStockDisappeared(rollingStockName)
     DataChangeBus.fireDataRemoved(RollingStockDtoFactory.createRefDto(rollingStockName))
 end
 
-function RollingStockRegistry.fireChangeRollingStockEvents(ceTypeOptionsByAlias)
+function RollingStockRegistry.fireChangeRollingStockEvents(ceTypeOptionsByAlias, fieldOptions)
     local rsOptions = ceTypeOptionsByAlias and ceTypeOptionsByAlias["rollingStock"] or nil
     local mode = SyncPolicy.getMode(rsOptions, true)
 
@@ -40,7 +40,7 @@ function RollingStockRegistry.fireChangeRollingStockEvents(ceTypeOptionsByAlias)
         local isSubscribed = mode == "all" or (mode == "selected" and isSelected)
 
         if rs.needsFullSend or needsInitialSend then
-            DataChangeBus.fireDataChanged(RollingStockDtoFactory.createFullDto(rs, isSubscribed))
+            DataChangeBus.fireDataChanged(RollingStockDtoFactory.createFullDto(rs, isSubscribed, fieldOptions))
             rs.needsFullSend = false
             rs:resetDirty()
             if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.RollingStock, rs.id) end
@@ -48,7 +48,8 @@ function RollingStockRegistry.fireChangeRollingStockEvents(ceTypeOptionsByAlias)
             local shouldSend = mode == "all"
                 or (mode == "selected" and isSelected)
             if shouldSend then
-                DataChangeBus.fireDataChanged(RollingStockDtoFactory.createPatchDto(rs, rs.dirtyFields, isSubscribed))
+                DataChangeBus.fireDataChanged(RollingStockDtoFactory.createPatchDto(rs, rs.dirtyFields, isSubscribed,
+                                                                                    fieldOptions))
             end
             rs:resetDirty()
         end

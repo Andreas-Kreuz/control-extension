@@ -1,4 +1,4 @@
--- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
+﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
@@ -7,28 +7,45 @@ local TrainDtoFactory = {}
 local CE_TYPE = HubCeTypes.Train
 local KEY_ID = "id"
 
--- ondemand fields use typed zero-value placeholders when isSubscribed is false
-local function toFullDto(train, isSubscribed)
-    return {
+local function shouldInclude(fieldOptions, fieldName)
+    local field = fieldOptions and fieldOptions[fieldName] or nil
+    return field == nil or field.collect ~= false
+end
+
+local function toFullDto(train, isSubscribed, fieldOptions)
+    local dto = {
         ceType = CE_TYPE,
         id = train:getName(),
         name = train:getName(),
-        route = train:getRoute(),
-        rollingStockCount = train:getRollingStockCount(),
-        length = train:getLength(),
-        line = train:getLine(),
-        destination = train:getDestination(),
-        direction = train:getDirection(),
-        trackType = train:getTrackType(),
-        movesForward = train:getMovesForward(),
-        speed = isSubscribed and train:getSpeed() or 0,
-        targetSpeed = isSubscribed and train:getTargetSpeed() or 0,
-        couplingFront = isSubscribed and train:getCouplingFront() or 0,
-        couplingRear = isSubscribed and train:getCouplingRear() or 0,
-        active = isSubscribed and train:getActive() or false,
-        inTrainyard = isSubscribed and train:getInTrainyard() or false,
-        trainyardId = isSubscribed and train:getTrainyardId() or "",
     }
+    if shouldInclude(fieldOptions, "route") then dto.route = train:getRoute() end
+    if shouldInclude(fieldOptions, "rollingStockCount") then dto.rollingStockCount = train:getRollingStockCount() end
+    if shouldInclude(fieldOptions, "length") then dto.length = train:getLength() end
+    if shouldInclude(fieldOptions, "line") then dto.line = train:getLine() end
+    if shouldInclude(fieldOptions, "destination") then dto.destination = train:getDestination() end
+    if shouldInclude(fieldOptions, "direction") then dto.direction = train:getDirection() end
+    if shouldInclude(fieldOptions, "trackType") then dto.trackType = train:getTrackType() end
+    if shouldInclude(fieldOptions, "movesForward") then dto.movesForward = train:getMovesForward() end
+    if shouldInclude(fieldOptions, "speed") then dto.speed = isSubscribed and train:getSpeed() or 0 end
+    if shouldInclude(fieldOptions, "targetSpeed") then
+        dto.targetSpeed = isSubscribed and train:getTargetSpeed() or 0
+    end
+    if shouldInclude(fieldOptions, "couplingFront") then
+        dto.couplingFront = isSubscribed and train:getCouplingFront() or 0
+    end
+    if shouldInclude(fieldOptions, "couplingRear") then
+        dto.couplingRear = isSubscribed and train:getCouplingRear() or 0
+    end
+    if shouldInclude(fieldOptions, "active") then
+        dto.active = isSubscribed and train:getActive() or false
+    end
+    if shouldInclude(fieldOptions, "inTrainyard") then
+        dto.inTrainyard = isSubscribed and train:getInTrainyard() or false
+    end
+    if shouldInclude(fieldOptions, "trainyardId") then
+        dto.trainyardId = isSubscribed and train:getTrainyardId() or ""
+    end
+    return dto
 end
 
 local placeHolders = {
@@ -60,13 +77,13 @@ local fieldGetters = {
     trainyardId = function (t) return t:getTrainyardId() end,
 }
 
-local function toPatchDto(train, dirtyFields, isSubscribed)
+local function toPatchDto(train, dirtyFields, isSubscribed, fieldOptions)
     local dto = {
         ceType = CE_TYPE,
         id = train:getName(),
     }
     for field in pairs(dirtyFields) do
-        local getter = fieldGetters[field]
+        local getter = shouldInclude(fieldOptions, field) and fieldGetters[field] or nil
         if getter then
             if placeHolders[field] ~= nil then
                 dto[field] = isSubscribed and getter(train) or placeHolders[field]
@@ -78,15 +95,15 @@ local function toPatchDto(train, dirtyFields, isSubscribed)
     return dto
 end
 
-function TrainDtoFactory.createFullDto(train, isSubscribed)
+function TrainDtoFactory.createFullDto(train, isSubscribed, fieldOptions)
     if isSubscribed == nil then isSubscribed = true end
-    local dto = toFullDto(train, isSubscribed)
+    local dto = toFullDto(train, isSubscribed, fieldOptions)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function TrainDtoFactory.createPatchDto(train, dirtyFields, isSubscribed)
+function TrainDtoFactory.createPatchDto(train, dirtyFields, isSubscribed, fieldOptions)
     if isSubscribed == nil then isSubscribed = true end
-    local dto = toPatchDto(train, dirtyFields, isSubscribed)
+    local dto = toPatchDto(train, dirtyFields, isSubscribed, fieldOptions)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 

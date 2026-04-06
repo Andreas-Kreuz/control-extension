@@ -225,11 +225,31 @@ function RollingStock:getLength()
     return self.length
 end
 
+function RollingStock:setLength(length)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(length) == "number", "Need 'length' as number")
+    length = tonumber(string.format("%.2f", length)) or 0
+    local oldLength = self.length
+    self.length = length
+    if oldLength ~= length then markDirty(self, "length") end
+end
+
 --- Get the type of this rolling stock
 ---@return number type of this rolling stock
 function RollingStock:getModelType()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return self.modelType
+end
+
+function RollingStock:setModelType(modelType)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(modelType) == "number", "Need 'modelType' as number")
+    local oldModelType = self.modelType
+    local oldModelTypeText = self.modelTypeText
+    self.modelType = modelType
+    self.modelTypeText = EEPRollingstockModelTypeText[modelType] or ""
+    if oldModelType ~= modelType then markDirty(self, "modelType") end
+    if oldModelTypeText ~= self.modelTypeText then markDirty(self, "modelTypeText") end
 end
 
 --- Get the type of this rolling stock
@@ -246,11 +266,30 @@ function RollingStock:getTag()
     return self.tag
 end
 
+function RollingStock:setTag(tag)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(tag) == "string", "Need 'tag' as string")
+    local oldTag = self.tag
+    local oldNr = self:getWagonNr()
+    self.tag = tag
+    self.values = StorageUtility.parseTableFromString(tag)
+    if oldTag ~= tag then markDirty(self, "tag") end
+    if oldNr ~= self:getWagonNr() then markDirty(self, "nr") end
+end
+
 --- Get the propelled value of this rolling stock
 ---@return boolean propelled value of this rolling stock
 function RollingStock:getPropelled()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return self.propelled
+end
+
+function RollingStock:setPropelled(propelled)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(propelled) == "boolean", "Need 'propelled' as boolean")
+    local oldPropelled = self.propelled
+    self.propelled = propelled
+    if oldPropelled ~= propelled then markDirty(self, "propelled") end
 end
 
 function RollingStock:setOrientationForward(orientationForward)

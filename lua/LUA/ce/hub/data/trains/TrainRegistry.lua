@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainRegistry ...") end
+﻿if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainRegistry ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
@@ -59,7 +59,7 @@ function TrainRegistry.trainDisappeared(trainName)
     DataChangeBus.fireDataRemoved(TrainDtoFactory.createRefDto(trainName))
 end
 
-function TrainRegistry.fireChangeTrainEvents(ceTypeOptionsByAlias)
+function TrainRegistry.fireChangeTrainEvents(ceTypeOptionsByAlias, fieldOptions)
     local trainOptions = ceTypeOptionsByAlias and ceTypeOptionsByAlias["train"] or nil
     local mode = SyncPolicy.getMode(trainOptions, true)
 
@@ -68,18 +68,18 @@ function TrainRegistry.fireChangeTrainEvents(ceTypeOptionsByAlias)
         local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Train, train.id)
         local isSubscribed = mode == "all" or (mode == "selected" and isSelected)
 
-        -- Handle subscription transitions: send full DTO or placeholder patch
         if train.needsFullSend or needsInitialSend then
-            DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSubscribed))
+            DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSubscribed, fieldOptions))
             train.needsFullSend = false
             train:resetDirty()
             if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Train, train.id) end
         elseif train:hasDirtyFields() then
             local shouldSend = mode == "all"
                 or (mode == "selected" and isSelected)
-                or not train.dirtyFields.speed -- send non-ondemand dirty fields always
+                or not train.dirtyFields.speed
             if shouldSend then
-                DataChangeBus.fireDataChanged(TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSubscribed))
+                DataChangeBus.fireDataChanged(TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSubscribed,
+                                                                            fieldOptions))
             end
             train:resetDirty()
         end

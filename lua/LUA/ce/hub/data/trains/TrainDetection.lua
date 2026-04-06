@@ -1,27 +1,24 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDetection ...") end
+﻿if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDetection ...") end
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 local TrackDetection = require("ce.hub.data.tracks.TrackDetection")
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-local HubCeTypes = require("ce.hub.data.HubCeTypes")
-
 local TrainDetection = {}
 TrainDetection.debug = AkStartWithDebug or false
 
--- trackCollectors will dectect trains by using their RegisteredFunctions
 local trackTypes = { "auxiliary", "control", "road", "rail", "tram" }
----@type table<string, TrackDetection>
 local trackCollectors = {}
 do for _, trackType in ipairs(trackTypes) do trackCollectors[trackType] = TrackDetection:new(trackType) end end
 
----@type table<string, boolean>
 local movedTrainNames = {}
----@type table<string, boolean>
 local dirtyTrainNames = {}
+local initialized = false
+local currentSnapshot = nil
 
-local function isSelected(selectedCeTypes, ceType)
-    if not selectedCeTypes or next(selectedCeTypes) == nil then return true end
-    return selectedCeTypes[ceType] == true
+local function copySet(values)
+    local copy = {}
+    for key, value in pairs(values or {}) do copy[key] = value end
+    return copy
 end
 
 local function removeTrain(trainName)
@@ -32,59 +29,32 @@ local function removeTrain(trainName)
     end
 end
 
----Fills the trackinformation from a train
----@param train Train
----@param info TrainUpdateInfo
-local function fillTrackInfoFromTrain(train, info)
-    local firstRollingStock = TrainRegistry.rollingStockNameInTrain(train.name, 0)
-    local ok, trackId, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
-    assert(ok, "Rollingstock not found: " .. firstRollingStock)
-
-    local trackType = "control"
-    if trackTypeId == 1 then trackType = "rail" end
-    if trackTypeId == 2 then trackType = "road" end
-    if trackTypeId == 3 then trackType = "tram" end
-    if trackTypeId == 4 then trackType = "auxiliary" end
-
-    info.tracks = { [tostring(trackId)] = trackId }
-    info.trackType = trackType
-    if (TrainDetection.debug) then
-        print("[#TrainDetection] TRAIN DETECTED: " .. trackType .. " -> " .. trackTypeId)
-    end
-end
-
----This will register callbacks to get informed, e.g. if a train has been coupled or lost coupling
 function TrainDetection.registerForTrainDetection()
-    -- React to train changes from EEP
-    local _EEPOnTrainCoupling = EEPOnTrainCoupling or function (_, _, _) -- EEP 14 Plug-In 1
+    local _EEPOnTrainCoupling = EEPOnTrainCoupling or function (_, _, _)
     end
     EEPOnTrainCoupling = function (trainA, trainB, trainNew)
-        -- Mark these trains as dirty, i.e. refresh their data
         dirtyTrainNames[trainA] = true
         dirtyTrainNames[trainB] = true
         dirtyTrainNames[trainNew] = true
         if TrainDetection.debug then
             print(string.format("[#TrainDetection] %s and %s were coupled to %s", trainA, trainB, trainNew))
         end
-        -- Call the original function
         return _EEPOnTrainCoupling(trainA, trainB, trainNew)
     end
 
-    local _EEPOnTrainLooseCoupling = EEPOnTrainLooseCoupling or function (_, _, _) -- EEP 14 Plug-In 1
+    local _EEPOnTrainLooseCoupling = EEPOnTrainLooseCoupling or function (_, _, _)
     end
     EEPOnTrainLooseCoupling = function (trainA, trainB, trainOld)
-        -- Mark these trains as dirty, i.e. refresh their data
         dirtyTrainNames[trainA] = true
         dirtyTrainNames[trainB] = true
         dirtyTrainNames[trainOld] = true
         if TrainDetection.debug then
             print(string.format("[#TrainDetection] %s lost coupling and got to %s and %s", trainOld, trainA, trainB))
         end
-        -- Call the original function
         return _EEPOnTrainLooseCoupling(trainA, trainB, trainOld)
     end
 
-    local _EEPOnTrainExitTrainyard = EEPOnTrainExitTrainyard or function (_, _) -- EEP 14 Plug-In 1
+    local _EEPOnTrainExitTrainyard = EEPOnTrainExitTrainyard or function (_, _)
     end
     EEPOnTrainExitTrainyard = function (depotId, trainName)
         movedTrainNames[trainName] = true
@@ -92,145 +62,16 @@ function TrainDetection.registerForTrainDetection()
     end
 end
 
----Update all the given trains by their name
----@param allKnownTrains table<string, TrainUpdateInfo>
-function TrainDetection.refreshTrainInfos(allKnownTrains, selectedCeTypes)
-    assert(type(allKnownTrains) == "table", "Need allKnownTrains as table")
-
-    local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
-    local activeRollingStock = EEPRollingstockGetActive and EEPRollingstockGetActive() or ""
-    local texturesSelected = isSelected(selectedCeTypes, HubCeTypes.RollingStockTextures)
-    local rotationSelected = isSelected(selectedCeTypes, HubCeTypes.RollingStockRotation)
-
-    for trainName, info in pairs(allKnownTrains) do
-        if TrainDetection.debug then print(string.format("[#TrainDetection] updating %s", trainName)) end
-        ---@type Train
-        local train = TrainRegistry.forName(trainName)
-        if info.dirty or info.moved or info.created then
-            if info.dirty then TrainRegistry.initRollingStock(train) end
-
-            if not train:getTrackType() and not info.tracks or not info.trackType then
-                fillTrackInfoFromTrain(train, info)
-            end
-
-            local start1 = os.clock()
-            train:setSpeed(info.speed);
-            local _, targetSpeed = EEPGetTrainSpeed(train.name, true)
-            train:setTargetSpeed(targetSpeed or info.speed)
-            local couplingFrontOk, trainCouplingFront = false, nil
-            if EEPGetTrainCouplingFront then
-                couplingFrontOk, trainCouplingFront = EEPGetTrainCouplingFront(train.name)
-            end
-            if couplingFrontOk then train:setCouplingFront(trainCouplingFront) end
-            local couplingRearOk, trainCouplingRear = false, nil
-            if EEPGetTrainCouplingRear then
-                couplingRearOk, trainCouplingRear = EEPGetTrainCouplingRear(train.name)
-            end
-            if couplingRearOk then train:setCouplingRear(trainCouplingRear) end
-            train:setActive(activeTrain == train.name)
-            local inTrainyard, trainyardId = false, nil
-            if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(train.name) end
-            train:setTrainyard(inTrainyard == true, trainyardId)
-            train:setOnTrack(info.tracks)
-            train:setTrackType(info.trackType)
-            RuntimeMetrics.storeRunTime("updateTrain-dynamic+static", os.clock() - start1)
-
-            local start2 = os.clock()
-            -- set rollingStockData
-            for positionInTrain = 0, train:getRollingStockCount() - 1, 1 do
-                local rs = RollingStockRegistry.forName(TrainRegistry.rollingStockNameInTrain(train.name,
-                                                                                              positionInTrain))
-                if info.dirty then
-                    rs:setPositionInTrain(positionInTrain)
-                    rs:setTrainName(train.name)
-                    rs:setTrackType(train.trackType)
-                end
-                if info.dirty or info.moved then
-                    local _, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(
-                        rs.rollingStockName) -- EEP 14.2
-
-                    local rollingStockMoved = trackId ~= rs:getTrackId() or trackDistance ~= rs:getTrackDistance()
-                    rs:setTrack(trackId, trackDistance, trackDirection, trackSystem)
-
-                    if rollingStockMoved then
-                        local hasPos, PosX, PosY, PosZ = EEPRollingstockGetPosition(rs.rollingStockName) -- EEP 16.1
-                        local hasMileage, mileage = EEPRollingstockGetMileage(rs.rollingStockName)       -- EEP 16.1
-
-                        if hasPos then
-                            rs:setPosition(hasPos and tonumber(PosX) or -1, hasPos and tonumber(PosY) or -1,
-                                           hasPos and tonumber(PosZ) or -1)
-                        end
-                        if hasMileage then rs:setMileage(mileage) end
-                    end
-                end
-            end
-            RuntimeMetrics.storeRunTime("updateRollingStock", os.clock() - start2)
-        else
-            RuntimeMetrics.storeRunTime("updateTrain-skipped", 0)
-        end
-
-        local _, targetSpeed = EEPGetTrainSpeed(train.name, true)
-        train:setTargetSpeed(targetSpeed or info.speed)
-        local couplingFrontOk, trainCouplingFront = false, nil
-        if EEPGetTrainCouplingFront then couplingFrontOk, trainCouplingFront = EEPGetTrainCouplingFront(train.name) end
-        if couplingFrontOk then train:setCouplingFront(trainCouplingFront) end
-        local couplingRearOk, trainCouplingRear = false, nil
-        if EEPGetTrainCouplingRear then couplingRearOk, trainCouplingRear = EEPGetTrainCouplingRear(train.name) end
-        if couplingRearOk then train:setCouplingRear(trainCouplingRear) end
-        train:setActive(activeTrain == train.name)
-        local inTrainyard, trainyardId = false, nil
-        if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(train.name) end
-        train:setTrainyard(inTrainyard == true, trainyardId)
-
-        for positionInTrain = 0, train:getRollingStockCount() - 1, 1 do
-            local rsName = TrainRegistry.rollingStockNameInTrain(train.name, positionInTrain)
-            if rsName then
-                local rs = RollingStockRegistry.forName(rsName)
-                local orientationOk, orientationForward = false, nil
-                if EEPRollingstockGetOrientation then
-                    orientationOk, orientationForward = EEPRollingstockGetOrientation(rs.rollingStockName)
-                end
-                if orientationOk then rs:setOrientationForward(orientationForward == true) end
-                local smokeOk, smoke = false, nil
-                if EEPRollingstockGetSmoke then smokeOk, smoke = EEPRollingstockGetSmoke(rs.rollingStockName) end
-                if smokeOk then rs:setSmoke(smoke) end
-                local hookOk, hookStatus = false, nil
-                if EEPRollingstockGetHook then hookOk, hookStatus = EEPRollingstockGetHook(rs.rollingStockName) end
-                if hookOk then rs:setHookStatus(hookStatus) end
-                local hookGlueOk, hookGlueMode = false, nil
-                if EEPRollingstockGetHookGlue then
-                    hookGlueOk, hookGlueMode = EEPRollingstockGetHookGlue(rs.rollingStockName)
-                end
-                if hookGlueOk then rs:setHookGlueMode(hookGlueMode) end
-                rs:setActive(activeRollingStock == rs.rollingStockName)
-                if texturesSelected then rs:updateTextureTexts() end
-                if rotationSelected and EEPRollingstockGetRotation then
-                    local rotationOk, rotX, rotY, rotZ = EEPRollingstockGetRotation(rs.rollingStockName)
-                    if rotationOk then rs:setRotation(rotX, rotY, rotZ) end
-                end
-            end
-        end
-    end
-end
-
----Combine all information about given detected trains
----@param detected table<string, boolean> map of trainName -> boolean
----@param dirtyTrains table<string, boolean> map of trainName -> boolean
----@param movedTrains table<string, boolean> map of trainName -> boolean
----@param trainTracks table<string,table<string,table<string,number>>> map of trackType -> trainName -> trackId -> nr
----@return table<string, TrainUpdateInfo>
 function TrainDetection.trainInfosForAllTrains(detected, dirtyTrains, movedTrains, trainTracks)
     assert(type(detected) == "table", "Need detected as table")
     assert(type(dirtyTrains) == "table", "Need dirtyTrains as table")
     assert(type(movedTrains) == "table", "Need movedTrains as table")
     assert(type(trainTracks) == "table", "Need trainTracks as table")
 
-    ---@type table<string, TrainUpdateInfo>
     local currentTrainInfos = {}
     local _ = trainTracks
-    -- Check train speed and add train to moved or dirty list
     for trainName in pairs(detected) do
-        local trainOnMap, speed = EEPGetTrainSpeed(trainName) -- EEP 11.0
+        local trainOnMap, speed = EEPGetTrainSpeed(trainName)
         if trainOnMap then
             local train, created = TrainRegistry.forName(trainName)
             local dirty = created or (dirtyTrains[trainName] and true or false)
@@ -245,7 +86,6 @@ function TrainDetection.trainInfosForAllTrains(detected, dirtyTrains, movedTrain
         end
     end
 
-    -- Add tracktype and tracks to knownTrains
     for trackType, tt in pairs(trainTracks) do
         for trainName, tracks in pairs(tt) do
             local info = currentTrainInfos[trainName]
@@ -261,16 +101,20 @@ end
 
 TrainDetection.registerForTrainDetection()
 
----Called once for initialization
-function TrainDetection.initialize(selectedCeTypes)
-    -- init once
-    for _, trackDetection in pairs(trackCollectors) do trackDetection:initialize(selectedCeTypes) end
+function TrainDetection.initialize(selectedCeTypes, trackFieldOptions)
+    if initialized then return end
+    for _, trackDetection in pairs(trackCollectors) do trackDetection:initialize(selectedCeTypes, trackFieldOptions) end
+    initialized = true
 end
 
----Called after initialization and in each data detection cycle
-function TrainDetection.update(selectedCeTypes)
+function TrainDetection.getCurrentSnapshot()
+    return currentSnapshot
+end
+
+function TrainDetection.update(selectedCeTypes, trackFieldOptions)
+    if not initialized then TrainDetection.initialize(selectedCeTypes, trackFieldOptions) end
+
     local time = os.clock()
-    ---@type table<string, boolean>
     local dirty = dirtyTrainNames
     local moved = movedTrainNames
     local detected = {}
@@ -279,25 +123,25 @@ function TrainDetection.update(selectedCeTypes)
     for trainName in pairs(dirty) do detected[trainName] = true end
     for trainName in pairs(moved) do detected[trainName] = true end
     for trackType, trackDetection in pairs(trackCollectors) do
-        local trainsOnTracks = trackDetection:findTrainsOnTrack(selectedCeTypes)
+        local trainsOnTracks = trackDetection:findTrainsOnTrack(selectedCeTypes, trackFieldOptions)
         for trainName in pairs(trainsOnTracks) do detected[trainName] = true end
         trainTracks[trackType] = trainsOnTracks
     end
     RuntimeMetrics.storeRunTime("TrainDetection.findTrainsOnTrack", os.clock() - time)
 
-    -- Gather all information for the detected train names
     time = os.clock()
-    local allKnownTrains = TrainDetection.trainInfosForAllTrains(detected, dirty, moved, trainTracks);
+    local allKnownTrains = TrainDetection.trainInfosForAllTrains(detected, dirty, moved, trainTracks)
     RuntimeMetrics.storeRunTime("TrainDetection.trainInfosForAllTrains", os.clock() - time)
 
-    -- Update all known trains by their information
-    time = os.clock()
-    TrainDetection.refreshTrainInfos(allKnownTrains, selectedCeTypes);
-    RuntimeMetrics.storeRunTime("TrainDetection.updateKnownTrains", os.clock() - time)
+    currentSnapshot = {
+        selectedCeTypes = copySet(selectedCeTypes),
+        trainTracks = trainTracks,
+        allKnownTrains = allKnownTrains,
+    }
 
-    -- Wipe all moved and dirty trains before for the next update
     dirtyTrainNames = {}
     movedTrainNames = {}
+    return currentSnapshot
 end
 
 return TrainDetection

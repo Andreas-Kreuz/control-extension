@@ -1,4 +1,4 @@
-insulate("CeHubModule", function ()
+﻿insulate("CeHubModule", function ()
     local function clearModule(name)
         package.loaded[name] = nil
     end
@@ -12,6 +12,10 @@ insulate("CeHubModule", function ()
         clearModule("ce.hub.StatePublisherRegistry")
         clearModule("ce.hub.bridge.HubBridgeConnector")
         clearModule("ce.hub.CeHubModule")
+        clearModule("ce.hub.data.trains.TracksStatePublisher")
+        clearModule("ce.hub.data.trains.TrainStatePublisher")
+        clearModule("ce.hub.data.trains.RollingStockStatePublisher")
+        clearModule("ce.hub.data.trains.TrainDetection")
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.databridge.IoInit")
         clearModule("ce.databridge.ServerExchangeCoordinator")
@@ -49,7 +53,9 @@ insulate("CeHubModule", function ()
         end
 
         assert.is_false(ServerExchangeCoordinator.checkServerStatus)
-        assert.is_true(publisherNames["ce.hub.data.trains.TrainsAndTracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.TracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.TrainStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.RollingStockStatePublisher"])
         assert.is_nil(publisherNames["ce.hub.data.time.TimeStatePublisher"])
     end)
 
@@ -77,7 +83,9 @@ insulate("CeHubModule", function ()
             publisherNames[statePublisher.name] = true
         end
 
-        assert.is_true(publisherNames["ce.hub.data.trains.TrainsAndTracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.TracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.TrainStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.RollingStockStatePublisher"])
         assert.is_true(publisherNames["ce.mods.road.data.RoadStatePublisher"])
         assert.is_nil(publisherNames["ce.hub.data.time.TimeStatePublisher"])
     end)

@@ -12,13 +12,13 @@ TrainsAndTracksStatePublisher.name = "ce.hub.data.trains.TrainsAndTracksStatePub
 
 TrainsAndTracksStatePublisher.options = {
     ceTypes = {
-        train = { ceType = "ce.hub.Train", mode = "all" },
-        rollingStock = { ceType = "ce.hub.RollingStock", mode = "all" },
-        auxiliaryTrack = { ceType = "ce.hub.AuxiliaryTrack", mode = "all" },
-        controlTrack = { ceType = "ce.hub.ControlTrack", mode = "all" },
-        roadTrack = { ceType = "ce.hub.RoadTrack", mode = "all" },
-        railTrack = { ceType = "ce.hub.RailTrack", mode = "all" },
-        tramTrack = { ceType = "ce.hub.TramTrack", mode = "all" }
+        train = { ceType = "ce.hub.Train", mode = "selected" },
+        rollingStock = { ceType = "ce.hub.RollingStock", mode = "selected" },
+        auxiliaryTrack = { ceType = "ce.hub.AuxiliaryTrack", mode = "selected" },
+        controlTrack = { ceType = "ce.hub.ControlTrack", mode = "selected" },
+        roadTrack = { ceType = "ce.hub.RoadTrack", mode = "selected" },
+        railTrack = { ceType = "ce.hub.RailTrack", mode = "selected" },
+        tramTrack = { ceType = "ce.hub.TramTrack", mode = "selected" }
     }
 }
 

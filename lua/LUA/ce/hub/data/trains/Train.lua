@@ -12,9 +12,9 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 local Train = {}
 
 -- Field update policies (see TrainStaticDtoTypes.d.lua / TrainDynamicDtoTypes.d.lua):
---   always   =>” real value always included in DTO
---   ondemand =>” real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
---   never    =>” always placeholder, never sent to clients
+--   always   => real value always included in DTO
+--   ondemand => real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
+--   never    => always placeholder, never sent to clients
 
 local function markDirty(train, fieldName)
     train.dirtyFields[fieldName] = true
@@ -97,6 +97,15 @@ function Train:getLength()
     return self.length
 end
 
+function Train:setLength(length)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(length) == "number", "Need 'length' as number")
+    length = tonumber(string.format("%.2f", length)) or 0
+    local oldLength = self.length
+    self.length = length
+    if oldLength ~= length then markDirty(self, "length") end
+end
+
 ---Adds or replaces a value to ALL rolling stock of the train
 ---@param key string
 ---@param value string
@@ -153,6 +162,14 @@ function Train:setRoute(routeName)
     if oldRoute ~= routeName then
         markDirty(self, "route")
     end
+end
+
+function Train:updateRoute(routeName)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(routeName) == "string", "Need 'route' as string")
+    local oldRoute = self.route
+    self.route = routeName
+    if oldRoute ~= routeName then markDirty(self, "route") end
 end
 
 --- Gets the trains route like used in EEP
@@ -341,6 +358,14 @@ end
 
 function Train:getDirection() return self:getValue(TagKeys.Train.direction) end
 
+function Train:updateDirection(direction)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(direction) == "string", "Need 'direction' as string")
+    local oldDirection = self:getDirection()
+    self.values[TagKeys.Train.direction] = direction
+    if oldDirection ~= direction then markDirty(self, "direction") end
+end
+
 function Train:setDestination(destination)
     assert(type(destination) == "string", "Need 'destination' as string")
     local oldDestination = self:getDestination()
@@ -353,6 +378,14 @@ end
 function Train:getDestination()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     return self:getValue(TagKeys.Train.destination)
+end
+
+function Train:updateDestination(destination)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(destination) == "string", "Need 'destination' as string")
+    local oldDestination = self:getDestination()
+    self.values[TagKeys.Train.destination] = destination
+    if oldDestination ~= destination then markDirty(self, "destination") end
 end
 
 function Train:setLine(line)
@@ -369,6 +402,15 @@ end
 function Train:getLine()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     return self:getValue(TagKeys.Train.line)
+end
+
+function Train:updateLine(line)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert("string" == type(line) or "number" == type(line), "Provide 'line' as 'string' or 'number'")
+    line = tostring(line)
+    local oldLine = self:getLine()
+    self.values[TagKeys.Train.line] = line
+    if oldLine ~= line then markDirty(self, "line") end
 end
 
 function Train:openDoors()

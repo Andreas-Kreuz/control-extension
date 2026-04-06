@@ -1,9 +1,18 @@
-describe("TrainDetection", function ()
+﻿describe("TrainDetection", function ()
     local debug = false
 
     local EepSimulator = require("ce.hub.eep.EepSimulator")
+    local TrainInfoUpdater = require("ce.hub.data.trains.TrainInfoUpdater")
+    local RollingStockInfoUpdater = require("ce.hub.data.rollingstock.RollingStockInfoUpdater")
     EepSimulator.debug = debug
     EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
+
+    local function refreshDetectedEntities(TrainDetection)
+        local snapshot = TrainDetection.update()
+        TrainInfoUpdater.refresh(snapshot.allKnownTrains, {})
+        RollingStockInfoUpdater.refresh(snapshot.allKnownTrains, {}, snapshot.selectedCeTypes)
+        return snapshot
+    end
 
     insulate("with #EepTrain1:", function ()
         local TrainDetection = require("ce.hub.data.trains.TrainDetection")
@@ -12,13 +21,13 @@ describe("TrainDetection", function ()
         TrainRegistry.debug = debug
 
         TrainDetection.initialize()
-        TrainDetection.update();
+        refreshDetectedEntities(TrainDetection)
 
         local haveTrainInitially = TrainRegistry.getAllTrainNames()["#EepTrain1"]
         it("have no train first", function () assert.is_falsy(haveTrainInitially) end)
 
         EepSimulator.simulatePlaceTrainOnRailTrack(1, "#EepTrain1")
-        TrainDetection.update();
+        refreshDetectedEntities(TrainDetection)
 
         local haveTrain1AfterInserting = TrainRegistry.getAllTrainNames()["#EepTrain1"]
         local haveTrain2AfterInserting = TrainRegistry.getAllTrainNames()["#EepTrain1;001"]
@@ -32,7 +41,7 @@ describe("TrainDetection", function ()
         end)
 
         EepSimulator.simulateSplitTrain("#EepTrain1", 1)
-        TrainDetection.update();
+        refreshDetectedEntities(TrainDetection)
         local haveTrain1AfterSplitting = TrainRegistry.getAllTrainNames()["#EepTrain1"]
         local haveTrain2AfterSplitting = TrainRegistry.getAllTrainNames()["#EepTrain1;001"]
         local rsCount1AfterSplitting = TrainRegistry.forName("#EepTrain1"):getRollingStockCount()
@@ -53,7 +62,7 @@ describe("TrainDetection", function ()
         EepSimulator.simulateAddTrain("#EepTrainMultiReturn", "RollingStock 3", "RollingStock 4")
         TrainDetection.initialize()
         EepSimulator.simulatePlaceTrainOnRailTrack(2, "#EepTrainMultiReturn")
-        TrainDetection.update()
+        refreshDetectedEntities(TrainDetection)
 
         it("uses all values from optional multi-return getters without errors", function ()
             local rollingStockName = TrainRegistry.rollingStockNameInTrain("#EepTrainMultiReturn", 0)
@@ -73,7 +82,7 @@ describe("TrainDetection", function ()
             EEPRollingstockSetHook(rollingStockName, true)
             EEPRollingstockSetHookGlue(rollingStockName, true)
 
-            assert.has_no.errors(function () TrainDetection.update() end)
+            assert.has_no.errors(function () refreshDetectedEntities(TrainDetection) end)
 
             local train = TrainRegistry.forName("#EepTrainMultiReturn")
             local rollingStock = RollingStockRegistry.forName(rollingStockName)
@@ -95,7 +104,7 @@ describe("TrainDetection", function ()
             _G.EEPRollingstockGetHook = nil
             _G.EEPRollingstockGetHookGlue = nil
 
-            assert.has_no.errors(function () TrainDetection.update() end)
+            assert.has_no.errors(function () refreshDetectedEntities(TrainDetection) end)
             assert.equals(1, train:getCouplingFront())
             assert.equals(2, train:getCouplingRear())
             assert.is_false(train:getInTrainyard())

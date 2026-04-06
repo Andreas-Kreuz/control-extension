@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
+﻿if AkDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
 
 ---@class CeHubModule: CeModule
 CeHubModule = {}
@@ -46,26 +46,46 @@ function CeHubModule.run()
     Scheduler:runTasks()
 end
 
-local publisherAliases = {
-    modules  = "ce.hub.data.modules.ModulesStatePublisher",
-    version  = "ce.hub.data.version.VersionStatePublisher",
-    runtime  = "ce.hub.data.runtime.RuntimeStatePublisher",
+local publisherModulePaths = {
+    modules = "ce.hub.data.modules.ModulesStatePublisher",
+    version = "ce.hub.data.version.VersionStatePublisher",
+    runtime = "ce.hub.data.runtime.RuntimeStatePublisher",
     frameData = "ce.hub.data.framedata.FrameDataStatePublisher",
-    slots    = "ce.hub.data.slots.DataSlotsStatePublisher",
-    signal   = "ce.hub.data.signals.SignalStatePublisher",
-    switch   = "ce.hub.data.switches.SwitchStatePublisher",
+    slots = "ce.hub.data.slots.DataSlotsStatePublisher",
+    signal = "ce.hub.data.signals.SignalStatePublisher",
+    switch = "ce.hub.data.switches.SwitchStatePublisher",
     structure = "ce.hub.data.structures.StructureStatePublisher",
-    time     = "ce.hub.data.time.TimeStatePublisher",
-    weather  = "ce.hub.data.weather.WeatherStatePublisher",
-    trains   = "ce.hub.data.trains.TrainsAndTracksStatePublisher"
+    time = "ce.hub.data.time.TimeStatePublisher",
+    weather = "ce.hub.data.weather.WeatherStatePublisher",
+    tracks = "ce.hub.data.trains.TracksStatePublisher",
+    train = "ce.hub.data.trains.TrainStatePublisher",
+    rollingStock = "ce.hub.data.trains.RollingStockStatePublisher"
 }
+
+local publisherAliasGroups = {
+    trains = { "tracks", "train", "rollingStock" }
+}
+
+local function modulePathsForAlias(alias)
+    if publisherModulePaths[alias] then
+        return { publisherModulePaths[alias] }
+    end
+
+    local grouped = publisherAliasGroups[alias]
+    if not grouped then return {} end
+
+    local modulePaths = {}
+    for _, groupAlias in ipairs(grouped) do
+        modulePaths[#modulePaths + 1] = publisherModulePaths[groupAlias]
+    end
+    return modulePaths
+end
 
 local function applyPublisherSync(publisherSync)
     if type(publisherSync) ~= "table" then return end
 
     for alias, syncOptions in pairs(publisherSync) do
-        local modulePath = publisherAliases[alias]
-        if modulePath then
+        for _, modulePath in ipairs(modulePathsForAlias(alias)) do
             local pub = require(modulePath)
             if syncOptions.enabled ~= nil then
                 pub.enabled = syncOptions.enabled == true
@@ -78,7 +98,7 @@ local function applyCeTypeSync(ceTypeSync)
     if type(ceTypeSync) ~= "table" then return end
 
     local ceTypeModes = {}
-    for _, modulePath in pairs(publisherAliases) do
+    for _, modulePath in pairs(publisherModulePaths) do
         local pub = require(modulePath)
         if pub.options and pub.options.ceTypes then
             for alias, ceTypeOptions in pairs(pub.options.ceTypes) do
@@ -100,7 +120,7 @@ local function applyFieldSync(fieldSync)
     if type(fieldSync) ~= "table" then return end
 
     for publisherAlias, fieldOptionsByName in pairs(fieldSync) do
-        local modulePath = publisherAliases[publisherAlias]
+        local modulePath = publisherModulePaths[publisherAlias]
         if modulePath then
             local pub = require(modulePath)
             local fields = pub.options and pub.options.fields or nil
