@@ -1,54 +1,45 @@
 if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureStatePublisher ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local Structure = require("ce.hub.data.structures.Structure")
-local StructureStaticDtoFactory = require("ce.hub.data.structures.StructureStaticDtoFactory")
-local StructureDynamicDtoFactory = require("ce.hub.data.structures.StructureDynamicDtoFactory")
+local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
 StructureStatePublisher = {}
-local enabled = true
+StructureStatePublisher.enabled = true
 local initialized = false
 StructureStatePublisher.name = "ce.hub.data.structures.StructureStatePublisher"
 
 StructureStatePublisher.options = {
-    fetchLight = true,
-    fetchSmoke = true,
-    fetchFire = true,
-    fetchTag = true,
-    sendStructureStatic = true,
-    sendStructureDynamic = true
+    ceTypes = {
+        structure = { ceType = "ce.hub.Structure", mode = "all" }
+    },
+    fields = {
+        light = { collect = true },
+        smoke = { collect = true },
+        fire = { collect = true },
+        tag = { collect = true }
+    }
 }
 
 local MAX_STRUCTURES = 50000
-local EEPStructureGetLight = _G.EEPStructureGetLight or function() return false end
-local EEPStructureGetSmoke = _G.EEPStructureGetSmoke or function() return false end
-local EEPStructureGetFire = _G.EEPStructureGetFire or function() return false end
 local EEPStructureGetModelType = _G.EEPStructureGetModelType or function() return false end
-local EEPStructureGetTagText = _G.EEPStructureGetTagText or function() return false end
 
 ---@type table<string, Structure>
 local allStructures = {}
 
 local function structureExists(name)
-    if EEPStructureGetModelType(name) then return true end
-    local opts = StructureStatePublisher.options
-    if opts.fetchLight and EEPStructureGetLight(name) then return true end
-    if opts.fetchSmoke and EEPStructureGetSmoke(name) then return true end
-    if opts.fetchFire and EEPStructureGetFire(name) then return true end
-    if opts.fetchTag and EEPStructureGetTagText(name) then return true end
-    return false
+    local exists = EEPStructureGetModelType(name)
+    return exists == true
 end
 
 function StructureStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not StructureStatePublisher.enabled or initialized then return end
 
     for i = 0, MAX_STRUCTURES do
         local name = "#" .. tostring(i)
         if structureExists(name) then
             local structure = Structure:new(name, StructureStatePublisher.options)
-            structure.staticValuesUpdated = false
-            structure.dynamicValuesUpdated = false
             allStructures[name] = structure
-            DataChangeBus.fireDataAdded(StructureStaticDtoFactory.createDto(structure))
-            DataChangeBus.fireDataAdded(StructureDynamicDtoFactory.createDto(structure))
+            DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure))
+            structure:resetDirty()
         end
     end
 
@@ -56,19 +47,15 @@ function StructureStatePublisher.initialize()
 end
 
 function StructureStatePublisher.syncState()
-    if not enabled then return end
+    if not StructureStatePublisher.enabled then return end
 
     if not initialized then StructureStatePublisher.initialize() end
 
     for _, structure in pairs(allStructures) do
         structure:refresh(StructureStatePublisher.options)
-        if structure.staticValuesUpdated then
-            structure.staticValuesUpdated = false
-            DataChangeBus.fireDataChanged(StructureStaticDtoFactory.createDto(structure))
-        end
-        if structure.dynamicValuesUpdated then
-            structure.dynamicValuesUpdated = false
-            DataChangeBus.fireDataChanged(StructureDynamicDtoFactory.createDto(structure))
+        if structure:hasDirtyFields() then
+            DataChangeBus.fireDataChanged(StructureDtoFactory.createPatchDto(structure, structure.dirtyFields))
+            structure:resetDirty()
         end
     end
 

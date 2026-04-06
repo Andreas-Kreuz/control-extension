@@ -12,8 +12,6 @@ import {
   WaitingOnSignalRoom,
   SwitchRoom,
   StructureRoom,
-  RollingStockTexturesRoom,
-  RollingStockRotationRoom,
   TrackRoom,
 } from '@ce/web-shared';
 import { Server } from 'socket.io';
@@ -67,16 +65,6 @@ export default class EepDataService implements DynamicRoomService {
       roomType: StructureRoom,
       id: 'StructureRoom',
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getStructures()),
-    });
-    this.roomDataProviders.push({
-      roomType: RollingStockTexturesRoom,
-      id: 'RollingStockTexturesRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getRollingStockTextures()),
-    });
-    this.roomDataProviders.push({
-      roomType: RollingStockRotationRoom,
-      id: 'RollingStockRotationRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getRollingStockRotation()),
     });
     this.roomDataProviders.push({
       roomType: TrackRoom,

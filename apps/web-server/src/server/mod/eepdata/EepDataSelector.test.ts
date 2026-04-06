@@ -109,13 +109,13 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
   assert.deepEqual(resetStatistics.initialization.moduleInitTimes, []);
 }
 
-function testStructureDtosMergeStaticAndDynamicCeTypes(): void {
+function testStructureDtosFromUnifiedCeType(): void {
   const selector = new EepDataSelector();
 
   selector.updateFromState({
     eventCounter: 1,
     ceTypes: {
-      [CeTypes.HubStructureStatic]: {
+      [CeTypes.HubStructure]: {
         '#7': {
           id: '#7',
           name: '#7',
@@ -128,11 +128,6 @@ function testStructureDtosMergeStaticAndDynamicCeTypes(): void {
           modelType: 22,
           modelTypeText: 'Immobilie',
           tag: 'Depot',
-        },
-      },
-      [CeTypes.HubStructureDynamic]: {
-        '#7': {
-          id: '#7',
           light: true,
           smoke: false,
           fire: true,
@@ -161,16 +156,15 @@ function testStructureDtosMergeStaticAndDynamicCeTypes(): void {
   });
 }
 
-function testStructureDtosRemainStableWhenOnlyOneSplitSideIsPresent(): void {
+function testStructureDtosWithPartialFields(): void {
   const selector = new EepDataSelector();
 
   selector.updateFromState({
     eventCounter: 1,
     ceTypes: {
-      [CeTypes.HubStructureDynamic]: {
+      [CeTypes.HubStructure]: {
         '#8': {
           id: '#8',
-          tag: 'Tree',
           light: false,
           smoke: true,
           fire: false,
@@ -182,16 +176,16 @@ function testStructureDtosRemainStableWhenOnlyOneSplitSideIsPresent(): void {
   assert.deepEqual(selector.getStructures(), {
     '#8': {
       id: '#8',
-      name: '#8',
-      pos_x: 0,
-      pos_y: 0,
-      pos_z: 0,
-      rot_x: 0,
-      rot_y: 0,
-      rot_z: 0,
-      modelType: 0,
-      modelTypeText: '',
-      tag: '',
+      name: undefined,
+      pos_x: undefined,
+      pos_y: undefined,
+      pos_z: undefined,
+      rot_x: undefined,
+      rot_y: undefined,
+      rot_z: undefined,
+      modelType: undefined,
+      modelTypeText: undefined,
+      tag: undefined,
       light: false,
       smoke: true,
       fire: false,
@@ -208,10 +202,10 @@ export async function run(): Promise<void> {
     'EepDataSelector keeps initialization statistics separate and resets them without runtime data',
     testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRuntime,
   );
-  await runTest('EepDataSelector merges structure static and dynamic ceTypes', testStructureDtosMergeStaticAndDynamicCeTypes);
+  await runTest('EepDataSelector maps unified structure ceType', testStructureDtosFromUnifiedCeType);
   await runTest(
-    'EepDataSelector keeps merged structures stable when only one split ceType is present',
-    testStructureDtosRemainStableWhenOnlyOneSplitSideIsPresent,
+    'EepDataSelector handles structures with partial fields',
+    testStructureDtosWithPartialFields,
   );
 }
 

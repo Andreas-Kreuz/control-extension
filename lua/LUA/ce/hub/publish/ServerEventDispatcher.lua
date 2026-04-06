@@ -3,28 +3,16 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.publish.ServerEventDispatcher
 local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local ServerEventBuffer = require("ce.databridge.ServerEventBuffer")
 local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local ServerEventDispatcher = {}
-local allowedHubCeTypes = {}
-local sendChecks = {}
+local ceTypeModes = {}
 
-local function toLookup(list)
-    local lookup = {}
-    for _, ceType in pairs(list or {}) do lookup[ceType] = true end
-    return lookup
-end
-
-local function shouldForwardHubCeType(ceType)
-    if next(allowedHubCeTypes) == nil then return true end
-    return allowedHubCeTypes[ceType] == true
-end
-
-function ServerEventDispatcher.setAllowedHubCeTypes(list)
-    allowedHubCeTypes = toLookup(list)
-end
-
-function ServerEventDispatcher.registerSendCheck(ceType, fn)
-    sendChecks[ceType] = fn
+function ServerEventDispatcher.setCeTypeModes(modes)
+    ceTypeModes = {}
+    for ceType, mode in pairs(modes or {}) do
+        ceTypeModes[ceType] = mode
+    end
 end
 
 function ServerEventDispatcher.fireEvent(event)
@@ -41,12 +29,10 @@ function ServerEventDispatcher.fireEvent(event)
         return
     end
 
-    if not shouldForwardHubCeType(ceType) then return end
+    local syncMode = SyncPolicy.normalizeMode(ceTypeModes[ceType], ceTypeDef.isDynamic)
+    if syncMode == "none" then return end
 
-    local sendCheck = sendChecks[ceType]
-    if sendCheck ~= nil and not sendCheck() then return end
-
-    if ceTypeDef.isDynamic then
+    if ceTypeDef.isDynamic and syncMode == "selected" then
         local element = payload.element or {}
         local entryId = element[ceTypeDef.keyId]
         if not DynamicUpdateRegistry.isSelected(ceType, tostring(entryId or "")) then return end

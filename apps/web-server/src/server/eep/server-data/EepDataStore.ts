@@ -43,10 +43,12 @@ export default class EepDataStore {
         const payload = event.payload as DataChangePayload<Record<string, unknown>>;
         const ceType = payload.ceType;
         const key = String(payload.element[payload.keyId]);
+        const existing = (state.ceTypes[ceType]?.[key] ?? undefined) as Record<string, unknown> | undefined;
+        const merged = existing ? { ...existing, ...payload.element } : payload.element;
         return {
           ...state,
           eventCounter: event.eventCounter,
-          ceTypes: { ...state.ceTypes, [ceType]: { ...state.ceTypes[ceType], [key]: payload.element } },
+          ceTypes: { ...state.ceTypes, [ceType]: { ...state.ceTypes[ceType], [key]: merged } },
         };
       }
       case 'DataRemoved': {

@@ -8,12 +8,14 @@ local TableUtils = require("ce.hub.util.TableUtils")
 ---@field initialize fun():nil
 ---@field syncState fun():table
 ModulesStatePublisher = {}
-local enabled = true
+ModulesStatePublisher.enabled = true
 local initialized = false
 ModulesStatePublisher.name = "ce.hub.ModulesStatePublisher"
 
 ModulesStatePublisher.options = {
-    sendModule = true
+    ceTypes = {
+        module = { ceType = "ce.hub.Module", mode = "all" }
+    }
 }
 
 ---@type table<string,ModuleDto>
@@ -30,7 +32,7 @@ local function checkModule(moduleName, module)
     knownModInfos[moduleName] = newModInfo
 end
 function ModulesStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not ModulesStatePublisher.enabled or initialized then return end
 
     local registeredCeModules = ModulesDataCollector.collectModules()
     for moduleName, module in pairs(registeredCeModules) do checkModule(moduleName, module) end
@@ -39,6 +41,8 @@ function ModulesStatePublisher.initialize()
 end
 
 function ModulesStatePublisher.syncState()
+    if not ModulesStatePublisher.enabled then return end
+
     local modInfos = {}
     modInfos.modules = {}
 

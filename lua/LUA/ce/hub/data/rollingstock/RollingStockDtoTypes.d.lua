@@ -1,0 +1,41 @@
+---@meta
+
+---@class RollingStockDto
+---@field ceType string
+---@field id string
+---@field name string
+---@field trainName string
+---@field positionInTrain number
+---@field couplingFront number
+---@field couplingRear number
+---@field length number
+---@field propelled boolean
+---@field modelType number
+---@field modelTypeText string
+---@field tag string
+---@field nr string|nil
+---@field trackType string|nil
+---@field hookStatus number
+---@field hookGlueMode number
+---@field surfaceTexts table<string,string>
+---@field trackId number -- ondemand: placeholder 0 when not subscribed
+---@field trackDistance number -- ondemand: placeholder 0 when not subscribed
+---@field trackDirection number -- ondemand: placeholder 0 when not subscribed
+---@field trackSystem number -- ondemand: placeholder 0 when not subscribed
+---@field posX number -- ondemand: placeholder 0 when not subscribed
+---@field posY number -- ondemand: placeholder 0 when not subscribed
+---@field posZ number -- ondemand: placeholder 0 when not subscribed
+---@field mileage number -- ondemand: placeholder 0 when not subscribed
+---@field orientationForward boolean -- ondemand: placeholder false when not subscribed
+---@field smoke number -- ondemand: placeholder 0 when not subscribed
+---@field active boolean -- ondemand: placeholder false when not subscribed
+---@field rotX number -- ondemand: placeholder 0 when not subscribed
+---@field rotY number -- ondemand: placeholder 0 when not subscribed
+---@field rotZ number -- ondemand: placeholder 0 when not subscribed
+
+---@class RollingStockDtoFactory
+---@field createFullDto fun(stock: RollingStock, isSubscribed: boolean|nil):string,string,string,RollingStockDto
+---@field createPatchDto fun(stock: RollingStock, dirtyFields: table<string,boolean>, isSubscribed: boolean|nil):
+---string,string,string,RollingStockDto
+---@field createOndemandPlaceholderPatch fun(stock: RollingStock):string,string,string,RollingStockDto
+---@field createRefDto fun(stockId: string):string,string,string,table

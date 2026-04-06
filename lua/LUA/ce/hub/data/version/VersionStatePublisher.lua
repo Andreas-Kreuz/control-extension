@@ -3,17 +3,19 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local VersionDataCollector = require("ce.hub.data.version.VersionDataCollector")
 local VersionDtoFactory = require("ce.hub.data.version.VersionDtoFactory")
 VersionStatePublisher = {}
-local enabled = true
+VersionStatePublisher.enabled = true
 local data = {}
 local initialized = false
 VersionStatePublisher.name = "ce.hub.VersionStatePublisher"
 
 VersionStatePublisher.options = {
-    sendEepVersion = true
+    ceTypes = {
+        eepVersion = { ceType = "ce.hub.EepVersion", mode = "all" }
+    }
 }
 
 function VersionStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not VersionStatePublisher.enabled or initialized then return end
 
     local versionInfo = VersionDataCollector.collectVersionInfo()
     -- TODO: Send event only with detected changes

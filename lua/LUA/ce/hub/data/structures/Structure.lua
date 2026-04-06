@@ -15,8 +15,8 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...
 ---@field light boolean|nil
 ---@field smoke boolean|nil
 ---@field fire boolean|nil
----@field staticValuesUpdated boolean
----@field dynamicValuesUpdated boolean
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
 ---@field isInitialized boolean
 local Structure = {}
 
@@ -27,6 +27,7 @@ local EEPStructureGetPosition = _G.EEPStructureGetPosition or function() end
 local EEPStructureGetRotation = _G.EEPStructureGetRotation or function() end
 local EEPStructureGetModelType = _G.EEPStructureGetModelType or function() end
 local EEPStructureGetTagText = _G.EEPStructureGetTagText or function() end
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local EEPStructureModelTypeText = {
     [16] = "Gleis/Gleisobjekt",
@@ -98,50 +99,51 @@ end
 
 function Structure:refresh(options)
     local opts = options or {}
-    local tag = self.tag or ""
-    local light = self.light
-    local smoke = self.smoke
-    local fire = self.fire
+    local fields = opts.fields or {}
+    self.dirtyFields = self.dirtyFields or {}
 
-    if opts.fetchTag ~= false then
+    if SyncPolicy.shouldCollect(fields.tag) then
         local _, fetchedTag = EEPStructureGetTagText(self.name)
-        tag = fetchedTag or ""
+        local tag = fetchedTag or ""
+        if not self.isInitialized or tag ~= (self.tag or "") then
+            self.tag = tag
+            self.dirtyFields.tag = true
+        end
     end
-    if opts.fetchLight ~= false then
+    if SyncPolicy.shouldCollect(fields.light) then
         local _, fetchedLight = EEPStructureGetLight(self.name)
-        light = fetchedLight or false
+        local light = fetchedLight or false
+        if not self.isInitialized or light ~= self.light then
+            self.light = light
+            self.dirtyFields.light = true
+        end
     end
-    if opts.fetchSmoke ~= false then
+    if SyncPolicy.shouldCollect(fields.smoke) then
         local _, fetchedSmoke = EEPStructureGetSmoke(self.name)
-        smoke = fetchedSmoke or false
+        local smoke = fetchedSmoke or false
+        if not self.isInitialized or smoke ~= self.smoke then
+            self.smoke = smoke
+            self.dirtyFields.smoke = true
+        end
     end
-    if opts.fetchFire ~= false then
+    if SyncPolicy.shouldCollect(fields.fire) then
         local _, fetchedFire = EEPStructureGetFire(self.name)
-        fire = fetchedFire or false
-    end
-
-    local staticChanged = not self.isInitialized
-        or tag ~= (self.tag or "")
-
-    local dynamicChanged = not self.isInitialized
-        or light ~= self.light
-        or smoke ~= self.smoke
-        or fire ~= self.fire
-
-    self.staticValuesUpdated = staticChanged
-    self.dynamicValuesUpdated = dynamicChanged
-
-    if staticChanged then
-        self.tag = tag
-    end
-
-    if dynamicChanged then
-        self.light = light
-        self.smoke = smoke
-        self.fire = fire
+        local fire = fetchedFire or false
+        if not self.isInitialized or fire ~= self.fire then
+            self.fire = fire
+            self.dirtyFields.fire = true
+        end
     end
 
     self.isInitialized = true
+end
+
+function Structure:resetDirty()
+    self.dirtyFields = {}
+end
+
+function Structure:hasDirtyFields()
+    return next(self.dirtyFields) ~= nil
 end
 
 return Structure

@@ -3,9 +3,9 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
 local Train = require("ce.hub.data.trains.Train")
-local TrainStaticDtoFactory = require("ce.hub.data.trains.TrainStaticDtoFactory")
-local TrainDynamicDtoFactory = require("ce.hub.data.trains.TrainDynamicDtoFactory")
+local TrainDtoFactory = require("ce.hub.data.trains.TrainDtoFactory")
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local TrainRegistry = {}
 TrainRegistry.debug = AkStartWithDebug or false
@@ -13,11 +13,6 @@ TrainRegistry.debug = AkStartWithDebug or false
 local allTrains = {}
 ---@type table<string,table<string,string>> table of trainName -> index(string) -> rollingstockname
 local trainRollingStockNames = {}
-
-local function isSelected(selectedCeTypes, ceType)
-    if not selectedCeTypes or next(selectedCeTypes) == nil then return true end
-    return selectedCeTypes[ceType] == true
-end
 
 function TrainRegistry.initRollingStock(train)
     trainRollingStockNames[train.name] = {}
@@ -61,35 +56,33 @@ function TrainRegistry.trainDisappeared(trainName)
     if TrainRegistry.debug then print(string.format("[#TrainRegistry] train removed: %s", trainName)) end
     allTrains[trainName] = nil
     trainRollingStockNames[trainName] = nil
-    DataChangeBus.fireDataRemoved(TrainStaticDtoFactory.createRefDto(trainName))
-    DataChangeBus.fireDataRemoved(TrainDynamicDtoFactory.createRefDto(trainName))
+    DataChangeBus.fireDataRemoved(TrainDtoFactory.createRefDto(trainName))
 end
 
-function TrainRegistry.fireChangeTrainEvents(selectedCeTypes)
-    local modifiedStaticTrains = {}
-    local modifiedDynamicTrains = {}
+function TrainRegistry.fireChangeTrainEvents(ceTypeOptionsByAlias)
+    local trainOptions = ceTypeOptionsByAlias and ceTypeOptionsByAlias["train"] or nil
+    local mode = SyncPolicy.getMode(trainOptions, true)
+
     for _, train in pairs(allTrains) do
-        if isSelected(selectedCeTypes, HubCeTypes.TrainStatic) and train.staticValuesUpdated then
-            modifiedStaticTrains[train.id] = train
-            train.staticValuesUpdated = false
+        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Train, train.id)
+        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Train, train.id)
+        local isSubscribed = mode == "all" or (mode == "selected" and isSelected)
+
+        -- Handle subscription transitions: send full DTO or placeholder patch
+        if train.needsFullSend or needsInitialSend then
+            DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSubscribed))
+            train.needsFullSend = false
+            train:resetDirty()
+            if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Train, train.id) end
+        elseif train:hasDirtyFields() then
+            local shouldSend = mode == "all"
+                or (mode == "selected" and isSelected)
+                or not train.dirtyFields.speed -- send non-ondemand dirty fields always
+            if shouldSend then
+                DataChangeBus.fireDataChanged(TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSubscribed))
+            end
+            train:resetDirty()
         end
-        if isSelected(selectedCeTypes, HubCeTypes.TrainDynamic)
-                and DynamicUpdateRegistry.isSelected(HubCeTypes.TrainDynamic, train.id)
-                and (
-                    train.dynamicValuesUpdated
-                    or DynamicUpdateRegistry.needsInitialSend(HubCeTypes.TrainDynamic, train.id)
-                ) then
-            modifiedDynamicTrains[train.id] = train
-            train.dynamicValuesUpdated = false
-        end
-    end
-    for _, train in pairs(modifiedStaticTrains) do
-        DataChangeBus.fireDataChanged(TrainStaticDtoFactory.createDto(train))
-    end
-    for _, train in pairs(modifiedDynamicTrains) do
-        local isSubscribed = DynamicUpdateRegistry.isSelected(HubCeTypes.TrainDynamic, train.id)
-        DataChangeBus.fireDataChanged(TrainDynamicDtoFactory.createDto(train, isSubscribed))
-        if isSubscribed then DynamicUpdateRegistry.markSent(HubCeTypes.TrainDynamic, train.id) end
     end
 end
 

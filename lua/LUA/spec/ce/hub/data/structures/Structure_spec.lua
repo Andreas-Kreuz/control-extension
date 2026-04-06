@@ -58,12 +58,12 @@ insulate("ce.hub.data.structures.Structure", function ()
         _G.EEPStructureGetTagText:revert()
     end)
 
-    it("reads static values during init and only refreshes dynamic values later", function ()
+    it("reads static values during init and tracks dirty fields on refresh", function ()
         local Structure = require("ce.hub.data.structures.Structure")
 
         local structure = Structure:new("#3")
-        structure.staticValuesUpdated = false
-        structure.dynamicValuesUpdated = false
+        -- After new(), all dynamic fields are dirty from init
+        structure:resetDirty()
         structure:refresh()
 
         assert.same(2, lightCalls)
@@ -79,17 +79,23 @@ insulate("ce.hub.data.structures.Structure", function ()
         assert.same(4.44, structure.rot_x)
         assert.same(5.55, structure.rot_y)
         assert.same(6.67, structure.rot_z)
-        assert.is_false(structure.staticValuesUpdated)
-        assert.is_false(structure.dynamicValuesUpdated)
+        -- No dirty fields since values haven't changed
+        assert.is_false(structure:hasDirtyFields())
     end)
 
     it("skips disabled dynamic fetchers and keeps existing values", function ()
         local Structure = require("ce.hub.data.structures.Structure")
-        local disabledOptions = { fetchLight = false, fetchSmoke = false, fetchFire = false, fetchTag = false }
+        local disabledOptions = {
+            fields = {
+                light = { collect = false },
+                smoke = { collect = false },
+                fire = { collect = false },
+                tag = { collect = false }
+            }
+        }
 
         local structure = Structure:new("#4", disabledOptions)
-        structure.staticValuesUpdated = false
-        structure.dynamicValuesUpdated = false
+        structure:resetDirty()
         structure.light = true
         structure.smoke = true
         structure.fire = true
@@ -107,7 +113,6 @@ insulate("ce.hub.data.structures.Structure", function ()
         assert.is_true(structure.smoke)
         assert.is_true(structure.fire)
         assert.same("Manual", structure.tag)
-        assert.is_false(structure.staticValuesUpdated)
-        assert.is_false(structure.dynamicValuesUpdated)
+        assert.is_false(structure:hasDirtyFields())
     end)
 end)

@@ -10,6 +10,8 @@ CeHubModule.CeTypes = require("ce.hub.data.HubCeTypes")
 local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
 local HubBridgeConnector = require("ce.hub.bridge.HubBridgeConnector")
+local ServerEventDispatcher = require("ce.hub.publish.ServerEventDispatcher")
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 CeTypeRegistry.registerCeTypes(
     { ceType = CeHubModule.CeTypes.Module, keyId = "id", owner = CeHubModule.name },
@@ -23,12 +25,8 @@ CeTypeRegistry.registerCeTypes(
     { ceType = CeHubModule.CeTypes.Switch, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.Structure, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.Time, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.TrainStatic, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.TrainDynamic, keyId = "id", owner = CeHubModule.name, isDynamic = true },
-    { ceType = CeHubModule.CeTypes.RollingStockStatic, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStockDynamic, keyId = "id", owner = CeHubModule.name, isDynamic = true },
-    { ceType = CeHubModule.CeTypes.RollingStockTextures, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStockRotation, keyId = "id", owner = CeHubModule.name },
+    { ceType = CeHubModule.CeTypes.Train, keyId = "id", owner = CeHubModule.name, isDynamic = true },
+    { ceType = CeHubModule.CeTypes.RollingStock, keyId = "id", owner = CeHubModule.name, isDynamic = true },
     { ceType = CeHubModule.CeTypes.AuxiliaryTrack, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.ControlTrack, keyId = "id", owner = CeHubModule.name },
     { ceType = CeHubModule.CeTypes.RoadTrack, keyId = "id", owner = CeHubModule.name },
@@ -62,6 +60,61 @@ local publisherAliases = {
     trains   = "ce.hub.data.trains.TrainsAndTracksStatePublisher"
 }
 
+local function applyPublisherSync(publisherSync)
+    if type(publisherSync) ~= "table" then return end
+
+    for alias, syncOptions in pairs(publisherSync) do
+        local modulePath = publisherAliases[alias]
+        if modulePath then
+            local pub = require(modulePath)
+            if syncOptions.enabled ~= nil then
+                pub.enabled = syncOptions.enabled == true
+            end
+        end
+    end
+end
+
+local function applyCeTypeSync(ceTypeSync)
+    if type(ceTypeSync) ~= "table" then return end
+
+    local ceTypeModes = {}
+    for _, modulePath in pairs(publisherAliases) do
+        local pub = require(modulePath)
+        if pub.options and pub.options.ceTypes then
+            for alias, ceTypeOptions in pairs(pub.options.ceTypes) do
+                local ceTypeDef = CeTypeRegistry.getCeTypeDefinition(ceTypeOptions.ceType)
+                local syncOptions = ceTypeSync[alias]
+                if syncOptions and syncOptions.mode ~= nil then
+                    ceTypeOptions.mode = SyncPolicy.normalizeMode(syncOptions.mode, ceTypeDef and ceTypeDef.isDynamic)
+                else
+                    ceTypeOptions.mode = SyncPolicy.normalizeMode(ceTypeOptions.mode, ceTypeDef and ceTypeDef.isDynamic)
+                end
+                ceTypeModes[ceTypeOptions.ceType] = ceTypeOptions.mode
+            end
+        end
+    end
+    ServerEventDispatcher.setCeTypeModes(ceTypeModes)
+end
+
+local function applyFieldSync(fieldSync)
+    if type(fieldSync) ~= "table" then return end
+
+    for publisherAlias, fieldOptionsByName in pairs(fieldSync) do
+        local modulePath = publisherAliases[publisherAlias]
+        if modulePath then
+            local pub = require(modulePath)
+            local fields = pub.options and pub.options.fields or nil
+            if fields then
+                for fieldAlias, fieldOptions in pairs(fieldOptionsByName) do
+                    if fields[fieldAlias] and fieldOptions.collect ~= nil then
+                        fields[fieldAlias].collect = fieldOptions.collect == true
+                    end
+                end
+            end
+        end
+    end
+end
+
 function CeHubModule.setOptions(options)
     options = options or {}
 
@@ -69,22 +122,14 @@ function CeHubModule.setOptions(options)
         local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
         ServerExchangeCoordinator.checkServerStatus = options.waitForServer
     end
-    if options.collectedCeTypes then
-        HubBridgeConnector.setCollectedCeTypes(options.collectedCeTypes)
-    end
-    if options.serverCeTypes then
-        require("ce.hub.publish.ServerEventDispatcher").setAllowedHubCeTypes(options.serverCeTypes)
-    end
-    if options.publisherOptions then
-        for alias, pubOptions in pairs(options.publisherOptions) do
-            local modulePath = publisherAliases[alias]
-            if modulePath then
-                local pub = require(modulePath)
-                for k, v in pairs(pubOptions) do
-                    pub.options[k] = v
-                end
-            end
-        end
+
+    local sync = options.sync or {}
+    applyPublisherSync(sync.publishers)
+    applyFieldSync(sync.fields)
+    applyCeTypeSync(sync.ceTypes)
+
+    if options.publisherOptions or options.collectedCeTypes or options.serverCeTypes then
+        error("CeHubModule.setOptions no longer supports legacy sync options. Use options.sync instead.")
     end
 
     return CeHubModule

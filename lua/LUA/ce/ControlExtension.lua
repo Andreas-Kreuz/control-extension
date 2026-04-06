@@ -39,4 +39,9 @@ function ControlExtension.setPauseEepDuringInitialization(pauseEepDuringInitiali
     return ControlExtension
 end
 
+function ControlExtension.setOptions(options)
+    ControlExtensionHub.setOptions(options)
+    return ControlExtension
+end
+
 return ControlExtension

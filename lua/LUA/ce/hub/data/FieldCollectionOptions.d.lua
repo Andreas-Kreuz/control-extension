@@ -1,0 +1,2 @@
+---@class FieldCollectionOptions
+---@field collect boolean|nil

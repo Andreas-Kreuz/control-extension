@@ -1,14 +1,12 @@
-insulate("ce.hub.data.structures.StructureDtoFactories", function ()
+insulate("ce.hub.data.structures.StructureDtoFactory", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     before_each(function ()
-        clearModule("ce.hub.data.structures.StructureStaticDtoFactory")
-        clearModule("ce.hub.data.structures.StructureDynamicDtoFactory")
+        clearModule("ce.hub.data.structures.StructureDtoFactory")
     end)
 
-    it("projects structures to detached static and dynamic DTO tables", function ()
-        local StructureStaticDtoFactory = require("ce.hub.data.structures.StructureStaticDtoFactory")
-        local StructureDynamicDtoFactory = require("ce.hub.data.structures.StructureDynamicDtoFactory")
+    it("creates a unified full DTO with all fields", function ()
+        local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
         local structure = {
             id = "#7",
             name = "#7",
@@ -30,17 +28,13 @@ insulate("ce.hub.data.structures.StructureDtoFactories", function ()
             getFire = function(self) return self.fire end
         }
 
-        local staticCeType, staticKeyId, staticKey, staticDto = StructureStaticDtoFactory.createDto(structure)
-        local staticListRoom, staticListKeyId, staticDtos = StructureStaticDtoFactory.createDtoList({ structure })
-        local dynamicCeType, dynamicKeyId, dynamicKey, dynamicDto = StructureDynamicDtoFactory.createDto(structure)
-        local dynamicListRoom, dynamicListKeyId, dynamicDtos = StructureDynamicDtoFactory.createDtoList({ structure })
-        structure.tag = "changed"
+        local ceType, keyId, key, dto = StructureDtoFactory.createFullDto(structure)
 
-        assert.equals("ce.hub.StructureStatic", staticCeType)
-        assert.equals("id", staticKeyId)
-        assert.equals("#7", staticKey)
+        assert.equals("ce.hub.Structure", ceType)
+        assert.equals("id", keyId)
+        assert.equals("#7", key)
         assert.same({
-                        ceType = "ce.hub.StructureStatic",
+                        ceType = "ce.hub.Structure",
                         id = "#7",
                         name = "#7",
                         pos_x = 1,
@@ -51,43 +45,36 @@ insulate("ce.hub.data.structures.StructureDtoFactories", function ()
                         rot_z = 6,
                         modelType = 22,
                         modelTypeText = "Immobilie",
-                        tag = "alpha"
-                    }, staticDto)
-        assert.equals("ce.hub.StructureStatic", staticListRoom)
-        assert.equals("id", staticListKeyId)
-        assert.same({ {
-                        ceType = "ce.hub.StructureStatic",
-                        id = "#7",
-                        name = "#7",
-                        pos_x = 1,
-                        pos_y = 2,
-                        pos_z = 3,
-                        rot_x = 4,
-                        rot_y = 5,
-                        rot_z = 6,
-                        modelType = 22,
-                        modelTypeText = "Immobilie",
-                        tag = "alpha"
-                    } }, staticDtos)
+                        tag = "alpha",
+                        light = true,
+                        smoke = false,
+                        fire = true
+                    }, dto)
+    end)
 
-        assert.equals("ce.hub.StructureDynamic", dynamicCeType)
-        assert.equals("id", dynamicKeyId)
-        assert.equals("#7", dynamicKey)
+    it("creates a patch DTO with only dirty fields", function ()
+        local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
+        local structure = {
+            id = "#7",
+            name = "#7",
+            tag = "changed",
+            fire = true,
+            getTag = function(self) return self.tag end,
+            getLight = function() return false end,
+            getSmoke = function() return false end,
+            getFire = function(self) return self.fire end
+        }
+
+        local ceType, keyId, key, dto = StructureDtoFactory.createPatchDto(structure, { tag = true, fire = true })
+
+        assert.equals("ce.hub.Structure", ceType)
+        assert.equals("id", keyId)
+        assert.equals("#7", key)
         assert.same({
-                        ceType = "ce.hub.StructureDynamic",
+                        ceType = "ce.hub.Structure",
                         id = "#7",
-                        light = true,
-                        smoke = false,
+                        tag = "changed",
                         fire = true
-                    }, dynamicDto)
-        assert.equals("ce.hub.StructureDynamic", dynamicListRoom)
-        assert.equals("id", dynamicListKeyId)
-        assert.same({ {
-                        ceType = "ce.hub.StructureDynamic",
-                        id = "#7",
-                        light = true,
-                        smoke = false,
-                        fire = true
-                    } }, dynamicDtos)
+                    }, dto)
     end)
 end)

@@ -12,17 +12,12 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 local Train = {}
 
 -- Field update policies (see TrainStaticDtoTypes.d.lua / TrainDynamicDtoTypes.d.lua):
---   always   â€” real value always included in DTO
---   ondemand â€” real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
---   never    â€” always placeholder, never sent to clients
+--   always   =>” real value always included in DTO
+--   ondemand =>” real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
+--   never    =>” always placeholder, never sent to clients
 
-local function markStaticUpdated(train)
-    train.valuesUpdated = true
-    train.staticValuesUpdated = true
-end
-
-local function markDynamicUpdated(train)
-    train.dynamicValuesUpdated = true
+local function markDirty(train, fieldName)
+    train.dirtyFields[fieldName] = true
 end
 
 
@@ -66,9 +61,8 @@ function Train:new(o)
     o.trackType = nil
     o.onTracks = {}
     o.occupiedTracks = {}
-    o.valuesUpdated = true
-    o.staticValuesUpdated = true
-    o.dynamicValuesUpdated = true
+    o.dirtyFields = {}
+    o.needsFullSend = true
     return o
 end
 
@@ -117,7 +111,6 @@ function Train:setValue(key, value)
         local rs = RollingStockRegistry.forName(rollingStockName)
         rs:setValue(key, value)
     end
-    markStaticUpdated(self)
 end
 
 ---Get the current value for key
@@ -158,8 +151,7 @@ function Train:setRoute(routeName)
     self.route = routeName
     EEPSetTrainRoute(self.name, self.route)
     if oldRoute ~= routeName then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, route = route})
+        markDirty(self, "route")
     end
 end
 
@@ -178,8 +170,7 @@ function Train:setRollingStockCount(count)
     local oldCount = self.rollingStockCount
     self.rollingStockCount = count
     if oldCount ~= count then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, rollingStockCount = count})
+        markDirty(self, "rollingStockCount")
     end
 end
 
@@ -199,11 +190,9 @@ function Train:setSpeed(speed)
     local oldSpeed = self.speed
     self.speed = speed
     if oldSpeed ~= speed then
-        markDynamicUpdated(self)
-
+        markDirty(self, "speed")
         if (oldSpeed < 0 and speed > 0) then self:setMovesForward(true) end
         if (oldSpeed > 0 and speed < 0) then self:setMovesForward(false) end
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, speed = speed})
     end
 end
 
@@ -220,7 +209,7 @@ function Train:setTargetSpeed(targetSpeed)
     targetSpeed = tonumber(string.format("%1.1f", targetSpeed)) or 0
     local oldTargetSpeed = self.targetSpeed
     self.targetSpeed = targetSpeed
-    if oldTargetSpeed ~= targetSpeed then markDynamicUpdated(self) end
+    if oldTargetSpeed ~= targetSpeed then markDirty(self, "targetSpeed") end
 end
 
 function Train:getTargetSpeed()
@@ -233,7 +222,7 @@ function Train:setCouplingFront(couplingFront)
     assert(type(couplingFront) == "number", "Need 'couplingFront' as number")
     local oldCouplingFront = self.couplingFront
     self.couplingFront = couplingFront
-    if oldCouplingFront ~= couplingFront then markDynamicUpdated(self) end
+    if oldCouplingFront ~= couplingFront then markDirty(self, "couplingFront") end
 end
 
 function Train:getCouplingFront()
@@ -246,7 +235,7 @@ function Train:setCouplingRear(couplingRear)
     assert(type(couplingRear) == "number", "Need 'couplingRear' as number")
     local oldCouplingRear = self.couplingRear
     self.couplingRear = couplingRear
-    if oldCouplingRear ~= couplingRear then markDynamicUpdated(self) end
+    if oldCouplingRear ~= couplingRear then markDirty(self, "couplingRear") end
 end
 
 function Train:getCouplingRear()
@@ -259,7 +248,7 @@ function Train:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
-    if oldActive ~= active then markDynamicUpdated(self) end
+    if oldActive ~= active then markDirty(self, "active") end
 end
 
 function Train:getActive()
@@ -274,7 +263,10 @@ function Train:setTrainyard(inTrainyard, trainyardId)
     local oldTrainyardId = self.trainyardId
     self.inTrainyard = inTrainyard
     self.trainyardId = inTrainyard and trainyardId or nil
-    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then markDynamicUpdated(self) end
+    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then
+        markDirty(self, "inTrainyard")
+        markDirty(self, "trainyardId")
+    end
 end
 
 function Train:getTrainyardId()
@@ -295,8 +287,7 @@ function Train:setMovesForward(movesForward)
     local oldMovesForward = self.movesForward
     self.movesForward = movesForward
     if oldMovesForward ~= movesForward then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, speed = speed})
+        markDirty(self, "movesForward")
     end
 end
 
@@ -315,8 +306,7 @@ function Train:setOnTrack(onTracks)
     local oldOnTracks = self.onTracks
     self.onTracks = onTracks
     if not TableUtils.sameDictEntries(oldOnTracks, onTracks) then
-        self.valuesUpdated = true
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, occupiedTacks = onTracks})
+        markDirty(self, "onTracks")
     end
 end
 
@@ -333,8 +323,7 @@ function Train:setTrackType(trackType)
     local oldTrackType = self.trackType
     self.trackType = trackType
     if oldTrackType ~= trackType then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, trackType = trackType})
+        markDirty(self, "trackType")
     end
 end
 
@@ -346,8 +335,7 @@ function Train:setDirection(direction)
     local oldDirection = self:getDirection()
     self:setValue(TagKeys.Train.direction, direction)
     if oldDirection ~= direction then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, direction = direction})
+        markDirty(self, "direction")
     end
 end
 
@@ -358,8 +346,7 @@ function Train:setDestination(destination)
     local oldDestination = self:getDestination()
     self:setValue(TagKeys.Train.destination, destination)
     if oldDestination ~= destination then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, destination = destination})
+        markDirty(self, "destination")
     end
 end
 
@@ -375,8 +362,7 @@ function Train:setLine(line)
     local oldLine = self:getLine()
     self:setValue(TagKeys.Train.line, line)
     if oldLine ~= line then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, line = line})
+        markDirty(self, "line")
     end
 end
 
@@ -401,6 +387,14 @@ function Train:closeDoors()
         local model = RollingStockModels.modelFor(rollingStockName)
         model:closeDoors(rollingStockName)
     end
+end
+
+function Train:resetDirty()
+    self.dirtyFields = {}
+end
+
+function Train:hasDirtyFields()
+    return next(self.dirtyFields) ~= nil
 end
 
 function Train:toJsonStatic()

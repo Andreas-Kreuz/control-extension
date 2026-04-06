@@ -4,12 +4,14 @@ local DataSlotDtoFactory = require("ce.hub.data.slots.DataSlotDtoFactory")
 
 local DataSlotsStatePublisher = {}
 DataSlotsStatePublisher.name = "ce.hub.data.slots.DataSlotsStatePublisher"
-local enabled = true
+DataSlotsStatePublisher.enabled = true
 local initialized = false
 
 DataSlotsStatePublisher.options = {
-    sendSaveSlot = true,
-    sendFreeSlot = true
+    ceTypes = {
+        saveSlot = { ceType = "ce.hub.SaveSlot", mode = "all" },
+        freeSlot = { ceType = "ce.hub.FreeSlot", mode = "all" }
+    }
 }
 local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
 local StorageUtility = require("ce.hub.util.StorageUtility")
@@ -29,7 +31,7 @@ end
 
 function DataSlotsStatePublisher.syncState()
     -- nothing todo
-    if not enabled then return end
+    if not DataSlotsStatePublisher.enabled then return end
     if not initialized then DataSlotsStatePublisher.initialize() end
 
     local filledSlots = {}

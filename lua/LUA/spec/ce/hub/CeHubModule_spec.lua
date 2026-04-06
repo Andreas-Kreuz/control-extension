@@ -33,9 +33,12 @@ insulate("CeHubModule", function ()
 
         assert.equals(CeHubModule, CeHubModule.setOptions({
             waitForServer = false,
-            collectedCeTypes = {
-                CeHubModule.CeTypes.TrainStatic,
-            },
+            sync = {
+                ceTypes = {
+                    train = { mode = "all" },
+                    time = { mode = "none" }
+                }
+            }
         }))
 
         CeHubModule.init()
@@ -58,9 +61,12 @@ insulate("CeHubModule", function ()
         ControlExtension.addModules(
             require("ce.mods.road.CeRoadModule"),
             CeHubModule.setOptions({
-                collectedCeTypes = {
-                    CeHubModule.CeTypes.TrainStatic,
-                },
+                sync = {
+                    ceTypes = {
+                        train = { mode = "all" },
+                        time = { mode = "none" }
+                    }
+                }
             })
         )
 

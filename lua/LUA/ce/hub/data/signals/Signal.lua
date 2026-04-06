@@ -23,6 +23,7 @@ local EEPGetSignalStopDistance = _G.EEPGetSignalStopDistance or function() retur
 local EEPGetSignalItemName = _G.EEPGetSignalItemName or function() return false, nil end
 local EEPGetSignalFunctions = _G.EEPGetSignalFunctions or function() return false, 0 end
 local EEPGetSignalFunction = _G.EEPGetSignalFunction or function() return false, nil end
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local function readFunctions(id, position)
     local functionsOk, functionCount = EEPGetSignalFunctions(id)
@@ -60,6 +61,7 @@ end
 
 function Signal:refresh(options)
     local opts = options or {}
+    local fields = opts.fields or {}
     local position = EEPGetSignal(self.id)
     local waitingVehiclesCount = EEPGetSignalTrainsCount(self.id) or 0
 
@@ -70,21 +72,21 @@ function Signal:refresh(options)
     local signalFunctions = self.signalFunctions
     local activeFunction = self.activeFunction
 
-    if opts.fetchTag ~= false then
+    if SyncPolicy.shouldCollect(fields.tag) then
         local _, tag = EEPSignalGetTagText(self.id)
         tagStr = tag or ""
     end
-    if opts.fetchStopDistance ~= false then
+    if SyncPolicy.shouldCollect(fields.stopDistance) then
         local ok, sd = EEPGetSignalStopDistance(self.id)
         stopDistanceVal = ok and sd or nil
     end
-    if opts.fetchItemName ~= false then
+    if SyncPolicy.shouldCollect(fields.itemName) then
         local ok, name = EEPGetSignalItemName(self.id, false)
         itemNameVal = ok and name or nil
         local okPath, namePath = EEPGetSignalItemName(self.id, true)
         itemNameWithModelPath = okPath and namePath or nil
     end
-    if opts.fetchFunctions ~= false then
+    if SyncPolicy.shouldCollect(fields.functions) then
         signalFunctions, activeFunction = readFunctions(self.id, position)
     end
 

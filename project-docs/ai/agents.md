@@ -1,5 +1,9 @@
 # Control Extension AI Reference
 
+Be concise with your answers. Do not acknowledge my messages causing duplication unless explicitly asked to do so. Do not provide summaries of the changes you made unless explicitly asked to do so.
+Only perform the tasks that have been asked by the user to perform. You are not permitted to modify files and code that are not relevant to the problem specified by the user. Your job is to do what you're told to do. Only express creativity when explicitly asked to do so.
+Start here. Follow links downward only for the domain you need.
+
 Project:
 
 - [overview.md](overview.md): what this project is — stack, layers, monorepo structure
@@ -32,5 +36,3 @@ Cross-cutting:
 
 - [encoding/rules.md](encoding/rules.md): file encoding (Latin1 vs UTF-8)
 - [guides/work-rules.md](guides/work-rules.md): change style, review focus, general rules
-
-Start here. Follow links downward only for the domain you need.

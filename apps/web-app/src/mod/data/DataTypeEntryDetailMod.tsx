@@ -7,24 +7,10 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import {
-  CeTypes,
-  DynamicRoom,
-  StructureDynamicRoom,
-  TrainDynamicRoom,
-  RollingStockDynamicRoom,
-} from '@ce/web-shared';
 import useTypeEntries from './useTypeEntries';
-import useDynamicEntry from './useDynamicEntry';
 
 const AppPage = lazy(() => import('../../components/AppPage'));
 const AppPageHeadline = lazy(() => import('../../components/AppPageHeadline'));
-
-const companionRooms: Record<string, DynamicRoom> = {
-  [CeTypes.HubStructureStatic]: StructureDynamicRoom,
-  [CeTypes.HubTrainStatic]: TrainDynamicRoom,
-  [CeTypes.HubRollingStockStatic]: RollingStockDynamicRoom,
-};
 
 function formatValue(value: unknown): string {
   if (value === undefined || value === null) return '';
@@ -33,25 +19,19 @@ function formatValue(value: unknown): string {
 
 function DataTypeEntryDetailMod() {
   const { ceType = '', entryId = '' } = useParams<{ ceType: string; entryId: string }>();
-  const companionRoom = companionRooms[ceType];
   const entriesMap = useTypeEntries(ceType);
-  const companionEntry = useDynamicEntry(companionRoom, entryId);
 
   const entry = entriesMap[entryId];
 
   const fields = useMemo(() => {
     if (!entry) return [];
-    const staticFields = Object.entries(entry).map(([field, value]) => ({
-      field,
-      value: formatValue(value),
-    }));
-    const dynamicFields = companionEntry
-      ? Object.entries(companionEntry)
-          .filter(([field]) => !(field in entry))
-          .map(([field, value]) => ({ field, value: formatValue(value) }))
-      : [];
-    return [...staticFields, ...dynamicFields].sort((a, b) => a.field.localeCompare(b.field));
-  }, [entry, companionEntry]);
+    return Object.entries(entry)
+      .map(([field, value]) => ({
+        field,
+        value: formatValue(value),
+      }))
+      .sort((a, b) => a.field.localeCompare(b.field));
+  }, [entry]);
 
   return (
     <AppPage>

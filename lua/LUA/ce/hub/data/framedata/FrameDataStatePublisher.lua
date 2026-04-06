@@ -3,22 +3,24 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local FrameDataDtoFactory = require("ce.hub.data.framedata.FrameDataDtoFactory")
 
 FrameDataStatePublisher = {}
-local enabled = true
+FrameDataStatePublisher.enabled = true
 local initialized = false
 FrameDataStatePublisher.name = "ce.hub.data.framedata.FrameDataStatePublisher"
 
 FrameDataStatePublisher.options = {
-    sendFrameData = true
+    ceTypes = {
+        frameData = { ceType = "ce.hub.FrameData", mode = "all" }
+    }
 }
 
 function FrameDataStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not FrameDataStatePublisher.enabled or initialized then return end
 
     initialized = true
 end
 
 function FrameDataStatePublisher.syncState()
-    if not enabled then return end
+    if not FrameDataStatePublisher.enabled then return end
     if not initialized then FrameDataStatePublisher.initialize() end
 
     local entries = {

@@ -18,13 +18,13 @@ insulate("ce.hub.bridge.HubBridgeConnector", function ()
         HubBridgeConnector.registerFunctions()
 
         IncomingCommandExecutor.executeIncomingCommands(
-            "HubDynamicData.startUpdatesFor|" .. HubCeTypes.TrainDynamic .. "|T1"
+            "HubDynamicData.startUpdatesFor|" .. HubCeTypes.Train .. "|T1"
         )
-        assert.is_true(DynamicUpdateRegistry.isSelected(HubCeTypes.TrainDynamic, "T1"))
+        assert.is_true(DynamicUpdateRegistry.isSelected(HubCeTypes.Train, "T1"))
 
         IncomingCommandExecutor.executeIncomingCommands(
-            "HubDynamicData.stopUpdatesFor|" .. HubCeTypes.TrainDynamic .. "|T1"
+            "HubDynamicData.stopUpdatesFor|" .. HubCeTypes.Train .. "|T1"
         )
-        assert.is_false(DynamicUpdateRegistry.isSelected(HubCeTypes.TrainDynamic, "T1"))
+        assert.is_false(DynamicUpdateRegistry.isSelected(HubCeTypes.Train, "T1"))
     end)
 end)

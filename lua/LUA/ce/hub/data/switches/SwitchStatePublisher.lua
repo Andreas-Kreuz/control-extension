@@ -3,12 +3,14 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local Switch = require("ce.hub.data.switches.Switch")
 local SwitchDtoFactory = require("ce.hub.data.switches.SwitchDtoFactory")
 SwitchStatePublisher = {}
-local enabled = true
+SwitchStatePublisher.enabled = true
 local initialized = false
 SwitchStatePublisher.name = "ce.hub.data.switches.SwitchStatePublisher"
 
 SwitchStatePublisher.options = {
-    sendSwitch = true
+    ceTypes = {
+        switch = { ceType = "ce.hub.Switch", mode = "all" }
+    }
 }
 
 local MAX_SWITCHES = 1000
@@ -18,7 +20,7 @@ local EEPGetSwitch = _G.EEPGetSwitch or function() return 0 end
 local allSwitches = {}
 
 function SwitchStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not SwitchStatePublisher.enabled or initialized then return end
 
     for i = 1, MAX_SWITCHES do
         if EEPGetSwitch(i) > 0 then
@@ -30,7 +32,7 @@ function SwitchStatePublisher.initialize()
 end
 
 function SwitchStatePublisher.syncState()
-    if not enabled then return end
+    if not SwitchStatePublisher.enabled then return end
 
     if not initialized then SwitchStatePublisher.initialize() end
 

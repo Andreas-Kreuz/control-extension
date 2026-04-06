@@ -26,6 +26,20 @@ function ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringIniti
     return pauseEepDuringInitialization
 end
 
+function ControlExtensionHub.setOptions(options)
+    options = options or {}
+
+    if options.debug ~= nil then
+        ControlExtensionHub.setDebug(options.debug)
+    end
+    if options.pauseEepDuringInitialization ~= nil then
+        ControlExtensionHub.setPauseEepDuringInitialization(options.pauseEepDuringInitialization)
+    end
+
+    require("ce.hub.CeHubModule").setOptions(options)
+    return options
+end
+
 function ControlExtensionHub.initTasks()
     MainLoopRunner.debug = ControlExtensionHub.debug
     MainLoopRunner.initModules(

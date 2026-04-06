@@ -26,6 +26,7 @@ insulate("ControlExtension", function ()
         local oldSetPause = ControlExtensionHub.setPauseEepDuringInitialization
         local oldActivateServer = ControlExtensionHub.activateServer
         local oldDeactivateServer = ControlExtensionHub.deactivateServer
+        local oldSetOptions = ControlExtensionHub.setOptions
 
         ModuleRegistry.registerModules = function (...)
             calls.registerModules = { ... }
@@ -55,6 +56,10 @@ insulate("ControlExtension", function ()
             calls.deactivateServer = true
             return "deactivated"
         end
+        ControlExtensionHub.setOptions = function (options)
+            calls.setOptions = options
+            return options
+        end
 
         local firstModule = { name = "spec.FirstModule" }
         local secondModule = { name = "spec.SecondModule" }
@@ -74,6 +79,8 @@ insulate("ControlExtension", function ()
         assert.is_true(calls.setDebug)
         assert.equals(ControlExtension, ControlExtension.setPauseEepDuringInitialization(true))
         assert.is_true(calls.setPause)
+        assert.equals(ControlExtension, ControlExtension.setOptions({ sync = { publishers = {} } }))
+        assert.same({ sync = { publishers = {} } }, calls.setOptions)
 
         assert.is_nil(ControlExtension.useModules)
         assert.is_nil(ControlExtension.run)
@@ -93,6 +100,7 @@ insulate("ControlExtension", function ()
         ControlExtensionHub.setPauseEepDuringInitialization = oldSetPause
         ControlExtensionHub.activateServer = oldActivateServer
         ControlExtensionHub.deactivateServer = oldDeactivateServer
+        ControlExtensionHub.setOptions = oldSetOptions
     end)
 
     it("keeps the minimal startup path optional", function ()

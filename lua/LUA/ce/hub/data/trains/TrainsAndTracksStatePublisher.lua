@@ -2,60 +2,67 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainsAndTracksSt
 local TrainDetection = require("ce.hub.data.trains.TrainDetection")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 TrainsAndTracksStatePublisher = {}
 
-local enabled = true
+TrainsAndTracksStatePublisher.enabled = true
 local initialized = false
 TrainsAndTracksStatePublisher.name = "ce.hub.data.trains.TrainsAndTracksStatePublisher"
 
 TrainsAndTracksStatePublisher.options = {
-    sendTrainStatic = true,
-    sendTrainDynamic = true,
-    sendRollingStockStatic = true,
-    sendRollingStockDynamic = true,
-    sendRollingStockTextures = true,
-    sendRollingStockRotation = true,
-    sendAuxiliaryTrack = true,
-    sendControlTrack = true,
-    sendRoadTrack = true,
-    sendRailTrack = true,
-    sendTramTrack = true
+    ceTypes = {
+        train = { ceType = "ce.hub.Train", mode = "all" },
+        rollingStock = { ceType = "ce.hub.RollingStock", mode = "all" },
+        auxiliaryTrack = { ceType = "ce.hub.AuxiliaryTrack", mode = "all" },
+        controlTrack = { ceType = "ce.hub.ControlTrack", mode = "all" },
+        roadTrack = { ceType = "ce.hub.RoadTrack", mode = "all" },
+        railTrack = { ceType = "ce.hub.RailTrack", mode = "all" },
+        tramTrack = { ceType = "ce.hub.TramTrack", mode = "all" }
+    }
 }
 
 local data = {}
-local selectedCeTypes = {}
+local activeCeTypes = {}
 
-local function isSelected(...)
-    if next(selectedCeTypes) == nil then return true end
+local function rebuildActiveCeTypes()
+    activeCeTypes = {}
+    for _, ceTypeOptions in pairs(TrainsAndTracksStatePublisher.options.ceTypes) do
+        if SyncPolicy.isActive(ceTypeOptions, ceTypeOptions.ceType == "ce.hub.Train"
+                or ceTypeOptions.ceType == "ce.hub.RollingStock") then
+            activeCeTypes[ceTypeOptions.ceType] = true
+        end
+    end
+end
+
+local function hasActiveCeType(...)
     for i = 1, select("#", ...) do
-        if selectedCeTypes[select(i, ...)] then return true end
+        if activeCeTypes[select(i, ...)] then return true end
     end
     return false
 end
 
-function TrainsAndTracksStatePublisher.setCollectedCeTypes(collected)
-    selectedCeTypes = collected or {}
-end
-
 function TrainsAndTracksStatePublisher.initialize()
-    if not enabled or initialized then return end
-    TrainDetection.initialize(selectedCeTypes)
+    if not TrainsAndTracksStatePublisher.enabled or initialized then return end
+    rebuildActiveCeTypes()
+    TrainDetection.initialize(activeCeTypes)
 
     initialized = true
 end
 
 function TrainsAndTracksStatePublisher.syncState()
-    if not enabled then return end
+    if not TrainsAndTracksStatePublisher.enabled then return end
 
     if not initialized then TrainsAndTracksStatePublisher.initialize() end
-    TrainDetection.update(selectedCeTypes)
+    rebuildActiveCeTypes()
+    TrainDetection.update(activeCeTypes)
 
-    if isSelected(HubCeTypes.TrainStatic, HubCeTypes.TrainDynamic) then
-        TrainRegistry.fireChangeTrainEvents(selectedCeTypes)
+    if hasActiveCeType("ce.hub.Train") then
+        TrainRegistry.fireChangeTrainEvents(TrainsAndTracksStatePublisher.options.ceTypes)
     end
-    RollingStockRegistry.fireChangeRollingStockEvents(selectedCeTypes)
+    if hasActiveCeType("ce.hub.RollingStock") then
+        RollingStockRegistry.fireChangeRollingStockEvents(TrainsAndTracksStatePublisher.options.ceTypes)
+    end
 
     return data
 end

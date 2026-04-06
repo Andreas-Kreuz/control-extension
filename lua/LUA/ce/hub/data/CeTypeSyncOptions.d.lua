@@ -1,0 +1,2 @@
+---@class CeTypeSyncOptions
+---@field mode "all"|"none"|"selected"|nil

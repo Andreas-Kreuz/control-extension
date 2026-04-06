@@ -3,12 +3,14 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local WeatherDtoFactory = require("ce.hub.data.weather.WeatherDtoFactory")
 
 WeatherStatePublisher = {}
-local enabled = true
+WeatherStatePublisher.enabled = true
 local initialized = false
 WeatherStatePublisher.name = "ce.hub.data.weather.WeatherStatePublisher"
 
 WeatherStatePublisher.options = {
-    sendWeather = true
+    ceTypes = {
+        weather = { ceType = "ce.hub.Weather", mode = "all" }
+    }
 }
 
 local function unwrapNumeric(getter)
@@ -24,13 +26,13 @@ local function unwrapNumeric(getter)
 end
 
 function WeatherStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not WeatherStatePublisher.enabled or initialized then return end
 
     initialized = true
 end
 
 function WeatherStatePublisher.syncState()
-    if not enabled then return end
+    if not WeatherStatePublisher.enabled then return end
     if not initialized then WeatherStatePublisher.initialize() end
 
     local weatherEntries = {

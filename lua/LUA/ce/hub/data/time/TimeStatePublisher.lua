@@ -3,22 +3,24 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local TimeDtoFactory = require("ce.hub.data.time.TimeDtoFactory")
 
 TimeStatePublisher = {}
-local enabled = true
+TimeStatePublisher.enabled = true
 local initialized = false
 TimeStatePublisher.name = "ce.hub.data.time.TimeStatePublisher"
 
 TimeStatePublisher.options = {
-    sendTime = true
+    ceTypes = {
+        time = { ceType = "ce.hub.Time", mode = "all" }
+    }
 }
 
 function TimeStatePublisher.initialize()
-    if not enabled or initialized then return end
+    if not TimeStatePublisher.enabled or initialized then return end
 
     initialized = true
 end
 
 function TimeStatePublisher.syncState()
-    if not enabled then return end
+    if not TimeStatePublisher.enabled then return end
 
     if not initialized then TimeStatePublisher.initialize() end
 

@@ -6,8 +6,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
     before_each(function ()
         clearModule("ce.hub.data.structures.StructureStatePublisher")
         clearModule("ce.hub.data.structures.StructureDataCollector")
-        clearModule("ce.hub.data.structures.StructureStaticDtoFactory")
-        clearModule("ce.hub.data.structures.StructureDynamicDtoFactory")
+        clearModule("ce.hub.data.structures.StructureDtoFactory")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -80,7 +79,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         _G.EEPStructureGetTagText:revert()
     end)
 
-    it("fires initial ceType data and later only dirty ceType data", function ()
+    it("fires initial full DTOs and later only dirty field patches", function ()
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
@@ -88,7 +87,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
         assert.same({
                         ["#2"] = {
-                            ceType = "ce.hub.StructureStatic",
+                            ceType = "ce.hub.Structure",
                             id = "#2",
                             name = "#2",
                             pos_x = 1,
@@ -99,10 +98,13 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                             rot_z = 6,
                             modelType = 22,
                             modelTypeText = "Immobilie",
-                            tag = "shed"
+                            tag = "shed",
+                            light = true,
+                            smoke = false,
+                            fire = false
                         },
                         ["#3"] = {
-                            ceType = "ce.hub.StructureStatic",
+                            ceType = "ce.hub.Structure",
                             id = "#3",
                             name = "#3",
                             pos_x = 7,
@@ -113,32 +115,46 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                             rot_z = 12,
                             modelType = 23,
                             modelTypeText = "Landschaftselement/Fauna",
-                            tag = "tree"
-                        }
-                    }, DataStore.getCeType("ce.hub.StructureStatic"))
-        assert.same({
-                        ["#2"] = {
-                            ceType = "ce.hub.StructureDynamic",
-                            id = "#2",
-                            light = true,
-                            smoke = false,
-                            fire = false
-                        },
-                        ["#3"] = {
-                            ceType = "ce.hub.StructureDynamic",
-                            id = "#3",
+                            tag = "tree",
                             light = false,
                             smoke = false,
                             fire = false
                         }
-                    }, DataStore.getCeType("ce.hub.StructureDynamic"))
+                    }, DataStore.getCeType("ce.hub.Structure"))
 
         states["#2"].fire = true
         states["#3"].tag = "tree-north"
         StructureStatePublisher.syncState()
 
-        assert.is_true(DataStore.get("ce.hub.StructureDynamic", "#2").fire)
-        assert.equals("tree-north", DataStore.get("ce.hub.StructureStatic", "#3").tag)
-        assert.same(22, DataStore.get("ce.hub.StructureStatic", "#2").modelType)
+        assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
+        assert.equals("tree-north", DataStore.get("ce.hub.Structure", "#3").tag)
+        assert.same(22, DataStore.get("ce.hub.Structure", "#2").modelType)
+    end)
+
+    it("does not create structures when only other structure functions succeed", function ()
+        states["#4"] = {
+            light = true,
+            smoke = true,
+            fire = true,
+            pos = { 13, 14, 15 },
+            rot = { 16, 17, 18 },
+            modelType = 24,
+            tag = "grass"
+        }
+
+        _G.EEPStructureGetModelType:revert()
+        stub(_G, "EEPStructureGetModelType", function (name)
+            if name == "#4" then return false end
+            local entry = states[name]
+            if not entry then return false end
+            return true, entry.modelType
+        end)
+
+        local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
+        local DataStore = require("ce.hub.publish.InternalDataStore")
+
+        StructureStatePublisher.initialize()
+
+        assert.is_nil(DataStore.get("ce.hub.Structure", "#4"))
     end)
 end)
