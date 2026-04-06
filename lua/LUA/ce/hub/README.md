@@ -141,6 +141,19 @@ Wichtig ist dabei:
 - Hub-Module dürfen als Argumente an `addModules(...)` genannt werden.
 - Die interne Orchestrierung innerhalb von `ce.hub` ist kein Teil der öffentlichen API.
 
+# Bridge-Anbindung
+
+Die Lua-seitige Anbindung des Hubs an den Web-Server liegt direkt in `ce.hub.HubBridgeConnector`.
+
+## Keine öffentliche API
+
+Die Bridge wird indirekt über `ControlExtension` gesteuert:
+
+- `ControlExtension.activateServer()` — schaltet die Server-Kommunikation ein
+- `ControlExtension.deactivateServer()` — schaltet sie aus, ohne die übrigen Module zu stoppen
+
+Direkter Zugriff auf interne Dateien unter `ce.hub.*` ist nicht vorgesehen.
+
 # Unterverzeichnisse
 
 - [data/DTO.md](data/DTO.md) — Alle Datenräume und DTO-Typen der eingebauten Collector

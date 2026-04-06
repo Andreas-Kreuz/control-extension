@@ -1,11 +1,11 @@
-﻿if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TracksStatePublisher ...") end
+if AkDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TracksStatePublisher ...") end
 local TrainDetection = require("ce.hub.data.trains.TrainDetection")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local TracksStatePublisher = {}
 TracksStatePublisher.enabled = true
 local initialized = false
-TracksStatePublisher.name = "ce.hub.data.trains.TracksStatePublisher"
+TracksStatePublisher.name = "ce.hub.data.tracks.TracksStatePublisher"
 
 TracksStatePublisher.options = {
     ceTypes = {

@@ -41,3 +41,5 @@ yarn format:lua             # Format Lua via sumneko.lua VSCode extension
 - Dev storybook: `yarn dev:storybook`
 - Headless server: `yarn workspace @ce/web-server run run:headless`
 - On Windows/PowerShell use `yarn.cmd` instead of `yarn`
+
+.luacheckrc and .busted are located in lua/

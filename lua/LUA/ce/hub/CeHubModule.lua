@@ -9,7 +9,7 @@ CeHubModule.name = "ce.hub.CeHubModule"
 CeHubModule.CeTypes = require("ce.hub.data.HubCeTypes")
 local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
-local HubBridgeConnector = require("ce.hub.bridge.HubBridgeConnector")
+local HubBridgeConnector = require("ce.hub.HubBridgeConnector")
 local ServerEventDispatcher = require("ce.hub.publish.ServerEventDispatcher")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
@@ -57,9 +57,9 @@ local publisherModulePaths = {
     structure = "ce.hub.data.structures.StructureStatePublisher",
     time = "ce.hub.data.time.TimeStatePublisher",
     weather = "ce.hub.data.weather.WeatherStatePublisher",
-    tracks = "ce.hub.data.trains.TracksStatePublisher",
+    tracks = "ce.hub.data.tracks.TracksStatePublisher",
     train = "ce.hub.data.trains.TrainStatePublisher",
-    rollingStock = "ce.hub.data.trains.RollingStockStatePublisher"
+    rollingStock = "ce.hub.data.rollingstock.RollingStockStatePublisher"
 }
 
 local publisherAliasGroups = {

@@ -1,4 +1,4 @@
-﻿if AkDebugLoad then print("[#Start] Loading ce.hub.bridge.HubBridgeConnector ...") end
+if AkDebugLoad then print("[#Start] Loading ce.hub.HubBridgeConnector ...") end
 local HubBridgeConnector = {}
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
@@ -68,7 +68,7 @@ function HubBridgeConnector.registerStatePublishers()
         if shouldRegister(pub, "weather") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
-        local pub = require("ce.hub.data.trains.TracksStatePublisher")
+        local pub = require("ce.hub.data.tracks.TracksStatePublisher")
         if pub.enabled ~= false and (
                 hasActiveCeType(pub.options.ceTypes or {},
                                 "auxiliaryTrack",
@@ -78,7 +78,7 @@ function HubBridgeConnector.registerStatePublishers()
                                 "tramTrack")
                 or hasActiveCeType(require("ce.hub.data.trains.TrainStatePublisher").options.ceTypes or {},
                                    "train")
-                or hasActiveCeType(require("ce.hub.data.trains.RollingStockStatePublisher").options.ceTypes or {},
+                or hasActiveCeType(require("ce.hub.data.rollingstock.RollingStockStatePublisher").options.ceTypes or {},
                                    "rollingStock")
             ) then
             StatePublisherRegistry.registerStatePublishers(pub)
@@ -89,7 +89,7 @@ function HubBridgeConnector.registerStatePublishers()
         if shouldRegister(pub, "train") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
-        local pub = require("ce.hub.data.trains.RollingStockStatePublisher")
+        local pub = require("ce.hub.data.rollingstock.RollingStockStatePublisher")
         if shouldRegister(pub, "rollingStock") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
 end

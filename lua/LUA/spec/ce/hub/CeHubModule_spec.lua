@@ -10,11 +10,11 @@
         clearModule("ce.hub.ModuleRegistry")
         clearModule("ce.hub.MainLoopRunner")
         clearModule("ce.hub.StatePublisherRegistry")
-        clearModule("ce.hub.bridge.HubBridgeConnector")
+        clearModule("ce.hub.HubBridgeConnector")
         clearModule("ce.hub.CeHubModule")
-        clearModule("ce.hub.data.trains.TracksStatePublisher")
+        clearModule("ce.hub.data.tracks.TracksStatePublisher")
         clearModule("ce.hub.data.trains.TrainStatePublisher")
-        clearModule("ce.hub.data.trains.RollingStockStatePublisher")
+        clearModule("ce.hub.data.rollingstock.RollingStockStatePublisher")
         clearModule("ce.hub.data.trains.TrainDetection")
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.databridge.IoInit")
@@ -53,9 +53,9 @@
         end
 
         assert.is_false(ServerExchangeCoordinator.checkServerStatus)
-        assert.is_true(publisherNames["ce.hub.data.trains.TracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.tracks.TracksStatePublisher"])
         assert.is_true(publisherNames["ce.hub.data.trains.TrainStatePublisher"])
-        assert.is_true(publisherNames["ce.hub.data.trains.RollingStockStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.rollingstock.RollingStockStatePublisher"])
         assert.is_nil(publisherNames["ce.hub.data.time.TimeStatePublisher"])
     end)
 
@@ -83,9 +83,9 @@
             publisherNames[statePublisher.name] = true
         end
 
-        assert.is_true(publisherNames["ce.hub.data.trains.TracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.tracks.TracksStatePublisher"])
         assert.is_true(publisherNames["ce.hub.data.trains.TrainStatePublisher"])
-        assert.is_true(publisherNames["ce.hub.data.trains.RollingStockStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.rollingstock.RollingStockStatePublisher"])
         assert.is_true(publisherNames["ce.mods.road.data.RoadStatePublisher"])
         assert.is_nil(publisherNames["ce.hub.data.time.TimeStatePublisher"])
     end)

@@ -1,8 +1,8 @@
-insulate("ce.hub.bridge.HubBridgeConnector", function ()
+insulate("ce.hub.HubBridgeConnector", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     before_each(function ()
-        clearModule("ce.hub.bridge.HubBridgeConnector")
+        clearModule("ce.hub.HubBridgeConnector")
         clearModule("ce.hub.data.dynamic.DynamicUpdateRegistry")
         clearModule("ce.databridge.ServerExchangeCoordinator")
         clearModule("ce.databridge.IncomingCommandExecutor")
@@ -11,7 +11,7 @@ insulate("ce.hub.bridge.HubBridgeConnector", function ()
 
     it("registers commands for dynamic update selection", function ()
         local HubCeTypes = require("ce.hub.data.HubCeTypes")
-        local HubBridgeConnector = require("ce.hub.bridge.HubBridgeConnector")
+        local HubBridgeConnector = require("ce.hub.HubBridgeConnector")
         local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
         local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
 

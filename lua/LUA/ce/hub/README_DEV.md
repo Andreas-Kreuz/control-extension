@@ -39,6 +39,24 @@ Alle Klassen unter `lua/LUA/ce/**/*StatePublisher.lua` folgen demselben Grundmus
 - StatePublisher werden nicht direkt von Fachlogik genutzt, sondern über ein passendes `*BridgeConnector`-Modul beim `StatePublisherRegistry` angemeldet.
 - Dadurch bleiben Domänenlogik und Web-Export lose gekoppelt.
 
+## Bridge-Anbindung
+
+### Zweck
+
+Der `HubBridgeConnector` registriert die StatePublisher des Hubs an der `StatePublisherRegistry`, damit diese ihre Daten über den `DataChangeBus` bereitstellen.
+
+### Dateien
+
+- `HubBridgeConnector.lua` — verbindet Hub-StatePublisher mit der StatePublisherRegistry
+
+### Design-Entscheidung
+
+Der BridgeConnector trennt Domänenlogik und Web-Export:
+
+- Fachmodule kennen den BridgeConnector nicht.
+- Der BridgeConnector kennt die StatePublisher und meldet sie an.
+- Dadurch bleibt die Kopplung zwischen Fachlogik und Datenexport minimal.
+
 ### 3. Singleton-artiger Modulzustand
 
 - Jeder StatePublisher ist eine modulweite Tabelle mit lokal gehaltenem Zustand.

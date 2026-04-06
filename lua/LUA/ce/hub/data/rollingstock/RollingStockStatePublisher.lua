@@ -1,4 +1,4 @@
-﻿if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.RollingStockStatePublisher ...") end
+if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockStatePublisher ...") end
 local TrainDetection = require("ce.hub.data.trains.TrainDetection")
 local RollingStockInfoUpdater = require("ce.hub.data.rollingstock.RollingStockInfoUpdater")
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
@@ -6,7 +6,7 @@ local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegis
 local RollingStockStatePublisher = {}
 RollingStockStatePublisher.enabled = true
 local initialized = false
-RollingStockStatePublisher.name = "ce.hub.data.trains.RollingStockStatePublisher"
+RollingStockStatePublisher.name = "ce.hub.data.rollingstock.RollingStockStatePublisher"
 
 RollingStockStatePublisher.options = {
     ceTypes = {
