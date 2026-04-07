@@ -41,7 +41,7 @@ siehe [apps/web-server/README.md](../apps/web-server/README.md)
 
 siehe [apps/web-app/README.md](../apps/web-app/README.md)
 
-- [ ] TODO: Anzeige und durchsuchen der Web-API
+- [x] Anzeige und durchsuchen der Web-API
 - [x] Anzeige der Züge
   - [x] Kameras auf Züge ausrichten
   - [ ] TODO: Züge filtern
