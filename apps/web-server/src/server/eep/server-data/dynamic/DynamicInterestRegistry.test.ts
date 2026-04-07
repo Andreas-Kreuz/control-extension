@@ -17,18 +17,18 @@ function testRetainOnlyStartsOnceForSameInterest(): void {
     commands.push(command);
   });
 
-  registry.retainToken('socket:a|room:TrainDynamic/ICE-1', 'ce.hub.TrainDynamic', 'ICE-1');
-  registry.retainToken('socket:b|room:TrainDynamic/ICE-1', 'ce.hub.TrainDynamic', 'ICE-1');
+  registry.retainToken('socket:a|room:Train/ICE-1', 'ce.hub.Train', 'ICE-1');
+  registry.retainToken('socket:b|room:Train/ICE-1', 'ce.hub.Train', 'ICE-1');
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.TrainDynamic|ICE-1']);
+  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
 
-  registry.releaseToken('socket:a|room:TrainDynamic/ICE-1');
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.TrainDynamic|ICE-1']);
+  registry.releaseToken('socket:a|room:Train/ICE-1');
+  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
 
-  registry.releaseToken('socket:b|room:TrainDynamic/ICE-1');
+  registry.releaseToken('socket:b|room:Train/ICE-1');
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.hub.TrainDynamic|ICE-1',
-    'HubDynamicData.stopUpdatesFor|ce.hub.TrainDynamic|ICE-1',
+    'HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1',
+    'HubDynamicData.stopUpdatesFor|ce.hub.Train|ICE-1',
   ]);
 }
 
@@ -38,18 +38,18 @@ async function testLeasedTokenRefreshesUntilTtlExpires(): Promise<void> {
     commands.push(command);
   });
 
-  registry.touchLeasedToken('json:ce.hub.RollingStockDynamic:RS-1', 'ce.hub.RollingStockDynamic', 'RS-1', 40);
+  registry.touchLeasedToken('json:ce.hub.RollingStock:RS-1', 'ce.hub.RollingStock', 'RS-1', 40);
   await new Promise((resolve) => setTimeout(resolve, 20));
-  registry.touchLeasedToken('json:ce.hub.RollingStockDynamic:RS-1', 'ce.hub.RollingStockDynamic', 'RS-1', 40);
+  registry.touchLeasedToken('json:ce.hub.RollingStock:RS-1', 'ce.hub.RollingStock', 'RS-1', 40);
   await new Promise((resolve) => setTimeout(resolve, 20));
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.RollingStockDynamic|RS-1']);
+  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.RollingStock|RS-1']);
 
   await new Promise((resolve) => setTimeout(resolve, 60));
 
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.hub.RollingStockDynamic|RS-1',
-    'HubDynamicData.stopUpdatesFor|ce.hub.RollingStockDynamic|RS-1',
+    'HubDynamicData.startUpdatesFor|ce.hub.RollingStock|RS-1',
+    'HubDynamicData.stopUpdatesFor|ce.hub.RollingStock|RS-1',
   ]);
 }
 
