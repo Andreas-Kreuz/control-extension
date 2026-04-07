@@ -7,7 +7,8 @@
 - Do not reset existing local user changes
 - Markdown files must use correct German umlauts — ASCII substitutions (`ae`, `oe`, `ue`) only for Lua identifiers
 - Generated build artifacts (`*.tsbuildinfo`) must not be committed; check `.gitignore` for new cache files
-- On Windows/PowerShell, `yarn.cmd` is more robust than `yarn` due to execution policy
+- On Windows/PowerShell, always use `yarn.cmd` instead of `yarn`; PowerShell may route `yarn` through `yarn.ps1`, which can be blocked by execution policy
+- Lua tool config locations: `luacheck` uses `lua/.luacheckrc`; `busted` uses `lua/.busted`
 
 ## Review Focus
 
