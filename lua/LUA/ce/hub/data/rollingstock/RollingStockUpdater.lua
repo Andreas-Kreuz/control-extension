@@ -91,8 +91,8 @@ function RollingStockUpdater.runUpdate()
                 if (SyncPolicy.shouldUpdateField(fieldPolicies, "rotX", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotY", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotZ", isSelected))
-                    and _G.EEPRollingstockGetRotation then
-                    local ok, rotX, rotY, rotZ = _G.EEPRollingstockGetRotation(rs.rollingStockName)
+                    and EEPRollingstockGetRotation then
+                    local ok, rotX, rotY, rotZ = EEPRollingstockGetRotation(rs.rollingStockName)
                     if ok then rs:setRotation(rotX, rotY, rotZ) end
                 end
                 if info.dirty or info.moved or info.created then
@@ -113,7 +113,7 @@ function RollingStockUpdater.runUpdate()
                         end
                     end
                     if SyncPolicy.shouldUpdateField(fieldPolicies, "mileage", isSelected) then
-                        local hasMileage, mileage = _G.EEPRollingstockGetMileage(rs.rollingStockName)
+                        local hasMileage, mileage = EEPRollingstockGetMileage(rs.rollingStockName)
                         if hasMileage then rs:setMileage(mileage) end
                     end
                 end
