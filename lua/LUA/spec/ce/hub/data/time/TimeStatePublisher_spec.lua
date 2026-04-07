@@ -1,5 +1,9 @@
 insulate("ce.hub.data.time.TimeStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local originalEEPTime = _G.EEPTime
+    local originalEEPTimeH = _G.EEPTimeH
+    local originalEEPTimeM = _G.EEPTimeM
+    local originalEEPTimeS = _G.EEPTimeS
 
     before_each(function ()
         clearModule("ce.hub.data.time.TimeStatePublisher")
@@ -18,10 +22,10 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
     end)
 
     after_each(function ()
-        rawset(_G, "EEPTime", nil)
-        rawset(_G, "EEPTimeH", nil)
-        rawset(_G, "EEPTimeM", nil)
-        rawset(_G, "EEPTimeS", nil)
+        rawset(_G, "EEPTime", originalEEPTime)
+        rawset(_G, "EEPTimeH", originalEEPTimeH)
+        rawset(_G, "EEPTimeM", originalEEPTimeM)
+        rawset(_G, "EEPTimeS", originalEEPTimeS)
         _G.EEPGetTimeLapse:revert()
     end)
 

@@ -1,5 +1,11 @@
 insulate("ce.hub.data.version.VersionDataCollector", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local originalEEPVer = _G.EEPVer
+    local originalEEPLng = _G.EEPLng
+    local originalEEPGetAnlVer = _G.EEPGetAnlVer
+    local originalEEPGetAnlLng = _G.EEPGetAnlLng
+    local originalEEPGetAnlName = _G.EEPGetAnlName
+    local originalEEPGetAnlPath = _G.EEPGetAnlPath
 
     before_each(function ()
         clearModule("ce.hub.data.version.VersionDataCollector")
@@ -14,12 +20,12 @@ insulate("ce.hub.data.version.VersionDataCollector", function ()
     end)
 
     after_each(function ()
-        rawset(_G, "EEPVer", nil)
-        rawset(_G, "EEPLng", nil)
-        rawset(_G, "EEPGetAnlVer", nil)
-        rawset(_G, "EEPGetAnlLng", nil)
-        rawset(_G, "EEPGetAnlName", nil)
-        rawset(_G, "EEPGetAnlPath", nil)
+        rawset(_G, "EEPVer", originalEEPVer)
+        rawset(_G, "EEPLng", originalEEPLng)
+        rawset(_G, "EEPGetAnlVer", originalEEPGetAnlVer)
+        rawset(_G, "EEPGetAnlLng", originalEEPGetAnlLng)
+        rawset(_G, "EEPGetAnlName", originalEEPGetAnlName)
+        rawset(_G, "EEPGetAnlPath", originalEEPGetAnlPath)
     end)
 
     it("collects optional EEP and layout version metadata", function ()

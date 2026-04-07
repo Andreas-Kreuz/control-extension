@@ -1,5 +1,13 @@
 insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local originalEEPGetSeason = _G.EEPGetSeason
+    local originalEEPGetCloudsIntensity = _G.EEPGetCloudsIntensity
+    local originalEEPGetCloudsMode = _G.EEPGetCloudsMode
+    local originalEEPGetWindIntensity = _G.EEPGetWindIntensity
+    local originalEEPGetRainIntensity = _G.EEPGetRainIntensity
+    local originalEEPGetSnowIntensity = _G.EEPGetSnowIntensity
+    local originalEEPGetHailIntensity = _G.EEPGetHailIntensity
+    local originalEEPGetFogIntensity = _G.EEPGetFogIntensity
 
     before_each(function ()
         clearModule("ce.hub.data.weather.WeatherStatePublisher")
@@ -21,14 +29,14 @@ insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
     end)
 
     after_each(function ()
-        rawset(_G, "EEPGetSeason", nil)
-        rawset(_G, "EEPGetCloudsIntensity", nil)
-        rawset(_G, "EEPGetCloudsMode", nil)
-        rawset(_G, "EEPGetWindIntensity", nil)
-        rawset(_G, "EEPGetRainIntensity", nil)
-        rawset(_G, "EEPGetSnowIntensity", nil)
-        rawset(_G, "EEPGetHailIntensity", nil)
-        rawset(_G, "EEPGetFogIntensity", nil)
+        rawset(_G, "EEPGetSeason", originalEEPGetSeason)
+        rawset(_G, "EEPGetCloudsIntensity", originalEEPGetCloudsIntensity)
+        rawset(_G, "EEPGetCloudsMode", originalEEPGetCloudsMode)
+        rawset(_G, "EEPGetWindIntensity", originalEEPGetWindIntensity)
+        rawset(_G, "EEPGetRainIntensity", originalEEPGetRainIntensity)
+        rawset(_G, "EEPGetSnowIntensity", originalEEPGetSnowIntensity)
+        rawset(_G, "EEPGetHailIntensity", originalEEPGetHailIntensity)
+        rawset(_G, "EEPGetFogIntensity", originalEEPGetFogIntensity)
     end)
 
     it("publishes global weather data as ce.hub.Weather", function ()
