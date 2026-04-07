@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStock ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStock ...") end
 
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local StorageUtility = require("ce.hub.util.StorageUtility")

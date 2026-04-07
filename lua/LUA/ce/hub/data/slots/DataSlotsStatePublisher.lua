@@ -1,6 +1,5 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotsStatePublisher ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local DataSlotDtoFactory = require("ce.hub.data.slots.DataSlotDtoFactory")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotsStatePublisher ...") end
+local DataSlotsPublisher = require("ce.hub.data.slots.DataSlotsPublisher")
 
 local DataSlotsStatePublisher = {}
 DataSlotsStatePublisher.name = "ce.hub.data.slots.DataSlotsStatePublisher"
@@ -9,54 +8,20 @@ local initialized = false
 
 DataSlotsStatePublisher.options = {
     ceTypes = {
-        saveSlot = { ceType = "ce.hub.SaveSlot", mode = "all" },
-        freeSlot = { ceType = "ce.hub.FreeSlot", mode = "all" }
+        saveSlots = { ceType = "ce.hub.SaveSlot", mode = "all" },
+        freeSlots = { ceType = "ce.hub.FreeSlot", mode = "all" }
     }
 }
-local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
-local StorageUtility = require("ce.hub.util.StorageUtility")
-local lastSlots = {}
-
-local function updateSlot(id, name, data)
-    local oldSlot = lastSlots.id
-    local newSlot = { id = id, name = name, data = data }
-    if not oldSlot or oldSlot.id ~= id or oldSlot.name ~= name or oldSlot.data ~= data then lastSlots[id] = newSlot end
-    return newSlot
-end
 
 function DataSlotsStatePublisher.initialize()
     initialized = true
-    lastSlots = {}
 end
 
 function DataSlotsStatePublisher.syncState()
     -- nothing todo
     if not DataSlotsStatePublisher.enabled then return end
     if not initialized then DataSlotsStatePublisher.initialize() end
-
-    local filledSlots = {}
-    local emptySlots = {}
-
-    DataSlotNameResolver.updateSlotNames()
-    for id = 1, 1000 do
-        local hResult, data = EEPLoadData(id)
-        if hResult then
-            local name = DataSlotNameResolver.getSlotName(id) or StorageUtility.getName(id) or "?"
-            local slot = updateSlot(id, name, data)
-            filledSlots[id] = slot
-            emptySlots[id] = nil
-        else
-            local slot = updateSlot(id)
-            filledSlots[id] = nil
-            emptySlots[id] = slot
-        end
-    end
-
-    -- TODO Update on changes only
-    DataChangeBus.fireListChange(DataSlotDtoFactory.createFilledDataSlotDtoList(filledSlots));
-    DataChangeBus.fireListChange(DataSlotDtoFactory.createEmptyDataSlotDtoList(emptySlots));
-
-    return {}
+    return DataSlotsPublisher.syncState()
 end
 
 return DataSlotsStatePublisher

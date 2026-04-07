@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.sync.SyncPolicy ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.sync.SyncPolicy ...") end
 
 local SyncPolicy = {}
 

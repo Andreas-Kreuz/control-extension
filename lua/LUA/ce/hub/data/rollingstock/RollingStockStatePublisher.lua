@@ -1,7 +1,5 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockStatePublisher ...") end
-local TrainDetection = require("ce.hub.data.trains.TrainDetection")
-local RollingStockInfoUpdater = require("ce.hub.data.rollingstock.RollingStockInfoUpdater")
-local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockStatePublisher ...") end
+local RollingStockPublisher = require("ce.hub.data.rollingstock.RollingStockPublisher")
 
 local RollingStockStatePublisher = {}
 RollingStockStatePublisher.enabled = true
@@ -10,7 +8,7 @@ RollingStockStatePublisher.name = "ce.hub.data.rollingstock.RollingStockStatePub
 
 RollingStockStatePublisher.options = {
     ceTypes = {
-        rollingStock = { ceType = "ce.hub.RollingStock", mode = "selected" }
+        rollingStocks = { ceType = "ce.hub.RollingStock", mode = "selected" }
     },
     fields = {
         trainName = { collect = true },
@@ -53,14 +51,7 @@ function RollingStockStatePublisher.syncState()
     if not RollingStockStatePublisher.enabled then return end
     if not initialized then RollingStockStatePublisher.initialize() end
 
-    local snapshot = TrainDetection.getCurrentSnapshot()
-    if not snapshot then return {} end
-
-    RollingStockInfoUpdater.refresh(snapshot.allKnownTrains, RollingStockStatePublisher.options.fields,
-                                    snapshot.selectedCeTypes)
-    RollingStockRegistry.fireChangeRollingStockEvents(RollingStockStatePublisher.options.ceTypes,
-                                                      RollingStockStatePublisher.options.fields)
-    return {}
+    return RollingStockPublisher.syncState(RollingStockStatePublisher.options)
 end
 
 return RollingStockStatePublisher

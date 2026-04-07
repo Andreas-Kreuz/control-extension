@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.publish.InternalDataStore ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.publish.InternalDataStore ...") end
 
 local InternalDataStore = {
     ceTypes = {}

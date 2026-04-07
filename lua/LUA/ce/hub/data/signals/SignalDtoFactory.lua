@@ -1,5 +1,5 @@
 -- TypeScript LuaDtos: apps/web-server/src/server/ce/dto/signals/SignalLuaDto.ts, WaitingOnSignalLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local SignalDtoFactory = {}

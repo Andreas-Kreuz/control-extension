@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDataCollector ...") end
 
 local SwitchDataCollector = {}
 

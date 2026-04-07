@@ -1,6 +1,5 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataStatePublisher ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local FrameDataDtoFactory = require("ce.hub.data.framedata.FrameDataDtoFactory")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataStatePublisher ...") end
+local FrameDataPublisher = require("ce.hub.data.framedata.FrameDataPublisher")
 
 FrameDataStatePublisher = {}
 FrameDataStatePublisher.enabled = true
@@ -22,18 +21,7 @@ end
 function FrameDataStatePublisher.syncState()
     if not FrameDataStatePublisher.enabled then return end
     if not initialized then FrameDataStatePublisher.initialize() end
-
-    local entries = {
-        {
-            id = "frameData",
-            framesPerSecond = EEPGetFramesPerSecond and EEPGetFramesPerSecond() or nil,
-            currentFrame = EEPGetCurrentFrame and EEPGetCurrentFrame() or nil,
-            currentRenderFrame = EEPGetCurrentRenderFrame and EEPGetCurrentRenderFrame() or nil,
-        }
-    }
-
-    DataChangeBus.fireListChange(FrameDataDtoFactory.createFrameDataDtoList(entries))
-    return {}
+    return FrameDataPublisher.syncState()
 end
 
 return FrameDataStatePublisher

@@ -1,4 +1,4 @@
-﻿if AkDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
+﻿if CeDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
 
 ---@class CeHubModule: CeModule
 CeHubModule = {}
@@ -12,6 +12,22 @@ local Scheduler = require("ce.hub.scheduler.Scheduler")
 local HubBridgeConnector = require("ce.hub.HubBridgeConnector")
 local ServerEventDispatcher = require("ce.hub.publish.ServerEventDispatcher")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+local ModulesUpdater = require("ce.hub.data.modules.ModulesUpdater")
+local VersionUpdater = require("ce.hub.data.version.VersionUpdater")
+local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
+local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
+local DataSlotsUpdater = require("ce.hub.data.slots.DataSlotsUpdater")
+local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
+local TimeUpdater = require("ce.hub.data.time.TimeUpdater")
+local WeatherUpdater = require("ce.hub.data.weather.WeatherUpdater")
+local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
+local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
+local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
+local SwitchUpdater = require("ce.hub.data.switches.SwitchUpdater")
+local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
+local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
 
 CeTypeRegistry.registerCeTypes(
     { ceType = CeHubModule.CeTypes.Module, keyId = "id", owner = CeHubModule.name },
@@ -34,58 +50,96 @@ CeTypeRegistry.registerCeTypes(
     { ceType = CeHubModule.CeTypes.TramTrack, keyId = "id", owner = CeHubModule.name }
 )
 
+local publisherModulePaths = {
+    modules = "ce.hub.data.modules.ModulesStatePublisher",
+    version = "ce.hub.data.version.VersionStatePublisher",
+    runtimes = "ce.hub.data.runtime.RuntimeStatePublisher",
+    frameData = "ce.hub.data.framedata.FrameDataStatePublisher",
+    slots = "ce.hub.data.slots.DataSlotsStatePublisher",
+    signals = "ce.hub.data.signals.SignalStatePublisher",
+    switches = "ce.hub.data.switches.SwitchStatePublisher",
+    structures = "ce.hub.data.structures.StructureStatePublisher",
+    time = "ce.hub.data.time.TimeStatePublisher",
+    weather = "ce.hub.data.weather.WeatherStatePublisher",
+    tracks = "ce.hub.data.tracks.TracksStatePublisher",
+    trains = "ce.hub.data.trains.TrainStatePublisher",
+    rollingStocks = "ce.hub.data.rollingstock.RollingStockStatePublisher"
+}
+
+local function publisherModule(alias)
+    local modulePath = publisherModulePaths[alias]
+    assert(modulePath, "Unknown publisher alias: " .. tostring(alias))
+    return require(modulePath)
+end
+
+local function runInitialDataDiscovery()
+    local signalOptions = publisherModule("signals").options
+    local structureOptions = publisherModule("structures").options
+
+    ModulesUpdater.runUpdate()
+    VersionUpdater.runUpdate()
+    RuntimeUpdater.runUpdate()
+    FrameDataUpdater.runUpdate()
+    DataSlotsUpdater.runUpdate()
+
+    SignalDiscovery.runInitialDiscovery()
+    SwitchDiscovery.runInitialDiscovery()
+    StructureDiscovery.runInitialDiscovery()
+    TrainDiscovery.runInitialDiscovery()
+
+    SignalUpdater.runUpdate(signalOptions)
+    SwitchUpdater.runUpdate()
+    StructureUpdater.runInitialUpdate(structureOptions)
+    TimeUpdater.runUpdate()
+    WeatherUpdater.runUpdate()
+end
+
+local function runDataUpdates()
+    local signalOptions = publisherModule("signals").options
+    local structureOptions = publisherModule("structures").options
+    local trainFieldOptions = publisherModule("trains").options.fields
+    local rollingStockOptions = publisherModule("rollingStocks").options
+
+    ModulesUpdater.runUpdate()
+    VersionUpdater.runUpdate()
+    RuntimeUpdater.runUpdate()
+    FrameDataUpdater.runUpdate()
+    DataSlotsUpdater.runUpdate()
+
+    SignalDiscovery.runDiscovery()
+    SwitchDiscovery.runDiscovery()
+    StructureDiscovery.runDiscovery()
+    TrainDiscovery.runDiscovery()
+
+    SignalUpdater.runUpdate(signalOptions)
+    SwitchUpdater.runUpdate()
+    StructureUpdater.runUpdate(structureOptions)
+    TimeUpdater.runUpdate()
+    WeatherUpdater.runUpdate()
+    TrainUpdater.runUpdate(trainFieldOptions)
+    RollingStockUpdater.runUpdate(rollingStockOptions)
+end
+
 function CeHubModule.init()
     if not CeHubModule.enabled or initialized then return end
     HubBridgeConnector.registerStatePublishers()
     HubBridgeConnector.registerFunctions()
+    runInitialDataDiscovery()
     initialized = true
 end
 
 function CeHubModule.run()
     if not CeHubModule.enabled then return end
+    runDataUpdates()
     Scheduler:runTasks()
-end
-
-local publisherModulePaths = {
-    modules = "ce.hub.data.modules.ModulesStatePublisher",
-    version = "ce.hub.data.version.VersionStatePublisher",
-    runtime = "ce.hub.data.runtime.RuntimeStatePublisher",
-    frameData = "ce.hub.data.framedata.FrameDataStatePublisher",
-    slots = "ce.hub.data.slots.DataSlotsStatePublisher",
-    signal = "ce.hub.data.signals.SignalStatePublisher",
-    switch = "ce.hub.data.switches.SwitchStatePublisher",
-    structure = "ce.hub.data.structures.StructureStatePublisher",
-    time = "ce.hub.data.time.TimeStatePublisher",
-    weather = "ce.hub.data.weather.WeatherStatePublisher",
-    tracks = "ce.hub.data.tracks.TracksStatePublisher",
-    train = "ce.hub.data.trains.TrainStatePublisher",
-    rollingStock = "ce.hub.data.rollingstock.RollingStockStatePublisher"
-}
-
-local publisherAliasGroups = {
-    trains = { "tracks", "train", "rollingStock" }
-}
-
-local function modulePathsForAlias(alias)
-    if publisherModulePaths[alias] then
-        return { publisherModulePaths[alias] }
-    end
-
-    local grouped = publisherAliasGroups[alias]
-    if not grouped then return {} end
-
-    local modulePaths = {}
-    for _, groupAlias in ipairs(grouped) do
-        modulePaths[#modulePaths + 1] = publisherModulePaths[groupAlias]
-    end
-    return modulePaths
 end
 
 local function applyPublisherSync(publisherSync)
     if type(publisherSync) ~= "table" then return end
 
     for alias, syncOptions in pairs(publisherSync) do
-        for _, modulePath in ipairs(modulePathsForAlias(alias)) do
+        local modulePath = publisherModulePaths[alias]
+        if modulePath then
             local pub = require(modulePath)
             if syncOptions.enabled ~= nil then
                 pub.enabled = syncOptions.enabled == true

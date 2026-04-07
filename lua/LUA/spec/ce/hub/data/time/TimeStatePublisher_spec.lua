@@ -4,6 +4,8 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
     before_each(function ()
         clearModule("ce.hub.data.time.TimeStatePublisher")
         clearModule("ce.hub.data.time.TimeDtoFactory")
+        clearModule("ce.hub.data.time.TimeRegistry")
+        clearModule("ce.hub.data.time.TimeUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -25,9 +27,10 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
 
     it("fires time ceTypes with the existing wire format", function ()
         local TimeStatePublisher = require("ce.hub.data.time.TimeStatePublisher")
+        local TimeUpdater = require("ce.hub.data.time.TimeUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        TimeStatePublisher.initialize()
+        TimeUpdater.runUpdate()
         TimeStatePublisher.syncState()
 
         assert.same({

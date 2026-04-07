@@ -1,35 +1,48 @@
-# Daten Sammlung
+# Züge und Discovery
 
-## Züge
+Der Zugpfad ist der zentrale Discovery-Pfad für die bewegten Weltobjekte im Hub.
 
-Als Züge werden alle Fahrzeugverbände in EEP bezeichnet. Ein Fahrzeugverband besteht aus mehreren Rollmaterialien.
+## Rollen
 
-### Erkennung neuer Züge
+- `TrainDiscovery`
+  Erkennt Tracks, Züge und RollingStock-Existenz.
+  Pflegt neue und entfernte Einträge in `TrackRegistry`, `TrainRegistry` und `RollingStockRegistry`.
+- `TrainUpdater`
+  Aktualisiert bekannte Züge über Setter auf `Train`.
+- `RollingStockUpdater`
+  Aktualisiert bekannte RollingStock-Einträge über Setter auf `RollingStock`.
+- `TrainPublisher`
+  Sendet Änderungen für `ce.hub.Train`.
+- `RollingStockPublisher`
+  Sendet Änderungen für `ce.hub.RollingStock`.
+- `TrackPublisher`
+  Sendet Änderungen für die Track-CeTypes `ce.hub.AuxiliaryTrack`, `ce.hub.ControlTrack`, `ce.hub.RoadTrack`, `ce.hub.RailTrack` und `ce.hub.TramTrack`.
 
-- Neue oder bekannte Züge werden wie folgt erkannt:
-  - Erkennung durch Belegung eines Streckenabschnitts mit `EEPIs...TrackReserved`
-  - Erkennung beim Verlassen eines Depots mittels `EEPOnTrainExitTrainyard`
+## Discovery-Regeln
 
-- Die folgenden Züge können neu oder bereits bekannt sein, müssen aber garantiert aktualsisiert werden:
-  - Erkennung beim Entkoppeln `EEPOnTrainLooseCoupling`
-  - Erkennung beim Ankoppeln `EEPOnTrainCoupling`
+Neue oder geänderte Züge werden insbesondere über die aktuelle Gleisbelegung und zugbezogene EEP-Ereignisse erkannt.
 
-### Aktualisierung von Zügen
+Wichtig ist dabei:
 
-1. Alle Einstellungen inklusive Rollmaterial aktualisieren
-   - Entfernte Züge müssen entfernt werden (inkl. deren Rollmaterial)
-   - Aktualisiert werden müssen:
-     - Neue Züge
-     - Züge, die durch ankoppeln oder entkoppeln neu zusammengestellt wurden
+- `TrainDiscovery` entscheidet, welche Züge und RollingStock-Elemente bekannt sind.
+- RollingStock wird nicht separat in der Welt gesucht, sondern aus der bekannten Zugzusammenstellung abgeleitet.
+- Die Track-Discovery ist Teil desselben Discovery-Laufs, damit Gleisbelegung und Zugsnapshot zusammenpassen.
 
-2. Bekannte Züge müssen aktualisiert werden, wenn sie ihre Position geändert haben
-   - Züge, die sich bewegt haben
+## Update-Regeln
 
-Folgende Zugeigenschaften werden aktualisiert:
+Ein Zug erhält ein Vollupdate, wenn er neu erkannt oder neu zusammengestellt wurde.
+Ein Teilupdate reicht aus, wenn sich nur laufend aktualisierte Felder geändert haben, etwa Geschwindigkeit oder Depotstatus.
 
-- bei Erkennung / Neuzusammenstellung (dirtyTrain)
-  - Alle Eigenschaften inklusive aller `RollingStock` Elemente des Zuges
-- bei Bewegung (movedTrain)
-  - Belegte Gleise
-  - Geschwindigkeiten
-  - Routen
+RollingStock folgt demselben Muster:
+
+- selten geänderte Felder wie Modelltyp oder Kupplungsdaten werden nur bei Bedarf neu gelesen
+- häufig geänderte Felder wie Position, Ausrichtung oder Rauchzustand werden im normalen Updater-Lauf aktualisiert
+
+## DTOs
+
+Aktiv sind heute genau zwei CeTypes in diesem Pfad:
+
+- `ce.hub.Train`
+- `ce.hub.RollingStock`
+
+Die Felder dieser DTOs sind in [../DTO.md](../DTO.md) dokumentiert.

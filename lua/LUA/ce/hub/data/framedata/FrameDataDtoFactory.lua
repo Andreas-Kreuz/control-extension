@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/framedata/FrameDataLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local FrameDataDtoFactory = {}

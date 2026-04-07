@@ -15,12 +15,12 @@ clearlog()
 --------------------------------------------------------------------
 -- Zeigt erweiterte Informationen waehrend der Initialisierung an --
 --------------------------------------------------------------------
-AkStartWithDebug = false
+CeStartWithDebug = false
 
 --------------------------------------------------------------------
 -- Zeigt erweiterte Informationen waehrend der erste Schitte an   --
 --------------------------------------------------------------------
-if AkDebugLoad then print("[#Start] Loading Ampeldemo-Grundmodelle-main ...") end
+if CeDebugLoad then print("[#Start] Loading Ampeldemo-Grundmodelle-main ...") end
 require("ce.demo-anlagen.ampel.Ampeldemo-Grundmodelle-main")
 
 --------------------------------------------------------------------

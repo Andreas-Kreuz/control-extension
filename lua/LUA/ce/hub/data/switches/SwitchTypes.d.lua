@@ -1,8 +1,20 @@
 ---@meta
 
----@class SwitchDataCollector
----@field collectInitialSwitches fun():table
----@field refreshSwitches fun(switches: table):nil
+---@class SwitchRegistry
+---@field has fun(switchId: number):boolean
+---@field add fun(switch: Switch):nil
+---@field get fun(switchId: number):Switch|nil
+---@field getAll fun():table<number, Switch>
+
+---@class SwitchDiscovery
+---@field runInitialDiscovery fun():nil
+---@field runDiscovery fun():nil
+
+---@class SwitchUpdater
+---@field runUpdate fun():nil
+
+---@class SwitchPublisher
+---@field syncState fun():table
 
 ---@class SwitchStatePublisher
 ---@field name string

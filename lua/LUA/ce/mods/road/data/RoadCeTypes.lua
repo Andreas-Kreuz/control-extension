@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadCeTypes ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadCeTypes ...") end
 
 local RoadCeTypes = {
     Intersection = "ce.mods.road.Intersection",

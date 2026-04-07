@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.IntersectionSequence ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.IntersectionSequence ...") end
 
 local Task = require("ce.hub.scheduler.Task")
 -- local Lane = require("ce.mods.road.Lane")
@@ -8,7 +8,7 @@ local Task = require("ce.hub.scheduler.Task")
 -- Klasse IntersectionSequence (schaltet mehrere Ampeln)
 ------------------------------------------------------
 local IntersectionSequence = {}
-IntersectionSequence.debug = AkStartWithDebug or false
+IntersectionSequence.debug = CeStartWithDebug or false
 ---@type table<string, TrafficLightType>
 IntersectionSequence.Type = { BUS = "BUS", CAR = "CAR", TRAM = "TRAM", PEDESTRIAN = "PEDESTRIAN", BICYCLE = "BICYCLE" }
 

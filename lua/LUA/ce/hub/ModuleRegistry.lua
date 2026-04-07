@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.ModuleRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.ModuleRegistry ...") end
 local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local TableUtils = require("ce.hub.util.TableUtils")
 

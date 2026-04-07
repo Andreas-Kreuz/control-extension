@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.HubCeTypes ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.HubCeTypes ...") end
 
 local HubCeTypes = {
     Module = "ce.hub.Module",

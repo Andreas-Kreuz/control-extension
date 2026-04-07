@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.StatePublisherRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.StatePublisherRegistry ...") end
 
 local StatePublisherRegistry = {}
 local registeredStatePublishers = {}

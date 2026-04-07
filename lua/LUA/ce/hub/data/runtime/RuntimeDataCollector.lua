@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDataCollector ...") end
 
 local RuntimeDataCollector = {}
 

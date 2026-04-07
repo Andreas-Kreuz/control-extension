@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitDataCollector ...") end
 local Line = require("ce.mods.transit.Line")
 local TransitSettings = require("ce.mods.transit.TransitSettings")
 

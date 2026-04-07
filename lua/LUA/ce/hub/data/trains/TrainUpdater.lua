@@ -1,60 +1,25 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainInfoUpdater ...") end
-local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainUpdater ...") end
+
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
+local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
 
 local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
-local TrainInfoUpdater = {}
-TrainInfoUpdater.debug = AkStartWithDebug or false
+local TrainUpdater = {}
+TrainUpdater.debug = CeStartWithDebug or false
 
 local function shouldCollect(fieldOptions, fieldName)
     local field = fieldOptions and fieldOptions[fieldName] or nil
     return field == nil or field.collect ~= false
 end
 
-local function fillTrackInfoFromTrain(train, info)
-    local firstRollingStock = TrainRegistry.rollingStockNameInTrain(train.name, 0)
-    local ok, trackId, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
-    assert(ok, "Rollingstock not found: " .. firstRollingStock)
-
-    local trackType = "control"
-    if trackTypeId == 1 then trackType = "rail" end
-    if trackTypeId == 2 then trackType = "road" end
-    if trackTypeId == 3 then trackType = "tram" end
-    if trackTypeId == 4 then trackType = "auxiliary" end
-
-    info.tracks = { [tostring(trackId)] = trackId }
-    info.trackType = trackType
-    if TrainInfoUpdater.debug then
-        print("[#TrainInfoUpdater] TRAIN DETECTED: " .. trackType .. " -> " .. trackTypeId)
-    end
-end
-
-local function ensureTrackInfo(train, info)
-    if (not info.tracks or not info.trackType) and not train:getTrackType() then
-        fillTrackInfoFromTrain(train, info)
-    elseif not info.trackType and train:getTrackType() then
-        info.trackType = train:getTrackType()
-    end
-end
-
-local function ensureTrainRollingStock(train, info)
-    if info.dirty and not info.rollingStockInitialized then
-        TrainRegistry.initRollingStock(train)
-        info.rollingStockInitialized = true
-    end
-end
-
-function TrainInfoUpdater.refresh(allKnownTrains, fieldOptions)
-    assert(type(allKnownTrains) == "table", "Need allKnownTrains as table")
-
+function TrainUpdater.runUpdate(fieldOptions)
     local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
 
-    for trainName, info in pairs(allKnownTrains) do
-        if TrainInfoUpdater.debug then print(string.format("[#TrainInfoUpdater] updating train %s", trainName)) end
-        local train = TrainRegistry.forName(trainName)
-        ensureTrainRollingStock(train, info)
-        ensureTrackInfo(train, info)
+    for trainName, train in pairs(TrainRegistry.getAll()) do
+        local info = TrainDiscoveryCache.get(trainName) or {}
+        if TrainUpdater.debug then print(string.format("[#TrainUpdater] updating train %s", trainName)) end
 
         if shouldCollect(fieldOptions, "route") then
             local routeOk, routeName = EEPGetTrainRoute(train.name)
@@ -77,14 +42,14 @@ function TrainInfoUpdater.refresh(allKnownTrains, fieldOptions)
             end
         end
         if shouldCollect(fieldOptions, "speed") then
-            train:setSpeed(info.speed)
+            train:setSpeed(info.speed or 0)
         end
         if shouldCollect(fieldOptions, "movesForward") and not shouldCollect(fieldOptions, "speed") then
-            train:setMovesForward(info.speed >= 0)
+            train:setMovesForward((info.speed or 0) >= 0)
         end
         if shouldCollect(fieldOptions, "targetSpeed") then
             local _, targetSpeed = EEPGetTrainSpeed(train.name, true)
-            train:setTargetSpeed(targetSpeed or info.speed)
+            train:setTargetSpeed(targetSpeed or info.speed or 0)
         end
         if shouldCollect(fieldOptions, "couplingFront") and EEPGetTrainCouplingFront then
             local ok, trainCouplingFront = EEPGetTrainCouplingFront(train.name)
@@ -109,4 +74,4 @@ function TrainInfoUpdater.refresh(allKnownTrains, fieldOptions)
     end
 end
 
-return TrainInfoUpdater
+return TrainUpdater

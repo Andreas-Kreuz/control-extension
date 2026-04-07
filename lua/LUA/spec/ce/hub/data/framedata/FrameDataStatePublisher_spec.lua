@@ -4,7 +4,10 @@ insulate("FrameDataStatePublisher", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.framedata.FrameDataDtoFactory")
+        clearModule("ce.hub.data.framedata.FrameDataPublisher")
+        clearModule("ce.hub.data.framedata.FrameDataRegistry")
         clearModule("ce.hub.data.framedata.FrameDataStatePublisher")
+        clearModule("ce.hub.data.framedata.FrameDataUpdater")
         clearModule("ce.hub.publish.DataChangeBus")
 
         stubFPS = stub(_G, "EEPGetFramesPerSecond", function () return 60 end)
@@ -21,12 +24,14 @@ insulate("FrameDataStatePublisher", function ()
     it("publishes frame data as a single entry", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")
+        local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
         local published = {}
 
         DataChangeBus.fireListChange = function (ceType, keyId, list)
             table.insert(published, { ceType = ceType, keyId = keyId, list = list })
         end
 
+        FrameDataUpdater.runUpdate()
         FrameDataStatePublisher.syncState()
         assert.equals(1, #published)
         assert.equals("ce.hub.FrameData", published[1].ceType)
@@ -46,8 +51,10 @@ insulate("FrameDataStatePublisher", function ()
         rawset(_G, "EEPGetFramesPerSecond", nil)
         rawset(_G, "EEPGetCurrentFrame", nil)
         rawset(_G, "EEPGetCurrentRenderFrame", nil)
+        clearModule("ce.hub.data.framedata.FrameDataRegistry")
 
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+        local FrameDataRegistry = require("ce.hub.data.framedata.FrameDataRegistry")
         local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")
         local published = {}
 
@@ -55,6 +62,11 @@ insulate("FrameDataStatePublisher", function ()
             table.insert(published, { ceType = ceType, keyId = keyId, list = list })
         end
 
+        FrameDataRegistry.set({
+            {
+                id = "frameData"
+            }
+        })
         FrameDataStatePublisher.syncState()
         assert.equals(1, #published)
         assert.same({

@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/time/TimeLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local TimeDtoFactory = {}

@@ -22,6 +22,7 @@ insulate("RuntimeStatePublisher", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local RuntimeDataCollector = require("ce.hub.data.runtime.RuntimeDataCollector")
         local RuntimeStatePublisher = require("ce.hub.data.runtime.RuntimeStatePublisher")
+        local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
         local published = {}
 
         DataChangeBus.fireListChange = function (ceType, keyId, list)
@@ -42,6 +43,7 @@ insulate("RuntimeStatePublisher", function ()
                 }
             }, true)
 
+        RuntimeUpdater.runUpdate()
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)
         assert.equals("ce.hub.Runtime", published[1].ceType)
@@ -56,6 +58,7 @@ insulate("RuntimeStatePublisher", function ()
                         }
                     }, published[1].list)
 
+        RuntimeUpdater.runUpdate()
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)
     end)

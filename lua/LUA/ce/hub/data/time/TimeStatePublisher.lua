@@ -1,6 +1,5 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeStatePublisher ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local TimeDtoFactory = require("ce.hub.data.time.TimeDtoFactory")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeStatePublisher ...") end
+local TimePublisher = require("ce.hub.data.time.TimePublisher")
 
 TimeStatePublisher = {}
 TimeStatePublisher.enabled = true
@@ -23,23 +22,7 @@ function TimeStatePublisher.syncState()
     if not TimeStatePublisher.enabled then return end
 
     if not initialized then TimeStatePublisher.initialize() end
-
-    local times = {
-        {
-            id = "times",           -- EEP-Web requires that data entries have an id or name tag
-            name = "times",         -- EEP-Web requires that data entries have an id or name tag
-            timeComplete = EEPTime, -- seconds since midnight
-            timeLapse = EEPGetTimeLapse and EEPGetTimeLapse() or nil,
-            timeH = EEPTimeH,
-            timeM = EEPTimeM,
-            timeS = EEPTimeS
-        }
-    }
-
-    -- TODO: Send event only with detected changes
-    DataChangeBus.fireListChange(TimeDtoFactory.createTimeDtoList(times))
-
-    return {}
+    return TimePublisher.syncState()
 end
 
 return TimeStatePublisher

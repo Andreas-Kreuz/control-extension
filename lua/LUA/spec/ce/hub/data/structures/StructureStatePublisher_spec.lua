@@ -5,8 +5,10 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.structures.StructureStatePublisher")
-        clearModule("ce.hub.data.structures.StructureDataCollector")
+        clearModule("ce.hub.data.structures.StructureDiscovery")
         clearModule("ce.hub.data.structures.StructureDtoFactory")
+        clearModule("ce.hub.data.structures.StructureRegistry")
+        clearModule("ce.hub.data.structures.StructureUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -80,10 +82,15 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
     end)
 
     it("fires initial full DTOs and later only dirty field patches", function ()
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
+        local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        StructureStatePublisher.initialize()
+        StructureDiscovery.runInitialDiscovery()
+        StructureUpdater.runInitialUpdate(StructureStatePublisher.options)
+        StructureUpdater.runUpdate(StructureStatePublisher.options)
+        StructureStatePublisher.syncState()
 
         assert.same({
                         ["#2"] = {
@@ -124,6 +131,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
         states["#2"].fire = true
         states["#3"].tag = "tree-north"
+        StructureUpdater.runUpdate(StructureStatePublisher.options)
         StructureStatePublisher.syncState()
 
         assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
@@ -151,9 +159,14 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         end)
 
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        StructureStatePublisher.initialize()
+        StructureDiscovery.runInitialDiscovery()
+        StructureUpdater.runInitialUpdate(StructureStatePublisher.options)
+        StructureUpdater.runUpdate(StructureStatePublisher.options)
+        StructureStatePublisher.syncState()
 
         assert.is_nil(DataStore.get("ce.hub.Structure", "#4"))
     end)

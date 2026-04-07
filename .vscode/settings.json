@@ -59,7 +59,7 @@
     "**/.pnp.*": true
   },
   "Lua.diagnostics.globals": [
-    "AkDebugLoad",
+    "CeDebugLoad",
     "EEPChangeInfoStructure",
     "EEPGetCameraPosition",
     "EEPGetCameraRotation",

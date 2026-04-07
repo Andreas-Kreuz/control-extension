@@ -1,7 +1,5 @@
-﻿if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainStatePublisher ...") end
-local TrainDetection = require("ce.hub.data.trains.TrainDetection")
-local TrainInfoUpdater = require("ce.hub.data.trains.TrainInfoUpdater")
-local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainStatePublisher ...") end
+local TrainPublisher = require("ce.hub.data.trains.TrainPublisher")
 
 local TrainStatePublisher = {}
 TrainStatePublisher.enabled = true
@@ -10,7 +8,7 @@ TrainStatePublisher.name = "ce.hub.data.trains.TrainStatePublisher"
 
 TrainStatePublisher.options = {
     ceTypes = {
-        train = { ceType = "ce.hub.Train", mode = "selected" }
+        trains = { ceType = "ce.hub.Train", mode = "selected" }
     },
     fields = {
         route = { collect = true },
@@ -40,12 +38,7 @@ function TrainStatePublisher.syncState()
     if not TrainStatePublisher.enabled then return end
     if not initialized then TrainStatePublisher.initialize() end
 
-    local snapshot = TrainDetection.getCurrentSnapshot()
-    if not snapshot then return {} end
-
-    TrainInfoUpdater.refresh(snapshot.allKnownTrains, TrainStatePublisher.options.fields)
-    TrainRegistry.fireChangeTrainEvents(TrainStatePublisher.options.ceTypes, TrainStatePublisher.options.fields)
-    return {}
+    return TrainPublisher.syncState(TrainStatePublisher.options)
 end
 
 return TrainStatePublisher

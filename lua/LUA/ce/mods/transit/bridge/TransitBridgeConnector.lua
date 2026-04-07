@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.bridge.TransitBridgeConnector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.bridge.TransitBridgeConnector ...") end
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
 local TransitSettings = require("ce.mods.transit.TransitSettings")

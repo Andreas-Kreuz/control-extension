@@ -3,8 +3,10 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.signals.SignalStatePublisher")
-        clearModule("ce.hub.data.signals.SignalDataCollector")
+        clearModule("ce.hub.data.signals.SignalDiscovery")
         clearModule("ce.hub.data.signals.SignalDtoFactory")
+        clearModule("ce.hub.data.signals.SignalRegistry")
+        clearModule("ce.hub.data.signals.SignalUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -48,10 +50,13 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
     end)
 
     it("fires both ceTypes with the existing wire format", function ()
+        local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
         local SignalStatePublisher = require("ce.hub.data.signals.SignalStatePublisher")
+        local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        SignalStatePublisher.initialize()
+        SignalDiscovery.runInitialDiscovery()
+        SignalUpdater.runUpdate(SignalStatePublisher.options)
         SignalStatePublisher.syncState()
 
         assert.same({

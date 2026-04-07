@@ -4,6 +4,8 @@ insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
     before_each(function ()
         clearModule("ce.hub.data.weather.WeatherStatePublisher")
         clearModule("ce.hub.data.weather.WeatherDtoFactory")
+        clearModule("ce.hub.data.weather.WeatherRegistry")
+        clearModule("ce.hub.data.weather.WeatherUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -31,9 +33,10 @@ insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
 
     it("publishes global weather data as ce.hub.Weather", function ()
         local WeatherStatePublisher = require("ce.hub.data.weather.WeatherStatePublisher")
+        local WeatherUpdater = require("ce.hub.data.weather.WeatherUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        WeatherStatePublisher.initialize()
+        WeatherUpdater.runUpdate()
         WeatherStatePublisher.syncState()
 
         assert.same({

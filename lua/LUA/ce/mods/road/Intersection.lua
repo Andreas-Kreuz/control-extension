@@ -1,5 +1,5 @@
 local TippTextFormatter = require("ce.hub.eep.TippTextFormatter")
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.Intersection ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.Intersection ...") end
 
 local Task = require("ce.hub.scheduler.Task")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
@@ -14,7 +14,7 @@ local fmt = require("ce.hub.eep.TippTextFormatter")
 ---@type table<string,Intersection>
 local allIntersections = {}
 local Intersection = {}
-Intersection.debug = AkStartWithDebug or false
+Intersection.debug = CeStartWithDebug or false
 ---@type table<string,Intersection>
 Intersection.allIntersections = {}
 

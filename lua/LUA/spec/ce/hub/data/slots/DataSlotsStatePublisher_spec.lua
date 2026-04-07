@@ -11,6 +11,8 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
+        clearModule("ce.hub.data.slots.DataSlotsRegistry")
+        clearModule("ce.hub.data.slots.DataSlotsUpdater")
 
         rawset(_G, "EEPLoadData", function (id)
             if id == 1 then return true, "payload-1" end
@@ -24,6 +26,7 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
 
     it("fires save-slot and free-slot ceTypes with the existing wire format", function ()
         local DataSlotsStatePublisher = require("ce.hub.data.slots.DataSlotsStatePublisher")
+        local DataSlotsUpdater = require("ce.hub.data.slots.DataSlotsUpdater")
         local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
         local StorageUtility = require("ce.hub.util.StorageUtility")
         local DataStore = require("ce.hub.publish.InternalDataStore")
@@ -35,7 +38,7 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         end
         StorageUtility.getName = function () return nil end
 
-        DataSlotsStatePublisher.initialize()
+        DataSlotsUpdater.runUpdate()
         DataSlotsStatePublisher.syncState()
 
         assert.same({

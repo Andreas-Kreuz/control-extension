@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDataCollector ...") end
 
 local SignalDataCollector = {}
 

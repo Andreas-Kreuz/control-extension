@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDataCollector ...") end
 
 local StructureDataCollector = {}
 

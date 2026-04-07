@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.ControlExtension ...") end
+if CeDebugLoad then print("[#Start] Loading ce.ControlExtension ...") end
 
 local ControlExtensionHub = require("ce.hub.ControlExtensionHub")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")

@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
 -- local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local TableUtils = require("ce.hub.util.TableUtils")
 

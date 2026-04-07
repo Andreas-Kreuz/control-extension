@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.MainLoopRunner ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.MainLoopRunner ...") end
 
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local DataStoreFileWriter = require("ce.databridge.DataStoreFileWriter")
@@ -10,7 +10,7 @@ local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
 
 local MainLoopRunner = {}
-MainLoopRunner.debug = AkStartWithDebug or false
+MainLoopRunner.debug = CeStartWithDebug or false
 
 local modulesInitialized = false
 local initializedStatePublisherNames = {}

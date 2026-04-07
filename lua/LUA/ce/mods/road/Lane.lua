@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.Lane ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.Lane ...") end
 
 local Queue = require("ce.hub.util.Queue")
 local StorageUtility = require("ce.hub.util.StorageUtility")
@@ -7,7 +7,7 @@ local fmt = require("ce.hub.eep.TippTextFormatter")
 
 -- Lane starts here
 local Lane = {}
-Lane.debug = AkStartWithDebug or false
+Lane.debug = CeStartWithDebug or false
 
 ---@type table<string, LaneRequestType>
 Lane.RequestType = {

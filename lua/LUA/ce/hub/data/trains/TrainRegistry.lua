@@ -1,28 +1,19 @@
-﻿if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainRegistry ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainRegistry ...") end
+
 local Train = require("ce.hub.data.trains.Train")
-local TrainDtoFactory = require("ce.hub.data.trains.TrainDtoFactory")
-local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local TrainRegistry = {}
-TrainRegistry.debug = AkStartWithDebug or false
+TrainRegistry.debug = CeStartWithDebug or false
+
 ---@type table<string, Train>
 local allTrains = {}
----@type table<string,table<string,string>> table of trainName -> index(string) -> rollingstockname
+---@type table<string,table<string,string>>
 local trainRollingStockNames = {}
+local addedTrainIds = {}
+local removedTrainIds = {}
 
-function TrainRegistry.initRollingStock(train)
-    trainRollingStockNames[train.name] = {}
-    local count = EEPGetRollingstockItemsCount(train.name)
-    train:setRollingStockCount(count)
-    for i = 0, (count - 1) do
-        local rollingStockName = EEPGetRollingstockItemName(train.name, i)
-        RollingStockRegistry.forName(rollingStockName)
-        trainRollingStockNames[train.name][tostring(i)] = rollingStockName
-    end
+function TrainRegistry.setRollingStockNames(trainName, rollingStockNamesByIndex)
+    trainRollingStockNames[trainName] = rollingStockNamesByIndex or {}
 end
 
 function TrainRegistry.allRollingStockNamesOf(trainName)
@@ -38,51 +29,25 @@ function TrainRegistry.forName(name)
     assert(type(name) == "string", "Need 'trainName' as string")
     if allTrains[name] then
         return allTrains[name], false
-    else
-        local train = Train:new({ name = name })
-        allTrains[train.name] = train
-        TrainRegistry.initRollingStock(train)
-        return train, true
     end
+
+    local train = Train:new({ name = name })
+    allTrains[train.name] = train
+    addedTrainIds[train.name] = true
+    removedTrainIds[train.name] = nil
+    return train, true
 end
 
-function TrainRegistry.trainAppeared(train)
-    if TrainRegistry.debug then
-        print(string.format("[#TrainRegistry] train created: %s (%s)", train:getName(), train:getTrackType()))
-    end
-end
-
-function TrainRegistry.trainDisappeared(trainName)
+function TrainRegistry.remove(trainName)
     if TrainRegistry.debug then print(string.format("[#TrainRegistry] train removed: %s", trainName)) end
+    if allTrains[trainName] == nil then return end
+
     allTrains[trainName] = nil
     trainRollingStockNames[trainName] = nil
-    DataChangeBus.fireDataRemoved(TrainDtoFactory.createRefDto(trainName))
-end
-
-function TrainRegistry.fireChangeTrainEvents(ceTypeOptionsByAlias, fieldOptions)
-    local trainOptions = ceTypeOptionsByAlias and ceTypeOptionsByAlias["train"] or nil
-    local mode = SyncPolicy.getMode(trainOptions, true)
-
-    for _, train in pairs(allTrains) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Train, train.id)
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Train, train.id)
-        local isSubscribed = mode == "all" or (mode == "selected" and isSelected)
-
-        if train.needsFullSend or needsInitialSend then
-            DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSubscribed, fieldOptions))
-            train.needsFullSend = false
-            train:resetDirty()
-            if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Train, train.id) end
-        elseif train:hasDirtyFields() then
-            local shouldSend = mode == "all"
-                or (mode == "selected" and isSelected)
-                or not train.dirtyFields.speed
-            if shouldSend then
-                DataChangeBus.fireDataChanged(TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSubscribed,
-                                                                            fieldOptions))
-            end
-            train:resetDirty()
-        end
+    if addedTrainIds[trainName] then
+        addedTrainIds[trainName] = nil
+    else
+        removedTrainIds[trainName] = true
     end
 end
 
@@ -90,6 +55,23 @@ function TrainRegistry.getAllTrainNames()
     local names = {}
     for trainName in pairs(allTrains) do names[trainName] = true end
     return names
+end
+
+function TrainRegistry.getAll()
+    local copy = {}
+    for trainName, train in pairs(allTrains) do copy[trainName] = train end
+    return copy
+end
+
+function TrainRegistry.getRemovedIds()
+    local copy = {}
+    for trainId in pairs(removedTrainIds) do copy[trainId] = true end
+    return copy
+end
+
+function TrainRegistry.clearPendingChanges()
+    addedTrainIds = {}
+    removedTrainIds = {}
 end
 
 return TrainRegistry

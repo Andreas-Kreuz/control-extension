@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitStatePublisher ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitStatePublisher ...") end
 local LineRegistry = require("ce.mods.transit.LineRegistry")
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local TransitDataCollector = require("ce.mods.transit.data.TransitDataCollector")

@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.ControlExtensionHub ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.ControlExtensionHub ...") end
 
 require("ce.databridge.IoInit").initialize()
 
@@ -6,7 +6,7 @@ local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
 
 local ControlExtensionHub = {}
-ControlExtensionHub.debug = AkStartWithDebug or false
+ControlExtensionHub.debug = CeStartWithDebug or false
 ControlExtensionHub.pauseEepDuringInitialization = false
 
 local serverEnabled = true

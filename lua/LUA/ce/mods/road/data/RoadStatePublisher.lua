@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadStatePublisher ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadStatePublisher ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local Intersection = require("ce.mods.road.Intersection")
 local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")

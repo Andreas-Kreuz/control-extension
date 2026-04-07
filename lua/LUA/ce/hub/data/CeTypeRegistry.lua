@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.CeTypeRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.CeTypeRegistry ...") end
 
 local CeTypeRegistry = {}
 local registeredCeTypes = {}

@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/runtime/RuntimeLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local RuntimeDtoFactory = {}

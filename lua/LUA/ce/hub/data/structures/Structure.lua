@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...") end
 
 ---@class Structure
 ---@field id string
@@ -17,125 +17,134 @@ if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...
 ---@field fire boolean|nil
 ---@field dirtyFields table<string, boolean>
 ---@field needsFullSend boolean
----@field isInitialized boolean
 local Structure = {}
 
-local EEPStructureGetLight = _G.EEPStructureGetLight or function() end
-local EEPStructureGetSmoke = _G.EEPStructureGetSmoke or function() end
-local EEPStructureGetFire = _G.EEPStructureGetFire or function() end
-local EEPStructureGetPosition = _G.EEPStructureGetPosition or function() end
-local EEPStructureGetRotation = _G.EEPStructureGetRotation or function() end
-local EEPStructureGetModelType = _G.EEPStructureGetModelType or function() end
-local EEPStructureGetTagText = _G.EEPStructureGetTagText or function() end
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
-
-local EEPStructureModelTypeText = {
-    [16] = "Gleis/Gleisobjekt",
-    [17] = "Schiene/Gleisobjekt",
-    [18] = "Strasse/Gleisobjekt",
-    [19] = "Sonstiges/Gleisobjekt",
-    [22] = "Immobilie",
-    [23] = "Landschaftselement/Fauna",
-    [24] = "Landschaftselement/Flora",
-    [25] = "Landschaftselement/Terra",
-    [38] = "Landschaftselement/Instancing"
-}
-
-local function round2(value)
-    return value and tonumber(string.format("%.2f", value)) or 0
+local function markDirty(structure, fieldName)
+    structure.dirtyFields[fieldName] = true
 end
 
-local function readStaticValues(name)
-    local _, modelType = EEPStructureGetModelType(name)
-    local _, pos_x, pos_y, pos_z = EEPStructureGetPosition(name)
-    local _, rot_x, rot_y, rot_z = EEPStructureGetRotation(name)
+function Structure:getPosX() return self.pos_x end
 
-    return {
-        modelType = modelType or 0,
-        modelTypeText = EEPStructureModelTypeText[modelType] or "",
-        pos_x = round2(pos_x),
-        pos_y = round2(pos_y),
-        pos_z = round2(pos_z),
-        rot_x = round2(rot_x),
-        rot_y = round2(rot_y),
-        rot_z = round2(rot_z)
-    }
-end
+function Structure:getPosY() return self.pos_y end
 
+function Structure:getPosZ() return self.pos_z end
+
+function Structure:getRotX() return self.rot_x end
+
+function Structure:getRotY() return self.rot_y end
+
+function Structure:getRotZ() return self.rot_z end
+
+function Structure:getModelType() return self.modelType end
+
+function Structure:getModelTypeText() return self.modelTypeText end
 
 function Structure:getTag() return self.tag end
+
 function Structure:getLight() return self.light end
+
 function Structure:getSmoke() return self.smoke end
+
 function Structure:getFire() return self.fire end
 
 ---@param name string
----@param options table|nil
 ---@return Structure
-function Structure:new(name, options)
+function Structure:new(name)
     local o = {
         id = name,
         name = name,
+        pos_x = 0,
+        pos_y = 0,
+        pos_z = 0,
+        rot_x = 0,
+        rot_y = 0,
+        rot_z = 0,
+        modelType = 0,
+        modelTypeText = "",
         light = false,
         smoke = false,
         fire = false,
-        tag = ""
+        tag = "",
+        dirtyFields = {},
+        needsFullSend = true
     }
     self.__index = self
     setmetatable(o, self)
 
-    local staticValues = readStaticValues(name)
-    o.modelType = staticValues.modelType
-    o.modelTypeText = staticValues.modelTypeText
-    o.pos_x = staticValues.pos_x
-    o.pos_y = staticValues.pos_y
-    o.pos_z = staticValues.pos_z
-    o.rot_x = staticValues.rot_x
-    o.rot_y = staticValues.rot_y
-    o.rot_z = staticValues.rot_z
-
-    o:refresh(options)
     return o
 end
 
-function Structure:refresh(options)
-    local opts = options or {}
-    local fields = opts.fields or {}
-    self.dirtyFields = self.dirtyFields or {}
+function Structure:setPosition(posX, posY, posZ)
+    if self.pos_x ~= posX then
+        self.pos_x = posX
+        markDirty(self, "pos_x")
+    end
+    if self.pos_y ~= posY then
+        self.pos_y = posY
+        markDirty(self, "pos_y")
+    end
+    if self.pos_z ~= posZ then
+        self.pos_z = posZ
+        markDirty(self, "pos_z")
+    end
+end
 
-    if SyncPolicy.shouldCollect(fields.tag) then
-        local _, fetchedTag = EEPStructureGetTagText(self.name)
-        local tag = fetchedTag or ""
-        if not self.isInitialized or tag ~= (self.tag or "") then
-            self.tag = tag
-            self.dirtyFields.tag = true
-        end
+function Structure:setRotation(rotX, rotY, rotZ)
+    if self.rot_x ~= rotX then
+        self.rot_x = rotX
+        markDirty(self, "rot_x")
     end
-    if SyncPolicy.shouldCollect(fields.light) then
-        local _, fetchedLight = EEPStructureGetLight(self.name)
-        local light = fetchedLight or false
-        if not self.isInitialized or light ~= self.light then
-            self.light = light
-            self.dirtyFields.light = true
-        end
+    if self.rot_y ~= rotY then
+        self.rot_y = rotY
+        markDirty(self, "rot_y")
     end
-    if SyncPolicy.shouldCollect(fields.smoke) then
-        local _, fetchedSmoke = EEPStructureGetSmoke(self.name)
-        local smoke = fetchedSmoke or false
-        if not self.isInitialized or smoke ~= self.smoke then
-            self.smoke = smoke
-            self.dirtyFields.smoke = true
-        end
+    if self.rot_z ~= rotZ then
+        self.rot_z = rotZ
+        markDirty(self, "rot_z")
     end
-    if SyncPolicy.shouldCollect(fields.fire) then
-        local _, fetchedFire = EEPStructureGetFire(self.name)
-        local fire = fetchedFire or false
-        if not self.isInitialized or fire ~= self.fire then
-            self.fire = fire
-            self.dirtyFields.fire = true
-        end
-    end
+end
 
-    self.isInitialized = true
+function Structure:setModelType(modelType, modelTypeText)
+    if self.modelType ~= modelType then
+        self.modelType = modelType
+        markDirty(self, "modelType")
+    end
+    if self.modelTypeText ~= modelTypeText then
+        self.modelTypeText = modelTypeText
+        markDirty(self, "modelTypeText")
+    end
+end
+
+function Structure:setTag(tag)
+    local value = tag or ""
+    if self.tag ~= value then
+        self.tag = value
+        markDirty(self, "tag")
+    end
+end
+
+function Structure:setLight(light)
+    local value = light == true
+    if self.light ~= value then
+        self.light = value
+        markDirty(self, "light")
+    end
+end
+
+function Structure:setSmoke(smoke)
+    local value = smoke == true
+    if self.smoke ~= value then
+        self.smoke = value
+        markDirty(self, "smoke")
+    end
+end
+
+function Structure:setFire(fire)
+    local value = fire == true
+    if self.fire ~= value then
+        self.fire = value
+        markDirty(self, "fire")
+    end
 end
 
 function Structure:resetDirty()

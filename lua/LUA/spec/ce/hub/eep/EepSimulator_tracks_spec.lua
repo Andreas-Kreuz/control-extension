@@ -103,17 +103,25 @@ describe("EepSimulator track state", function ()
         end)
     end)
 
-    insulate("lets tram track detection initialize against the shared state", function ()
-        require("ce.hub.eep.EepSimulator")
-        local TrackDetection = require("ce.hub.data.tracks.TrackDetection")
+    insulate("lets tram track discovery initialize against the shared state", function ()
+        local function clearModule(name) package.loaded[name] = nil end
 
-        local tramDetection = TrackDetection:new("tram")
-        tramDetection:initialize()
+        clearModule("ce.hub.eep.EepSimulator")
+        clearModule("ce.hub.eep.EepSimulatorStore")
+        clearModule("ce.hub.data.trains.TrainDiscovery")
+        clearModule("ce.hub.data.tracks.TrackRegistry")
+
+        require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
+        local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+
+        TrainDiscovery.runInitialDiscovery({ [HubCeTypes.TramTrack] = true })
 
         it("discovers the simulated existing tram tracks", function ()
-            assert.is_not_nil(tramDetection.tracks["1"])
-            assert.is_not_nil(tramDetection.tracks["11"])
-            assert.is_nil(tramDetection.tracks["12"])
+            assert.is_not_nil(TrackRegistry.get("tram", 1))
+            assert.is_not_nil(TrackRegistry.get("tram", 11))
+            assert.is_nil(TrackRegistry.get("tram", 12))
         end)
     end)
 end)

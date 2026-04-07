@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.dynamic.DynamicUpdateRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.DynamicUpdateRegistry ...") end
 
 local DynamicUpdateRegistry = {}
 

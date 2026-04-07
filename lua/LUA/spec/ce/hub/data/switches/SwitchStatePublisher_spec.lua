@@ -3,8 +3,10 @@ insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.switches.SwitchStatePublisher")
-        clearModule("ce.hub.data.switches.SwitchDataCollector")
+        clearModule("ce.hub.data.switches.SwitchDiscovery")
         clearModule("ce.hub.data.switches.SwitchDtoFactory")
+        clearModule("ce.hub.data.switches.SwitchRegistry")
+        clearModule("ce.hub.data.switches.SwitchUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -34,10 +36,13 @@ insulate("ce.hub.data.switches.SwitchStatePublisher", function ()
     end)
 
     it("fires switch ceTypes with the existing wire format", function ()
+        local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
         local SwitchStatePublisher = require("ce.hub.data.switches.SwitchStatePublisher")
+        local SwitchUpdater = require("ce.hub.data.switches.SwitchUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        SwitchStatePublisher.initialize()
+        SwitchDiscovery.runInitialDiscovery()
+        SwitchUpdater.runUpdate()
         SwitchStatePublisher.syncState()
 
         assert.same({

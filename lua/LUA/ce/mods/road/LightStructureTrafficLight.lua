@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.LightStructureTrafficLight ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.LightStructureTrafficLight ...") end
 
 ---@class LightStructureTrafficLight
 local LightStructureTrafficLight = {}

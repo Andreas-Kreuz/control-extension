@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/structures/StructureLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local StructureDtoFactory = {}
@@ -34,10 +34,10 @@ local function toFullDto(structure, isSelected)
 end
 
 local fieldGetters = {
-    tag = function(s) return s:getTag() end,
-    light = function(s) return s:getLight() end,
-    smoke = function(s) return s:getSmoke() end,
-    fire = function(s) return s:getFire() end,
+    tag = function (s) return s:getTag() end,
+    light = function (s) return s:getLight() end,
+    smoke = function (s) return s:getSmoke() end,
+    fire = function (s) return s:getFire() end,
 }
 
 local function toPatchDto(structure, dirtyFields, isSelected)

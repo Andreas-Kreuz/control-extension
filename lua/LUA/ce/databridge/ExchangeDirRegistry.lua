@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.ExchangeDirRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.ExchangeDirRegistry ...") end
 
 --- Pruefe ob das Verzeichnis existiert und Dateien geschrieben werden koennen.
 -- Call this function via pcall to catch any exceptions

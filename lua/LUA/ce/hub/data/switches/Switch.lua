@@ -1,43 +1,55 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.switches.Switch ...") end
-
--- Field update policies (see SwitchDtoTypes.d.lua): all fields always
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.Switch ...") end
 
 ---@class Switch
 ---@field id number
 ---@field position number
 ---@field tag string
----@field valuesUpdated boolean
----@field isInitialized boolean
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
 local Switch = {}
 
-local EEPGetSwitch = _G.EEPGetSwitch or function() return 0 end
-local EEPSwitchGetTagText = _G.EEPSwitchGetTagText or function() return false, nil end
+local function markDirty(switch, fieldName)
+    switch.dirtyFields[fieldName] = true
+end
 
----@param id number
----@return Switch
 function Switch:new(id)
-    local o = { id = id }
+    local o = {
+        id = id,
+        position = 0,
+        tag = "",
+        dirtyFields = {},
+        needsFullSend = true
+    }
     self.__index = self
     setmetatable(o, self)
-    o:refresh()
     return o
 end
 
-function Switch:refresh()
-    local position = EEPGetSwitch(self.id)
-    local _, tag = EEPSwitchGetTagText(self.id)
-    local tagStr = tag or ""
+function Switch:getPosition() return self.position end
 
-    local changed = not self.isInitialized
-        or position ~= self.position
-        or tagStr ~= (self.tag or "")
+function Switch:getTag() return self.tag end
 
-    if changed then
-        self.valuesUpdated = true
-        self.isInitialized = true
+function Switch:setPosition(position)
+    if self.position ~= position then
         self.position = position
-        self.tag = tagStr
+        markDirty(self, "position")
     end
+end
+
+function Switch:setTag(tag)
+    local value = tag or ""
+    if self.tag ~= value then
+        self.tag = value
+        markDirty(self, "tag")
+    end
+end
+
+function Switch:resetDirty()
+    self.dirtyFields = {}
+end
+
+function Switch:hasDirtyFields()
+    return next(self.dirtyFields) ~= nil
 end
 
 return Switch

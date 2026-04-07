@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotNameResolver ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotNameResolver ...") end
 local DataSlotNameResolver = {}
 
 local function isModuleAvailable(name)

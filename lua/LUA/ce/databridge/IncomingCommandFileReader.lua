@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.IncomingCommandFileReader ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.IncomingCommandFileReader ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
 

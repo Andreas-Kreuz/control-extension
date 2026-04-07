@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLight ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLight ...") end
 
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local AxisStructureTrafficLight = require("ce.mods.road.AxisStructureTrafficLight")
@@ -12,7 +12,7 @@ local fmt = require("ce.hub.eep.TippTextFormatter")
 -- Optional kann die Ampel bei Immobilien Licht ein- und ausschalten (Straba - Ampelsatz)
 ------------------------------------------------------------------------------------------
 local TrafficLight = {}
-TrafficLight.debug = AkStartWithDebug or false
+TrafficLight.debug = CeStartWithDebug or false
 local registeredSignals = {}
 local counter = -1
 

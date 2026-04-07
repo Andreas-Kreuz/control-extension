@@ -1,59 +1,56 @@
-﻿local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
 local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+
 local RollingStockRegistry = {}
+
 ---@type table<string,RollingStock>
 local allRollingStock = {}
+local addedRollingStockIds = {}
+local removedRollingStockIds = {}
 
 function RollingStockRegistry.forName(rollingStockName)
     assert(rollingStockName, "Provide a rollingStockName")
     assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
     if allRollingStock[rollingStockName] then
-        local rs = allRollingStock[rollingStockName]
-        return rs
-    else
-        local o = RollingStock:new({ rollingStockName = rollingStockName })
-        allRollingStock[o.rollingStockName] = o
-        RollingStockRegistry.rollingStockAppeared(o)
-        return o
+        return allRollingStock[rollingStockName]
     end
+
+    local rollingStock = RollingStock:new({ rollingStockName = rollingStockName })
+    allRollingStock[rollingStock.rollingStockName] = rollingStock
+    addedRollingStockIds[rollingStock.rollingStockName] = true
+    removedRollingStockIds[rollingStock.rollingStockName] = nil
+    return rollingStock
 end
 
-function RollingStockRegistry.rollingStockAppeared(_)
+function RollingStockRegistry.has(rollingStockName)
+    return allRollingStock[rollingStockName] ~= nil
 end
 
-function RollingStockRegistry.rollingStockDisappeared(rollingStockName)
+function RollingStockRegistry.remove(rollingStockName)
+    if allRollingStock[rollingStockName] == nil then return end
+
     allRollingStock[rollingStockName] = nil
-    DataChangeBus.fireDataRemoved(RollingStockDtoFactory.createRefDto(rollingStockName))
+    if addedRollingStockIds[rollingStockName] then
+        addedRollingStockIds[rollingStockName] = nil
+    else
+        removedRollingStockIds[rollingStockName] = true
+    end
 end
 
-function RollingStockRegistry.fireChangeRollingStockEvents(ceTypeOptionsByAlias, fieldOptions)
-    local rsOptions = ceTypeOptionsByAlias and ceTypeOptionsByAlias["rollingStock"] or nil
-    local mode = SyncPolicy.getMode(rsOptions, true)
+function RollingStockRegistry.getAll()
+    local copy = {}
+    for rollingStockName, rollingStock in pairs(allRollingStock) do copy[rollingStockName] = rollingStock end
+    return copy
+end
 
-    for _, rs in pairs(allRollingStock) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.RollingStock, rs.id)
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.RollingStock, rs.id)
-        local isSubscribed = mode == "all" or (mode == "selected" and isSelected)
+function RollingStockRegistry.getRemovedIds()
+    local copy = {}
+    for rollingStockId in pairs(removedRollingStockIds) do copy[rollingStockId] = true end
+    return copy
+end
 
-        if rs.needsFullSend or needsInitialSend then
-            DataChangeBus.fireDataChanged(RollingStockDtoFactory.createFullDto(rs, isSubscribed, fieldOptions))
-            rs.needsFullSend = false
-            rs:resetDirty()
-            if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.RollingStock, rs.id) end
-        elseif rs:hasDirtyFields() then
-            local shouldSend = mode == "all"
-                or (mode == "selected" and isSelected)
-            if shouldSend then
-                DataChangeBus.fireDataChanged(RollingStockDtoFactory.createPatchDto(rs, rs.dirtyFields, isSubscribed,
-                                                                                    fieldOptions))
-            end
-            rs:resetDirty()
-        end
-    end
+function RollingStockRegistry.clearPendingChanges()
+    addedRollingStockIds = {}
+    removedRollingStockIds = {}
 end
 
 return RollingStockRegistry

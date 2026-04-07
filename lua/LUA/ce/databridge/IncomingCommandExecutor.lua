@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.IncomingCommandExecutor ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.IncomingCommandExecutor ...") end
 
 -- split a string
 local function split(text, delimiter)

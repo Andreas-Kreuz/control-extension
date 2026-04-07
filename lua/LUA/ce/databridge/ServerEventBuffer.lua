@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.ServerEventBuffer ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.ServerEventBuffer ...") end
 local json = require("ce.third-party.json")
 
 local ServerEventBuffer = {}

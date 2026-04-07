@@ -1,8 +1,8 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.HubBridgeConnector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.HubBridgeConnector ...") end
 local HubBridgeConnector = {}
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
-local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
+local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
@@ -29,7 +29,7 @@ function HubBridgeConnector.registerStatePublishers()
 
     do
         local pub = require("ce.hub.data.modules.ModulesStatePublisher")
-        if shouldRegister(pub, "module") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "modules") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
         local pub = require("ce.hub.data.version.VersionStatePublisher")
@@ -37,7 +37,7 @@ function HubBridgeConnector.registerStatePublishers()
     end
     do
         local pub = require("ce.hub.data.runtime.RuntimeStatePublisher")
-        if shouldRegister(pub, "runtime") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "runtimes") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
         local pub = require("ce.hub.data.framedata.FrameDataStatePublisher")
@@ -45,19 +45,23 @@ function HubBridgeConnector.registerStatePublishers()
     end
     do
         local pub = require("ce.hub.data.slots.DataSlotsStatePublisher")
-        if shouldRegister(pub, "saveSlot", "freeSlot") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "saveSlots", "freeSlots") then
+            StatePublisherRegistry.registerStatePublishers(pub)
+        end
     end
     do
         local pub = require("ce.hub.data.signals.SignalStatePublisher")
-        if shouldRegister(pub, "signal", "waitingOnSignal") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "signals", "waitingOnSignals") then
+            StatePublisherRegistry.registerStatePublishers(pub)
+        end
     end
     do
         local pub = require("ce.hub.data.switches.SwitchStatePublisher")
-        if shouldRegister(pub, "switch") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "switches") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
         local pub = require("ce.hub.data.structures.StructureStatePublisher")
-        if shouldRegister(pub, "structure") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "structures") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
         local pub = require("ce.hub.data.time.TimeStatePublisher")
@@ -71,26 +75,26 @@ function HubBridgeConnector.registerStatePublishers()
         local pub = require("ce.hub.data.tracks.TracksStatePublisher")
         if pub.enabled ~= false and (
                 hasActiveCeType(pub.options.ceTypes or {},
-                                "auxiliaryTrack",
-                                "controlTrack",
-                                "roadTrack",
-                                "railTrack",
-                                "tramTrack")
+                                "auxiliaryTracks",
+                                "controlTracks",
+                                "roadTracks",
+                                "railTracks",
+                                "tramTracks")
                 or hasActiveCeType(require("ce.hub.data.trains.TrainStatePublisher").options.ceTypes or {},
-                                   "train")
+                                   "trains")
                 or hasActiveCeType(require("ce.hub.data.rollingstock.RollingStockStatePublisher").options.ceTypes or {},
-                                   "rollingStock")
+                                   "rollingStocks")
             ) then
             StatePublisherRegistry.registerStatePublishers(pub)
         end
     end
     do
         local pub = require("ce.hub.data.trains.TrainStatePublisher")
-        if shouldRegister(pub, "train") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "trains") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
     do
         local pub = require("ce.hub.data.rollingstock.RollingStockStatePublisher")
-        if shouldRegister(pub, "rollingStock") then StatePublisherRegistry.registerStatePublishers(pub) end
+        if shouldRegister(pub, "rollingStocks") then StatePublisherRegistry.registerStatePublishers(pub) end
     end
 end
 

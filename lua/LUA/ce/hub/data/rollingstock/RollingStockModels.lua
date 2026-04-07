@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockModels ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockModels ...") end
 
 local RollingStockModels = {}
 local assignedModels = {}

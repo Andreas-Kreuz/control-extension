@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.util.TableUtils ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.util.TableUtils ...") end
 local TableUtils = {}
 
 ---Creates are read-only table by wrapping the current table into a proxy.

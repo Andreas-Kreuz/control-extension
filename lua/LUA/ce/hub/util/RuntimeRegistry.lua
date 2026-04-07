@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.util.RuntimeRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.util.RuntimeRegistry ...") end
 
 local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 

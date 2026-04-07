@@ -1,8 +1,8 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.publish.ServerEventDispatcher ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.publish.ServerEventDispatcher ...") end
 
 local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local ServerEventBuffer = require("ce.databridge.ServerEventBuffer")
-local DynamicUpdateRegistry = require("ce.hub.data.dynamic.DynamicUpdateRegistry")
+local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local ServerEventDispatcher = {}

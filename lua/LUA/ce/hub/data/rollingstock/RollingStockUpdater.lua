@@ -1,67 +1,30 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockInfoUpdater ...") end
-local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockUpdater ...") end
 
-local RollingStockInfoUpdater = {}
-RollingStockInfoUpdater.debug = AkStartWithDebug or false
+local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
+local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+
+local RollingStockUpdater = {}
+RollingStockUpdater.debug = CeStartWithDebug or false
 
 local function shouldCollect(fieldOptions, fieldName)
     local field = fieldOptions and fieldOptions[fieldName] or nil
     return field == nil or field.collect ~= false
 end
 
-local function isSelected(selectedCeTypes, ceType)
-    if not selectedCeTypes or next(selectedCeTypes) == nil then return true end
-    return selectedCeTypes[ceType] == true
-end
-
-local function fillTrackInfoFromTrain(train, info)
-    local firstRollingStock = TrainRegistry.rollingStockNameInTrain(train.name, 0)
-    local ok, trackId, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
-    assert(ok, "Rollingstock not found: " .. firstRollingStock)
-
-    local trackType = "control"
-    if trackTypeId == 1 then trackType = "rail" end
-    if trackTypeId == 2 then trackType = "road" end
-    if trackTypeId == 3 then trackType = "tram" end
-    if trackTypeId == 4 then trackType = "auxiliary" end
-
-    info.tracks = { [tostring(trackId)] = trackId }
-    info.trackType = trackType
-    if RollingStockInfoUpdater.debug then
-        print("[#RollingStockInfoUpdater] TRAIN DETECTED: " .. trackType .. " -> " .. trackTypeId)
-    end
-end
-
-local function ensureTrackInfo(train, info)
-    if (not info.tracks or not info.trackType) and not train:getTrackType() then
-        fillTrackInfoFromTrain(train, info)
-    elseif not info.trackType and train:getTrackType() then
-        info.trackType = train:getTrackType()
-    end
-end
-
-local function ensureTrainRollingStock(train, info)
-    if info.dirty and not info.rollingStockInitialized then
-        TrainRegistry.initRollingStock(train)
-        info.rollingStockInitialized = true
-    end
-end
-
-function RollingStockInfoUpdater.refresh(allKnownTrains, fieldOptions, selectedCeTypes)
-    assert(type(allKnownTrains) == "table", "Need allKnownTrains as table")
-
+function RollingStockUpdater.runUpdate(options)
+    local opts = options or {}
+    local fieldOptions = opts.fields or {}
+    local ceTypeOptions = opts.ceTypes and opts.ceTypes.rollingStock or nil
+    local rollingStockActive = SyncPolicy.isActive(ceTypeOptions, true)
     local activeRollingStock = EEPRollingstockGetActive and EEPRollingstockGetActive() or ""
-    local rollingStockSelected = isSelected(selectedCeTypes, HubCeTypes.RollingStock)
 
-    for trainName, info in pairs(allKnownTrains) do
-        if RollingStockInfoUpdater.debug then
-            print(string.format("[#RollingStockInfoUpdater] updating rolling stock of %s", trainName))
+    for trainName, train in pairs(TrainRegistry.getAll()) do
+        local info = TrainDiscoveryCache.get(trainName) or {}
+        if RollingStockUpdater.debug then
+            print(string.format("[#RollingStockUpdater] updating rolling stock of %s", trainName))
         end
-        local train = TrainRegistry.forName(trainName)
-        ensureTrainRollingStock(train, info)
-        ensureTrackInfo(train, info)
 
         for positionInTrain = 0, train:getRollingStockCount() - 1, 1 do
             local rsName = TrainRegistry.rollingStockNameInTrain(train.name, positionInTrain)
@@ -113,11 +76,11 @@ function RollingStockInfoUpdater.refresh(allKnownTrains, fieldOptions, selectedC
                 if shouldCollect(fieldOptions, "active") then
                     rs:setActive(activeRollingStock == rs.rollingStockName)
                 end
-                if shouldCollect(fieldOptions, "surfaceTexts") and rollingStockSelected then rs:updateTextureTexts() end
+                if shouldCollect(fieldOptions, "surfaceTexts") and rollingStockActive then rs:updateTextureTexts() end
                 if (shouldCollect(fieldOptions, "rotX")
                         or shouldCollect(fieldOptions, "rotY")
                         or shouldCollect(fieldOptions, "rotZ"))
-                    and rollingStockSelected
+                    and rollingStockActive
                     and _G.EEPRollingstockGetRotation then
                     local ok, rotX, rotY, rotZ = _G.EEPRollingstockGetRotation(rs.rollingStockName)
                     if ok then rs:setRotation(rotX, rotY, rotZ) end
@@ -149,4 +112,4 @@ function RollingStockInfoUpdater.refresh(allKnownTrains, fieldOptions, selectedC
     end
 end
 
-return RollingStockInfoUpdater
+return RollingStockUpdater

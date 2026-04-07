@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeMetrics ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeMetrics ...") end
 
 ---@class RuntimeMetrics
 local RuntimeMetrics = {}

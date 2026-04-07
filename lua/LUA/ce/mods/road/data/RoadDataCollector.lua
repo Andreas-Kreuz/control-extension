@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDataCollector ...") end
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local Lane = require("ce.mods.road.Lane")
 local TrafficLightState = require("ce.mods.road.TrafficLightState")

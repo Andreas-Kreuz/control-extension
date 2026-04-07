@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.DataStoreFileWriter ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.DataStoreFileWriter ...") end
 local InternalDataStore = require("ce.hub.publish.InternalDataStore")
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 local json = require("ce.third-party.json")

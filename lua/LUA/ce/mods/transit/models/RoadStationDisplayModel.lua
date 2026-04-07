@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.models.RoadStationDisplayModel ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.models.RoadStationDisplayModel ...") end
 local SimpleStructure = require("ce.mods.transit.models.SimpleStructure")
 local Tram_Schild_DL1 = require("ce.mods.transit.models.V15NDL10027_Tram_Schild_DL1")
 local BusHSInfo_RG3 = require("ce.mods.transit.models.V15NRG35002_BusHSInfo_RG3")

@@ -1,220 +1,210 @@
 ---
 layout: page_with_toc
-title: Zielarchitektur
-subtitle: Angestrebte Aufteilung der Verantwortlichkeiten im Lua-Teil der Bibliothek
+title: Hub-Architektur
+subtitle: Aktive Verantwortlichkeiten und Zielstruktur des Lua-Hubs
 permalink: lua/LUA/ce/hub/docs/architecture/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---
 
-# Zielarchitektur der Lua-Bibliothek
+# Architektur des Lua-Hubs
 
-Diese Datei beschreibt das angestrebte Zielbild des Lua-Teils der Bibliothek.
-Sie dokumentiert bewusst nicht den heutigen Ist-Zustand, sondern die fachlich gewünschte Aufteilung der Verantwortlichkeiten für einen schrittweisen Umbau.
+Diese Datei beschreibt die aktive Architektur des Lua-Hubs und die Richtung für weitere Aufräumarbeiten.
+Sie ist damit keine reine Zieldokumentation mehr, sondern die führende Beschreibung des aktuellen Zustands.
 
 ## Architekturprinzipien
 
-Die Zielarchitektur soll den Lua-Code in drei klar getrennte Bereiche aufteilen:
+Die aktuelle Architektur trennt bewusst zwischen drei Bereichen:
 
 1. `hub`
-   - gemeinsame Laufzeit-, Daten- und Event-Infrastruktur
-2. `bridge`
-   - Kommunikation mit dem Server und dateibasierter Austausch
-3. `modules`
-   - Fachlogik wie Straße, Schiene und ÖPNV
+   gemeinsame Laufzeit-, Daten- und Event-Infrastruktur
+2. `databridge`
+   dateibasierte Kommunikation mit dem Server
+3. `mods`
+   Fachlogik wie Straße und ÖPNV
 
 Daraus folgen diese Leitlinien:
 
 - jede Datei soll eine kleine, klar benannte Verantwortung haben
-- fachlicher Zustand und Server-Kommunikation sollen getrennt bleiben
+- fachlicher Zustand, EEP-Zugriff und Publishing sollen getrennt bleiben
 - öffentliche Einstiegspunkte sollen stabil bleiben, interne Pfade gelten als Infrastruktur
-- modulbezogenes Publishing soll beim jeweiligen Owner bleiben
-- generische Infrastruktur soll keine Fachsemantik kennen
+- modulbezogenes Publishing bleibt beim jeweiligen Owner
+- generische Infrastruktur kennt keine Fachsemantik
 
 ## Hub
 
-Der Hub ist die interne Plattform des Lua-Teils. Er soll keine Server-I/O kapseln, sondern die gemeinsame Laufzeit und Datenhaltung bereitstellen.
+Der Hub ist die interne Plattform des Lua-Teils. Er kapselt die gemeinsame Laufzeit, Datenhaltung und Publishing-Verdrahtung.
 
-### `hub`
+### `hub/`
 
-Direkt unter `hub/` sollen die zentralen Laufzeitbausteine der gesamten Lua-Laufzeit liegen:
+Direkt unter `hub/` liegen die zentralen Laufzeitbausteine:
 
-- Modul-Lebenszyklus
-- Registrieren und Ausführen von Modulen
-- Registrieren und Ausführen von `StatePublisher`
-- DTO-Factories und Publisher für hub-weite Metadaten
+- `CeHubModule`
+  zentraler Orchestrator des Hub-Datenpfads
+- `MainLoopRunner`
+  führt den Modul- und Publisher-Zyklus aus
+- `ModuleRegistry`
+  registriert die verwendeten Lua-Module
+- `StatePublisherRegistry`
+  hält die registrierbaren Publisher-Adapter
+- `HubBridgeConnector`
+  verbindet den Hub mit der Publishing- und Bridge-Infrastruktur
 
-Typische Verantwortungen in diesem Bereich:
+### `hub/data`
 
-- `ModuleRegistry` als zentraler Einstieg für die registrierten Lua-Module
-- `MainLoopRunner` als Orchestrierung des Zyklus
-- `StatePublisherRegistry` als Verwaltung der Publishing-Adapter
-- `*CeModule.lua` direkt unter `hub/`
+`hub/data` folgt heute auf dem aktiven Pfad einer klaren Rollenstruktur:
 
-Diese Ebene soll nicht selbst für Dateiaustausch, Logging-Dateien oder Remote-Kommandos verantwortlich sein. Diese Verantwortung gehört in die Bridge.
+- `Domain`
+- `Registry`
+- `Discovery`
+- `Updater`
+- `Publisher`
+- `DtoFactory`
+
+Typische Beispiele:
+
+- `structures`
+  `Structure`, `StructureRegistry`, `StructureDiscovery`, `StructureUpdater`, `StructurePublisher`, `StructureDtoFactory`
+- `signals`
+  `Signal`, `SignalRegistry`, `SignalDiscovery`, `SignalUpdater`, `SignalPublisher`, `SignalDtoFactory`
+- `switches`
+  `Switch`, `SwitchRegistry`, `SwitchDiscovery`, `SwitchUpdater`, `SwitchPublisher`, `SwitchDtoFactory`
+- `trains`
+  `Train`, `TrainRegistry`, `TrainDiscovery`, `TrainUpdater`, `TrainPublisher`, `TrainDtoFactory`
+- `rollingstock`
+  `RollingStock`, `RollingStockRegistry`, `RollingStockUpdater`, `RollingStockPublisher`, `RollingStockDtoFactory`
+- `tracks`
+  gemeinsamer `TrackRegistry`, `TrackPublisher`, `TrackDtoFactory`, mit Discovery über `TrainDiscovery`
+
+Einfachere Singleton-CeTypes wie `time`, `weather`, `runtime`, `version`, `modules`, `slots` und `framedata` verwenden meist nur:
+
+- `Registry`
+- `Updater`
+- `Publisher`
+- `DtoFactory`
+
+### `CeHubModule` als Orchestrator
+
+`CeHubModule` besitzt heute die aktive Discovery- und Update-Orchestrierung.
+
+Das bedeutet:
+
+- `init()` startet Initial-Discovery und Initial-Updates
+- `run()` startet laufende Discovery und Updates
+- Publisher werden dort nicht mehr als Ort der Datenerfassung verstanden
+
+Beispielhafte Aufrufe im aktiven Pfad:
+
+- `SignalDiscovery.runInitialDiscovery()`
+- `SignalUpdater.runUpdate(...)`
+- `StructureDiscovery.runInitialDiscovery()`
+- `StructureUpdater.runInitialUpdate(...)`
+- `TrainDiscovery.runDiscovery(...)`
+- `TrainUpdater.runUpdate(...)`
+- `RollingStockUpdater.runUpdate(...)`
+
+### `*StatePublisher` als Adapter
+
+Die `*StatePublisher.lua`-Dateien bleiben auf dem aktiven Pfad erhalten, aber in reduzierter Rolle:
+
+- sie erfüllen die Schnittstelle für `StatePublisherRegistry`
+- sie halten `enabled`, `name`, `initialize()` und `syncState()`
+- ihr `syncState()` delegiert an den eigentlichen `Publisher`
+
+Damit sind sie heute vor allem Registrierungs- und Kompatibilitätsadapter, nicht mehr der Ort für Discovery oder EEP-Fetching.
+
+### `hub/publish`
+
+`hub/publish` stellt die generische Event-Infrastruktur bereit:
+
+- `DataChangeBus`
+- `InternalDataStore`
+- Event-Dispatcher und Transporthelfer
+
+Dabei gilt weiter:
+
+- `DataChangeBus` bleibt generisch
+- der Bus interpretiert keine Fachobjekte
+- Listener-Verdrahtung passiert außerhalb des Busses
 
 ### `hub/scheduler`
 
-`hub/scheduler` soll die gemeinsame Ablaufhilfe für zeitversetzte Aktionen enthalten:
+`hub/scheduler` enthält die gemeinsame Ablaufhilfe für zeitversetzte Aktionen:
 
 - `Scheduler`
 - `Task`
-- weitere scheduler-nahe Helfer
-
-Der Scheduler bleibt Teil des Hubs, ist aber kein eigener Laufzeit-Hauptbereich mehr neben `hub`, sondern eine klar abgegrenzte Unterkategorie.
+- scheduler-nahe Helfer
 
 ### `hub/eep`
 
-`hub/eep` soll technische EEP-Adapter und Simulator-Unterstützung enthalten:
+`hub/eep` enthält technische EEP-Adapter und Simulator-Unterstützung:
 
 - Wrapper um EEP-Funktionen
 - Simulator-Unterstützung für Tests
 - Hilfen für EEP-spezifische Text- und Anzeigeformate
 
-### `hub/data`
-
-`hub/data` soll alle gemeinsam genutzten Datenbereiche bündeln:
-
-- DTO-Verträge
-- Collectors für allgemeine EEP-Daten
-- Registries und Snapshots
-- DtoFactories für Hub-eigene Daten
-- materialisierte Zustände wie `InternalDataStore`
-
-Unterbereiche des Zielbilds:
-
-- `contracts`
-  - gemeinsame DTO-Definitionen wie `DtoTypes.d.lua` und `DtoTypes.d.md`
-- `slots`
-  - Datenslot-Namen, Datenslot-DTOs und Datenslot-Publisher
-- `signal-detection`
-  - Signalerkennung, Signal-DTOs und Signal-Publisher
-- `switches`
-  - Weichenerkennung, Weichen-DTOs und Weichen-Publisher
-- `structures`
-  - Struktur-Erkennung, Struktur-DTOs und Struktur-Publisher
-- `time`
-  - Zeit-DTOs und Zeit-Publisher
-- `tracks`
-  - Gleiserkennung und Gleis-DTOs
-- `trains`
-  - Zugmodelle, Zugerkennung, Zugregistries und zugehöriges Publishing
-- `rollingstock`
-  - Rollmaterialmodelle, Registries, Tags und Rollmaterial-DTOs
-- `store`
-  - materialisierte Snapshots und zustandsbezogene Hilfen
-
-Wichtig: Zug-, Gleis- und Rollmaterialdaten sollen im Zielbild Teil des Hub-Datenbereichs sein und kein eigenständiges Plugin darstellen.
-
-### `hub/publish`
-
-`hub/publish` soll die generische Event-Infrastruktur bereitstellen:
-
-- `DataChangeBus`
-- Eventtypen
-- gemeinsame Regeln für das Veröffentlichen von Zustandsänderungen
-
-Dabei gilt:
-
-- `DataChangeBus` soll generisch bleiben
-- der Bus soll keine Fachobjekte interpretieren
-- der Bus soll nicht selbst fest verdrahten, welche Listener registriert werden
-
-Die Verdrahtung von Listenern wie `InternalDataStore` oder `ServerEventBuffer` soll außerhalb des Busses erfolgen.
-
 ### `hub/util`
 
-`hub/util` soll technische Helfer enthalten, die nicht zur Fachdomäne gehören:
+`hub/util` enthält technische Helfer ohne Fachsemantik:
 
 - Tabellen- und Queue-Helfer
 - Laufzeitmetriken
-- Typdefinitionen für Utilities
-- Persistenzhilfen wie `StorageUtility`
+- Persistenzhilfen
 
-`storage` ist in diesem Zielbild kein eigener Hauptbereich mehr, sondern eine Unterkategorie des Hubs.
+## Mods
+
+Unter `mods/` liegt die Fachlogik der Erweiterungen, insbesondere:
+
+- `road`
+- `transit`
+
+Jedes Fachmodul soll intern mindestens zwischen zwei Rollen unterscheiden:
+
+1. Domänenlogik
+   Modelle, Regeln, Zustandsübergänge, Registries und EEP-Fachlogik
+2. modulbezogenes Publishing
+   modulbezogene Publisher, DtoFactories und Bridge-Verdrahtung
 
 ## DataBridge
 
-Die DataBridge soll sämtliche Kommunikation zwischen Lua und Server kapseln, ohne selbst fachlichen Zustand zu besitzen.
+Die dateibasierte Kommunikation zwischen Lua und Server bleibt im Bereich `ce.databridge`.
 
-Im Zielbild liegt dieser Bereich unter `bridge/server`.
-
-Seine Verantwortung umfasst:
+Ihre Verantwortung umfasst:
 
 - Initialisierung der I/O-Infrastruktur
 - Verwaltung des Austauschverzeichnisses
 - Lesen und Ausführen erlaubter Remote-Kommandos
 - Puffern und Schreiben ausgehender Events
 - Dateihandshake mit dem Server
-- Spiegelung von Logausgaben in Austauschdateien
 
-Typische Unterbereiche:
+Die Bridge besitzt keinen eigenen Fachzustand. Sie transportiert, puffert, liest und schreibt nur.
 
-- `init`
-  - I/O-Initialisierung und Austauschverzeichnis
-- `commands`
-  - erlaubte Kommandos und Kommandoeingabe
-- `output`
-  - Eventbuffer, Logausgabe, optionale JSON-Snapshots
-- `exchange`
-  - Dateiprotokoll und Server-Austausch
-- `connectors`
-  - Verdrahtung zwischen Hub bzw. Modulen und der Bridge
+## Aktiver Laufzeitfluss
 
-Die Bridge soll keinen eigenen Fachzustand pflegen. Sie transportiert, puffert, liest und schreibt nur.
-
-Der modernere Name für diese Verdrahtung ist im Zielbild `ServerConnector`. Historische Namen wie `WebConnector` können in bestehendem Code oder älterer Dokumentation noch vorkommen, sollen aber langfristig durch die präzisere Verantwortungsbezeichnung ersetzt werden.
-
-## Module
-
-Unter `modules` soll die Fachlogik liegen. Hierzu gehören insbesondere:
-
-- `road`
-- `rail`
-- `transit`
-
-Jedes Fachmodul soll intern mindestens zwischen zwei Rollen unterscheiden:
-
-1. Domänenlogik
-   - Modelle, Regeln, Zustandsübergänge, Registries und EEP-Fachlogik
-2. modulbezogenes Publishing
-   - modulbezogene `StatePublisher`
-   - modulbezogene DtoFactories
-   - modulbezogene Server-Connectoren
-
-Das bedeutet insbesondere:
-
-- `Crossing`, `Line`, `RoadStation` oder `Rail` gehören zur Domänenlogik
-- `RoadStatePublisher` oder `TransitStatePublisher` bleiben beim jeweiligen Modul
-- modulbezogene DtoFactories bleiben ebenfalls beim jeweiligen Modul
-
-Die Module sollen ihre Fachdaten besitzen und veröffentlichen, aber keine generische Server-Infrastruktur nachbauen.
-
-## Laufzeitfluss
-
-Der gewünschte Laufzeitfluss ist:
+Der heutige Laufzeitfluss ist:
 
 1. `ce.ControlExtension` dient als stabiler Einstiegspunkt für EEP-Skripte.
 2. `ModuleRegistry` registriert die verwendeten Lua-Module.
-3. `MainLoopRunner` führt Initialisierung und Zyklus aus.
-4. Module registrieren ihre `StatePublisher` über die dafür vorgesehenen Connectoren.
-5. `StatePublisher` lesen Zustand aus Hub- oder Modulbereichen.
-6. Änderungen werden über `DataChangeBus` veröffentlicht.
-7. `InternalDataStore` kann daraus einen materialisierten Snapshot halten.
-8. `ServerEventBuffer` nimmt veröffentlichte Events für die Bridge entgegen.
-9. Die Bridge schreibt Austauschdateien und liest Remote-Kommandos.
+3. `MainLoopRunner` ruft `module.init()` und später `module.run()` auf.
+4. `CeHubModule.init()` registriert Publisher/Funktionen und führt Initial-Discovery sowie Initial-Updates aus.
+5. `CeHubModule.run()` führt Discovery und Updates aus und startet danach den Scheduler.
+6. `MainLoopRunner` ruft `initialize()` und `syncState()` der registrierten Publisher-Adapter auf.
+7. Die eigentlichen Publisher veröffentlichen Änderungen über `DataChangeBus`.
+8. `InternalDataStore` und `ServerEventBuffer` konsumieren diese Events für Snapshot und Transport.
 
-Wichtig ist dabei die Trennung der Rollen:
+## Discovery mit gekoppelten CeTypes
 
-- `MainLoopRunner` orchestriert
-- `DataChangeBus` verteilt Events
-- `InternalDataStore` hält Snapshot-Daten
-- `ServerEventBuffer` puffert für den Transport
-- die Bridge übernimmt ausschließlich den Austausch mit dem Server
+Einige CeTypes sind bewusst gekoppelt.
+Das wichtigste Beispiel ist der Zugpfad:
+
+- `TrainDiscovery` erkennt Tracks, Züge und RollingStock-Existenz gemeinsam
+- `TrackPublisher`, `TrainPublisher` und `RollingStockPublisher` veröffentlichen anschließend getrennt
+
+Damit bleibt die Discovery zentral, während Registry, Updater und Publisher weiter je CeType getrennt bleiben.
 
 ## Zielstruktur im Repository
 
-Die Zielstruktur soll in kompakter Form so aussehen:
+Die aktuelle Struktur ist in kompakter Form:
 
 ```text
 lua/LUA/ce/
@@ -227,64 +217,35 @@ lua/LUA/ce/
     scheduler/
     eep/
     data/
-      contracts/
+      dynamic/
+      framedata/
+      modules/
+      rollingstock/
+      runtime/
+      signals/
       slots/
-      signal-detection/
-      switches/
       structures/
+      switches/
       time/
       tracks/
       trains/
-      rollingstock/
-      store/
+      version/
+      weather/
+    docs/
     publish/
     util/
-  bridge/
-    server/
-      init/
-      commands/
-      output/
-      exchange/
-      connectors/
-  modules/
+  databridge/
+  mods/
     road/
-    rail/
     transit/
 ```
 
-Diese Darstellung ist bewusst kompakt gehalten. Sie soll die Verantwortlichkeiten zeigen und nicht jede einzelne Datei vollständig aufzählen.
-
 ## Öffentliche Schnittstellen
 
-Stabil gehalten werden sollen nur wenige öffentliche Einstiegspunkte:
+Stabil gehalten werden nur wenige Einstiegspunkte:
 
 - `ce.ControlExtension`
-- `ce.modules.road.CeRoadModule`
-- `ce.modules.transit.CeTransitModule`
-- perspektivisch weitere Einstiegspunkte unter `ce.modules.rail.*`
+- `ce.mods.road.CeRoadModule`
+- `ce.mods.transit.CeTransitModule`
 
-Interne Pfade unter `ce.hub.*` und `ce.bridge.*` sind Infrastruktur und sollen nicht als stabile öffentliche API behandelt werden.
-
-## StatePublisher im Zielbild
-
-`StatePublisher` sind in diesem Projekt keine bloßen Datenklassen. Sie sind zustandsbehaftete Publishing-Adapter mit einheitlichem Lebenszyklus:
-
-- sie werden registriert
-- einmalig initialisiert
-- zyklisch synchronisiert
-- veröffentlichen Änderungen in Richtung Event- und Bridge-Infrastruktur
-
-Die gemeinsamen Muster der `*StatePublisher` sind weiterhin in [StatePublishers.md](./hub/StatePublishers.md) dokumentiert. Diese Dokumentation ist im Licht des Zielbilds zu lesen: `StatePublisher` gehören fachlich zum Publishing ihrer jeweiligen Owner und nicht zu einer generischen Datenablage.
-
-## Dokumentationskonsequenzen
-
-Diese Datei ist als führende Zielbild-Dokumentation auf Root-Ebene gedacht.
-
-Andere Dokumente können vorübergehend noch historische Begriffe oder den aktuellen Ist-Zustand beschreiben, zum Beispiel:
-
-- `hub/StatePublishers.md`
-- `hub/README.md`
-- `databridge/ARCHITECTURE.md`
-- Modul-READMEs
-
-Wenn diese Dokumente Begriffe wie `WebConnector` oder ältere Paketgrenzen verwenden, ist diese Datei für das Zielbild maßgeblich.
+Interne Pfade unter `ce.hub.*` und `ce.databridge.*` sind Infrastruktur und sollen nicht als stabile öffentliche API behandelt werden.

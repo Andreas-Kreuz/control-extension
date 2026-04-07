@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulatorStore ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulatorStore ...") end
 
 local Store = {}
 

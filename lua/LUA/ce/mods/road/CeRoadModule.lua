@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.CeRoadModule ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.CeRoadModule ...") end
 ---@class CeRoadModule
 CeRoadModule = {}
 CeRoadModule.id = "c5a3e6d3-0f9b-4c89-a908-ed8cf8809362"
