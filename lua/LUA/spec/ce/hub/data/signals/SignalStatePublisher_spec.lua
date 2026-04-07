@@ -56,7 +56,7 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
         SignalDiscovery.runInitialDiscovery()
-        SignalUpdater.runUpdate(SignalStatePublisher.options)
+        SignalUpdater.runUpdate()
         SignalStatePublisher.syncState()
 
         assert.same({

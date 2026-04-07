@@ -88,8 +88,8 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
         StructureDiscovery.runInitialDiscovery()
-        StructureUpdater.runInitialUpdate(StructureStatePublisher.options)
-        StructureUpdater.runUpdate(StructureStatePublisher.options)
+        StructureUpdater.runInitialUpdate()
+        StructureUpdater.runUpdate()
         StructureStatePublisher.syncState()
 
         assert.same({
@@ -131,7 +131,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
         states["#2"].fire = true
         states["#3"].tag = "tree-north"
-        StructureUpdater.runUpdate(StructureStatePublisher.options)
+        StructureUpdater.runUpdate()
         StructureStatePublisher.syncState()
 
         assert.is_true(DataStore.get("ce.hub.Structure", "#2").fire)
@@ -164,8 +164,8 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
         StructureDiscovery.runInitialDiscovery()
-        StructureUpdater.runInitialUpdate(StructureStatePublisher.options)
-        StructureUpdater.runUpdate(StructureStatePublisher.options)
+        StructureUpdater.runInitialUpdate()
+        StructureUpdater.runUpdate()
         StructureStatePublisher.syncState()
 
         assert.is_nil(DataStore.get("ce.hub.Structure", "#4"))

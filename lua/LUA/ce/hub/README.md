@@ -54,7 +54,7 @@ Beispiele für zulässige Module:
 
 - `require("ce.mods.road.CeRoadModule")`
 - `require("ce.mods.transit.CeTransitModule")`
-- `require("ce.hub.CeHubModule").setOptions({ sync = { ... } })`
+- `require("ce.hub.CeHubModule").setOptions({ ceTypes = { ... } })`
 
 Das Hub-Modul ist bereits eingebaut. Du musst es nur dann explizit an `addModules(...)` übergeben, wenn Du seine Optionen direkt im Initialisierungscode setzen möchtest.
 
@@ -103,15 +103,15 @@ ControlExtension
     .addModules(
         require("ce.mods.road.CeRoadModule"),
         CeHubModule.setOptions({
-            sync = {
-                ceTypes = {
-                    trains = { mode = "selected" },
-                    rollingStocks = { mode = "selected" },
-                },
-                fields = {
-                    trains = {
-                        speed = { collect = true },
-                        targetSpeed = { collect = true },
+            ceTypes = {
+                trains = {
+                    fieldUpdates = {
+                        speed = "onselection",
+                        targetSpeed = "onselection",
+                    },
+                    fieldPublish = {
+                        speed = "always",
+                        targetSpeed = "onselection",
                     },
                 },
             },
@@ -166,7 +166,7 @@ Direkter Zugriff auf interne Dateien unter `ce.hub.*` ist nicht vorgesehen.
 
 # Unterverzeichnisse
 
-- [OPTIONS.md](OPTIONS.md) - Hub-Optionen, Fetch-Policy und Sync-Policy
+- [options/OPTIONS.md](options/OPTIONS.md) - Hub-Optionen fuer Discovery, Update und Publish
 - [data/README.md](data/README.md) - Hub-Daten, CeTypes und Klassenstruktur
 - [data/DTO.md](data/DTO.md) - aktive CeTypes und DTO-Felder des Hubs
 - [docs/README.md](docs/README.md) - ergänzende Architekturdokumente

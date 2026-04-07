@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.weather.WeatherUpdater ...") end
 
 local WeatherRegistry = require("ce.hub.data.weather.WeatherRegistry")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local WeatherUpdater = {}
 
@@ -17,6 +18,7 @@ local function unwrapNumeric(getter)
 end
 
 function WeatherUpdater.runUpdate()
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("weather") then return end
     WeatherRegistry.set({
         weather = {
             id = "weather",

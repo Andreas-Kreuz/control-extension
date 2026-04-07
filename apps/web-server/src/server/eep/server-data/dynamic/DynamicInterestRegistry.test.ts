@@ -53,9 +53,38 @@ async function testLeasedTokenRefreshesUntilTtlExpires(): Promise<void> {
   ]);
 }
 
+function testRetainPerRoomOnlyStopsAfterLastRoomSubscription(): void {
+  const commands: string[] = [];
+  const registry = new DynamicInterestRegistry((command) => {
+    commands.push(command);
+  });
+
+  registry.retainToken('socket:a|room:train-details|ICE-1', 'ce.hub.Train', 'ICE-1');
+  registry.retainToken('socket:b|room:train-details|ICE-1', 'ce.hub.Train', 'ICE-1');
+  registry.retainToken('socket:a|room:sidebar|ICE-1', 'ce.hub.Train', 'ICE-1');
+
+  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
+
+  registry.releaseToken('socket:a|room:train-details|ICE-1');
+  registry.releaseToken('socket:b|room:train-details|ICE-1');
+
+  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
+
+  registry.releaseToken('socket:a|room:sidebar|ICE-1');
+
+  assert.deepEqual(commands, [
+    'HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1',
+    'HubDynamicData.stopUpdatesFor|ce.hub.Train|ICE-1',
+  ]);
+}
+
 export async function run(): Promise<void> {
   await runTest('retainToken starts updates once and stops after last release', testRetainOnlyStartsOnceForSameInterest);
   await runTest('touchLeasedToken keeps interest alive until ttl expires', testLeasedTokenRefreshesUntilTtlExpires);
+  await runTest(
+    'retainToken keeps an entry selected until the last room subscription is released',
+    testRetainPerRoomOnlyStopsAfterLastRoomSubscription,
+  );
 }
 
 if (require.main === module) {

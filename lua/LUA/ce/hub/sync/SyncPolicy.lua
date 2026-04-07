@@ -2,38 +2,57 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.sync.SyncPolicy ...") end
 
 local SyncPolicy = {}
 
-local validModes = {
-    all = true,
-    none = true,
-    selected = true
+local validFieldPolicies = {
+    always = true,
+    onselection = true,
+    never = true
 }
 
-function SyncPolicy.normalizeMode(mode, isDynamic)
-    local resolvedMode = mode or "all"
-    assert(validModes[resolvedMode] == true, "Invalid ceType sync mode: " .. tostring(mode))
-    if resolvedMode == "selected" and not isDynamic then
-        return "all"
+function SyncPolicy.normalizeFieldPolicy(policy)
+    local resolvedPolicy = policy
+    if type(policy) == "table" then
+        if policy.policy ~= nil then
+            resolvedPolicy = policy.policy
+        elseif policy.collect == false then
+            resolvedPolicy = "never"
+        end
     end
-    return resolvedMode
+
+    resolvedPolicy = resolvedPolicy or "always"
+    assert(validFieldPolicies[resolvedPolicy] == true, "Invalid field policy: " .. tostring(resolvedPolicy))
+    return resolvedPolicy
 end
 
-function SyncPolicy.getMode(ceTypeOptions, isDynamic)
-    if type(ceTypeOptions) ~= "table" then
-        return SyncPolicy.normalizeMode(nil, isDynamic)
+function SyncPolicy.isDiscoveryAndUpdateEnabled(ceTypeOptions)
+    if type(ceTypeOptions) ~= "table" then return true end
+    return ceTypeOptions.discoveryAndUpdate ~= false
+end
+
+function SyncPolicy.isPublishEnabled(ceTypeOptions)
+    if type(ceTypeOptions) ~= "table" then return true end
+    if ceTypeOptions.publish ~= nil then
+        return ceTypeOptions.publish == true
     end
-    return SyncPolicy.normalizeMode(ceTypeOptions.mode, isDynamic)
+    return ceTypeOptions.mode ~= "none"
 end
 
-function SyncPolicy.isActive(ceTypeOptions, isDynamic)
-    return SyncPolicy.getMode(ceTypeOptions, isDynamic) ~= "none"
+function SyncPolicy.getFieldPolicy(fieldPolicies, fieldName)
+    local fieldPolicy = type(fieldPolicies) == "table" and fieldPolicies[fieldName] or nil
+    return SyncPolicy.normalizeFieldPolicy(fieldPolicy)
 end
 
-function SyncPolicy.isSelected(ceTypeOptions, isDynamic)
-    return SyncPolicy.getMode(ceTypeOptions, isDynamic) == "selected"
+function SyncPolicy.shouldUpdateField(fieldPolicies, fieldName, isSelected)
+    local policy = SyncPolicy.getFieldPolicy(fieldPolicies, fieldName)
+    return policy == "always" or (policy == "onselection" and isSelected == true)
 end
 
-function SyncPolicy.shouldCollect(fieldOptions)
-    return not (type(fieldOptions) == "table" and fieldOptions.collect == false)
+function SyncPolicy.shouldPublishField(fieldPolicies, fieldName, isSelected)
+    local policy = SyncPolicy.getFieldPolicy(fieldPolicies, fieldName)
+    return policy == "always" or (policy == "onselection" and isSelected == true)
+end
+
+function SyncPolicy.shouldPublishPlaceholder(fieldPolicies, fieldName, isSelected)
+    return SyncPolicy.getFieldPolicy(fieldPolicies, fieldName) == "onselection" and isSelected ~= true
 end
 
 return SyncPolicy

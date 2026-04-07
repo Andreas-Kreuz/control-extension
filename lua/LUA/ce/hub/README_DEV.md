@@ -53,8 +53,7 @@ Einfachere Singleton-CeTypes wie Zeit, Wetter, Version oder Runtime nutzen meist
 
 Es übernimmt insbesondere:
 
-- Registrierung der Hub-CeTypes im `CeTypeRegistry`
-- Anwenden der Sync-Optionen auf Publisher, CeTypes und Felder
+- Anwenden der Hub-Optionen aus `HubOptionDefaults` und Schreiben der wirksamen Optionen in `HubOptionsRegistry`
 - Initial-Discovery und Initial-Updates in `init()`
 - laufende Discovery und Updates in `run()`
 
@@ -127,7 +126,7 @@ Wenn ein Publisher Daten direkt zurückgibt, müssen diese nur serialisierbare W
 
 ## Weiterführende Dokumentation
 
-- [OPTIONS.md](OPTIONS.md) - Hub-Optionen, Fetch-Policy und Sync-Policy
+- [options/OPTIONS.md](options/OPTIONS.md) - Hub-Optionen, Fetch-Policy und Sync-Policy
 - [data/README_DEV.md](data/README_DEV.md) - Rollen und DTO-Fluss der Hub-Daten
 - [data/DTO.md](data/DTO.md) - aktive CeTypes und DTO-Felder
 - [docs/Architecture.md](docs/Architecture.md) - Hub-Architektur und aktuelle Zielstruktur

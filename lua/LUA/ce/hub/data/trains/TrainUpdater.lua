@@ -9,66 +9,72 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 local TrainUpdater = {}
 TrainUpdater.debug = CeStartWithDebug or false
 
-local function shouldCollect(fieldOptions, fieldName)
-    local field = fieldOptions and fieldOptions[fieldName] or nil
-    return field == nil or field.collect ~= false
-end
-
-function TrainUpdater.runUpdate(fieldOptions)
+function TrainUpdater.runUpdate()
+    local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+    local HubCeTypes = require("ce.hub.data.HubCeTypes")
+    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("trains") then return end
+    local fieldPolicies = HubOptionsRegistry.getFieldUpdatePolicies("trains")
     local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
 
     for trainName, train in pairs(TrainRegistry.getAll()) do
         local info = TrainDiscoveryCache.get(trainName) or {}
+        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Train, tostring(train.id or train.name or ""))
         if TrainUpdater.debug then print(string.format("[#TrainUpdater] updating train %s", trainName)) end
 
-        if shouldCollect(fieldOptions, "route") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "route", isSelected) then
             local routeOk, routeName = EEPGetTrainRoute(train.name)
             if routeOk then train:updateRoute(routeName or "") end
         end
-        if shouldCollect(fieldOptions, "length") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "length", isSelected) then
             local _, length = EEPGetTrainLength(train.name)
             if length then train:setLength(length) end
         end
-        if shouldCollect(fieldOptions, "line")
-            or shouldCollect(fieldOptions, "destination")
-            or shouldCollect(fieldOptions, "direction") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "line", isSelected)
+            or SyncPolicy.shouldUpdateField(fieldPolicies, "destination", isSelected)
+            or SyncPolicy.shouldUpdateField(fieldPolicies, "direction", isSelected) then
             local values = train:load()
-            if shouldCollect(fieldOptions, "line") then train:updateLine(values[TagKeys.Train.line] or "") end
-            if shouldCollect(fieldOptions, "destination") then
+            if SyncPolicy.shouldUpdateField(fieldPolicies, "line", isSelected) then
+                train:updateLine(values[TagKeys.Train.line] or "")
+            end
+            if SyncPolicy.shouldUpdateField(fieldPolicies, "destination", isSelected) then
                 train:updateDestination(values[TagKeys.Train.destination] or "")
             end
-            if shouldCollect(fieldOptions, "direction") then
+            if SyncPolicy.shouldUpdateField(fieldPolicies, "direction", isSelected) then
                 train:updateDirection(values[TagKeys.Train.direction] or "")
             end
         end
-        if shouldCollect(fieldOptions, "speed") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "speed", isSelected) then
             train:setSpeed(info.speed or 0)
         end
-        if shouldCollect(fieldOptions, "movesForward") and not shouldCollect(fieldOptions, "speed") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "movesForward", isSelected)
+            and not SyncPolicy.shouldUpdateField(fieldPolicies, "speed", isSelected) then
             train:setMovesForward((info.speed or 0) >= 0)
         end
-        if shouldCollect(fieldOptions, "targetSpeed") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "targetSpeed", isSelected) then
             local _, targetSpeed = EEPGetTrainSpeed(train.name, true)
             train:setTargetSpeed(targetSpeed or info.speed or 0)
         end
-        if shouldCollect(fieldOptions, "couplingFront") and EEPGetTrainCouplingFront then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) and EEPGetTrainCouplingFront then
             local ok, trainCouplingFront = EEPGetTrainCouplingFront(train.name)
             if ok then train:setCouplingFront(trainCouplingFront) end
         end
-        if shouldCollect(fieldOptions, "couplingRear") and EEPGetTrainCouplingRear then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) and EEPGetTrainCouplingRear then
             local ok, trainCouplingRear = EEPGetTrainCouplingRear(train.name)
             if ok then train:setCouplingRear(trainCouplingRear) end
         end
-        if shouldCollect(fieldOptions, "active") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
             train:setActive(activeTrain == train.name)
         end
-        if shouldCollect(fieldOptions, "inTrainyard") or shouldCollect(fieldOptions, "trainyardId") then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "inTrainyard", isSelected)
+            or SyncPolicy.shouldUpdateField(fieldPolicies, "trainyardId", isSelected) then
             local inTrainyard, trainyardId = false, nil
             if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(train.name) end
             train:setTrainyard(inTrainyard == true, trainyardId)
         end
         if info.tracks then train:setOnTrack(info.tracks) end
-        if shouldCollect(fieldOptions, "trackType") and info.trackType then
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "trackType", isSelected) and info.trackType then
             train:setTrackType(info.trackType)
         end
     end

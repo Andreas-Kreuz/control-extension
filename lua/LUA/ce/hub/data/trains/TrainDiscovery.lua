@@ -5,6 +5,7 @@ local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local TrainDiscovery = {}
 TrainDiscovery.debug = CeStartWithDebug or false
@@ -33,8 +34,8 @@ local tracksInitialized = false
 
 local function trackTypeFromSystemId(trackTypeId)
     if trackTypeId == 1 then return "rail" end
-    if trackTypeId == 2 then return "road" end
-    if trackTypeId == 3 then return "tram" end
+    if trackTypeId == 2 then return "tram" end
+    if trackTypeId == 3 then return "road" end
     if trackTypeId == 4 then return "auxiliary" end
     return "control"
 end
@@ -183,12 +184,32 @@ local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks)
 end
 
 function TrainDiscovery.runInitialDiscovery()
+    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("trains",
+                                                             "rollingStocks",
+                                                             "auxiliaryTracks",
+                                                             "controlTracks",
+                                                             "roadTracks",
+                                                             "railTracks",
+                                                             "tramTracks") then
+        return
+    end
+
     registerHooks()
     initializeTracks()
     TrainDiscoveryCache.clear()
 end
 
 function TrainDiscovery.runDiscovery()
+    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("trains",
+                                                             "rollingStocks",
+                                                             "auxiliaryTracks",
+                                                             "controlTracks",
+                                                             "roadTracks",
+                                                             "railTracks",
+                                                             "tramTracks") then
+        return
+    end
+
     registerHooks()
 
     local time = os.clock()

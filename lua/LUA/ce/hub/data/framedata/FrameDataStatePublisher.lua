@@ -6,12 +6,6 @@ FrameDataStatePublisher.enabled = true
 local initialized = false
 FrameDataStatePublisher.name = "ce.hub.data.framedata.FrameDataStatePublisher"
 
-FrameDataStatePublisher.options = {
-    ceTypes = {
-        frameData = { ceType = "ce.hub.FrameData", mode = "all" }
-    }
-}
-
 function FrameDataStatePublisher.initialize()
     if not FrameDataStatePublisher.enabled or initialized then return end
 

@@ -6,12 +6,6 @@ TimeStatePublisher.enabled = true
 local initialized = false
 TimeStatePublisher.name = "ce.hub.data.time.TimeStatePublisher"
 
-TimeStatePublisher.options = {
-    ceTypes = {
-        time = { ceType = "ce.hub.Time", mode = "all" }
-    }
-}
-
 function TimeStatePublisher.initialize()
     if not TimeStatePublisher.enabled or initialized then return end
 

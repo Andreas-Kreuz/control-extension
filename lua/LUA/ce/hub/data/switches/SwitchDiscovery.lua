@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDiscovery
 
 local Switch = require("ce.hub.data.switches.Switch")
 local SwitchRegistry = require("ce.hub.data.switches.SwitchRegistry")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local SwitchDiscovery = {}
 
@@ -17,10 +18,12 @@ local function discoverSwitches()
 end
 
 function SwitchDiscovery.runInitialDiscovery()
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("switches") then return end
     discoverSwitches()
 end
 
 function SwitchDiscovery.runDiscovery()
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("switches") then return end
     discoverSwitches()
 end
 

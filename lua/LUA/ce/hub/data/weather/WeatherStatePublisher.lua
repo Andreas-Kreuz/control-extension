@@ -6,12 +6,6 @@ WeatherStatePublisher.enabled = true
 local initialized = false
 WeatherStatePublisher.name = "ce.hub.data.weather.WeatherStatePublisher"
 
-WeatherStatePublisher.options = {
-    ceTypes = {
-        weather = { ceType = "ce.hub.Weather", mode = "all" }
-    }
-}
-
 function WeatherStatePublisher.initialize()
     if not WeatherStatePublisher.enabled or initialized then return end
 

@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/rolling-stocks/RollingStockLuaDto.ts
+﻿ -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/rolling-stocks/RollingStockLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
@@ -6,16 +6,13 @@ local RollingStockDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.RollingStock
 local KEY_ID = "id"
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local function copyTable(values)
     local copy = {}
     for key, value in pairs(values or {}) do copy[key] = value end
     return copy
-end
-
-local function shouldInclude(fieldOptions, fieldName)
-    local field = fieldOptions and fieldOptions[fieldName] or nil
-    return field == nil or field.collect ~= false
 end
 
 local placeHolders = {
@@ -34,51 +31,6 @@ local placeHolders = {
     rotY = 0,
     rotZ = 0,
 }
-
-local function toFullDto(stock, isSubscribed, fieldOptions)
-    local dto = {
-        ceType = CE_TYPE,
-        id = stock.rollingStockName,
-        name = stock.rollingStockName,
-    }
-    if shouldInclude(fieldOptions, "trainName") then dto.trainName = stock:getTrainName() end
-    if shouldInclude(fieldOptions, "positionInTrain") then dto.positionInTrain = stock:getPositionInTrain() end
-    if shouldInclude(fieldOptions, "couplingFront") then dto.couplingFront = stock:getCouplingFront() end
-    if shouldInclude(fieldOptions, "couplingRear") then dto.couplingRear = stock:getCouplingRear() end
-    if shouldInclude(fieldOptions, "length") then dto.length = stock:getLength() end
-    if shouldInclude(fieldOptions, "propelled") then dto.propelled = stock:getPropelled() end
-    if shouldInclude(fieldOptions, "modelType") then dto.modelType = stock:getModelType() end
-    if shouldInclude(fieldOptions, "modelTypeText") then dto.modelTypeText = stock:getModelTypeText() end
-    if shouldInclude(fieldOptions, "tag") then dto.tag = stock:getTag() end
-    if shouldInclude(fieldOptions, "nr") then dto.nr = stock:getWagonNr() end
-    if shouldInclude(fieldOptions, "trackType") then dto.trackType = stock:getTrackType() end
-    if shouldInclude(fieldOptions, "hookStatus") then dto.hookStatus = stock:getHookStatus() end
-    if shouldInclude(fieldOptions, "hookGlueMode") then dto.hookGlueMode = stock:getHookGlueMode() end
-    if shouldInclude(fieldOptions, "surfaceTexts") then dto.surfaceTexts = copyTable(stock:getTextureTexts()) end
-    if shouldInclude(fieldOptions, "trackId") then dto.trackId = isSubscribed and stock:getTrackId() or 0 end
-    if shouldInclude(fieldOptions, "trackDistance") then
-        dto.trackDistance = isSubscribed and stock:getTrackDistance() or 0
-    end
-    if shouldInclude(fieldOptions, "trackDirection") then
-        dto.trackDirection = isSubscribed and stock:getTrackDirection() or 0
-    end
-    if shouldInclude(fieldOptions, "trackSystem") then
-        dto.trackSystem = isSubscribed and stock:getTrackSystem() or 0
-    end
-    if shouldInclude(fieldOptions, "posX") then dto.posX = isSubscribed and stock:getX() or 0 end
-    if shouldInclude(fieldOptions, "posY") then dto.posY = isSubscribed and stock:getY() or 0 end
-    if shouldInclude(fieldOptions, "posZ") then dto.posZ = isSubscribed and stock:getZ() or 0 end
-    if shouldInclude(fieldOptions, "mileage") then dto.mileage = isSubscribed and stock:getMileage() or 0 end
-    if shouldInclude(fieldOptions, "orientationForward") then
-        dto.orientationForward = isSubscribed and stock:getOrientationForward() or false
-    end
-    if shouldInclude(fieldOptions, "smoke") then dto.smoke = isSubscribed and stock:getSmoke() or 0 end
-    if shouldInclude(fieldOptions, "active") then dto.active = isSubscribed and stock:getActive() or false end
-    if shouldInclude(fieldOptions, "rotX") then dto.rotX = isSubscribed and stock:getRotX() or 0 end
-    if shouldInclude(fieldOptions, "rotY") then dto.rotY = isSubscribed and stock:getRotY() or 0 end
-    if shouldInclude(fieldOptions, "rotZ") then dto.rotZ = isSubscribed and stock:getRotZ() or 0 end
-    return dto
-end
 
 local fieldGetters = {
     name = function (s) return s.rollingStockName end,
@@ -112,33 +64,53 @@ local fieldGetters = {
     rotZ = function (s) return s:getRotZ() end,
 }
 
-local function toPatchDto(stock, dirtyFields, isSubscribed, fieldOptions)
+local function toFullDto(stock, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("rollingStocks")
     local dto = {
         ceType = CE_TYPE,
         id = stock.rollingStockName,
+        name = stock.rollingStockName,
     }
-    for field in pairs(dirtyFields) do
-        local getter = shouldInclude(fieldOptions, field) and fieldGetters[field] or nil
-        if getter then
-            if placeHolders[field] ~= nil then
-                dto[field] = isSubscribed and getter(stock) or placeHolders[field]
-            else
+    for field, getter in pairs(fieldGetters) do
+        if field ~= "name" then
+            if SyncPolicy.shouldPublishField(fieldPolicies, field, isSelected) then
                 dto[field] = getter(stock)
+            elseif placeHolders[field] ~= nil
+                and SyncPolicy.shouldPublishPlaceholder(fieldPolicies, field, isSelected) then
+                dto[field] = placeHolders[field]
             end
         end
     end
     return dto
 end
 
-function RollingStockDtoFactory.createFullDto(stock, isSubscribed, fieldOptions)
-    if isSubscribed == nil then isSubscribed = true end
-    local dto = toFullDto(stock, isSubscribed, fieldOptions)
+local function toPatchDto(stock, dirtyFields, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("rollingStocks")
+    local dto = {
+        ceType = CE_TYPE,
+        id = stock.rollingStockName,
+    }
+    for field in pairs(dirtyFields) do
+        local getter = fieldGetters[field]
+        if getter and SyncPolicy.shouldPublishField(fieldPolicies, field, isSelected) then
+            dto[field] = getter(stock)
+        elseif getter and placeHolders[field] ~= nil and SyncPolicy.shouldPublishPlaceholder(fieldPolicies, field,
+                                                                                             isSelected) then
+            dto[field] = placeHolders[field]
+        end
+    end
+    return dto
+end
+
+function RollingStockDtoFactory.createFullDto(stock, isSelected)
+    if isSelected == nil then isSelected = true end
+    local dto = toFullDto(stock, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function RollingStockDtoFactory.createPatchDto(stock, dirtyFields, isSubscribed, fieldOptions)
-    if isSubscribed == nil then isSubscribed = true end
-    local dto = toPatchDto(stock, dirtyFields, isSubscribed, fieldOptions)
+function RollingStockDtoFactory.createPatchDto(stock, dirtyFields, isSelected)
+    if isSelected == nil then isSelected = true end
+    local dto = toPatchDto(stock, dirtyFields, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 

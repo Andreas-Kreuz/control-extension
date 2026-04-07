@@ -5,12 +5,6 @@ VersionStatePublisher.enabled = true
 local initialized = false
 VersionStatePublisher.name = "ce.hub.VersionStatePublisher"
 
-VersionStatePublisher.options = {
-    ceTypes = {
-        eepVersion = { ceType = "ce.hub.EepVersion", mode = "all" }
-    }
-}
-
 function VersionStatePublisher.initialize()
     if not VersionStatePublisher.enabled or initialized then return end
     initialized = true

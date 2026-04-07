@@ -3,14 +3,20 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructurePubl
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
-
 local StructurePublisher = {}
 
-function StructurePublisher.syncState(options)
-    local opts = options or {}
-    local ceTypeOptions = opts.ceTypes and opts.ceTypes.structure or nil
-    if not SyncPolicy.isActive(ceTypeOptions, false) then
+local function hasPayloadFields(dto)
+    for key in pairs(dto or {}) do
+        if key ~= "ceType" and key ~= "id" then return true end
+    end
+    return false
+end
+
+function StructurePublisher.syncState()
+    local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local HubCeTypes = require("ce.hub.data.HubCeTypes")
+    if not HubOptionsRegistry.isPublishEnabled("structures") then
         StructureRegistry.clearPendingChanges()
         return {}
     end
@@ -21,7 +27,8 @@ function StructurePublisher.syncState(options)
     for structureId in pairs(addedIds) do
         local structure = StructureRegistry.forId(structureId)
         if structure then
-            DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure, true))
+            local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
+            DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure, isSelected))
             structure.needsFullSend = false
             structure:resetDirty()
         end
@@ -32,14 +39,20 @@ function StructurePublisher.syncState(options)
     end
 
     for structureId, structure in pairs(StructureRegistry.getAll()) do
-        if not addedIds[structureId] and (structure.needsFullSend or structure:hasDirtyFields()) then
-            if structure.needsFullSend then
-                DataChangeBus.fireDataChanged(StructureDtoFactory.createFullDto(structure, true))
+        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
+        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Structure, tostring(structure.id))
+        if not addedIds[structureId]
+            and (structure.needsFullSend or structure:hasDirtyFields() or needsInitialSend) then
+            if structure.needsFullSend or needsInitialSend then
+                DataChangeBus.fireDataChanged(StructureDtoFactory.createFullDto(structure, isSelected))
                 structure.needsFullSend = false
+                if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Structure, tostring(structure.id)) end
             else
-                DataChangeBus.fireDataChanged(
-                    StructureDtoFactory.createPatchDto(structure, structure.dirtyFields, true)
-                )
+                local ceType, keyId, key, dto = StructureDtoFactory.createPatchDto(structure, structure.dirtyFields,
+                                                                                   isSelected)
+                if hasPayloadFields(dto) then
+                    DataChangeBus.fireDataChanged(ceType, keyId, key, dto)
+                end
             end
             structure:resetDirty()
         end

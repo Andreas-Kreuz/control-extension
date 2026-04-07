@@ -37,11 +37,8 @@
 
         assert.equals(CeHubModule, CeHubModule.setOptions({
             waitForServer = false,
-            sync = {
-                ceTypes = {
-                    train = { mode = "all" },
-                    time = { mode = "none" }
-                }
+            ceTypes = {
+                time = { publish = false }
             }
         }))
 
@@ -67,11 +64,8 @@
         ControlExtension.addModules(
             require("ce.mods.road.CeRoadModule"),
             CeHubModule.setOptions({
-                sync = {
-                    ceTypes = {
-                        train = { mode = "all" },
-                        time = { mode = "none" }
-                    }
+                ceTypes = {
+                    time = { publish = false }
                 }
             })
         )

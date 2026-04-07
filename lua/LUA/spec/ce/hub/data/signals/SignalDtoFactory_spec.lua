@@ -17,12 +17,12 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
             itemNameWithModelPath = "Signals/Signal 7",
             signalFunctions = { "1", "2" },
             activeFunction = "1",
-            getTag = function(self) return self.tag end,
-            getStopDistance = function(self) return self.stopDistance end,
-            getItemName = function(self) return self.itemName end,
-            getItemNameWithModelPath = function(self) return self.itemNameWithModelPath end,
-            getSignalFunctions = function(self) return self.signalFunctions end,
-            getActiveFunction = function(self) return self.activeFunction end
+            getTag = function (self) return self.tag end,
+            getStopDistance = function (self) return self.stopDistance end,
+            getItemName = function (self) return self.itemName end,
+            getItemNameWithModelPath = function (self) return self.itemNameWithModelPath end,
+            getSignalFunctions = function (self) return self.signalFunctions end,
+            getActiveFunction = function (self) return self.activeFunction end
         }
         local waiting = {
             ceType = "ce.hub.WaitingOnSignal",

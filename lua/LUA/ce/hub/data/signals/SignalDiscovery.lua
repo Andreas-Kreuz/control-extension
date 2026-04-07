@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDiscovery 
 
 local Signal = require("ce.hub.data.signals.Signal")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local SignalDiscovery = {}
 
@@ -17,10 +18,12 @@ local function discoverSignals()
 end
 
 function SignalDiscovery.runInitialDiscovery()
+    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
     discoverSignals()
 end
 
 function SignalDiscovery.runDiscovery()
+    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
     discoverSignals()
 end
 

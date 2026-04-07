@@ -190,7 +190,7 @@ Der heutige Laufzeitfluss ist:
 5. `CeHubModule.run()` führt Discovery und Updates aus und startet danach den Scheduler.
 6. `MainLoopRunner` ruft `initialize()` und `syncState()` der registrierten Publisher-Adapter auf.
 7. Die eigentlichen Publisher veröffentlichen Änderungen über `DataChangeBus`.
-8. `InternalDataStore` und `ServerEventBuffer` konsumieren diese Events für Snapshot und Transport.
+8. `InternalDataStore` und `ServerEventDispatcher` konsumieren diese Events für Snapshot und Server-Transport.
 
 ## Discovery mit gekoppelten CeTypes
 

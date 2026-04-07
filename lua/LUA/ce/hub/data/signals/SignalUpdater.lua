@@ -31,29 +31,33 @@ local function readFunctions(id, position)
     return #fns > 0 and fns or nil, activeFunction
 end
 
-function SignalUpdater.runUpdate(options)
-    local opts = options or {}
-    local fields = opts.fields or {}
+function SignalUpdater.runUpdate()
+    local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local HubCeTypes = require("ce.hub.data.HubCeTypes")
+    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
+    local fields = HubOptionsRegistry.getFieldUpdatePolicies("signals")
 
     for _, signal in pairs(SignalRegistry.getAll()) do
+        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
         local position = EEPGetSignal(signal.id)
         signal:setPosition(position)
         signal:setWaitingVehiclesCount(EEPGetSignalTrainsCount(signal.id) or 0)
 
-        if SyncPolicy.shouldCollect(fields.tag) then
+        if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
             local _, tag = EEPSignalGetTagText(signal.id)
             signal:setTag(tag or "")
         end
-        if SyncPolicy.shouldCollect(fields.stopDistance) then
+        if SyncPolicy.shouldUpdateField(fields, "stopDistance", isSelected) then
             local ok, stopDistance = EEPGetSignalStopDistance(signal.id)
             signal:setStopDistance(ok and stopDistance or nil)
         end
-        if SyncPolicy.shouldCollect(fields.itemName) then
+        if SyncPolicy.shouldUpdateField(fields, "itemName", isSelected) then
             local ok, itemName = EEPGetSignalItemName(signal.id, false)
             local okPath, itemNameWithModelPath = EEPGetSignalItemName(signal.id, true)
             signal:setItemName(ok and itemName or nil, okPath and itemNameWithModelPath or nil)
         end
-        if SyncPolicy.shouldCollect(fields.functions) then
+        if SyncPolicy.shouldUpdateField(fields, "functions", isSelected) then
             local signalFunctions, activeFunction = readFunctions(signal.id, position)
             signal:setFunctions(signalFunctions, activeFunction)
         end

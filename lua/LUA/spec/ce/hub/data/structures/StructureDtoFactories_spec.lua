@@ -22,10 +22,10 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
             light = true,
             smoke = false,
             fire = true,
-            getTag = function(self) return self.tag end,
-            getLight = function(self) return self.light end,
-            getSmoke = function(self) return self.smoke end,
-            getFire = function(self) return self.fire end
+            getTag = function (self) return self.tag end,
+            getLight = function (self) return self.light end,
+            getSmoke = function (self) return self.smoke end,
+            getFire = function (self) return self.fire end
         }
 
         local ceType, keyId, key, dto = StructureDtoFactory.createFullDto(structure)
@@ -59,10 +59,10 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
             name = "#7",
             tag = "changed",
             fire = true,
-            getTag = function(self) return self.tag end,
-            getLight = function() return false end,
-            getSmoke = function() return false end,
-            getFire = function(self) return self.fire end
+            getTag = function (self) return self.tag end,
+            getLight = function () return false end,
+            getSmoke = function () return false end,
+            getFire = function (self) return self.fire end
         }
 
         local ceType, keyId, key, dto = StructureDtoFactory.createPatchDto(structure, { tag = true, fire = true })

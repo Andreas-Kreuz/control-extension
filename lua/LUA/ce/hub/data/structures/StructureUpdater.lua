@@ -39,10 +39,9 @@ local function applyStaticUpdate(structure)
     structure:setRotation(round2(rotX), round2(rotY), round2(rotZ))
 end
 
-function StructureUpdater.runInitialUpdate(options)
-    local opts = options or {}
-    local ceTypeOptions = opts.ceTypes and opts.ceTypes.structure or nil
-    if not SyncPolicy.isActive(ceTypeOptions, false) then return end
+function StructureUpdater.runInitialUpdate()
+    local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
 
     for _, structure in pairs(StructureRegistry.getAll()) do
         applyStaticUpdate(structure)
@@ -50,27 +49,30 @@ function StructureUpdater.runInitialUpdate(options)
     end
 end
 
-function StructureUpdater.runUpdate(options)
-    local opts = options or {}
-    local ceTypeOptions = opts.ceTypes and opts.ceTypes.structure or nil
-    if not SyncPolicy.isActive(ceTypeOptions, false) then return end
+function StructureUpdater.runUpdate()
+    local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local HubCeTypes = require("ce.hub.data.HubCeTypes")
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
 
-    local fields = opts.fields or {}
+    local fields = HubOptionsRegistry.getFieldUpdatePolicies("structures")
     for _, structure in pairs(StructureRegistry.getAll()) do
+        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure,
+                                                            tostring(structure.id or structure.name))
         applyStaticUpdate(structure)
-        if SyncPolicy.shouldCollect(fields.tag) then
+        if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
             local _, tag = EEPStructureGetTagText(structure.name)
             structure:setTag(tag or "")
         end
-        if SyncPolicy.shouldCollect(fields.light) then
+        if SyncPolicy.shouldUpdateField(fields, "light", isSelected) then
             local _, light = EEPStructureGetLight(structure.name)
             structure:setLight(light == true)
         end
-        if SyncPolicy.shouldCollect(fields.smoke) then
+        if SyncPolicy.shouldUpdateField(fields, "smoke", isSelected) then
             local _, smoke = EEPStructureGetSmoke(structure.name)
             structure:setSmoke(smoke == true)
         end
-        if SyncPolicy.shouldCollect(fields.fire) then
+        if SyncPolicy.shouldUpdateField(fields, "fire", isSelected) then
             local _, fire = EEPStructureGetFire(structure.name)
             structure:setFire(fire == true)
         end

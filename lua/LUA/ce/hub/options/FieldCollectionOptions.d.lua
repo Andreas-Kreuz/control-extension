@@ -1,0 +1,2 @@
+---@class FieldCollectionOptions
+---@field policy "always"|"onselection"|"never"|nil

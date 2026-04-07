@@ -5,12 +5,6 @@ SwitchStatePublisher.enabled = true
 local initialized = false
 SwitchStatePublisher.name = "ce.hub.data.switches.SwitchStatePublisher"
 
-SwitchStatePublisher.options = {
-    ceTypes = {
-        switches = { ceType = "ce.hub.Switch", mode = "all" }
-    }
-}
-
 function SwitchStatePublisher.initialize()
     if not SwitchStatePublisher.enabled or initialized then return end
     initialized = true

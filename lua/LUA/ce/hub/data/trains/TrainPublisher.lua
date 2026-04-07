@@ -3,17 +3,25 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainPublisher ..
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 local TrainDtoFactory = require("ce.hub.data.trains.TrainDtoFactory")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
 local TrainPublisher = {}
 
-function TrainPublisher.syncState(options)
-    local opts = options or {}
-    local trainOptions = opts.ceTypes and opts.ceTypes.train or nil
-    local mode = SyncPolicy.getMode(trainOptions, true)
-    local fieldOptions = opts.fields or {}
+local function hasPayloadFields(dto)
+    for key in pairs(dto or {}) do
+        if key ~= "ceType" and key ~= "id" then return true end
+    end
+    return false
+end
+
+function TrainPublisher.syncState()
+    local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+
+    if not HubOptionsRegistry.isPublishEnabled("trains") then
+        TrainRegistry.clearPendingChanges()
+        return {}
+    end
 
     for trainId in pairs(TrainRegistry.getRemovedIds()) do
         DataChangeBus.fireDataRemoved(TrainDtoFactory.createRefDto(trainId))
@@ -22,20 +30,16 @@ function TrainPublisher.syncState(options)
     for _, train in pairs(TrainRegistry.getAll()) do
         local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Train, train.id)
         local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Train, train.id)
-        local isSubscribed = mode == "all" or (mode == "selected" and isSelected)
 
         if train.needsFullSend or needsInitialSend then
-            DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSubscribed, fieldOptions))
+            DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSelected))
             train.needsFullSend = false
             train:resetDirty()
             if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Train, train.id) end
         elseif train:hasDirtyFields() then
-            local shouldSend = mode == "all"
-                or (mode == "selected" and isSelected)
-                or not train.dirtyFields.speed
-            if shouldSend then
-                DataChangeBus.fireDataChanged(TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSubscribed,
-                                                                             fieldOptions))
+            local ceType, keyId, key, dto = TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSelected)
+            if hasPayloadFields(dto) then
+                DataChangeBus.fireDataChanged(ceType, keyId, key, dto)
             end
             train:resetDirty()
         end

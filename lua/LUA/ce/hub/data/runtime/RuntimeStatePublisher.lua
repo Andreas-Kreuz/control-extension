@@ -6,12 +6,6 @@ RuntimeStatePublisher.enabled = true
 local initialized = false
 RuntimeStatePublisher.name = "ce.hub.data.runtime.RuntimeStatePublisher"
 
-RuntimeStatePublisher.options = {
-    ceTypes = {
-        runtimes = { ceType = "ce.hub.Runtime", mode = "all" }
-    }
-}
-
 function RuntimeStatePublisher.initialize()
     if not RuntimeStatePublisher.enabled or initialized then return end
 

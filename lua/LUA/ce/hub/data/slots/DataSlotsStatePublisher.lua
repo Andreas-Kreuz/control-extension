@@ -6,13 +6,6 @@ DataSlotsStatePublisher.name = "ce.hub.data.slots.DataSlotsStatePublisher"
 DataSlotsStatePublisher.enabled = true
 local initialized = false
 
-DataSlotsStatePublisher.options = {
-    ceTypes = {
-        saveSlots = { ceType = "ce.hub.SaveSlot", mode = "all" },
-        freeSlots = { ceType = "ce.hub.FreeSlot", mode = "all" }
-    }
-}
-
 function DataSlotsStatePublisher.initialize()
     initialized = true
 end

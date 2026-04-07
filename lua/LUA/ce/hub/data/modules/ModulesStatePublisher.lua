@@ -9,12 +9,6 @@ ModulesStatePublisher.enabled = true
 local initialized = false
 ModulesStatePublisher.name = "ce.hub.ModulesStatePublisher"
 
-ModulesStatePublisher.options = {
-    ceTypes = {
-        modules = { ceType = "ce.hub.Module", mode = "all" }
-    }
-}
-
 function ModulesStatePublisher.initialize()
     if not ModulesStatePublisher.enabled or initialized then return end
     initialized = true

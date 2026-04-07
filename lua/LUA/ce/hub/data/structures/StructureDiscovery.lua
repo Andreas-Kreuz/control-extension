@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDisc
 
 local Structure = require("ce.hub.data.structures.Structure")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local StructureDiscovery = {}
 
@@ -35,10 +36,12 @@ local function discoverStructures()
 end
 
 function StructureDiscovery.runInitialDiscovery()
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
     discoverStructures()
 end
 
 function StructureDiscovery.runDiscovery()
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
     discoverStructures()
 end
 

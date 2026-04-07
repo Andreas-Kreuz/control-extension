@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotsUpdater .
 
 local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
 local DataSlotsRegistry = require("ce.hub.data.slots.DataSlotsRegistry")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 
 local DataSlotsUpdater = {}
@@ -16,6 +17,8 @@ local function updateSlot(id, name, data)
 end
 
 function DataSlotsUpdater.runUpdate()
+    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("saveSlots", "freeSlots") then return end
+
     local filledSlots = {}
     local emptySlots = {}
 

@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
+﻿ -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
@@ -12,11 +12,8 @@ local TRACK_CE_TYPES = {
     rail = HubCeTypes.RailTrack,
     tram = HubCeTypes.TramTrack
 }
-
-local function shouldInclude(fieldOptions, fieldName)
-    local field = fieldOptions and fieldOptions[fieldName] or nil
-    return field == nil or field.collect ~= false
-end
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local function ceTypeForTrackType(trackType)
     local ceType = TRACK_CE_TYPES[trackType]
@@ -24,25 +21,32 @@ local function ceTypeForTrackType(trackType)
     return ceType
 end
 
-local function toTrackDto(trackType, track, fieldOptions)
+local function toTrackDto(trackType, track, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies(trackType .. "Tracks")
     local dto = {
         ceType = ceTypeForTrackType(trackType),
         id = track.id,
     }
-    if shouldInclude(fieldOptions, "reserved") then dto.reserved = track.reserved end
-    if shouldInclude(fieldOptions, "reservedByTrainName") then dto.reservedByTrainName = track.reservedByTrainName end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "reserved", isSelected) then dto.reserved = track.reserved end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "reservedByTrainName", isSelected) then
+        dto.reservedByTrainName = track.reservedByTrainName
+    end
     return dto
 end
 
-function TrackDtoFactory.createTrackDto(trackType, track, fieldOptions)
-    local dto = toTrackDto(trackType, track, fieldOptions)
+function TrackDtoFactory.ceTypeForTrackType(trackType)
+    return ceTypeForTrackType(trackType)
+end
+
+function TrackDtoFactory.createTrackDto(trackType, track, isSelected)
+    local dto = toTrackDto(trackType, track, isSelected == true)
     return dto.ceType, KEY_ID, dto[KEY_ID], dto
 end
 
-function TrackDtoFactory.createTrackDtoList(trackType, tracks, fieldOptions)
+function TrackDtoFactory.createTrackDtoList(trackType, tracks, isSelected)
     local trackDtos = {}
     for trackId, track in pairs(tracks) do
-        local _, _, _, dto = TrackDtoFactory.createTrackDto(trackType, track, fieldOptions)
+        local _, _, _, dto = TrackDtoFactory.createTrackDto(trackType, track, isSelected)
         trackDtos[trackId] = dto
     end
     return ceTypeForTrackType(trackType), KEY_ID, trackDtos

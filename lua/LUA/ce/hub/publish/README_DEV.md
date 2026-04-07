@@ -31,7 +31,7 @@ Das Paket ist bewusst klein gehalten:
 1. `DataChangeBus` definiert die Eventtypen
 2. `DataChangeBus` nimmt Datenänderungen aus anderen Paketen entgegen
 3. `DataChangeBus` verteilt diese Änderungen an alle registrierten Listener
-4. `ServerEventBuffer` aus `ce.databridge` zeichnet die verteilten Ereignisse für den späteren Export auf
+4. `ServerEventDispatcher` prüft Hub-Ereignisse gegen die wirksamen Hub-Optionen und leitet erlaubte Events an `ServerEventBuffer` weiter
 
 Wichtig: `ce.hub.publish` enthält keine Fachdaten und keine Dateiausgabe. Es ist nur die interne Drehscheibe für Änderungsereignisse.
 
@@ -63,7 +63,8 @@ Der reguläre Ablauf für eine Datenänderung ist:
 3. `DataChangeBus` erhöht den internen `eventCounter`.
 4. `DataChangeBus` erzeugt ein Eventobjekt mit Typ und Payload.
 5. Alle registrierten Listener erhalten dieses Event über `fireEvent(...)`.
-6. `ServerEventBuffer` aus `ce.databridge` puffert das Event für den späteren Export.
+6. `ServerEventDispatcher` filtert Hub-CeTypes über `HubOptionsRegistry.isCeTypePublishEnabled(...)`.
+7. `ServerEventBuffer` aus `ce.databridge` puffert erlaubte Events für den späteren Export.
 
 Beim Laden des Moduls wird einmal ein `CompleteReset` erzeugt, damit nachgelagerte Empfänger ihren Zustand vollständig neu aufbauen können.
 
@@ -76,6 +77,12 @@ Beim Laden des Moduls wird einmal ein `CompleteReset` erzeugt, damit nachgelager
 ### Keine Dateiausgabe
 
 Aufzeichnung und Ausgabe liegen außerhalb des Pakets. `ServerEventBuffer` aus `ce.databridge` übernimmt das.
+
+### Dispatcher filtert nur Hub-CeTypes
+
+`ServerEventDispatcher` interpretiert nur `payload.ceType` so weit, dass Hub-CeTypes mit `publish = false`
+nicht an den Server weitergereicht werden. CeTypes, die nicht in `HubOptionsRegistry` vorkommen, werden
+unverändert weitergeleitet.
 
 ### Listener werden synchron aufgerufen
 
@@ -94,7 +101,7 @@ Ein fehlerhafter oder langsamer Listener kann den gesamten Änderungsfluss beein
 
 ## Relevante Nachbarn
 
-- `ce.databridge` — `ServerEventBuffer` zeichnet die verteilten Ereignisse auf
+- `ce.databridge` — `ServerEventBuffer` zeichnet die freigegebenen Ereignisse auf
 - `ce.hub.data`, `ce.mods.road`, `ce.mods.transit` — erzeugen Datenänderungen
 - `ce.hub.util.TableUtils` — unterstützt die Debug-Ausgabe
 
