@@ -7,6 +7,7 @@ export interface RuntimeStatisticsTimeDto {
 export interface RuntimeStatisticsHistoryDto {
   publisherSyncTimes: RuntimeStatisticsTimeDto[][];
   moduleRunTimes: RuntimeStatisticsTimeDto[][];
+  updateTimes: RuntimeStatisticsTimeDto[][];
   controllerUpdateTimes: RuntimeStatisticsTimeDto[][];
   sampleEventCounters: number[];
 }

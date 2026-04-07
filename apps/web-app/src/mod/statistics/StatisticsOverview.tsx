@@ -7,27 +7,16 @@ import AppPageHeadline from '../../components/AppPageHeadline';
 import VersionInfoWrapper from './VersionInfoWrapper';
 
 function StatisticsOverview() {
-  const { publisherSyncTimes, publisherInitTimes, controllerUpdateTimes, moduleInitTimes, moduleRunTimes } =
-    useStatistics();
+  const { overallTimes, initializationTimes, controllerUpdateTimes } = useStatistics();
 
   return (
     <AppPage>
       <AppPageHeadline>Statistik</AppPageHeadline>
       <AppCardGridContainer>
         <VersionInfoWrapper />
-        <StatisticsCard title="Ausführung der Publisher" samples={publisherSyncTimes} />
-        <StatisticsCard title="Ausführung CeModule" samples={moduleRunTimes} />
-        <StatisticsCard title="Server" samples={controllerUpdateTimes} />
-        <StatisticsCard
-          title="Initialisierung CeModule"
-          samples={moduleInitTimes.length > 0 ? [moduleInitTimes] : []}
-          maxEntries={1}
-        />
-        <StatisticsCard
-          title="Initialisierung der Publisher"
-          samples={publisherInitTimes.length > 0 ? [publisherInitTimes] : []}
-          maxEntries={1}
-        />
+        <StatisticsCard title="Initialisierungszeit" samples={initializationTimes} maxEntries={1} hidelegend />
+        <StatisticsCard title="Gesamtzeit" samples={overallTimes} />
+        <StatisticsCard title="Server-Kommunikation" samples={controllerUpdateTimes} />
       </AppCardGridContainer>
     </AppPage>
   );
