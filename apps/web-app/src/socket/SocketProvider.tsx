@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import useDebug from './useDebug';
 
 const clientStorageKey = 'ce-client-key';
-const socketUrl = window.location.protocol + '//' + window.location.hostname + ':3000';
+const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.protocol + '//' + window.location.hostname + ':3000';
 const socket = io(socketUrl, { autoConnect: false });
 
 const SocketConnectedContext = createContext<boolean>(false);
@@ -135,4 +135,3 @@ export function useSocketPairingCode() {
 export function useSocketIsAdmin() {
   return useContext(SocketAdminContext);
 }
-
