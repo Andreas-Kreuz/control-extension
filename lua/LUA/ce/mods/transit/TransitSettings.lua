@@ -1,6 +1,6 @@
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local RoadStation = require("ce.mods.transit.RoadStation")
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.TransitSettings ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.TransitSettings ...") end
 
 local TransitSettings = {}
 TransitSettings.showDepartureTippText = false

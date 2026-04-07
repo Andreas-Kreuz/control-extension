@@ -10,7 +10,6 @@ const pagesRoot = path.join(repoRoot, 'pages');
 const luaDocsSourceRoot = path.join(repoRoot, 'lua');
 const luaDocsTargetRoot = path.join(pagesRoot, 'lua');
 const stagedRootMarkdown = [
-  { source: 'AGENTS.md', target: 'AGENTS.md' },
   { source: 'project-docs/ARCHITECTURE.md', target: 'ARCHITECTURE.md' },
   { source: 'project-docs/CHANGELOG.md', target: 'CHANGELOG.md' },
   { source: 'CONTRIBUTING.md', target: 'CONTRIBUTING.md' },
@@ -50,7 +49,7 @@ function stageLuaDocs() {
 }
 
 function stageRootMarkdown() {
-  for (const { source, target } of stagedRootMarkdown) {
+  for (const { source, target, rewriteOptions } of stagedRootMarkdown) {
     const sourcePath = path.join(repoRoot, source);
     if (!existsSync(sourcePath)) {
       continue;
@@ -58,7 +57,9 @@ function stageRootMarkdown() {
 
     const targetPath = path.join(pagesRoot, target);
     const content = readFileSync(sourcePath, 'utf8');
-    writeFileSync(targetPath, rewriteMarkdownLinks(content, { stripLeadingParent: source.startsWith('project-docs/') }), 'utf8');
+    mkdirSync(path.dirname(targetPath), { recursive: true });
+    const options = rewriteOptions ?? { stripLeadingParent: source.startsWith('project-docs/') };
+    writeFileSync(targetPath, rewriteMarkdownLinks(content, options), 'utf8');
     stagedPaths.push(targetPath);
   }
 }
@@ -110,11 +111,19 @@ function rewriteMarkdownTarget(target, options = {}) {
     target = target.slice(3);
   }
 
+  if (options.stripLeadingAiPrefix && target.startsWith('ai/')) {
+    target = target.slice('ai/'.length);
+  }
+
   if (target.startsWith('project-docs/')) {
     target = target.slice('project-docs/'.length);
   }
 
   target = target.replace('/project-docs/', '/');
+
+  if (options.mapAgentsToAi && target === 'agents.md') {
+    target = 'ai/agents.md';
+  }
 
   if (target === 'README.md') {
     return './';

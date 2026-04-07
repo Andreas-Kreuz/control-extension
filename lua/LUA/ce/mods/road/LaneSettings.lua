@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.LaneSettings ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.LaneSettings ...") end
 
 local Lane = require("ce.mods.road.Lane")
 -- local Queue = require("ce.hub.util.Queue")

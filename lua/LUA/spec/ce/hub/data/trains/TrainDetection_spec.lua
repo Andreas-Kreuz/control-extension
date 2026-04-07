@@ -1,69 +1,55 @@
-describe("TrainDetection", function ()
-    local debug = false
+describe("TrainDiscovery", function ()
+    local function runCycle(selectedTrackCeTypes)
+        local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+        local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
 
-    local EepSimulator = require("ce.hub.eep.EepSimulator")
-    EepSimulator.debug = debug
-    EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
+        TrainDiscovery.runDiscovery(selectedTrackCeTypes or {})
+        TrainUpdater.runUpdate({})
+        RollingStockUpdater.runUpdate({})
+    end
 
-    insulate("with #EepTrain1:", function ()
-        local TrainDetection = require("ce.hub.data.trains.TrainDetection")
-        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-        TrainDetection.debug = debug
-        TrainRegistry.debug = debug
+    insulate("discovers trains on tracks and updates rolling-stock composition after splits", function ()
+        it("keeps train discovery isolated", function ()
+            local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
-        TrainDetection.initialize()
-        TrainDetection.update();
+            EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
+            TrainDiscovery.runInitialDiscovery()
+            runCycle()
+            assert.is_falsy(TrainRegistry.getAllTrainNames()["#EepTrain1"])
 
-        local haveTrainInitially = TrainRegistry.getAllTrainNames()["#EepTrain1"]
-        it("have no train first", function () assert.is_falsy(haveTrainInitially) end)
+            EepSimulator.simulatePlaceTrainOnRailTrack(1, "#EepTrain1")
+            runCycle()
 
-        EepSimulator.simulatePlaceTrainOnRailTrack(1, "#EepTrain1")
-        TrainDetection.update();
+            assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1"])
+            assert.is_falsy(TrainRegistry.getAllTrainNames()["#EepTrain1;001"])
+            assert.equals(2, TrainRegistry.forName("#EepTrain1"):getRollingStockCount())
 
-        local haveTrain1AfterInserting = TrainRegistry.getAllTrainNames()["#EepTrain1"]
-        local haveTrain2AfterInserting = TrainRegistry.getAllTrainNames()["#EepTrain1;001"]
-        local rsCount1AfterInserting = TrainRegistry.forName("#EepTrain1"):getRollingStockCount()
-        it("have #EepTrain1 after inserting", function () assert.is_true(haveTrain1AfterInserting) end)
-        it("no #EepTrain1;001 after inserting", function () assert.is_falsy(haveTrain2AfterInserting) end)
-        it("#EepTrain1 has 2 rollingStock", function () assert.equals(2, rsCount1AfterInserting) end)
-        it("train #EepTrain1 was not created", function ()
-            local _, created = TrainRegistry.forName("#EepTrain1")
-            assert.is_false(created)
+            EepSimulator.simulateSplitTrain("#EepTrain1", 1)
+            runCycle()
+
+            assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1"])
+            assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1;001"])
+            assert.equals(1, TrainRegistry.forName("#EepTrain1"):getRollingStockCount())
+            assert.equals(1, TrainRegistry.forName("#EepTrain1;001"):getRollingStockCount())
         end)
-
-        EepSimulator.simulateSplitTrain("#EepTrain1", 1)
-        TrainDetection.update();
-        local haveTrain1AfterSplitting = TrainRegistry.getAllTrainNames()["#EepTrain1"]
-        local haveTrain2AfterSplitting = TrainRegistry.getAllTrainNames()["#EepTrain1;001"]
-        local rsCount1AfterSplitting = TrainRegistry.forName("#EepTrain1"):getRollingStockCount()
-        local rsCount2AfterSplitting = TrainRegistry.forName("#EepTrain1;001"):getRollingStockCount()
-        it("have #EepTrain1 after splitTrain", function () assert.is_true(haveTrain1AfterSplitting) end)
-        it("no #EepTrain1;001 after splitTrain", function () assert.is_true(haveTrain2AfterSplitting) end)
-        it("#EepTrain1 has 1 rollingStock", function () assert.equals(1, rsCount1AfterSplitting) end)
-        it("#EepTrain1;001 has 1 rollingStock", function () assert.equals(1, rsCount2AfterSplitting) end)
     end)
 
-    insulate("with multi-return getters:", function ()
-        local TrainDetection = require("ce.hub.data.trains.TrainDetection")
-        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-        TrainDetection.debug = debug
-        TrainRegistry.debug = debug
+    insulate("keeps optional multi-return getters robust during updates", function ()
+        it("handles missing optional globals without leaking them", function ()
+            local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+            local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 
-        EepSimulator.simulateAddTrain("#EepTrainMultiReturn", "RollingStock 3", "RollingStock 4")
-        TrainDetection.initialize()
-        EepSimulator.simulatePlaceTrainOnRailTrack(2, "#EepTrainMultiReturn")
-        TrainDetection.update()
+            EepSimulator.simulateAddTrain("#EepTrainMultiReturn", "RollingStock 3", "RollingStock 4")
+            TrainDiscovery.runInitialDiscovery()
+            EepSimulator.simulatePlaceTrainOnRailTrack(2, "#EepTrainMultiReturn")
+            runCycle()
 
-        it("uses all values from optional multi-return getters without errors", function ()
             local rollingStockName = TrainRegistry.rollingStockNameInTrain("#EepTrainMultiReturn", 0)
-            local originalGetTrainCouplingFront = _G.EEPGetTrainCouplingFront
-            local originalGetTrainCouplingRear = _G.EEPGetTrainCouplingRear
-            local originalIsTrainInTrainyard = _G.EEPIsTrainInTrainyard
-            local originalGetOrientation = _G.EEPRollingstockGetOrientation
-            local originalGetSmoke = _G.EEPRollingstockGetSmoke
-            local originalGetHook = _G.EEPRollingstockGetHook
-            local originalGetHookGlue = _G.EEPRollingstockGetHookGlue
 
             EEPSetTrainCouplingFront("#EepTrainMultiReturn", true)
             EEPSetTrainCouplingRear("#EepTrainMultiReturn", false)
@@ -73,7 +59,7 @@ describe("TrainDetection", function ()
             EEPRollingstockSetHook(rollingStockName, true)
             EEPRollingstockSetHookGlue(rollingStockName, true)
 
-            assert.has_no.errors(function () TrainDetection.update() end)
+            assert.has_no.errors(function () runCycle() end)
 
             local train = TrainRegistry.forName("#EepTrainMultiReturn")
             local rollingStock = RollingStockRegistry.forName(rollingStockName)
@@ -95,7 +81,7 @@ describe("TrainDetection", function ()
             _G.EEPRollingstockGetHook = nil
             _G.EEPRollingstockGetHookGlue = nil
 
-            assert.has_no.errors(function () TrainDetection.update() end)
+            assert.has_no.errors(function () runCycle() end)
             assert.equals(1, train:getCouplingFront())
             assert.equals(2, train:getCouplingRear())
             assert.is_false(train:getInTrainyard())
@@ -104,14 +90,75 @@ describe("TrainDetection", function ()
             assert.equals(1, rollingStock:getSmoke())
             assert.equals(1, rollingStock:getHookStatus())
             assert.equals(1, rollingStock:getHookGlueMode())
+        end)
+    end)
 
-            _G.EEPGetTrainCouplingFront = originalGetTrainCouplingFront
-            _G.EEPGetTrainCouplingRear = originalGetTrainCouplingRear
-            _G.EEPIsTrainInTrainyard = originalIsTrainInTrainyard
-            _G.EEPRollingstockGetOrientation = originalGetOrientation
-            _G.EEPRollingstockGetSmoke = originalGetSmoke
-            _G.EEPRollingstockGetHook = originalGetHook
-            _G.EEPRollingstockGetHookGlue = originalGetHookGlue
+    insulate("discovers one single-rolling-stock train on the second track of each track type", function ()
+        it("maps occupied track buckets to the expected discovered train track types", function ()
+            local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local Store = require("ce.hub.eep.EepSimulatorStore")
+            local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+            local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
+
+            local occupiedTracksByType = {
+                auxiliary = 2,
+                control = 4,
+                road = 6,
+                rail = 8,
+                tram = 10
+            }
+            local systemIdByType = {
+                rail = 1,
+                road = 3,
+                tram = 2,
+                auxiliary = 4,
+                control = 5
+            }
+            local rollingStockByTrainName = {}
+            local originalGetRollingstockTrack = _G.EEPRollingstockGetTrack
+
+            for trackType, trackId in pairs(occupiedTracksByType) do
+                local trainName = "#Train-" .. trackType
+                local rollingStockName = "RS-" .. trackType
+                rollingStockByTrainName[rollingStockName] = {
+                    trackId = trackId,
+                    systemId = systemIdByType[trackType]
+                }
+                EepSimulator.simulateAddTrain(trainName, rollingStockName)
+            end
+
+            TrainDiscovery.runInitialDiscovery()
+
+            for trackType, trackId in pairs(occupiedTracksByType) do
+                local trainName = "#Train-" .. trackType
+                Store.state.tracks[trackType][trackId] = Store.state.tracks[trackType][trackId] or {}
+                Store.state.tracks[trackType][trackId].registered = true
+                Store.state.tracks[trackType][trackId].occupiedTrainName = trainName
+            end
+
+            _G.EEPRollingstockGetTrack = function (rollingStockName)
+                local info = rollingStockByTrainName[rollingStockName]
+                if info then
+                    return true, info.trackId, 5, 1, info.systemId
+                end
+                return originalGetRollingstockTrack(rollingStockName)
+            end
+
+            runCycle()
+
+            for trackType, trackId in pairs(occupiedTracksByType) do
+                local trainName = "#Train-" .. trackType
+                local train = TrainRegistry.getAll()[trainName]
+                local track = TrackRegistry.get(trackType, trackId)
+
+                assert.is_not_nil(train)
+                assert.equals(trackType, train:getTrackType())
+                assert.same({ [tostring(trackId)] = trackId }, train:getOnTrack())
+                assert.is_not_nil(track)
+                assert.is_true(track.reserved)
+                assert.equals(trainName, track.reservedByTrainName)
+            end
         end)
     end)
 end)

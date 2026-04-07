@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/modules/ModuleLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModuleDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModuleDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local ModuleDtoFactory = {}

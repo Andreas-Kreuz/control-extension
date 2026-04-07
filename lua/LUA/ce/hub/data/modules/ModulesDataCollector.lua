@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModulesDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModulesDataCollector ...") end
 
 local ModulesDataCollector = {}
 

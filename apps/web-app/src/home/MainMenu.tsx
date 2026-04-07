@@ -1,15 +1,15 @@
 import { lazy, useMemo } from 'react';
-import useNavState from '../nav/NavElements';
+import useNavState from './NavElements';
 import { useNavigate } from 'react-router-dom';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 
-const AppCardGrid = lazy(() => import('../ui/AppCardGrid'));
-const AppCardGridContainer = lazy(() => import('../ui/AppCardGridContainer'));
-const AppCardImg = lazy(() => import('../ui/AppCardImg'));
-const AppPage = lazy(() => import('../ui/AppPage'));
+const AppCardGrid = lazy(() => import('../components/AppCardGrid'));
+const AppCardGridContainer = lazy(() => import('../components/AppCardGridContainer'));
+const AppCardImg = lazy(() => import('../components/AppCardImg'));
+const AppPage = lazy(() => import('../components/AppPage'));
 
 function MainMenu() {
   const navigation = useNavState();
@@ -45,8 +45,8 @@ function MainMenu() {
           <Button variant="text" startIcon={<BarChartIcon />} onClick={() => navigate('statistics')}>
             Statistik
           </Button>
-          <Button variant="text" startIcon={<Inventory2Icon />} href="/api">
-            API
+          <Button variant="text" startIcon={<Inventory2Icon />} href="/data">
+            Daten
           </Button>
         </Grid>
       </AppPage>

@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.rail.Rail ...") end
+if CeDebugLoad then print("[#Start] Loading ce.rail.Rail ...") end
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local fmt = require("ce.hub.eep.TippTextFormatter")
 

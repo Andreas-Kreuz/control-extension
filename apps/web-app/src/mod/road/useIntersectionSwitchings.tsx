@@ -1,6 +1,6 @@
 import { CeTypes } from '@ce/web-shared';
 import { useState } from 'react';
-import { useApiDataRoomHandler } from '../../io/useRoomHandler';
+import { useApiDataRoomHandler } from '../../socket/useRoomHandler';
 import IntersectionSwitching from './model/IntersectionSwitching';
 
 function useIntersectionSwitchings(): IntersectionSwitching[] {

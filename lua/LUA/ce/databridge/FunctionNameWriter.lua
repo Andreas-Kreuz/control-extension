@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.FunctionNameWriter ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.FunctionNameWriter ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 
 local FunctionNameWriter = {}

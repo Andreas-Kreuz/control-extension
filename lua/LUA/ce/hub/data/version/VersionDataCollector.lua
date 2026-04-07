@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionDataCollector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionDataCollector ...") end
 
 local VersionInfo = require("ce.hub.data.version.VersionInfo")
 

@@ -1,12 +1,12 @@
-import { useSocket } from '../../io/SocketProvider';
-import { CommandEvent, RollingStockStaticDto } from '@ce/web-shared';
-import useDebug from '../../io/useDebug';
+import { useSocket } from '../../socket/SocketProvider';
+import { CommandEvent, RollingStockDto } from '@ce/web-shared';
+import useDebug from '../../socket/useDebug';
 
 const useSetRollingStockCam = () => {
   const socket = useSocket();
   const debug = useDebug();
 
-  return (rollingStock: RollingStockStaticDto | undefined, key: number) => {
+  return (rollingStock: RollingStockDto | undefined, key: number) => {
     if (debug) console.log('                 |📹 CAM SET --', 'for ROLLING STOCK', rollingStock, key);
     if (!rollingStock) {
       return;
@@ -43,4 +43,3 @@ const useSetRollingStockCam = () => {
 };
 
 export default useSetRollingStockCam;
-

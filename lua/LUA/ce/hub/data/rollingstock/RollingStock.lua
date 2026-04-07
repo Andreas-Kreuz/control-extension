@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStock ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStock ...") end
 
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local StorageUtility = require("ce.hub.util.StorageUtility")
@@ -43,13 +43,13 @@ end
 
 local RollingStock = {}
 
-local function markStaticUpdated(rollingStock)
-    rollingStock.valuesUpdated = true
-    rollingStock.staticValuesUpdated = true
-end
+-- Field update policies (see RollingStockStaticDtoTypes.d.lua / RollingStockDynamicDtoTypes.d.lua):
+--   always   -> real value always included in DTO
+--   ondemand -> real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
+--   never    -> always placeholder, never sent to clients
 
-local function markDynamicUpdated(rollingStock)
-    rollingStock.dynamicValuesUpdated = true
+local function markDirty(rollingStock, fieldName)
+    rollingStock.dirtyFields[fieldName] = true
 end
 
 
@@ -118,11 +118,8 @@ function RollingStock:new(o)
     o.rotX = rotationOk and round2(rotX) or 0
     o.rotY = rotationOk and round2(rotY) or 0
     o.rotZ = rotationOk and round2(rotZ) or 0
-    o.valuesUpdated = true
-    o.staticValuesUpdated = true
-    o.dynamicValuesUpdated = true
-    o.textureTextsUpdated = true
-    o.rotationUpdated = true
+    o.dirtyFields = {}
+    o.needsFullSend = true
     return o
 end
 
@@ -154,8 +151,7 @@ function RollingStock:save(clearCurrentInfo)
     local hresult = EEPRollingstockSetTagText(self.rollingStockName, newTag)
     assert(hresult)
     if oldTag ~= self.tag then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, tag = self.tag})
+        markDirty(self, "tag")
     end
 end
 
@@ -178,8 +174,7 @@ function RollingStock:setWagonNr(nr)
     self:setValue(TagKeys.RollingStock.wagonNumber, nr)
     self.model:setWagonNr(self.rollingStockName, nr)
     if oldNr ~= nr then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, nr = nr})
+        markDirty(self, "nr")
     end
 end
 
@@ -193,8 +188,7 @@ function RollingStock:setTrainName(trainName)
     local oldTrainName = self.trainName
     self.trainName = trainName
     if oldTrainName ~= trainName then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, trainName = trainName})
+        markDirty(self, "trainName")
     end
 end
 
@@ -213,8 +207,7 @@ function RollingStock:setPositionInTrain(positionInTrain)
     local oldPositionInTrain = self.positionInTrain
     self.positionInTrain = positionInTrain
     if oldPositionInTrain ~= positionInTrain then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, positionInTrain = positionInTrain})
+        markDirty(self, "positionInTrain")
     end
 end
 
@@ -232,11 +225,31 @@ function RollingStock:getLength()
     return self.length
 end
 
+function RollingStock:setLength(length)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(length) == "number", "Need 'length' as number")
+    length = tonumber(string.format("%.2f", length)) or 0
+    local oldLength = self.length
+    self.length = length
+    if oldLength ~= length then markDirty(self, "length") end
+end
+
 --- Get the type of this rolling stock
 ---@return number type of this rolling stock
 function RollingStock:getModelType()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return self.modelType
+end
+
+function RollingStock:setModelType(modelType)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(modelType) == "number", "Need 'modelType' as number")
+    local oldModelType = self.modelType
+    local oldModelTypeText = self.modelTypeText
+    self.modelType = modelType
+    self.modelTypeText = EEPRollingstockModelTypeText[modelType] or ""
+    if oldModelType ~= modelType then markDirty(self, "modelType") end
+    if oldModelTypeText ~= self.modelTypeText then markDirty(self, "modelTypeText") end
 end
 
 --- Get the type of this rolling stock
@@ -253,6 +266,17 @@ function RollingStock:getTag()
     return self.tag
 end
 
+function RollingStock:setTag(tag)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(tag) == "string", "Need 'tag' as string")
+    local oldTag = self.tag
+    local oldNr = self:getWagonNr()
+    self.tag = tag
+    self.values = StorageUtility.parseTableFromString(tag)
+    if oldTag ~= tag then markDirty(self, "tag") end
+    if oldNr ~= self:getWagonNr() then markDirty(self, "nr") end
+end
+
 --- Get the propelled value of this rolling stock
 ---@return boolean propelled value of this rolling stock
 function RollingStock:getPropelled()
@@ -260,12 +284,20 @@ function RollingStock:getPropelled()
     return self.propelled
 end
 
+function RollingStock:setPropelled(propelled)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(propelled) == "boolean", "Need 'propelled' as boolean")
+    local oldPropelled = self.propelled
+    self.propelled = propelled
+    if oldPropelled ~= propelled then markDirty(self, "propelled") end
+end
+
 function RollingStock:setOrientationForward(orientationForward)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(orientationForward) == "boolean", "Need 'orientationForward' as boolean")
     local oldOrientationForward = self.orientationForward
     self.orientationForward = orientationForward
-    if oldOrientationForward ~= orientationForward then markDynamicUpdated(self) end
+    if oldOrientationForward ~= orientationForward then markDirty(self, "orientationForward") end
 end
 
 function RollingStock:getOrientationForward()
@@ -278,7 +310,7 @@ function RollingStock:setSmoke(smoke)
     assert(type(smoke) == "number", "Need 'smoke' as number")
     local oldSmoke = self.smoke
     self.smoke = smoke
-    if oldSmoke ~= smoke then markDynamicUpdated(self) end
+    if oldSmoke ~= smoke then markDirty(self, "smoke") end
 end
 
 function RollingStock:getSmoke()
@@ -291,7 +323,7 @@ function RollingStock:setHookStatus(hookStatus)
     assert(type(hookStatus) == "number", "Need 'hookStatus' as number")
     local oldHookStatus = self.hookStatus
     self.hookStatus = hookStatus
-    if oldHookStatus ~= hookStatus then markStaticUpdated(self) end
+    if oldHookStatus ~= hookStatus then markDirty(self, "hookStatus") end
 end
 
 function RollingStock:getHookStatus()
@@ -304,7 +336,7 @@ function RollingStock:setHookGlueMode(hookGlueMode)
     assert(type(hookGlueMode) == "number", "Need 'hookGlueMode' as number")
     local oldHookGlueMode = self.hookGlueMode
     self.hookGlueMode = hookGlueMode
-    if oldHookGlueMode ~= hookGlueMode then markStaticUpdated(self) end
+    if oldHookGlueMode ~= hookGlueMode then markDirty(self, "hookGlueMode") end
 end
 
 function RollingStock:getHookGlueMode()
@@ -317,7 +349,7 @@ function RollingStock:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
-    if oldActive ~= active then markDynamicUpdated(self) end
+    if oldActive ~= active then markDirty(self, "active") end
 end
 
 function RollingStock:getActive()
@@ -330,7 +362,7 @@ function RollingStock:setTextureTexts(textureTexts)
     assert(type(textureTexts) == "table", "Need 'textureTexts' as table")
     local oldTextureTexts = self.textureTexts or {}
     self.textureTexts = textureTexts
-    if not TableUtils.sameDictEntries(oldTextureTexts, textureTexts) then self.textureTextsUpdated = true end
+    if not TableUtils.sameDictEntries(oldTextureTexts, textureTexts) then markDirty(self, "surfaceTexts") end
 end
 
 function RollingStock:getTextureTexts()
@@ -355,7 +387,11 @@ function RollingStock:setRotation(rotX, rotY, rotZ)
     self.rotX = rotX
     self.rotY = rotY
     self.rotZ = rotZ
-    if oldRotX ~= rotX or oldRotY ~= rotY or oldRotZ ~= rotZ then self.rotationUpdated = true end
+    if oldRotX ~= rotX or oldRotY ~= rotY or oldRotZ ~= rotZ then
+        markDirty(self, "rotX")
+        markDirty(self, "rotY")
+        markDirty(self, "rotZ")
+    end
 end
 
 function RollingStock:getRotX()
@@ -381,8 +417,7 @@ function RollingStock:setCouplingFront(couplingFront)
     local oldCoupling = self.couplingFront
     self.couplingFront = couplingFront
     if oldCoupling ~= couplingFront then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, couplingFront = couplingFront})
+        markDirty(self, "couplingFront")
     end
 end
 
@@ -401,8 +436,7 @@ function RollingStock:setCouplingRear(couplingRear)
     local oldCoupling = self.couplingRear
     self.couplingRear = couplingRear
     if oldCoupling ~= couplingRear then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, couplingRear = couplingRear})
+        markDirty(self, "couplingRear")
     end
 end
 
@@ -436,16 +470,10 @@ function RollingStock:setTrack(trackId, trackDistance, trackDirection, trackSyst
     self.trackDistance = trackDistance
     self.trackDirection = trackDirection
     self.trackSystem = trackSystem
-    if oldId ~= trackId or oldDist ~= trackDistance or oldDir ~= trackDirection or oldSys ~= trackSystem then
-        markDynamicUpdated(self)
-        -- DataChangeBus.fireDataChanged("rollingStockInfo", "id", {
-        --     id = self.id,
-        --     trackId = trackId,
-        --     trackDistance = trackDistance,
-        --     trackDirection = trackDirection,
-        --     trackSystem = trackSystem
-        -- })
-    end
+    if oldId ~= trackId then markDirty(self, "trackId") end
+    if oldDist ~= trackDistance then markDirty(self, "trackDistance") end
+    if oldDir ~= trackDirection then markDirty(self, "trackDirection") end
+    if oldSys ~= trackSystem then markDirty(self, "trackSystem") end
 end
 
 --- Get the track distance of the rolling stock
@@ -477,8 +505,7 @@ function RollingStock:setTrackType(trackType)
     local oldValue = self.trackType
     self.trackType = trackType
     if oldValue ~= trackType then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("rolling-stocks", "id", {id = self.id, trackType = trackType})
+        markDirty(self, "trackType")
     end
 end
 
@@ -502,10 +529,9 @@ function RollingStock:setPosition(x, y, z)
     self.x = x
     self.y = y
     self.z = z
-    if oldX ~= x or oldY ~= y or oldZ ~= z then
-        markDynamicUpdated(self)
-        -- DataChangeBus.fireDataChanged("rollingStockInfo", "id", {id = self.id, posX = x, posY = y, posZ = z})
-    end
+    if oldX ~= x then markDirty(self, "posX") end
+    if oldY ~= y then markDirty(self, "posY") end
+    if oldZ ~= z then markDirty(self, "posZ") end
 end
 
 --- Get the x coordinate of this rolling stock
@@ -537,8 +563,7 @@ function RollingStock:setMileage(mileage)
     local oldMileage = self.mileage
     self.mileage = mileage
     if oldMileage ~= mileage then
-        markDynamicUpdated(self)
-        -- DataChangeBus.fireDataChanged("rollingStockInfo", "id", {id = self.id, mileage = mileage})
+        markDirty(self, "mileage")
     end
 end
 
@@ -547,6 +572,14 @@ end
 function RollingStock:getMileage()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return self.mileage
+end
+
+function RollingStock:resetDirty()
+    self.dirtyFields = {}
+end
+
+function RollingStock:hasDirtyFields()
+    return next(self.dirtyFields) ~= nil
 end
 
 function RollingStock:openDoors() self.model:openDoors(self.rollingStockName) end

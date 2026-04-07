@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.LogOutputFileWriter ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.LogOutputFileWriter ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
 local os = require("os")

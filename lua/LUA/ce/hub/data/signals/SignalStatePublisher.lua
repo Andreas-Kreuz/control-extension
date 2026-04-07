@@ -1,34 +1,21 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalStatePublisher ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local SignalDataCollector = require("ce.hub.data.signals.SignalDataCollector")
-local SignalDtoFactory = require("ce.hub.data.signals.SignalDtoFactory")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalStatePublisher ...") end
+local SignalPublisher = require("ce.hub.data.signals.SignalPublisher")
 local SignalStatePublisher = {}
-local enabled = true
+SignalStatePublisher.enabled = true
 local initialized = false
 SignalStatePublisher.name = "ce.hub.data.signals.SignalStatePublisher"
-
-local signals = {}
+SignalStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Signal
 
 function SignalStatePublisher.initialize()
-    if not enabled or initialized then return end
-
-    signals = SignalDataCollector.collectInitialSignals()
-
+    if not SignalStatePublisher.enabled or initialized then return end
     initialized = true
 end
 
 function SignalStatePublisher.syncState()
-    if not enabled then return end
+    if not SignalStatePublisher.enabled then return end
 
     if not initialized then SignalStatePublisher.initialize() end
-
-    SignalDataCollector.refreshSignals(signals)
-    local waitingOnSignals = SignalDataCollector.collectWaitingOnSignals(signals)
-
-    DataChangeBus.fireListChange(SignalDtoFactory.createSignalDtoList(signals))
-    DataChangeBus.fireListChange(SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals))
-
-    return {}
+    return SignalPublisher.syncState()
 end
 
 return SignalStatePublisher

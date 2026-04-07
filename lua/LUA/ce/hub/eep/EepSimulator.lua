@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulator ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulator ...") end
 
 ----------------
 -- EEP Simulator

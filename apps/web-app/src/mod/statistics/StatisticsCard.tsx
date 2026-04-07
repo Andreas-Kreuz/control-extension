@@ -1,10 +1,50 @@
 import { lazy } from 'react';
 import Grid from '@mui/material/Grid';
-const AppCardBg = lazy(() => import('../../ui/AppCardBg'));
+const AppCardBg = lazy(() => import('../../components/AppCardBg'));
 import TimeDesc from './model/TimeDesc';
-import React from 'react';
+import React, { useState } from 'react';
 
-const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEntries?: number }) => {
+const LEGEND_COLORS = [
+  '#d62828',
+  '#f77f00',
+  '#fcbf49',
+  '#2a9d8f',
+  '#3a86ff',
+  '#8338ec',
+  '#ff006e',
+  '#6a994e',
+  '#bc4749',
+  '#577590',
+  '#ff595e',
+  '#ff924c',
+  '#8ac926',
+  '#1982c4',
+  '#6a4c93',
+  '#c1121f',
+  '#00b4d8',
+  '#9b5de5',
+  '#00f5d4',
+  '#f15bb5',
+  '#4361ee',
+  '#fb5607',
+  '#3a0ca3',
+  '#4d908e',
+  '#90be6d',
+  '#277da1',
+  '#f94144',
+  '#f3722c',
+  '#43aa8b',
+  '#577590',
+  '#b5179e',
+];
+
+const StatisticsOverview = (props: {
+  title: string;
+  samples: TimeDesc[][];
+  maxEntries?: number;
+  hidelegend?: boolean;
+}) => {
+  const [legendHidden, setLegendHidden] = useState(props.hidelegend === true);
   const maxEntries = props.maxEntries || 10;
   const list = props.samples;
   const max = getMax(list);
@@ -16,38 +56,13 @@ const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEn
     .map((x, i) => i);
 
   function colorOf(index: number) {
-    switch (index) {
-      case 0:
-        return '#db2b1d';
-      case 1:
-        return '#dbdc1d';
-      case 2:
-        return '#17ac21';
-      case 3:
-        return '#412396';
-      case 4:
-        return '#a9b3ce';
-      case 5:
-        return '#cf4d6f';
-      case 6:
-        return '#7cdedc';
-      case 7:
-        return '#7284a8';
-      case 8:
-        return '#7284a8';
-      case 9:
-        return '#474954';
-      case 10:
-        return '#eb9486';
-      default:
-        return 'red';
-    }
+    return LEGEND_COLORS[index % LEGEND_COLORS.length] ?? '#d62828';
   }
 
   function getMax(list: TimeDesc[][]) {
     let max1 = 0;
     for (const entries of list) {
-      max1 = Math.max(max1, maxOfSingleList(entries));
+      max1 = Math.max(100, Math.max(max1, maxOfSingleList(entries)));
     }
     return max1;
   }
@@ -93,7 +108,12 @@ const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEn
         title={title + (maxEntries > 1 ? ' (max: ' : ' (') + Math.round(max) + ' ms)'}
         image={'/assets/title-image-simulator.jpg'}
       >
-        <Grid paddingLeft={2} paddingRight={2}>
+        <Grid
+          paddingLeft={2}
+          paddingRight={2}
+          onClick={() => setLegendHidden((current) => !current)}
+          style={{ cursor: 'pointer' }}
+        >
           <svg width="100%" height={graphSvgHeight} style={{ backgroundColor: 'white' }}>
             {items.map((item, index) => (
               <rect
@@ -138,32 +158,36 @@ const StatisticsOverview = (props: { title: string; samples: TimeDesc[][]; maxEn
               </React.Fragment>
             ))}
           </svg>
-          <p style={{ marginTop: '1rem', marginBottom: '0.3rem' }}>Legende</p>
-          <svg width="100%" height={legendSvgHeight} style={{ backgroundColor: 'white' }}>
-            {ids.map((id: string, j: number) => (
-              <React.Fragment key={'Legend' + j}>
-                <rect
-                  x="0"
-                  y={j * legendLineHeight}
-                  width={legendEntryHeight}
-                  height={legendEntryHeight}
-                  style={{ fill: colorOf(j) }}
-                />
-                <text
-                  x={1.5 * legendEntryHeight}
-                  y={j * legendLineHeight + legendEntryHeight / 2}
-                  style={{
-                    fontSize: fontSize + 'px',
-                    dominantBaseline: 'middle',
-                    fontFamily: "source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace",
-                    fontWeight: 'lighter',
-                  }}
-                >
-                  {id}
-                </text>
-              </React.Fragment>
-            ))}
-          </svg>
+          <p style={{ marginTop: '1rem', marginBottom: legendHidden ? '1rem' : '0.3rem' }}>
+            Legende {legendHidden ? '(anzeigen)' : '(ausblenden)'}
+          </p>
+          {!legendHidden ? (
+            <svg width="100%" height={legendSvgHeight} style={{ backgroundColor: 'white', marginBottom: '0.5rem' }}>
+              {ids.map((id: string, j: number) => (
+                <React.Fragment key={'Legend' + j}>
+                  <rect
+                    x="0"
+                    y={j * legendLineHeight}
+                    width={legendEntryHeight}
+                    height={legendEntryHeight}
+                    style={{ fill: colorOf(j) }}
+                  />
+                  <text
+                    x={1.5 * legendEntryHeight}
+                    y={j * legendLineHeight + legendEntryHeight / 2}
+                    style={{
+                      fontSize: fontSize + 'px',
+                      dominantBaseline: 'middle',
+                      fontFamily: "source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace",
+                      fontWeight: 'lighter',
+                    }}
+                  >
+                    {id}
+                  </text>
+                </React.Fragment>
+              ))}
+            </svg>
+          ) : null}
         </Grid>
       </AppCardBg>
     </Grid>

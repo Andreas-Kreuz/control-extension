@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/traffic-light-models/TrafficLightModelLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.data.TrafficLightModelDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.TrafficLightModelDtoFactory ...") end
 
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local TrafficLightModelDtoFactory = {}

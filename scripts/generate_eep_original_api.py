@@ -5,7 +5,7 @@ from __future__ import annotations
 Generator fuer `lua/LUA/ce/hub/eep/EepOriginalApi.d.lua`.
 
 Referenz fuer den semantischen Tabellenaufbau im PDF:
-`lua/LUA/ce/hub/eep/Aufbau_Lua_Manual.md`
+`lua/LUA/ce/hub/eep/EepOriginalApi.md`
 
 Wichtige Layout-Regeln:
 - Funktionsbloecke haben drei Spalten.
@@ -76,6 +76,19 @@ KNOWN_COUNT_OVERRIDES: dict[tuple[str, str], list[int]] = {
     ("EEPRollingstockGetHookPosition", "Parameter"): [2],
     ("EEPRollingstockSetHorn", "Parameter"): [2],
     ("EEPGetFogIntensity", "Rueckgabewerte"): [1],
+}
+
+# Schreibfehler in der EEP-API, die im Handbuch (Inhaltsverzeichnis oder Bemerkungen)
+# auftauchen und in EEP als echte Funktionsnamen funktionieren.
+# Format: Schreibfehler -> kanonischer Name
+KNOWN_TYPO_ALIASES: dict[str, str] = {
+    "EEPAuxiliaryTackGetTextureText": "EEPAuxiliaryTrackGetTextureText",
+    "EEPAuxiliaryTackSetTextureText": "EEPAuxiliaryTrackSetTextureText",
+    "EEPTramTackGetTextureText": "EEPTramTrackGetTextureText",
+    "EEPTramTackSetTextureText": "EEPTramTrackSetTextureText",
+    "EEPGoodsSetAxisByNumer": "EEPGoodsSetAxisByNumber",
+    "EEPSructureSetAxisByNumer": "EEPStructureSetAxisByNumber",
+    "EEPStructureSetLightingColour": "EEPStructureSetLightningColour",
 }
 
 ASCII_TRANSLATION = str.maketrans(
@@ -1384,7 +1397,7 @@ def parse_function_rows(rows: list[TableRow]) -> Entry:
     return entry
 
 
-def build_entries_layout_schema() -> list[Entry]:
+def build_entries_layout_schema() -> tuple[list[Entry], dict[str, str]]:
     rows = normalize_layout_rows(layout_table_rows())
     blocks: list[list[TableRow]] = []
     current: list[TableRow] = []
@@ -1420,6 +1433,7 @@ def build_entries_layout_schema() -> list[Entry]:
         filtered.append(entry)
 
     deduped_by_name: dict[str, Entry] = {}
+    typo_aliases: dict[str, str] = {}
     for entry in filtered:
         matching_name = next(
             (
@@ -1432,16 +1446,21 @@ def build_entries_layout_schema() -> list[Entry]:
         if matching_name is not None:
             previous = deduped_by_name[matching_name]
             if entry_quality(entry) < entry_quality(previous):
+                typo_aliases[matching_name] = entry.name
                 entry.name = matching_name
                 deduped_by_name[matching_name] = entry
+            else:
+                typo_aliases[entry.name] = matching_name
             continue
         previous = deduped_by_name.get(entry.name)
         if previous is None or entry_quality(entry) < entry_quality(previous):
             deduped_by_name[entry.name] = entry
-    return list(deduped_by_name.values())
+    all_aliases = {**KNOWN_TYPO_ALIASES, **typo_aliases}
+    valid_aliases = {typo: canonical for typo, canonical in all_aliases.items() if canonical in deduped_by_name}
+    return list(deduped_by_name.values()), valid_aliases
 
 
-def build_entries() -> list[Entry]:
+def build_entries() -> tuple[list[Entry], dict[str, str]]:
     return build_entries_layout_schema()
 
 
@@ -3087,7 +3106,24 @@ def render_block_separator(entry: Entry) -> str:
     return prefix + ("=" * (WRAP_WIDTH - len(prefix)))
 
 
-def render_entries(entries: list[Entry]) -> str:
+def render_typo_aliases(typo_aliases: dict[str, str]) -> list[str]:
+    if not typo_aliases:
+        return []
+    lines: list[str] = [
+        f"-- === Bekannte Schreibfehler {'=' * (WRAP_WIDTH - len('-- === Bekannte Schreibfehler ') - 1)}",
+        "-- Die folgenden Funktionsnamen sind Schreibfehler in der EEP-API,",
+        "-- die aber trotzdem funktionieren.",
+        "",
+    ]
+    for typo_name in sorted(typo_aliases):
+        canonical = typo_aliases[typo_name]
+        lines.append(f"---@type fun(...): any")
+        lines.append(f"{typo_name} = {canonical}")
+        lines.append("")
+    return lines
+
+
+def render_entries(entries: list[Entry], typo_aliases: dict[str, str] | None = None) -> str:
     output: list[str] = [
         "---@meta",
         "",
@@ -3099,19 +3135,25 @@ def render_entries(entries: list[Entry]) -> str:
         output.append(render_block_separator(entry))
         output.extend(render_entry(entry, emitted_aliases))
         output.append("")
+    if typo_aliases:
+        output.extend(render_typo_aliases(typo_aliases))
     return ascii_text("\n".join(output).rstrip() + "\n")
 
 
-def write_generated_output(path: Path, entries: list[Entry]) -> None:
-    path.write_text(render_entries(entries), encoding="latin-1")
+def write_generated_output(path: Path, entries: list[Entry], typo_aliases: dict[str, str] | None = None) -> None:
+    path.write_text(render_entries(entries, typo_aliases), encoding="latin-1")
 
 
 def main() -> int:
-    entries = build_entries()
+    entries, typo_aliases = build_entries()
 
-    write_generated_output(OUTPUT, entries)
+    write_generated_output(OUTPUT, entries, typo_aliases)
     print(f"generated {OUTPUT}")
     print(f"entries: {len(entries)}")
+    if typo_aliases:
+        print(f"typo aliases: {len(typo_aliases)}")
+        for typo_name, canonical in sorted(typo_aliases.items()):
+            print(f"  {typo_name} -> {canonical}")
     return 0
 
 

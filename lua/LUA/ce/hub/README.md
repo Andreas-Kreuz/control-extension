@@ -9,26 +9,27 @@ img: '/docs/assets/headers/SourceCode.png'
 
 # Was ist der Lua Hub?
 
-Der Lua Hub dient der Sammlung aller Daten aus einer EEP-Anlage.
+Der Lua Hub ist die interne Laufzeit- und Datenplattform der Control Extension in EEP.
 
 Seine Aufgaben sind:
 
-1. **Erfassen und Bereitstellen von Daten**
-   - Erfassen der Daten beim Anlagenstart
-   - Erkennen geänderter Daten im Betrieb
-   - Halten der Daten zur späteren Verwendung
-   - Bereitstellen der Daten über den DataBus
+1. **Module orchestrieren**
+   - registrierte `CeModule` initialisieren
+   - zyklische Modulaufrufe in `EEPMain()` ausführen
+   - zeitversetzte Aufgaben über den Scheduler abarbeiten
 
-2. **Steuern der Datenübergabe und Module**
-   - Initialisieren und Ausführen von Control Extension Modulen
-   - Planen und Ausführen verzögerter Funktionenaufrufe
-   - Datenbereitstellung an den Control Extension Server
+2. **EEP-Daten erfassen und veröffentlichen**
+   - Discovery und Updates der Hub-Daten ausführen
+   - bekannte Zustände in Registries halten
+   - Änderungen als DTOs über den Datenbus veröffentlichen
+
+3. **Bridge-Anbindung bereitstellen**
+   - Hub- und Modul-Publisher an die Publishing-Infrastruktur anbinden
+   - Daten für Server und Web App verfügbar machen
 
 # Schnellstart
 
-`ce.ControlExtension` ist der stabile Einstiegspunkt für EEP-Skripte — darüber bindest Du die Control Extension in deine EEP-Anlage ein und führst sie in `EEPMain()` zyklisch aus.
-
-Das folgende Beispiel skizziert den minimalen Lua-Code, den du für eine Anlage benötigst.
+`ce.ControlExtension` ist der stabile Einstiegspunkt für EEP-Skripte. Darüber bindest Du die Control Extension in Deine Anlage ein und führst sie in `EEPMain()` zyklisch aus.
 
 ```lua
 local ControlExtension = require("ce.ControlExtension")
@@ -53,23 +54,21 @@ Beispiele für zulässige Module:
 
 - `require("ce.mods.road.CeRoadModule")`
 - `require("ce.mods.transit.CeTransitModule")`
-- `require("ce.hub.CeHubModule").setOptions({ ... })`
+- `require("ce.hub.CeHubModule").setOptions({ ceTypes = { ... } })`
 
-Das Hub-Modul ist bereits eingebaut. Du musst es nur dann explizit an `addModules(...)` übergeben, wenn du seine Optionen direkt im Initialisierungscode setzen möchtest.
+Das Hub-Modul ist bereits eingebaut. Du musst es nur dann explizit an `addModules(...)` übergeben, wenn Du seine Optionen direkt im Initialisierungscode setzen möchtest.
 
 ## `ControlExtension.initTasks()`
 
 Initialisiert die registrierten Module einmalig.
 
-Diese Funktion ist optional.
-Wenn Du sie nicht selbst aufrufst, geschieht die Initialisierung automatisch beim ersten Aufruf von `ControlExtension.runTasks(...)`.
+Diese Funktion ist optional. Wenn Du sie nicht selbst aufrufst, geschieht die Initialisierung automatisch beim ersten Aufruf von `ControlExtension.runTasks(...)`.
 
 ## `ControlExtension.runTasks(cycleCount)`
 
 Führt die registrierten Module zyklisch aus.
 
-Dieser Aufruf gehört in `EEPMain()`.
-Der optionale Parameter `cycleCount` steuert, in welchem Abstand I/O-nahe Veröffentlichungen erfolgen:
+Dieser Aufruf gehört in `EEPMain()`. Der optionale Parameter `cycleCount` steuert, in welchem Abstand I/O-nahe Veröffentlichungen erfolgen:
 
 - `1`: bei jedem EEP-Zyklus
 - `5`: ungefähr einmal pro Sekunde
@@ -91,21 +90,11 @@ Schaltet Debug-Ausgaben für den Laufzeitablauf ein oder aus.
 
 Steuert, ob EEP während der ersten Initialisierung der Module kurz pausiert werden soll.
 
-## Kurzes Beispiel
+## Beispiel mit Hub-Optionen
 
 ```lua
 local ControlExtension = require("ce.ControlExtension")
-
-function EEPMain()
-    ControlExtension.runTasks(1)
-    return 1
-end
-```
-
-## Langes Beispiel
-
-```lua
-local ControlExtension = require("ce.ControlExtension")
+local CeHubModule = require("ce.hub.CeHubModule")
 
 ControlExtension
     .setDebug(true)
@@ -113,9 +102,18 @@ ControlExtension
     .setPauseEepDuringInitialization(true)
     .addModules(
         require("ce.mods.road.CeRoadModule"),
-        require("ce.hub.CeHubModule").setOptions({
-            collectedCeTypes = {
-                require("ce.hub.CeHubModule").CeTypes.Train,
+        CeHubModule.setOptions({
+            ceTypes = {
+                trains = {
+                    fieldUpdates = {
+                        speed = "onselection",
+                        targetSpeed = "onselection",
+                    },
+                    fieldPublish = {
+                        speed = "always",
+                        targetSpeed = "onselection",
+                    },
+                },
             },
         })
     )
@@ -141,12 +139,40 @@ Wichtig ist dabei:
 - Hub-Module dürfen als Argumente an `addModules(...)` genannt werden.
 - Die interne Orchestrierung innerhalb von `ce.hub` ist kein Teil der öffentlichen API.
 
+## Aktiver Hub-Lebenszyklus
+
+Der aktive Hub-Pfad läuft heute in dieser Form:
+
+1. `MainLoopRunner` ruft `module.init()` für alle registrierten Module auf.
+2. `CeHubModule.init()` registriert Publisher und Hub-Funktionen und führt die Initial-Discovery und Initial-Updates aus.
+3. `MainLoopRunner` ruft in jedem Zyklus `module.run()` auf.
+4. `CeHubModule.run()` führt Discovery und Updates aus und startet danach den Scheduler.
+5. Die registrierten `*StatePublisher` rufen nur noch `Publisher.syncState(...)` auf und veröffentlichen Änderungen über `DataChangeBus`.
+
+Damit liegen Discovery und Fetch-Logik heute nicht mehr in den `*StatePublisher.lua`-Dateien, sondern in `CeHubModule`, `Discovery`- und `Updater`-Klassen.
+
+# Bridge-Anbindung
+
+Die Lua-seitige Anbindung des Hubs an den Web-Server liegt in `ce.hub.HubBridgeConnector`.
+
+## Keine öffentliche API
+
+Die Bridge wird indirekt über `ControlExtension` gesteuert:
+
+- `ControlExtension.activateServer()` - schaltet die Server-Kommunikation ein
+- `ControlExtension.deactivateServer()` - schaltet sie aus, ohne die übrigen Module zu stoppen
+
+Direkter Zugriff auf interne Dateien unter `ce.hub.*` ist nicht vorgesehen.
+
 # Unterverzeichnisse
 
-- [data/DTO.md](data/DTO.md) — Alle Datenräume und DTO-Typen der eingebauten Collector
-- [eep/README.md](eep/README.md) — EEP-Simulator für Tests ohne EEP
-- [scheduler/README.md](scheduler/README.md) — Zeitbasierter Task-Planer
-- [util/README.md](util/README.md) — Hilfsfunktionen für persistente Zustandsablage
+- [options/OPTIONS.md](options/OPTIONS.md) - Hub-Optionen fuer Discovery, Update und Publish
+- [data/README.md](data/README.md) - Hub-Daten, CeTypes und Klassenstruktur
+- [data/DTO.md](data/DTO.md) - aktive CeTypes und DTO-Felder des Hubs
+- [docs/README.md](docs/README.md) - ergänzende Architekturdokumente
+- [eep/README.md](eep/README.md) - EEP-Simulator für Tests ohne EEP
+- [scheduler/README.md](scheduler/README.md) - zeitbasierter Task-Planer
+- [util/README.md](util/README.md) - technische Hilfsfunktionen
 
 ---
 

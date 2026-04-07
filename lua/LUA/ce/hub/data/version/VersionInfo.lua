@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionInfo ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionInfo ...") end
 
 -- TODO What is this used for? Do we need it? Can we remove it?
 local VersionInfo = {}

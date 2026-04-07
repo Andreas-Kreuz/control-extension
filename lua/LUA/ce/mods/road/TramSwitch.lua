@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.TramSwitch ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.TramSwitch ...") end
 
 local TramSwitch = {}
 --- Registriert eine neue Strassenbahnweiche und schaltet das Licht der angegeben Immobilien anhand der Weichenstellung

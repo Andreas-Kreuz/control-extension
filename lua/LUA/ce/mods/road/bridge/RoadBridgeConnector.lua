@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.bridge.RoadBridgeConnector ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.bridge.RoadBridgeConnector ...") end
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
 local Intersection = require("ce.mods.road.Intersection")

@@ -1,19 +1,17 @@
 import { DynamicDataProvider } from '../../eep/server-data/dynamic/DynamicDataProvider';
 import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService';
 import DynamicInterestRegistry from '../../eep/server-data/dynamic/DynamicInterestRegistry';
-import { RollingStockDynamicSelector } from './RollingStockDynamicSelector';
-import { RollingStockStaticSelector } from './RollingStockStaticSelector';
-import { TrainDynamicSelector } from './TrainDynamicSelector';
-import { TrainStaticSelector } from './TrainStaticSelector';
+import { RollingStockSelector } from './RollingStockSelector';
+import { TrainSelector } from './TrainSelector';
 import EepService from '../../eep/service/EepService';
 import { State } from '../../eep/server-data/EepDataStore';
 import {
   CeTypes,
-  RollingStockDynamicRoom,
-  RollingStockStaticRoom,
-  TrainDynamicRoom,
+  RollingStockRoom,
+  RollingStockTexturesRoom,
+  RollingStockRotationRoom,
   TrainListRoom,
-  TrainStaticRoom,
+  TrainRoom,
 } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
@@ -28,10 +26,8 @@ function roomToken(socket: Socket, roomName: string): string {
 
 export default class TrainUpdateService implements DynamicRoomService {
   private roomDataProviders: DynamicDataProvider[] = [];
-  private rollingStockStaticSelector = new RollingStockStaticSelector();
-  private rollingStockDynamicSelector = new RollingStockDynamicSelector();
-  private trainStaticSelector = new TrainStaticSelector(this.rollingStockStaticSelector);
-  private trainDynamicSelector = new TrainDynamicSelector();
+  private rollingStockSelector = new RollingStockSelector();
+  private trainSelector = new TrainSelector(this.rollingStockSelector);
   private dynamicInterestRegistry: DynamicInterestRegistry;
   private socketTokens = new Map<string, Set<string>>();
 
@@ -47,39 +43,39 @@ export default class TrainUpdateService implements DynamicRoomService {
       id: 'TrainListRoom',
       jsonCreator: (room: string): string => {
         const trackType = TrainListRoom.idOfRoom(room);
-        return JSON.stringify(this.trainStaticSelector.getTrainList(trackType));
+        return JSON.stringify(this.trainSelector.getTrainList(trackType));
       },
     });
     this.roomDataProviders.push({
-      roomType: TrainStaticRoom,
-      id: 'TrainStaticRoom',
+      roomType: TrainRoom,
+      id: 'TrainRoom',
       jsonCreator: (room: string): string => {
-        const trainId = TrainStaticRoom.idOfRoom(room);
-        return JSON.stringify(this.trainStaticSelector.getTrain(trainId) ?? null);
+        const trainId = TrainRoom.idOfRoom(room);
+        return JSON.stringify(this.trainSelector.getTrain(trainId) ?? null);
       },
     });
     this.roomDataProviders.push({
-      roomType: TrainDynamicRoom,
-      id: 'TrainDynamicRoom',
+      roomType: RollingStockRoom,
+      id: 'RollingStockRoom',
       jsonCreator: (room: string): string => {
-        const trainId = TrainDynamicRoom.idOfRoom(room);
-        return JSON.stringify(this.trainDynamicSelector.getTrain(trainId) ?? null);
+        const rollingStockId = RollingStockRoom.idOfRoom(room);
+        return JSON.stringify(this.rollingStockSelector.getRollingStock(rollingStockId) ?? null);
       },
     });
     this.roomDataProviders.push({
-      roomType: RollingStockStaticRoom,
-      id: 'RollingStockStaticRoom',
+      roomType: RollingStockTexturesRoom,
+      id: 'RollingStockTexturesRoom',
       jsonCreator: (room: string): string => {
-        const rollingStockId = RollingStockStaticRoom.idOfRoom(room);
-        return JSON.stringify(this.rollingStockStaticSelector.getRollingStock(rollingStockId) ?? null);
+        const rollingStockId = RollingStockTexturesRoom.idOfRoom(room);
+        return JSON.stringify(this.rollingStockSelector.getRollingStockTextures(rollingStockId) ?? null);
       },
     });
     this.roomDataProviders.push({
-      roomType: RollingStockDynamicRoom,
-      id: 'RollingStockDynamicRoom',
+      roomType: RollingStockRotationRoom,
+      id: 'RollingStockRotationRoom',
       jsonCreator: (room: string): string => {
-        const rollingStockId = RollingStockDynamicRoom.idOfRoom(room);
-        return JSON.stringify(this.rollingStockDynamicSelector.getRollingStock(rollingStockId) ?? null);
+        const rollingStockId = RollingStockRotationRoom.idOfRoom(room);
+        return JSON.stringify(this.rollingStockSelector.getRollingStockRotation(rollingStockId) ?? null);
       },
     });
 
@@ -87,29 +83,27 @@ export default class TrainUpdateService implements DynamicRoomService {
   }
 
   getUpdaters = () => [
-    { updateFromState: this.trainStaticSelector.updateFromState },
-    { updateFromState: this.trainDynamicSelector.updateFromState },
-    { updateFromState: (state: Readonly<State>) => this.rollingStockStaticSelector.updateFromState(state) },
-    { updateFromState: (state: Readonly<State>) => this.rollingStockDynamicSelector.updateFromState(state) },
+    { updateFromState: this.trainSelector.updateFromState },
+    { updateFromState: (state: Readonly<State>) => this.rollingStockSelector.updateFromState(state) },
   ];
 
   getDataProviders = () => this.roomDataProviders;
 
   onJoinRoom(socket: Socket, roomName: string): void {
-    if (TrainDynamicRoom.matchesRoom(roomName)) {
-      const trainId = TrainDynamicRoom.idOfRoom(roomName);
-      this.retainSocketRoomInterest(socket, roomName, CeTypes.HubTrainDynamic, trainId);
+    if (TrainRoom.matchesRoom(roomName)) {
+      const trainId = TrainRoom.idOfRoom(roomName);
+      this.retainSocketRoomInterest(socket, roomName, CeTypes.HubTrain, trainId);
       return;
     }
 
-    if (RollingStockDynamicRoom.matchesRoom(roomName)) {
-      const rollingStockId = RollingStockDynamicRoom.idOfRoom(roomName);
-      this.retainSocketRoomInterest(socket, roomName, CeTypes.HubRollingStockDynamic, rollingStockId);
+    if (RollingStockRoom.matchesRoom(roomName)) {
+      const rollingStockId = RollingStockRoom.idOfRoom(roomName);
+      this.retainSocketRoomInterest(socket, roomName, CeTypes.HubRollingStock, rollingStockId);
     }
   }
 
   onLeaveRoom(socket: Socket, roomName: string): void {
-    if (TrainDynamicRoom.matchesRoom(roomName) || RollingStockDynamicRoom.matchesRoom(roomName)) {
+    if (TrainRoom.matchesRoom(roomName) || RollingStockRoom.matchesRoom(roomName)) {
       this.releaseSocketRoomInterest(socket, roomName);
     }
   }
@@ -128,11 +122,11 @@ export default class TrainUpdateService implements DynamicRoomService {
 
   private registerRoutes(): void {
     this.router.get('/train-static', (_req, res) => {
-      res.json(this.trainStaticSelector.getAllTrains());
+      res.json(this.trainSelector.getAllTrains());
     });
 
     this.router.get('/train-static/:id', (req, res) => {
-      const train = this.trainStaticSelector.getTrain(req.params.id);
+      const train = this.trainSelector.getTrain(req.params.id);
       if (!train) {
         res.status(404).json({ error: 'not found' });
         return;
@@ -141,11 +135,11 @@ export default class TrainUpdateService implements DynamicRoomService {
     });
 
     this.router.get('/rollingstock-static', (_req, res) => {
-      res.json(this.rollingStockStaticSelector.getAllRollingStock());
+      res.json(this.rollingStockSelector.getAllRollingStock());
     });
 
     this.router.get('/rollingstock-static/:id', (req, res) => {
-      const rollingStock = this.rollingStockStaticSelector.getRollingStock(req.params.id);
+      const rollingStock = this.rollingStockSelector.getRollingStock(req.params.id);
       if (!rollingStock) {
         res.status(404).json({ error: 'not found' });
         return;
@@ -155,14 +149,14 @@ export default class TrainUpdateService implements DynamicRoomService {
 
     this.router.get('/train-dynamic/:id', async (req, res) => {
       const trainId = req.params.id;
-      if (!this.trainStaticSelector.getTrain(trainId)) {
+      if (!this.trainSelector.getTrain(trainId)) {
         res.status(404).json({ error: 'not found' });
         return;
       }
 
-      const token = 'json:' + CeTypes.HubTrainDynamic + ':' + trainId;
-      this.dynamicInterestRegistry.touchLeasedToken(token, CeTypes.HubTrainDynamic, trainId, jsonInterestTtlMs);
-      const train = await this.waitForDynamicData(() => this.trainDynamicSelector.getTrain(trainId));
+      const token = 'json:' + CeTypes.HubTrain + ':' + trainId;
+      this.dynamicInterestRegistry.touchLeasedToken(token, CeTypes.HubTrain, trainId, jsonInterestTtlMs);
+      const train = await this.waitForDynamicData(() => this.trainSelector.getTrain(trainId));
       if (!train) {
         res.status(504).json({ error: 'timeout' });
         return;
@@ -172,19 +166,19 @@ export default class TrainUpdateService implements DynamicRoomService {
 
     this.router.get('/rollingstock-dynamic/:id', async (req, res) => {
       const rollingStockId = req.params.id;
-      if (!this.rollingStockStaticSelector.getRollingStock(rollingStockId)) {
+      if (!this.rollingStockSelector.getRollingStock(rollingStockId)) {
         res.status(404).json({ error: 'not found' });
         return;
       }
 
-      const token = 'json:' + CeTypes.HubRollingStockDynamic + ':' + rollingStockId;
+      const token = 'json:' + CeTypes.HubRollingStock + ':' + rollingStockId;
       this.dynamicInterestRegistry.touchLeasedToken(
         token,
-        CeTypes.HubRollingStockDynamic,
+        CeTypes.HubRollingStock,
         rollingStockId,
         jsonInterestTtlMs,
       );
-      const rollingStock = await this.waitForDynamicData(() => this.rollingStockDynamicSelector.getRollingStock(rollingStockId));
+      const rollingStock = await this.waitForDynamicData(() => this.rollingStockSelector.getRollingStock(rollingStockId));
       if (!rollingStock) {
         res.status(504).json({ error: 'timeout' });
         return;
@@ -237,4 +231,3 @@ export default class TrainUpdateService implements DynamicRoomService {
     });
   }
 }
-

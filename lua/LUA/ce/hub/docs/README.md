@@ -13,4 +13,4 @@ Dieses Verzeichnis enthält technische Dokumente zum Lua-Hub der Control Extensi
 
 ## Dokumente
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — Zielarchitektur des Lua-Teils der Bibliothek. Beschreibt die angestrebte Aufteilung in `hub`, `bridge` und `modules` und die Verantwortlichkeiten der einzelnen Bereiche.
+- [Architecture.md](Architecture.md) - aktive Architektur des Lua-Hubs. Beschreibt die heutige Aufteilung in `hub`, `databridge` und `mods` sowie die Verantwortlichkeiten der einzelnen Bereiche.

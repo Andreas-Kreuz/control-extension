@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.ControlExtension ...") end
+if CeDebugLoad then print("[#Start] Loading ce.ControlExtension ...") end
 
 local ControlExtensionHub = require("ce.hub.ControlExtensionHub")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
@@ -36,6 +36,11 @@ end
 
 function ControlExtension.setPauseEepDuringInitialization(pauseEepDuringInitialization)
     ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringInitialization)
+    return ControlExtension
+end
+
+function ControlExtension.setOptions(options)
+    ControlExtensionHub.setOptions(options)
     return ControlExtension
 end
 

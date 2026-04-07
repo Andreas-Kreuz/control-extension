@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLightModel ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLightModel ...") end
 
 local TrafficLightState = require("ce.mods.road.TrafficLightState")
 ------------------------------------------------------------------------------------------

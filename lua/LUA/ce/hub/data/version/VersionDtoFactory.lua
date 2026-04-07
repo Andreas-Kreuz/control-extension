@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/version/VersionLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local VersionDtoFactory = {}

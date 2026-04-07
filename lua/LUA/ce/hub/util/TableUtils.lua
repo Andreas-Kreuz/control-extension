@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.util.TableUtils ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.util.TableUtils ...") end
 local TableUtils = {}
 
 ---Creates are read-only table by wrapping the current table into a proxy.
@@ -76,6 +76,46 @@ function TableUtils.shallowcopy(orig)
         copy = orig
     end
     return copy
+end
+
+function TableUtils.deepcopy(value)
+    if type(value) ~= "table" then return value end
+
+    local copy = {}
+    for key, entry in pairs(value) do
+        copy[key] = TableUtils.deepcopy(entry)
+    end
+    return copy
+end
+
+function TableUtils.deepMerge(base, override)
+    if type(base) ~= "table" then
+        if type(override) == "table" then return TableUtils.deepMerge({}, override) end
+        return override
+    end
+
+    local merged = {}
+    for key, value in pairs(base) do
+        if type(value) == "table" then
+            merged[key] = TableUtils.deepMerge(value, nil)
+        else
+            merged[key] = value
+        end
+    end
+
+    if type(override) ~= "table" then return merged end
+
+    for key, value in pairs(override) do
+        if type(value) == "table" and type(merged[key]) == "table" then
+            merged[key] = TableUtils.deepMerge(merged[key], value)
+        elseif type(value) == "table" then
+            merged[key] = TableUtils.deepMerge({}, value)
+        else
+            merged[key] = value
+        end
+    end
+
+    return merged
 end
 
 function TableUtils.valuesOfDict(dictionary)

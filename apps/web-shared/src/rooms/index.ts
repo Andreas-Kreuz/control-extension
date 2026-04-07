@@ -2,10 +2,8 @@ export { DynamicRoom } from './DynamicRoom';
 export {
   ApiDataRoom,
   TrainListRoom,
-  TrainStaticRoom,
-  TrainDynamicRoom,
-  RollingStockStaticRoom,
-  RollingStockDynamicRoom,
+  TrainRoom,
+  RollingStockRoom,
   TransitLineListRoom,
   TransitLineDetailsRoom,
   TransitStationListRoom,

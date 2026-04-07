@@ -1,7 +1,7 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.LineSegment ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.LineSegment ...") end
 
 local LineSegment = {}
-LineSegment.debug = AkDebugLoad or false
+LineSegment.debug = CeDebugLoad or false
 
 --- Creates a new Bus or Tram Station
 ---@param routeName string with the EEP-Route Name

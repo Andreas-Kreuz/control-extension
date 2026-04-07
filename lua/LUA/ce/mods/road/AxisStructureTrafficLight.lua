@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.AxisStructureTrafficLight ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.AxisStructureTrafficLight ...") end
 
 ---@class AxisStructureTrafficLight
 ---@field structureName string Name der Immobilie, deren Achse gesteuert werden soll

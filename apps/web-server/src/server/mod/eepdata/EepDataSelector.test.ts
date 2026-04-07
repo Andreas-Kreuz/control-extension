@@ -31,21 +31,21 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
 
   selector.updateFromState(
     makeState(1, {
-      'StatePublisher.ce.hub.ModulesStatePublisher.syncState': makeRuntimeEntry(
-        'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
+      'Update/ce.hub.Module': makeRuntimeEntry(
+        'Update/ce.hub.Module',
         1,
       ),
-      'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 2),
+      'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
     }),
   );
   selector.updateFromState(
     makeState(2, {
-      'StatePublisher.ce.hub.ModulesStatePublisher.syncState': makeRuntimeEntry(
-        'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
+      'Update/ce.hub.Module': makeRuntimeEntry(
+        'Update/ce.hub.Module',
         1,
       ),
-      'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 2),
+      'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
     }),
   );
@@ -53,11 +53,11 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
   for (let eventCounter = 3; eventCounter <= 14; eventCounter += 1) {
     selector.updateFromState(
       makeState(eventCounter, {
-        'StatePublisher.ce.hub.ModulesStatePublisher.syncState': makeRuntimeEntry(
-          'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
+        'Update/ce.hub.Module': makeRuntimeEntry(
+          'Update/ce.hub.Module',
           eventCounter,
         ),
-        'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', eventCounter),
+        'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', eventCounter),
         'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', eventCounter),
       }),
     );
@@ -66,14 +66,24 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
   const runtimeStatistics = selector.getRuntimeStatistics();
   const firstPublisherSyncTimes = runtimeStatistics.history.publisherSyncTimes[0];
   const lastModuleRunTimes = runtimeStatistics.history.moduleRunTimes[9];
+  const firstUpdateTimes = runtimeStatistics.history.updateTimes[0];
   const lastControllerUpdateTimes = runtimeStatistics.history.controllerUpdateTimes[9];
+  const modulesPublisherTime = firstPublisherSyncTimes?.find((entry) => entry.id === 'ce.hub.ModulesStatePublisher');
+  const moduleUpdateTime = firstUpdateTimes?.find((entry) => entry.id === 'Update/ce.hub.Module');
+  const signalDiscoveryTime = lastModuleRunTimes?.find((entry) => entry.id === 'Discovery/ce.hub.Signal');
   assert.ok(firstPublisherSyncTimes);
   assert.ok(lastModuleRunTimes);
+  assert.ok(firstUpdateTimes);
   assert.ok(lastControllerUpdateTimes);
+  assert.ok(modulesPublisherTime);
+  assert.ok(moduleUpdateTime);
+  assert.ok(signalDiscoveryTime);
   assert.equal(runtimeStatistics.history.publisherSyncTimes.length, 10);
+  assert.equal(runtimeStatistics.history.updateTimes.length, 10);
   assert.deepEqual(runtimeStatistics.history.sampleEventCounters, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
-  assert.equal(firstPublisherSyncTimes[0]?.ms, 5);
-  assert.equal(lastModuleRunTimes[0]?.ms, 14);
+  assert.equal(modulesPublisherTime.ms, 0);
+  assert.equal(moduleUpdateTime.ms, 5);
+  assert.equal(signalDiscoveryTime.ms, 14);
   assert.equal(lastControllerUpdateTimes[1]?.ms, 14);
 }
 
@@ -82,24 +92,53 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
 
   selector.updateFromState(
     makeState(1, {
-      'StatePublisher.ce.hub.ModulesStatePublisher.initialize': makeRuntimeEntry(
-        'StatePublisher.ce.hub.ModulesStatePublisher.initialize',
+      'Update/ce.hub.Module': makeRuntimeEntry(
+        'Update/ce.hub.Module',
         11,
       ),
-      'CeModule.ce.hub.CeHubModule.init': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.init', 12),
+      'Update-init/ce.hub.Module': makeRuntimeEntry(
+        'Update-init/ce.hub.Module',
+        11,
+      ),
       'StatePublisher.ce.hub.ModulesStatePublisher.syncState': makeRuntimeEntry(
         'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
+        7,
+      ),
+      'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', 12),
+      'Discovery-init/ce.hub.Signal': makeRuntimeEntry('Discovery-init/ce.hub.Signal', 12),
+      'Update/ce.hub.Time': makeRuntimeEntry(
+        'Update/ce.hub.Time',
         13,
       ),
-      'CeModule.ce.hub.CeHubModule.run': makeRuntimeEntry('CeModule.ce.hub.CeHubModule.run', 14),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 15),
     }),
   );
 
   const runtimeStatistics = selector.getRuntimeStatistics();
-  assert.equal(runtimeStatistics.initialization.publisherInitTimes[0]?.ms, 11);
-  assert.equal(runtimeStatistics.initialization.moduleInitTimes[0]?.ms, 12);
+  const modulesPublisherTime = runtimeStatistics.history.publisherSyncTimes[0]?.find(
+    (entry) => entry.id === 'ce.hub.ModulesStatePublisher',
+  );
+  const moduleUpdateTime = runtimeStatistics.history.updateTimes[0]?.find(
+    (entry) => entry.id === 'Update/ce.hub.Module',
+  );
+  const signalDiscoveryTime = runtimeStatistics.history.moduleRunTimes[0]?.find(
+    (entry) => entry.id === 'Discovery/ce.hub.Signal',
+  );
+  const moduleUpdateInitTime = runtimeStatistics.initialization.publisherInitTimes.find(
+    (entry) => entry.id === 'Update-init/ce.hub.Module',
+  );
+  const signalDiscoveryInitTime = runtimeStatistics.initialization.moduleInitTimes.find(
+    (entry) => entry.id === 'Discovery-init/ce.hub.Signal',
+  );
+  assert.ok(moduleUpdateInitTime);
+  assert.ok(signalDiscoveryInitTime);
   assert.equal(runtimeStatistics.history.publisherSyncTimes.length, 1);
+  assert.equal(runtimeStatistics.history.updateTimes.length, 1);
+  assert.equal(moduleUpdateInitTime?.ms, 11);
+  assert.equal(signalDiscoveryInitTime?.ms, 12);
+  assert.equal(modulesPublisherTime?.ms, 7);
+  assert.equal(moduleUpdateTime?.ms, 11);
+  assert.equal(signalDiscoveryTime?.ms, 12);
 
   selector.updateFromState({ eventCounter: 2, ceTypes: {} });
 
@@ -107,6 +146,90 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
   assert.deepEqual(resetStatistics.history.sampleEventCounters, []);
   assert.deepEqual(resetStatistics.initialization.publisherInitTimes, []);
   assert.deepEqual(resetStatistics.initialization.moduleInitTimes, []);
+}
+
+function testStructureDtosFromUnifiedCeType(): void {
+  const selector = new EepDataSelector();
+
+  selector.updateFromState({
+    eventCounter: 1,
+    ceTypes: {
+      [CeTypes.HubStructure]: {
+        '#7': {
+          id: '#7',
+          name: '#7',
+          pos_x: 1,
+          pos_y: 2,
+          pos_z: 3,
+          rot_x: 4,
+          rot_y: 5,
+          rot_z: 6,
+          modelType: 22,
+          modelTypeText: 'Immobilie',
+          tag: 'Depot',
+          light: true,
+          smoke: false,
+          fire: true,
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(selector.getStructures(), {
+    '#7': {
+      id: '#7',
+      name: '#7',
+      pos_x: 1,
+      pos_y: 2,
+      pos_z: 3,
+      rot_x: 4,
+      rot_y: 5,
+      rot_z: 6,
+      modelType: 22,
+      modelTypeText: 'Immobilie',
+      tag: 'Depot',
+      light: true,
+      smoke: false,
+      fire: true,
+    },
+  });
+}
+
+function testStructureDtosWithPartialFields(): void {
+  const selector = new EepDataSelector();
+
+  selector.updateFromState({
+    eventCounter: 1,
+    ceTypes: {
+      [CeTypes.HubStructure]: {
+        '#8': {
+          id: '#8',
+          light: false,
+          smoke: true,
+          fire: false,
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(selector.getStructures(), {
+    '#8': {
+      id: '#8',
+      name: undefined,
+      pos_x: undefined,
+      pos_y: undefined,
+      pos_z: undefined,
+      rot_x: undefined,
+      rot_y: undefined,
+      rot_z: undefined,
+      modelType: undefined,
+      modelTypeText: undefined,
+      tag: undefined,
+      light: false,
+      smoke: true,
+      fire: false,
+    },
+  });
 }
 
 export async function run(): Promise<void> {
@@ -118,6 +241,11 @@ export async function run(): Promise<void> {
     'EepDataSelector keeps initialization statistics separate and resets them without runtime data',
     testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRuntime,
   );
+  await runTest('EepDataSelector maps unified structure ceType', testStructureDtosFromUnifiedCeType);
+  await runTest(
+    'EepDataSelector handles structures with partial fields',
+    testStructureDtosWithPartialFields,
+  );
 }
 
 if (require.main === module) {
@@ -126,4 +254,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-

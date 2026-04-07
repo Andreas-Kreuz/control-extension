@@ -1,6 +1,6 @@
 -- TypeScript LuaDtos: apps/web-server/src/server/ce/dto/transit/
 --   TransitStationLuaDto, TransitLineLuaDto, TransitLineSegmentLuaDto
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitDtoFactory ...") end
 
 local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitDtoFactory = {}

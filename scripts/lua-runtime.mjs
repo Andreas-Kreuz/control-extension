@@ -1,13 +1,38 @@
 import {spawnSync} from 'node:child_process'
+import {existsSync} from 'node:fs'
+import {join} from 'node:path'
 
 export const REQUIRED_LUA_VERSION = '5.3'
 
 function getLuaCandidates() {
-  const candidates = process.platform === 'win32'
+  const baseCandidates = process.platform === 'win32'
     ? ['lua53', 'lua5.3', 'lua']
     : ['lua5.3', 'lua53', 'lua']
 
-  return candidates
+  if (process.platform !== 'win32') {
+    return baseCandidates
+  }
+
+  const discoveredPaths = []
+  const pathEntries = (process.env.PATH ?? '')
+    .split(';')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+
+  for (const pathEntry of pathEntries) {
+    for (const candidate of baseCandidates) {
+      const directPath = join(pathEntry, candidate)
+      const exePath = join(pathEntry, `${candidate}.exe`)
+      if (existsSync(directPath)) {
+        discoveredPaths.push(directPath)
+      }
+      if (existsSync(exePath)) {
+        discoveredPaths.push(exePath)
+      }
+    }
+  }
+
+  return [...new Set([...discoveredPaths, ...baseCandidates])]
 }
 
 function parseLuaVersion(output) {
@@ -18,7 +43,7 @@ function parseLuaVersion(output) {
 function probeLuaCommand(command) {
   const result = spawnSync(command, ['-v'], {
     encoding: 'utf8',
-    shell: process.platform === 'win32',
+    shell: false,
     windowsHide: true,
   })
 

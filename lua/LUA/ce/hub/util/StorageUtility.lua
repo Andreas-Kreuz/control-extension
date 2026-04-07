@@ -1,10 +1,10 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.util.StorageUtility ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.util.StorageUtility ...") end
 
 local saveSlots = {}
 local savedValues = {}
 local StorageUtility = {}
 StorageUtility.debugFile = "StorageUtilityValues.txt"
-StorageUtility.debug = AkStartWithDebug or false
+StorageUtility.debug = CeStartWithDebug or false
 StorageUtility.maxSaveDataStringLength = 999
 StorageUtility.maxRollingStockTagLength = 1024
 

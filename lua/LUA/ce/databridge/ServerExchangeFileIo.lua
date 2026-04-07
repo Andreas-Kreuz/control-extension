@@ -1,8 +1,8 @@
-if AkDebugLoad then print("[#Start] Loading ce.databridge.ServerExchangeFileIo ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.ServerExchangeFileIo ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 
 local ServerExchangeFileIo = {}
-ServerExchangeFileIo.debug = AkStartWithDebug or false
+ServerExchangeFileIo.debug = CeStartWithDebug or false
 
 --- Pruefe ob Datei existiert.
 local function fileExists(name)

@@ -1,9 +1,11 @@
 ---@meta
 
+-- Field policies: all fields always
+
 ---@class ModuleDto
----@field id string
----@field name string
----@field enabled boolean
+---@field id string      -- Policy: always
+---@field name string    -- Policy: always
+---@field enabled boolean -- Policy: always
 
 ---@class ModuleDtoFactory
 ---@field createModuleDto fun(moduleName: string, module: CeModule):string,string,string|number,ModuleDto

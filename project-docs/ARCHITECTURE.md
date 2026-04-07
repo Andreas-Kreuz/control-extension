@@ -170,8 +170,8 @@ von der Data Bridge ignoriert.
 
 ## Teilarchitekturen
 
-| Bereich                              | Datei                                                                            |
-| ------------------------------------ | -------------------------------------------------------------------------------- |
+| Bereich                              | Datei                                                                               |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
 | Lua Hub, CeModule, Data Bridge       | [lua/LUA/ce/ARCHITECTURE_LUA.md](../lua/LUA/ce/ARCHITECTURE_LUA.md)                 |
 | Control Extension Server             | [apps/web-server/ARCHITECTURE_SERVER.md](../apps/web-server/ARCHITECTURE_SERVER.md) |
 | Gemeinsames Datenmodell (web-shared) | [apps/web-shared/ARCHITECTURE_SHARED.md](../apps/web-shared/ARCHITECTURE_SHARED.md) |

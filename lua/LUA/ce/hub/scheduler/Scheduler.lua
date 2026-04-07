@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.scheduler.Scheduler ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.scheduler.Scheduler ...") end
 local os = require("os")
 
 local secondsPerDay = 24 * 60 * 60
@@ -28,7 +28,7 @@ end
 -- Class Scheduler
 ------------------
 local Scheduler = { ready = true }
-Scheduler.debug = AkStartWithDebug or false
+Scheduler.debug = CeStartWithDebug or false
 Scheduler.scheduledTasks = {}
 Scheduler.futureTasks = {} -- Wird zu self.eingeplanteAktionen hinzugefuegt
 Scheduler.lastRuntime = 0

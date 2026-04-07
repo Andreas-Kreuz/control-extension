@@ -1,15 +1,12 @@
 insulate("ce.hub.data.signals.SignalStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originalGetSignal = _G.EEPGetSignal
-    local originalSignalGetTagText = _G.EEPSignalGetTagText
-    local originalGetSignalTrainsCount = _G.EEPGetSignalTrainsCount
-    local originalGetSignalTrainName = _G.EEPGetSignalTrainName
-
     before_each(function ()
         clearModule("ce.hub.data.signals.SignalStatePublisher")
-        clearModule("ce.hub.data.signals.SignalDataCollector")
+        clearModule("ce.hub.data.signals.SignalDiscovery")
         clearModule("ce.hub.data.signals.SignalDtoFactory")
+        clearModule("ce.hub.data.signals.SignalRegistry")
+        clearModule("ce.hub.data.signals.SignalUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -23,43 +20,43 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
             }
         }
 
-        rawset(_G, "EEPGetSignal", function (id)
+        stub(_G, "EEPGetSignal", function (id)
             local entry = states[id]
             if not entry then return 0 end
             return entry.position
         end)
-        rawset(_G, "EEPSignalGetTagText", function (id)
+        stub(_G, "EEPSignalGetTagText", function (id)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.tag
         end)
-        rawset(_G, "EEPGetSignalTrainsCount", function (id)
+        stub(_G, "EEPGetSignalTrainsCount", function (id)
             local entry = states[id]
             if not entry then return nil end
             return entry.waitingCount
         end)
-        rawset(_G, "EEPGetSignalTrainName", function (id, position)
+        stub(_G, "EEPGetSignalTrainName", function (id, position)
             local entry = states[id]
             if not entry then return nil end
             return entry.vehicles[position]
         end)
-
-        _G.__signal_state_test_states = states
     end)
 
     after_each(function ()
-        rawset(_G, "EEPGetSignal", originalGetSignal)
-        rawset(_G, "EEPSignalGetTagText", originalSignalGetTagText)
-        rawset(_G, "EEPGetSignalTrainsCount", originalGetSignalTrainsCount)
-        rawset(_G, "EEPGetSignalTrainName", originalGetSignalTrainName)
-        _G.__signal_state_test_states = nil
+        _G.EEPGetSignal:revert()
+        _G.EEPSignalGetTagText:revert()
+        _G.EEPGetSignalTrainsCount:revert()
+        _G.EEPGetSignalTrainName:revert()
     end)
 
     it("fires both ceTypes with the existing wire format", function ()
+        local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
         local SignalStatePublisher = require("ce.hub.data.signals.SignalStatePublisher")
+        local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        SignalStatePublisher.initialize()
+        SignalDiscovery.runInitialDiscovery()
+        SignalUpdater.runUpdate()
         SignalStatePublisher.syncState()
 
         assert.same({

@@ -1,0 +1,5 @@
+---@class CeTypeSyncOptions
+---@field discoveryAndUpdate boolean|nil
+---@field publish boolean|nil
+---@field fieldUpdates table<string, FieldCollectionOptions>|nil
+---@field fieldPublish table<string, FieldCollectionOptions>|nil

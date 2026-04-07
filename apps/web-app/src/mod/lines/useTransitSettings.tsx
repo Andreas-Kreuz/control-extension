@@ -1,8 +1,8 @@
 import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
-import { useApiDataRoomHandler } from '../../io/useRoomHandler';
+import { useApiDataRoomHandler } from '../../socket/useRoomHandler';
 
 import { useState } from 'react';
-import useDebug from '../../io/useDebug';
+import useDebug from '../../socket/useDebug';
 
 function useIntersectionSettings(): SettingsDto | undefined {
   const [settings, setSettings] = useState<SettingsDto | undefined>(undefined);

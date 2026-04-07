@@ -1,5 +1,5 @@
-import { useSocket } from '../io/SocketProvider';
-import { useRoomHandler } from '../io/useRoomHandler';
+import { useSocket } from '../socket/SocketProvider';
+import { useRoomHandler } from '../socket/useRoomHandler';
 import './ServerHome.css';
 import {
   ApprovePairingClientPayload,

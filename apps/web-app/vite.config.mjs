@@ -1,19 +1,22 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { fileURLToPath, URL } from 'node:url';
+import { defineConfig, searchForWorkspaceRoot } from 'vite';
+
+const webSharedSource = fileURLToPath(new URL('../web-shared/src/index.ts', import.meta.url));
+const webAppRoot = fileURLToPath(new URL('.', import.meta.url));
+const webSharedRoot = fileURLToPath(new URL('../web-shared', import.meta.url));
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    // We need to include all libraries manually
-    include: ['@ce/web-shared'],
-    // exclude: [],
+  resolve: {
+    alias: {
+      '@ce/web-shared': webSharedSource,
+    },
   },
-  build: {
-    commonjsOptions: {
-      include: ['@ce/web-shared'],
-      // exclude: [],
+  server: {
+    fs: {
+      allow: [searchForWorkspaceRoot(process.cwd()), webAppRoot, webSharedRoot],
     },
   },
 });
-

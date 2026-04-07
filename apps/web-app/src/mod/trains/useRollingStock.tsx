@@ -1,15 +1,15 @@
-import { useDynamicRoomHandler } from '../../io/useRoomHandler';
-import { RollingStockStaticDto, RollingStockStaticRoom } from '@ce/web-shared';
+import { useDynamicRoomHandler } from '../../socket/useRoomHandler';
+import { RollingStockDto, RollingStockRoom } from '@ce/web-shared';
 import { useState } from 'react';
 
-function useRollingStock(name: string): RollingStockStaticDto | undefined {
-  const [rollingStock, setRollingStock] = useState<RollingStockStaticDto | undefined>(undefined);
+function useRollingStock(name: string): RollingStockDto | undefined {
+  const [rollingStock, setRollingStock] = useState<RollingStockDto | undefined>(undefined);
 
   useDynamicRoomHandler(
-    RollingStockStaticRoom,
+    RollingStockRoom,
     name,
     (payload: string) => {
-      const data = JSON.parse(payload) as RollingStockStaticDto | null;
+      const data = JSON.parse(payload) as RollingStockDto | null;
       setRollingStock(data ?? undefined);
     },
     () => setRollingStock(undefined),
@@ -19,4 +19,3 @@ function useRollingStock(name: string): RollingStockStaticDto | undefined {
 }
 
 export default useRollingStock;
-

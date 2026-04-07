@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.road.IntersectionSettings ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.road.IntersectionSettings ...") end
 local StorageUtility = require("ce.hub.util.StorageUtility")
 
 local IntersectionSettings = {}

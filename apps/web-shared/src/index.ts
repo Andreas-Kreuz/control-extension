@@ -16,16 +16,15 @@ export { TrainType } from './model/trains/TrainType';
 export { TrackType } from './model/trains/TrackType';
 
 export type { TrainListDto } from './dtos/server/trains/TrainListDto';
-export type { TrainStaticDto } from './dtos/server/trains/TrainStaticDto';
-export type { TrainDynamicDto } from './dtos/server/trains/TrainDynamicDto';
-export type { RollingStockStaticDto } from './dtos/server/trains/RollingStockStaticDto';
-export type { RollingStockDynamicDto } from './dtos/server/trains/RollingStockDynamicDto';
+export type { TrainDto } from './dtos/server/trains/TrainDto';
+export type { RollingStockDto } from './dtos/server/trains/RollingStockDto';
 export type { SettingDto } from './dtos/server/settings/SettingDto';
 export type { SettingsDto } from './dtos/server/settings/SettingsDto';
 export type { VersionDto } from './dtos/server/version/VersionDto';
 export type { WeatherDto } from './dtos/server/weather/WeatherDto';
 export type { TimeDto } from './dtos/server/time/TimeDto';
 export type { RuntimeDto } from './dtos/server/runtime/RuntimeDto';
+export type { FrameDataDto } from './dtos/server/framedata/FrameDataDto';
 export type {
   RuntimeStatisticsDto,
   RuntimeStatisticsHistoryDto,
@@ -71,8 +70,7 @@ export { TimeRoom } from './rooms/DynamicRooms';
 export { TrackRoom } from './rooms/DynamicRooms';
 export { TrafficLightModelRoom } from './rooms/DynamicRooms';
 export { TrainListRoom } from './rooms/DynamicRooms';
-export { TrainStaticRoom } from './rooms/DynamicRooms';
-export { TrainDynamicRoom } from './rooms/DynamicRooms';
+export { TrainRoom } from './rooms/DynamicRooms';
 export { TransitLineDetailsRoom } from './rooms/DynamicRooms';
 export { TransitLineListRoom } from './rooms/DynamicRooms';
 export { TransitSettingsRoom } from './rooms/DynamicRooms';
@@ -81,10 +79,10 @@ export { TransitStationListRoom } from './rooms/DynamicRooms';
 export { VersionRoom } from './rooms/DynamicRooms';
 export { WeatherRoom } from './rooms/DynamicRooms';
 export { WaitingOnSignalRoom } from './rooms/DynamicRooms';
-export { RollingStockStaticRoom } from './rooms/DynamicRooms';
-export { RollingStockDynamicRoom } from './rooms/DynamicRooms';
+export { RollingStockRoom } from './rooms/DynamicRooms';
 export { RollingStockTexturesRoom } from './rooms/DynamicRooms';
 export { RollingStockRotationRoom } from './rooms/DynamicRooms';
+export { detailRoomForCeType } from './rooms/DynamicRooms';
 
 export type { ApprovePairingClientPayload } from './PairingEvent';
 export type { PairingStatusPayload } from './PairingEvent';

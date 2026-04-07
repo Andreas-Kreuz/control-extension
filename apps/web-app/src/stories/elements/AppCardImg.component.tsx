@@ -1,4 +1,4 @@
-import MyAppCardImg, { AppCardImgProps as MyAppCardProps } from '../../ui/AppCardImg';
+import MyAppCardImg, { AppCardImgProps as MyAppCardProps } from '../../components/AppCardImg';
 import { BrowserRouter } from 'react-router-dom';
 
 export interface AppCardImgProps extends MyAppCardProps {

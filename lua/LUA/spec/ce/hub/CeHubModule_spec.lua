@@ -1,19 +1,23 @@
-insulate("CeHubModule", function ()
+﻿insulate("CeHubModule", function ()
     local function clearModule(name)
         package.loaded[name] = nil
     end
 
-    local originalPrint = print
-
     before_each(function ()
-        _G.print = function () end
+        stub(_G, "print")
         clearModule("ce.ControlExtension")
         clearModule("ce.hub.ControlExtensionHub")
         clearModule("ce.hub.ModuleRegistry")
         clearModule("ce.hub.MainLoopRunner")
         clearModule("ce.hub.StatePublisherRegistry")
-        clearModule("ce.hub.bridge.HubBridgeConnector")
+        clearModule("ce.hub.HubBridgeConnector")
         clearModule("ce.hub.CeHubModule")
+        clearModule("ce.hub.data.runtime.RuntimeMetrics")
+        clearModule("ce.hub.util.RuntimeRegistry")
+        clearModule("ce.hub.data.tracks.TracksStatePublisher")
+        clearModule("ce.hub.data.trains.TrainStatePublisher")
+        clearModule("ce.hub.data.rollingstock.RollingStockStatePublisher")
+        clearModule("ce.hub.data.trains.TrainDetection")
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.databridge.IoInit")
         clearModule("ce.databridge.ServerExchangeCoordinator")
@@ -23,7 +27,7 @@ insulate("CeHubModule", function ()
     end)
 
     after_each(function ()
-        _G.print = originalPrint
+        _G.print:revert()
     end)
 
     it("returns CeHubModule from setOptions and applies hub options", function ()
@@ -35,9 +39,9 @@ insulate("CeHubModule", function ()
 
         assert.equals(CeHubModule, CeHubModule.setOptions({
             waitForServer = false,
-            collectedCeTypes = {
-                CeHubModule.CeTypes.TrainStatic,
-            },
+            ceTypes = {
+                time = { publish = false }
+            }
         }))
 
         CeHubModule.init()
@@ -48,7 +52,9 @@ insulate("CeHubModule", function ()
         end
 
         assert.is_false(ServerExchangeCoordinator.checkServerStatus)
-        assert.is_true(publisherNames["ce.hub.data.trains.TrainsAndTracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.tracks.TracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.TrainStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.rollingstock.RollingStockStatePublisher"])
         assert.is_nil(publisherNames["ce.hub.data.time.TimeStatePublisher"])
     end)
 
@@ -60,9 +66,9 @@ insulate("CeHubModule", function ()
         ControlExtension.addModules(
             require("ce.mods.road.CeRoadModule"),
             CeHubModule.setOptions({
-                collectedCeTypes = {
-                    CeHubModule.CeTypes.TrainStatic,
-                },
+                ceTypes = {
+                    time = { publish = false }
+                }
             })
         )
 
@@ -73,8 +79,32 @@ insulate("CeHubModule", function ()
             publisherNames[statePublisher.name] = true
         end
 
-        assert.is_true(publisherNames["ce.hub.data.trains.TrainsAndTracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.tracks.TracksStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.trains.TrainStatePublisher"])
+        assert.is_true(publisherNames["ce.hub.data.rollingstock.RollingStockStatePublisher"])
         assert.is_true(publisherNames["ce.mods.road.data.RoadStatePublisher"])
         assert.is_nil(publisherNames["ce.hub.data.time.TimeStatePublisher"])
+    end)
+
+    it("records timings for initial discovery and recurring updates", function ()
+        local CeHubModule = require("ce.hub.CeHubModule")
+        local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
+
+        CeHubModule.init()
+        CeHubModule.run()
+
+        assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Module").count)
+        assert.equals(1, RuntimeMetrics.get("Discovery-init/ce.hub.Signal").count)
+        assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Structure").count)
+        assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Time").count)
+        assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.RollingStock").count)
+        assert.equals(1, RuntimeMetrics.get("Discovery-init/ce.hub.Train").count)
+        assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Module").count)
+        assert.equals(1, RuntimeMetrics.get("Discovery/ce.hub.Signal").count)
+        assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Structure").count)
+        assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Time").count)
+        assert.equals(1, RuntimeMetrics.get("Update/ce.hub.RollingStock").count)
+        assert.equals(1, RuntimeMetrics.get("Discovery/ce.hub.Train").count)
+        assert.is_true(RuntimeMetrics.get("Discovery/ce.hub.Train").lastTime >= 0)
     end)
 end)

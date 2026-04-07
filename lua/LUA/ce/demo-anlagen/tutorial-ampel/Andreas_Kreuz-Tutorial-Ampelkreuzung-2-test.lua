@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading AkEepFunctions ...") end
+if CeDebugLoad then print("[#Start] Loading AkEepFunctions ...") end
 local EepSimulator = require("ce.hub.eep.EepSimulator")
 
 local Scheduler = require("ce.hub.scheduler.Scheduler")
@@ -11,7 +11,7 @@ clearlog()
 --------------------------------------------------------------------
 -- Zeigt erweiterte Informationen waehrend der Initialisierung an --
 --------------------------------------------------------------------
-AkStartWithDebug = false
+CeStartWithDebug = false
 
 -- Ampeln für die Straßenbahn nutzen die Lichtfunktion der einzelnen Immobilien
 EEPStructureSetLight("#29_Straba Signal Halt", false)      -- rot
@@ -26,7 +26,7 @@ EEPStructureSetLight("#33_Straba Signal A", false)         -- Anforderung
 --------------------------------------------------------------------
 -- Zeigt erweiterte Informationen waehrend der erste Schitte an   --
 --------------------------------------------------------------------
-if AkDebugLoad then
+if CeDebugLoad then
     print("[#Start] Loading ce.demo-anlagen.tutorial-ampel.Andreas_Kreuz-Tutorial-Ampelkreuzung-2-main ...")
 end
 require("ce.demo-anlagen.tutorial-ampel.Andreas_Kreuz-Tutorial-Ampelkreuzung-2-main")

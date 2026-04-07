@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/runtime/RuntimeLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local RuntimeDtoFactory = {}
@@ -13,10 +13,7 @@ local function toRuntimeDto(runtimeEntry)
         id = runtimeEntry.id,
         count = runtimeEntry.count,
         time = runtimeEntry.time,
-        lastTime = runtimeEntry.lastTime,
-        framesPerSecond = runtimeEntry.framesPerSecond,
-        currentFrame = runtimeEntry.currentFrame,
-        currentRenderFrame = runtimeEntry.currentRenderFrame
+        lastTime = runtimeEntry.lastTime
     }
 end
 

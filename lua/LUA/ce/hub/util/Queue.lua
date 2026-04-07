@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.util.Queue ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.util.Queue ...") end
 
 local Queue = {}
 function Queue:new()

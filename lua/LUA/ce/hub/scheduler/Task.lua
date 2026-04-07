@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.scheduler.Task ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.scheduler.Task ...") end
 
 ---------------------------------------
 -- Class Task - is just a function

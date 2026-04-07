@@ -1,9 +1,9 @@
 local LineSegment = require("ce.mods.transit.LineSegment")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.Line ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.Line ...") end
 
 local Line = {}
-Line.debug = AkDebugLoad or false
+Line.debug = CeDebugLoad or false
 ---@type table<string, Line>
 local lines = {}
 

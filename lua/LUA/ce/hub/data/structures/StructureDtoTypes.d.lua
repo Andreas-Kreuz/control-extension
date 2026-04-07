@@ -1,6 +1,7 @@
 ---@meta
 
 ---@class StructureDto
+---@field ceType string
 ---@field id string
 ---@field name string
 ---@field pos_x number
@@ -17,5 +18,7 @@
 ---@field fire boolean
 
 ---@class StructureDtoFactory
----@field createStructureDto fun(structure: table):string,string,string|number,StructureDto
----@field createStructureDtoList fun(structures: table):string,string,table
+---@field createFullDto fun(structure: Structure, isSelected: boolean|nil):string,string,string|number,StructureDto
+---@field createPatchDto fun(structure: Structure, dirtyFields: table<string,boolean>, isSelected: boolean|nil):string,
+---string,string|number,StructureDto
+---@field createRefDto fun(structureId: string):string,string,string|number,table

@@ -1,80 +1,135 @@
 ---
 layout: page_with_toc
-title: Hub — Entwickler
-subtitle: Interner Laufzeitfluss und StatePublisher-Muster des Lua-Hubs
+title: Hub - Entwickler
+subtitle: Interner Laufzeitfluss und Verantwortlichkeiten des Lua-Hubs
 permalink: lua/LUA/ce/hub/dev/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---
 
-# Hub — Entwickler
+# Hub - Entwickler
 
 ## Interner Laufzeitfluss
 
-Der Hub orchestriert alle registrierten Module und StatePublisher in einem festen Ablauf:
+Der Hub orchestriert registrierte Module, Datenupdates und Publishing in einem festen Ablauf:
 
 1. `ce.ControlExtension` ist der stabile Einstiegspunkt für EEP-Skripte.
 2. `ModuleRegistry` registriert die verwendeten Lua-Module.
 3. `MainLoopRunner` führt Initialisierung und Zyklus aus.
-4. Module registrieren ihre `StatePublisher` über die dafür vorgesehenen BridgeConnectoren.
-5. `StatePublisher` lesen Zustand aus Hub- oder Modulbereichen.
-6. Änderungen werden über `DataChangeBus` veröffentlicht.
+4. `CeHubModule.init()` registriert Hub-Publisher und Hub-Funktionen und startet die Initial-Discovery und Initial-Updates.
+5. `CeHubModule.run()` führt die laufende Discovery und die laufenden Updates aus.
+6. Die registrierten Publisher veröffentlichen Änderungen über `DataChangeBus`.
 7. `InternalDataStore` kann daraus einen materialisierten Snapshot halten.
 8. `ServerEventBuffer` nimmt veröffentlichte Events für die Bridge entgegen.
 9. Die Bridge schreibt Austauschdateien und liest Remote-Kommandos.
 
 Design-Entscheidung: Die öffentliche API beschränkt sich auf `ce.ControlExtension`. Interne Pfade unter `ce.hub.*` sind Infrastruktur und gelten nicht als stabile öffentliche API.
 
-## Gemeinsamkeiten der `*StatePublisher`-Klassen
+## Rollen im Hub-Datenpfad
 
-Alle Klassen unter `lua/LUA/ce/**/*StatePublisher.lua` folgen demselben Grundmuster für den Export von Lua- und EEP-Daten in Richtung Web-/Server-Schicht:
+Für die Hub-Daten gilt heute eine klare Aufteilung der Verantwortlichkeiten:
 
-### 1. Gemeinsame Schnittstelle
+- `Domain`
+  Zustand, Getter/Setter und Dirty-Tracking
+- `Registry`
+  zentrale Map der bekannten Objekte nach ID
+- `Discovery`
+  erkennt neue und entfernte Objekte
+- `Updater`
+  liest EEP-Zustand und schreibt per Setter in die Domain-Objekte
+- `Publisher`
+  wertet Sync-Optionen aus und sendet Add/Change/Remove-Events
+- `DtoFactory`
+  baut serialisierbare DTOs
 
-- Jeder StatePublisher exportiert genau ein Lua-Modul mit `name`, `initialize()` und `syncState()`.
-- Diese Form wird beim Registrieren im `ce.hub.StatePublisherRegistry` validiert; dort werden genau diese Felder geprüft.
+Einfachere Singleton-CeTypes wie Zeit, Wetter, Version oder Runtime nutzen meist nur `Registry + Updater + Publisher`, folgen aber denselben Zuständigkeitsgrenzen:
 
-### 2. Registrierung über BridgeConnector-Module
+- Fetch-Logik liegt im `Updater`
+- Sync-Logik liegt im `Publisher`
 
-- StatePublisher werden nicht direkt von Fachlogik genutzt, sondern über ein passendes `*BridgeConnector`-Modul beim `StatePublisherRegistry` angemeldet.
-- Dadurch bleiben Domänenlogik und Web-Export lose gekoppelt.
+## Rolle von `CeHubModule`
 
-### 3. Singleton-artiger Modulzustand
+`CeHubModule` ist heute der zentrale Orchestrator des Hub-Datenpfads.
 
-- Jeder StatePublisher ist eine modulweite Tabelle mit lokal gehaltenem Zustand.
-- Typisch sind lokale Flags wie `enabled` und `initialized` sowie Caches oder Snapshots für bereits bekannte Objekte.
+Es übernimmt insbesondere:
 
-### 4. Zweiphasiger Lebenszyklus
+- Anwenden der Hub-Optionen aus `HubOptionDefaults` und Schreiben der wirksamen Optionen in `HubOptionsRegistry`
+- Initial-Discovery und Initial-Updates in `init()`
+- laufende Discovery und Updates in `run()`
 
-- `initialize()` ist für einmalige Vorbereitung gedacht, zum Beispiel Initialsuche, Indexaufbau oder das Merken bereits bekannter Objekte.
-- `initialize()` wird im regulären Ablauf vom `ce.hub.MainLoopRunner` einmal pro registriertem StatePublisher aufgerufen.
-- `syncState()` wird danach ebenfalls vom `MainLoopRunner` in jedem Zyklus ausgeführt.
-- Viele StatePublisher sind trotzdem idempotent aufgebaut und behalten ein lokales `initialized`-Flag, damit zusätzliche oder direkte Aufrufe keinen ungewollten Effekt haben.
+Typische Aufrufe im aktiven Pfad sind zum Beispiel:
 
-### 5. Adapter zwischen EEP/Fachmodulen und API-Daten
+- `StructureDiscovery.runInitialDiscovery()`
+- `StructureUpdater.runInitialUpdate(...)`
+- `SignalDiscovery.runDiscovery()`
+- `SignalUpdater.runUpdate(...)`
+- `TrainDiscovery.runDiscovery(...)`
+- `TrainUpdater.runUpdate(...)`
+- `RollingStockUpdater.runUpdate(...)`
 
-- Die StatePublisher lesen ihren Zustand entweder direkt über EEP-Funktionen oder über fachliche Registries oder Modelle des Projekts.
-- Dabei formen sie interne Zustände in flache, webtaugliche Tabellen mit stabilen Kennungen wie `id` oder `name` um.
-- Änderungen des Zustandes werden über `DataChangeBus.fire*()` bekanntgemacht. Dabei wird immer ein eindeutiger Identifier übergeben.
+## Rolle der `*StatePublisher`
 
-### 6. Ereignisgetriebener Export
+Die historischen `*StatePublisher.lua`-Dateien existieren weiterhin, aber ihre Verantwortung ist heute kleiner:
 
-- Der eigentliche Datentransport läuft primär über Events.
-- Die meisten StatePublisher senden ihre Ergebnisse über `ce.hub.publish.DataChangeBus`, meist als `fireListChange(...)`, teilweise auch granularer wie `fireDataAdded(...)` oder `fireDataChanged(...)`.
-- Auch dort, wo `syncState()` nominal Daten zurückgeben kann, ist der Event-Strom in der Praxis meist der relevante Ausgabekanal.
+- sie bleiben die registrierbaren Objekte für `StatePublisherRegistry`
+- sie halten kompatible Felder wie `name`, `enabled`, `initialize()` und `syncState()`
+- auf dem aktiven Pfad rufen sie nur noch den zugehörigen `Publisher.syncState(...)` auf
 
-### 7. Rückgabewerte sind Nebenkanal oder Kompatibilitätsschicht
+Das bedeutet:
 
-- Viele StatePublisher geben bewusst `{}` oder nur kommentierte Platzhalter zurück.
-- Das passt zur Verwendung im `MainLoopRunner`: Die Rückgabewerte von `syncState()` werden dort nicht weiterverarbeitet, während die aktuellen StatePublisher ihre Nutzdaten überwiegend schon während `syncState()` per Event veröffentlichen.
-- Wenn ein StatePublisher doch Tabellen zurückgibt, müssen sie nur serialisierbare Werte enthalten; Funktionen oder nicht-string-/nicht-number-Schlüssel sind unzulässig.
+- Discovery gehört nicht mehr in die StatePublisher
+- Fetch-Logik gehört nicht mehr in die StatePublisher
+- die eigentliche Synchronisationsentscheidung bleibt beim `Publisher`
 
-### 8. API-orientierte Datenform
+## Bridge-Anbindung
 
-- Exportierte Listen enthalten nach Möglichkeit ein eindeutiges Feld (`id` oder `name`), weil Web-Clients und Änderungsereignisse damit arbeiten.
-- Mehrere StatePublisher erzeugen nicht nur reine Zustandslisten, sondern auch Settings- oder Metadatenlisten, damit die Web-Oberfläche Fachmodule einheitlich darstellen und fernsteuern kann.
+Der `HubBridgeConnector` registriert die Hub-Publisher an der `StatePublisherRegistry`, damit sie über den `DataChangeBus` veröffentlichen können.
 
-Zusammengefasst sind `*StatePublisher` keine isolierten Datenklassen, sondern zustandsbehaftete Adapter mit einheitlichem Lebenszyklus: über BridgeConnectoren registrieren, vom `StatePublisherRegistry` verwalten, vom `MainLoopRunner` initialisieren und dann zyklisch Zustand lesen und Änderungen über die Event- und Server-Infrastruktur veröffentlichen.
+Diese Trennung bleibt bewusst bestehen:
+
+- Fachlogik kennt den BridgeConnector nicht
+- der BridgeConnector kennt die registrierbaren Publisher
+- `DataChangeBus` bleibt generische Event-Infrastruktur
+
+## MainLoopRunner und Publisher-Lebenszyklus
+
+Der `MainLoopRunner` arbeitet weiterhin mit Modulen und registrierten Publisher-Adaptern:
+
+1. `module.init()`
+2. `module.run()`
+3. `statePublisher.initialize()`
+4. `statePublisher.syncState()`
+
+Wichtig ist aber die neue Verantwortung innerhalb dieses Schemas:
+
+- die relevante Datenarbeit liegt bei den Modulen, insbesondere bei `CeHubModule`
+- `statePublisher.initialize()` ist meist nur noch leichtgewichtig oder ein Kompatibilitätshaken
+- `statePublisher.syncState()` delegiert an den eigentlichen `Publisher`
+
+## Discovery mit gekoppelten CeTypes
+
+Nicht jeder CeType scannt die Welt unabhängig. Der wichtigste gekoppelte Pfad ist der Zugpfad:
+
+- `TrainDiscovery` erkennt Tracks, Züge und RollingStock-Existenz gemeinsam
+- `TrainUpdater` aktualisiert Zugobjekte
+- `RollingStockUpdater` aktualisiert RollingStock-Objekte
+- `TrackPublisher`, `TrainPublisher` und `RollingStockPublisher` veröffentlichen ihre Änderungen getrennt
+
+Dadurch bleibt die Discovery zentral, während Registry, Updater und Publisher weiter je CeType getrennt bleiben.
+
+## Rückgabewerte und Events
+
+Die aktiven Hub-Publisher transportieren ihre Nutzdaten primär über `DataChangeBus.fire*()`.
+Die Rückgabewerte von `syncState()` sind meist nur `{}` oder eine Kompatibilitätsschicht für bestehende Aufrufer.
+
+Wenn ein Publisher Daten direkt zurückgibt, müssen diese nur serialisierbare Werte enthalten. Funktionen oder nicht-string-/nicht-number-Schlüssel sind unzulässig.
+
+## Weiterführende Dokumentation
+
+- [options/OPTIONS.md](options/OPTIONS.md) - Hub-Optionen, Fetch-Policy und Sync-Policy
+- [data/README_DEV.md](data/README_DEV.md) - Rollen und DTO-Fluss der Hub-Daten
+- [data/DTO.md](data/DTO.md) - aktive CeTypes und DTO-Felder
+- [docs/Architecture.md](docs/Architecture.md) - Hub-Architektur und aktuelle Zielstruktur
 
 ---
 

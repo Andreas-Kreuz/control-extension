@@ -1,5 +1,4 @@
-// Lua DtoFactory: lua/LUA/ce/hub/data/structures/StructureDtoFactory.lua
-// Room: structures
+// Legacy combined structure DTO retained for compatibility with older event fixtures.
 export interface StructureLuaDto {
   id: string;
   name: string;

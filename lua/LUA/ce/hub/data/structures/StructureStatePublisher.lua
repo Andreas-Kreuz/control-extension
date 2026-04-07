@@ -1,35 +1,22 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureStatePublisher ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local StructureDataCollector = require("ce.hub.data.structures.StructureDataCollector")
-local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureStatePublisher ...") end
+local StructurePublisher = require("ce.hub.data.structures.StructurePublisher")
 StructureStatePublisher = {}
-local enabled = true
+StructureStatePublisher.enabled = true
 local initialized = false
 StructureStatePublisher.name = "ce.hub.data.structures.StructureStatePublisher"
-
-local structures = {}
+StructureStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Structure
 
 function StructureStatePublisher.initialize()
-    if not enabled or initialized then return end
-
-    structures = StructureDataCollector.collectInitialStructures()
-    DataChangeBus.fireListChange(StructureDtoFactory.createStructureDtoList(structures))
-
+    if not StructureStatePublisher.enabled or initialized then return end
     initialized = true
 end
 
 function StructureStatePublisher.syncState()
-    if not enabled then return end
+    if not StructureStatePublisher.enabled then return end
 
     if not initialized then StructureStatePublisher.initialize() end
 
-    local dirtyStructures = StructureDataCollector.refreshDirtyStructures(structures)
-
-    for i = 1, #dirtyStructures do
-        DataChangeBus.fireDataChanged(StructureDtoFactory.createStructureDto(dirtyStructures[i]))
-    end
-
-    return {}
+    return StructurePublisher.syncState()
 end
 
 return StructureStatePublisher

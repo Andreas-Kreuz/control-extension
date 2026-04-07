@@ -1,5 +1,5 @@
 -- Use this class in XxxBridgeConnector to register commands
-if AkDebugLoad then print("[#Start] Loading ce.databridge.ServerExchangeCoordinator ...") end
+if CeDebugLoad then print("[#Start] Loading ce.databridge.ServerExchangeCoordinator ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local ServerEventBuffer = require("ce.databridge.ServerEventBuffer")
 local ServerExchangeFileIo = require("ce.databridge.ServerExchangeFileIo")
@@ -7,7 +7,7 @@ local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
 local os = require("os")
 
 local ServerExchangeCoordinator = {}
-ServerExchangeCoordinator.debug = AkStartWithDebug or false
+ServerExchangeCoordinator.debug = CeStartWithDebug or false
 local initialized = false
 
 -- checkServerStatus:

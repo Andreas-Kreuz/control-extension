@@ -177,7 +177,7 @@ Einige alte Sammelmodule wurden bewusst aufgeteilt:
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `ak.core.ModuleRegistry`      | Öffentlicher Einstieg über `ce.ControlExtension`, Laufzeit über `ce.hub.ControlExtensionHub`, Registry intern in `ce.hub.ModuleRegistry` |
 | `ak.core.CoreWebConnector`    | `ce.hub.bridge.CoreBridgeConnector` und `ce.hub.bridge.DataBridgeConnector`                                                              |
-| `ak.data.DataLuaModule`       | `ce.hub.CeHubModule` mit `ce.hub.bridge.HubBridgeConnector`                                                                              |
+| `ak.data.DataLuaModule`       | `ce.hub.CeHubModule` mit `ce.hub.HubBridgeConnector`                                                                                     |
 | `ak.road.CrossingLuaModule`   | `ce.mods.road.CeRoadModule` mit `ce.mods.road.bridge.RoadBridgeConnector`                                                                |
 | `ak.transit.TransitLuaModule` | `ce.mods.transit.CeTransitModule` mit `ce.mods.transit.bridge.TransitBridgeConnector`                                                    |
 

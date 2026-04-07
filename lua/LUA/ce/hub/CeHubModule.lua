@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
 
 ---@class CeHubModule: CeModule
 CeHubModule = {}
@@ -7,60 +7,105 @@ CeHubModule.enabled = true
 local initialized = false
 CeHubModule.name = "ce.hub.CeHubModule"
 CeHubModule.CeTypes = require("ce.hub.data.HubCeTypes")
-local CeTypeRegistry = require("ce.hub.data.CeTypeRegistry")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
-local HubBridgeConnector = require("ce.hub.bridge.HubBridgeConnector")
+local HubBridgeConnector = require("ce.hub.HubBridgeConnector")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+local HubOptionDefaults = require("ce.hub.options.HubOptionDefaults")
+local TableUtils = require("ce.hub.util.TableUtils")
+local ModulesUpdater = require("ce.hub.data.modules.ModulesUpdater")
+local VersionUpdater = require("ce.hub.data.version.VersionUpdater")
+local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
+local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
+local DataSlotsUpdater = require("ce.hub.data.slots.DataSlotsUpdater")
+local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
+local TimeUpdater = require("ce.hub.data.time.TimeUpdater")
+local WeatherUpdater = require("ce.hub.data.weather.WeatherUpdater")
+local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
+local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
+local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
+local SwitchUpdater = require("ce.hub.data.switches.SwitchUpdater")
+local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
+local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
 
-CeTypeRegistry.registerCeTypes(
-    { ceType = CeHubModule.CeTypes.Module, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Runtime, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.EepVersion, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Weather, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.SaveSlot, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.FreeSlot, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Signal, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.WaitingOnSignal, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Switch, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Structure, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.Time, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.TrainStatic, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.TrainDynamic, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStockStatic, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStockDynamic, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStockTextures, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RollingStockRotation, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.AuxiliaryTrack, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.ControlTrack, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RoadTrack, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.RailTrack, keyId = "id", owner = CeHubModule.name },
-    { ceType = CeHubModule.CeTypes.TramTrack, keyId = "id", owner = CeHubModule.name }
-)
+local function tk(group, func)
+    RuntimeRegistry.runTimedAndKeep(group, func)
+end
+
+local function tu(group, func)
+    RuntimeRegistry.runTimed(group, func)
+end
+
+local function runInitialDataDiscovery()
+    tk("Discovery-init/ce.hub.Signal", SignalDiscovery.runInitialDiscovery)
+    tk("Discovery-init/ce.hub.Switch", SwitchDiscovery.runInitialDiscovery)
+    tk("Discovery-init/ce.hub.Structure", StructureDiscovery.runInitialDiscovery)
+    tk("Discovery-init/ce.hub.Train", TrainDiscovery.runInitialDiscovery)
+
+    tk("Update-init/ce.hub.DataSlot", DataSlotsUpdater.runUpdate)
+    tk("Update-init/ce.hub.Frame", FrameDataUpdater.runUpdate)
+    tk("Update-init/ce.hub.Module", ModulesUpdater.runUpdate)
+    tk("Update-init/ce.hub.RollingStock", RollingStockUpdater.runUpdate)
+    tk("Update-init/ce.hub.Runtime", RuntimeUpdater.runUpdate)
+    tk("Update-init/ce.hub.Signal", SignalUpdater.runUpdate)
+    tk("Update-init/ce.hub.Structure", StructureUpdater.runInitialUpdate)
+    tk("Update-init/ce.hub.Switch", SwitchUpdater.runUpdate)
+    tk("Update-init/ce.hub.Time", TimeUpdater.runUpdate)
+    tk("Update-init/ce.hub.Train", TrainUpdater.runUpdate)
+    tk("Update-init/ce.hub.Version", VersionUpdater.runUpdate)
+    tk("Update-init/ce.hub.Weather", WeatherUpdater.runUpdate)
+end
+
+local function runDataUpdates()
+    tu("Discovery/ce.hub.Signal", SignalDiscovery.runDiscovery)
+    tu("Discovery/ce.hub.Switch", SwitchDiscovery.runDiscovery)
+    tu("Discovery/ce.hub.Structure", StructureDiscovery.runDiscovery)
+    tu("Discovery/ce.hub.Train", TrainDiscovery.runDiscovery)
+
+    tu("Update/ce.hub.DataSlots", DataSlotsUpdater.runUpdate)
+    tu("Update/ce.hub.FrameData", FrameDataUpdater.runUpdate)
+    tu("Update/ce.hub.Module", ModulesUpdater.runUpdate)
+    tu("Update/ce.hub.RollingStock", RollingStockUpdater.runUpdate)
+    tu("Update/ce.hub.Runtime", RuntimeUpdater.runUpdate)
+    tu("Update/ce.hub.Signal", SignalUpdater.runUpdate)
+    tu("Update/ce.hub.Structure", StructureUpdater.runUpdate)
+    tu("Update/ce.hub.Switch", SwitchUpdater.runUpdate)
+    tu("Update/ce.hub.Time", TimeUpdater.runUpdate)
+    tu("Update/ce.hub.Train", TrainUpdater.runUpdate)
+    tu("Update/ce.hub.Version", VersionUpdater.runUpdate)
+    tu("Update/ce.hub.Weather", WeatherUpdater.runUpdate)
+end
 
 function CeHubModule.init()
     if not CeHubModule.enabled or initialized then return end
     HubBridgeConnector.registerStatePublishers()
     HubBridgeConnector.registerFunctions()
+    runInitialDataDiscovery()
     initialized = true
 end
 
 function CeHubModule.run()
     if not CeHubModule.enabled then return end
+    runDataUpdates()
     Scheduler:runTasks()
 end
 
 function CeHubModule.setOptions(options)
-    options = options or {}
+    options = HubOptionsRegistry.copyTable(options or {})
+
+    if options.sync or options.publisherOptions or options.collectedCeTypes or options.serverCeTypes then
+        error("CeHubModule.setOptions no longer supports legacy sync options. Use options.ceTypes instead.")
+    end
 
     if options.waitForServer ~= nil then
         local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
         ServerExchangeCoordinator.checkServerStatus = options.waitForServer
     end
-    if options.collectedCeTypes then
-        HubBridgeConnector.setCollectedCeTypes(options.collectedCeTypes)
-    end
-    if options.serverCeTypes then
-        require("ce.hub.publish.ServerEventDispatcher").setAllowedHubCeTypes(options.serverCeTypes)
-    end
+
+    local mergedOptions = TableUtils.deepMerge(HubOptionDefaults.create(), options)
+    HubOptionsRegistry.setOptions(mergedOptions)
 
     return CeHubModule
 end

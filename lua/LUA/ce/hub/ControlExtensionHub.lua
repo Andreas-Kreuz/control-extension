@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.ControlExtensionHub ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.ControlExtensionHub ...") end
 
 require("ce.databridge.IoInit").initialize()
 
@@ -6,7 +6,7 @@ local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
 
 local ControlExtensionHub = {}
-ControlExtensionHub.debug = AkStartWithDebug or false
+ControlExtensionHub.debug = CeStartWithDebug or false
 ControlExtensionHub.pauseEepDuringInitialization = false
 
 local serverEnabled = true
@@ -24,6 +24,20 @@ function ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringIniti
     assert(pauseEepDuringInitialization == true or pauseEepDuringInitialization == false)
     ControlExtensionHub.pauseEepDuringInitialization = pauseEepDuringInitialization
     return pauseEepDuringInitialization
+end
+
+function ControlExtensionHub.setOptions(options)
+    options = options or {}
+
+    if options.debug ~= nil then
+        ControlExtensionHub.setDebug(options.debug)
+    end
+    if options.pauseEepDuringInitialization ~= nil then
+        ControlExtensionHub.setPauseEepDuringInitialization(options.pauseEepDuringInitialization)
+    end
+
+    require("ce.hub.CeHubModule").setOptions(options)
+    return options
 end
 
 function ControlExtensionHub.initTasks()

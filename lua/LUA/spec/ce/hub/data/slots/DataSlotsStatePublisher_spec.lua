@@ -1,8 +1,6 @@
 insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
-    local originalLoadData = _G.EEPLoadData
-
     before_each(function ()
         clearModule("ce.hub.data.slots.DataSlotsStatePublisher")
         clearModule("ce.hub.data.slots.DataSlotDtoFactory")
@@ -11,19 +9,22 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
+        clearModule("ce.hub.data.slots.DataSlotsRegistry")
+        clearModule("ce.hub.data.slots.DataSlotsUpdater")
 
-        rawset(_G, "EEPLoadData", function (id)
+        stub(_G, "EEPLoadData", function (id)
             if id == 1 then return true, "payload-1" end
             return false, nil
         end)
     end)
 
     after_each(function ()
-        rawset(_G, "EEPLoadData", originalLoadData)
+        _G.EEPLoadData:revert()
     end)
 
     it("fires save-slot and free-slot ceTypes with the existing wire format", function ()
         local DataSlotsStatePublisher = require("ce.hub.data.slots.DataSlotsStatePublisher")
+        local DataSlotsUpdater = require("ce.hub.data.slots.DataSlotsUpdater")
         local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
         local StorageUtility = require("ce.hub.util.StorageUtility")
         local DataStore = require("ce.hub.publish.InternalDataStore")
@@ -35,7 +36,7 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         end
         StorageUtility.getName = function () return nil end
 
-        DataSlotsStatePublisher.initialize()
+        DataSlotsUpdater.runUpdate()
         DataSlotsStatePublisher.syncState()
 
         assert.same({

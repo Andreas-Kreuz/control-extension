@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitCeTypes ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitCeTypes ...") end
 
 local TransitCeTypes = {
     Station = "ce.mods.transit.Station",

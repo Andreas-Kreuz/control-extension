@@ -2,7 +2,7 @@ import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { lazy } from 'react';
-const ThemedApp = lazy(() => import('./base/ThemedApp'));
+const ThemedApp = lazy(() => import('./app/ThemedApp'));
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 

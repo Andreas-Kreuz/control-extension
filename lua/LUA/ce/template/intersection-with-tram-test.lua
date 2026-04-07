@@ -12,8 +12,8 @@
 -- 4) Rufe "lua anlage1-test.lua" auf der Kommandozeile auf
 -----------------------------------------------------------------------------------------------------------------------
 -- Zeigt erweiterte Informationen waehrend der Initialisierung an (oder nicht)
-AkDebugLoad = false
-AkStartWithDebug = false
+CeDebugLoad = false
+CeStartWithDebug = false
 
 -- Lädt den EEP Simulator
 local EepSimulator = require("ce.hub.eep.EepSimulator")

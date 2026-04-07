@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/weather/WeatherLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.weather.WeatherDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.weather.WeatherDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local WeatherDtoFactory = {}

@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulatorRuntime ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulatorRuntime ...") end
 
 local Store = require("ce.hub.eep.EepSimulatorStore")
 local state = Store.state

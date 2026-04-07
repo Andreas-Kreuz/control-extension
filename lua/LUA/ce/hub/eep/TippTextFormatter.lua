@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.eep.TippTextFormatter ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.TippTextFormatter ...") end
 
 local TippTextFormatter = {
     -- <br> neue Zeile

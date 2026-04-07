@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.StationQueueEntry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.StationQueueEntry ...") end
 
 local StationQueueEntry = {}
 function StationQueueEntry:new(trainName, destination, line, timeInMinutes, platform)

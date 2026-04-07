@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.StationQueue ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.StationQueue ...") end
 
 local StationQueueEntry = require("ce.mods.transit.StationQueueEntry")
 

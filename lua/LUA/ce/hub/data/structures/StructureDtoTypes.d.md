@@ -1,9 +1,9 @@
-# Structure DTO-CeTypes
+# Structure DTO-CeType
 
 ## CeType `ce.hub.Structure`
 
 - Key-ID: `id`
-- DtoFactory: `ce.hub.data.ce.hub.Structure.StructureDtoFactory`
+- DtoFactory: `ce.hub.data.structures.StructureDtoFactory`
 
 | Name            | Typ       |
 | --------------- | --------- |
@@ -21,3 +21,8 @@
 | `light`         | `boolean` |
 | `smoke`         | `boolean` |
 | `fire`          | `boolean` |
+
+Hinweis:
+
+- Die Discovery nimmt nur Strukturen in die Registry auf, für die dynamische Zustände wie `light`, `smoke` oder `fire` relevant sind.
+- Im `selected`-Modus können die dynamischen Felder bei nicht selektierten Objekten mit Platzhalterwerten gesendet werden.

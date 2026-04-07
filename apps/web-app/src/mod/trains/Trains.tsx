@@ -13,10 +13,10 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { useState } from 'react';
-const AppCardGrid = lazy(() => import('../../ui/AppCardGrid'));
-const AppCardGridContainer = lazy(() => import('../../ui/AppCardGridContainer'));
-const AppPageHeadline = lazy(() => import('../../ui/AppPageHeadline'));
-const AppPage = lazy(() => import('../../ui/AppPage'));
+const AppCardGrid = lazy(() => import('../../components/AppCardGrid'));
+const AppCardGridContainer = lazy(() => import('../../components/AppCardGridContainer'));
+const AppPageHeadline = lazy(() => import('../../components/AppPageHeadline'));
+const AppPage = lazy(() => import('../../components/AppPage'));
 const TrainListEntryCard = lazy(() => import('./TrainListEntryCard'));
 
 interface ChipData {

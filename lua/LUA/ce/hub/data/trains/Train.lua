@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
 -- local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local TableUtils = require("ce.hub.util.TableUtils")
 
@@ -11,13 +11,13 @@ local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 
 local Train = {}
 
-local function markStaticUpdated(train)
-    train.valuesUpdated = true
-    train.staticValuesUpdated = true
-end
+-- Field update policies (see TrainStaticDtoTypes.d.lua / TrainDynamicDtoTypes.d.lua):
+--   always   => real value always included in DTO
+--   ondemand => real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
+--   never    => always placeholder, never sent to clients
 
-local function markDynamicUpdated(train)
-    train.dynamicValuesUpdated = true
+local function markDirty(train, fieldName)
+    train.dirtyFields[fieldName] = true
 end
 
 
@@ -61,9 +61,8 @@ function Train:new(o)
     o.trackType = nil
     o.onTracks = {}
     o.occupiedTracks = {}
-    o.valuesUpdated = true
-    o.staticValuesUpdated = true
-    o.dynamicValuesUpdated = true
+    o.dirtyFields = {}
+    o.needsFullSend = true
     return o
 end
 
@@ -98,6 +97,15 @@ function Train:getLength()
     return self.length
 end
 
+function Train:setLength(length)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(length) == "number", "Need 'length' as number")
+    length = tonumber(string.format("%.2f", length)) or 0
+    local oldLength = self.length
+    self.length = length
+    if oldLength ~= length then markDirty(self, "length") end
+end
+
 ---Adds or replaces a value to ALL rolling stock of the train
 ---@param key string
 ---@param value string
@@ -112,7 +120,6 @@ function Train:setValue(key, value)
         local rs = RollingStockRegistry.forName(rollingStockName)
         rs:setValue(key, value)
     end
-    markStaticUpdated(self)
 end
 
 ---Get the current value for key
@@ -153,9 +160,16 @@ function Train:setRoute(routeName)
     self.route = routeName
     EEPSetTrainRoute(self.name, self.route)
     if oldRoute ~= routeName then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, route = route})
+        markDirty(self, "route")
     end
+end
+
+function Train:updateRoute(routeName)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(routeName) == "string", "Need 'route' as string")
+    local oldRoute = self.route
+    self.route = routeName
+    if oldRoute ~= routeName then markDirty(self, "route") end
 end
 
 --- Gets the trains route like used in EEP
@@ -173,8 +187,7 @@ function Train:setRollingStockCount(count)
     local oldCount = self.rollingStockCount
     self.rollingStockCount = count
     if oldCount ~= count then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, rollingStockCount = count})
+        markDirty(self, "rollingStockCount")
     end
 end
 
@@ -194,11 +207,9 @@ function Train:setSpeed(speed)
     local oldSpeed = self.speed
     self.speed = speed
     if oldSpeed ~= speed then
-        markDynamicUpdated(self)
-
+        markDirty(self, "speed")
         if (oldSpeed < 0 and speed > 0) then self:setMovesForward(true) end
         if (oldSpeed > 0 and speed < 0) then self:setMovesForward(false) end
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, speed = speed})
     end
 end
 
@@ -215,7 +226,7 @@ function Train:setTargetSpeed(targetSpeed)
     targetSpeed = tonumber(string.format("%1.1f", targetSpeed)) or 0
     local oldTargetSpeed = self.targetSpeed
     self.targetSpeed = targetSpeed
-    if oldTargetSpeed ~= targetSpeed then markDynamicUpdated(self) end
+    if oldTargetSpeed ~= targetSpeed then markDirty(self, "targetSpeed") end
 end
 
 function Train:getTargetSpeed()
@@ -228,7 +239,7 @@ function Train:setCouplingFront(couplingFront)
     assert(type(couplingFront) == "number", "Need 'couplingFront' as number")
     local oldCouplingFront = self.couplingFront
     self.couplingFront = couplingFront
-    if oldCouplingFront ~= couplingFront then markDynamicUpdated(self) end
+    if oldCouplingFront ~= couplingFront then markDirty(self, "couplingFront") end
 end
 
 function Train:getCouplingFront()
@@ -241,7 +252,7 @@ function Train:setCouplingRear(couplingRear)
     assert(type(couplingRear) == "number", "Need 'couplingRear' as number")
     local oldCouplingRear = self.couplingRear
     self.couplingRear = couplingRear
-    if oldCouplingRear ~= couplingRear then markDynamicUpdated(self) end
+    if oldCouplingRear ~= couplingRear then markDirty(self, "couplingRear") end
 end
 
 function Train:getCouplingRear()
@@ -254,7 +265,7 @@ function Train:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
-    if oldActive ~= active then markDynamicUpdated(self) end
+    if oldActive ~= active then markDirty(self, "active") end
 end
 
 function Train:getActive()
@@ -269,7 +280,10 @@ function Train:setTrainyard(inTrainyard, trainyardId)
     local oldTrainyardId = self.trainyardId
     self.inTrainyard = inTrainyard
     self.trainyardId = inTrainyard and trainyardId or nil
-    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then markDynamicUpdated(self) end
+    if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then
+        markDirty(self, "inTrainyard")
+        markDirty(self, "trainyardId")
+    end
 end
 
 function Train:getTrainyardId()
@@ -290,8 +304,7 @@ function Train:setMovesForward(movesForward)
     local oldMovesForward = self.movesForward
     self.movesForward = movesForward
     if oldMovesForward ~= movesForward then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, speed = speed})
+        markDirty(self, "movesForward")
     end
 end
 
@@ -310,8 +323,7 @@ function Train:setOnTrack(onTracks)
     local oldOnTracks = self.onTracks
     self.onTracks = onTracks
     if not TableUtils.sameDictEntries(oldOnTracks, onTracks) then
-        self.valuesUpdated = true
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, occupiedTacks = onTracks})
+        markDirty(self, "onTracks")
     end
 end
 
@@ -328,8 +340,7 @@ function Train:setTrackType(trackType)
     local oldTrackType = self.trackType
     self.trackType = trackType
     if oldTrackType ~= trackType then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, trackType = trackType})
+        markDirty(self, "trackType")
     end
 end
 
@@ -341,26 +352,40 @@ function Train:setDirection(direction)
     local oldDirection = self:getDirection()
     self:setValue(TagKeys.Train.direction, direction)
     if oldDirection ~= direction then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, direction = direction})
+        markDirty(self, "direction")
     end
 end
 
 function Train:getDirection() return self:getValue(TagKeys.Train.direction) end
+
+function Train:updateDirection(direction)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(direction) == "string", "Need 'direction' as string")
+    local oldDirection = self:getDirection()
+    self.values[TagKeys.Train.direction] = direction
+    if oldDirection ~= direction then markDirty(self, "direction") end
+end
 
 function Train:setDestination(destination)
     assert(type(destination) == "string", "Need 'destination' as string")
     local oldDestination = self:getDestination()
     self:setValue(TagKeys.Train.destination, destination)
     if oldDestination ~= destination then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, destination = destination})
+        markDirty(self, "destination")
     end
 end
 
 function Train:getDestination()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     return self:getValue(TagKeys.Train.destination)
+end
+
+function Train:updateDestination(destination)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(destination) == "string", "Need 'destination' as string")
+    local oldDestination = self:getDestination()
+    self.values[TagKeys.Train.destination] = destination
+    if oldDestination ~= destination then markDirty(self, "destination") end
 end
 
 function Train:setLine(line)
@@ -370,14 +395,22 @@ function Train:setLine(line)
     local oldLine = self:getLine()
     self:setValue(TagKeys.Train.line, line)
     if oldLine ~= line then
-        markStaticUpdated(self)
-        -- DataChangeBus.fireDataChanged("trains", "id", {id = self.name, line = line})
+        markDirty(self, "line")
     end
 end
 
 function Train:getLine()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     return self:getValue(TagKeys.Train.line)
+end
+
+function Train:updateLine(line)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert("string" == type(line) or "number" == type(line), "Provide 'line' as 'string' or 'number'")
+    line = tostring(line)
+    local oldLine = self:getLine()
+    self.values[TagKeys.Train.line] = line
+    if oldLine ~= line then markDirty(self, "line") end
 end
 
 function Train:openDoors()
@@ -396,6 +429,14 @@ function Train:closeDoors()
         local model = RollingStockModels.modelFor(rollingStockName)
         model:closeDoors(rollingStockName)
     end
+end
+
+function Train:resetDirty()
+    self.dirtyFields = {}
+end
+
+function Train:hasDirtyFields()
+    return next(self.dirtyFields) ~= nil
 end
 
 function Train:toJsonStatic()

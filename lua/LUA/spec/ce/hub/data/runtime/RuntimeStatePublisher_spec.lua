@@ -1,8 +1,5 @@
 insulate("RuntimeStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
-    local originalEEPGetFramesPerSecond = _G.EEPGetFramesPerSecond
-    local originalEEPGetCurrentFrame = _G.EEPGetCurrentFrame
-    local originalEEPGetCurrentRenderFrame = _G.EEPGetCurrentRenderFrame
 
     before_each(function ()
         clearModule("ce.hub.data.runtime.RuntimeDataCollector")
@@ -10,21 +7,22 @@ insulate("RuntimeStatePublisher", function ()
         clearModule("ce.hub.data.runtime.RuntimeStatePublisher")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        _G.EEPGetFramesPerSecond = function () return 60 end
-        _G.EEPGetCurrentFrame = function () return 15 end
-        _G.EEPGetCurrentRenderFrame = function () return 15948 end
+        stub(_G, "EEPGetFramesPerSecond", function () return 60 end)
+        stub(_G, "EEPGetCurrentFrame", function () return 15 end)
+        stub(_G, "EEPGetCurrentRenderFrame", function () return 15948 end)
     end)
 
     after_each(function ()
-        _G.EEPGetFramesPerSecond = originalEEPGetFramesPerSecond
-        _G.EEPGetCurrentFrame = originalEEPGetCurrentFrame
-        _G.EEPGetCurrentRenderFrame = originalEEPGetCurrentRenderFrame
+        _G.EEPGetFramesPerSecond:revert()
+        _G.EEPGetCurrentFrame:revert()
+        _G.EEPGetCurrentRenderFrame:revert()
     end)
 
     it("publishes the last completed runtime snapshot only once", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local RuntimeDataCollector = require("ce.hub.data.runtime.RuntimeDataCollector")
         local RuntimeStatePublisher = require("ce.hub.data.runtime.RuntimeStatePublisher")
+        local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
         local published = {}
 
         DataChangeBus.fireListChange = function (ceType, keyId, list)
@@ -45,6 +43,7 @@ insulate("RuntimeStatePublisher", function ()
                 }
             }, true)
 
+        RuntimeUpdater.runUpdate()
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)
         assert.equals("ce.hub.Runtime", published[1].ceType)
@@ -56,12 +55,10 @@ insulate("RuntimeStatePublisher", function ()
                             count = 2,
                             time = 4,
                             lastTime = 1,
-                            framesPerSecond = 60,
-                            currentFrame = 15,
-                            currentRenderFrame = 15948
                         }
                     }, published[1].list)
 
+        RuntimeUpdater.runUpdate()
         RuntimeStatePublisher.syncState()
         assert.equals(1, #published)
     end)

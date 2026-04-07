@@ -1,5 +1,5 @@
 -- TypeScript LuaDtos: apps/web-server/src/server/ce/dto/signals/SignalLuaDto.ts, WaitingOnSignalLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local SignalDtoFactory = {}
@@ -7,24 +7,34 @@ local SignalDtoFactory = {}
 local SIGNAL_CE_TYPE = HubCeTypes.Signal
 local WAITING_CE_TYPE = HubCeTypes.WaitingOnSignal
 local KEY_ID = "id"
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
-local function toSignalDto(signal)
-    return {
+local function toSignalDto(signal, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("signals")
+    local dto = {
         ceType = SIGNAL_CE_TYPE,
         id = signal.id,
         position = signal.position,
-        tag = signal.tag,
         waitingVehiclesCount = signal.waitingVehiclesCount,
-        stopDistance = signal.stopDistance,
-        itemName = signal.itemName,
-        itemNameWithModelPath = signal.itemNameWithModelPath,
-        signalFunctions = signal.signalFunctions,
-        activeFunction = signal.activeFunction
     }
+    if SyncPolicy.shouldPublishField(fieldPolicies, "tag", isSelected) then dto.tag = signal:getTag() end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "stopDistance", isSelected) then
+        dto.stopDistance = signal:getStopDistance()
+    end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "itemName", isSelected) then
+        dto.itemName = signal:getItemName()
+        dto.itemNameWithModelPath = signal:getItemNameWithModelPath()
+    end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "functions", isSelected) then
+        dto.signalFunctions = signal:getSignalFunctions()
+        dto.activeFunction = signal:getActiveFunction()
+    end
+    return dto
 end
 
-function SignalDtoFactory.createSignalDto(signal)
-    local dto = toSignalDto(signal)
+function SignalDtoFactory.createSignalDto(signal, isSelected)
+    local dto = toSignalDto(signal, isSelected == true)
     return SIGNAL_CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 

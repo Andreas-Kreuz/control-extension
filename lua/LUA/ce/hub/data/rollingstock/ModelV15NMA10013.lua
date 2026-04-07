@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.ModelV15NMA10013 ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.ModelV15NMA10013 ...") end
 local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
 
 local ModelV15NMA10013 = {}

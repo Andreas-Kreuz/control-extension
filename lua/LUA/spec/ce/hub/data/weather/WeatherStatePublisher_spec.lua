@@ -1,43 +1,50 @@
 insulate("ce.hub.data.weather.WeatherStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
-
-    local originals = {}
+    local originalEEPGetSeason = _G.EEPGetSeason
+    local originalEEPGetCloudsIntensity = _G.EEPGetCloudsIntensity
+    local originalEEPGetCloudsMode = _G.EEPGetCloudsMode
+    local originalEEPGetWindIntensity = _G.EEPGetWindIntensity
+    local originalEEPGetRainIntensity = _G.EEPGetRainIntensity
+    local originalEEPGetSnowIntensity = _G.EEPGetSnowIntensity
+    local originalEEPGetHailIntensity = _G.EEPGetHailIntensity
+    local originalEEPGetFogIntensity = _G.EEPGetFogIntensity
 
     before_each(function ()
         clearModule("ce.hub.data.weather.WeatherStatePublisher")
         clearModule("ce.hub.data.weather.WeatherDtoFactory")
+        clearModule("ce.hub.data.weather.WeatherRegistry")
+        clearModule("ce.hub.data.weather.WeatherUpdater")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
 
-        originals.EEPGetSeason = _G.EEPGetSeason
-        originals.EEPGetCloudsIntensity = _G.EEPGetCloudsIntensity
-        originals.EEPGetCloudsMode = _G.EEPGetCloudsMode
-        originals.EEPGetWindIntensity = _G.EEPGetWindIntensity
-        originals.EEPGetRainIntensity = _G.EEPGetRainIntensity
-        originals.EEPGetSnowIntensity = _G.EEPGetSnowIntensity
-        originals.EEPGetHailIntensity = _G.EEPGetHailIntensity
-        originals.EEPGetFogIntensity = _G.EEPGetFogIntensity
-
-        _G.EEPGetSeason = function () return 2 end
-        _G.EEPGetCloudsIntensity = function () return true, 30 end
-        _G.EEPGetCloudsMode = function () return 1 end
-        _G.EEPGetWindIntensity = function () return true, 40 end
-        _G.EEPGetRainIntensity = function () return true, 50 end
-        _G.EEPGetSnowIntensity = function () return true, 60 end
-        _G.EEPGetHailIntensity = function () return true, 70 end
-        _G.EEPGetFogIntensity = function () return true, 80 end
+        rawset(_G, "EEPGetSeason", function () return 2 end)
+        rawset(_G, "EEPGetCloudsIntensity", function () return true, 30 end)
+        rawset(_G, "EEPGetCloudsMode", function () return 1 end)
+        rawset(_G, "EEPGetWindIntensity", function () return true, 40 end)
+        rawset(_G, "EEPGetRainIntensity", function () return true, 50 end)
+        rawset(_G, "EEPGetSnowIntensity", function () return true, 60 end)
+        rawset(_G, "EEPGetHailIntensity", function () return true, 70 end)
+        rawset(_G, "EEPGetFogIntensity", function () return true, 80 end)
     end)
 
     after_each(function ()
-        for key, value in pairs(originals) do rawset(_G, key, value) end
+        rawset(_G, "EEPGetSeason", originalEEPGetSeason)
+        rawset(_G, "EEPGetCloudsIntensity", originalEEPGetCloudsIntensity)
+        rawset(_G, "EEPGetCloudsMode", originalEEPGetCloudsMode)
+        rawset(_G, "EEPGetWindIntensity", originalEEPGetWindIntensity)
+        rawset(_G, "EEPGetRainIntensity", originalEEPGetRainIntensity)
+        rawset(_G, "EEPGetSnowIntensity", originalEEPGetSnowIntensity)
+        rawset(_G, "EEPGetHailIntensity", originalEEPGetHailIntensity)
+        rawset(_G, "EEPGetFogIntensity", originalEEPGetFogIntensity)
     end)
 
     it("publishes global weather data as ce.hub.Weather", function ()
         local WeatherStatePublisher = require("ce.hub.data.weather.WeatherStatePublisher")
+        local WeatherUpdater = require("ce.hub.data.weather.WeatherUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        WeatherStatePublisher.initialize()
+        WeatherUpdater.runUpdate()
         WeatherStatePublisher.syncState()
 
         assert.same({

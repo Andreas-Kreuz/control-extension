@@ -1,8 +1,9 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.HubCeTypes ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.HubCeTypes ...") end
 
 local HubCeTypes = {
     Module = "ce.hub.Module",
     Runtime = "ce.hub.Runtime",
+    FrameData = "ce.hub.FrameData",
     EepVersion = "ce.hub.EepVersion",
     Weather = "ce.hub.Weather",
     SaveSlot = "ce.hub.SaveSlot",
@@ -12,12 +13,8 @@ local HubCeTypes = {
     Switch = "ce.hub.Switch",
     Structure = "ce.hub.Structure",
     Time = "ce.hub.Time",
-    TrainStatic = "ce.hub.TrainStatic",
-    TrainDynamic = "ce.hub.TrainDynamic",
-    RollingStockStatic = "ce.hub.RollingStockStatic",
-    RollingStockDynamic = "ce.hub.RollingStockDynamic",
-    RollingStockTextures = "ce.hub.RollingStockTextures",
-    RollingStockRotation = "ce.hub.RollingStockRotation",
+    Train = "ce.hub.Train",
+    RollingStock = "ce.hub.RollingStock",
     AuxiliaryTrack = "ce.hub.AuxiliaryTrack",
     ControlTrack = "ce.hub.ControlTrack",
     RoadTrack = "ce.hub.RoadTrack",

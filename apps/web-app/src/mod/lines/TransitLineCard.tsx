@@ -4,7 +4,7 @@ import Line from './model/Line';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import { useState } from 'react';
-import AkCard from '../../ui/AkCard';
+import AkCard from '../../components/AkCard';
 import { Avatar, CardActionArea, Divider, Stack, Typography } from '@mui/material';
 import { getColor, getIcon } from './Transit';
 

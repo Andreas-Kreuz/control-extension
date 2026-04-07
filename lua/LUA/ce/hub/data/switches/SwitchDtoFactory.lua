@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/switches/SwitchLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDtoFactory ...") end
 
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local SwitchDtoFactory = {}

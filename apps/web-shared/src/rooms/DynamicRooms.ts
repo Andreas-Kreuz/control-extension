@@ -6,10 +6,8 @@ const ApiEntriesRoom = new DynamicRoom(CeTypes.ServerApiEntries);
 const ServerStatsRoom = new DynamicRoom(CeTypes.ServerStats);
 const RuntimeStatisticsRoom = new DynamicRoom(CeTypes.ServerRuntimeStatistics);
 const TrainListRoom = new DynamicRoom('TrainList');
-const TrainStaticRoom = new DynamicRoom('TrainStatic');
-const TrainDynamicRoom = new DynamicRoom('TrainDynamic');
-const RollingStockStaticRoom = new DynamicRoom('RollingStockStatic');
-const RollingStockDynamicRoom = new DynamicRoom('RollingStockDynamic');
+const TrainRoom = new DynamicRoom(CeTypes.HubTrain);
+const RollingStockRoom = new DynamicRoom(CeTypes.HubRollingStock);
 const TransitLineListRoom = new DynamicRoom('Transit List of Lines');
 const TransitLineDetailsRoom = new DynamicRoom('Transit Details of Line');
 const TransitStationListRoom = new DynamicRoom('Transit List of Stations');
@@ -27,22 +25,30 @@ const SignalRoom = new DynamicRoom(CeTypes.HubSignal);
 const WaitingOnSignalRoom = new DynamicRoom(CeTypes.HubWaitingOnSignal);
 const SwitchRoom = new DynamicRoom(CeTypes.HubSwitch);
 const StructureRoom = new DynamicRoom(CeTypes.HubStructure);
-const RollingStockTexturesRoom = new DynamicRoom(CeTypes.HubRollingStockTextures);
-const RollingStockRotationRoom = new DynamicRoom(CeTypes.HubRollingStockRotation);
+const RollingStockTexturesRoom = new DynamicRoom('ce.hub.RollingStockTextures');
+const RollingStockRotationRoom = new DynamicRoom('ce.hub.RollingStockRotation');
 const TrackRoom = new DynamicRoom('Track');
 const IntersectionRoom = new DynamicRoom(CeTypes.RoadIntersection);
 const IntersectionLaneRoom = new DynamicRoom(CeTypes.RoadIntersectionLane);
 const IntersectionSwitchingRoom = new DynamicRoom(CeTypes.RoadIntersectionSwitching);
 const IntersectionTrafficLightRoom = new DynamicRoom(CeTypes.RoadIntersectionTrafficLight);
 const TrafficLightModelRoom = new DynamicRoom(CeTypes.RoadSignalTypeDefinition);
+const DetailRoomByCeType: Partial<Record<string, DynamicRoom>> = {
+  [CeTypes.HubTrain]: TrainRoom,
+  [CeTypes.HubRollingStock]: RollingStockRoom,
+  [CeTypes.HubStructure]: StructureRoom,
+};
+
+function detailRoomForCeType(ceType: string): DynamicRoom | undefined {
+  return DetailRoomByCeType[ceType];
+}
 
 export { ApiDataRoom };
 export { ApiEntriesRoom };
 export { ServerStatsRoom };
 export { RuntimeStatisticsRoom };
 export { TrainListRoom };
-export { TrainStaticRoom };
-export { TrainDynamicRoom };
+export { TrainRoom };
 export { TransitLineListRoom };
 export { TransitLineDetailsRoom };
 export { TransitStationListRoom };
@@ -59,8 +65,7 @@ export { SignalRoom };
 export { WaitingOnSignalRoom };
 export { SwitchRoom };
 export { StructureRoom };
-export { RollingStockStaticRoom };
-export { RollingStockDynamicRoom };
+export { RollingStockRoom };
 export { RollingStockTexturesRoom };
 export { RollingStockRotationRoom };
 export { TrackRoom };
@@ -69,3 +74,4 @@ export { IntersectionLaneRoom };
 export { IntersectionSwitchingRoom };
 export { IntersectionTrafficLightRoom };
 export { TrafficLightModelRoom };
+export { detailRoomForCeType };

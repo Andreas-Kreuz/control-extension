@@ -1,5 +1,5 @@
 import { CeTypes } from '@ce/web-shared';
-import { useApiDataRoomHandler } from '../../io/useRoomHandler';
+import { useApiDataRoomHandler } from '../../socket/useRoomHandler';
 import Line from './model/Line';
 import { useState } from 'react';
 

@@ -1,6 +1,6 @@
 import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
-import useDebug from '../../io/useDebug';
-import { useApiDataRoomHandler } from '../../io/useRoomHandler';
+import useDebug from '../../socket/useDebug';
+import { useApiDataRoomHandler } from '../../socket/useRoomHandler';
 import Intersection from './model/Intersection';
 import { useState } from 'react';
 

@@ -1,9 +1,9 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.publish.DataChangeBus ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.publish.DataChangeBus ...") end
 local TableUtils = require("ce.hub.util.TableUtils")
 
 local DataChangeBus = {}
 local listeners = {}
-DataChangeBus.debug = AkStartWithDebug or false
+DataChangeBus.debug = CeStartWithDebug or false
 local initialized = false
 local eventCounter = 0
 

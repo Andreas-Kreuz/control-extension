@@ -1,15 +1,15 @@
-import { useDynamicRoomHandler } from '../../io/useRoomHandler';
-import { TrainDynamicDto, TrainDynamicRoom } from '@ce/web-shared';
+import { useDynamicRoomHandler } from '../../socket/useRoomHandler';
+import { TrainDto, TrainRoom } from '@ce/web-shared';
 import { useState } from 'react';
 
-function useTrainDynamic(trainId: string): TrainDynamicDto | undefined {
-  const [train, setTrain] = useState<TrainDynamicDto | undefined>(undefined);
+function useTrainDynamic(trainId: string): TrainDto | undefined {
+  const [train, setTrain] = useState<TrainDto | undefined>(undefined);
 
   useDynamicRoomHandler(
-    TrainDynamicRoom,
+    TrainRoom,
     trainId,
     (payload: string) => {
-      const data = JSON.parse(payload) as TrainDynamicDto | null;
+      const data = JSON.parse(payload) as TrainDto | null;
       setTrain(data ?? undefined);
     },
     () => setTrain(undefined),
@@ -19,4 +19,3 @@ function useTrainDynamic(trainId: string): TrainDynamicDto | undefined {
 }
 
 export default useTrainDynamic;
-

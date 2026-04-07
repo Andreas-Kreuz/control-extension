@@ -2,7 +2,7 @@ local Platform = require("ce.mods.transit.Platform")
 local StationQueue = require("ce.mods.transit.StationQueue")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 
-if AkDebugLoad then print("[#Start] Loading ce.mods.transit.RoadStation ...") end
+if CeDebugLoad then print("[#Start] Loading ce.mods.transit.RoadStation ...") end
 
 local RoadStation = {}
 RoadStation.debug = false

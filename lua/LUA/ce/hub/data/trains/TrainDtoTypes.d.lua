@@ -1,0 +1,28 @@
+---@meta
+
+---@class TrainDto
+---@field ceType string
+---@field id string
+---@field name string
+---@field route string
+---@field rollingStockCount number
+---@field length number
+---@field line string|nil
+---@field destination string|nil
+---@field direction string|nil
+---@field trackType string
+---@field movesForward boolean
+---@field speed number -- ondemand: placeholder 0 when not subscribed
+---@field targetSpeed number -- ondemand: placeholder 0 when not subscribed
+---@field couplingFront number -- ondemand: placeholder 0 when not subscribed
+---@field couplingRear number -- ondemand: placeholder 0 when not subscribed
+---@field active boolean -- ondemand: placeholder false when not subscribed
+---@field inTrainyard boolean -- ondemand: placeholder false when not subscribed
+---@field trainyardId string|number -- ondemand: placeholder "" when not subscribed
+
+---@class TrainDtoFactory
+---@field createFullDto fun(train: Train, isSubscribed: boolean|nil):string,string,string,TrainDto
+---@field createPatchDto fun(train: Train, dirtyFields: table<string,boolean>, isSubscribed: boolean|nil):string,
+---string,string,TrainDto
+---@field createOndemandPlaceholderPatch fun(train: Train):string,string,string,TrainDto
+---@field createRefDto fun(trainId: string):string,string,string,table

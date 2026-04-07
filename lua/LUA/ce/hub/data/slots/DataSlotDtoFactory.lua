@@ -1,5 +1,5 @@
 -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/data-slots/DataSlotLuaDto.ts
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotDtoFactory ...") end
 
 local TableUtils = require("ce.hub.util.TableUtils")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")

@@ -1,4 +1,4 @@
-if AkDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.TagKeys ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.TagKeys ...") end
 
 -- TODO: Architecture and implementation plan for RollingStock tag ownership: see TODO.md in this directory.
 ---@class TagKeys
