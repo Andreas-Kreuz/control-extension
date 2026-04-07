@@ -5,6 +5,12 @@ local TracksStatePublisher = {}
 TracksStatePublisher.enabled = true
 local initialized = false
 TracksStatePublisher.name = "ce.hub.data.tracks.TracksStatePublisher"
+TracksStatePublisher.ceTypes =
+    require("ce.hub.data.HubCeTypes").AuxiliaryTrack .. "," ..
+    require("ce.hub.data.HubCeTypes").ControlTrack .. "," ..
+    require("ce.hub.data.HubCeTypes").RoadTrack .. "," ..
+    require("ce.hub.data.HubCeTypes").RailTrack .. "," ..
+    require("ce.hub.data.HubCeTypes").TramTrack
 
 function TracksStatePublisher.initialize()
     if not TracksStatePublisher.enabled or initialized then return end

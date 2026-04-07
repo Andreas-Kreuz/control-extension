@@ -3,6 +3,9 @@ local DataSlotsPublisher = require("ce.hub.data.slots.DataSlotsPublisher")
 
 local DataSlotsStatePublisher = {}
 DataSlotsStatePublisher.name = "ce.hub.data.slots.DataSlotsStatePublisher"
+DataSlotsStatePublisher.ceTypes =
+    require("ce.hub.data.HubCeTypes").SaveSlot .. "," ..
+    require("ce.hub.data.HubCeTypes").FreeSlot
 DataSlotsStatePublisher.enabled = true
 local initialized = false
 

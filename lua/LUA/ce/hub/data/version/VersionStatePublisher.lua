@@ -4,6 +4,7 @@ VersionStatePublisher = {}
 VersionStatePublisher.enabled = true
 local initialized = false
 VersionStatePublisher.name = "ce.hub.VersionStatePublisher"
+VersionStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").EepVersion
 
 function VersionStatePublisher.initialize()
     if not VersionStatePublisher.enabled or initialized then return end

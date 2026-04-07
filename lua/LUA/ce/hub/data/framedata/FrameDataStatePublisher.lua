@@ -5,6 +5,7 @@ FrameDataStatePublisher = {}
 FrameDataStatePublisher.enabled = true
 local initialized = false
 FrameDataStatePublisher.name = "ce.hub.data.framedata.FrameDataStatePublisher"
+FrameDataStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").FrameData
 
 function FrameDataStatePublisher.initialize()
     if not FrameDataStatePublisher.enabled or initialized then return end

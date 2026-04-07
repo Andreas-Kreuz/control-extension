@@ -4,6 +4,7 @@ local SignalStatePublisher = {}
 SignalStatePublisher.enabled = true
 local initialized = false
 SignalStatePublisher.name = "ce.hub.data.signals.SignalStatePublisher"
+SignalStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Signal
 
 function SignalStatePublisher.initialize()
     if not SignalStatePublisher.enabled or initialized then return end

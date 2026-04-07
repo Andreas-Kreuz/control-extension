@@ -5,6 +5,7 @@ local RollingStockStatePublisher = {}
 RollingStockStatePublisher.enabled = true
 local initialized = false
 RollingStockStatePublisher.name = "ce.hub.data.rollingstock.RollingStockStatePublisher"
+RollingStockStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").RollingStock
 
 function RollingStockStatePublisher.initialize()
     if not RollingStockStatePublisher.enabled or initialized then return end

@@ -8,6 +8,7 @@ ModulesStatePublisher = {}
 ModulesStatePublisher.enabled = true
 local initialized = false
 ModulesStatePublisher.name = "ce.hub.ModulesStatePublisher"
+ModulesStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Module
 
 function ModulesStatePublisher.initialize()
     if not ModulesStatePublisher.enabled or initialized then return end

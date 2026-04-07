@@ -5,6 +5,7 @@ local TrainStatePublisher = {}
 TrainStatePublisher.enabled = true
 local initialized = false
 TrainStatePublisher.name = "ce.hub.data.trains.TrainStatePublisher"
+TrainStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Train
 
 function TrainStatePublisher.initialize()
     if not TrainStatePublisher.enabled or initialized then return end

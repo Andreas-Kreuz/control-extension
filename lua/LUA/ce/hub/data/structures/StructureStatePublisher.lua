@@ -4,6 +4,7 @@ StructureStatePublisher = {}
 StructureStatePublisher.enabled = true
 local initialized = false
 StructureStatePublisher.name = "ce.hub.data.structures.StructureStatePublisher"
+StructureStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Structure
 
 function StructureStatePublisher.initialize()
     if not StructureStatePublisher.enabled or initialized then return end

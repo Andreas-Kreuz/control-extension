@@ -5,6 +5,7 @@ TimeStatePublisher = {}
 TimeStatePublisher.enabled = true
 local initialized = false
 TimeStatePublisher.name = "ce.hub.data.time.TimeStatePublisher"
+TimeStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Time
 
 function TimeStatePublisher.initialize()
     if not TimeStatePublisher.enabled or initialized then return end

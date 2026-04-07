@@ -4,6 +4,7 @@ SwitchStatePublisher = {}
 SwitchStatePublisher.enabled = true
 local initialized = false
 SwitchStatePublisher.name = "ce.hub.data.switches.SwitchStatePublisher"
+SwitchStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Switch
 
 function SwitchStatePublisher.initialize()
     if not SwitchStatePublisher.enabled or initialized then return end

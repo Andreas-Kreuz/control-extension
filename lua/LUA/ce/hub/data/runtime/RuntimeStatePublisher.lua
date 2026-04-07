@@ -5,6 +5,7 @@ RuntimeStatePublisher = {}
 RuntimeStatePublisher.enabled = true
 local initialized = false
 RuntimeStatePublisher.name = "ce.hub.data.runtime.RuntimeStatePublisher"
+RuntimeStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Runtime
 
 function RuntimeStatePublisher.initialize()
     if not RuntimeStatePublisher.enabled or initialized then return end
