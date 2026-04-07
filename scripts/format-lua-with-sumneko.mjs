@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const EXCLUDED_SEGMENTS = new Set(['anlagen', 'demo-anlagen', 'third-party']);
+const EXCLUDED_SEGMENTS = new Set(['anlagen', 'demo-anlagen', 'third-party', 'modell-pakete']);
 const SKIPPED_ROOT_SEGMENTS = new Set(['.git', '.yarn', 'node_modules']);
 
 function printHelp() {
