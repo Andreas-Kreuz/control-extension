@@ -11,7 +11,7 @@ const borderRadius = 12;
 export const theme = createTheme({
   palette: {
     background: {
-      default: grey[200],
+      default: grey[100],
     },
     primary: {
       main: indigo[700],

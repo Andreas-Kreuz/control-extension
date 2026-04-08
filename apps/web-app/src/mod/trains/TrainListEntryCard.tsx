@@ -42,7 +42,7 @@ const TrainListDtoCard = (props: { train: TrainListDto }) => {
     >
       {expanded && <Divider sx={{ width: 1 }} />}
       <Collapse in={expanded} mountOnEnter unmountOnExit sx={{ flexGrow: 1, width: 1 }}>
-        <Box sx={{ flexGrow: 1, width: 1, p: 2 }}>
+        <Box sx={{ flexGrow: 1, width: 1, p: 0 }}>
           <TrainDetails train={t} />
         </Box>
       </Collapse>
@@ -51,4 +51,3 @@ const TrainListDtoCard = (props: { train: TrainListDto }) => {
 };
 
 export default TrainListDtoCard;
-

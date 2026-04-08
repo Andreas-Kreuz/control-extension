@@ -1,22 +1,22 @@
-import TrainCamList from './TrainCamList';
+import TrainCamerasView from './TrainCamerasView';
+import TrainInformationView from './TrainInformationView';
+import TrainLineInformationView from './TrainLineInformationView';
+import TrainRollingStockView from './TrainRollingStockView';
 import useTrainDynamic from './useTrainDynamic';
+import useTrainRollingStock from './useTrainRollingStock';
 import { TrainListDto } from '@ce/web-shared';
 import BadgeIcon from '@mui/icons-material/Badge';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import LabelIcon from '@mui/icons-material/Label';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RouteIcon from '@mui/icons-material/Route';
-import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import { useState } from 'react';
+import useTransitSettings from '../lines/useTransitSettings';
 
 export const getTrainChips = (t: TrainListDto) => {
   const elements = getTrainElements(t).filter((el) => el.key !== 1 && el.on);
@@ -38,70 +38,48 @@ export const getTrainElements = (t: TrainListDto) => [
 ];
 
 const TrainDetails = (props: { train: TrainListDto }) => {
-  const [editMode, setEditMode] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const t = props.train;
-  const trainElements = getTrainElements(t);
   const trainDynamic = useTrainDynamic(t.id);
-  void editMode;
-  void setEditMode;
-  void trainDynamic;
+  const rollingStock = useTrainRollingStock(t.id);
+  const transitSettings = useTransitSettings();
+  const showTransitTab = Boolean(transitSettings);
+  const currentLine = trainDynamic?.line ?? t.line ?? '-';
+  const currentDestination = trainDynamic?.destination ?? t.destination ?? '-';
+  const tabs = [
+    { key: 'information', label: 'Information' },
+    { key: 'rolling-stock', label: 'RollingStock' },
+    { key: 'kameras', label: 'Kameras' },
+    ...(showTransitTab ? [{ key: 'linieninformationen', label: 'Linieninformationen' }] : []),
+  ];
+
+  const safeTabIndex = Math.min(activeTab, tabs.length - 1);
 
   return (
-    <>
-      <TrainCamList trainName={t.id} rollingStockName={t.firstRollingStockName} />
-      <Divider sx={{ my: 1 }} />
-      <Typography variant="h6" component="span">
-        Zugeinstellungen
-      </Typography>
-      <List
-        dense
-        sx={{
-          '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
-        }}
+    <Stack spacing={0}>
+      <Tabs
+        value={safeTabIndex}
+        onChange={(_event, value: number) => setActiveTab(value)}
+        variant="scrollable"
+        allowScrollButtonsMobile
+        sx={{ minHeight: 44 }}
       >
-        {trainElements
-          .filter((e) => e.key !== 'Zugname')
-          .map((el) => (
-            <ListItem key={el.key}>
-              <ListItemIcon>{<el.icon />}</ListItemIcon>
-              <ListItemText primary={el.primary} secondary={el.description}></ListItemText>
-            </ListItem>
-          ))}
-        <ListItem>
-          <ListItemIcon>{<LabelIcon />}</ListItemIcon>
-          <TextField
-            disabled
-            variant="outlined"
-            id="outlined-required"
-            label="Zugnummer"
-            defaultValue={t.name || '-'}
-          />
-        </ListItem>
-      </List>
-      <Box
-        component="form"
-        sx={{
-          '& .MuiTextField-root': { m: 1, width: '25ch' },
-        }}
-        noValidate
-        autoComplete="off"
-      ></Box>
-      {/* <Typography variant="h6" component="span">
-        Wageneinstellungen
-      </Typography>
-      <Divider sx={{ my: 1 }} />
-      <Box
-        component="form"
-        sx={{
-          '& .MuiTextField-root': { m: 1, width: '25ch' },
-        }}
-        noValidate
-        autoComplete="off"
-      >
-        <TextField disabled id="outlined-required" label="Kfz-Kennzeichen" defaultValue="B AD 2002" />
-        <TextField disabled id="outlined-required" label="Wagennummer" defaultValue="2002" />
-      </Box> */}
-    </>
+        {tabs.map((tab) => (
+          <Tab key={tab.key} label={tab.label} />
+        ))}
+      </Tabs>
+      <Divider />
+      {tabs[safeTabIndex]?.key === 'information' && (
+        <TrainInformationView train={t} targetSpeed={trainDynamic?.targetSpeed} />
+      )}
+      {tabs[safeTabIndex]?.key === 'rolling-stock' && <TrainRollingStockView rollingStock={rollingStock} />}
+      {tabs[safeTabIndex]?.key === 'kameras' && (
+        <TrainCamerasView trainName={t.id} rollingStockName={t.firstRollingStockName} />
+      )}
+      {tabs[safeTabIndex]?.key === 'linieninformationen' && (
+        <TrainLineInformationView line={currentLine} destination={currentDestination} />
+      )}
+    </Stack>
   );
 };
 

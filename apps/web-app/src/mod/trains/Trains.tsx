@@ -3,17 +3,18 @@ import setTrackType from './useSetTrackType';
 import useTrackType from './useTrackType';
 import useTrains from './useTrains';
 import { TrackType } from '@ce/web-shared';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState } from 'react';
-const AppCardGrid = lazy(() => import('../../components/AppCardGrid'));
 const AppCardGridContainer = lazy(() => import('../../components/AppCardGridContainer'));
 const AppPageHeadline = lazy(() => import('../../components/AppPageHeadline'));
 const AppPage = lazy(() => import('../../components/AppPage'));
@@ -32,57 +33,84 @@ const Trains = () => {
   const trains = useTrains();
   const trackType = useTrackType();
   const setType = setTrackType();
+  const theme = useTheme();
+  const showNameFilter = useMediaQuery(theme.breakpoints.up('md'));
+  const [nameFilter, setNameFilter] = useState('');
 
-  const [chipData, setChipData] = useState<readonly ChipData[]>([
+  const [chipData] = useState<readonly ChipData[]>([
     { key: TrackType.Rail, label: 'Gleise' },
     { key: TrackType.Tram, label: 'Straßenbahn' },
     { key: TrackType.Road, label: 'Straße' },
     { key: TrackType.Auxiliary, label: 'Sonstige Splines' },
     { key: TrackType.Control, label: 'Steuerstrecken' },
   ]);
+  const selectedTrackLabel = chipData.find((entry) => entry.key === trackType)?.label;
+  const normalizedNameFilter = nameFilter.trim().toLocaleLowerCase();
+  const filteredTrains = trains.filter((train) => train.name.toLocaleLowerCase().includes(normalizedNameFilter));
 
   return (
     <AppPage>
       <AppPageHeadline>Gleissystem</AppPageHeadline>
-      <Paper
+      <Box
         sx={{
           display: 'flex',
-          justifyContent: 'center',
+          alignItems: 'center',
           flexWrap: 'wrap',
           listStyle: 'none',
           p: 0.5,
           m: 0,
         }}
-        component="ul"
       >
-        {chipData.map((data) => (
-          <ListItem key={data.key}>
-            <Chip
-              label={data.label}
-              variant="filled"
-              color={trackType === data.key ? 'primary' : 'default'}
-              onClick={() => setType(data.key)}
+        {showNameFilter && (
+          <Box sx={{ px: 0.5, py: 0.5, mr: 1, minWidth: 240 }}>
+            <TextField
+              size="small"
+              label="Zugname filtern"
+              value={nameFilter}
+              onChange={(event) => setNameFilter(event.target.value)}
+              fullWidth
             />
-          </ListItem>
-        ))}
-      </Paper>
+          </Box>
+        )}
+        <Box
+          component="ul"
+          sx={{
+            display: 'flex',
+            justifyContent: { xs: 'center', md: 'flex-start' },
+            flexWrap: 'wrap',
+            listStyle: 'none',
+            p: 0,
+            m: 0,
+            flexGrow: 1,
+          }}
+        >
+          {chipData.map((data) => (
+            <ListItem key={data.key}>
+              <Chip
+                label={data.label}
+                variant="filled"
+                color={trackType === data.key ? 'primary' : 'default'}
+                onClick={() => setType(data.key)}
+              />
+            </ListItem>
+          ))}
+        </Box>
+      </Box>
       <AppCardGridContainer>
-        <AppPageHeadline gutterTop>
-          Fahrzeuge {chipData.filter((e, i) => e.key == trackType).map((e) => e.label)}
-        </AppPageHeadline>
-        {trains.length === 0 ? (
+        <AppPageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</AppPageHeadline>
+        {filteredTrains.length === 0 ? (
           <Grid size={{ xs: 12 }}>
             <>
               <Typography variant="body2">
-                Es wurden keine Fahrzeuge im Gleissystem{' '}
-                {chipData.filter((e, i) => e.key == trackType).map((e) => e.label)} gefunden. Wähle ein anderes
-                Gleissystem oder füge Fahrzeuge in EEP hinzu.
+                {normalizedNameFilter
+                  ? `Es wurden keine Fahrzeuge mit dem Namen "${nameFilter}" im Gleissystem ${selectedTrackLabel} gefunden.`
+                  : `Es wurden keine Fahrzeuge im Gleissystem ${selectedTrackLabel} gefunden. Wähle ein anderes Gleissystem oder füge Fahrzeuge in EEP hinzu.`}
               </Typography>
             </>
           </Grid>
         ) : (
           <>
-            {trains.map((t) => (
+            {filteredTrains.map((t) => (
               <Grid size={{ xs: 12 }} key={t.id}>
                 <TrainListEntryCard train={t} />
               </Grid>
@@ -118,4 +146,3 @@ const Trains = () => {
 };
 
 export default Trains;
-

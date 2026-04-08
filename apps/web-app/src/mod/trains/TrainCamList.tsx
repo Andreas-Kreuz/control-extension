@@ -3,21 +3,26 @@ import useRollingStockDynamic from './useRollingStockDynamic';
 import useSetRollingStockCam from './useSetRollingStockCam';
 import useSetTrainCam from './useSetTrainCam';
 import CamIcon from '@mui/icons-material/Videocam';
-import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import { useState } from 'react';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import useDebug from '../../socket/useDebug';
 
-interface ChipData {
+interface CameraData {
   key: number;
   label: string;
 }
 
-const ListItem = styled('li')(({ theme }) => ({
-  margin: theme.spacing(0.5),
-}));
+const cameraData: readonly CameraData[] = [
+  { key: 3, label: 'Links oben' },
+  { key: 4, label: 'Rechts oben' },
+  { key: 8, label: 'Führerstand' },
+  { key: -1, label: 'Front' },
+  { key: -2, label: 'Front 2' },
+  { key: 10, label: 'Kabine' },
+];
 
 const TrainCamList = (props: { trainName: string; rollingStockName: string }) => {
   const rollingStock = useRollingStock(props.rollingStockName);
@@ -25,14 +30,6 @@ const TrainCamList = (props: { trainName: string; rollingStockName: string }) =>
   const setRollingStockCam = useSetRollingStockCam();
   const setTrainCam = useSetTrainCam();
   const debug = useDebug();
-  const [chipData, setChipData] = useState<readonly ChipData[]>([
-    { key: 3, label: 'Links oben' },
-    { key: 4, label: 'Rechts oben' },
-    { key: 8, label: 'Führerstand' },
-    { key: -1, label: 'Front' },
-    { key: -2, label: 'Front 2' },
-    { key: 10, label: 'Kabine' },
-  ]);
   void rollingStockDynamic;
 
   const changeCam = (key: number) => {
@@ -51,35 +48,18 @@ const TrainCamList = (props: { trainName: string; rollingStockName: string }) =>
   };
 
   return (
-    <Box
-      sx={{
-        width: 1,
-        display: 'flex',
-        flexWrap: 'wrap',
-        listStyle: 'none',
-        alignContent: 'center',
-        p: 0,
-        m: 0,
-      }}
-      component="ul"
-    >
-      <ListItem key="caption">
-        <Typography variant="caption" color="GrayText">
-          Kameras
-        </Typography>
-      </ListItem>
-      {chipData.map((data) => (
-        <ListItem key={data.key}>
-          <Chip
-            size="small"
-            icon={<CamIcon />}
-            label={data.label}
-            variant="filled"
-            onClick={() => changeCam(data.key)}
-          />
+    <List dense disablePadding>
+      {cameraData.map((data) => (
+        <ListItem key={data.key} disablePadding>
+          <ListItemButton onClick={() => changeCam(data.key)}>
+            <ListItemIcon>
+              <CamIcon />
+            </ListItemIcon>
+            <ListItemText primary={data.label} />
+          </ListItemButton>
         </ListItem>
       ))}
-    </Box>
+    </List>
   );
 };
 
