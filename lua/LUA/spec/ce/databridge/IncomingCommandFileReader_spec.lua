@@ -19,7 +19,7 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         local commands = {}
 
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/commands-to-ce" then
                 return originalIoOpen(name, mode)
@@ -57,7 +57,7 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         local commands = {}
 
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/commands-to-ce" and
                 name ~= "other-dir/ce-version.txt" and

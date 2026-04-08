@@ -18,7 +18,7 @@ insulate("ce.databridge.FunctionNameWriter", function ()
         local writtenContent
 
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/ak-runtime-functions.txt" then
                 return originalIoOpen(name, mode)

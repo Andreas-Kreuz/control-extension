@@ -1,6 +1,7 @@
 return {
   _all = {
     directory = "lua/LUA",
+    helper = "spec/test-bootstrap.lua",
     verbose = true,
     loaders = { 'lua' },
     output = 'utfTerminal'
