@@ -14,7 +14,7 @@ export const initialState: State = {
   trainList: [],
 };
 
-type Action =
+export type Action =
   | { type: 'trains updated'; trains: TrainListDto[] }
   | { type: 'set track type'; trackType: TrackType };
 
@@ -31,9 +31,9 @@ const reducer = (state: State, action: Action) => {
   }
 };
 
-const TrainContext = createContext<State | null>(null);
+export const TrainContext = createContext<State | null>(null);
 
-const TrainDispatchContext = createContext<Dispatch<Action> | null>(null);
+export const TrainDispatchContext = createContext<Dispatch<Action> | null>(null);
 
 export const TrainProvider = (props: { children: ReactNode }) => {
   const debug = useDebug();
@@ -61,4 +61,3 @@ export function useTrain() {
 export function useTrainDispatch() {
   return useContext(TrainDispatchContext);
 }
-
