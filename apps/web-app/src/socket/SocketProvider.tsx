@@ -5,7 +5,21 @@ import { useContext } from 'react';
 import useDebug from './useDebug';
 
 const clientStorageKey = 'ce-client-key';
-const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.protocol + '//' + window.location.hostname + ':3000';
+
+function resolveSocketUrl(): string {
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL;
+  }
+
+  const currentPort = window.location.port;
+  if (currentPort === '3000' || currentPort === '3001') {
+    return window.location.origin;
+  }
+
+  return window.location.protocol + '//' + window.location.hostname + ':3000';
+}
+
+const socketUrl = resolveSocketUrl();
 const socket = io(socketUrl, { autoConnect: false });
 
 const SocketConnectedContext = createContext<boolean>(false);

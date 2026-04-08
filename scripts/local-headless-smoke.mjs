@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
-const baseUrl = 'http://127.0.0.1:3000';
+const baseUrl = 'http://127.0.0.1:3001';
 const probeUrls = [
   `${baseUrl}/server`,
   `${baseUrl}/api/v1/ce.server.ServerStats`,
@@ -54,4 +54,3 @@ try {
 }
 
 terminate(server);
-

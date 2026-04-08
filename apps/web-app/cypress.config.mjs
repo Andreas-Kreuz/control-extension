@@ -23,7 +23,7 @@ async function waitForFileMissing(fileName, timeoutMs = 5000) {
 export default defineConfig({
   projectId: 'g5rj4e',
   e2e: {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:3001',
     testIsolation: false,
     setupNodeEvents(on) {
       on('task', {

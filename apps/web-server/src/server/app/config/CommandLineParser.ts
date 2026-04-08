@@ -5,6 +5,18 @@ export default class CommandLineParser {
   parseOptions(): commandLineArgs.CommandLineOptions {
     const optionDefinitions = [
       {
+        name: 'port',
+        alias: 'p',
+        type: Number,
+        typeLabel: '{underline <port>}',
+        description: 'The HTTP and Socket.IO port to listen on.',
+      },
+      {
+        name: 'config-dir',
+        typeLabel: '{underline <dir>}',
+        description: 'The directory for persisted server settings.',
+      },
+      {
         name: 'exchange-dir',
         alias: 'd',
         typeLabel: '{underline <dir>}',
