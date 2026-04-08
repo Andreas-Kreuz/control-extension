@@ -12,6 +12,7 @@ local HubCeTypes = {
     WaitingOnSignal = "ce.hub.WaitingOnSignal",
     Switch = "ce.hub.Switch",
     Structure = "ce.hub.Structure",
+    Scenario = "ce.hub.Scenario",
     Time = "ce.hub.Time",
     Train = "ce.hub.Train",
     RollingStock = "ce.hub.RollingStock",

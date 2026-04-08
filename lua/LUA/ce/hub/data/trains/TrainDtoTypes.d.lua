@@ -7,9 +7,6 @@
 ---@field route string
 ---@field rollingStockCount number
 ---@field length number
----@field line string|nil
----@field destination string|nil
----@field direction string|nil
 ---@field trackType string
 ---@field movesForward boolean
 ---@field speed number -- ondemand: placeholder 0 when not subscribed

@@ -30,6 +30,7 @@ function HubBridgeConnector.registerStatePublishers()
     registerStatePublisher(require("ce.hub.data.signals.SignalStatePublisher"), { "signals", "waitingOnSignals" })
     registerStatePublisher(require("ce.hub.data.switches.SwitchStatePublisher"), { "switches" })
     registerStatePublisher(require("ce.hub.data.structures.StructureStatePublisher"), { "structures" })
+    registerStatePublisher(require("ce.hub.data.scenario.ScenarioStatePublisher"), { "scenario" })
     registerStatePublisher(require("ce.hub.data.time.TimeStatePublisher"), { "time" })
     registerStatePublisher(require("ce.hub.data.weather.WeatherStatePublisher"), { "weather" })
     registerStatePublisher(require("ce.hub.data.tracks.TracksStatePublisher"), {

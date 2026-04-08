@@ -6,9 +6,4 @@ export interface VersionLuaDto {
   eepVersion: string;
   luaVersion: string;
   singleVersion: string;
-  eepLanguage?: string;
-  layoutVersion?: number;
-  layoutLanguage?: string;
-  layoutName?: string;
-  layoutPath?: string;
 }

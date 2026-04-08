@@ -22,13 +22,6 @@ local function toFullDto(train, isSelected)
         dto.rollingStockCount = train:getRollingStockCount()
     end
     if SyncPolicy.shouldPublishField(fieldPolicies, "length", isSelected) then dto.length = train:getLength() end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "line", isSelected) then dto.line = train:getLine() end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "destination", isSelected) then
-        dto.destination = train:getDestination()
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "direction", isSelected) then
-        dto.direction = train:getDirection()
-    end
     if SyncPolicy.shouldPublishField(fieldPolicies, "trackType", isSelected) then
         dto.trackType = train:getTrackType()
     end
@@ -88,9 +81,6 @@ local fieldGetters = {
     route = function (t) return t:getRoute() end,
     rollingStockCount = function (t) return t:getRollingStockCount() end,
     length = function (t) return t:getLength() end,
-    line = function (t) return t:getLine() end,
-    destination = function (t) return t:getDestination() end,
-    direction = function (t) return t:getDirection() end,
     trackType = function (t) return t:getTrackType() end,
     movesForward = function (t) return t:getMovesForward() end,
     speed = function (t) return t:getSpeed() end,

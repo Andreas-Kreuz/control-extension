@@ -1,5 +1,6 @@
 local LineSegment = require("ce.mods.transit.LineSegment")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.Line ...") end
 
 local Line = {}
@@ -39,13 +40,14 @@ end
 
 local function checkLine(train)
     if train then
-        local lineName = train:getLine()
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        local lineName = transitTrain:getLine()
         local routeName = train:getRoute()
         if not lineName then
             for _, line in pairs(lines) do
                 for _, segment in pairs(line.lineSegments) do
                     if segment.routeName == routeName then
-                        train:changeDestination(segment.destination, line.nr)
+                        transitTrain:changeDestination(segment.destination, line.nr)
                     end
                 end
             end
@@ -60,9 +62,10 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
     assert(type(timeInMinutes) == "number", "Need 'timeInMinutes' as number")
 
     local train = TrainRegistry.forName(trainName)
-    local lineName = train:getLine()
     local routeName = train:getRoute()
     checkLine(train)
+    local transitTrain = TransitTrainRegistry.forTrain(train)
+    local lineName = transitTrain:getLine()
     assert(type(routeName) == "string", "Need 'routeName' as string")
 
     if lineName then
@@ -88,13 +91,14 @@ function Line.trainDeparted(trainName, station)
     assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
 
     local train = TrainRegistry.forName(trainName)
-    local lineName = train:getLine()
     local routeName = train:getRoute()
     checkLine(train)
+    local transitTrain = TransitTrainRegistry.forTrain(train)
+    local lineName = transitTrain:getLine()
     assert(type(routeName) == "string", "Need 'routeName' as string")
 
     if lineName then
-        station:trainLeft(trainName, train:getDestination(), lineName)
+        station:trainLeft(trainName, transitTrain:getDestination(), lineName)
         local line = lines[lineName]
         if line then
             local lineSegment = line.lineSegments[routeName]

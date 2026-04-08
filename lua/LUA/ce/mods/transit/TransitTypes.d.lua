@@ -6,6 +6,30 @@
 ---@field saveSettings fun():nil
 ---@field setShowDepartureTippText fun(value: boolean):nil
 
+---@class TransitTrain
+---@field id string
+---@field type string
+---@field hubTrain Train
+---@field line string|nil
+---@field destination string|nil
+---@field direction string|nil
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
+---@field new fun(self: TransitTrain, hubTrain: Train):TransitTrain
+---@field setHubTrain fun(self: TransitTrain, hubTrain: Train):nil
+---@field setLine fun(self: TransitTrain, line: string|number):nil
+---@field getLine fun(self: TransitTrain):string|nil
+---@field updateLine fun(self: TransitTrain, line: string|number|nil):nil
+---@field setDestination fun(self: TransitTrain, destination: string):nil
+---@field getDestination fun(self: TransitTrain):string|nil
+---@field updateDestination fun(self: TransitTrain, destination: string|nil):nil
+---@field setDirection fun(self: TransitTrain, direction: string):nil
+---@field getDirection fun(self: TransitTrain):string|nil
+---@field updateDirection fun(self: TransitTrain, direction: string|nil):nil
+---@field changeDestination fun(self: TransitTrain, destination: string, line: string|number):nil
+---@field resetDirty fun(self: TransitTrain):nil
+---@field hasDirtyFields fun(self: TransitTrain):boolean
+
 ---@class Line
 ---@field type string
 ---@field trafficType string

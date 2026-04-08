@@ -97,6 +97,13 @@ function HubOptionDefaults.create()
                     fire = "always"
                 }
             },
+            scenario = {
+                ceType = HubCeTypes.Scenario,
+                discoveryAndUpdate = true,
+                publish = true,
+                fieldUpdates = {},
+                fieldPublish = {}
+            },
             time = {
                 ceType = HubCeTypes.Time,
                 discoveryAndUpdate = true,
@@ -169,9 +176,6 @@ function HubOptionDefaults.create()
                     route = "always",
                     rollingStockCount = "always",
                     length = "always",
-                    line = "always",
-                    destination = "always",
-                    direction = "always",
                     trackType = "always",
                     movesForward = "always",
                     speed = "always",
@@ -186,9 +190,6 @@ function HubOptionDefaults.create()
                     route = "always",
                     rollingStockCount = "always",
                     length = "always",
-                    line = "always",
-                    destination = "always",
-                    direction = "always",
                     trackType = "always",
                     movesForward = "always",
                     speed = "onselection",

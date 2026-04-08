@@ -28,6 +28,12 @@
 ---@field value boolean
 ---@field eepFunction string
 
+---@class TransitTrainDto
+---@field id string
+---@field line string|nil
+---@field destination string|nil
+---@field direction string|nil
+
 ---@class TransitDtoFactory
 ---@field createStationDto fun(station: table):string,string,string|number,TransitStationDto
 ---@field createStationDtoList fun(stations: table):string,string,table
@@ -37,3 +43,4 @@
 ---@field createModuleSettingDtoList fun(settings: table):string,string,table
 ---@field createLineNameDto fun(line: Line|table):string,string,string|number,TransitLineDto
 ---@field createLineNameDtoList fun(lines: table):string,string,table
+---@field createTransitTrainDto fun(transitTrain: TransitTrain|table):string,string,string|number,TransitTrainDto

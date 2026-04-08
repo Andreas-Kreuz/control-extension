@@ -15,12 +15,7 @@ function VersionDtoFactory.createVersionDto(versionInfo)
         name = ENTRY_ID,
         eepVersion = versionInfo.eepVersion,
         luaVersion = versionInfo.luaVersion,
-        singleVersion = versionInfo.singleVersion,
-        eepLanguage = versionInfo.eepLanguage,
-        layoutVersion = versionInfo.layoutVersion,
-        layoutLanguage = versionInfo.layoutLanguage,
-        layoutName = versionInfo.layoutName,
-        layoutPath = versionInfo.layoutPath
+        singleVersion = versionInfo.singleVersion
     }
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end

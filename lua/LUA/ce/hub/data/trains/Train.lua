@@ -5,7 +5,6 @@ local TableUtils = require("ce.hub.util.TableUtils")
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local StorageUtility = require("ce.hub.util.StorageUtility")
-local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
 local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
 local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
 
@@ -129,26 +128,6 @@ function Train:getValue(key)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(key) == "string", "Need 'key' as string")
     return self.values[key]
-end
-
----Changes line and destination of the train
----@param destination string
----@param line string
-function Train:changeDestination(destination, line)
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    assert(type(destination) == "string", "Need 'destination' as string")
-    assert(type(line) == "string", "Need 'line' as string")
-
-    self:setLine(line)
-    self:setDestination(destination)
-
-    local carCount = EEPGetRollingstockItemsCount(self.name)
-    for i = 0, carCount - 1 do
-        local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        local model = RollingStockModels.modelFor(rollingStockName)
-        model:setLine(rollingStockName, line)
-        model:setDestination(rollingStockName, destination)
-    end
 end
 
 --- Changes the trains route
@@ -346,73 +325,6 @@ end
 
 function Train:getTrackType() return self.trackType end
 
-function Train:setDirection(direction)
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    assert(type(direction) == "string", "Need 'direction' as string")
-    local oldDirection = self:getDirection()
-    self:setValue(TagKeys.Train.direction, direction)
-    if oldDirection ~= direction then
-        markDirty(self, "direction")
-    end
-end
-
-function Train:getDirection() return self:getValue(TagKeys.Train.direction) end
-
-function Train:updateDirection(direction)
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    assert(type(direction) == "string", "Need 'direction' as string")
-    local oldDirection = self:getDirection()
-    self.values[TagKeys.Train.direction] = direction
-    if oldDirection ~= direction then markDirty(self, "direction") end
-end
-
-function Train:setDestination(destination)
-    assert(type(destination) == "string", "Need 'destination' as string")
-    local oldDestination = self:getDestination()
-    self:setValue(TagKeys.Train.destination, destination)
-    if oldDestination ~= destination then
-        markDirty(self, "destination")
-    end
-end
-
-function Train:getDestination()
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    return self:getValue(TagKeys.Train.destination)
-end
-
-function Train:updateDestination(destination)
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    assert(type(destination) == "string", "Need 'destination' as string")
-    local oldDestination = self:getDestination()
-    self.values[TagKeys.Train.destination] = destination
-    if oldDestination ~= destination then markDirty(self, "destination") end
-end
-
-function Train:setLine(line)
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    assert("string" == type(line) or "number" == type(line), "Provide 'line' as 'string' or 'number'")
-    line = tostring(line)
-    local oldLine = self:getLine()
-    self:setValue(TagKeys.Train.line, line)
-    if oldLine ~= line then
-        markDirty(self, "line")
-    end
-end
-
-function Train:getLine()
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    return self:getValue(TagKeys.Train.line)
-end
-
-function Train:updateLine(line)
-    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
-    assert("string" == type(line) or "number" == type(line), "Provide 'line' as 'string' or 'number'")
-    line = tostring(line)
-    local oldLine = self:getLine()
-    self.values[TagKeys.Train.line] = line
-    if oldLine ~= line then markDirty(self, "line") end
-end
-
 function Train:openDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
@@ -445,9 +357,6 @@ function Train:toJsonStatic()
         route = self:getRoute(),
         rollingStockCount = self:getRollingStockCount(),
         length = self:getLength(),
-        line = self:getLine(),
-        destination = self:getDestination(),
-        direction = self:getDirection(),
         trackType = self:getTrackType(),
         movesForward = self:getMovesForward(),
         speed = self:getSpeed(),

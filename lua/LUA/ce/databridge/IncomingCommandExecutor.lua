@@ -19,6 +19,12 @@ local IncomingCommandExecutor = {}
 --- Parameters of these functions are separated by | in the calls
 local allowedCommands = {}
 
+local function registerIfFunction(fName, f)
+    if type(f) == "function" then
+        IncomingCommandExecutor.registerAllowedCommand(fName, f)
+    end
+end
+
 --- Adding an accepted function
 ---NOTE: acceptedFunctions are typically added via the Modules BridgeConnector
 ---@param fName string @using the name of the function as called from EEP-Web
@@ -31,6 +37,10 @@ end
 
 -- Accept EEPPause function
 IncomingCommandExecutor.registerAllowedCommand("EEPPause", EEPPause)
+registerIfFunction("EEPRollingstockSetActive", EEPRollingstockSetActive)
+registerIfFunction("EEPActivateCtrlDesk", EEPActivateCtrlDesk)
+registerIfFunction("EEPShowInfoTextBottom", EEPShowInfoTextBottom)
+registerIfFunction("EEPShowInfoTextTop", EEPShowInfoTextTop)
 
 -- Accept all EEP*Set functions
 for name, value in pairs(_G) do

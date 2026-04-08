@@ -32,6 +32,7 @@ Wichtig:
 | `runtime`                 | `RuntimeUpdater`, `RuntimePublisher`, `RuntimeDtoFactory`                                                        | `ListChanged` für `ce.hub.Runtime`                               |
 | `framedata`               | `FrameDataUpdater`, `FrameDataPublisher`, `FrameDataDtoFactory`                                                  | `ListChanged` für `ce.hub.FrameData`                             |
 | `version`                 | `VersionUpdater`, `VersionPublisher`, `VersionDtoFactory`                                                        | `ListChanged` für `ce.hub.EepVersion`                            |
+| `scenario`                | `ScenarioUpdater`, `ScenarioPublisher`, `ScenarioDtoFactory`                                                     | `ListChanged` für `ce.hub.Scenario`                              |
 | `signals`                 | `SignalDiscovery`, `SignalUpdater`, `SignalPublisher`, `SignalDtoFactory`                                        | `ListChanged` für `ce.hub.Signal` und `ce.hub.WaitingOnSignal`   |
 | `switches`                | `SwitchDiscovery`, `SwitchUpdater`, `SwitchPublisher`, `SwitchDtoFactory`                                        | `ListChanged` für `ce.hub.Switch`                                |
 | `time`                    | `TimeUpdater`, `TimePublisher`, `TimeDtoFactory`                                                                 | `ListChanged` für `ce.hub.Time`                                  |
@@ -55,6 +56,7 @@ Wichtig:
 | Signale                             | `ce.hub.Signal`                         | `id`      |
 | Wartende Fahrzeuge an Signalen      | `ce.hub.WaitingOnSignal`                | `id`      |
 | Weichen                             | `ce.hub.Switch`                         | `id`      |
+| Szenario                            | `ce.hub.Scenario`                       | `id`      |
 | Zeit                                | `ce.hub.Time`                           | `id`      |
 | Wetter                              | `ce.hub.Weather`                        | `id`      |
 | Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
@@ -105,11 +107,23 @@ Elementtyp: Versionsinfo
 | `eepVersion`     | `string`          | z. B. `16.3`       | EEP-Version aus `EEPVer`; im Updater bewusst als String formatiert   |
 | `luaVersion`     | `string`          | Lua-Versionsstring | `_VERSION` des eingebetteten Lua                                     |
 | `singleVersion`  | `string`          | Versionsstring     | Programmversion des Web-/Single-Prozesses                            |
-| `eepLanguage`    | `string` \| `nil` | Sprachkennung      | Sprache der laufenden EEP-Instanz aus `EEPLng`                       |
-| `layoutVersion`  | `number` \| `nil` | Versionsnummer     | Versionsnummer der geladenen Anlage aus `EEPGetAnlVer()`             |
-| `layoutLanguage` | `string` \| `nil` | Sprachkennung      | Sprache der geladenen Anlage aus `EEPGetAnlLng()`                    |
-| `layoutName`     | `string` \| `nil` | freier Text        | Name der geladenen Anlage aus `EEPGetAnlName()`                      |
-| `layoutPath`     | `string` \| `nil` | Pfad               | Dateipfad der geladenen Anlage aus `EEPGetAnlPath()`                 |
+
+### `ce.hub.Scenario`
+
+Elementtyp: Szenarioinfo
+
+| Name                 | Typ               | Wertebereich     | Beschreibung                                                  |
+| -------------------- | ----------------- | ---------------- | ------------------------------------------------------------- |
+| `id`                 | `string`          | fest `scenario`  | technischer Schlüssel                                         |
+| `name`               | `string`          | fest `scenario`  | Anzeigename                                                   |
+| `scenarioName`       | `string` \| `nil` | freier Text      | Name der geladenen Anlage aus `EEPGetAnlName()`               |
+| `scenarioPath`       | `string` \| `nil` | Pfad             | Dateipfad der geladenen Anlage aus `EEPGetAnlPath()`          |
+| `savedWithEep`       | `number` \| `nil` | Versionsnummer   | Versionsnummer der geladenen Anlage aus `EEPGetAnlVer()`      |
+| `scenarioLanguage`   | `string` \| `nil` | Sprachkennung    | Sprache der geladenen Anlage aus `EEPGetAnlLng()`             |
+| `eepLanguage`        | `string` \| `nil` | Sprachkennung    | Sprache der laufenden EEP-Instanz aus `EEPLng`                |
+| `activeTrain`        | `string` \| `nil` | Zugname          | aktiver Zug aus `EEPGetTrainActive()`                         |
+| `activeRollingStock` | `string` \| `nil` | Fahrzeugname     | aktives Rollmaterial aus `EEPRollingstockGetActive()`         |
+| `timeLapse`          | `number` \| `nil` | Zeitraffer       | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()`            |
 
 ### `ce.hub.Runtime`
 
@@ -189,7 +203,6 @@ Elementtyp: EEP-Zeit
 | `id`           | `string`          | fest `times`    | technischer Schlüssel                              |
 | `name`         | `string`          | fest `times`    | Anzeigename                                        |
 | `timeComplete` | `integer`         | `0` bis `86399` | Sekunden seit Mitternacht aus `EEPTime`            |
-| `timeLapse`    | `number` \| `nil` | Zeitraffer      | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()` |
 | `timeH`        | `integer`         | `0` bis `23`    | Stundenanteil aus `EEPTimeH`                       |
 | `timeM`        | `integer`         | `0` bis `59`    | Minutenanteil aus `EEPTimeM`                       |
 | `timeS`        | `integer`         | `0` bis `59`    | Sekundenanteil aus `EEPTimeS`                      |
@@ -197,7 +210,6 @@ Elementtyp: EEP-Zeit
 Abgeleitet aus:
 
 - `EEPTime`
-- `EEPGetTimeLapse()`
 - `EEPTimeH`
 - `EEPTimeM`
 - `EEPTimeS`
@@ -606,6 +618,7 @@ Die `*StatePublisher.lua`-Dateien sind dabei nur noch dünne Adapter auf die eig
 | `RuntimeStatePublisher.syncState()`          | `{}`                       | Nutzdaten nur im Event                  |
 | `FrameDataStatePublisher.syncState()`        | `{}`                       | Nutzdaten nur im Event                  |
 | `VersionStatePublisher.syncState()`          | `{}`                       | Nutzdaten nur im Event                  |
+| `ScenarioStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
 | `SignalStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
 | `SwitchStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
 | `TimeStatePublisher.syncState()`             | `{}`                       | Nutzdaten nur im Event                  |

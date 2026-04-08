@@ -3,12 +3,14 @@ insulate("ce.hub.DtoFactories", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.modules.ModuleDtoFactory")
+        clearModule("ce.hub.data.scenario.ScenarioDtoFactory")
         clearModule("ce.hub.data.version.VersionDtoFactory")
         clearModule("ce.hub.data.runtime.RuntimeDtoFactory")
     end)
 
     it("provides metadata and detached DTOs for core ceTypes", function ()
         local ModuleDtoFactory = require("ce.hub.data.modules.ModuleDtoFactory")
+        local ScenarioDtoFactory = require("ce.hub.data.scenario.ScenarioDtoFactory")
         local VersionDtoFactory = require("ce.hub.data.version.VersionDtoFactory")
         local RuntimeDtoFactory = require("ce.hub.data.runtime.RuntimeDtoFactory")
 
@@ -20,6 +22,25 @@ insulate("ce.hub.DtoFactories", function ()
         assert.equals("id", keyId)
         assert.equals("m-1", key)
         assert.same({ ceType = "ce.hub.Module", id = "m-1", name = "mod.name", enabled = true }, moduleDto)
+
+        local scenarioRoom, scenarioKeyId, scenarioDtos =
+            ScenarioDtoFactory.createScenarioDtoList({
+                id = "scenario",
+                name = "scenario",
+                scenarioName = "Sample",
+                timeLapse = 4
+            })
+        assert.equals("ce.hub.Scenario", scenarioRoom)
+        assert.equals("id", scenarioKeyId)
+        assert.same({
+                        scenario = {
+                            ceType = "ce.hub.Scenario",
+                            id = "scenario",
+                            name = "scenario",
+                            scenarioName = "Sample",
+                            timeLapse = 4
+                        }
+                    }, scenarioDtos)
 
         local versionRoom, versionKeyId, versionDtos =
             VersionDtoFactory.createVersionDtoList({

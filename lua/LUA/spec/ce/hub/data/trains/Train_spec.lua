@@ -2,14 +2,13 @@ describe("ce.hub.data.trains.Train", function ()
     local EepSimulator = require("ce.hub.eep.EepSimulator")
     EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
 
-    insulate("new Train is empty", function ()
+    insulate("new Train keeps generic tag values", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
         local tram = TrainRegistry.forName("#EepTrain1");
 
         it("Train has right name", function () assert.equals("#EepTrain1", tram.name) end)
-        it("Dest is nil", function () assert.is_nil(tram:getDestination()) end)
-        it("Line is nil", function () assert.is_nil(tram:getLine()) end)
+        it("Values table exists", function () assert.same({}, tram.values) end)
     end)
 end)
 
@@ -17,40 +16,12 @@ describe("ce.hub.data.trains.Train", function ()
     local EepSimulator = require("ce.hub.eep.EepSimulator")
     EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
 
-    insulate("Destination is set", function ()
+    insulate("Generic train tag values can be set", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
         local tram = TrainRegistry.forName("#EepTrain1");
-        tram:setDestination("DEST")
+        tram:setValue("x", "DEST")
 
-        it("Dest is nil", function () assert.equals("DEST", tram:getDestination()) end)
-    end)
-end)
-
-describe("ce.hub.data.trains.Train", function ()
-    local EepSimulator = require("ce.hub.eep.EepSimulator")
-    EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
-
-    insulate("Line is set", function ()
-        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-
-        local tram = TrainRegistry.forName("#EepTrain1");
-        tram:setLine("Line")
-
-        it("Line is Set", function () assert.equals("Line", tram:getLine()) end)
-    end)
-end)
-
-describe("ce.hub.data.trains.Train", function ()
-    local EepSimulator = require("ce.hub.eep.EepSimulator")
-    EepSimulator.simulateAddTrain("#EepTrain1", "RollingStock 1", "RollingStock 2")
-
-    insulate("Line is string", function ()
-        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-
-        local tram = TrainRegistry.forName("#EepTrain1");
-        tram:setLine(12)
-
-        it("Line is String", function () assert.equals("12", tram:getLine()) end)
+        it("Stored generic value is readable", function () assert.equals("DEST", tram:getValue("x")) end)
     end)
 end)

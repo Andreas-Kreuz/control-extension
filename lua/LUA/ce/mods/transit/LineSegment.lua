@@ -1,5 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.LineSegment ...") end
 
+local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+
 local LineSegment = {}
 LineSegment.debug = CeDebugLoad or false
 
@@ -172,14 +174,15 @@ function LineSegment:trainDeparted(train, currentStation)
     assert(type(currentStation) == "table", "Need 'currentStation' as table")
     assert(currentStation.type == "RoadStation", "Provide 'currentStation' as 'RoadStation'")
 
-    local oldDestination = train:getDestination()
-    local oldLine = train:getLine()
+    local transitTrain = TransitTrainRegistry.forTrain(train)
+    local oldDestination = transitTrain:getDestination()
+    local oldLine = transitTrain:getLine()
     local infoList = self:nextStationList(train:getRoute(), nil, currentStation)
 
     if currentStation == self:getLastStation() and train:getRoute() == self.routeName and self.nextLineSegmentInfo then
         local nextSegment = self.nextLineSegmentInfo.followingSegment
         train:setRoute(nextSegment.routeName)
-        train:changeDestination(nextSegment.destination, nextSegment.line.nr)
+        transitTrain:changeDestination(nextSegment.destination, nextSegment.line.nr)
     end
 
     for _, info in ipairs(infoList) do

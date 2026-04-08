@@ -13,7 +13,6 @@ local function toTimeDto(timeData)
         id = timeData.id,
         name = timeData.name,
         timeComplete = timeData.timeComplete,
-        timeLapse = timeData.timeLapse,
         timeH = timeData.timeH,
         timeM = timeData.timeM,
         timeS = timeData.timeS

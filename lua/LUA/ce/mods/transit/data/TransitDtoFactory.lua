@@ -63,6 +63,16 @@ local function toTransitModuleSettingDto(setting)
     }
 end
 
+local function toTransitTrainDto(transitTrain)
+    return {
+        ceType = TransitCeTypes.TransitTrain,
+        id = transitTrain.id,
+        line = transitTrain.getLine and transitTrain:getLine() or transitTrain.line,
+        destination = transitTrain.getDestination and transitTrain:getDestination() or transitTrain.destination,
+        direction = transitTrain.getDirection and transitTrain:getDirection() or transitTrain.direction
+    }
+end
+
 local function createDto(ceType, keyId, value, toDto)
     local dto = toDto(value, ceType)
     return ceType, keyId, dto[keyId], dto
@@ -108,6 +118,10 @@ end
 
 function TransitDtoFactory.createLineNameDtoList(lines)
     return createDtoList(TransitCeTypes.LineName, "id", lines, TransitDtoFactory.createLineNameDto)
+end
+
+function TransitDtoFactory.createTransitTrainDto(transitTrain)
+    return createDto(TransitCeTypes.TransitTrain, "id", transitTrain, toTransitTrainDto)
 end
 
 return TransitDtoFactory

@@ -6,9 +6,6 @@ export interface TrainLuaDto {
   route?: string;
   rollingStockCount?: number;
   length?: number;
-  line?: string;
-  destination?: string;
-  direction?: string;
   trackType?: string;
   movesForward?: boolean;
   // dynamic fields (optional for patches)

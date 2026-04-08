@@ -12,7 +12,6 @@ function TimeUpdater.runUpdate()
             id = "times",
             name = "times",
             timeComplete = EEPTime,
-            timeLapse = EEPGetTimeLapse and EEPGetTimeLapse() or nil,
             timeH = EEPTimeH,
             timeM = EEPTimeM,
             timeS = EEPTimeS
