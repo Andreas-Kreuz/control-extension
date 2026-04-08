@@ -3,7 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioDataCol
 local ScenarioDataCollector = {}
 
 local function callOptional(fn, ...)
-    if type(fn) ~= "function" then return nil end
+    if type(fn) ~= "function" then return "-" end
 
     local ok, value = pcall(fn, ...)
     if not ok then return nil end
