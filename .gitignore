@@ -46,6 +46,7 @@ __pycache__
 /apps/web-app/cypress/screenshots
 /apps/web-app/cypress/videos
 /apps/web-app/dist
+/apps/web-app/storybook-static
 
 # @ak/web-server
 /apps/web-server/target
