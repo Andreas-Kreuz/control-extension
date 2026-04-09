@@ -62,6 +62,7 @@ local fieldGetters = {
     rotX = function (s) return s:getRotX() end,
     rotY = function (s) return s:getRotY() end,
     rotZ = function (s) return s:getRotZ() end,
+    xmlModel = function (s) return s:getXmlModel() end,
 }
 
 local function toFullDto(stock, isSelected)

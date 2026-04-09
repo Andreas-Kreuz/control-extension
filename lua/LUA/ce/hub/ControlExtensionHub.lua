@@ -36,7 +36,11 @@ function ControlExtensionHub.setOptions(options)
         ControlExtensionHub.setPauseEepDuringInitialization(options.pauseEepDuringInitialization)
     end
 
-    require("ce.hub.CeHubModule").setOptions(options)
+    local CeHubModule = require("ce.hub.CeHubModule")
+    if options.anl3path ~= nil then
+        CeHubModule.setAnl3Path(options.anl3path)
+    end
+    CeHubModule.setOptions(options)
     return options
 end
 

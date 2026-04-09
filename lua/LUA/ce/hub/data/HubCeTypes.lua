@@ -20,7 +20,8 @@ local HubCeTypes = {
     ControlTrack = "ce.hub.ControlTrack",
     RoadTrack = "ce.hub.RoadTrack",
     RailTrack = "ce.hub.RailTrack",
-    TramTrack = "ce.hub.TramTrack"
+    TramTrack = "ce.hub.TramTrack",
+    Contact = "ce.hub.Contact"
 }
 
 return HubCeTypes

@@ -44,6 +44,7 @@ function HubBridgeConnector.registerStatePublishers()
     })
     registerStatePublisher(require("ce.hub.data.trains.TrainStatePublisher"), { "trains" })
     registerStatePublisher(require("ce.hub.data.rollingstock.RollingStockStatePublisher"), { "rollingStocks" })
+    registerStatePublisher(require("ce.hub.data.contacts.ContactStatePublisher"), { "contacts" })
 end
 
 function HubBridgeConnector.registerFunctions()

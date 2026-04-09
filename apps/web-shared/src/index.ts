@@ -38,6 +38,7 @@ export type { SignalDto } from './dtos/server/signals/SignalDto';
 export type { WaitingOnSignalDto } from './dtos/server/signals/WaitingOnSignalDto';
 export type { SwitchDto } from './dtos/server/switches/SwitchDto';
 export type { StructureDto } from './dtos/server/structures/StructureDto';
+export type { ContactDto } from './dtos/server/contacts/ContactDto';
 export type { TrackDto } from './dtos/server/tracks/TrackDto';
 export type { RollingStockTexturesDto } from './dtos/server/trains/RollingStockTexturesDto';
 export type { RollingStockRotationDto } from './dtos/server/trains/RollingStockRotationDto';

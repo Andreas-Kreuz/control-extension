@@ -41,6 +41,8 @@ local function collectTextureTexts(rollingStockName)
     return surfaceTexts
 end
 
+---@class RollingStock
+---@field xmlModel string|nil
 local RollingStock = {}
 
 -- Field update policies (see RollingStockStaticDtoTypes.d.lua / RollingStockDynamicDtoTypes.d.lua):
@@ -118,6 +120,7 @@ function RollingStock:new(o)
     o.rotX = rotationOk and round2(rotX) or 0
     o.rotY = rotationOk and round2(rotY) or 0
     o.rotZ = rotationOk and round2(rotZ) or 0
+    o.xmlModel = nil
     o.dirtyFields = {}
     o.needsFullSend = true
     return o
@@ -572,6 +575,16 @@ end
 function RollingStock:getMileage()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return self.mileage
+end
+
+function RollingStock:getXmlModel()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.xmlModel
+end
+
+function RollingStock:setXmlModel(model)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    self.xmlModel = model
 end
 
 function RollingStock:resetDirty()

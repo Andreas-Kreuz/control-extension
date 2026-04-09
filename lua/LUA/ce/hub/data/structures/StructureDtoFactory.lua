@@ -46,6 +46,9 @@ local function toFullDto(structure, isSelected)
     elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "fire", isSelected) then
         dto.fire = placeHolders.fire
     end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "gsbname", isSelected) then
+        dto.gsbname = structure:getGsbname()
+    end
     return dto
 end
 

@@ -14,4 +14,5 @@ export interface StructureLuaDto {
   light: boolean;
   smoke: boolean;
   fire: boolean;
+  gsbname?: string;
 }

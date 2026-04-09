@@ -31,4 +31,5 @@ export interface RollingStockDto {
   rotZ: number;
   nr?: string;
   trackType?: string;
+  xmlModel?: string;
 }

@@ -34,4 +34,6 @@ export interface RollingStockLuaDto {
   rotX?: number;
   rotY?: number;
   rotZ?: number;
+  // xml
+  xmlModel?: string;
 }

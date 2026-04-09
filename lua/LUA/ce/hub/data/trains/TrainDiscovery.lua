@@ -183,6 +183,30 @@ local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks)
     return allKnownTrains
 end
 
+function TrainDiscovery.initFromAnl3(tableOfAnl3)
+    if not tableOfAnl3 then return end
+    for _, train in ipairs(tableOfAnl3.trains) do
+        if train.name then
+            local registeredTrain = TrainRegistry.forName(train.name)
+            syncRollingStockComposition(registeredTrain)
+
+            local firstRollingStock = TrainRegistry.rollingStockNameInTrain(registeredTrain.name, 0)
+            if firstRollingStock and EEPRollingstockGetTrack then
+                local ok, _, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
+                if ok then
+                    registeredTrain:setTrackType(trackTypeFromSystemId(trackTypeId))
+                end
+            end
+        end
+    end
+    for _, rs in ipairs(tableOfAnl3.rollingStocks) do
+        if rs.name then
+            local rollingStock = RollingStockRegistry.forName(rs.name)
+            rollingStock:setXmlModel(rs.model)
+        end
+    end
+end
+
 function TrainDiscovery.runInitialDiscovery()
     if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("trains",
                                                              "rollingStocks",

@@ -94,7 +94,8 @@ function HubOptionDefaults.create()
                     tag = "always",
                     light = "always",
                     smoke = "always",
-                    fire = "always"
+                    fire = "always",
+                    gsbname = "onselection"
                 }
             },
             scenario = {
@@ -156,6 +157,16 @@ function HubOptionDefaults.create()
                 fieldPublish = {
                     reserved = "always",
                     reservedByTrainName = "always"
+                }
+            },
+            contacts = {
+                ceType = HubCeTypes.Contact,
+                discoveryAndUpdate = true,
+                publish = true,
+                fieldUpdates = {},
+                fieldPublish = {
+                    luaFn = "always",
+                    tipTxt = "onselection"
                 }
             },
             tramTracks = {
@@ -263,7 +274,8 @@ function HubOptionDefaults.create()
                     active = "onselection",
                     rotX = "onselection",
                     rotY = "onselection",
-                    rotZ = "onselection"
+                    rotZ = "onselection",
+                    xmlModel = "onselection"
                 }
             }
         }

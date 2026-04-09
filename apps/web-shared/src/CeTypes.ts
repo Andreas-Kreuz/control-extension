@@ -24,6 +24,7 @@ export const CeTypes = {
   HubRoadTrack: 'ce.hub.RoadTrack',
   HubRailTrack: 'ce.hub.RailTrack',
   HubTramTrack: 'ce.hub.TramTrack',
+  HubContact: 'ce.hub.Contact',
   RoadIntersection: 'ce.mods.road.Intersection',
   RoadIntersectionLane: 'ce.mods.road.IntersectionLane',
   RoadIntersectionSwitching: 'ce.mods.road.IntersectionSwitching',

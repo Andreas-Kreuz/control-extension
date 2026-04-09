@@ -2,7 +2,7 @@ import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainLuaDto } from '../../ce/dto/trains/TrainLuaDto';
 import { TransitTrainLuaDto } from '../../ce/dto/transit/TransitTrainLuaDto';
 import { RollingStockSelector } from './RollingStockSelector';
-import { calcTrainType, CeTypes, TrainDto, TrainListDto, TrainType } from '@ce/web-shared';
+import { calcTrainType, CeTypes, TrackType, TrainDto, TrainListDto, TrainType } from '@ce/web-shared';
 
 export class TrainSelector {
   private lastState: Record<string, unknown> | undefined;
@@ -44,6 +44,7 @@ export class TrainSelector {
       const movesForward = trainDto.movesForward ?? true;
       const firstRollingStock = rollingStock[movesForward ? 0 : rollingStock.length - 1];
       const lastRollingStock = rollingStock[movesForward ? rollingStock.length - 1 : 0];
+      const trackType = this.getTrackType(trainDto, firstRollingStock, lastRollingStock);
       const trainListDto: TrainListDto = {
         id: trainDto.id,
         name: trainDto.name ?? trainDto.id,
@@ -55,7 +56,7 @@ export class TrainSelector {
         movesForward,
         ...(transitTrainDto?.line !== undefined ? { line: transitTrainDto.line } : {}),
         ...(transitTrainDto?.destination !== undefined ? { destination: transitTrainDto.destination } : {}),
-        ...(trainDto.trackType !== undefined ? { trackType: trainDto.trackType } : {}),
+        ...(trackType !== undefined ? { trackType } : {}),
       };
       this.trainListMap.set(trainListDto.id, trainListDto);
 
@@ -75,7 +76,7 @@ export class TrainSelector {
         ...(transitTrainDto?.line !== undefined ? { line: transitTrainDto.line } : {}),
         ...(transitTrainDto?.destination !== undefined ? { destination: transitTrainDto.destination } : {}),
         ...(transitTrainDto?.direction !== undefined ? { direction: transitTrainDto.direction } : {}),
-        ...(trainDto.trackType !== undefined ? { trackType: trainDto.trackType } : {}),
+        ...(trackType !== undefined ? { trackType } : {}),
         ...(trainDto.trainyardId !== undefined && trainDto.trainyardId !== ''
           ? { trainyardId: Number(trainDto.trainyardId) }
           : {}),
@@ -109,5 +110,36 @@ export class TrainSelector {
     }
 
     return TrainType.TrainElectric;
+  }
+
+  private getTrackType(
+    train: TrainLuaDto,
+    firstRollingStock?: { trackType?: string; trackSystem?: number },
+    lastRollingStock?: { trackType?: string; trackSystem?: number },
+  ): string | undefined {
+    return (
+      train.trackType ??
+      firstRollingStock?.trackType ??
+      lastRollingStock?.trackType ??
+      this.trackTypeFromTrackSystem(firstRollingStock?.trackSystem) ??
+      this.trackTypeFromTrackSystem(lastRollingStock?.trackSystem)
+    );
+  }
+
+  private trackTypeFromTrackSystem(trackSystem?: number): TrackType | undefined {
+    switch (trackSystem) {
+      case 1:
+        return TrackType.Rail;
+      case 2:
+        return TrackType.Tram;
+      case 3:
+        return TrackType.Road;
+      case 4:
+        return TrackType.Auxiliary;
+      case 5:
+        return TrackType.Control;
+      default:
+        return undefined;
+    }
   }
 }
