@@ -109,7 +109,7 @@ const TrainsPage = () => {
         filterSlot={filterSlot}
       />
 
-      <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
+      {/* <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
       <AppCardGridContainer>
         <Grid size={{ xs: 12 }}>
           <Card>
@@ -130,7 +130,7 @@ const TrainsPage = () => {
             </CardActions>
           </Card>
         </Grid>
-      </AppCardGridContainer>
+      </AppCardGridContainer> */}
     </AppPage>
   );
 };

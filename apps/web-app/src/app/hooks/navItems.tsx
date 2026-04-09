@@ -7,7 +7,7 @@ import type { NavItem } from '../components/AppLayout';
 const navItems: NavItem[] = [
   { icon: <HomeIcon />, label: 'Start', path: '/' },
   { icon: <CommuteIcon />, label: 'Fuhrpark', path: '/trains' },
-  { icon: <TrafficIcon />, label: 'Straße', path: '/road' },
+  { icon: <TrafficIcon />, label: 'Ampeln', path: '/road' },
   { icon: <TramIcon />, label: 'ÖPNV', path: '/transit' },
 ];
 

@@ -303,7 +303,7 @@ end`;
                       Gib den Ordner an, in dem EEP installiert ist. <br />
                       Der Server sucht nach dem Verzeichnis &quot;LUA/ce/databridge/exchange&quot;.
                       <br />
-                      Die Lua-Bibliothek muss installiert sein. <br />
+                      Die Control-Extension muss installiert sein. <br />
                     </Typography>
                   </Alert>
                 </div>
@@ -396,7 +396,8 @@ end`;
               renderInput={(params) => <TextField {...params} label="EEP-Ordner" />}
             />
             <DialogContentText>
-              Mit der Auswahl des richtigen Ordners kann der Server auf die Ausgaben der Lua-Bibliothek zugreifen.
+              Mit der Auswahl des richtigen Ordners kann der Server auf die Ausgaben der Data Bridge der
+              Control-Extension zugreifen.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

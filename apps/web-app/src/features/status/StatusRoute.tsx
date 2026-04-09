@@ -20,7 +20,7 @@ function StatusRoute() {
       </Grid>
       <Grid size={{ xs: 12 }}>
         <StatusCard
-          name="LUA-Bibliothek"
+          name="Data-Bridge"
           icon={isConnected && luaDataReceived ? 'ok' : 'error'}
           statusColor={isConnected && luaDataReceived ? 'success' : 'error'}
           statusText={
@@ -29,8 +29,8 @@ function StatusRoute() {
           statusDescription={
             isConnected
               ? luaDataReceived
-                ? 'Die Lua-Bibliothek stellt ' + apiEntryCount + ' verschiedene Informationen zur Verfügung'
-                : 'Konfiguriere die Lua-Bibliothek in EEP, damit Du Informationen anzeigen kannst'
+                ? 'Die Data-Bridge stellt ' + apiEntryCount + ' verschiedene Informationen zur Verfügung'
+                : 'Konfiguriere die Control-Extension in EEP, damit Du Informationen anzeigen kannst'
               : 'Diese Webseite zeigt nur aktuelle Informationen an, wenn sie den Web-Server erreicht.'
           }
         />

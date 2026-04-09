@@ -53,7 +53,7 @@ function IntersectionOverview() {
         ]}
       />
 
-      <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
+      {/* <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
       <AppCardGridContainer>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <Card>
@@ -61,7 +61,7 @@ function IntersectionOverview() {
               <Typography variant="h5" gutterBottom>
                 Hilfe
               </Typography>
-              <Typography variant="body2">Erfahre wie Du Kreuzungen mit der Lua-Bibliothek einrichtest</Typography>
+              <Typography variant="body2">Erfahre wie Du Kreuzungen mit der Control Extension einrichtest</Typography>
             </CardActionArea>
             <CardActions>
               <Button
@@ -74,7 +74,7 @@ function IntersectionOverview() {
             </CardActions>
           </Card>
         </Grid>
-      </AppCardGridContainer>
+      </AppCardGridContainer> */}
     </AppPage>
   );
 }
