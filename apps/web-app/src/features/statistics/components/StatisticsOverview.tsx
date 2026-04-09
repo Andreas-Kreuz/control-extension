@@ -23,5 +23,3 @@ function StatisticsOverview() {
 }
 
 export default StatisticsOverview;
-
-

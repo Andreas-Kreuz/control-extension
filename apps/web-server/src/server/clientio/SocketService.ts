@@ -344,4 +344,3 @@ export default class SocketService {
     this.emitPendingClientsToAdmins();
   }
 }
-

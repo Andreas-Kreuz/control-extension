@@ -86,4 +86,3 @@ export const registerCommandMod = (
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));
 };
-

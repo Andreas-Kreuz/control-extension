@@ -7,7 +7,6 @@ const commandLineOptions = new CommandLineParser().parseOptions();
 const serverPort = typeof commandLineOptions.port === 'number' ? commandLineOptions.port : 3000;
 const serverConfigDir = typeof commandLineOptions['config-dir'] === 'string' ? commandLineOptions['config-dir'] : '.';
 const server = new ServerMain(serverConfigDir, serverPort, {
-  allowOpenServerRoute:
-    Boolean(commandLineOptions['testmode']) || Boolean(commandLineOptions['allow-dev-origins']),
+  allowOpenServerRoute: Boolean(commandLineOptions['testmode']) || Boolean(commandLineOptions['allow-dev-origins']),
 });
 server.start();

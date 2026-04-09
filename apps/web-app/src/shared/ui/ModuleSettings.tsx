@@ -35,7 +35,7 @@ const ModuleSettings = (props: { settings: SettingsDto }) => {
         <FormLabel component="legend">{props.settings.moduleName}</FormLabel>
         {catSettings.map((c) => (
           <Box key={c.category}>
-            <Typography variant="h6" pt={5}>
+            <Typography variant="h6" sx={{ pt: 5 }}>
               {c.category}
             </Typography>
             {c.settings.map((s) => (
@@ -49,4 +49,3 @@ const ModuleSettings = (props: { settings: SettingsDto }) => {
 };
 
 export default ModuleSettings;
-

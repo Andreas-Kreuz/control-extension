@@ -20,12 +20,8 @@ function combineOverallTimes(
   const combined: TimeDesc[][] = [];
 
   for (let index = 0; index < maxLength; index += 1) {
-    const discoveryEntries = (moduleRunTimes[index] ?? []).map(
-      (entry) => new TimeDesc(entry.id, entry.ms),
-    );
-    const updaterEntries = (updateTimes[index] ?? []).map(
-      (entry) => new TimeDesc(entry.id, entry.ms),
-    );
+    const discoveryEntries = (moduleRunTimes[index] ?? []).map((entry) => new TimeDesc(entry.id, entry.ms));
+    const updaterEntries = (updateTimes[index] ?? []).map((entry) => new TimeDesc(entry.id, entry.ms));
     const publisherEntries = (publisherSyncTimes[index] ?? []).map(
       (entry) => new TimeDesc('Publisher/' + entry.id, entry.ms),
     );
@@ -81,5 +77,3 @@ function useStatistics() {
 }
 
 export default useStatistics;
-
-

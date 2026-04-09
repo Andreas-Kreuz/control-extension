@@ -22,7 +22,9 @@ const docsArtifacts = [
   'pages/.sass-cache',
   '.sass-cache',
   ...readdirSync(repoRoot).filter((entry) => entry.startsWith('.jekyll')),
-  ...readdirSync(pagesRoot).map((entry) => path.join('pages', entry)).filter((entry) => path.basename(entry).startsWith('.jekyll')),
+  ...readdirSync(pagesRoot)
+    .map((entry) => path.join('pages', entry))
+    .filter((entry) => path.basename(entry).startsWith('.jekyll')),
 ];
 
 const uniqueArtifacts = [...new Set(docsArtifacts)];

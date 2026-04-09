@@ -22,6 +22,3 @@ function useIntersectionSettings(): SettingsDto | undefined {
 }
 
 export default useIntersectionSettings;
-
-
-

@@ -31,5 +31,3 @@ function TransitOverview() {
 }
 
 export default TransitOverview;
-
-

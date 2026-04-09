@@ -89,4 +89,3 @@ function DataTypeEntriesMod() {
 }
 
 export default DataTypeEntriesMod;
-

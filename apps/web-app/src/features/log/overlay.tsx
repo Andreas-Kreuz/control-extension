@@ -10,4 +10,3 @@ const LogMod = () => {
 };
 
 export default LogMod;
-

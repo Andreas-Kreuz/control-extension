@@ -29,4 +29,3 @@ export default class TimeService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
-

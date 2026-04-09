@@ -13,4 +13,3 @@ const useSetTrainCam = () => {
 };
 
 export default useSetTrainCam;
-

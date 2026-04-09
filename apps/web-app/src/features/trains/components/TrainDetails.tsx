@@ -62,4 +62,3 @@ const TrainDetails = (props: { train: TrainListDto }) => {
 };
 
 export default TrainDetails;
-

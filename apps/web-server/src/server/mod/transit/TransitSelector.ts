@@ -48,4 +48,3 @@ export default class TransitSelector {
   getTransitLines = (): Record<string, TransitLineDto> => this.transitLines;
   getTransitStations = (): Record<string, TransitStationDto> => this.transitStations;
 }
-

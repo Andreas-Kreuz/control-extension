@@ -11,9 +11,7 @@ let mainWindow: Electron.BrowserWindow | null = null;
 function createWindow() {
   const commandLineOptions = new CommandLineParser().parseOptions();
   const allowOpenServerRoute =
-    Boolean(commandLineOptions['testmode']) ||
-    Boolean(commandLineOptions['allow-dev-origins']) ||
-    !app.isPackaged;
+    Boolean(commandLineOptions['testmode']) || Boolean(commandLineOptions['allow-dev-origins']) || !app.isPackaged;
   const adminSessionValue = randomBytes(24).toString('hex');
   const icon = app.isPackaged ? undefined : path.resolve(__dirname, '../../resources/icon.ico');
 

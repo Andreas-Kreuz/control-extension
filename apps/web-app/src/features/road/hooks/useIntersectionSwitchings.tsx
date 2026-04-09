@@ -15,6 +15,3 @@ function useIntersectionSwitchings(): IntersectionSwitching[] {
 }
 
 export default useIntersectionSwitchings;
-
-
-

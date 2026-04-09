@@ -28,20 +28,21 @@ function MainMenu() {
     () => (
       <AppPage>
         <AppCardGridContainer>
-          {trafficNav.map((card) => (
-            card.image && (
-              <AppCardGrid key={card.title}>
-                <AppCardImg
-                  title={card.title}
-                  image={'/assets/' + card.image}
-                  to={card.link}
-                  {...(card.subtitle !== undefined ? { subtitle: card.subtitle } : {})}
-                />
-              </AppCardGrid>
-            )
-          ))}
+          {trafficNav.map(
+            (card) =>
+              card.image && (
+                <AppCardGrid key={card.title}>
+                  <AppCardImg
+                    title={card.title}
+                    image={'/assets/' + card.image}
+                    to={card.link}
+                    {...(card.subtitle !== undefined ? { subtitle: card.subtitle } : {})}
+                  />
+                </AppCardGrid>
+              ),
+          )}
         </AppCardGridContainer>
-        <Grid container style={{ alignItems: 'flex-start' }} justifyContent={'flex-start'} spacing={2} mt={2}>
+        <Grid container spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'flex-start', mt: 2 }}>
           <Button variant="text" startIcon={<BarChartIcon />} onClick={() => navigate('statistics')}>
             Statistik
           </Button>
@@ -56,5 +57,3 @@ function MainMenu() {
 }
 
 export default MainMenu;
-
-

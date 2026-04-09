@@ -35,5 +35,3 @@ function PairingGate(props: { children: ReactNode }) {
 }
 
 export default PairingGate;
-
-

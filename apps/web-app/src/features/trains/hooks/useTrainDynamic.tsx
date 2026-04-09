@@ -19,4 +19,3 @@ function useTrainDynamic(trainId: string): TrainDto | undefined {
 }
 
 export default useTrainDynamic;
-

@@ -58,5 +58,3 @@ function getIcon(trafficType: string) {
 }
 
 export default OldTransitLineCard;
-
-

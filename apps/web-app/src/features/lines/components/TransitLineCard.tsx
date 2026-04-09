@@ -31,14 +31,14 @@ const TransitLineCard = (props: TransitLineCardProps) => {
   return (
     <AkCard>
       <CardActionArea onClick={handleExpand}>
-        <Stack direction={'row'} pt={2} px={2} spacing={1}>
+        <Stack direction={'row'} spacing={1} sx={{ pt: 2, px: 2 }}>
           <Avatar sx={{ bgcolor: getColor(line.trafficType) }}>{getIcon(line.trafficType)}</Avatar>
-          <Typography variant="h5" fontWeight={500} px={2} minWidth={'4rem'} align="center">
+          <Typography variant="h5" align="center" sx={{ fontWeight: 500, px: 2, minWidth: '4rem' }}>
             {line.nr}
           </Typography>
           <Typography variant="h5">{line.lineSegments.flatMap((el) => el.destination).join(' - ')}</Typography>
         </Stack>
-        <Stack pb={(expanded && 0) || 2}></Stack>
+        <Stack sx={{ pb: (expanded && 0) || 2 }}></Stack>
         {expanded && (
           <>
             <Divider />
@@ -57,5 +57,3 @@ const TransitLineCard = (props: TransitLineCardProps) => {
 };
 
 export default TransitLineCard;
-
-

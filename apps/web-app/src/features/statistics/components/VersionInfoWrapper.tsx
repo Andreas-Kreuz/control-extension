@@ -10,4 +10,3 @@ function VersionInfoWrapper() {
 }
 
 export default VersionInfoWrapper;
-

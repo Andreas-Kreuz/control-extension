@@ -14,4 +14,3 @@ function useApiEntries(): DataType[] {
 }
 
 export default useApiEntries;
-

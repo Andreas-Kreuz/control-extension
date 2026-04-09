@@ -79,7 +79,10 @@ function testRetainPerRoomOnlyStopsAfterLastRoomSubscription(): void {
 }
 
 export async function run(): Promise<void> {
-  await runTest('retainToken starts updates once and stops after last release', testRetainOnlyStartsOnceForSameInterest);
+  await runTest(
+    'retainToken starts updates once and stops after last release',
+    testRetainOnlyStartsOnceForSameInterest,
+  );
   await runTest('touchLeasedToken keeps interest alive until ttl expires', testLeasedTokenRefreshesUntilTtlExpires);
   await runTest(
     'retainToken keeps an entry selected until the last room subscription is released',

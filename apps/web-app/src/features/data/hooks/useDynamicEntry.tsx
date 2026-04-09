@@ -4,10 +4,7 @@ import { DynamicRoom } from '@ce/web-shared';
 
 const noopRoom = new DynamicRoom('__noop__');
 
-function useDynamicEntry(
-  room: DynamicRoom | undefined,
-  entryId: string,
-): Record<string, unknown> | undefined {
+function useDynamicEntry(room: DynamicRoom | undefined, entryId: string): Record<string, unknown> | undefined {
   const [entry, setEntry] = useState<Record<string, unknown> | undefined>(undefined);
 
   useDynamicRoomHandler(
@@ -24,4 +21,3 @@ function useDynamicEntry(
 }
 
 export default useDynamicEntry;
-

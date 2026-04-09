@@ -68,4 +68,3 @@ export default class TransitService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
-

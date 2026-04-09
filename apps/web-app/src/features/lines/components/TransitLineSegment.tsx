@@ -47,7 +47,7 @@ const TransitLineSegment = (props: TransitLineSegmentProps) => {
 
   return (
     <>
-      <Typography variant="h5" pt={2} px={2}>
+      <Typography variant="h5" sx={{ pt: 2, px: 2 }}>
         {'Richtung: ' + segment.destination}
       </Typography>
       <List dense>
@@ -74,4 +74,3 @@ const TransitLineSegment = (props: TransitLineSegmentProps) => {
 };
 
 export default TransitLineSegment;
-

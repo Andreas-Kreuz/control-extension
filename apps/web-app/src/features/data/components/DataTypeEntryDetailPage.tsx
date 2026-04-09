@@ -42,12 +42,7 @@ function DataTypeEntryDetailMod() {
         <Link component={RouterLink} to="/data" underline="hover" color="inherit">
           CE-Typen
         </Link>
-        <Link
-          component={RouterLink}
-          to={`/data/${encodeURIComponent(ceType)}`}
-          underline="hover"
-          color="inherit"
-        >
+        <Link component={RouterLink} to={`/data/${encodeURIComponent(ceType)}`} underline="hover" color="inherit">
           {ceType}
         </Link>
         <Typography color="text.primary">{entryId}</Typography>
@@ -74,4 +69,3 @@ function DataTypeEntryDetailMod() {
 }
 
 export default DataTypeEntryDetailMod;
-

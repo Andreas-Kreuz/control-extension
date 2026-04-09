@@ -18,4 +18,3 @@ function useIntersection(id: number | undefined): Intersection | undefined {
 }
 
 export default useIntersection;
-

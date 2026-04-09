@@ -110,7 +110,9 @@ for (const tool of tools) {
   const { name, purpose, requiredFor } = tool;
   const ok = isToolAvailable(tool);
   const status = ok ? 'OK     ' : 'MISSING';
-  console.log(`  [${status}]  ${name.padEnd(nameWidth)}  ${purpose.padEnd(purposeWidth)}  — required for: ${requiredFor}`);
+  console.log(
+    `  [${status}]  ${name.padEnd(nameWidth)}  ${purpose.padEnd(purposeWidth)}  — required for: ${requiredFor}`,
+  );
   if (!ok) {
     allOk = false;
     missingTools.push(tool);

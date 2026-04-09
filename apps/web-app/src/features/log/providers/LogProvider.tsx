@@ -86,5 +86,3 @@ export function useLog() {
 export function useLogDispatch() {
   return useContext(LogDispatchContext);
 }
-
-

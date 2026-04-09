@@ -19,4 +19,3 @@ function useRollingStock(name: string): RollingStockDto | undefined {
 }
 
 export default useRollingStock;
-

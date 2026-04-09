@@ -15,6 +15,3 @@ function useLines(): Line[] {
 }
 
 export default useLines;
-
-
-

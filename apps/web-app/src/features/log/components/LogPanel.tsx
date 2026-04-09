@@ -134,4 +134,3 @@ function LogPanel() {
 }
 
 export default LogPanel;
-

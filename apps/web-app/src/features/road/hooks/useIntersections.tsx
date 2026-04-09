@@ -15,6 +15,3 @@ function useIntersections(): Intersection[] {
 }
 
 export default useIntersections;
-
-
-

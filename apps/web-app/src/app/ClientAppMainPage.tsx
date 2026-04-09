@@ -34,4 +34,3 @@ function ClientAppMainPage() {
 }
 
 export default ClientAppMainPage;
-

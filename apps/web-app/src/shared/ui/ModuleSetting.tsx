@@ -33,4 +33,3 @@ const ModuleSetting = (props: { setting: SettingDto<unknown> }) => {
 };
 
 export default ModuleSetting;
-

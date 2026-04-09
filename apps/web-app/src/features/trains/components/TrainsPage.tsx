@@ -144,6 +144,3 @@ const TrainsPage = () => {
 };
 
 export default TrainsPage;
-
-
-

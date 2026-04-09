@@ -18,4 +18,3 @@ function useIntersectionSwitching(id: string | undefined): IntersectionSwitching
 }
 
 export default useIntersectionSwitching;
-

@@ -108,12 +108,7 @@ const StatisticsOverview = (props: {
         title={title + (maxEntries > 1 ? ' (max: ' : ' (') + Math.round(max) + ' ms)'}
         image={'/assets/title-image-simulator.jpg'}
       >
-        <Grid
-          paddingLeft={2}
-          paddingRight={2}
-          onClick={() => setLegendHidden((current) => !current)}
-          style={{ cursor: 'pointer' }}
-        >
+        <Grid sx={{ pl: 2, pr: 2, cursor: 'pointer' }} onClick={() => setLegendHidden((current) => !current)}>
           <svg width="100%" height={graphSvgHeight} style={{ backgroundColor: 'white' }}>
             {items.map((item, index) => (
               <rect
@@ -195,5 +190,3 @@ const StatisticsOverview = (props: {
 };
 
 export default StatisticsOverview;
-
-

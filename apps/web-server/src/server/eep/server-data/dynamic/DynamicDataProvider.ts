@@ -5,4 +5,3 @@ export interface DynamicDataProvider {
   id: string;
   jsonCreator: (roomName: string) => string;
 }
-

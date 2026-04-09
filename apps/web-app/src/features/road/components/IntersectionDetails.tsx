@@ -85,8 +85,7 @@ function IntersectionDetails() {
             <Stack
               direction="row"
               flexWrap="wrap"
-              pt={1}
-              pb={0}
+              sx={{ pt: 1, pb: 0 }}
               // sx={{ backgroundColor: theme.palette.background.default }}
             >
               {switchings.map((s) => {
@@ -120,7 +119,7 @@ function IntersectionDetails() {
               <>
                 <Divider sx={{ py: 1 }} />
                 <AppCaption gutterTop>Kameras</AppCaption>
-                <Stack direction="row" pt={1} pb={0}>
+                <Stack direction="row" sx={{ pt: 1, pb: 0 }}>
                   {i.staticCams.map((c, j) => {
                     return (
                       <Tooltip title={c}>
@@ -177,4 +176,3 @@ function IntersectionDetails() {
 }
 
 export default IntersectionDetails;
-

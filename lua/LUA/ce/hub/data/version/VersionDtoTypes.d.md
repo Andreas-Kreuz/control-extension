@@ -5,10 +5,10 @@
 - Key-ID: `id`
 - DtoFactory: `ce.hub.data.version.VersionDtoFactory`
 
-| Name             | Typ      |
-| ---------------- | -------- |
-| `id`             | `string` |
-| `name`           | `string` |
-| `eepVersion`     | `string` |
-| `luaVersion`     | `string` |
-| `singleVersion`  | `string` |
+| Name            | Typ      |
+| --------------- | -------- |
+| `id`            | `string` |
+| `name`          | `string` |
+| `eepVersion`    | `string` |
+| `luaVersion`    | `string` |
+| `singleVersion` | `string` |

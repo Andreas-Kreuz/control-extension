@@ -67,7 +67,7 @@ function StatusSnackBar() {
         open={open}
         autoHideDuration={2000}
         onClose={handleClose}
-        TransitionProps={{ onExited: handleExited }}
+        slotProps={{ transition: { onExited: handleExited } }}
       >
         <Alert
           sx={{ width: '100%' }}
@@ -86,4 +86,3 @@ function StatusSnackBar() {
 }
 
 export default StatusSnackBar;
-

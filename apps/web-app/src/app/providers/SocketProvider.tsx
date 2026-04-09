@@ -146,4 +146,3 @@ export function useSocketPairingCode() {
 export function useSocketIsAdmin() {
   return useContext(SocketAdminContext);
 }
-

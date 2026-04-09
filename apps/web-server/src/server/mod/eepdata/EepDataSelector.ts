@@ -67,7 +67,10 @@ const groupedModuleCollectors: RuntimeStatisticsCollector[] = [
   { label: 'Discovery/ce.hub.Train', runtimeKeys: ['Discovery/ce.hub.Train'] },
 ];
 const groupedPublisherInitCollectors: RuntimeStatisticsCollector[] = [
-  { label: 'Update-init/ce.hub.DataSlot', runtimeKeys: ['Update-init/ce.hub.DataSlot', 'Update-init/ce.hub.DataSlots'] },
+  {
+    label: 'Update-init/ce.hub.DataSlot',
+    runtimeKeys: ['Update-init/ce.hub.DataSlot', 'Update-init/ce.hub.DataSlots'],
+  },
   { label: 'Update-init/ce.hub.Frame', runtimeKeys: ['Update-init/ce.hub.Frame', 'Update-init/ce.hub.FrameData'] },
   { label: 'Update-init/ce.hub.Module', runtimeKeys: ['Update-init/ce.hub.Module'] },
   { label: 'Update-init/ce.hub.RollingStock', runtimeKeys: ['Update-init/ce.hub.RollingStock'] },
@@ -203,7 +206,6 @@ export default class EepDataSelector {
         ...optionalProperty('reservedByTrainName', dto.reservedByTrainName),
       }));
     }
-
   }
 
   private mapCeType<TLua, TDto>(

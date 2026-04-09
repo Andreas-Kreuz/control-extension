@@ -64,10 +64,7 @@ const trains: TrainListDto[] = [
   },
 ];
 
-const reducer = (
-  state: { trackType: TrackType; trainList: TrainListDto[] },
-  action: Action,
-) => {
+const reducer = (state: { trackType: TrackType; trainList: TrainListDto[] }, action: Action) => {
   switch (action.type) {
     case 'set track type':
       return { ...state, trackType: action.trackType };

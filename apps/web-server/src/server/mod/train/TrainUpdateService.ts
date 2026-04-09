@@ -188,13 +188,10 @@ export default class TrainUpdateService implements DynamicRoomService {
       }
 
       const token = 'json:' + CeTypes.HubRollingStock + ':' + rollingStockId;
-      this.dynamicInterestRegistry.touchLeasedToken(
-        token,
-        CeTypes.HubRollingStock,
-        rollingStockId,
-        jsonInterestTtlMs,
+      this.dynamicInterestRegistry.touchLeasedToken(token, CeTypes.HubRollingStock, rollingStockId, jsonInterestTtlMs);
+      const rollingStock = await this.waitForDynamicData(() =>
+        this.rollingStockSelector.getRollingStock(rollingStockId),
       );
-      const rollingStock = await this.waitForDynamicData(() => this.rollingStockSelector.getRollingStock(rollingStockId));
       if (!rollingStock) {
         res.status(504).json({ error: 'timeout' });
         return;

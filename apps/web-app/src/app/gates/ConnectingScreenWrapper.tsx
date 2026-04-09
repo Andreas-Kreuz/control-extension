@@ -7,4 +7,3 @@ function ConnectingScreenWrapper() {
 }
 
 export default ConnectingScreenWrapper;
-

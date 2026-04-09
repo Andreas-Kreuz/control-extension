@@ -68,4 +68,3 @@ export function useRoomHandler(
     socket.emit(RoomEvent.JoinRoom, { room: roomName });
   }, [canJoinRoom, roomName, socket]);
 }
-

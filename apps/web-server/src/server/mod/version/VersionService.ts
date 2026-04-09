@@ -29,4 +29,3 @@ export default class VersionService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
-

@@ -419,5 +419,3 @@ end`;
 }
 
 export default ServerHome;
-
-

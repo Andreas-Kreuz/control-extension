@@ -52,4 +52,3 @@ const TrainListEntryCard = (props: { train: TrainListDto }) => {
 };
 
 export default TrainListEntryCard;
-

@@ -219,7 +219,10 @@ export async function run(): Promise<void> {
   await runTest('index returns empty list when no rooms registered', testIndexReturnsEmptyListWithNoRooms);
   await runTest('index lists room links after state change', testIndexListsRoomsAfterStateChange);
   await runTest('/:room returns 404 for unknown room', testRoomReturns404WhenUnknown);
-  await runTest('/:room delegates to next for unknown room when provided', testRoomDelegatesToNextWhenUnknownAndNextProvided);
+  await runTest(
+    '/:room delegates to next for unknown room when provided',
+    testRoomDelegatesToNextWhenUnknownAndNextProvided,
+  );
   await runTest('/:room returns JSON data for known room', testRoomReturnsJsonAfterStateChange);
   await runTest('/:room returns 404 after room is removed', testRoomReturns404AfterRoomIsRemoved);
 }
@@ -230,4 +233,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-

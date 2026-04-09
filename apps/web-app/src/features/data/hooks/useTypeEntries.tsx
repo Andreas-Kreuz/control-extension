@@ -15,4 +15,3 @@ function useTypeEntries(ceType: string): EntryMap {
 }
 
 export default useTypeEntries;
-

@@ -30,5 +30,3 @@ export default function useVersionInfo(): Versions {
 
   return versions;
 }
-
-

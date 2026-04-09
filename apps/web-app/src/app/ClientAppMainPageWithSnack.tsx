@@ -14,6 +14,3 @@ function ClientAppMainPageWithSnack() {
 }
 
 export default ClientAppMainPageWithSnack;
-
-
-

@@ -60,5 +60,3 @@ export function useTrain() {
 export function useTrainDispatch() {
   return useContext(TrainDispatchContext);
 }
-
-

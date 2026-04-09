@@ -32,4 +32,3 @@ export default class WeatherSelector {
 
   getWeather = (): Record<string, WeatherDto> => this.weather;
 }
-

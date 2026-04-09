@@ -64,4 +64,3 @@ function IntersectionOverview() {
 }
 
 export default IntersectionOverview;
-

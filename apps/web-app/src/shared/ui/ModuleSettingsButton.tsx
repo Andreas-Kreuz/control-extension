@@ -56,7 +56,7 @@ function ModuleSettingsButton(props: { settings?: SettingsDto }) {
         fullScreen
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        slots={{ transition: Transition }}
         sx={{ backgroundColor: '#fff' }}
       >
         <AppBar sx={{ position: 'relative' }}>
@@ -78,4 +78,3 @@ function ModuleSettingsButton(props: { settings?: SettingsDto }) {
 }
 
 export default ModuleSettingsButton;
-

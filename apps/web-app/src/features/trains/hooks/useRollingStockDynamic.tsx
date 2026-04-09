@@ -19,4 +19,3 @@ function useRollingStockDynamic(rollingStockId: string): RollingStockDto | undef
 }
 
 export default useRollingStockDynamic;
-

@@ -54,4 +54,3 @@ function LogLines() {
 }
 
 export default LogLines;
-

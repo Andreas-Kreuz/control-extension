@@ -17,5 +17,3 @@ export function useServerStatus(): [SetStateAction<boolean>, SetStateAction<bool
 
   return [eepDataUpToDate, luaDataReceived, apiEntryCount];
 }
-
-
