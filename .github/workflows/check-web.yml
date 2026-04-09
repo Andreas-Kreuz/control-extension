@@ -84,7 +84,7 @@ jobs:
           install: false
           working-directory: apps/web-app
           start: yarn workspace @ce/web-server run run:test
-          wait-on: 'http://localhost:3000/server'
+          wait-on: 'http://localhost:3001/server'
           record: false
           command: yarn test:e2e
         env:
