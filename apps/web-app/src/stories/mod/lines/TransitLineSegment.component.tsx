@@ -1,6 +1,6 @@
 import MyTransitLineSegment, {
   TransitLineSegmentProps as MyTransitLineSegmentProps,
-} from '../../../mod/lines/TransitLineSegment';
+} from '../../../features/lines/components/TransitLineSegment';
 import { Box } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 

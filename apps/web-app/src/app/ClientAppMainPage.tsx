@@ -1,5 +1,5 @@
-import { lazy } from 'react';
-const AppBackButton = lazy(() => import('../components/AppBackButton'));
+﻿import { lazy } from 'react';
+const AppBackButton = lazy(() => import('../shared/ui/AppBackButton'));
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
@@ -34,3 +34,4 @@ function ClientAppMainPage() {
 }
 
 export default ClientAppMainPage;
+

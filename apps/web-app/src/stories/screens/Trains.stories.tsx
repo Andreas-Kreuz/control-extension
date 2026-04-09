@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { TrackType, TrainListDto, TrainType } from '@ce/web-shared';
 import { PropsWithChildren, useReducer } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import Trains from '../../mod/trains/Trains';
-import { Action, TrainContext, TrainDispatchContext } from '../../mod/trains/TrainProvider';
+import TrainsPage from '../../features/trains/components/TrainsPage';
+import { Action, TrainContext, TrainDispatchContext } from '../../features/trains/providers/TrainProvider';
 
 const trains: TrainListDto[] = [
   {
@@ -95,7 +95,7 @@ const TrainsStoryShell = ({ children }: PropsWithChildren) => {
 
 const meta = {
   title: 'Screens/Routes/Trains',
-  component: Trains,
+  component: TrainsPage,
   parameters: {
     layout: 'fullscreen',
   },
@@ -106,7 +106,7 @@ const meta = {
       </TrainsStoryShell>
     ),
   ],
-} satisfies Meta<typeof Trains>;
+} satisfies Meta<typeof TrainsPage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

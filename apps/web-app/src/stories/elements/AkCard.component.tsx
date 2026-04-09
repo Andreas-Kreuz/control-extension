@@ -1,4 +1,4 @@
-import MyAkCard, { AkCardProps as MyAppCardProps } from '../../components/AkCard';
+import MyAkCard, { AkCardProps as MyAppCardProps } from '../../shared/ui/AkCard';
 import { Box } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 
