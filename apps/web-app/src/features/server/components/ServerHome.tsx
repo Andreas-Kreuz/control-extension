@@ -1,4 +1,4 @@
-import { useSocket } from '../../../app/providers/SocketProvider';
+import { useSocket } from '../../../app/hooks/useSocket';
 import { useRoomHandler } from '../../../shared/socket/useRoomHandler';
 import './ServerHome.css';
 import {

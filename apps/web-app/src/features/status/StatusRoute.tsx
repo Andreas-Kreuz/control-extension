@@ -1,9 +1,9 @@
-﻿import { useSocketIsConnected } from '../../app/providers/SocketProvider';
+import { useSocketIsConnected } from '../../app/hooks/useSocketConnection';
 import StatusCard from './components/StatusCard';
 import { useServerStatus } from './hooks/useServerInfo';
 import Grid from '@mui/material/Grid';
 
-function StatusGrid() {
+function StatusRoute() {
   const isConnected = useSocketIsConnected();
   const [eepDataUpToDate, luaDataReceived, apiEntryCount] = useServerStatus();
 
@@ -54,4 +54,4 @@ function StatusGrid() {
   );
 }
 
-export default StatusGrid;
+export default StatusRoute;

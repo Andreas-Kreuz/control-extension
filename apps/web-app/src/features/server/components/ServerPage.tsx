@@ -1,8 +1,9 @@
 import Box from '@mui/material/Box';
 import './ServerPage.css';
 import ServerHome from './ServerHome';
-import ConnectingScreenWrapper from '../../../app/gates/ConnectingScreenWrapper';
-import { useSocketIsAdmin, useSocketIsConnected, useSocketPairingStatus } from '../../../app/providers/SocketProvider';
+import ConnectingScreenHost from '../../../app/components/ConnectingScreenHost';
+import { useSocketIsConnected } from '../../../app/hooks/useSocketConnection';
+import { useSocketIsAdmin, useSocketPairingStatus } from '../../../app/hooks/useSocketPairing';
 import { PairingStatus } from '@ce/web-shared';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -15,7 +16,7 @@ function ServerPage() {
   const isAdmin = useSocketIsAdmin();
 
   if (!socketIsConnected || pairingStatus === PairingStatus.Connecting) {
-    return <ConnectingScreenWrapper />;
+    return <ConnectingScreenHost />;
   }
 
   if (!isAdmin) {

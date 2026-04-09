@@ -2,12 +2,9 @@
 import { PairingStatus } from '@ce/web-shared';
 import ConnectingScreen from '../../shared/ui/ConnectingScreen';
 import PairingScreen from '../../shared/ui/PairingScreen';
-import {
-  useSocketIsConnected,
-  useSocketPairingCode,
-  useSocketPairingStatus,
-  useSocketUrl,
-} from '../providers/SocketProvider';
+import { useSocketIsConnected } from '../hooks/useSocketConnection';
+import { useSocketPairingCode, useSocketPairingStatus } from '../hooks/useSocketPairing';
+import { useSocketUrl } from '../hooks/useSocketUrl';
 
 function PairingGate(props: { children: ReactNode }) {
   const currentPath = window.location.pathname;

@@ -1,5 +1,5 @@
 ﻿import { CommandEvent } from '@ce/web-shared';
-import { useSocket } from '../../../app/providers/SocketProvider';
+import { useSocket } from '../../../app/hooks/useSocket';
 import useDebug from '../../../shared/socket/useDebug';
 
 const useSetTrainCam = () => {

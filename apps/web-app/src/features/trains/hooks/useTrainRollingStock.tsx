@@ -1,6 +1,6 @@
 import { RollingStockDto } from '@ce/web-shared';
 import { useEffect, useState } from 'react';
-import { useSocketUrl } from '../../../app/providers/SocketProvider';
+import { useSocketUrl } from '../../../app/hooks/useSocketUrl';
 
 function useTrainRollingStock(trainId: string): RollingStockDto[] | undefined {
   const [rollingStock, setRollingStock] = useState<RollingStockDto[] | undefined>(undefined);

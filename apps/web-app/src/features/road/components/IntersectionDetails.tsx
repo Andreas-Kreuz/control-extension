@@ -3,7 +3,7 @@ const AppCaption = lazy(() => import('../../../shared/ui/AppCaption'));
 const AppHeadline = lazy(() => import('../../../shared/ui/AppHeadline'));
 const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
 const AppPaper = lazy(() => import('../../../shared/ui/AppPaper'));
-import { useSocket } from '../../../app/providers/SocketProvider';
+import { useSocket } from '../../../app/hooks/useSocket';
 import useIntersection from '../hooks/useIntersection';
 import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
 import { CommandEvent, RoadEvent } from '@ce/web-shared';

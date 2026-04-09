@@ -1,9 +1,9 @@
 ﻿import ConnectingScreen from '../../shared/ui/ConnectingScreen';
-import { useSocketUrl } from '../providers/SocketProvider';
+import { useSocketUrl } from '../hooks/useSocketUrl';
 
-function ConnectingScreenWrapper() {
+function ConnectingScreenHost() {
   const socketUrl = useSocketUrl();
   return <ConnectingScreen url={socketUrl} />;
 }
 
-export default ConnectingScreenWrapper;
+export default ConnectingScreenHost;

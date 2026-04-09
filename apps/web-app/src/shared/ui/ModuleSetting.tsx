@@ -1,4 +1,4 @@
-﻿import { useSocket } from '../../app/providers/SocketProvider';
+import { useSocket } from '../../app/hooks/useSocket';
 import { CommandEvent, SettingDto } from '@ce/web-shared';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';

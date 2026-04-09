@@ -1,7 +1,9 @@
-import { useSocket, useSocketIsConnected, useSocketPairingStatus } from '../../app/providers/SocketProvider';
 import { ApiDataRoom, PairingStatus, RoomEvent } from '@ce/web-shared';
 import { DynamicRoom } from '@ce/web-shared';
 import { useEffect, useRef, useState } from 'react';
+import { useSocket } from '../../app/hooks/useSocket';
+import { useSocketIsConnected } from '../../app/hooks/useSocketConnection';
+import { useSocketPairingStatus } from '../../app/hooks/useSocketPairing';
 import useDebug from './useDebug';
 
 export function useDynamicRoomHandler(
