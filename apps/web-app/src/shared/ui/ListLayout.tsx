@@ -182,7 +182,7 @@ function ListLayout<T>({
       : null;
 
   return (
-    <Stack spacing={isMobile ? 2 : 0}>
+    <Stack spacing={2}>
       <TextField
         size="small"
         label={filterLabel}
@@ -192,29 +192,34 @@ function ListLayout<T>({
       />
       {filterSlot}
       {resolvedEmptyMessage}
-      {isMobile ? (
-        filteredItems.map((item) => {
-          const key = keyExtractor(item);
-          const selected = key === selectedKey;
-          const mobileExpansion = (
-            <Collapse in={selected} mountOnEnter unmountOnExit>
-              <Divider sx={{ width: 1 }} />
-              <MobileTabs sections={getDetails(item)} />
-            </Collapse>
-          );
-          return <Box key={key}>{renderCard(item, selected, () => handleSelect(key), mobileExpansion)}</Box>;
-        })
-      ) : (
-        <Paper>
-          <List disablePadding>
-            {filteredItems.map((item) => {
-              const key = keyExtractor(item);
-              const selected = key === selectedKey;
-              return <Fragment key={key}>{renderListItem(item, selected, () => handleSelect(key))}</Fragment>;
-            })}
-          </List>
-        </Paper>
-      )}
+      {isMobile
+        ? filteredItems.map((item) => {
+            const key = keyExtractor(item);
+            const selected = key === selectedKey;
+            const mobileExpansion = (
+              <Collapse in={selected} mountOnEnter unmountOnExit>
+                <Divider sx={{ width: 1 }} />
+                <MobileTabs sections={getDetails(item)} />
+              </Collapse>
+            );
+            return <Box key={key}>{renderCard(item, selected, () => handleSelect(key), mobileExpansion)}</Box>;
+          })
+        : filteredItems.length > 0 && (
+            <Paper>
+              <List disablePadding>
+                {filteredItems.map((item, index) => {
+                  const key = keyExtractor(item);
+                  const selected = key === selectedKey;
+                  return (
+                    <>
+                      {index !== 0 && <Divider />}
+                      <Fragment key={key}>{renderListItem(item, selected, () => handleSelect(key))}</Fragment>
+                    </>
+                  );
+                })}
+              </List>
+            </Paper>
+          )}
     </Stack>
   );
 }

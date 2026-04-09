@@ -43,14 +43,7 @@ function DataTypeEntriesMod() {
           </ListItem>
         )}
         renderCard={(item, selected, onSelect, mobileExpansion) => (
-          <AppCardBg
-            title={item.id}
-            subtitle={ceType}
-            image=""
-            selected={selected}
-            expanded={selected}
-            setExpanded={() => onSelect()}
-          >
+          <AppCardBg title={item.id} image="" selected={selected} expanded={selected} setExpanded={() => onSelect()}>
             {mobileExpansion}
           </AppCardBg>
         )}

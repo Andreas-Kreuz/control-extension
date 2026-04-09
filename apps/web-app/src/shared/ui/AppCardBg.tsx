@@ -48,11 +48,11 @@ function AppCardBg(props: AppCardBgProps) {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" gutterBottom={props.subtitle || props.additionalChips ? true : undefined}>
           {props.title}
         </Typography>
         {props.subtitle && (
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h5" gutterBottom={props.additionalChips ? true : undefined}>
             {props.subtitle}
           </Typography>
         )}

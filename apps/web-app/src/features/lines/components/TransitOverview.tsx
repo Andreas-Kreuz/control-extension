@@ -9,6 +9,7 @@ import TransitLineSegment from './TransitLineSegment';
 const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
 const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
 import ListLayout from '../../../shared/ui/ListLayout';
+import { Typography } from '@mui/material';
 
 function TransitOverview() {
   const lines = useLines();
@@ -29,6 +30,7 @@ function TransitOverview() {
         renderListItem={(line, selected, onSelect) => (
           <TransitLineListItem line={line} selected={selected} onSelect={onSelect} />
         )}
+        emptyMessage={(ft) => <Typography variant="body2">{`Es wurden keine ÖPNV-Linien gefunden.`}</Typography>}
         renderCard={(line, selected, onSelect, mobileExpansion) => (
           <TransitLineCard line={line} selected={selected} onSelect={onSelect}>
             {mobileExpansion}

@@ -1,10 +1,9 @@
 import { TrainListDto } from '@ce/web-shared';
-import Avatar from '@mui/material/Avatar';
 import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { trainIconFor } from '../lib/trainIconFor';
+import { ListItemIcon } from '@mui/material';
 
 interface TrainListItemProps {
   train: TrainListDto;
@@ -17,9 +16,9 @@ const TrainListItem = ({ train, selected, onSelect }: TrainListItemProps) => {
   return (
     <ListItem disablePadding>
       <ListItemButton selected={selected} onClick={onSelect}>
-        <ListItemAvatar>
-          <Avatar src={iconSrc} sx={{ bgcolor: 'background.paper' }} />
-        </ListItemAvatar>
+        <ListItemIcon sx={{ pr: 1 }}>
+          <img src={iconSrc} height="32" />
+        </ListItemIcon>
         <ListItemText primary={train.id} />
       </ListItemButton>
     </ListItem>
