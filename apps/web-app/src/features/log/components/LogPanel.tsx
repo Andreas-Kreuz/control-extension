@@ -115,12 +115,12 @@ function LogPanel() {
         </Box>
         {open && <Divider />}
         <Box
-          height={open ? '14.2em' : 0}
-          width={open ? 'calc(100vw)' : 0}
-          maxWidth="100%"
           sx={{
             pt: 0,
             px: 0,
+            height: open ? '14.2em' : 0,
+            width: open ? '100vw' : 0,
+            maxWidth: '100%',
             transition: theme.transitions.create(['width', 'height'], transitionOptions),
           }}
         >
