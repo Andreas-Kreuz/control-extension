@@ -2,14 +2,12 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import { lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppCardImg from '../../../shared/components/AppCardImg';
+import AppCardGrid from '../../../shared/layouts/AppCardGrid';
+import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
+import AppPage from '../../../shared/layouts/AppPage';
 import getNavSections from '../lib/NavElements';
-
-const AppCardGrid = lazy(() => import('../../../shared/layouts/AppCardGrid'));
-const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
-const AppCardImg = lazy(() => import('../../../shared/components/AppCardImg'));
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
 
 function MainMenu() {
   const navigation = getNavSections();

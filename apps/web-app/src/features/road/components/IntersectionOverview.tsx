@@ -1,22 +1,20 @@
-import { lazy } from 'react';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import AppCardBg from '../../../shared/components/AppCardBg';
+import ModuleSettingsButton from '../../../shared/components/ModuleSettingsButton';
+import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
+import AppPage from '../../../shared/layouts/AppPage';
+import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import ListLayout from '../../../shared/layouts/ListLayout';
 import useIntersectionSettings from '../hooks/useIntersectionSettings';
 import useIntersections from '../hooks/useIntersections';
 import IntersectionControlSection from './IntersectionControlSection';
 import IntersectionCamsSection from './IntersectionCamsSection';
 import IntersectionListItem from './IntersectionListItem';
-
-const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
-const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
-const ModuleSettingsButton = lazy(() => import('../../../shared/components/ModuleSettingsButton'));
-import ListLayout from '../../../shared/layouts/ListLayout';
 
 function IntersectionOverview() {
   const intersections = useIntersections();

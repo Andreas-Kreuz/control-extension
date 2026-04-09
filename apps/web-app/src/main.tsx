@@ -1,8 +1,7 @@
 import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { lazy } from 'react';
-const WebAppRoot = lazy(() => import('./app/components/WebAppRoot'));
+import WebAppRoot from './app/components/WebAppRoot';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 

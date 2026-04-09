@@ -1,15 +1,14 @@
-import { lazy, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
+import AppCardBg from '../../../shared/components/AppCardBg';
+import AppPage from '../../../shared/layouts/AppPage';
+import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
 import useTypeEntries from '../hooks/useTypeEntries';
 import DataEntryDetailSection from './DataEntryDetailSection';
-
-const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
 
 interface DataEntry {
   id: string;

@@ -1,9 +1,8 @@
-import { lazy } from 'react';
-const AppCaption = lazy(() => import('../../../shared/components/AppCaption'));
-const AppHeadline = lazy(() => import('../../../shared/components/AppHeadline'));
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
-const AppPaper = lazy(() => import('../../../shared/layouts/AppPaper'));
 import { useSocket } from '../../../app/hooks/useSocket';
+import AppCaption from '../../../shared/components/AppCaption';
+import AppHeadline from '../../../shared/components/AppHeadline';
+import AppPage from '../../../shared/layouts/AppPage';
+import AppPaper from '../../../shared/layouts/AppPaper';
 import useIntersection from '../hooks/useIntersection';
 import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
 import { CommandEvent, RoadEvent } from '@ce/web-shared';

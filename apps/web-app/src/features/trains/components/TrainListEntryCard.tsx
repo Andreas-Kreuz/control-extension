@@ -1,10 +1,8 @@
-import { lazy } from 'react';
 import type { ReactNode } from 'react';
 import { TrainListDto, TrainType } from '@ce/web-shared';
+import AppCardBg from '../../../shared/components/AppCardBg';
 import { trainIconFor } from '../lib/trainIconFor';
 import { getTrainChips } from '../lib/trainDetails';
-
-const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
 
 const getIconName = (trainType: TrainType): string => {
   const imgName = trainIconFor(trainType);

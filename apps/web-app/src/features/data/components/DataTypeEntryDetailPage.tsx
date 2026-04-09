@@ -1,12 +1,10 @@
-import { lazy } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
+import AppPage from '../../../shared/layouts/AppPage';
+import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import DataEntryDetailSection from './DataEntryDetailSection';
-
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
 
 function DataTypeEntryDetailMod() {
   const { ceType = '', entryId = '' } = useParams<{ ceType: string; entryId: string }>();

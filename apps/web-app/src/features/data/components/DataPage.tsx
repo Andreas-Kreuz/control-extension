@@ -1,4 +1,4 @@
-import { lazy, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -6,10 +6,9 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
+import AppPage from '../../../shared/layouts/AppPage';
+import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import useApiEntries from '../hooks/useApiEntries';
-
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
 
 function DataMod() {
   const entries = useApiEntries();

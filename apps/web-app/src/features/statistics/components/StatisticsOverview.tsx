@@ -1,6 +1,5 @@
-import { lazy } from 'react';
-const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
+import AppPage from '../../../shared/layouts/AppPage';
 import StatisticsCard from './StatisticsCard';
 import useStatistics from '../hooks/useStatistics';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';

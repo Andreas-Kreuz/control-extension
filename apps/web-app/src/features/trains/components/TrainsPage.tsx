@@ -1,4 +1,4 @@
-import { lazy, useState } from 'react';
+import { useState } from 'react';
 import { TrackType } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -9,6 +9,10 @@ import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
+import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
+import AppPage from '../../../shared/layouts/AppPage';
+import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import ListLayout from '../../../shared/layouts/ListLayout';
 import setTrackType from '../hooks/useSetTrackType';
 import useTrackType from '../hooks/useTrackType';
 import useTrains from '../hooks/useTrains';
@@ -16,13 +20,8 @@ import TrainCamerasView from './TrainCamerasView';
 import TrainInformationSection from './TrainInformationSection';
 import TrainRollingStockSection from './TrainRollingStockSection';
 import TrainLineInfoSection from './TrainLineInfoSection';
+import TrainListEntryCard from './TrainListEntryCard';
 import TrainListItem from './TrainListItem';
-
-const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
-const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
-const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
-const TrainListEntryCard = lazy(() => import('./TrainListEntryCard'));
-import ListLayout from '../../../shared/layouts/ListLayout';
 
 interface ChipData {
   key: TrackType;
