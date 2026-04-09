@@ -14,10 +14,11 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { SideSheetContext, defaultSideSheetState } from '../contexts/SideSheetContext';
 import type { SideSheetState } from '../contexts/SideSheetContext';
+import AppBackButton from './AppBackButton';
 
 const DRAWER_WIDTH = 240;
 const RAIL_WIDTH = 80;
@@ -87,7 +88,13 @@ function AppLayout({ navItems }: AppLayoutProps) {
           }}
         >
           <Toolbar variant={toolbarVariant}>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            <AppBackButton sx={{ mr: 2, color: theme.palette.primary.contrastText }} />
+            <Typography
+              variant="h6"
+              component={RouterLink}
+              to="/"
+              sx={{ flexGrow: 1, textDecoration: 'none', color: theme.palette.primary.contrastText }}
+            >
               Control Extension App
             </Typography>
           </Toolbar>

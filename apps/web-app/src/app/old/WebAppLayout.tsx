@@ -1,12 +1,11 @@
-﻿import { lazy } from 'react';
-const AppBackButton = lazy(() => import('./AppBackButton'));
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Outlet } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import AppBackButton from '../components/AppBackButton';
 
 function WebAppLayout() {
   const theme = useTheme();

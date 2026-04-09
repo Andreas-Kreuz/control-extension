@@ -1,10 +1,8 @@
-import { useState } from 'react';
-
 const hubCeModuleId = 'b9f34a2e-1c5d-4f8a-9e7b-3d0a6c8f2e41'; // "ce.hub.CeHubModule"
 const roadCeModuleId = 'c5a3e6d3-0f9b-4c89-a908-ed8cf8809362'; // "ce.mods.road.CeRoadModule"
 const transitCeModuleId = '83ce6b42-1bda-45e0-8b4a-e8daeed047ab'; // "ce.mods.transit.CeTransitModule"
 
-function useNavState(): {
+function getNavSections(): {
   name: string;
   available: boolean;
   values: {
@@ -19,10 +17,10 @@ function useNavState(): {
     requiredModuleId?: string;
   }[];
 }[] {
-  const [availLuaData, setAvailLuaData] = useState(false);
-  const [availIntersection, setAvailIntersection] = useState(false);
-  const [availTransit, setAvailTransit] = useState(false);
-  const [availModules, setAvailModules] = useState(false);
+  const availLuaData = false;
+  const availIntersection = false;
+  const availTransit = false;
+  const availModules = false;
 
   const navigation = [
     {
@@ -154,4 +152,4 @@ function useNavState(): {
   return navigation;
 }
 
-export default useNavState;
+export default getNavSections;

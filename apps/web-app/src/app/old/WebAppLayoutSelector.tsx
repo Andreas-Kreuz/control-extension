@@ -1,7 +1,5 @@
-import { lazy } from 'react';
-
-const WebAppLayout = lazy(() => import('./WebAppLayout'));
-const WebAppOverlayLayout = lazy(() => import('./WebAppOverlayLayout'));
+import WebAppLayout from './WebAppLayout';
+import WebAppOverlayLayout from './WebAppOverlayLayout';
 
 function WebAppLayoutSelector(props: { simple?: boolean }) {
   return props.simple ? <WebAppLayout /> : <WebAppOverlayLayout />;

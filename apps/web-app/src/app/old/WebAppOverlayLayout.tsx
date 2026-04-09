@@ -1,7 +1,6 @@
-﻿import { lazy } from 'react';
-const WebAppLayout = lazy(() => import('./WebAppLayout'));
-const StatusSnackBar = lazy(() => import('../../features/status/components/StatusSnackBar'));
+﻿import StatusSnackBar from '../../features/status/components/StatusSnackBar';
 import LogOverlay from '../../features/log/overlay';
+import WebAppLayout from './WebAppLayout';
 
 function WebAppOverlayLayout() {
   return (
