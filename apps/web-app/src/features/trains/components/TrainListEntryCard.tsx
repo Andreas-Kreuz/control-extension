@@ -33,8 +33,7 @@ const TrainListEntryCard = ({ train, selected, onSelect, children }: TrainListEn
 
   return (
     <AppCardBg
-      title="Fahrzeug"
-      id={train.id}
+      title={train.id}
       additionalChips={additionalChips}
       icon={getIconName(train.trainType)}
       image={getImageName(train.trackType ?? 'train')}

@@ -21,8 +21,7 @@ export const getTrainElements = (train: TrainListDto) => [
 ];
 
 export const getTrainChips = (train: TrainListDto) => {
-  const elements = getTrainElements(train).filter((element) => element.key !== 1 && element.on);
-  return elements.map((element) => (
-    <Chip key={element.key} variant="outlined" label={element.primary} icon={<element.icon />} />
-  ));
+  return getTrainElements(train)
+    .filter((element) => element.key === 2 && element.on)
+    .map((element) => <Chip key={element.key} variant="outlined" label={element.primary} icon={<element.icon />} />);
 };
