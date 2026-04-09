@@ -7,18 +7,22 @@ import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { styled, useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { styled } from '@mui/material/styles';
 import setTrackType from '../hooks/useSetTrackType';
 import useTrackType from '../hooks/useTrackType';
 import useTrains from '../hooks/useTrains';
+import TrainCamerasView from './TrainCamerasView';
+import TrainInformationSection from './TrainInformationSection';
+import TrainRollingStockSection from './TrainRollingStockSection';
+import TrainLineInfoSection from './TrainLineInfoSection';
+import TrainListItem from './TrainListItem';
 
 const AppCardGridContainer = lazy(() => import('../../../shared/ui/AppCardGridContainer'));
 const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
 const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
 const TrainListEntryCard = lazy(() => import('./TrainListEntryCard'));
+import ListLayout from '../../../shared/ui/ListLayout';
 
 interface ChipData {
   key: TrackType;
@@ -33,9 +37,6 @@ const TrainsPage = () => {
   const trains = useTrains();
   const trackType = useTrackType();
   const setType = setTrackType();
-  const theme = useTheme();
-  const showNameFilter = useMediaQuery(theme.breakpoints.up('md'));
-  const [nameFilter, setNameFilter] = useState('');
 
   const [chipData] = useState<readonly ChipData[]>([
     { key: TrackType.Rail, label: 'Gleise' },
@@ -45,77 +46,69 @@ const TrainsPage = () => {
     { key: TrackType.Control, label: 'Steuerstrecken' },
   ]);
   const selectedTrackLabel = chipData.find((entry) => entry.key === trackType)?.label;
-  const normalizedNameFilter = nameFilter.trim().toLocaleLowerCase();
-  const filteredTrains = trains.filter((train) => train.name.toLocaleLowerCase().includes(normalizedNameFilter));
+
+  const filterSlot = (
+    <>
+      <Box
+        component="ul"
+        sx={{
+          display: 'flex',
+          justifyContent: { xs: 'center', md: 'flex-start' },
+          flexWrap: 'wrap',
+          listStyle: 'none',
+          p: 0,
+          m: 0,
+        }}
+      >
+        {chipData.map((data) => (
+          <ListItem key={data.key}>
+            <Chip
+              label={data.label}
+              variant="filled"
+              color={trackType === data.key ? 'primary' : 'default'}
+              onClick={() => setType(data.key)}
+            />
+          </ListItem>
+        ))}
+      </Box>
+      <AppPageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</AppPageHeadline>
+    </>
+  );
 
   return (
     <AppPage>
       <AppPageHeadline>Gleissystem</AppPageHeadline>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          listStyle: 'none',
-          p: 0.5,
-          m: 0,
-        }}
-      >
-        {showNameFilter && (
-          <Box sx={{ px: 0.5, py: 0.5, mr: 1, minWidth: 240 }}>
-            <TextField
-              size="small"
-              label="Zugname filtern"
-              value={nameFilter}
-              onChange={(event) => setNameFilter(event.target.value)}
-              fullWidth
-            />
-          </Box>
+      <ListLayout
+        items={trains}
+        keyExtractor={(train) => train.id}
+        getFilterText={(train) => train.id}
+        filterLabel="Zugname filtern"
+        emptyMessage={(ft) => (
+          <Typography variant="body2">
+            {ft
+              ? `Es wurden keine Fahrzeuge mit dem Namen "${ft}" im Gleissystem ${selectedTrackLabel} gefunden.`
+              : `Es wurden keine Fahrzeuge im Gleissystem ${selectedTrackLabel} gefunden. Wähle ein anderes Gleissystem oder füge Fahrzeuge in EEP hinzu.`}
+          </Typography>
         )}
-        <Box
-          component="ul"
-          sx={{
-            display: 'flex',
-            justifyContent: { xs: 'center', md: 'flex-start' },
-            flexWrap: 'wrap',
-            listStyle: 'none',
-            p: 0,
-            m: 0,
-            flexGrow: 1,
-          }}
-        >
-          {chipData.map((data) => (
-            <ListItem key={data.key}>
-              <Chip
-                label={data.label}
-                variant="filled"
-                color={trackType === data.key ? 'primary' : 'default'}
-                onClick={() => setType(data.key)}
-              />
-            </ListItem>
-          ))}
-        </Box>
-      </Box>
-      <AppCardGridContainer>
-        <AppPageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</AppPageHeadline>
-        {filteredTrains.length === 0 ? (
-          <Grid size={{ xs: 12 }}>
-            <Typography variant="body2">
-              {normalizedNameFilter
-                ? `Es wurden keine Fahrzeuge mit dem Namen "${nameFilter}" im Gleissystem ${selectedTrackLabel} gefunden.`
-                : `Es wurden keine Fahrzeuge im Gleissystem ${selectedTrackLabel} gefunden. Wähle ein anderes Gleissystem oder füge Fahrzeuge in EEP hinzu.`}
-            </Typography>
-          </Grid>
-        ) : (
-          <>
-            {filteredTrains.map((train) => (
-              <Grid size={{ xs: 12 }} key={train.id}>
-                <TrainListEntryCard train={train} />
-              </Grid>
-            ))}
-          </>
+        renderListItem={(train, selected, onSelect) => (
+          <TrainListItem train={train} selected={selected} onSelect={onSelect} />
         )}
-      </AppCardGridContainer>
+        renderCard={(train, selected, onSelect, mobileExpansion) => (
+          <TrainListEntryCard train={train} selected={selected} onSelect={onSelect}>
+            {mobileExpansion}
+          </TrainListEntryCard>
+        )}
+        getDetails={(train) => [
+          {
+            title: 'Kameras',
+            component: <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />,
+          },
+          { title: 'Information', component: <TrainInformationSection train={train} /> },
+          { title: 'RollingStock', component: <TrainRollingStockSection trainId={train.id} /> },
+          { title: 'Linien', component: <TrainLineInfoSection train={train} /> },
+        ]}
+        filterSlot={filterSlot}
+      />
 
       <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
       <AppCardGridContainer>

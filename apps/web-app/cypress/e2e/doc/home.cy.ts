@@ -6,7 +6,7 @@ describe('Home Screenshots', () => createScreenshots(tests));
 function tests(size: string, simulator: EepSimulator) {
   function waitForHome() {
     simulator.eepEvent('eep-version-complete.json');
-    cy.contains('App für EEP');
+    cy.contains('Control Extension App');
   }
 
   beforeEach(() => {
@@ -21,13 +21,13 @@ function tests(size: string, simulator: EepSimulator) {
       cy.screenshot(`${path}`);
     });
     it('/ home-eep-active', () => {
-      cy.visit('/');
+      cy.visit('/old');
       waitForHome();
       cy.contains('EEP sendet Daten');
       cy.screenshot(`${path}eep-active`);
     });
     it('/ home-eep-paused', () => {
-      cy.visit('/');
+      cy.visit('/old');
       waitForHome();
       cy.contains('EEP wurde pausiert');
       cy.screenshot(`${path}eep-paused`);

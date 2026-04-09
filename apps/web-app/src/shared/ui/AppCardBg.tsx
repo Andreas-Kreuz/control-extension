@@ -17,6 +17,7 @@ export interface AppCardBgProps {
   image: string;
   small?: boolean;
   expanded?: boolean;
+  selected?: boolean;
   setExpanded?: (expanded: boolean) => void;
 }
 
@@ -65,7 +66,11 @@ function AppCardBg(props: AppCardBgProps) {
     </Stack>
   );
 
-  return <Card sx={{ flexGrow: 1 }}>{contents}</Card>;
+  return (
+    <Card sx={{ flexGrow: 1, ...(props.selected && { outline: '2px solid', outlineColor: 'primary.main' }) }}>
+      {contents}
+    </Card>
+  );
 }
 
 export default AppCardBg;

@@ -1,9 +1,6 @@
-import { lazy, useState } from 'react';
+import { lazy } from 'react';
+import type { ReactNode } from 'react';
 import { TrainListDto, TrainType } from '@ce/web-shared';
-import Box from '@mui/material/Box';
-import Collapse from '@mui/material/Collapse';
-import Divider from '@mui/material/Divider';
-import TrainDetails from './TrainDetails';
 import { trainIconFor } from '../lib/trainIconFor';
 import { getTrainChips } from '../lib/trainDetails';
 
@@ -26,9 +23,14 @@ const getImageName = (trackType: string): string => {
   }
 };
 
-const TrainListEntryCard = (props: { train: TrainListDto }) => {
-  const [expanded, setExpanded] = useState(false);
-  const train = props.train;
+interface TrainListEntryCardProps {
+  train: TrainListDto;
+  selected: boolean;
+  onSelect: () => void;
+  children?: ReactNode;
+}
+
+const TrainListEntryCard = ({ train, selected, onSelect, children }: TrainListEntryCardProps) => {
   const additionalChips = getTrainChips(train);
 
   return (
@@ -38,15 +40,11 @@ const TrainListEntryCard = (props: { train: TrainListDto }) => {
       additionalChips={additionalChips}
       icon={getIconName(train.trainType)}
       image={getImageName(train.trackType ?? 'train')}
-      expanded={expanded}
-      setExpanded={setExpanded}
+      selected={selected}
+      expanded={selected}
+      setExpanded={() => onSelect()}
     >
-      {expanded && <Divider sx={{ width: 1 }} />}
-      <Collapse in={expanded} mountOnEnter unmountOnExit sx={{ flexGrow: 1, width: 1 }}>
-        <Box sx={{ flexGrow: 1, width: 1, p: 0 }}>
-          <TrainDetails train={train} />
-        </Box>
-      </Collapse>
+      {children}
     </AppCardBg>
   );
 };

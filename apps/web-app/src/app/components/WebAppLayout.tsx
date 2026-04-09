@@ -22,7 +22,7 @@ function WebAppLayout() {
               to={'/'}
               sx={{ flexGrow: 1, display: 'block', textDecoration: 'none', color: theme.palette.primary.contrastText }}
             >
-              App für EEP
+              Control Extension App
             </Typography>
           </Toolbar>
         </AppBar>

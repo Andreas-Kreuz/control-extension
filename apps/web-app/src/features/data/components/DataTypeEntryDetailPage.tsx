@@ -1,40 +1,15 @@
-import { lazy, useMemo } from 'react';
+import { lazy } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { detailRoomForCeType } from '@ce/web-shared';
-import useDynamicEntry from '../hooks/useDynamicEntry';
-import useTypeEntries from '../hooks/useTypeEntries';
+import DataEntryDetailSection from './DataEntryDetailSection';
 
 const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
 const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
 
-function formatValue(value: unknown): string {
-  if (value === undefined || value === null) return '';
-  return typeof value === 'object' ? JSON.stringify(value) : String(value);
-}
-
 function DataTypeEntryDetailMod() {
   const { ceType = '', entryId = '' } = useParams<{ ceType: string; entryId: string }>();
-  const entriesMap = useTypeEntries(ceType);
-  const dynamicEntry = useDynamicEntry(detailRoomForCeType(ceType), entryId);
-
-  const entry = dynamicEntry ?? entriesMap[entryId];
-
-  const fields = useMemo(() => {
-    if (!entry) return [];
-    return Object.entries(entry)
-      .map(([field, value]) => ({
-        field,
-        value: formatValue(value),
-      }))
-      .sort((a, b) => a.field.localeCompare(b.field));
-  }, [entry]);
 
   return (
     <AppPage>
@@ -48,22 +23,7 @@ function DataTypeEntryDetailMod() {
         <Typography color="text.primary">{entryId}</Typography>
       </Breadcrumbs>
       <AppPageHeadline>{entryId}</AppPageHeadline>
-      {entry ? (
-        <Table size="small">
-          <TableBody>
-            {fields.map(({ field, value }) => (
-              <TableRow key={field}>
-                <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                  {field}
-                </TableCell>
-                <TableCell>{value}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <Typography color="text.secondary">Eintrag wird geladen …</Typography>
-      )}
+      <DataEntryDetailSection ceType={ceType} entryId={entryId} />
     </AppPage>
   );
 }

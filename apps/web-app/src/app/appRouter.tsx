@@ -1,5 +1,7 @@
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
+import useNavItems from './hooks/useNavItems';
+import AppLayout from './components/AppLayout';
 
 const WebAppLayoutSelector = lazy(() => import('./components/WebAppLayoutSelector'));
 const DataRoute = lazy(() => import('../features/data/DataRoute'));
@@ -36,8 +38,16 @@ export const appRouter = createBrowserRouter([
     })),
   },
   {
-    path: '/',
+    path: '/old',
     element: <WebAppLayoutSelector />,
+    children: homeRoutes.map((route) => ({
+      path: '/old' + route.path,
+      element: route.element,
+    })),
+  },
+  {
+    path: '/',
+    element: <AppLayout navItems={useNavItems} />,
     children: homeRoutes,
   },
   { path: '/status', element: <StatusRoute /> },

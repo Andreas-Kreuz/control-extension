@@ -12,7 +12,7 @@ function TrainRollingStockView(props: { rollingStock: RollingStockDto[] | undefi
   }
 
   return (
-    <List disablePadding sx={{ px: 2, pb: 2 }}>
+    <List disablePadding sx={{ px: 2, pb: 2, containerType: 'inline-size' }}>
       {rollingStock.map((item) => (
         <RollingStockRow key={item.id} rollingStock={item} />
       ))}
@@ -38,7 +38,10 @@ function RollingStockRow(props: { rollingStock: RollingStockDto }) {
         sx={{
           width: 1,
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: 'minmax(160px, 1fr) minmax(180px, 1fr) minmax(260px, 2fr)' },
+          gridTemplateColumns: '1fr',
+          '@container (min-width: 560px)': {
+            gridTemplateColumns: 'minmax(160px, 1fr) minmax(180px, 1fr) minmax(260px, 2fr)',
+          },
           gap: 2,
         }}
       >
