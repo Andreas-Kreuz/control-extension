@@ -1,4 +1,4 @@
-import MyAppCardBg, { AppCardBgProps as MyAppCardProps } from '../../shared/ui/AppCardBg';
+import MyAppCardBg, { AppCardBgProps as MyAppCardProps } from '../../shared/components/AppCardBg';
 import { BrowserRouter } from 'react-router-dom';
 
 export type AppCardBgProps = MyAppCardProps;

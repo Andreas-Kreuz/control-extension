@@ -1,14 +1,14 @@
 import { lazy } from 'react';
-import ModuleSettingsButton from '../../../shared/ui/ModuleSettingsButton';
+import ModuleSettingsButton from '../../../shared/components/ModuleSettingsButton';
 import useLines from '../hooks/useLines';
 import useTransitSettings from '../hooks/useTransitSettings';
 import TransitLineCard from './TransitLineCard';
 import TransitLineListItem from './TransitLineListItem';
 import TransitLineSegment from './TransitLineSegment';
 
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
-import ListLayout from '../../../shared/ui/ListLayout';
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
+import ListLayout from '../../../shared/layouts/ListLayout';
 import { Typography } from '@mui/material';
 
 function TransitOverview() {

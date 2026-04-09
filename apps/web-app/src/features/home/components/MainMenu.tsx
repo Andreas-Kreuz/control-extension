@@ -6,10 +6,10 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 
-const AppCardGrid = lazy(() => import('../../../shared/ui/AppCardGrid'));
-const AppCardGridContainer = lazy(() => import('../../../shared/ui/AppCardGridContainer'));
-const AppCardImg = lazy(() => import('../../../shared/ui/AppCardImg'));
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
+const AppCardGrid = lazy(() => import('../../../shared/layouts/AppCardGrid'));
+const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
+const AppCardImg = lazy(() => import('../../../shared/components/AppCardImg'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
 
 function MainMenu() {
   const navigation = useNavState();

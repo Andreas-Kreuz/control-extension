@@ -5,8 +5,8 @@ import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import DataEntryDetailSection from './DataEntryDetailSection';
 
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
 
 function DataTypeEntryDetailMod() {
   const { ceType = '', entryId = '' } = useParams<{ ceType: string; entryId: string }>();

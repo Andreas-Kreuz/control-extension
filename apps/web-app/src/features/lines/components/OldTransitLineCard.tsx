@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-const AppCardBg = lazy(() => import('../../../shared/ui/AppCardBg'));
+const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
 import TransitLineSegment from './TransitLineSegment';
 import Line from '../model/Line';
 import BusIcon from '@mui/icons-material/DirectionsBus';

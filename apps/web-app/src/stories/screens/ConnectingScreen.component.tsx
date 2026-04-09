@@ -1,4 +1,4 @@
-import MyConnectingScreen, { ConnectingScreenProps as MyConnectingScreenProps } from '../../shared/ui/ConnectingScreen';
+import MyConnectingScreen, { ConnectingScreenProps as MyConnectingScreenProps } from '../../app/components/ConnectingScreen';
 
 export type ConnectingScreenProps = Omit<MyConnectingScreenProps, 'children'>;
 

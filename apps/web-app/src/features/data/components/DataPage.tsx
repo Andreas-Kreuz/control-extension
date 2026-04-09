@@ -8,8 +8,8 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import useApiEntries from '../hooks/useApiEntries';
 
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
 
 function DataMod() {
   const entries = useApiEntries();

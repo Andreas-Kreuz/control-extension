@@ -18,11 +18,11 @@ import TrainRollingStockSection from './TrainRollingStockSection';
 import TrainLineInfoSection from './TrainLineInfoSection';
 import TrainListItem from './TrainListItem';
 
-const AppCardGridContainer = lazy(() => import('../../../shared/ui/AppCardGridContainer'));
-const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
+const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
+const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
 const TrainListEntryCard = lazy(() => import('./TrainListEntryCard'));
-import ListLayout from '../../../shared/ui/ListLayout';
+import ListLayout from '../../../shared/layouts/ListLayout';
 
 interface ChipData {
   key: TrackType;

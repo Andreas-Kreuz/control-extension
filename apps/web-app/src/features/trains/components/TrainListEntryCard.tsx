@@ -4,7 +4,7 @@ import { TrainListDto, TrainType } from '@ce/web-shared';
 import { trainIconFor } from '../lib/trainIconFor';
 import { getTrainChips } from '../lib/trainDetails';
 
-const AppCardBg = lazy(() => import('../../../shared/ui/AppCardBg'));
+const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
 
 const getIconName = (trainType: TrainType): string => {
   const imgName = trainIconFor(trainType);

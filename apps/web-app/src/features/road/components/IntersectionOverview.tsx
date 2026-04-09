@@ -11,12 +11,12 @@ import IntersectionControlSection from './IntersectionControlSection';
 import IntersectionCamsSection from './IntersectionCamsSection';
 import IntersectionListItem from './IntersectionListItem';
 
-const AppCardBg = lazy(() => import('../../../shared/ui/AppCardBg'));
-const AppCardGridContainer = lazy(() => import('../../../shared/ui/AppCardGridContainer'));
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
-const ModuleSettingsButton = lazy(() => import('../../../shared/ui/ModuleSettingsButton'));
-import ListLayout from '../../../shared/ui/ListLayout';
+const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
+const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
+const ModuleSettingsButton = lazy(() => import('../../../shared/components/ModuleSettingsButton'));
+import ListLayout from '../../../shared/layouts/ListLayout';
 
 function IntersectionOverview() {
   const intersections = useIntersections();

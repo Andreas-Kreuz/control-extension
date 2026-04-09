@@ -1,7 +1,7 @@
 ﻿import { ReactNode } from 'react';
 import { PairingStatus } from '@ce/web-shared';
-import ConnectingScreen from '../../shared/ui/ConnectingScreen';
-import PairingScreen from '../../shared/ui/PairingScreen';
+import ConnectingScreen from './ConnectingScreen';
+import PairingScreen from './PairingScreen';
 import { useSocketIsConnected } from '../hooks/useSocketConnection';
 import { useSocketPairingCode, useSocketPairingStatus } from '../hooks/useSocketPairing';
 import { useSocketUrl } from '../hooks/useSocketUrl';

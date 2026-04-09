@@ -1,9 +1,9 @@
 import { lazy } from 'react';
-const AppCardGridContainer = lazy(() => import('../../../shared/ui/AppCardGridContainer'));
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
+const AppCardGridContainer = lazy(() => import('../../../shared/layouts/AppCardGridContainer'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
 import StatisticsCard from './StatisticsCard';
 import useStatistics from '../hooks/useStatistics';
-import AppPageHeadline from '../../../shared/ui/AppPageHeadline';
+import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import VersionInfoWrapper from './VersionInfoWrapper';
 
 function StatisticsOverview() {

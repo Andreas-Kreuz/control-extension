@@ -8,7 +8,7 @@ import { styled } from '@mui/material/styles';
 import { useSocket } from '../../../app/hooks/useSocket';
 import { CommandEvent } from '@ce/web-shared';
 import Intersection from '../model/Intersection';
-import AppCaption from '../../../shared/ui/AppCaption';
+import AppCaption from '../../../shared/components/AppCaption';
 
 const Pre = styled('pre')({ fontSize: 14, whiteSpace: 'normal' });
 

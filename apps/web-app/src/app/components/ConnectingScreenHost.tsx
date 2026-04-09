@@ -1,4 +1,4 @@
-﻿import ConnectingScreen from '../../shared/ui/ConnectingScreen';
+﻿import ConnectingScreen from './ConnectingScreen';
 import { useSocketUrl } from '../hooks/useSocketUrl';
 
 function ConnectingScreenHost() {

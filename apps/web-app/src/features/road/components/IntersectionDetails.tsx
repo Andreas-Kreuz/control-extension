@@ -1,8 +1,8 @@
 import { lazy } from 'react';
-const AppCaption = lazy(() => import('../../../shared/ui/AppCaption'));
-const AppHeadline = lazy(() => import('../../../shared/ui/AppHeadline'));
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
-const AppPaper = lazy(() => import('../../../shared/ui/AppPaper'));
+const AppCaption = lazy(() => import('../../../shared/components/AppCaption'));
+const AppHeadline = lazy(() => import('../../../shared/components/AppHeadline'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+const AppPaper = lazy(() => import('../../../shared/layouts/AppPaper'));
 import { useSocket } from '../../../app/hooks/useSocket';
 import useIntersection from '../hooks/useIntersection';
 import useIntersectionSwitching from '../hooks/useIntersectionSwitching';

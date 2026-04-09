@@ -3,13 +3,13 @@ import { useParams } from 'react-router-dom';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import ListLayout from '../../../shared/ui/ListLayout';
+import ListLayout from '../../../shared/layouts/ListLayout';
 import useTypeEntries from '../hooks/useTypeEntries';
 import DataEntryDetailSection from './DataEntryDetailSection';
 
-const AppCardBg = lazy(() => import('../../../shared/ui/AppCardBg'));
-const AppPage = lazy(() => import('../../../shared/ui/AppPage'));
-const AppPageHeadline = lazy(() => import('../../../shared/ui/AppPageHeadline'));
+const AppCardBg = lazy(() => import('../../../shared/components/AppCardBg'));
+const AppPage = lazy(() => import('../../../shared/layouts/AppPage'));
+const AppPageHeadline = lazy(() => import('../../../shared/layouts/AppPageHeadline'));
 
 interface DataEntry {
   id: string;

@@ -6,7 +6,7 @@ import { useSocket } from '../../../app/hooks/useSocket';
 import { RoadEvent } from '@ce/web-shared';
 import Intersection from '../model/Intersection';
 import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
-import AppCaption from '../../../shared/ui/AppCaption';
+import AppCaption from '../../../shared/components/AppCaption';
 
 function IntersectionControlSection({ intersection: i }: { intersection: Intersection }) {
   const theme = useTheme();
