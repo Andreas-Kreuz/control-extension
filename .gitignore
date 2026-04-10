@@ -43,9 +43,11 @@ __pycache__
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-is-running
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-state.*
 /apps/web-app/cypress/io/ce*
+/apps/web-app/cypress/server-config/settings.json
 /apps/web-app/cypress/screenshots
 /apps/web-app/cypress/videos
 /apps/web-app/dist
+/apps/web-app/storybook-static
 
 # @ak/web-server
 /apps/web-server/target
@@ -69,6 +71,8 @@ __pycache__
 /lua/LUA/ce/databridge/exchange/ce-version.txt
 /lua/LUA/ce/databridge/exchange/server-is-running
 /lua/LUA/ce/databridge/exchange/server-state.*
+/lua/LUA/ce/databridge/exchange-test/
+!/lua/LUA/ce/databridge/exchange-test/.gitkeep
 /lua/LUA/comm_*
 /lua/modell-pakete
 

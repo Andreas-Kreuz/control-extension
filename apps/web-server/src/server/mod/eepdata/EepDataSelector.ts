@@ -5,6 +5,7 @@ import { SignalLuaDto } from '../../ce/dto/signals/SignalLuaDto';
 import { WaitingOnSignalLuaDto } from '../../ce/dto/signals/WaitingOnSignalLuaDto';
 import { SwitchLuaDto } from '../../ce/dto/switches/SwitchLuaDto';
 import { StructureLuaDto } from '../../ce/dto/structures/StructureLuaDto';
+import { ContactLuaDto } from '../../ce/dto/contacts/ContactLuaDto';
 import { TrackLuaDto } from '../../ce/dto/tracks/TrackLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
@@ -19,6 +20,7 @@ import {
   WaitingOnSignalDto,
   SwitchDto,
   StructureDto,
+  ContactDto,
   TrackDto,
   trackTypeForCeType,
 } from '@ce/web-shared';
@@ -52,6 +54,7 @@ const groupedPublisherCollectors: RuntimeStatisticsCollector[] = [
   { label: 'Update/ce.hub.RollingStock', runtimeKeys: ['Update/ce.hub.RollingStock'] },
   { label: 'Update/ce.hub.Runtime', runtimeKeys: ['Update/ce.hub.Runtime'] },
   { label: 'Update/ce.hub.Signal', runtimeKeys: ['Update/ce.hub.Signal'] },
+  { label: 'Update/ce.hub.Scenario', runtimeKeys: ['Update/ce.hub.Scenario'] },
   { label: 'Update/ce.hub.Structure', runtimeKeys: ['Update/ce.hub.Structure'] },
   { label: 'Update/ce.hub.Switch', runtimeKeys: ['Update/ce.hub.Switch'] },
   { label: 'Update/ce.hub.Time', runtimeKeys: ['Update/ce.hub.Time'] },
@@ -66,12 +69,16 @@ const groupedModuleCollectors: RuntimeStatisticsCollector[] = [
   { label: 'Discovery/ce.hub.Train', runtimeKeys: ['Discovery/ce.hub.Train'] },
 ];
 const groupedPublisherInitCollectors: RuntimeStatisticsCollector[] = [
-  { label: 'Update-init/ce.hub.DataSlot', runtimeKeys: ['Update-init/ce.hub.DataSlot', 'Update-init/ce.hub.DataSlots'] },
+  {
+    label: 'Update-init/ce.hub.DataSlot',
+    runtimeKeys: ['Update-init/ce.hub.DataSlot', 'Update-init/ce.hub.DataSlots'],
+  },
   { label: 'Update-init/ce.hub.Frame', runtimeKeys: ['Update-init/ce.hub.Frame', 'Update-init/ce.hub.FrameData'] },
   { label: 'Update-init/ce.hub.Module', runtimeKeys: ['Update-init/ce.hub.Module'] },
   { label: 'Update-init/ce.hub.RollingStock', runtimeKeys: ['Update-init/ce.hub.RollingStock'] },
   { label: 'Update-init/ce.hub.Runtime', runtimeKeys: ['Update-init/ce.hub.Runtime'] },
   { label: 'Update-init/ce.hub.Signal', runtimeKeys: ['Update-init/ce.hub.Signal'] },
+  { label: 'Update-init/ce.hub.Scenario', runtimeKeys: ['Update-init/ce.hub.Scenario'] },
   { label: 'Update-init/ce.hub.Structure', runtimeKeys: ['Update-init/ce.hub.Structure'] },
   { label: 'Update-init/ce.hub.Switch', runtimeKeys: ['Update-init/ce.hub.Switch'] },
   { label: 'Update-init/ce.hub.Time', runtimeKeys: ['Update-init/ce.hub.Time'] },
@@ -110,6 +117,7 @@ export default class EepDataSelector {
   private waitingOnSignals: Record<string, WaitingOnSignalDto> = {};
   private switches: Record<string, SwitchDto> = {};
   private structures: Record<string, StructureDto> = {};
+  private contacts: Record<string, ContactDto> = {};
   private tracks: Record<string, Record<string, TrackDto>> = {};
 
   updateFromState(state: fromEepData.State): void {
@@ -189,6 +197,13 @@ export default class EepDataSelector {
       light: dto.light,
       smoke: dto.smoke,
       fire: dto.fire,
+      ...optionalProperty('gsbname', dto.gsbname),
+    }));
+
+    this.contacts = this.mapCeType<ContactLuaDto, ContactDto>(state, CeTypes.HubContact, (dto) => ({
+      id: dto.id,
+      ...optionalProperty('luaFn', dto.luaFn),
+      ...optionalProperty('tipTxt', dto.tipTxt),
     }));
 
     this.tracks = {};
@@ -201,7 +216,6 @@ export default class EepDataSelector {
         ...optionalProperty('reservedByTrainName', dto.reservedByTrainName),
       }));
     }
-
   }
 
   private mapCeType<TLua, TDto>(
@@ -359,6 +373,7 @@ export default class EepDataSelector {
   getSwitches = (): Record<string, SwitchDto> => this.switches;
   getStructures = (): Record<string, StructureDto> => this.structures;
   getStructure = (id: string): StructureDto | undefined => this.structures[id];
+  getContacts = (): Record<string, ContactDto> => this.contacts;
   getTracksForRoom = (trackType: string): Record<string, TrackDto> => this.tracks[trackType] ?? {};
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);
 }

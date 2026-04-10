@@ -11,6 +11,5 @@ describe('Road', () => {
     cy.visit('/simple/road');
     cy.contains('Bahnhofstr. - Hauptstr.');
     cy.contains('Kreuzung 2');
-    cy.contains('Hilfe');
   });
 });

@@ -70,14 +70,14 @@ end
 
 Diese alten Modul-Wrapper sind die häufigsten Stellen, an denen deine bestehende Anlage jetzt bricht:
 
-| Alt                                          | Neu                                          | Hinweis                                                    |
-| -------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
-| `require("ak.core.CoreLuaModule")`           | `require("ce.hub.CeHubModule")`              | Heutiger Hub-Einstieg                                      |
-| `require("ak.data.DataLuaModule")`           | `require("ce.hub.CeHubModule")`              | Datenexport ist im Hub-Modul enthalten                     |
-| `require("ak.scheduler.SchedulerLuaModule")` | `require("ce.hub.CeHubModule")`              | Scheduler-Lauf ist im Hub-Modul enthalten                  |
-| `require("ak.road.CrossingLuaModule")`       | `require("ce.mods.road.CeRoadModule")`       | Straßenverkehrsmodul                                       |
-| `require("ak.road.CrossingLuaModul")`        | `require("ce.mods.road.CeRoadModule")`       | Alter Tippfehler in einigen Anlagen-Dateien                |
-| `require("ak.transit.TransitLuaModule")`     | `require("ce.mods.transit.CeTransitModule")` | ÖPNV-Modul                                                 |
+| Alt                                          | Neu                                          | Hinweis                                     |
+| -------------------------------------------- | -------------------------------------------- | ------------------------------------------- |
+| `require("ak.core.CoreLuaModule")`           | `require("ce.hub.CeHubModule")`              | Heutiger Hub-Einstieg                       |
+| `require("ak.data.DataLuaModule")`           | `require("ce.hub.CeHubModule")`              | Datenexport ist im Hub-Modul enthalten      |
+| `require("ak.scheduler.SchedulerLuaModule")` | `require("ce.hub.CeHubModule")`              | Scheduler-Lauf ist im Hub-Modul enthalten   |
+| `require("ak.road.CrossingLuaModule")`       | `require("ce.mods.road.CeRoadModule")`       | Straßenverkehrsmodul                        |
+| `require("ak.road.CrossingLuaModul")`        | `require("ce.mods.road.CeRoadModule")`       | Alter Tippfehler in einigen Anlagen-Dateien |
+| `require("ak.transit.TransitLuaModule")`     | `require("ce.mods.transit.CeTransitModule")` | ÖPNV-Modul                                  |
 
 ## Direkte `require()`-Ersetzungen nach Bereich
 
@@ -125,19 +125,19 @@ Die folgenden Ersetzungen decken die typischen direkten Modulzugriffe aus besteh
 
 Viele bisher flache `ak.*`-Bereiche wurden beim Refactoring fachlich aufgeteilt. Für dich ist vor allem diese Zuordnung relevant:
 
-| Alter Bereich    | Neuer Bereich                                           | Typische Beispiele                             |
-| ---------------- | ------------------------------------------------------- | ---------------------------------------------- |
-| `ak.core.*`      | `ce.hub.*`                                              | Laufzeit, Registry, EEP-Simulator              |
-| `ak.io.*`        | `ce.databridge.*`                                       | Datei- und Serveraustausch                     |
-| `ak.events.*`    | `ce.hub.publish.*`                                      | Event- und Änderungsbus                        |
-| `ak.storage.*`   | `ce.hub.util.*`                                         | Persistenz-Helfer                              |
-| `ak.util.*`      | `ce.hub.util.*`                                         | Tabellen, Queue, Laufzeit-Helfer               |
-| `ak.scheduler.*` | `ce.hub.scheduler.*` und `ce.hub.CeHubModule`           | Scheduler-Kern und Hub-Modul                   |
+| Alter Bereich    | Neuer Bereich                                                | Typische Beispiele                             |
+| ---------------- | ------------------------------------------------------------ | ---------------------------------------------- |
+| `ak.core.*`      | `ce.hub.*`                                                   | Laufzeit, Registry, EEP-Simulator              |
+| `ak.io.*`        | `ce.databridge.*`                                            | Datei- und Serveraustausch                     |
+| `ak.events.*`    | `ce.hub.publish.*`                                           | Event- und Änderungsbus                        |
+| `ak.storage.*`   | `ce.hub.util.*`                                              | Persistenz-Helfer                              |
+| `ak.util.*`      | `ce.hub.util.*`                                              | Tabellen, Queue, Laufzeit-Helfer               |
+| `ak.scheduler.*` | `ce.hub.scheduler.*` und `ce.hub.CeHubModule`                | Scheduler-Kern und Hub-Modul                   |
 | `ak.data.*`      | `ce.hub.data.*`, `ce.hub.publish.*` und `ce.hub.CeHubModule` | Slots, Signale, Strukturen, Zeit, Tracks, Züge |
-| `ak.train.*`     | `ce.hub.data.trains.*` und `ce.hub.data.rollingstock.*` | Zug- und Rollmaterialdaten                     |
-| `ak.road.*`      | `ce.mods.road.*` und `ce.mods.road.data.*`              | Kreuzungen, Ampeln, Road-Daten                 |
-| `ak.transit.*`   | `ce.mods.transit.*` und `ce.mods.transit.data.*`        | Linien, Haltestellen, ÖPNV-Daten               |
-| `ak.roadline.*`  | `ce.mods.transit.*`                                     | Frühere Linien-Tests und Linienlogik           |
+| `ak.train.*`     | `ce.hub.data.trains.*` und `ce.hub.data.rollingstock.*`      | Zug- und Rollmaterialdaten                     |
+| `ak.road.*`      | `ce.mods.road.*` und `ce.mods.road.data.*`                   | Kreuzungen, Ampeln, Road-Daten                 |
+| `ak.transit.*`   | `ce.mods.transit.*` und `ce.mods.transit.data.*`             | Linien, Haltestellen, ÖPNV-Daten               |
+| `ak.roadline.*`  | `ce.mods.transit.*`                                          | Frühere Linien-Tests und Linienlogik           |
 
 ## Häufige 1:1-Dateiwechsel
 

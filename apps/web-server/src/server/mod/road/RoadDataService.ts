@@ -53,4 +53,3 @@ export default class RoadDataService implements DynamicRoomService {
 
   getDataProviders = () => this.roomDataProviders;
 }
-

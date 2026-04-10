@@ -203,12 +203,12 @@ EEPAuxiliaryTackSetTextureText = EEPAuxiliaryTrackSetTextureText  -- Tack vs Tra
 
 Bekannte Schreibfehler im Handbuch (Stand: EEP 18.1 Plugin 1):
 
-| Schreibfehler im Handbuch            | Kanonischer Name                      | Fehler       |
-|---------------------------------------|---------------------------------------|--------------|
-| `EEPAuxiliaryTackGetTextureText`      | `EEPAuxiliaryTrackGetTextureText`     | Tack / Track |
-| `EEPAuxiliaryTackSetTextureText`      | `EEPAuxiliaryTrackSetTextureText`     | Tack / Track |
-| `EEPTramTackGetTextureText`           | `EEPTramTrackGetTextureText`          | Tack / Track |
-| `EEPTramTackSetTextureText`           | `EEPTramTrackSetTextureText`          | Tack / Track |
-| `EEPGoodsSetAxisByNumer`              | `EEPGoodsSetAxisByNumber`             | Numer / Number |
-| `EEPSructureSetAxisByNumer`           | `EEPStructureSetAxisByNumber`         | Sructure + Numer |
-| `EEPStructureSetLightingColour`       | `EEPStructureSetLightningColour`      | Lighting / Lightning |
+| Schreibfehler im Handbuch        | Kanonischer Name                  | Fehler               |
+| -------------------------------- | --------------------------------- | -------------------- |
+| `EEPAuxiliaryTackGetTextureText` | `EEPAuxiliaryTrackGetTextureText` | Tack / Track         |
+| `EEPAuxiliaryTackSetTextureText` | `EEPAuxiliaryTrackSetTextureText` | Tack / Track         |
+| `EEPTramTackGetTextureText`      | `EEPTramTrackGetTextureText`      | Tack / Track         |
+| `EEPTramTackSetTextureText`      | `EEPTramTrackSetTextureText`      | Tack / Track         |
+| `EEPGoodsSetAxisByNumer`         | `EEPGoodsSetAxisByNumber`         | Numer / Number       |
+| `EEPSructureSetAxisByNumer`      | `EEPStructureSetAxisByNumber`     | Sructure + Numer     |
+| `EEPStructureSetLightingColour`  | `EEPStructureSetLightningColour`  | Lighting / Lightning |

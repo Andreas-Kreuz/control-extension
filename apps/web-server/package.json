@@ -16,7 +16,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "run": "electron ./build/main/index.js",
     "run:headless": "node ./build/server/app/HeadlessStart.js",
-    "run:test": "node ../../scripts/prepare-cypress-io.mjs && tsc && node ./build/server/app/HeadlessStart.js --testmode --exchange-dir ../web-app/cypress/io",
+    "run:test": "node ../../scripts/prepare-cypress-io.mjs && tsc && node ./build/server/app/HeadlessStart.js --testmode --port 3001 --exchange-dir ../web-app/cypress/io --config-dir ../web-app/cypress/server-config",
     "tools:copy-app": "node ../../scripts/copy-web-app.mjs",
     "tools:persist-eep-state": "tsc && node ./build/server/eep/helpers/EepStateReader.js",
     "tools:sync-version": "node ../../scripts/sync-control-extension-version.mjs"

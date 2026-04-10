@@ -1,6 +1,5 @@
 import { VersionLuaDto } from '../../ce/dto/version/VersionLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { optionalProperty } from '../../utils/optionalProperty';
 import { CeTypes, VersionDto } from '@ce/web-shared';
 
 export default class VersionSelector {
@@ -21,15 +20,9 @@ export default class VersionSelector {
         eepVersion: dto.eepVersion,
         luaVersion: dto.luaVersion,
         singleVersion: dto.singleVersion,
-        ...optionalProperty('eepLanguage', dto.eepLanguage),
-        ...optionalProperty('layoutVersion', dto.layoutVersion),
-        ...optionalProperty('layoutLanguage', dto.layoutLanguage),
-        ...optionalProperty('layoutName', dto.layoutName),
-        ...optionalProperty('layoutPath', dto.layoutPath),
       };
     });
   }
 
   getVersions = (): Record<string, VersionDto> => this.versions;
 }
-

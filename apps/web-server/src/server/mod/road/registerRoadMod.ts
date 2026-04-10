@@ -34,4 +34,3 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));
 };
-

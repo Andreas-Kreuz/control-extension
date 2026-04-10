@@ -23,7 +23,7 @@ insulate("ce.databridge.ServerExchangeFileIo", function ()
 
         io.close = function () end
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/server-is-running" and
                 name ~= "custom-dir/events-from-ce.pending" then
@@ -58,7 +58,7 @@ insulate("ce.databridge.ServerExchangeFileIo", function ()
 
         io.close = function () end
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/events-from-ce" and
                 name ~= "custom-dir/server-is-running" and

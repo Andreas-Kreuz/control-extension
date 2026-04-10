@@ -36,4 +36,3 @@ Im regulären Betrieb gelten für Web-Clients folgende Regeln:
 
 Hinweis:
 Die Regeln oben beschreiben den normalen Betrieb. Explizite Entwicklungs- und Testpfade wie `--testmode` sind davon ausgenommen.
-

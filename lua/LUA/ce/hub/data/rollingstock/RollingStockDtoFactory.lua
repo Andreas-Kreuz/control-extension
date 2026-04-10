@@ -30,7 +30,13 @@ local placeHolders = {
     rotX = 0,
     rotY = 0,
     rotZ = 0,
+    xmlModel = "",
 }
+
+local function getXmlModel(stock)
+    if stock.getXmlModel then return stock:getXmlModel() end
+    return stock.xmlModel or placeHolders.xmlModel
+end
 
 local fieldGetters = {
     name = function (s) return s.rollingStockName end,
@@ -62,6 +68,7 @@ local fieldGetters = {
     rotX = function (s) return s:getRotX() end,
     rotY = function (s) return s:getRotY() end,
     rotZ = function (s) return s:getRotZ() end,
+    xmlModel = function (s) return getXmlModel(s) end,
 }
 
 local function toFullDto(stock, isSelected)

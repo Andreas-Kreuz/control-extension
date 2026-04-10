@@ -15,6 +15,7 @@ export const CeTypes = {
   HubWaitingOnSignal: 'ce.hub.WaitingOnSignal',
   HubSwitch: 'ce.hub.Switch',
   HubStructure: 'ce.hub.Structure',
+  HubScenario: 'ce.hub.Scenario',
   HubTime: 'ce.hub.Time',
   HubTrain: 'ce.hub.Train',
   HubRollingStock: 'ce.hub.RollingStock',
@@ -23,6 +24,7 @@ export const CeTypes = {
   HubRoadTrack: 'ce.hub.RoadTrack',
   HubRailTrack: 'ce.hub.RailTrack',
   HubTramTrack: 'ce.hub.TramTrack',
+  HubContact: 'ce.hub.Contact',
   RoadIntersection: 'ce.mods.road.Intersection',
   RoadIntersectionLane: 'ce.mods.road.IntersectionLane',
   RoadIntersectionSwitching: 'ce.mods.road.IntersectionSwitching',
@@ -31,6 +33,7 @@ export const CeTypes = {
   RoadSignalTypeDefinition: 'ce.mods.road.SignalTypeDefinition',
   TransitStation: 'ce.mods.transit.Station',
   TransitLine: 'ce.mods.transit.Line',
+  TransitTrain: 'ce.mods.transit.TransitTrain',
   TransitModuleSetting: 'ce.mods.transit.ModuleSetting',
   TransitLineName: 'ce.mods.transit.LineName',
 } as const;

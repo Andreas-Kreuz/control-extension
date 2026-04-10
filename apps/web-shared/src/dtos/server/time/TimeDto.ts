@@ -6,5 +6,4 @@ export interface TimeDto {
   timeH: number;
   timeM: number;
   timeS: number;
-  timeLapse?: number;
 }

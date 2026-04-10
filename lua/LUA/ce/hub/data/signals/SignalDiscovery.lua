@@ -17,6 +17,16 @@ local function discoverSignals()
     end
 end
 
+function SignalDiscovery.initFromAnl3(tableOfAnl3)
+    if not tableOfAnl3 then return end
+
+    for _, entry in ipairs(tableOfAnl3.signals or {}) do
+        if entry.keyId and not SignalRegistry.has(entry.keyId) then
+            SignalRegistry.add(Signal:new(entry.keyId))
+        end
+    end
+end
+
 function SignalDiscovery.runInitialDiscovery()
     if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
     discoverSignals()

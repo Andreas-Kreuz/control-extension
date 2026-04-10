@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from 'storybook/test';
 import { OldTransitLineCard as MyOldTransitLineCard } from './OldTransitLineCard.component';
-import Line from '../../../mod/lines/model/Line';
-import StationInfo from '../../../mod/lines/model/StationInfo';
+import Line from '../../../features/lines/model/Line';
+import StationInfo from '../../../features/lines/model/StationInfo';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {

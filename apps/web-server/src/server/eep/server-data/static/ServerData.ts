@@ -111,4 +111,3 @@ export default class JsonApiReducer {
     return this.data.urls;
   }
 }
-

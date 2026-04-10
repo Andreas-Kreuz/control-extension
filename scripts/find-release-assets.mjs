@@ -45,6 +45,8 @@ for (const [key, value] of Object.entries(outputs)) {
 }
 
 if (githubOutput) {
-  const lines = Object.entries(outputs).map(([key, value]) => `${key}=${value}\n`).join('');
+  const lines = Object.entries(outputs)
+    .map(([key, value]) => `${key}=${value}\n`)
+    .join('');
   appendFileSync(githubOutput, lines, 'utf8');
 }

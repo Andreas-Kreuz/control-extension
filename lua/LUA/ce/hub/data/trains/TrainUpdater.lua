@@ -1,6 +1,5 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainUpdater ...") end
 
-local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
@@ -30,20 +29,6 @@ function TrainUpdater.runUpdate()
         if SyncPolicy.shouldUpdateField(fieldPolicies, "length", isSelected) then
             local _, length = EEPGetTrainLength(train.name)
             if length then train:setLength(length) end
-        end
-        if SyncPolicy.shouldUpdateField(fieldPolicies, "line", isSelected)
-            or SyncPolicy.shouldUpdateField(fieldPolicies, "destination", isSelected)
-            or SyncPolicy.shouldUpdateField(fieldPolicies, "direction", isSelected) then
-            local values = train:load()
-            if SyncPolicy.shouldUpdateField(fieldPolicies, "line", isSelected) then
-                train:updateLine(values[TagKeys.Train.line] or "")
-            end
-            if SyncPolicy.shouldUpdateField(fieldPolicies, "destination", isSelected) then
-                train:updateDestination(values[TagKeys.Train.destination] or "")
-            end
-            if SyncPolicy.shouldUpdateField(fieldPolicies, "direction", isSelected) then
-                train:updateDirection(values[TagKeys.Train.direction] or "")
-            end
         end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "speed", isSelected) then
             train:setSpeed(info.speed or 0)

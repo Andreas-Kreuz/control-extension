@@ -6,12 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..');
 
-const luaArtifacts = new Set([
-  '.luacov',
-  'luacov.report.html',
-  'luacov.report.out',
-  'luacov.stats.out',
-]);
+const luaArtifacts = new Set(['.luacov', 'luacov.report.html', 'luacov.report.out', 'luacov.stats.out']);
 
 for (const entry of readdirSync(repoRoot)) {
   if (entry.startsWith('luacov.')) {

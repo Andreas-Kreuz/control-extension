@@ -65,6 +65,18 @@ local function discoverStructures()
     end
 end
 
+function StructureDiscovery.initFromAnl3(tableOfAnl3)
+    if not tableOfAnl3 then return end
+
+    for _, entry in ipairs(tableOfAnl3.structures or {}) do
+        if entry.name and not StructureRegistry.forId(entry.name) then
+            local structure = Structure:new(entry.name)
+            structure:setGsbname(entry.gsbname)
+            StructureRegistry.add(structure)
+        end
+    end
+end
+
 function StructureDiscovery.runInitialDiscovery()
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
     discoverStructures()

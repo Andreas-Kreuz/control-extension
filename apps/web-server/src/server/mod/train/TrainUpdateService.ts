@@ -134,6 +134,22 @@ export default class TrainUpdateService implements DynamicRoomService {
       res.json(train);
     });
 
+    this.router.get('/train-static/:id/rollingstock', (req, res) => {
+      const train = this.trainSelector.getTrain(req.params.id);
+      if (!train) {
+        res.status(404).json({ error: 'not found' });
+        return;
+      }
+
+      const rollingStockById = this.rollingStockSelector.rollingStockListOfTrain(train.id);
+      if (rollingStockById.length > 0 || train.name === train.id) {
+        res.json(rollingStockById);
+        return;
+      }
+
+      res.json(this.rollingStockSelector.rollingStockListOfTrain(train.name));
+    });
+
     this.router.get('/rollingstock-static', (_req, res) => {
       res.json(this.rollingStockSelector.getAllRollingStock());
     });
@@ -172,13 +188,10 @@ export default class TrainUpdateService implements DynamicRoomService {
       }
 
       const token = 'json:' + CeTypes.HubRollingStock + ':' + rollingStockId;
-      this.dynamicInterestRegistry.touchLeasedToken(
-        token,
-        CeTypes.HubRollingStock,
-        rollingStockId,
-        jsonInterestTtlMs,
+      this.dynamicInterestRegistry.touchLeasedToken(token, CeTypes.HubRollingStock, rollingStockId, jsonInterestTtlMs);
+      const rollingStock = await this.waitForDynamicData(() =>
+        this.rollingStockSelector.getRollingStock(rollingStockId),
       );
-      const rollingStock = await this.waitForDynamicData(() => this.rollingStockSelector.getRollingStock(rollingStockId));
       if (!rollingStock) {
         res.status(504).json({ error: 'timeout' });
         return;

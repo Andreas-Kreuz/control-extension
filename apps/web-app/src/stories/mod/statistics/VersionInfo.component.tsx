@@ -1,4 +1,6 @@
-import MyVersionInfo, { VersionInfoProps as MyVersionInfoProps } from '../../../mod/statistics/VersionInfo';
+import MyVersionInfo, {
+  VersionInfoProps as MyVersionInfoProps,
+} from '../../../features/statistics/components/VersionInfo';
 
 export type VersionInfoProps = Omit<MyVersionInfoProps, 'children'>;
 

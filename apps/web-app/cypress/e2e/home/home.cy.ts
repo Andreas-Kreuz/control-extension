@@ -9,10 +9,10 @@ beforeEach(() => {
 describe('App Home', () => {
   it('contains the home modules after reset', () => {
     cy.visit('/simple');
-    cy.contains('App für EEP');
-    cy.contains('Ampelkreuzungen');
-    cy.contains('ÖPNV-Linien');
-    cy.contains('Fahrzeuge');
+    cy.contains('Control Extension App');
+    cy.contains('Ampeln');
+    cy.contains('ÖPNV');
+    cy.contains('Fuhrpark');
     cy.contains('Statistik');
   });
 
@@ -20,10 +20,10 @@ describe('App Home', () => {
     simulator.eepEvent('eep-version-complete.json');
 
     cy.visit('/simple');
-    cy.contains('App für EEP');
-    cy.contains('Ampelkreuzungen');
-    cy.contains('ÖPNV-Linien');
-    cy.contains('Fahrzeuge');
+    cy.contains('Control Extension App');
+    cy.contains('Ampeln');
+    cy.contains('ÖPNV');
+    cy.contains('Fuhrpark');
     cy.contains('Statistik');
   });
 });

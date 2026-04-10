@@ -14,4 +14,5 @@ export interface StructureDto {
   light: boolean;
   smoke: boolean;
   fire: boolean;
+  gsbname?: string;
 }

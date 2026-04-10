@@ -7,6 +7,7 @@ local initialized = false
 CeTransitModule.name = "ce.mods.transit.CeTransitModule"
 CeTransitModule.CeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitSettings = require("ce.mods.transit.TransitSettings")
+local TransitTrainUpdater = require("ce.mods.transit.data.TransitTrainUpdater")
 
 function CeTransitModule.loadSettingsFromSlot(eepSaveId) return TransitSettings.loadSettingsFromSlot(eepSaveId) end
 
@@ -22,6 +23,7 @@ end
 
 function CeTransitModule.run()
     if not CeTransitModule.enabled then return end
+    TransitTrainUpdater.runUpdate()
 end
 
 return CeTransitModule

@@ -1,11 +1,13 @@
 import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainLuaDto } from '../../ce/dto/trains/TrainLuaDto';
+import { TransitTrainLuaDto } from '../../ce/dto/transit/TransitTrainLuaDto';
 import { RollingStockSelector } from './RollingStockSelector';
-import { calcTrainType, CeTypes, TrainDto, TrainListDto, TrainType } from '@ce/web-shared';
+import { calcTrainType, CeTypes, TrackType, TrainDto, TrainListDto, TrainType } from '@ce/web-shared';
 
 export class TrainSelector {
   private lastState: Record<string, unknown> | undefined;
   private rollingStockState: Record<string, unknown> | undefined;
+  private transitTrainState: Record<string, unknown> | undefined;
   private trainMap = new Map<string, TrainDto>();
   private trainListMap = new Map<string, TrainListDto>();
 
@@ -14,7 +16,12 @@ export class TrainSelector {
   updateFromState = (state: Readonly<fromJsonData.State>): void => {
     const nextTrainState = state.ceTypes[CeTypes.HubTrain] as Record<string, unknown> | undefined;
     const nextRollingStockState = state.ceTypes[CeTypes.HubRollingStock] as Record<string, unknown> | undefined;
-    if (this.lastState === nextTrainState && this.rollingStockState === nextRollingStockState) {
+    const nextTransitTrainState = state.ceTypes[CeTypes.TransitTrain] as Record<string, unknown> | undefined;
+    if (
+      this.lastState === nextTrainState &&
+      this.rollingStockState === nextRollingStockState &&
+      this.transitTrainState === nextTransitTrainState
+    ) {
       return;
     }
 
@@ -29,12 +36,15 @@ export class TrainSelector {
     }
 
     const trainDict = nextTrainState as Record<string, TrainLuaDto>;
+    const transitTrainDict = (nextTransitTrainState ?? {}) as Record<string, TransitTrainLuaDto>;
     Object.values(trainDict).forEach((trainDto) => {
+      const transitTrainDto = transitTrainDict[trainDto.id];
       const rollingStock = this.rollingStockSelector.rollingStockListOfTrain(trainDto.id);
       const trainType: TrainType = this.getTrainType(trainDto);
       const movesForward = trainDto.movesForward ?? true;
       const firstRollingStock = rollingStock[movesForward ? 0 : rollingStock.length - 1];
       const lastRollingStock = rollingStock[movesForward ? rollingStock.length - 1 : 0];
+      const trackType = this.getTrackType(trainDto, firstRollingStock, lastRollingStock);
       const trainListDto: TrainListDto = {
         id: trainDto.id,
         name: trainDto.name ?? trainDto.id,
@@ -44,9 +54,9 @@ export class TrainSelector {
         trainType,
         rollingStockCount: trainDto.rollingStockCount ?? 0,
         movesForward,
-        ...(trainDto.line !== undefined ? { line: trainDto.line } : {}),
-        ...(trainDto.destination !== undefined ? { destination: trainDto.destination } : {}),
-        ...(trainDto.trackType !== undefined ? { trackType: trainDto.trackType } : {}),
+        ...(transitTrainDto?.line !== undefined ? { line: transitTrainDto.line } : {}),
+        ...(transitTrainDto?.destination !== undefined ? { destination: transitTrainDto.destination } : {}),
+        ...(trackType !== undefined ? { trackType } : {}),
       };
       this.trainListMap.set(trainListDto.id, trainListDto);
 
@@ -63,10 +73,10 @@ export class TrainSelector {
         active: trainDto.active ?? false,
         inTrainyard: trainDto.inTrainyard ?? false,
         movesForward,
-        ...(trainDto.line !== undefined ? { line: trainDto.line } : {}),
-        ...(trainDto.destination !== undefined ? { destination: trainDto.destination } : {}),
-        ...(trainDto.direction !== undefined ? { direction: trainDto.direction } : {}),
-        ...(trainDto.trackType !== undefined ? { trackType: trainDto.trackType } : {}),
+        ...(transitTrainDto?.line !== undefined ? { line: transitTrainDto.line } : {}),
+        ...(transitTrainDto?.destination !== undefined ? { destination: transitTrainDto.destination } : {}),
+        ...(transitTrainDto?.direction !== undefined ? { direction: transitTrainDto.direction } : {}),
+        ...(trackType !== undefined ? { trackType } : {}),
         ...(trainDto.trainyardId !== undefined && trainDto.trainyardId !== ''
           ? { trainyardId: Number(trainDto.trainyardId) }
           : {}),
@@ -76,6 +86,7 @@ export class TrainSelector {
 
     this.lastState = nextTrainState;
     this.rollingStockState = nextRollingStockState;
+    this.transitTrainState = nextTransitTrainState;
   };
 
   getTrainList(trackType: string): TrainListDto[] {
@@ -99,5 +110,36 @@ export class TrainSelector {
     }
 
     return TrainType.TrainElectric;
+  }
+
+  private getTrackType(
+    train: TrainLuaDto,
+    firstRollingStock?: { trackType?: string; trackSystem?: number },
+    lastRollingStock?: { trackType?: string; trackSystem?: number },
+  ): string | undefined {
+    return (
+      train.trackType ??
+      firstRollingStock?.trackType ??
+      lastRollingStock?.trackType ??
+      this.trackTypeFromTrackSystem(firstRollingStock?.trackSystem) ??
+      this.trackTypeFromTrackSystem(lastRollingStock?.trackSystem)
+    );
+  }
+
+  private trackTypeFromTrackSystem(trackSystem?: number): TrackType | undefined {
+    switch (trackSystem) {
+      case 1:
+        return TrackType.Rail;
+      case 2:
+        return TrackType.Tram;
+      case 3:
+        return TrackType.Road;
+      case 4:
+        return TrackType.Auxiliary;
+      case 5:
+        return TrackType.Control;
+      default:
+        return undefined;
+    }
   }
 }

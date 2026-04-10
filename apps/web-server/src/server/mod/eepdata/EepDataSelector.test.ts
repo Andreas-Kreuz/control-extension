@@ -31,20 +31,14 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
 
   selector.updateFromState(
     makeState(1, {
-      'Update/ce.hub.Module': makeRuntimeEntry(
-        'Update/ce.hub.Module',
-        1,
-      ),
+      'Update/ce.hub.Module': makeRuntimeEntry('Update/ce.hub.Module', 1),
       'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
     }),
   );
   selector.updateFromState(
     makeState(2, {
-      'Update/ce.hub.Module': makeRuntimeEntry(
-        'Update/ce.hub.Module',
-        1,
-      ),
+      'Update/ce.hub.Module': makeRuntimeEntry('Update/ce.hub.Module', 1),
       'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', 2),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 3),
     }),
@@ -53,10 +47,7 @@ function testRuntimeStatisticsHistoryCachesOnlyChangedSamplesAndKeepsLastTen(): 
   for (let eventCounter = 3; eventCounter <= 14; eventCounter += 1) {
     selector.updateFromState(
       makeState(eventCounter, {
-        'Update/ce.hub.Module': makeRuntimeEntry(
-          'Update/ce.hub.Module',
-          eventCounter,
-        ),
+        'Update/ce.hub.Module': makeRuntimeEntry('Update/ce.hub.Module', eventCounter),
         'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', eventCounter),
         'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', eventCounter),
       }),
@@ -92,24 +83,15 @@ function testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRunti
 
   selector.updateFromState(
     makeState(1, {
-      'Update/ce.hub.Module': makeRuntimeEntry(
-        'Update/ce.hub.Module',
-        11,
-      ),
-      'Update-init/ce.hub.Module': makeRuntimeEntry(
-        'Update-init/ce.hub.Module',
-        11,
-      ),
+      'Update/ce.hub.Module': makeRuntimeEntry('Update/ce.hub.Module', 11),
+      'Update-init/ce.hub.Module': makeRuntimeEntry('Update-init/ce.hub.Module', 11),
       'StatePublisher.ce.hub.ModulesStatePublisher.syncState': makeRuntimeEntry(
         'StatePublisher.ce.hub.ModulesStatePublisher.syncState',
         7,
       ),
       'Discovery/ce.hub.Signal': makeRuntimeEntry('Discovery/ce.hub.Signal', 12),
       'Discovery-init/ce.hub.Signal': makeRuntimeEntry('Discovery-init/ce.hub.Signal', 12),
-      'Update/ce.hub.Time': makeRuntimeEntry(
-        'Update/ce.hub.Time',
-        13,
-      ),
+      'Update/ce.hub.Time': makeRuntimeEntry('Update/ce.hub.Time', 13),
       'MainLoopRunner.runCycle-5-commands': makeRuntimeEntry('MainLoopRunner.runCycle-5-commands', 15),
     }),
   );
@@ -242,10 +224,7 @@ export async function run(): Promise<void> {
     testRuntimeStatisticsKeepsInitializationSeparateAndResetsOnMissingRuntime,
   );
   await runTest('EepDataSelector maps unified structure ceType', testStructureDtosFromUnifiedCeType);
-  await runTest(
-    'EepDataSelector handles structures with partial fields',
-    testStructureDtosWithPartialFields,
-  );
+  await runTest('EepDataSelector handles structures with partial fields', testStructureDtosWithPartialFields);
 }
 
 if (require.main === module) {

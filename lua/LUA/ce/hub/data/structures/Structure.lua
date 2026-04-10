@@ -15,6 +15,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...
 ---@field light boolean|nil
 ---@field smoke boolean|nil
 ---@field fire boolean|nil
+---@field gsbname string|nil
 ---@field dirtyFields table<string, boolean>
 ---@field needsFullSend boolean
 local Structure = {}
@@ -47,6 +48,12 @@ function Structure:getSmoke() return self.smoke end
 
 function Structure:getFire() return self.fire end
 
+function Structure:getGsbname() return self.gsbname end
+
+function Structure:setGsbname(name)
+    self.gsbname = name
+end
+
 ---@param name string
 ---@return Structure
 function Structure:new(name)
@@ -64,6 +71,7 @@ function Structure:new(name)
         light = false,
         smoke = false,
         fire = false,
+        gsbname = nil,
         tag = "",
         dirtyFields = {},
         needsFullSend = true

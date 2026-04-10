@@ -23,19 +23,21 @@ insulate("Line Management Ring Line", function ()
 
     insulate("train1 changes destination correctly", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
         local train1 = TrainRegistry.forName("train1")
+        local transitTrain1 = TransitTrainRegistry.forTrain(train1)
         train1:setRoute(ringLineSegment.routeName)
-        train1:changeDestination(ringLineSegment.destination, ringLineSegment.line.nr)
+        transitTrain1:changeDestination(ringLineSegment.destination, ringLineSegment.line.nr)
         it("train1 has correct initial route",
            function () assert.are.equal(train1.route, "Linie R: Tram Innerer Ring") end)
         it("train1 got initial destination to Messe Dresden",
-           function () assert.are.equal("Innerer Ring", train1:getDestination()) end)
+           function () assert.are.equal("Innerer Ring", transitTrain1:getDestination()) end)
 
         Line.trainDeparted("train1", RoadStation.forName("C"))
         it("train1 has correct initial route",
            function () assert.are.equal(train1.route, "Linie R: Tram Innerer Ring") end)
         it("train1 got initial destination to Messe Dresden",
-           function () assert.are.equal("Innerer Ring", train1:getDestination()) end)
+           function () assert.are.equal("Innerer Ring", transitTrain1:getDestination()) end)
     end)
 
     insulate("LineSegments", function ()
@@ -63,88 +65,77 @@ insulate("Line Management 4 Line segments", function ()
     EepSimulator.simulateAddTrain("train3", "RollingStock 3a", "RollingStock 3b")
     it("EEPLoadData exists", function () assert.is_truthy(_G.EEPLoadData) end)
 
-    -- Core Stuff
     local ControlExtension = require("ce.ControlExtension")
-
-    -- Intersections
     local CeRoadModule = require("ce.mods.road.CeRoadModule")
-
-    -- Public Transport
     local CeTransitModule = require("ce.mods.transit.CeTransitModule")
     local Line = require("ce.mods.transit.Line")
     local RoadStation = require("ce.mods.transit.RoadStation")
     local RSDM = require("ce.mods.transit.models.RoadStationDisplayModel")
 
-    ---------------------------------------------------------------------------------------------------------------
-    -- Register the required modules
     ControlExtension.addModules(CeRoadModule, CeTransitModule)
     CeRoadModule.loadSettingsFromSlot(1)
     CeTransitModule.loadSettingsFromSlot(2)
-    ---------------------------------------------------------------------------------------------------------------
-    -- Die folgende Methode wird von EEP mind. alle 200 ms ausgeführt
+
     function EEPMain()
         ControlExtension.runTasks(1)
         return 1
     end
 
-    ---------------------------------------------------------------------------------------------------------------
-
     local linie10 = Line.forName("10")
     local linie12 = Line.forName("12")
 
-    -- Linie mit Hin- und Rückweg
     ---@type LineSegment
     local linie10Messe = linie10:addSection("Linie 10: Tram in Richtung Messe Dresden", "Messe Dresden")
-    linie10Messe:addStop(RoadStation.forName("Ludwig-Hartmann-Straße"):platform(1), 0)
-    linie10Messe:addStop(RoadStation.forName("Straßbuger Platz"):platform(1), 2)
+    linie10Messe:addStop(RoadStation.forName("Ludwig-Hartmann-Stra?e"):platform(1), 0)
+    linie10Messe:addStop(RoadStation.forName("Stra?buger Platz"):platform(1), 2)
     linie10Messe:addStop(RoadStation.forName("Hauptbahnhof"):platform(1), 2)
-    -- linie10Messe:addStop(RoadStation.forName("Messe Dresden"):platform(1), 2)
 
     ---@type LineSegment
     local linie10Striesen = linie10:addSection("Linie 10: Tram in Richtung Striesen", "Striesen")
     linie10Striesen:addStop(RoadStation.forName("Messe Dresden"):platform(1), 0)
     linie10Striesen:addStop(RoadStation.forName("Hauptbahnhof"):platform(2), 2)
-    linie10Striesen:addStop(RoadStation.forName("Straßbuger Platz"):platform(2), 2)
-    -- linie10Striesen:addStop(RoadStation.forName("Ludwig-Hartmann-Straße"):platform(1), 2)
+    linie10Striesen:addStop(RoadStation.forName("Stra?buger Platz"):platform(2), 2)
 
     ---@type LineSegment
     local linie12Leutewitz = linie12:addSection("Linie 12: Tram in Richtung Leutewitz", "Leutewitz")
-    linie12Leutewitz:addStop(RoadStation.forName("Ludwig-Hartmann-Straße"):platform(2), 0)
-    linie12Leutewitz:addStop(RoadStation.forName("Straßbuger Platz"):platform(1), 2)
+    linie12Leutewitz:addStop(RoadStation.forName("Ludwig-Hartmann-Stra?e"):platform(2), 0)
+    linie12Leutewitz:addStop(RoadStation.forName("Stra?buger Platz"):platform(1), 2)
     linie12Leutewitz:addStop(RoadStation.forName("Irgendwo"):platform(1), 2)
 
     ---@type LineSegment
     local linie12Striesen = linie12:addSection("Linie 12: Tram in Richtung Striesen", "Striesen")
     linie12Striesen:addStop(RoadStation.forName("Leutewitz"):platform(2), 2)
     linie12Striesen:addStop(RoadStation.forName("Irgendwo"):platform(2), 2)
-    linie12Striesen:addStop(RoadStation.forName("Straßbuger Platz"):platform(2), 2)
+    linie12Striesen:addStop(RoadStation.forName("Stra?buger Platz"):platform(2), 2)
 
     linie10Messe:setNextSection(linie10Striesen, 6)
     linie10Striesen:setNextSection(linie12Leutewitz, 7)
     linie12Leutewitz:setNextSection(linie12Striesen, 8)
     linie12Striesen:setNextSection(linie10Messe, 9)
 
-    RoadStation.forName("Ludwig-Hartmann-Straße"):platform(1):addDisplay("#1", RSDM.SimpleStructure)
-    RoadStation.forName("Straßbuger Platz"):platform(1):addDisplay("#2", RSDM.SimpleStructure)
-    RoadStation.forName("Straßbuger Platz"):platform(2):addDisplay("#3", RSDM.SimpleStructure)
+    RoadStation.forName("Ludwig-Hartmann-Stra?e"):platform(1):addDisplay("#1", RSDM.SimpleStructure)
+    RoadStation.forName("Stra?buger Platz"):platform(1):addDisplay("#2", RSDM.SimpleStructure)
+    RoadStation.forName("Stra?buger Platz"):platform(2):addDisplay("#3", RSDM.SimpleStructure)
     RoadStation.forName("Hauptbahnhof"):platform(1):addDisplay("#4", RSDM.SimpleStructure)
     RoadStation.forName("Hauptbahnhof"):platform(2):addDisplay("#5", RSDM.SimpleStructure)
     RoadStation.forName("Messe Dresden"):platform(1):addDisplay("#6", RSDM.SimpleStructure)
 
     insulate("train1", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
         local train1 = TrainRegistry.forName("train1")
+        local transitTrain1 = TransitTrainRegistry.forTrain(train1)
         train1:setRoute(linie10Messe.routeName)
-        train1:changeDestination(linie10Messe.destination, linie10Messe.line.nr)
+        transitTrain1:changeDestination(linie10Messe.destination, linie10Messe.line.nr)
         it("initial route",
            function () assert.are.equal("Linie 10: Tram in Richtung Messe Dresden", train1:getRoute()) end)
-        it("initial destination", function () assert.are.equal("Messe Dresden", train1:getDestination()) end)
-        it("initial line", function () assert.are.equal("10", train1:getLine()) end)
+        it("initial destination", function () assert.are.equal("Messe Dresden", transitTrain1:getDestination()) end)
+        it("initial line", function () assert.are.equal("10", transitTrain1:getLine()) end)
 
         insulate("train1", function ()
             Line.trainDeparted("train1", RoadStation.forName("Hauptbahnhof"))
             local route = train1:getRoute()
-            local destination = train1:getDestination()
+            local destination = transitTrain1:getDestination()
 
             it("changes line to Striesen",
                function () assert.are.equal("Linie 10: Tram in Richtung Striesen", route) end)
@@ -154,16 +145,15 @@ insulate("Line Management 4 Line segments", function ()
         insulate("nextStations", function ()
             EepSimulator.simulateAddTrain("train4", "RollingStock 4a", "RollingStock 4b")
             local train4 = TrainRegistry.forName("train4")
+            local transitTrain4 = TransitTrainRegistry.forTrain(train4)
             train4:setRoute(linie10Messe.routeName)
-            train4:changeDestination(linie10Messe.destination, linie10Messe.line.nr)
+            transitTrain4:changeDestination(linie10Messe.destination, linie10Messe.line.nr)
             local LineSegment = require("ce.mods.transit.LineSegment")
 
-            -- Depart from 1st station
-            Line.trainDeparted("train4", RoadStation.forName("Straßbuger Platz"))
+            Line.trainDeparted("train4", RoadStation.forName("Stra?buger Platz"))
             local route = train4:getRoute()
             it("", function () assert.are.equal("Linie 10: Tram in Richtung Messe Dresden", route) end)
 
-            -- Depart for Line Change
             Line.trainDeparted("train4", RoadStation.forName("Hauptbahnhof"))
             local route2 = train4:getRoute()
             local queue = RoadStation.forName("Hauptbahnhof").queue
@@ -177,10 +167,9 @@ insulate("Line Management 4 Line segments", function ()
             end)
 
             LineSegment.debug = false
-            -- Depart for last Line Change
             train4:setRoute(linie12Striesen.routeName)
-            train4:changeDestination(linie12Striesen.destination, linie12Striesen.line.nr)
-            Line.trainDeparted("train4", RoadStation.forName("Straßbuger Platz"))
+            transitTrain4:changeDestination(linie12Striesen.destination, linie12Striesen.line.nr)
+            Line.trainDeparted("train4", RoadStation.forName("Stra?buger Platz"))
             local route5 = train4:getRoute()
             it("", function () assert.are.equal("Linie 10: Tram in Richtung Messe Dresden", route5) end)
         end)
@@ -204,19 +193,18 @@ end)
 insulate("Line Management", function ()
     local EepSimulator = require("ce.hub.eep.EepSimulator")
     local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+    local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
     local Line = require("ce.mods.transit.Line")
     local RoadStation = require("ce.mods.transit.RoadStation")
 
     local testTrain = "#Train 1"
     EepSimulator.simulateAddTrain(testTrain, "RollingStock 1", "RollingStock 2")
 
-    -- Station definition
     local sMesseDresden = RoadStation:new("Messe Dresden", -1)
     local sFeuerwehrGasse = RoadStation:new("Feuerwehrgasse", -1)
     local sHauptbahnhof = RoadStation:new("Hauptbahnhof", -1)
     local sStriesen = RoadStation:new("Striesen", -1)
 
-    -- Route definition
     local line10 = Line.forName("10")
     local l10Striesen = line10:addSection("10 Striesen", "Striesen")
     l10Striesen:addStop(sMesseDresden:platform(1))
@@ -230,7 +218,6 @@ insulate("Line Management", function ()
     l10MesseDresden:addStop(sFeuerwehrGasse:platform(2), 2)
     l10MesseDresden:addStop(sMesseDresden:platform(2))
 
-    -- Check route
     it("Station 1", function () assert.equals("Messe Dresden", l10Striesen:getFirstStation().name) end)
     it("Station 4", function () assert.equals("Striesen", l10Striesen:getLastStation().name) end)
 
@@ -239,11 +226,9 @@ insulate("Line Management", function ()
     it("", function () assert.equals("2", sFeuerwehrGasse.routePlatforms["10->Messe Dresden"].platform) end)
     it("", function () assert.equals("1", sFeuerwehrGasse.routePlatforms["10->Striesen"].platform) end)
 
-    -- Check reverse route
     it("Station 1", function () assert.equals("Striesen", l10MesseDresden:getFirstStation().name) end)
     it("Station 4", function () assert.equals("Messe Dresden", l10MesseDresden:getLastStation().name) end)
 
-    -- add contact-point functions
     local function stationArrivalPlanned(trainName, station, timeInMinutes)
         assert(type(trainName) == "string", "Need 'trainName' as string")
         assert(type(station) == "table", "Need 'station' as table")
@@ -266,23 +251,17 @@ insulate("Line Management", function ()
         assert(type(station) == "table", "Need 'station' as table")
         assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
         if departureTime then assert(type(departureTime) == "number", "Need 'departureTime' as number") end
-
-        -- THIS METHOD IS OBSOLETE - use Line.scheduleDeparture(...)
     end
 
     l10Striesen:setNextSection(l10MesseDresden, 2)
     l10MesseDresden:setNextSection(l10Striesen, 2)
 
-    -- Create a new train
+    local hubTrain = TrainRegistry.forName(testTrain)
+    hubTrain:setRoute(l10MesseDresden.routeName)
+    TransitTrainRegistry.forTrain(hubTrain):changeDestination(l10MesseDresden.destination, l10MesseDresden.line.nr)
 
-    TrainRegistry.forName(testTrain):setRoute(l10MesseDresden.routeName)
-    TrainRegistry.forName(testTrain):changeDestination(l10MesseDresden.destination, l10MesseDresden.line.nr)
-
-    -- Prepare to use route 1
-    -- line10:prepareDepartureAt(trainName, l10MesseDresden, 10)-- The following stations are informed
     changeDestination(testTrain, sMesseDresden)
 
-    -- Drive through route 1 by contacts
     stationLeft(testTrain, sMesseDresden)
     stationArrivalPlanned(testTrain, sFeuerwehrGasse, 3)
     stationArrivalPlanned(testTrain, sFeuerwehrGasse, 2)
@@ -294,11 +273,8 @@ insulate("Line Management", function ()
     stationArrivalPlanned(testTrain, sStriesen, 0)
     stationLeft(testTrain, sStriesen)
 
-    -- Prepare to use route 2
-    -- line10:prepareDepartureAt(trainName, l10Striesen, 10)-- The following stations are informed
     changeDestination(testTrain, sStriesen)
 
-    -- Drive through route 2 by contacts
     stationArrivalPlanned(testTrain, sStriesen, 0)
     stationLeft(testTrain, sStriesen)
     stationArrivalPlanned(testTrain, sHauptbahnhof, 0)

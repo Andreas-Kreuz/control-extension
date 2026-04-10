@@ -7,5 +7,4 @@ export interface TimeLuaDto {
   timeH: number;
   timeM: number;
   timeS: number;
-  timeLapse?: number;
 }

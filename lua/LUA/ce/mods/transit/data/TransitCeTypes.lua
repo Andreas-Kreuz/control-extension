@@ -3,6 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitCeTypes 
 local TransitCeTypes = {
     Station = "ce.mods.transit.Station",
     Line = "ce.mods.transit.Line",
+    TransitTrain = "ce.mods.transit.TransitTrain",
     ModuleSetting = "ce.mods.transit.ModuleSetting",
     LineName = "ce.mods.transit.LineName"
 }

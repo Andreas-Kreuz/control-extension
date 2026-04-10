@@ -1,6 +1,7 @@
 read_globals = {
     "CeDebugLoad",
     "CeStartWithDebug",
+    "CeTestingMode",
     "clearlog",
     "EEPActivateCtrlDesk",
     "EEPAuxiliaryTackGetTextureText",
@@ -261,7 +262,7 @@ files["lua/LUA/ce/mods/transit/TransitTypes.d.lua"].ignore = {"631"}
 files["lua/LUA/ce/hub/data/trains/TrainTypes.d.lua"].ignore = {"631"}
 files["lua/LUA/spec/ce/hub/data/version/VersionInfo_spec.lua"].ignore = {"122"}
 files["lua/LUA/spec/ce/databridge/DataStoreFileWriter_spec.lua"].ignore = {"122"}
-files["lua/LUA/spec/ce/databridge/ExchangeDirRegistry_spec.lua"].ignore = {"122"}
+files["lua/LUA/spec/ce/databridge/ExchangeDirRegistry_spec.lua"].ignore = {"121", "122"}
 files["lua/LUA/spec/ce/databridge/FunctionNameWriter_spec.lua"].ignore = {"122"}
 files["lua/LUA/spec/ce/databridge/IncomingCommandFileReader_spec.lua"].ignore = {"122"}
 files["lua/LUA/spec/ce/databridge/LogOutputFileWriter_spec.lua"].ignore = {"111", "113", "121", "122"}

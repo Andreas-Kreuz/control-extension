@@ -1,8 +1,7 @@
 import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { lazy } from 'react';
-const ThemedApp = lazy(() => import('./app/ThemedApp'));
+import WebAppRoot from './app/components/WebAppRoot';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -14,7 +13,7 @@ if (serverRenderPaths.some((path) => window.location.pathname.startsWith(path)))
 } else {
   root.render(
     <React.StrictMode>
-      <ThemedApp />
+      <WebAppRoot />
     </React.StrictMode>,
   );
 }

@@ -15,6 +15,11 @@ local placeHolders = {
     fire = false,
 }
 
+local function getGsbname(structure)
+    if structure.getGsbname then return structure:getGsbname() end
+    return structure.gsbname
+end
+
 local function toFullDto(structure, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("structures")
     local dto = {
@@ -45,6 +50,12 @@ local function toFullDto(structure, isSelected)
         dto.fire = structure:getFire()
     elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "fire", isSelected) then
         dto.fire = placeHolders.fire
+    end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "gsbname", isSelected) then
+        local gsbname = getGsbname(structure)
+        if gsbname ~= nil and gsbname ~= "" then
+            dto.gsbname = gsbname
+        end
     end
     return dto
 end

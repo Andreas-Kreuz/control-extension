@@ -33,4 +33,3 @@ export default class TransitSettingsSelector {
 
   getSettings = () => this.settings;
 }
-

@@ -126,4 +126,3 @@ export default class RoadSelector {
   getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightDto> => this.intersectionTrafficLights;
   getTrafficLightModels = (): Record<string, TrafficLightModelDto> => this.trafficLightModels;
 }
-

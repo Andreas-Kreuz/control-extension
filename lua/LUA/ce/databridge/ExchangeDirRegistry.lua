@@ -25,6 +25,7 @@ end
 --- Ermittelt das Default-Austauschverzeichnis.
 ---@return string
 local function resolveDefaultExchangeDirectory()
+    if CeTestingMode then return existingDirOf({ "./ce/databridge/exchange-test" }) or "." end
     return existingDirOf({ "../LUA/ce/databridge/exchange", "./LUA/ce/databridge/exchange" }) or "."
 end
 

@@ -16,6 +16,7 @@
 ---@field light boolean
 ---@field smoke boolean
 ---@field fire boolean
+---@field gsbname string|nil -- onselection
 
 ---@class StructureDtoFactory
 ---@field createFullDto fun(structure: Structure, isSelected: boolean|nil):string,string,string|number,StructureDto

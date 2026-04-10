@@ -56,7 +56,7 @@ paket2:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Te
 -- Paket: Tutorial Ampelkreuzung
 -----------------------------------------
 local paket3 = AkModellPaket:new("13,2", "Tutorial - Aufbau einer Ampelkreuzung",
-                                 "Eine Anlage mit einer Kreuzung, die die Verwendung der Lua-Bibliothek erklärt")
+                                 "Eine Anlage mit einer Kreuzung, die die Verwendung der  erklärt")
 paket3:addFiles(currentDirectory, "", "LUA\\ce\\demo-anlagen\\tutorial-ampel", { "README.md", "desktop.ini" })
 paket3:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Tutorial-Ampelkreuzung",
                 { ".dds", "README.md", "desktop.ini" })

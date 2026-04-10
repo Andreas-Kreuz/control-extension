@@ -19,6 +19,7 @@ local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
 local DataSlotsUpdater = require("ce.hub.data.slots.DataSlotsUpdater")
 local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
 local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
+local ScenarioUpdater = require("ce.hub.data.scenario.ScenarioUpdater")
 local TimeUpdater = require("ce.hub.data.time.TimeUpdater")
 local WeatherUpdater = require("ce.hub.data.weather.WeatherUpdater")
 local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
@@ -28,7 +29,11 @@ local SwitchUpdater = require("ce.hub.data.switches.SwitchUpdater")
 local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
 local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
 local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
+local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
 local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
+
+local anl3Path = nil
 
 local function tk(group, func)
     RuntimeRegistry.runTimedAndKeep(group, func)
@@ -50,6 +55,7 @@ local function runInitialDataDiscovery()
     tk("Update-init/ce.hub.RollingStock", RollingStockUpdater.runUpdate)
     tk("Update-init/ce.hub.Runtime", RuntimeUpdater.runUpdate)
     tk("Update-init/ce.hub.Signal", SignalUpdater.runUpdate)
+    tk("Update-init/ce.hub.Scenario", ScenarioUpdater.runUpdate)
     tk("Update-init/ce.hub.Structure", StructureUpdater.runInitialUpdate)
     tk("Update-init/ce.hub.Switch", SwitchUpdater.runUpdate)
     tk("Update-init/ce.hub.Time", TimeUpdater.runUpdate)
@@ -70,6 +76,7 @@ local function runDataUpdates()
     tu("Update/ce.hub.RollingStock", RollingStockUpdater.runUpdate)
     tu("Update/ce.hub.Runtime", RuntimeUpdater.runUpdate)
     tu("Update/ce.hub.Signal", SignalUpdater.runUpdate)
+    tu("Update/ce.hub.Scenario", ScenarioUpdater.runUpdate)
     tu("Update/ce.hub.Structure", StructureUpdater.runUpdate)
     tu("Update/ce.hub.Switch", SwitchUpdater.runUpdate)
     tu("Update/ce.hub.Time", TimeUpdater.runUpdate)
@@ -78,10 +85,36 @@ local function runDataUpdates()
     tu("Update/ce.hub.Weather", WeatherUpdater.runUpdate)
 end
 
+function CeHubModule.setAnl3Path(path)
+    anl3Path = path
+end
+
+local function runAnl3Discovery()
+    if not anl3Path then return end
+    local tableOfAnl3, err = Anl3ToTable.loadAnlage(anl3Path)
+    if not tableOfAnl3 then
+        print("[CeHubModule] Anl3 load failed: " .. tostring(err))
+        return
+    end
+    local scenarioName = EEPGetAnlName and EEPGetAnlName() or nil
+    if scenarioName then
+        local rawLuaPath = Anl3DiscoveryHelper.getLuaPath(tableOfAnl3) or ""
+        local luaPathName = rawLuaPath:match("\\([^\\]+)%.lua$")
+        if luaPathName ~= scenarioName then
+            print(string.format(
+                "[CeHubModule] Anl3 mismatch: EEPGetAnlName=%s but LUAPath=%s -- skipping anl3 discoveries",
+                tostring(scenarioName), tostring(rawLuaPath)))
+            return
+        end
+    end
+    Anl3DiscoveryHelper.fillDiscoveries(tableOfAnl3)
+end
+
 function CeHubModule.init()
     if not CeHubModule.enabled or initialized then return end
     HubBridgeConnector.registerStatePublishers()
     HubBridgeConnector.registerFunctions()
+    runAnl3Discovery()
     runInitialDataDiscovery()
     initialized = true
 end

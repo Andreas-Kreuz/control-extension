@@ -1,13 +1,12 @@
-import MyTransitLineCard, { TransitLineCardProps as MyTransitLineCardProps } from '../../../mod/lines/TransitLineCard';
-import { Box } from '@mui/material';
+import MyTransitLineCard, {
+  TransitLineCardProps as MyTransitLineCardProps,
+} from '../../../features/lines/components/TransitLineCard';
 import { BrowserRouter } from 'react-router-dom';
 
-export type TransitLineCardProps = Omit<MyTransitLineCardProps, 'children'>;
+export type TransitLineCardProps = MyTransitLineCardProps;
 
-export const TransitLineCard = ({ ...rest }: TransitLineCardProps) => (
+export const TransitLineCard = (props: TransitLineCardProps) => (
   <BrowserRouter>
-    <MyTransitLineCard {...rest}>
-      <Box p={2}>Hello World</Box>
-    </MyTransitLineCard>
+    <MyTransitLineCard {...props} />
   </BrowserRouter>
 );

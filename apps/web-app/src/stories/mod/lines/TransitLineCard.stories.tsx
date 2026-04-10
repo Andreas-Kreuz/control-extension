@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from 'storybook/test';
 import { TransitLineCard as AkTransitLineCard } from './TransitLineCard.component';
-import Line from '../../../mod/lines/model/Line';
-import StationInfo from '../../../mod/lines/model/StationInfo';
+import Line from '../../../features/lines/model/Line';
+import StationInfo from '../../../features/lines/model/StationInfo';
 
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
   title: 'Module Elements/Transit/AkTransitLineCard',
   tags: ['autodocs'],
@@ -36,83 +34,41 @@ const line1: Line = {
   ],
 };
 
-const line2Bus: Line = {
-  ...line1,
-  id: 65,
-  nr: '65',
-  trafficType: 'BUS',
-};
-
-const line3Train: Line = {
-  ...line1,
-  id: 43,
-  nr: 'S43',
-  trafficType: 'TRAIN',
-};
-
-const line4Subway: Line = {
-  ...line1,
-  id: 405,
-  nr: 'U5',
-  trafficType: 'SUBWAY',
-};
+const line2Bus: Line = { ...line1, id: 65, nr: '65', trafficType: 'BUS' };
+const line3Train: Line = { ...line1, id: 43, nr: 'S43', trafficType: 'TRAIN' };
+const line4Subway: Line = { ...line1, id: 405, nr: 'U5', trafficType: 'SUBWAY' };
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Tram: Story = {
-  args: {
-    line: line1,
-    expanded: false,
-  },
+  args: { line: line1, selected: false, onSelect: () => {} },
 };
 
 export const Bus: Story = {
-  args: {
-    line: line2Bus,
-    expanded: false,
-  },
+  args: { line: line2Bus, selected: false, onSelect: () => {} },
 };
 
 export const Rail: Story = {
-  args: {
-    line: line3Train,
-    expanded: false,
-  },
+  args: { line: line3Train, selected: false, onSelect: () => {} },
 };
 
 export const Subway: Story = {
-  args: {
-    line: line4Subway,
-    expanded: false,
-  },
+  args: { line: line4Subway, selected: false, onSelect: () => {} },
 };
 
 export const SubwayOnMobile: Story = {
-  args: {
-    line: line4Subway,
-    expanded: false,
-  },
-  globals: {
-    viewport: { value: 'mobile1', isRotated: false },
-  },
+  args: { line: line4Subway, selected: false, onSelect: () => {} },
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
   tags: ['mobile'],
 };
 
-export const Expanded: Story = {
-  args: {
-    line: line1,
-    expanded: true,
-  },
+export const Selected: Story = {
+  args: { line: line1, selected: true, onSelect: () => {} },
 };
 
-export const ExpandedOnMobile: Story = {
-  args: {
-    line: line1,
-    expanded: true,
-  },
-  globals: {
-    viewport: { value: 'mobile1', isRotated: false },
-  },
+export const SelectedOnMobile: Story = {
+  args: { line: line1, selected: true, onSelect: () => {} },
+  globals: { viewport: { value: 'mobile1', isRotated: false } },
   tags: ['mobile'],
 };

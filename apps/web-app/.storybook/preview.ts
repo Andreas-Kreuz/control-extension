@@ -8,7 +8,7 @@ import '@fontsource/material-icons';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { withThemeFromJSXProvider } from '@storybook/addon-themes';
-import { theme } from '../src/base/Theme';
+import { theme } from '../src/app/theme/theme';
 
 export const decorators = [
   withThemeFromJSXProvider({

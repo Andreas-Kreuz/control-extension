@@ -99,4 +99,3 @@ export const registerLogMod = (io: Server, socketService: SocketService, eepServ
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));
 };
-

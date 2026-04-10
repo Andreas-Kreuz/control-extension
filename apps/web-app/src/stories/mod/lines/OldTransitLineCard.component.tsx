@@ -1,6 +1,6 @@
 import MyOldTransitLineCard, {
   OldTransitLineCardProps as MyOldTransitLineCardProps,
-} from '../../../mod/lines/OldTransitLineCard';
+} from '../../../features/lines/components/OldTransitLineCard';
 import { Box } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 

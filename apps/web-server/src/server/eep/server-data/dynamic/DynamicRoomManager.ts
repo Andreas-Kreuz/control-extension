@@ -120,4 +120,3 @@ export default class DynamicRoomManager {
     this.roomServices.forEach((service) => service.onSocketClose?.(socket));
   };
 }
-

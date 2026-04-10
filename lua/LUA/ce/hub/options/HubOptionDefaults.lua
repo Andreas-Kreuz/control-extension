@@ -94,8 +94,16 @@ function HubOptionDefaults.create()
                     tag = "always",
                     light = "always",
                     smoke = "always",
-                    fire = "always"
+                    fire = "always",
+                    gsbname = "onselection"
                 }
+            },
+            scenario = {
+                ceType = HubCeTypes.Scenario,
+                discoveryAndUpdate = true,
+                publish = true,
+                fieldUpdates = {},
+                fieldPublish = {}
             },
             time = {
                 ceType = HubCeTypes.Time,
@@ -151,6 +159,16 @@ function HubOptionDefaults.create()
                     reservedByTrainName = "always"
                 }
             },
+            contacts = {
+                ceType = HubCeTypes.Contact,
+                discoveryAndUpdate = true,
+                publish = true,
+                fieldUpdates = {},
+                fieldPublish = {
+                    luaFn = "always",
+                    tipTxt = "onselection"
+                }
+            },
             tramTracks = {
                 ceType = HubCeTypes.TramTrack,
                 discoveryAndUpdate = true,
@@ -169,9 +187,6 @@ function HubOptionDefaults.create()
                     route = "always",
                     rollingStockCount = "always",
                     length = "always",
-                    line = "always",
-                    destination = "always",
-                    direction = "always",
                     trackType = "always",
                     movesForward = "always",
                     speed = "always",
@@ -186,9 +201,6 @@ function HubOptionDefaults.create()
                     route = "always",
                     rollingStockCount = "always",
                     length = "always",
-                    line = "always",
-                    destination = "always",
-                    direction = "always",
                     trackType = "always",
                     movesForward = "always",
                     speed = "onselection",
@@ -262,7 +274,8 @@ function HubOptionDefaults.create()
                     active = "onselection",
                     rotX = "onselection",
                     rotY = "onselection",
-                    rotZ = "onselection"
+                    rotZ = "onselection",
+                    xmlModel = "onselection"
                 }
             }
         }

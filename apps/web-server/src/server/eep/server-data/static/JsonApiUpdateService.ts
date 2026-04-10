@@ -148,4 +148,3 @@ export default class JsonApiUpdateService {
     }, 1000);
   }
 }
-

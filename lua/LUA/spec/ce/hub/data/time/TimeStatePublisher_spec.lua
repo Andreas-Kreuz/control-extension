@@ -18,7 +18,6 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
         rawset(_G, "EEPTimeH", 1)
         rawset(_G, "EEPTimeM", 2)
         rawset(_G, "EEPTimeS", 3)
-        stub(_G, "EEPGetTimeLapse", function () return 4 end)
     end)
 
     after_each(function ()
@@ -26,7 +25,6 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
         rawset(_G, "EEPTimeH", originalEEPTimeH)
         rawset(_G, "EEPTimeM", originalEEPTimeM)
         rawset(_G, "EEPTimeS", originalEEPTimeS)
-        _G.EEPGetTimeLapse:revert()
     end)
 
     it("fires time ceTypes with the existing wire format", function ()
@@ -43,7 +41,6 @@ insulate("ce.hub.data.time.TimeStatePublisher", function ()
                             id = "times",
                             name = "times",
                             timeComplete = 3723,
-                            timeLapse = 4,
                             timeH = 1,
                             timeM = 2,
                             timeS = 3

@@ -10,7 +10,6 @@
 | `id`           | `string` |
 | `name`         | `string` |
 | `timeComplete` | `number` |
-| `timeLapse`    | `number` |
 | `timeH`        | `number` |
 | `timeM`        | `number` |
 | `timeS`        | `number` |

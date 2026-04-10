@@ -3,6 +3,7 @@ local LineRegistry = require("ce.mods.transit.LineRegistry")
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local TransitDataCollector = require("ce.mods.transit.data.TransitDataCollector")
 local TransitDtoFactory = require("ce.mods.transit.data.TransitDtoFactory")
+local TransitTrainPublisher = require("ce.mods.transit.data.TransitTrainPublisher")
 
 ---@class TransitStatePublisher
 TransitStatePublisher = {}
@@ -18,6 +19,8 @@ end
 function TransitStatePublisher.syncState()
     if not enabled then return end
     if not initialized then TransitStatePublisher.initialize() end
+
+    TransitTrainPublisher.syncState()
 
     local data = TransitDataCollector.collectTransitData()
 

@@ -52,7 +52,7 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
         installSimpleGlobals()
         os.date = function () return "" end
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/log-from-ce" then
                 return originalIoOpen(name, mode)
@@ -92,7 +92,7 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
 
         installSimpleGlobals()
         io.open = function (name, mode)
-            if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/log-from-ce" then
                 return originalIoOpen(name, mode)
