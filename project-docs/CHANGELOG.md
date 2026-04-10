@@ -4,7 +4,7 @@ Der erste Fokus liegt auf dem Webserver und der Bereitstellung der Daten von EEP
 ## **Control Extension v0.0.1** Vorschauversion ⚠️
 
 Diese Version funktioniert lokal und kann getestet werden.
-Was sich aktuell mit jedem Release komplett ändert ist die Bereitstellung der Server-Schnittstellen nach außen und das Erscheinungsbild der App.
+Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren Abläufe ändern.
 
 ## Neu
 
