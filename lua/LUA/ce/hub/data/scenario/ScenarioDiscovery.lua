@@ -18,12 +18,14 @@ function ScenarioDiscovery.initFromAnl3(tableOfAnl3)
     dynamicCameras = {}
     if not tableOfAnl3 then return end
 
-    for _, name in ipairs(tableOfAnl3.cameras.static) do
+    local cameras = tableOfAnl3.cameras or { static = {}, dynamic = {} }
+
+    for _, name in ipairs(cameras.static or {}) do
         if name ~= "Leer" then
             staticCameras[#staticCameras + 1] = name
         end
     end
-    for _, name in ipairs(tableOfAnl3.cameras.dynamic) do
+    for _, name in ipairs(cameras.dynamic or {}) do
         if name ~= "Leer" then
             dynamicCameras[#dynamicCameras + 1] = name
         end

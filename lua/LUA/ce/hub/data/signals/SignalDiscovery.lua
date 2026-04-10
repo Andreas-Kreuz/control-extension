@@ -19,7 +19,8 @@ end
 
 function SignalDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
-    for _, entry in ipairs(tableOfAnl3.signals) do
+
+    for _, entry in ipairs(tableOfAnl3.signals or {}) do
         if entry.keyId and not SignalRegistry.has(entry.keyId) then
             SignalRegistry.add(Signal:new(entry.keyId))
         end

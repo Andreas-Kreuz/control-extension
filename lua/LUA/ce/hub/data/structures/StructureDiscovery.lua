@@ -67,7 +67,8 @@ end
 
 function StructureDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
-    for _, entry in ipairs(tableOfAnl3.structures) do
+
+    for _, entry in ipairs(tableOfAnl3.structures or {}) do
         if entry.name and not StructureRegistry.forId(entry.name) then
             local structure = Structure:new(entry.name)
             structure:setGsbname(entry.gsbname)
