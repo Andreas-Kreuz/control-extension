@@ -1,6 +1,9 @@
 Die Control Extension für EEP ist ein Neustart. Sie ersetzt die Lua-Bibliothek für EEP von Andreas Kreuz.
 Der erste Fokus liegt auf dem Webserver und der Bereitstellung der Daten von EEP.
 
+Für die Installation nutze die bereitgestellte ZIP-Datei innerhalb von EEP.
+Updateanleitung siehe
+
 ## **Control Extension v0.0.1** Vorschauversion ⚠️
 
 Diese Version funktioniert lokal und kann getestet werden.
@@ -18,5 +21,6 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 ### Neu
 
 - ⭐ Installation aller Dateien erfolgt nach `LUA\ce` bzw. `Resourcen\Anlagen` im EEP-Verzeichnis
-- ⭐ [Migrationsanleitung](lua\LUA\ce\Migrate_ak_to_ce.md), wenn du von der Lua-Bibliothek für EEP von Andreas Kreuz kommst.
-- ⭐ [Anleitung für Deinstallation](lua\LUA\ce\Deinstallation.md)
+- ⭐ [Migrationsanleitung](/lua/LUA/ce/Migrate_ak_to_ce.md), wenn du von der Lua-Bibliothek für EEP von Andreas Kreuz kommst.
+- ⭐ [Anleitung für Updates](/lua/LUA/ce/Update.md)
+- ⭐ [Anleitung für Deinstallation](/lua/LUA/ce/Deinstallation.md)
