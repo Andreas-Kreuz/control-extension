@@ -1,7 +1,8 @@
-import IntersectionOverview from './components/IntersectionOverview';
+import { useRoutes } from 'react-router-dom';
+import routes from './routes';
 
 function RoadRoute() {
-  return <IntersectionOverview />;
+  return useRoutes(routes);
 }
 
 export default RoadRoute;

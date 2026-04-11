@@ -50,7 +50,7 @@ function searchFiles(baseDir, subdirectory, excludePatterns) {
 // Package definitions
 // ---------------------------------------------------------------------------
 
-const INSTALLER_NAME = `control-extension-for-eep-${version}`;
+const INSTALLER_NAME = `control-extension-for-eep-${version}-installer`;
 
 const packages = [
   {
@@ -78,17 +78,17 @@ const packages = [
   },
   {
     eepVersion: '13,2',
-    germanName: 'Demo-Anlage (Ampel, \u00d6PNV)',
-    germanDescription: 'Die Demo-Anlagen f\u00fcr Ampeln und \u00d6PNV',
+    germanName: 'Demo-Anlage (Ampel, ÖPNV)',
+    germanDescription: 'Die Demo-Anlagen für Ampeln und ÖPNV',
     sources: [
       { subdirectory: 'LUA\\ce\\demo-anlagen\\ampel', exclude: ['README.md', 'desktop.ini'] },
       {
-        subdirectory: 'Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Ampel',
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Ampel',
         exclude: ['.dds', 'README.md', 'desktop.ini'],
       },
       { subdirectory: 'LUA\\ce\\demo-anlagen\\demo-linien', exclude: ['.dds', 'README.md', 'desktop.ini'] },
       {
-        subdirectory: 'Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Linien',
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Linien',
         exclude: ['.dds', 'README.md', 'desktop.ini'],
       },
     ],
@@ -100,7 +100,7 @@ const packages = [
     sources: [
       { subdirectory: 'LUA\\ce\\demo-anlagen\\testen', exclude: ['README.md', 'desktop.ini'] },
       {
-        subdirectory: 'Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Testen',
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Testen',
         exclude: ['.dds', 'README.md', 'desktop.ini'],
       },
     ],
@@ -108,11 +108,11 @@ const packages = [
   {
     eepVersion: '13,2',
     germanName: 'Tutorial - Aufbau einer Ampelkreuzung',
-    germanDescription: 'Eine Anlage mit einer Kreuzung, die die Verwendung der Lua-Bibliothek erkl\u00e4rt',
+    germanDescription: 'Eine Anlage mit einer Kreuzung, die die Verwendung der Lua-Bibliothek erklärt',
     sources: [
       { subdirectory: 'LUA\\ce\\demo-anlagen\\tutorial-ampel', exclude: ['README.md', 'desktop.ini'] },
       {
-        subdirectory: 'Resourcen\\Anlagen\\Andreas_Kreuz-Tutorial-Ampelkreuzung',
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Tutorial-Ampelkreuzung',
         exclude: ['.dds', 'README.md', 'desktop.ini'],
       },
     ],
@@ -200,11 +200,11 @@ for (const [index, pkg] of packages.entries()) {
     cpSync(absolutePath, path.join(pkgDir, fileName));
   }
 
-  writeFileSync(path.join(pkgDir, 'install.ini'), generateInstallIni(allFiles, pkg.eepVersion), 'utf8');
+  writeFileSync(path.join(pkgDir, 'install.ini'), generateInstallIni(allFiles, pkg.eepVersion), 'latin1');
   console.log(`[create-installer] Package ${label}: ${pkg.germanName} (${allFiles.length} files)`);
 }
 
-writeFileSync(path.join(installationDir, 'Installation.eep'), generateInstallationEep(packages), 'utf8');
+writeFileSync(path.join(installationDir, 'Installation.eep'), generateInstallationEep(packages), 'latin1');
 
 const zipPath = path.join(outputDir, `${INSTALLER_NAME}.zip`);
 createZip(installationDir, zipPath);

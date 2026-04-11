@@ -8,15 +8,9 @@ const repoRoot = path.resolve(__dirname, '..');
 const packageJson = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
 const version = packageJson.version;
 
-const exePath = path.join(repoRoot, 'apps', 'web-server', 'dist', 'control-extension-server.exe');
 const packageDir = path.join(repoRoot, 'lua', 'modell-pakete');
-const packageName = `control-extension-for-eep-${version}.zip`;
+const packageName = `control-extension-for-eep-${version}-installer.zip`;
 const packagePath = path.join(packageDir, packageName);
-
-if (!existsSync(exePath)) {
-  console.error(`[find-release-assets] Missing Windows executable: ${exePath}`);
-  process.exit(1);
-}
 
 if (!existsSync(packageDir)) {
   console.error(`[find-release-assets] Missing package directory: ${packageDir}`);
@@ -34,8 +28,6 @@ if (!existsSync(packagePath)) {
 
 const githubOutput = process.env.GITHUB_OUTPUT;
 const outputs = {
-  exe_path: exePath,
-  exe_name: path.basename(exePath),
   eep_package_path: packagePath,
   eep_package_name: path.basename(packagePath),
 };

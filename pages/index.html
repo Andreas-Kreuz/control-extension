@@ -3,39 +3,269 @@ layout: page_landing
 title: Control Extension (CE)
 permalink: /
 subtitle:
-  Der <strong>CE Lua Hub</strong> erfasst die Daten Deiner Anlagen und stellt sie in Echtzeit zur Verfügung.<br><br>
-  Die <strong>CE Data Bridge</strong> ermöglicht es Dir, die Daten Deiner Anlagen in Echtzeit an andere Anwendungen zu übertragen. Mit dem mitgelieferten <strong>CE Webserver</strong> und <strong>CE Web App</strong> kannst Du deine Anlage im lokalen Netzwerk steuern.
+  Die <strong>Control Extension</strong> erweitert EEP um einen  <strong>Lua Hub</strong> mit optionaler <strong>Data Bridge</strong>, <strong>Server</strong> und <strong>Web App</strong>.<br><br>
+  Du kannst klein mit Lua in EEP starten und Deine Anlage bei Bedarf Schritt für Schritt um Datenaustausch, Fernzugriff und eigene Werkzeuge erweitern.
 
 feature-img: '/assets/headers/SourceCode.png'
 img: '/assets/headers/SourceCode.png'
 ---
 
-<div class="row">
-  <div class="col col-lg-6">
-    <div class="row">
-      <div class="col col-md-6 pb-5">
-        <h4>Herunterladen</h4>
-        <p class="lead">Lade die neueste Version herunter und probiere sie gleich aus.</p>
-        <p class="lead">
-          <a href="https://github.com/Andreas-Kreuz/control-extension/releases/latest" class="btn btn-primary btn-lg"
-            >Download</a
-          >
-        </p>
+<span class="article">
+  <div class="row pb-4">
+    <div class="col-12">
+      <p class="lead">
+        Auf dieser Seite findest den schnellsten Einstieg zum Herunterladen, Installieren und Benutzen der Control
+        Extension. Wenn Du tiefer einsteigen willst, findest du unten den Einstieg in Architektur und Projektaufbau.
+      </p>
+    </div>
+  </div>
+
+  <div class="row pt-2">
+    <div class="col-12">
+      <h2>Schnell starten</h2>
+    </div>
+  </div>
+
+  <div class="row equal-height pb-4">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card border-success mb-4 bg-light h-100">
+        <!-- <div class="card-header text-white bg-success">1. Installation</div> -->
+        <div class="card-body">
+          <h4 class="card-title">1. Herunterladen, installieren und Server vorbereiten</h4>
+          <p class="card-text">
+            Diese Anleitung führt Dich durch Download, EEP Modell-Installer und die erste Einrichtung des Servers.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="docs/anleitungen-installation/installation" class="btn btn-success">Installieren</a>
+        </div>
       </div>
-      <div class="col col-md-6 pb-5">
-        <h4>Informieren</h4>
-        <p class="lead">Schritt-für-Schritt Anleitungen helfen Dir beim Steuern Deiner Anlagen.</p>
-        <p class="lead">
-          <a href="docs/anleitungen/" class="btn btn-success btn-lg">Anleitungen</a>
-        </p>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card border-success mb-4 bg-light h-100">
+        <!-- <div class="card-header text-white bg-success">2. Demo ausprobieren</div> -->
+        <div class="card-body">
+          <h4 class="card-title">2. Control Extension mit Demo-Anlage starten</h4>
+          <p class="card-text">
+            Das ist der schnellste Weg, um Server, Web App und Demo-Anlage gemeinsam in Betrieb zu sehen.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="docs/anleitungen-installation/use-demo" class="btn btn-success">Demo Anlage nutzen</a>
+        </div>
       </div>
-      <div class="col col-md-6 pb-5">
-        <h4>Mehr Infos</h4>
-        <p class="lead">Die Dokumentation verrät Dir, wie Du die Bibliothek benutzen kannst.</p>
-        <p class="lead">
-          <a href="lua/LUA/ce/" class="btn btn-secondary btn-lg">Dokumentation</a>
-        </p>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card border-success mb-4 bg-light h-100">
+        <!-- <div class="card-header text-white bg-success">3. Eigene Anlage anbinden</div> -->
+        <div class="card-body">
+          <h4 class="card-title">3. Minimalen Lua-Einstieg in Deine Anlage einbauen</h4>
+          <p class="card-text">
+            Diese Anleitung zeigt Dir die minimale Lua-Integration, um die Control Extension in einer bestehenden Anlage
+            zu verwenden.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="docs/anleitungen-installation/use-own-scenario-01" class="btn btn-success">Eigene Anlage nutzen</a>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <div class="row pt-3">
+    <div class="col-12">
+      <h2>So funktioniert die Control Extension</h2>
+    </div>
+  </div>
+
+  <div class="row pb-2">
+    <div class="col-12">
+      <p class="lead">
+        Die Control Extension ist modular aufgebaut. Du kannst mit dem Lua-Kern in EEP beginnen und weitere Bausteine
+        nur dann hinzunehmen, wenn Du sie wirklich brauchst.
+      </p>
+    </div>
+  </div>
+
+  <div class="row equal-height pb-4">
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-primary mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Lua Hub</h4>
+          <p class="card-text">
+            Der Lua Hub ist der Kern in EEP. Hier laufen Deine Module, Deine Anlagenlogik und die öffentlichen
+            Einstiegspunkte der Bibliothek.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-info mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Data Bridge</h4>
+          <p class="card-text">
+            Die Data Bridge überträgt Daten aus EEP nach außen. Sie verbindet die Lua-Seite mit weiteren Werkzeugen,
+            ohne dass Deine Anlage direkt von der Web-Oberfläche abhängt.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-warning mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Server</h4>
+          <p class="card-text">
+            Der Server liest die bereitgestellten Daten, bereitet sie für Clients auf und stellt sie lokal oder im
+            Netzwerk zur Verfügung.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-success mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Web App</h4>
+          <p class="card-text">
+            Die Web App zeigt den Zustand Deiner Anlage im Browser und erlaubt Bedienung über das lokale Netzwerk. Sie
+            baut auf dem Server auf und ist optional.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row pb-5">
+    <div class="col-12">
+      <p>
+        Wichtig ist: <strong>Der Lua-Hub ist der Kern</strong>. Server und Web App sind Erweiterungen für
+        Datenaustausch, Darstellung und Bedienung außerhalb von EEP.
+      </p>
+    </div>
+  </div>
+
+  <div class="row pt-2">
+    <div class="col-12">
+      <h2>Lua, Server und App verwenden</h2>
+    </div>
+  </div>
+
+  <div class="row equal-height pb-4">
+    <div class="col-12 col-md-6 col-lg-6">
+      <div class="card border-success mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Control Extension einrichten</h4>
+          <p class="card-text">
+            Dieser Einstieg zeigt Dir, was in EEP laufen muss, welche Dateien ausgetauscht werden und wie Du Server und
+            App startest.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="docs/anleitungen/" class="btn btn-success">Zu den Anleitungen</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-6">
+      <div class="card border-secondary mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Mit Lua arbeiten</h4>
+          <p class="card-text">
+            Wenn Du in EEP Module, Laufzeitlogik und eigene Steuerung bauen willst, findest Du in der Bibliotheksdoku
+            und in den Anleitungen den passenden Einstieg.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="lua/LUA/ce/" class="btn btn-secondary">Zur Lua-Dokumentation</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row pb-5">
+    <div class="col-lg-10">
+      <p>
+        Damit ist schnell erkennbar, was in EEP läuft und was außerhalb von EEP stattfindet: Lua arbeitet direkt in der
+        Anlage, während Server und Web App nur dann dazukommen, wenn Du Daten sichtbar machen oder von außerhalb
+        zugreifen möchtest.
+      </p>
+    </div>
+  </div>
+
+  <div class="row pt-2" id="fuer-entwickler">
+    <div class="col-12">
+      <h2>Für Entwickler</h2>
+    </div>
+  </div>
+
+  <div class="row pb-2">
+    <div class="col-12">
+      <p class="lead">
+        Die Control Extension ist als Monorepo aufgebaut. Die produktive Lua-Seite, der Server, die Web App und
+        gemeinsam genutzte Typen sind bewusst getrennt, damit die Schichten unabhängig entwickelt und getestet werden
+        können.
+      </p>
+      <p>
+        Der wichtigste Einstieg für die Entwicklung ist die Projektaufbau-Dokumentation. Für das technische Gesamtbild
+        gibt es außerdem eine Architektur-Übersicht im Repository.
+      </p>
+    </div>
+  </div>
+
+  <div class="row equal-height pb-5">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card border-warning mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Projektaufbau</h4>
+          <p class="card-text">
+            Lerne die Hauptbereiche <code>lua/</code>, <code>apps/web-server/</code>, <code>apps/web-app/</code> und
+            <code>apps/web-shared/</code> kennen und starte die lokale Entwicklungsumgebung.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="docs/anleitungen-entwickler/aufbau-des-projektes" class="btn btn-warning">Projektaufbau</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card border-dark mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Architektur</h4>
+          <p class="card-text">
+            Verschaffe Dir einen kompakten Überblick über Schichten, Verantwortlichkeiten und den Datenfluss zwischen
+            Lua, Data Bridge, Server und Web App.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a
+            href="https://github.com/Andreas-Kreuz/control-extension/blob/main/project-docs/ARCHITECTURE.md"
+            class="btn btn-dark"
+            >Architektur lesen</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card border-success mb-4 bg-light h-100">
+        <div class="card-body">
+          <h4 class="card-title">Mitwirken</h4>
+          <p class="card-text">
+            Wenn Du Fehler melden, Ideen einbringen oder selbst beitragen willst, findest Du im Repository Hinweise zum
+            Zusammenarbeiten und zu den nächsten Schritten.
+          </p>
+        </div>
+        <div class="card-footer bg-transparent">
+          <a href="https://github.com/Andreas-Kreuz/control-extension/blob/main/CONTRIBUTING.md" class="btn btn-success"
+            >Mitwirken</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</span>

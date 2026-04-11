@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
@@ -44,10 +44,6 @@ function AppLayout({ navItems }: AppLayoutProps) {
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setSideSheetState(defaultSideSheetState);
-  }, [location.pathname]);
 
   const setSheet = useCallback((content: ReactNode, options?: { permanentOnTablet?: boolean; key?: string }) => {
     setSideSheetState({

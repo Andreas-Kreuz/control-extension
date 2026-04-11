@@ -1,12 +1,11 @@
 import { TrainProvider } from './providers/TrainProvider';
-import TrainsPage from './components/TrainsPage';
+import { useRoutes } from 'react-router-dom';
+import routes from './routes';
 
 const TrainsRoute = () => {
-  return (
-    <TrainProvider>
-      <TrainsPage />
-    </TrainProvider>
-  );
+  const routeElement = useRoutes(routes);
+
+  return <TrainProvider>{routeElement}</TrainProvider>;
 };
 
 export default TrainsRoute;

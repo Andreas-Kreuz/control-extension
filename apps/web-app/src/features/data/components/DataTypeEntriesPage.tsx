@@ -7,6 +7,7 @@ import AppCardBg from '../../../shared/components/AppCardBg';
 import AppPage from '../../../shared/layouts/AppPage';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
+import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import useTypeEntries from '../hooks/useTypeEntries';
 import DataEntryDetailSection from './DataEntryDetailSection';
 
@@ -14,9 +15,14 @@ interface DataEntry {
   id: string;
 }
 
-function DataTypeEntriesMod() {
+interface DataTypeEntriesPageProps {
+  selectedElement?: string;
+}
+
+function DataTypeEntriesMod({ selectedElement }: DataTypeEntriesPageProps) {
   const { ceType = '' } = useParams<{ ceType: string }>();
   const entriesMap = useTypeEntries(ceType);
+  const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
 
   const items = useMemo(
     () =>
@@ -49,6 +55,8 @@ function DataTypeEntriesMod() {
         getDetails={(item) => [
           { title: 'Details', component: <DataEntryDetailSection ceType={ceType} entryId={item.id} /> },
         ]}
+        selectedElement={selectedElement}
+        onSelectedElementChange={handleSelectedElementChange}
       />
     </AppPage>
   );

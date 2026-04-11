@@ -147,6 +147,6 @@ local crossingCeModule = require("ce.mods.road.CeRoadModule")
 ControlExtension.addModules(crossingCeModule)
 
 function EEPMain()
-    ControlExtension.runTasks()
+    ControlExtension.runTasks(1)
     return 1
 end

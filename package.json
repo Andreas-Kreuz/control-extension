@@ -1,7 +1,7 @@
 {
   "name": "@ce/root",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "workspaces": [
     "apps/*",
     "packages/*",
@@ -20,7 +20,7 @@
     "clean:lua": "node ./scripts/clean-lua.mjs",
     "clean:web": "yarn workspace @ce/web-app run clean && yarn workspace @ce/web-shared run clean && yarn workspace @ce/web-server run clean",
     "dev:app": "yarn workspace @ce/web-shared run build && node ./scripts/run-parallel.mjs \"yarn workspace @ce/web-server run dev\" \"yarn workspace @ce/web-app run dev\"",
-    "dev:docs": "node ./scripts/run-jekyll.mjs serve",
+    "dev:docs": "node ./scripts/run-jekyll.mjs serve --livereload",
     "dev:storybook": "yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run dev:storybook",
     "format": "yarn run format:apps && yarn run format:lua",
     "format:apps": "prettier --write .",
