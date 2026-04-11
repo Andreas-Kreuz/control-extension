@@ -3,6 +3,7 @@ import { useRoomHandler } from '../../../shared/socket/useRoomHandler';
 import './ServerHome.css';
 import {
   ApprovePairingClientPayload,
+  CeTypes,
   PairingEvent,
   PendingPairingClient,
   ServerStatusEvent,
@@ -46,6 +47,7 @@ function ServerHome() {
   const [open, setOpen] = useState(false);
   const [pendingClients, setPendingClients] = useState<PendingPairingClient[]>([]);
   const [pairingRequired, setPairingRequired] = useState(true);
+  const hasEepData = data.some((entry) => entry !== CeTypes.ServerApiEntries && entry !== CeTypes.ServerStats);
 
   const webAppUrl =
     window.location.protocol + '//' + (serverHost ? serverHost : window.location.hostname) + ':' + window.location.port;
@@ -339,7 +341,7 @@ end`;
             </Stack>
           </ListItem>
           {directoryOk ? <Divider /> : ''}
-          {data.length > 0 && directoryOk ? (
+          {hasEepData && directoryOk ? (
             <ListItem>
               <Stack
                 sx={{
@@ -363,7 +365,7 @@ end`;
           ) : (
             ''
           )}
-          {!directoryOk ? (
+          {directoryOk && !hasEepData ? (
             <ListItem>
               <Stack sx={{ width: 1 }}>
                 <div>

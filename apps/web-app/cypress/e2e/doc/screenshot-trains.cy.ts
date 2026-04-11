@@ -11,12 +11,12 @@ function tests(size: string, closestSelector: string, simulator: EepSimulator) {
   describe('screenshot', () => {
     const path = `assets/doc/${size}-trains`;
 
-    it('/ road', () => {
+    it('/ trains ' + size, () => {
       cy.visit('/trains');
       cy.contains('#Acros_Schweiger_HB3').closest(closestSelector);
       cy.screenshot(`${path}`, { capture: 'viewport' });
     });
-    it('/ road details', () => {
+    it('/ trains details' + size, () => {
       cy.visit('/trains/%23Acros_Schweiger_HB3');
       cy.contains('#Acros_Schweiger_HB3')
         .closest(closestSelector)

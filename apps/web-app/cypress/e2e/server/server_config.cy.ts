@@ -1,65 +1,48 @@
 import EepSimulator from '../../test-helpers/eep-simulator';
 
 const simulator = new EepSimulator();
+const projectRoot = Cypress.config('projectRoot');
+const validDir = `${projectRoot}/cypress/io`;
+const emptyDir = `${projectRoot}/cypress/io-empty`;
+
+function chooseDirectory(dir: string) {
+  cy.visit('/server');
+  cy.get('#choose-dir-button').should('be.enabled').click();
+  cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(dir).type('{esc}');
+  cy.get('#dir-dialog-choose').should('be.enabled').click();
+  cy.get('#responsive-dialog-title').should('not.exist');
+}
 
 describe('Server Tests "/server"', () => {
-  const pwd: { dir: string; pairingRequired: boolean } = { dir: '-', pairingRequired: true };
+  const pairingRequired = { value: true };
 
   before(() => {
-    // Remember the old server dir otherwise the following tests will not work!
-    cy.visit('/server');
-    cy.wait(500).then(() => {
-      cy.get('#choose-dir-current-dir')
-        .should('not.have.text', '-')
-        .should('not.contain.text', 'io-empty')
-        .invoke('text')
-        .then((value) => {
-          pwd.dir = value as string;
-        });
-      cy.get('input#pairing-required-switch')
-        .invoke('prop', 'checked')
-        .then((value) => {
-          pwd.pairingRequired = Boolean(value);
-        });
-    });
+    cy.readFile(simulator.fileNames.serverIsRunning, { timeout: 20000 }).should('exist');
     simulator.reset();
     simulator.eepEvent('eep-version-complete.json');
-    cy.wait(500).then(() => {
-      cy.contains('ce.server.ApiEntries');
-      cy.contains('ce.hub.EepVersion');
-      cy.contains('aus 2 Events');
-    });
+    chooseDirectory(validDir);
+    cy.get('input#pairing-required-switch')
+      .invoke('prop', 'checked')
+      .then((value) => {
+        pairingRequired.value = Boolean(value);
+      });
+    cy.contains('ce.server.ApiEntries');
+    cy.contains('ce.hub.EepVersion');
+    cy.contains('aus 2 Events');
   });
 
   after(() => {
-    if (pwd.dir) {
-      // Reset the old server dir otherwise the following tests will not work!
-      cy.log('RESET TO: ' + pwd.dir);
-      cy.visit('/server');
-      cy.wait(500);
-      cy.get('input#pairing-required-switch').then(($switch) => {
-        const currentValue = Boolean($switch.prop('checked'));
-        if (currentValue !== pwd.pairingRequired) {
-          if (pwd.pairingRequired) {
-            cy.wrap($switch).check({ force: true });
-          } else {
-            cy.wrap($switch).uncheck({ force: true });
-          }
+    chooseDirectory(validDir);
+    cy.get('input#pairing-required-switch').then(($switch) => {
+      const currentValue = Boolean($switch.prop('checked'));
+      if (currentValue !== pairingRequired.value) {
+        if (pairingRequired.value) {
+          cy.wrap($switch).check({ force: true });
+        } else {
+          cy.wrap($switch).uncheck({ force: true });
         }
-      });
-      cy.get('#choose-dir-current-dir')
-        .should('not.have.text', '-')
-        .then(() => {
-          cy.get('#choose-dir-button')
-            .should('be.enabled')
-            .click()
-            .then(() => {
-              cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(pwd.dir).type('{esc}');
-              cy.get('#dir-dialog-choose').should('be.enabled').click();
-              cy.get('#responsive-dialog-title').should('not.exist');
-            });
-        });
-    }
+      }
+    });
   });
 
   it('has button "Ordner wählen"', () => {
@@ -82,7 +65,7 @@ describe('Server Tests "/server"', () => {
   describe('Changing the directory', () => {
     it('button "Wählen" is enabled', () => {
       cy.get('#choose-dir-button').click();
-      cy.get('input#dir-dialog-dir').should('exist').should('be.visible').should('contain.value', pwd.dir);
+      cy.get('input#dir-dialog-dir').should('exist').should('be.visible').should('contain.value', 'cypress/io');
       cy.get('#dir-dialog-choose').should('be.enabled');
       cy.get('#dir-dialog-cancel').should('be.enabled');
       cy.get('input#dir-dialog-dir').type('{esc}');
@@ -126,6 +109,7 @@ describe('Server Tests "/server"', () => {
       });
 
       it('Change to EEP directory without contents ', () => {
+        simulator.clearPersistedState(emptyDir);
         cy.get('#choose-dir-button')
           .should('be.enabled')
           .click()
@@ -134,29 +118,18 @@ describe('Server Tests "/server"', () => {
               .should('exist')
               .should('be.visible')
               .clear()
-              .type(pwd.dir + '-empty')
+              .type(emptyDir)
               .type('{esc}');
             cy.get('#dir-dialog-choose').should('be.enabled').click();
             cy.get('#responsive-dialog-title').should('not.exist');
+            cy.reload();
             cy.wait(1000);
             cy.contains('Es wurden keine Daten von EEP gesammelt');
           });
       });
 
       after(() => {
-        // Reset the old server dir otherwise the following tests will not work!
-        cy.get('#choose-dir-current-dir')
-          .should('contain.text', '-empty')
-          .then(() => {
-            cy.get('#choose-dir-button')
-              .should('be.enabled')
-              .click()
-              .then(() => {
-                cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(pwd.dir).type('{esc}');
-                cy.get('#dir-dialog-choose').should('be.enabled').click();
-                cy.get('#responsive-dialog-title').should('not.exist');
-              });
-          });
+        chooseDirectory(validDir);
       });
     });
   });

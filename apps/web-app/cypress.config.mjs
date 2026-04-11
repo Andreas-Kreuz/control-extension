@@ -20,6 +20,11 @@ async function waitForFileMissing(fileName, timeoutMs = 5000) {
   throw new Error(`Timed out waiting for file to disappear: ${fileName}`);
 }
 
+async function waitUntilFilesMissing(fileNames, timeoutMs = 5000) {
+  await Promise.all(fileNames.map((fileName) => waitForFileMissing(fileName, timeoutMs)));
+  return null;
+}
+
 export default defineConfig({
   projectId: 'g5rj4e',
   allowCypressEnv: false,
@@ -33,8 +38,17 @@ export default defineConfig({
           rm(fileName, () => {});
           return null;
         },
+        deleteFiles(fileNames) {
+          fileNames.forEach((fileName) => {
+            rm(fileName, { force: true }, () => {});
+          });
+          return null;
+        },
         waitForFileMissing(fileName) {
           return waitForFileMissing(fileName);
+        },
+        waitForFilesMissing(fileNames) {
+          return waitUntilFilesMissing(fileNames);
         },
       });
     },

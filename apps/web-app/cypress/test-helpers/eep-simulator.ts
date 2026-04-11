@@ -9,6 +9,15 @@ export enum FileNames {
 }
 
 const resetMarker = '@@CE_LOG_RESET@@';
+const exchangeRelativePath = 'LUA/ce/databridge/exchange';
+const persistedStateFiles = [
+  'events-from-ce',
+  'events-from-ce.pending',
+  'log-from-ce',
+  'commands-to-ce',
+  'server-state.json',
+  'server-state.counter',
+];
 
 export default class EepSimulator {
   private eventCounter = 0;
@@ -24,6 +33,16 @@ export default class EepSimulator {
     cy.writeFile(FileNames.logFromCe, '', 'latin1');
     cy.writeFile(FileNames.commandsToCe, '');
     this.eepEvent('reset.json');
+  };
+
+  clearPersistedState = (eepDir = 'cypress/io') => {
+    this.eventCounter = 0;
+    const rootDir = Cypress.config('projectRoot');
+    const baseDir = eepDir.startsWith('/') ? eepDir : `${rootDir}/${eepDir}`;
+    const exchangeDir = `${baseDir}/${exchangeRelativePath}`;
+    const fileNames = persistedStateFiles.map((fileName) => `${exchangeDir}/${fileName}`);
+    cy.task('deleteFiles', fileNames);
+    cy.task('waitForFilesMissing', fileNames);
   };
 
   loadFixtures = (fixtures: string[]): Cypress.Chainable<any[]> => {

@@ -15,7 +15,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
 
   describe('screenshot', () => {
     const path = `assets/doc/${size}-home`;
-    it('/ log open', () => {
+    it('/ log open ' + size, () => {
       simulator.reset();
       simulator.writeLogLine('Willkommen in EEP');
       simulator.writeLogLine('-----------------');
@@ -39,7 +39,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.wait(1000);
       cy.screenshot(`${path}-log`);
     });
-    it('/ log closed', () => {
+    it('/ log closed ' + size, () => {
       cy.visit('/old');
       waitForHome();
       cy.screenshot(`${path}-log-closed`);
