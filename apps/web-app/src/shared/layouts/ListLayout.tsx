@@ -117,8 +117,7 @@ function ListLayout<T>({
     ? items.filter((item) => getFilterText(item).toLocaleLowerCase().includes(normalizedFilter))
     : items;
   const selectedKey = selectedElement ?? null;
-  const selectedItem =
-    selectedKey !== null ? items.find((item) => keyExtractor(item) === selectedKey) ?? null : null;
+  const selectedItem = selectedKey !== null ? (items.find((item) => keyExtractor(item) === selectedKey) ?? null) : null;
   const { setSheet, closeSheet } = useSideSheet();
 
   const updateSelectedKey = useCallback(
@@ -132,9 +131,12 @@ function ListLayout<T>({
     updateSelectedKey(null);
   }, [updateSelectedKey]);
 
-  const handleSelect = useCallback((key: string) => {
-    updateSelectedKey(selectedKey === key ? null : key);
-  }, [selectedKey, updateSelectedKey]);
+  const handleSelect = useCallback(
+    (key: string) => {
+      updateSelectedKey(selectedKey === key ? null : key);
+    },
+    [selectedKey, updateSelectedKey],
+  );
 
   useEffect(() => {
     if (isMobile) {
@@ -195,7 +197,7 @@ function ListLayout<T>({
           })
         : filteredItems.length > 0 && (
             <Paper>
-              <List disablePadding>
+              <List>
                 {filteredItems.map((item, index) => {
                   const key = keyExtractor(item);
                   const selected = key === selectedKey;
