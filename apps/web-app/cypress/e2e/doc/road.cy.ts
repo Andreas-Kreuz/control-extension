@@ -3,7 +3,7 @@ import { createScreenshots } from './createScreenshots';
 
 describe('Road Screenshots', () => createScreenshots(tests));
 
-function tests(size: string, simulator: EepSimulator) {
+function tests(size: string, _closestSelector: string, simulator: EepSimulator) {
   beforeEach(() => {
     simulator.reset();
     simulator.simulateMap('map-01-events', 1, 81);
