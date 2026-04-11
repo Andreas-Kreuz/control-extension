@@ -7,8 +7,6 @@ function TransitOverviewRoute() {
   return <TransitOverview selectedElement={selectedElement} />;
 }
 
-const routes: RouteObject[] = [
-  { path: ':selectedElement?', element: <TransitOverviewRoute /> },
-];
+const routes: RouteObject[] = [{ path: ':selectedElement?', element: <TransitOverviewRoute /> }];
 
 export default routes;

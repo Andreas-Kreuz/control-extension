@@ -5,11 +5,7 @@ import routes from './routes';
 const TrainsRoute = () => {
   const routeElement = useRoutes(routes);
 
-  return (
-    <TrainProvider>
-      {routeElement}
-    </TrainProvider>
-  );
+  return <TrainProvider>{routeElement}</TrainProvider>;
 };
 
 export default TrainsRoute;

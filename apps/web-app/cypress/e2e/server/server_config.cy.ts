@@ -114,12 +114,7 @@ describe('Server Tests "/server"', () => {
           .should('be.enabled')
           .click()
           .then(() => {
-            cy.get('input#dir-dialog-dir')
-              .should('exist')
-              .should('be.visible')
-              .clear()
-              .type(emptyDir)
-              .type('{esc}');
+            cy.get('input#dir-dialog-dir').should('exist').should('be.visible').clear().type(emptyDir).type('{esc}');
             cy.get('#dir-dialog-choose').should('be.enabled').click();
             cy.get('#responsive-dialog-title').should('not.exist');
             cy.reload();

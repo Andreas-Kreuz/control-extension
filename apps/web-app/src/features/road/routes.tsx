@@ -7,8 +7,6 @@ function RoadOverviewRoute() {
   return <IntersectionOverview selectedElement={selectedElement} />;
 }
 
-const routes: RouteObject[] = [
-  { path: ':selectedElement?', element: <RoadOverviewRoute /> },
-];
+const routes: RouteObject[] = [{ path: ':selectedElement?', element: <RoadOverviewRoute /> }];
 
 export default routes;

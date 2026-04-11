@@ -7,8 +7,6 @@ function TrainsPageRoute() {
   return <TrainsPage selectedElement={selectedElement} />;
 }
 
-const routes: RouteObject[] = [
-  { path: ':selectedElement?', element: <TrainsPageRoute /> },
-];
+const routes: RouteObject[] = [{ path: ':selectedElement?', element: <TrainsPageRoute /> }];
 
 export default routes;
