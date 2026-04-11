@@ -13,6 +13,7 @@ import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
 import AppPage from '../../../shared/layouts/AppPage';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
+import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import setTrackType from '../hooks/useSetTrackType';
 import useTrackType from '../hooks/useTrackType';
 import useTrains from '../hooks/useTrains';
@@ -32,10 +33,15 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
-const TrainsPage = () => {
+interface TrainsPageProps {
+  selectedElement?: string;
+}
+
+const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
   const trains = useTrains();
   const trackType = useTrackType();
   const setType = setTrackType();
+  const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
 
   const [chipData] = useState<readonly ChipData[]>([
     { key: TrackType.Rail, label: 'Gleise' },
@@ -107,6 +113,8 @@ const TrainsPage = () => {
           { title: 'Linien', component: <TrainLineInfoSection train={train} /> },
         ]}
         filterSlot={filterSlot}
+        selectedElement={selectedElement}
+        onSelectedElementChange={handleSelectedElementChange}
       />
 
       {/* <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>

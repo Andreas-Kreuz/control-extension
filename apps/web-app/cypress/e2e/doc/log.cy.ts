@@ -5,7 +5,7 @@ export const screenShotsizes = [['ipad-2', 'landscape']];
 
 describe('Log Screenshots', () => createScreenshots(tests, screenShotsizes));
 
-function tests(size: string, simulator: EepSimulator) {
+function tests(size: string, _closestSelector: string, simulator: EepSimulator) {
   function waitForHome() {
     simulator.eepEvent('eep-version-complete.json');
     cy.contains('Control Extension App');

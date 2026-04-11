@@ -3,7 +3,7 @@ import { createScreenshots } from './createScreenshots';
 
 describe('Home Screenshots', () => createScreenshots(tests));
 
-function tests(size: string, simulator: EepSimulator) {
+function tests(size: string, _closestSelector: string, simulator: EepSimulator) {
   function waitForHome() {
     simulator.eepEvent('eep-version-complete.json');
     cy.contains('Control Extension App');
@@ -15,22 +15,10 @@ function tests(size: string, simulator: EepSimulator) {
   describe('screenshot', () => {
     const path = `assets/doc/${size}-home`;
     it('/ home', () => {
-      cy.visit('/simple/');
+      cy.visit('/');
       waitForHome();
       cy.contains('Ampeln');
       cy.screenshot(`${path}`);
-    });
-    it('/ home-eep-active', () => {
-      cy.visit('/old');
-      waitForHome();
-      cy.contains('EEP sendet Daten');
-      cy.screenshot(`${path}eep-active`);
-    });
-    it('/ home-eep-paused', () => {
-      cy.visit('/old');
-      waitForHome();
-      cy.contains('EEP wurde pausiert');
-      cy.screenshot(`${path}eep-paused`);
     });
   });
 }

@@ -3,10 +3,19 @@ import EepSimulator from '../../test-helpers/eep-simulator';
 export const defaultSizes = [
   ['iphone-xr', 'portrait'],
   ['ipad-2', 'landscape'],
+  ['macbook-13', 'portrait'],
 ];
 
+const getClosestSelector = (size: string) => {
+  if (size === 'iphone-xr') {
+    return '.MuiCard-root';
+  }
+
+  return '.MuiListItem-root';
+};
+
 export const createScreenshots = (
-  tests: (size: string, simulator: EepSimulator) => void,
+  tests: (size: string, closestSelector: string, simulator: EepSimulator) => void,
   screenShotsizes?: string[][],
 ) => {
   const simulator = new EepSimulator();
@@ -18,7 +27,7 @@ export const createScreenshots = (
         });
         cy.viewport(size[0], size[1]);
       });
-      tests(size[0], simulator);
+      tests(size[0], getClosestSelector(size[0]), simulator);
     });
   });
 };

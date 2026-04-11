@@ -27,9 +27,9 @@ EEPStructureSetLight("#33_Straba Signal A", false)         -- Anforderung
 -- Zeigt erweiterte Informationen waehrend der erste Schitte an   --
 --------------------------------------------------------------------
 if CeDebugLoad then
-    print("[#Start] Loading ce.demo-anlagen.tutorial-ampel.Andreas_Kreuz-Tutorial-Ampelkreuzung-2-main ...")
+    print("[#Start] Loading ce.demo-anlagen.tutorial-ampel.Control_Extension-Tutorial-Ampelkreuzung-2-main ...")
 end
-require("ce.demo-anlagen.tutorial-ampel.Andreas_Kreuz-Tutorial-Ampelkreuzung-2-main")
+require("ce.demo-anlagen.tutorial-ampel.Control_Extension-Tutorial-Ampelkreuzung-2-main")
 
 --------------------------------------------------------------------
 -- Zeige erweiterte Informationen an                              --

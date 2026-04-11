@@ -1,6 +1,6 @@
 clearlog()
 print("Der wahre Schatz liegt in: ")
-print([[EEP\LUA\ce\demo-anlagen\testen\Andreas_Kreuz-Lua-Testbeispiel-test.lua]])
+print([[EEP\LUA\ce\demo-anlagen\testen\Control_Extension-Lua-Testbeispiel-test.lua]])
 print("")
 print("Mit der test-Datei kann man diese Datei hier ohne EEP testen!")
 

@@ -3,15 +3,21 @@ import ModuleSettingsButton from '../../../shared/components/ModuleSettingsButto
 import AppPage from '../../../shared/layouts/AppPage';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
+import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import useLines from '../hooks/useLines';
 import useTransitSettings from '../hooks/useTransitSettings';
 import TransitLineCard from './TransitLineCard';
 import TransitLineListItem from './TransitLineListItem';
 import TransitLineSegment from './TransitLineSegment';
 
-function TransitOverview() {
+interface TransitOverviewProps {
+  selectedElement?: string;
+}
+
+function TransitOverview({ selectedElement }: TransitOverviewProps) {
   const lines = useLines();
   const settings = useTransitSettings();
+  const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
 
   return (
     <AppPage>
@@ -28,7 +34,7 @@ function TransitOverview() {
         renderListItem={(line, selected, onSelect) => (
           <TransitLineListItem line={line} selected={selected} onSelect={onSelect} />
         )}
-        emptyMessage={(ft) => <Typography variant="body2">{`Es wurden keine ÖPNV-Linien gefunden.`}</Typography>}
+        emptyMessage={() => <Typography variant="body2">{`Es wurden keine ÖPNV-Linien gefunden.`}</Typography>}
         renderCard={(line, selected, onSelect, mobileExpansion) => (
           <TransitLineCard line={line} selected={selected} onSelect={onSelect}>
             {mobileExpansion}
@@ -40,6 +46,8 @@ function TransitOverview() {
             component: <TransitLineSegment segment={ls} />,
           }))
         }
+        selectedElement={selectedElement}
+        onSelectedElementChange={handleSelectedElementChange}
       />
     </AppPage>
   );

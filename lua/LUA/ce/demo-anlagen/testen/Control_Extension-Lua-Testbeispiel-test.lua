@@ -3,7 +3,7 @@ require("ce.hub.eep.EepSimulator")
 EEPSaveData(1, 0) -- Speichere den Zähler auf 0 - muss vor dem Skript aufgerufen werden
 
 -- Laden das Haupt-Skripts
-require("ce.demo-anlagen.testen.Andreas_Kreuz-Lua-Testbeispiel-main")
+require("ce.demo-anlagen.testen.Control_Extension-Lua-Testbeispiel-main")
 
 assert(1 == EEPMain())       -- EEPMain muss 1 zurückgeben!
 assert(4 == EEPGetSignal(1)) -- Der Zaehler ist 0, das Signal muss auf 4 stehen
