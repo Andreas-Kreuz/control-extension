@@ -27,11 +27,16 @@ function AppCardBg(props: AppCardBgProps) {
       props.setExpanded(!props.expanded);
     }
   };
+  const actionAreaProps = props.to
+    ? {
+        component: RouterLink,
+        to: props.to,
+      }
+    : {};
   const contents = (
     <Stack sx={{ flexDirection: 'column', alignItems: 'fill' }}>
       <CardActionArea
-        component={RouterLink}
-        to={props.to || ''}
+        {...actionAreaProps}
         onClick={handleExpand}
         disableRipple={((props.setExpanded || !props.to) && true) || false}
         sx={{
