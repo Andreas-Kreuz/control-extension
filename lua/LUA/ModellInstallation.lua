@@ -36,11 +36,11 @@ end
 -----------------------------------------
 local paket1 = AkModellPaket:new("13,2", "Demo-Anlage (Ampel, ÖPNV)", "Die Demo-Anlagen für Ampeln und ÖPNV")
 paket1:addFiles(currentDirectory, "", "LUA\\ce\\demo-anlagen\\ampel", { "README.md", "desktop.ini" })
-paket1:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Ampel",
+paket1:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Ampel",
                 { ".dds", "README.md", "desktop.ini" })
 paket1:addFiles(currentDirectory, "", "LUA\\ce\\demo-anlagen\\demo-linien",
                 { ".dds", "README.md", "desktop.ini" })
-paket1:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Linien",
+paket1:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Linien",
                 { ".dds", "README.md", "desktop.ini" })
 
 -----------------------------------------
@@ -49,7 +49,7 @@ paket1:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Li
 local paket2 = AkModellPaket:new("13,2", "Demo-Anlage Testen mit EEP (Erweiterte Modelle)",
                                  "Eine Anlage mit Shop-Modellen - mit zwei komplexen Kreuzungen und Ampel-Skripten")
 paket2:addFiles(currentDirectory, "", "LUA\\ce\\demo-anlagen\\testen", { "README.md", "desktop.ini" })
-paket2:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Testen",
+paket2:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Testen",
                 { ".dds", "README.md", "desktop.ini" })
 
 -----------------------------------------
@@ -58,7 +58,7 @@ paket2:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Demo-Te
 local paket3 = AkModellPaket:new("13,2", "Tutorial - Aufbau einer Ampelkreuzung",
                                  "Eine Anlage mit einer Kreuzung, die die Verwendung der  erklärt")
 paket3:addFiles(currentDirectory, "", "LUA\\ce\\demo-anlagen\\tutorial-ampel", { "README.md", "desktop.ini" })
-paket3:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\Andreas_Kreuz-Tutorial-Ampelkreuzung",
+paket3:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\ce\\Control_Extension-Tutorial-Ampelkreuzung",
                 { ".dds", "README.md", "desktop.ini" })
 
 print("[#ModellInstallation] " .. paket0.germanName)

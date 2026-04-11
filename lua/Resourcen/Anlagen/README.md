@@ -11,7 +11,7 @@ img: '/docs/assets/headers/AmpelDemo.jpg'
 
 ![SourceCode](../../assets/headers/AmpelDemo.jpg)
 
-- **[Andreas_Kreuz-Demo-Ampel](Andreas_Kreuz-Demo-Ampel/)**
+- **[Control_Extension-Demo-Ampel](ce/Control_Extension-Demo-Ampel/)**
 
   **Demonstration zweier Ampelschaltungen** - Diese Anlage zeigt die Grundlagen anhand zweier Kreuzungen (nur mit Grundmodellen aus EEP 14)
 
@@ -21,6 +21,6 @@ img: '/docs/assets/headers/AmpelDemo.jpg'
 
 ![SourceCode](../../assets/headers/TestDemo.png)
 
-- **[Andreas_Kreuz-Demo-Testen](Andreas_Kreuz-Demo-Testen/)**
+- **[Control_Extension-Demo-Testen](ce/Control_Extension-Demo-Testen/)**
 
   **Demonstration eines ausführlichen Test-Skriptes** - Der Aufbau der Skripte dieser Anlage zeigt, wie man Lua-Skripte testen kann, ohne EEP zu starten, siehe [ak-demo-lua/testen](ak-demo-lua/testen/)

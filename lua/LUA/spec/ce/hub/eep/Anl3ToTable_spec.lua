@@ -127,14 +127,14 @@ insulate("Anl3ToTable", function ()
     end)
 
     it("parses the real smallest anl3 file and returns sutrackp root", function ()
-        local realPath = "../Resourcen/Anlagen/Andreas_Kreuz-Demo-Testen/Andreas_Kreuz-Lua-Testbeispiel.anl3"
+        local realPath = "../Resourcen/Anlagen/ce/Control_Extension-Demo-Testen/Control_Extension-Lua-Testbeispiel.anl3"
         local root, err = Anl3ToTable.loadAnlage(realPath)
         assert.is_nil(err)
         assert.is_not_nil(root)
         if root then
             assert.equals("sutrackp", root.tag)
             local eepLua = assert(findChild(root, "EEPLua"))
-            assert.equals("\\Andreas_Kreuz-Lua-Testbeispiel.lua", eepLua.attrs.LUAPath)
+            assert.equals("\\Control_Extension-Lua-Testbeispiel.lua", eepLua.attrs.LUAPath)
             assert.is_true(#findAll(root, "Kontakt") > 0)
             assert.is_true(#findAll(root, "Zugverband") > 0)
         end
