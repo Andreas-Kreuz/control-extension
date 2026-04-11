@@ -13,12 +13,12 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
     simulator.reset();
   });
   describe('screenshot', () => {
-    const path = `assets/doc/${size}-home`;
+    const path = `assets/doc/thumbnails`;
     it('/ home', () => {
       cy.visit('/');
       waitForHome();
       cy.contains('Ampeln');
-      cy.screenshot(`${path}`);
+      cy.screenshot(`${path}/eep-web-startseite`);
     });
   });
 }

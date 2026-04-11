@@ -6,7 +6,7 @@ export const screenShotsizes = [['ipad-2', 'landscape']];
 describe('Server Screenshots', () => createScreenshots(tests, screenShotsizes));
 
 function tests(size: string, _closestSelector: string, simulator: EepSimulator) {
-  const path = `assets/doc/${size}-server`;
+  const path = `assets/tutorial/eep-web-installation`;
   const projectRoot = Cypress.config('projectRoot');
   const validDir = `${projectRoot}/cypress/io`;
   const emptyDir = `${projectRoot}/cypress/io-empty`;
@@ -52,7 +52,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.wait(500);
       cy.contains('Bevor es losgeht, muss Du nur noch den Ordner von EEP angeben.');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
-      cy.screenshot(`${path}-nonexistentdir`);
+      cy.screenshot(`${path}/02-server-verzeichnis-falsch`);
     });
 
     it('/ server emptydir ' + size, () => {
@@ -62,7 +62,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.wait(500);
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
       cy.contains('Es wurden keine Daten von EEP gesammelt');
-      cy.screenshot(`${path}-emptydir`);
+      cy.screenshot(`${path}/02-server-verzeichnis-ok`);
     });
 
     it('/ server ok ' + size, () => {
@@ -76,7 +76,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.contains('ce.hub.EepVersion');
       cy.contains('aus 2 Events');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
-      cy.screenshot(`${path}-ok`);
+      cy.screenshot(`${path}/02-server-verzeichnis-ok-daten-da`);
     });
   });
 }

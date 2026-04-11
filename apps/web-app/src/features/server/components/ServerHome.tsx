@@ -53,10 +53,9 @@ function ServerHome() {
     window.location.protocol + '//' + (serverHost ? serverHost : window.location.hostname) + ':' + window.location.port;
 
   const code = `local ControlExtension = require("ce.ControlExtension")
-ControlExtension.addModules(require("ce.hub.CeHubModule"))
 
 function EEPMain()
-    ControlExtension.runTasks()
+    ControlExtension.runTasks(1)
     return 1
 end`;
 

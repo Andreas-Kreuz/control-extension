@@ -4,7 +4,6 @@
   background: $brand-color;
   display: inline-block;
   float: left;
-  width: 100%;
 
   a {
     color: $header-link-color;
@@ -71,6 +70,10 @@
   }
 }
 
+.navbar {
+  background-color: #fff;
+}
+
 .nav {
   display: block;
 }
@@ -99,6 +102,10 @@
 }
 
 @media screen and (max-width: $break) {
+  .navbar .navbar-nav .nav-item {
+    margin: 0 0 0.5rem;
+  }
+
   .site-header {
     img.avatar {
       margin-top: -7px;

@@ -25,7 +25,7 @@ ControlExtension.addModules(
 )
 
 function EEPMain()
-    ControlExtension.runTasks()
+    ControlExtension.runTasks(1)
     return 1
 end
 
