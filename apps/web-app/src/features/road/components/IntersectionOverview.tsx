@@ -10,15 +10,21 @@ import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
 import AppPage from '../../../shared/layouts/AppPage';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
+import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import useIntersectionSettings from '../hooks/useIntersectionSettings';
 import useIntersections from '../hooks/useIntersections';
 import IntersectionControlSection from './IntersectionControlSection';
 import IntersectionCamsSection from './IntersectionCamsSection';
 import IntersectionListItem from './IntersectionListItem';
 
-function IntersectionOverview() {
+interface IntersectionOverviewProps {
+  selectedElement?: string;
+}
+
+function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
   const intersections = useIntersections();
   const settings = useIntersectionSettings();
+  const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
 
   return (
     <AppPage>
@@ -51,6 +57,8 @@ function IntersectionOverview() {
           { title: 'Modus & Schaltung', component: <IntersectionControlSection intersection={i} /> },
           { title: 'Kameras', component: <IntersectionCamsSection intersection={i} /> },
         ]}
+        selectedElement={selectedElement}
+        onSelectedElementChange={handleSelectedElementChange}
       />
 
       {/* <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>

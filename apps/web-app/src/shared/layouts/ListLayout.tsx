@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
@@ -32,6 +32,8 @@ export interface ListLayoutProps<T> {
   emptyMessage?: ReactNode | ((filterText: string) => ReactNode);
   placeholder?: ReactNode;
   filterSlot?: ReactNode;
+  selectedElement: string | undefined;
+  onSelectedElementChange: (selectedElement: string | null) => void;
 }
 
 function MobileTabs({ sections }: { sections: DetailSection[] }) {
@@ -102,6 +104,8 @@ function ListLayout<T>({
   emptyMessage,
   placeholder,
   filterSlot,
+  selectedElement,
+  onSelectedElementChange,
 }: ListLayoutProps<T>) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -112,37 +116,25 @@ function ListLayout<T>({
   const filteredItems = normalizedFilter
     ? items.filter((item) => getFilterText(item).toLocaleLowerCase().includes(normalizedFilter))
     : items;
+  const selectedKey = selectedElement ?? null;
+  const selectedItem =
+    selectedKey !== null ? items.find((item) => keyExtractor(item) === selectedKey) ?? null : null;
+  const { setSheet, closeSheet } = useSideSheet();
 
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const { state, setSheet, closeSheet } = useSideSheet();
-
-  // Keep stable refs so effects don't re-run on every render
-  const itemsRef = useRef(items);
-  itemsRef.current = items;
-  const getDetailsRef = useRef(getDetails);
-  getDetailsRef.current = getDetails;
-  const keyExtractorRef = useRef(keyExtractor);
-  keyExtractorRef.current = keyExtractor;
+  const updateSelectedKey = useCallback(
+    (nextSelectedKey: string | null) => {
+      onSelectedElementChange(nextSelectedKey);
+    },
+    [onSelectedElementChange],
+  );
 
   const handleClose = useCallback(() => {
-    setSelectedKey(null);
-  }, []);
-
-  // Deselect when the sheet is closed externally (e.g. backdrop click on tablet).
-  // Only react to a true→false transition to avoid clearing selection when the
-  // sheet hasn't been opened yet (state.open starts as false).
-  const prevSheetOpenRef = useRef(state.open);
-  useEffect(() => {
-    const wasOpen = prevSheetOpenRef.current;
-    prevSheetOpenRef.current = state.open;
-    if (wasOpen && !state.open && selectedKey !== null && !isMobile && !isDesktop) {
-      setSelectedKey(null);
-    }
-  }, [state.open, selectedKey, isMobile, isDesktop]);
+    updateSelectedKey(null);
+  }, [updateSelectedKey]);
 
   const handleSelect = useCallback((key: string) => {
-    setSelectedKey((prev) => (prev === key ? null : key));
-  }, []);
+    updateSelectedKey(selectedKey === key ? null : key);
+  }, [selectedKey, updateSelectedKey]);
 
   useEffect(() => {
     if (isMobile) {
@@ -150,16 +142,13 @@ function ListLayout<T>({
       return;
     }
 
-    if (selectedKey) {
-      const item = itemsRef.current.find((i) => keyExtractorRef.current(i) === selectedKey) ?? null;
-      if (item) {
-        const sections = getDetailsRef.current(item);
-        setSheet(<SideSheetDetail sections={sections} onClose={handleClose} />, {
-          permanentOnTablet: false,
-          key: selectedKey,
-        });
-        return;
-      }
+    if (selectedItem && selectedKey) {
+      const sections = getDetails(selectedItem);
+      setSheet(<SideSheetDetail sections={sections} onClose={handleClose} />, {
+        permanentOnTablet: false,
+        key: selectedKey,
+      });
+      return;
     }
 
     if (isDesktop) {
@@ -167,7 +156,7 @@ function ListLayout<T>({
     } else {
       closeSheet();
     }
-  }, [selectedKey, isDesktop, isMobile, placeholder, handleClose, setSheet, closeSheet]);
+  }, [selectedItem, selectedKey, getDetails, isDesktop, isMobile, placeholder, handleClose, setSheet, closeSheet]);
 
   // Cleanup on unmount
   useEffect(() => {

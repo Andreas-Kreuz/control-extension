@@ -1,7 +1,8 @@
-import DataPage from './components/DataPage';
+import { useRoutes } from 'react-router-dom';
+import routes from './routes';
 
 function DataRoute() {
-  return <DataPage />;
+  return useRoutes(routes);
 }
 
 export default DataRoute;
