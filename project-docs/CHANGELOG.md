@@ -20,7 +20,16 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 
 ### Neu
 
-- ⭐ Installation aller Dateien erfolgt nach `LUA\ce` bzw. `Resourcen\Anlagen` im EEP-Verzeichnis
+- ⭐ Installation aller Dateien erfolgt nach `LUA\ce` bzw. `Resourcen\Anlagen\ce` im EEP-Verzeichnis
 - ⭐ [Migrationsanleitung](/lua/LUA/ce/Migrate_ak_to_ce.md), wenn du von der Lua-Bibliothek für EEP von Andreas Kreuz kommst.
 - ⭐ [Anleitung für Updates](/lua/LUA/ce/Update.md)
 - ⭐ [Anleitung für Deinstallation](/lua/LUA/ce/Deinstallation.md)
+
+### Bugfixes
+
+- 🐞 Karten können wieder ausgewählt werden
+
+### Dokumentation
+
+- 📖 Installationsanleitungen aktualisiert
+- 📖 Startseite der Dokumentation aktualisiert
