@@ -34,9 +34,26 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
   }
 
   function openLogPanel() {
-    cy.get('#open-log').should('contain.text', 'Log anzeigen').click();
-    cy.get('#open-log').should('contain.text', 'Log verbergen');
-    return cy.get('ul').should('be.visible');
+    cy.get('#open-log').then(($button) => {
+      const buttonText = $button.text().toLowerCase();
+      if (buttonText.includes('log anzeigen')) {
+        cy.wrap($button).click();
+      }
+    });
+
+    cy.get('#open-log').invoke('text').should('match', /log verbergen/i);
+    cy.get('#delete-log').should('be.visible');
+    return cy.get('ul');
+  }
+
+  function waitForLogScrollToSettle() {
+    cy.get('ul')
+      .parent()
+      .should(($container) => {
+        const element = $container[0];
+        const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
+        expect(element.scrollTop).to.equal(maxScrollTop);
+      });
   }
 
   function waitForLogLines(expectedTotal: number, lastLine: string) {
@@ -45,6 +62,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       .should('have.length', expectedTotal)
       .last()
       .should('contain.text', lastLine);
+    waitForLogScrollToSettle();
   }
 
   beforeEach(() => {});

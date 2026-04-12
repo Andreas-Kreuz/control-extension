@@ -13,7 +13,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
     simulator.reset();
   });
   describe('screenshot', () => {
-    const path = `assets/doc/thumbnails`;
+    const path = `assets/thumbnails`;
     it('/ home', () => {
       cy.visit('/');
       waitForHome();

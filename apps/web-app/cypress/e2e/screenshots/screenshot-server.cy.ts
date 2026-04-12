@@ -21,6 +21,19 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
     cy.get('#responsive-dialog-title').should('not.exist');
   }
 
+  function waitForScreenshotVisualState() {
+    cy.get('#choose-dir-button').then(($button) => {
+      if ($button.is(':focus')) {
+        cy.wrap($button).blur();
+      }
+    });
+
+    cy.get('body').should(($body) => {
+      expect($body.find('.MuiTouchRipple-rippleVisible')).to.have.length(0);
+      expect($body.find('.Mui-focusVisible')).to.have.length(0);
+    });
+  }
+
   before(() => {
     cy.readFile(simulator.fileNames.serverIsRunning, { timeout: 20000 }).should('exist');
     chooseDirectory(validDir);
@@ -29,7 +42,6 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       .then((value) => {
         pairingRequired.value = Boolean(value);
       });
-    cy.wait(1000);
   });
 
   after(() => {
@@ -49,9 +61,9 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
   describe('screenshot', () => {
     it('/ server nonexistingdir ' + size, () => {
       chooseDirectory(nonexistentDir);
-      cy.wait(500);
       cy.contains('Bevor es losgeht, muss Du nur noch den Ordner von EEP angeben.');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
+      waitForScreenshotVisualState();
       cy.screenshot(`${path}/02-server-verzeichnis-falsch`);
     });
 
@@ -59,9 +71,9 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       simulator.clearPersistedState(emptyDir);
       chooseDirectory(emptyDir);
       cy.reload();
-      cy.wait(500);
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
       cy.contains('Es wurden keine Daten von EEP gesammelt');
+      waitForScreenshotVisualState();
       cy.screenshot(`${path}/02-server-verzeichnis-ok`);
     });
 
@@ -70,12 +82,12 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       simulator.reset();
       simulator.eepEvent('eep-version-complete.json');
       cy.reload();
-      cy.wait(500);
       cy.contains('Bereitgestellte Daten');
       cy.contains('ce.server.ApiEntries');
       cy.contains('ce.hub.EepVersion');
       cy.contains('aus 2 Events');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
+      waitForScreenshotVisualState();
       cy.screenshot(`${path}/02-server-verzeichnis-ok-daten-da`);
     });
   });

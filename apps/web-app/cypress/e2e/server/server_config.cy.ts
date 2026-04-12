@@ -103,7 +103,6 @@ describe('Server Tests "/server"', () => {
               .type('{esc}');
             cy.get('#dir-dialog-choose').should('be.enabled').click();
             cy.get('#responsive-dialog-title').should('not.exist');
-            cy.wait(1000);
             cy.contains('Bevor es losgeht, muss Du nur noch den Ordner von EEP angeben.');
           });
       });
@@ -118,7 +117,6 @@ describe('Server Tests "/server"', () => {
             cy.get('#dir-dialog-choose').should('be.enabled').click();
             cy.get('#responsive-dialog-title').should('not.exist');
             cy.reload();
-            cy.wait(1000);
             cy.contains('Es wurden keine Daten von EEP gesammelt');
           });
       });

@@ -84,7 +84,6 @@ export default class EepSimulator {
       cy.log(oldLines);
       const prefix = oldLines.length > 0 && !oldLines.endsWith('\n') ? oldLines + '\n' : oldLines;
       cy.writeFile(FileNames.logFromCe, prefix + line + '\n', 'latin1');
-      cy.wait(100); // Give the web server some time to read new log lines
     });
   }
 
