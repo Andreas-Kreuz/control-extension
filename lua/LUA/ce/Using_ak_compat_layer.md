@@ -8,26 +8,26 @@ Die Dateien unter `LUA/ak/road/` und `LUA/ak/public-transport/` sind Weiterleitu
 
 Abgedeckte Module:
 
-| Dein bisheriger `require`                              | leitet intern weiter nach                        |
-| ------------------------------------------------------ | ------------------------------------------------ |
-| `ak.road.TrafficLight`                                 | `ce.mods.road.TrafficLight`                      |
-| `ak.road.TrafficLightModel`                            | `ce.mods.road.TrafficLightModel`                 |
-| `ak.road.TrafficLightState`                            | `ce.mods.road.TrafficLightState`                 |
-| `ak.road.Crossing`                                     | `ce.mods.road.Intersection` (compat-Wrapper)     |
-| `ak.road.CrossingSequence`                             | `ce.mods.road.IntersectionSequence`              |
-| `ak.road.Lane`                                         | `ce.mods.road.Lane`                              |
-| `ak.road.LaneSettings`                                 | `ce.mods.road.LaneSettings`                      |
-| `ak.road.AxisStructureTrafficLight`                    | `ce.mods.road.AxisStructureTrafficLight`          |
-| `ak.road.LightStructureTrafficLight`                   | `ce.mods.road.LightStructureTrafficLight`        |
-| `ak.road.Bus`                                          | `ce.mods.road.Bus`                               |
-| `ak.road.TramSwitch`                                   | `ce.mods.road.TramSwitch`                        |
-| `ak.public-transport.Line`                             | `ce.mods.transit.Line` (compat-Wrapper)          |
-| `ak.public-transport.LineRegistry`                     | `ce.mods.transit.LineRegistry`                   |
-| `ak.public-transport.LineSegment`                      | `ce.mods.transit.LineSegment`                    |
-| `ak.public-transport.RoadStation`                      | `ce.mods.transit.RoadStation`                    |
-| `ak.public-transport.Platform`                         | `ce.mods.transit.Platform`                       |
-| `ak.public-transport.StationQueue`                     | `ce.mods.transit.StationQueue`                   |
-| `ak.public-transport.StationQueueEntry`                | `ce.mods.transit.StationQueueEntry`              |
+| Dein bisheriger `require`               | leitet intern weiter nach                    |
+| --------------------------------------- | -------------------------------------------- |
+| `ak.road.TrafficLight`                  | `ce.mods.road.TrafficLight`                  |
+| `ak.road.TrafficLightModel`             | `ce.mods.road.TrafficLightModel`             |
+| `ak.road.TrafficLightState`             | `ce.mods.road.TrafficLightState`             |
+| `ak.road.Crossing`                      | `ce.mods.road.Intersection` (compat-Wrapper) |
+| `ak.road.CrossingSequence`              | `ce.mods.road.IntersectionSequence`          |
+| `ak.road.Lane`                          | `ce.mods.road.Lane`                          |
+| `ak.road.LaneSettings`                  | `ce.mods.road.LaneSettings`                  |
+| `ak.road.AxisStructureTrafficLight`     | `ce.mods.road.AxisStructureTrafficLight`     |
+| `ak.road.LightStructureTrafficLight`    | `ce.mods.road.LightStructureTrafficLight`    |
+| `ak.road.Bus`                           | `ce.mods.road.Bus`                           |
+| `ak.road.TramSwitch`                    | `ce.mods.road.TramSwitch`                    |
+| `ak.public-transport.Line`              | `ce.mods.transit.Line` (compat-Wrapper)      |
+| `ak.public-transport.LineRegistry`      | `ce.mods.transit.LineRegistry`               |
+| `ak.public-transport.LineSegment`       | `ce.mods.transit.LineSegment`                |
+| `ak.public-transport.RoadStation`       | `ce.mods.transit.RoadStation`                |
+| `ak.public-transport.Platform`          | `ce.mods.transit.Platform`                   |
+| `ak.public-transport.StationQueue`      | `ce.mods.transit.StationQueue`               |
+| `ak.public-transport.StationQueueEntry` | `ce.mods.transit.StationQueueEntry`          |
 
 Diese `require`-Zeilen kannst Du unverändert in Deinem Skript belassen.
 
@@ -47,22 +47,22 @@ local ControlExtension = require("ce.ControlExtension")
 
 Dazu die Methodennamen anpassen:
 
-| Alt                                  | Neu                                       |
-| ------------------------------------ | ----------------------------------------- |
-| `ModuleRegistry.registerModules(…)`  | `ControlExtension.addModules(…)`          |
-| `ModuleRegistry.runTasks(…)`         | `ControlExtension.runTasks(…)`            |
-| `ModuleRegistry.deactivateServer()`  | `ControlExtension.deactivateServer()`     |
-| `ModuleRegistry.activateServer()`    | `ControlExtension.activateServer()`       |
+| Alt                                 | Neu                                   |
+| ----------------------------------- | ------------------------------------- |
+| `ModuleRegistry.registerModules(…)` | `ControlExtension.addModules(…)`      |
+| `ModuleRegistry.runTasks(…)`        | `ControlExtension.runTasks(…)`        |
+| `ModuleRegistry.deactivateServer()` | `ControlExtension.deactivateServer()` |
+| `ModuleRegistry.activateServer()`   | `ControlExtension.activateServer()`   |
 
 ### 2. Modul-Wrapper austauschen
 
 Diese alten Wrapper-Module gibt es unter `ak.*` nicht mehr:
 
-| Alt                                              | Neu                                      |
-| ------------------------------------------------ | ---------------------------------------- |
-| `require("ak.core.CoreLuaModule")`               | nicht mehr nötig (in `ce` eingebaut)     |
-| `require("ak.data.DataLuaModule")`               | nicht mehr nötig (in `ce` eingebaut)     |
-| `require("ak.road.CrossingLuaModul")`            | `require("ce.mods.road.CeRoadModule")`   |
+| Alt                                                      | Neu                                          |
+| -------------------------------------------------------- | -------------------------------------------- |
+| `require("ak.core.CoreLuaModule")`                       | nicht mehr nötig (in `ce` eingebaut)         |
+| `require("ak.data.DataLuaModule")`                       | nicht mehr nötig (in `ce` eingebaut)         |
+| `require("ak.road.CrossingLuaModul")`                    | `require("ce.mods.road.CeRoadModule")`       |
 | `require("ak.public-transport.PublicTransportLuaModul")` | `require("ce.mods.transit.CeTransitModule")` |
 
 ### 3. Nicht abgedeckte Einzelmodule
@@ -104,6 +104,10 @@ end
 ## Hinweis zu `Crossing` und `CrossingSequence`
 
 Die Compat-Datei für `ak.road.Crossing` liefert einen Wrapper, der alle Aufrufe an `ce.mods.road.Intersection` weiterleitet. Das bedeutet: Du kannst weiterhin `Crossing.new(...)` schreiben — es wird intern als `Intersection.new(...)` ausgeführt. Dasselbe gilt für `CrossingSequence`, das intern auf `IntersectionSequence` zeigt. Neue Skripte sollten direkt die `ce`-Namen verwenden.
+
+## Wichtig:
+
+Deinstalliere vor der Installation der neuen Pakete die bisherigen ce und ak-Verzeichnisse im LUA-Ordner von EEP -> [Deinstallation](Deinstallation.md).
 
 ## Nächste Schritte
 
