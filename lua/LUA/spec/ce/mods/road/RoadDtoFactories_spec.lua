@@ -78,11 +78,15 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             hidden = true
         }
         local ceType, keyId, key, intersectionDto = RoadDtoFactory.createIntersectionDto(intersection)
+        local _, _, _, selectedIntersectionDto = RoadDtoFactory.createIntersectionDto(intersection, true)
         local laneCeType, laneKeyId, laneKey, laneDto = RoadDtoFactory.createIntersectionLaneDto(lane)
+        local _, _, _, selectedLaneDto = RoadDtoFactory.createIntersectionLaneDto(lane, true)
         local switchingCeType, switchingKeyId, switchingKey, switchingDto =
             RoadDtoFactory.createIntersectionSwitchingDto(switching)
         local tlCeType, tlKeyId, tlKey, trafficLightDto =
             RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight)
+        local _, _, _, selectedTrafficLightDto =
+            RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight, true)
         local moduleCeType, moduleKeyId, moduleKey, moduleDto =
             RoadDtoFactory.createIntersectionModuleSettingDto(moduleSetting)
         local defsCeType, defsKeyId, defs =
@@ -122,6 +126,17 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         timeForGreen = 0,        -- onselection, never selected
                         staticCams = {}          -- onselection, never selected
                     }, intersectionDto)
+        assert.same({
+                        ceType = "ce.mods.road.Intersection",
+                        id = 1,
+                        name = "A",
+                        currentSwitching = "S1",
+                        manualSwitching = "S2",
+                        nextSwitching = "S3",
+                        ready = true,
+                        timeForGreen = 15,
+                        staticCams = { "Cam 1" }
+                    }, selectedIntersectionDto)
         assert.equals("ce.mods.road.IntersectionLane", laneCeType)
         assert.equals("id", laneKeyId)
         assert.equals("1-L1", laneKey)
@@ -141,6 +156,22 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         switchings = { "S1" },
                         tracks = { 10 }
                     }, laneDto)
+        assert.same({
+                        ceType = "ce.mods.road.IntersectionLane",
+                        id = "1-L1",
+                        intersectionId = 1,
+                        name = "L1",
+                        phase = "GREEN",
+                        vehicleMultiplier = 2,
+                        eepSaveId = 5,
+                        type = "NORMAL",
+                        countType = "TRACKS",
+                        waitingTrains = { "T1" },
+                        waitingForGreenCyclesCount = 4,
+                        directions = { "LEFT" },
+                        switchings = { "S1" },
+                        tracks = { 10 }
+                    }, selectedLaneDto)
         assert.equals("ce.mods.road.IntersectionSwitching", switchingCeType)
         assert.equals("id", switchingKeyId)
         assert.equals("A-S1", switchingKey)
@@ -182,6 +213,34 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                             }
                         }
                     }, trafficLightDto)
+        assert.same({
+                        ceType = "ce.mods.road.IntersectionTrafficLight",
+                        id = 2,
+                        signalId = 2,
+                        modelId = "road",
+                        currentPhase = "GREEN",
+                        intersectionId = 1,
+                        lightStructures = {
+                            ["0"] = {
+                                structureRed = "Red",
+                                structureGreen = "Green",
+                                structureYellow = "Yellow",
+                                structureRequest = "Request"
+                            }
+                        },
+                        axisStructures = {
+                            {
+                                structureName = "Axis",
+                                axisName = "Signal",
+                                positionDefault = 0,
+                                positionRed = 1,
+                                positionGreen = 2,
+                                positionYellow = 3,
+                                positionPedestrian = 4,
+                                positionRedYellow = 5
+                            }
+                        }
+                    }, selectedTrafficLightDto)
         assert.equals("ce.mods.road.ModuleSetting", moduleCeType)
         assert.equals("name", moduleKeyId)
         assert.equals("Show", moduleKey)
@@ -220,5 +279,28 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                             }
                         }
                     }, defs)
+    end)
+
+    it("applies per-entry selection when creating road DTO lists", function ()
+        local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
+
+        local _, _, dtos = RoadDtoFactory.createIntersectionDtoList({
+            [1] = {
+                id = 1,
+                name = "A",
+                currentSwitching = "S1",
+                manualSwitching = "S2",
+                nextSwitching = "S3",
+                ready = true,
+                timeForGreen = 15,
+                staticCams = { "Cam 1" }
+            }
+        }, function (intersection)
+            return intersection.id == 1
+        end)
+
+        assert.same("S1", dtos[1].currentSwitching)
+        assert.same("S3", dtos[1].nextSwitching)
+        assert.is_true(dtos[1].ready)
     end)
 end)

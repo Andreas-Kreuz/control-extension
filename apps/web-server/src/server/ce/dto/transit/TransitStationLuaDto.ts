@@ -1,5 +1,8 @@
-// Lua DtoFactory: lua/LUA/ce/mods/transit/data/TransitDtoFactory.lua
-// Room: transit-stations (or similar transit station room)
+import { TransitStationDto } from '@ce/web-shared';
+
 export interface TransitStationLuaDto {
   id: string;
+  name?: TransitStationDto['name'];
+  platforms?: TransitStationDto['platforms'];
+  queue?: TransitStationDto['queue'];
 }

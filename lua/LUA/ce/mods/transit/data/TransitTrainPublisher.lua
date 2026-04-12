@@ -27,15 +27,17 @@ function TransitTrainPublisher.syncState()
     end
 
     for _, transitTrain in pairs(TransitTrainRegistry.getAll()) do
+        local isSelected = DynamicUpdateRegistry.isSelected(TransitCeTypes.TransitTrain, transitTrain.id)
         local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(TransitCeTypes.TransitTrain, transitTrain.id)
         if transitTrain.needsFullSend or needsInitialSend then
-            DataChangeBus.fireDataChanged(TransitTrainDtoFactory.createFullDto(transitTrain))
+            DataChangeBus.fireDataChanged(TransitTrainDtoFactory.createFullDto(transitTrain, isSelected))
             transitTrain.needsFullSend = false
             transitTrain:resetDirty()
-            DynamicUpdateRegistry.markSent(TransitCeTypes.TransitTrain, transitTrain.id)
+            if isSelected then DynamicUpdateRegistry.markSent(TransitCeTypes.TransitTrain, transitTrain.id) end
         elseif transitTrain:hasDirtyFields() then
             local ceType, keyId, key, dto = TransitTrainDtoFactory.createPatchDto(transitTrain,
-                                                                                  transitTrain.dirtyFields)
+                                                                                  transitTrain.dirtyFields,
+                                                                                  isSelected)
             if hasPayloadFields(dto) then
                 DataChangeBus.fireDataChanged(ceType, keyId, key, dto)
             end

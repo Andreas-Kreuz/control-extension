@@ -1,5 +1,7 @@
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
 local Line = require("ce.mods.transit.Line")
+local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitDtoFactory = require("ce.mods.transit.data.TransitDtoFactory")
 local TransitOptionsRegistry = require("ce.mods.transit.options.TransitOptionsRegistry")
 local LineRegistry = {}
@@ -43,7 +45,9 @@ function LineRegistry.fireChangeLinesEvent()
             line.valuesUpdated = false
         end
     end
-    DataChangeBus.fireListChange(TransitDtoFactory.createLineNameDtoList(modifiedLines))
+    DataChangeBus.fireListChange(TransitDtoFactory.createLineNameDtoList(modifiedLines, function (line)
+        return DynamicUpdateRegistry.isSelected(TransitCeTypes.LineName, tostring(line.id or line.nr))
+    end))
 end
 
 return LineRegistry

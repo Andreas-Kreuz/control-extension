@@ -58,6 +58,7 @@ export class RollingStockSelector {
         rotX: rsDto.rotX ?? 0,
         rotY: rsDto.rotY ?? 0,
         rotZ: rsDto.rotZ ?? 0,
+        ...(rsDto.xmlModel !== undefined ? { xmlModel: rsDto.xmlModel } : {}),
       };
       const trainRs = this.trainRollingStock.get(rollingStock.trainName) ?? new Map<number, RollingStockDto>();
       trainRs.set(rollingStock.positionInTrain, rollingStock);

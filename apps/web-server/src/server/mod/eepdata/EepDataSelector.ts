@@ -369,11 +369,15 @@ export default class EepDataSelector {
   getSaveSlots = (): Record<string, DataSlotDto> => this.saveSlots;
   getFreeSlots = (): Record<string, DataSlotDto> => this.freeSlots;
   getSignals = (): Record<string, SignalDto> => this.signals;
+  getSignal = (id: string): SignalDto | undefined => this.signals[id];
   getWaitingOnSignals = (): Record<string, WaitingOnSignalDto> => this.waitingOnSignals;
   getSwitches = (): Record<string, SwitchDto> => this.switches;
+  getSwitch = (id: string): SwitchDto | undefined => this.switches[id];
   getStructures = (): Record<string, StructureDto> => this.structures;
   getStructure = (id: string): StructureDto | undefined => this.structures[id];
   getContacts = (): Record<string, ContactDto> => this.contacts;
+  getContact = (id: string): ContactDto | undefined => this.contacts[id];
   getTracksForRoom = (trackType: string): Record<string, TrackDto> => this.tracks[trackType] ?? {};
+  getTrack = (trackType: string, id: string): TrackDto | undefined => this.tracks[trackType]?.[id];
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);
 }

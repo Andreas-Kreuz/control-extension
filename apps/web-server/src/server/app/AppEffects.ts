@@ -1,6 +1,8 @@
 import SocketService from '../clientio/SocketService';
 import { CacheService } from '../eep/server-data/CacheService';
 import EepDataEffects from '../eep/server-data/EepDataEffects';
+import DynamicInterestRegistry from '../eep/server-data/dynamic/DynamicInterestRegistry';
+import DynamicInterestService from '../eep/server-data/dynamic/DynamicInterestService';
 import EepService from '../eep/service/EepService';
 import { ServerStatisticsService } from '../eep/service/ServerStatisticsService';
 import { registerCommandMod } from '../mod/command/registerCommandMod';
@@ -29,6 +31,7 @@ export default class AppEffects {
   private serverConfigFile: string;
   private eepDataEffects!: EepDataEffects;
   private eepService: EepService | null = null;
+  private dynamicInterestService: DynamicInterestService | null = null;
   private store = new AppReducer();
   private TESTMODE = false;
 
@@ -190,7 +193,14 @@ export default class AppEffects {
     this.socketService.resetOnSocketConnectedCallbacks();
     this.socketService.addOnSocketConnectedCallback((socket: Socket) => this.socketConnected(socket));
 
-    this.eepDataEffects = new EepDataEffects(this.router, this.io, this.socketService, eepService as CacheService);
+    this.dynamicInterestService = new DynamicInterestService(new DynamicInterestRegistry(eepService.queueCommand));
+    this.eepDataEffects = new EepDataEffects(
+      this.router,
+      this.io,
+      this.socketService,
+      eepService as CacheService,
+      this.dynamicInterestService,
+    );
 
     // Init event handler
     eepService.setOnNewEventLine((eventLines: string) => {
@@ -211,7 +221,9 @@ export default class AppEffects {
 
   private registerMods(eepDataEffects: EepDataEffects, eepService: EepService) {
     // register dynamic rooms services
-    eepDataEffects.registerDynamicRoom(new TrainUpdateService(this.io, this.router, eepService));
+    eepDataEffects.registerDynamicRoom(
+      new TrainUpdateService(this.io, this.router, this.dynamicInterestService ?? undefined),
+    );
     eepDataEffects.registerDynamicRoom(new TransitService(this.io));
     eepDataEffects.registerDynamicRoom(new VersionService(this.io));
     eepDataEffects.registerDynamicRoom(new ScenarioService(this.io));

@@ -1,5 +1,6 @@
 import EepDataStore from '../EepDataStore';
 import { DynamicDataProvider } from './DynamicDataProvider';
+import DynamicInterestService from './DynamicInterestService';
 import { DynamicDataUpdater } from './DynamicDataUpdater';
 import DynamicRoomService from './DynamicRoomService';
 import { DynamicRoom } from '@ce/web-shared';
@@ -12,16 +13,20 @@ export default class DynamicRoomManager {
   private roomServices: DynamicRoomService[] = [];
   private roomMap: Map<
     DynamicRoom,
-    {
-      id: string;
-      jsonCreator: (roomName: string) => string;
-      lastDataCache: Map<string, string>;
-      currentData: Map<string, string>;
-      sockets: Map<Socket, string>;
-    }
+      {
+        id: string;
+        jsonCreator: (roomName: string) => string;
+        dynamicInterest?: DynamicDataProvider['dynamicInterest'];
+        lastDataCache: Map<string, string>;
+        currentData: Map<string, string>;
+        sockets: Map<Socket, string>;
+      }
   > = new Map();
 
-  constructor(private io: Server) {}
+  constructor(
+    private io: Server,
+    private dynamicInterestService?: DynamicInterestService,
+  ) {}
 
   registerService(dynamicRoomService: DynamicRoomService) {
     this.roomServices.push(dynamicRoomService);
@@ -33,6 +38,7 @@ export default class DynamicRoomManager {
       this.roomMap.set(provider.roomType, {
         id: provider.id,
         jsonCreator: provider.jsonCreator,
+        dynamicInterest: provider.dynamicInterest,
         lastDataCache: new Map(),
         currentData: new Map(),
         sockets: new Map(),
@@ -93,6 +99,9 @@ export default class DynamicRoomManager {
       if (room.matchesRoom(nameOfRoom)) {
         const eventName = room.eventId(room.idOfRoom(nameOfRoom));
         dynRoomSetting.sockets.set(socket, nameOfRoom);
+        if (dynRoomSetting.dynamicInterest) {
+          this.dynamicInterestService?.retainRoomInterest(socket, nameOfRoom, dynRoomSetting.dynamicInterest);
+        }
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + eventName);
         socket.emit(eventName, dynRoomSetting.jsonCreator(nameOfRoom));
         if (this.debug)
@@ -106,6 +115,9 @@ export default class DynamicRoomManager {
     this.roomMap.forEach((dynRoomSetting, room) => {
       if (room.matchesRoom(nameOfRoom)) {
         dynRoomSetting.sockets.delete(socket);
+        if (dynRoomSetting.dynamicInterest) {
+          this.dynamicInterestService?.releaseRoomInterest(socket, nameOfRoom);
+        }
         if (this.debug) console.log(dynRoomSetting.id, ': disconnect ', nameOfRoom, ' from socket ', socket.id);
       }
     });
@@ -117,6 +129,7 @@ export default class DynamicRoomManager {
       dynRoomSetting.sockets.delete(socket);
       if (this.debug) console.log(dynRoomSetting.id, ': disconnect socket ', socket.id);
     });
+    this.dynamicInterestService?.releaseSocketInterests(socket);
     this.roomServices.forEach((service) => service.onSocketClose?.(socket));
   };
 }

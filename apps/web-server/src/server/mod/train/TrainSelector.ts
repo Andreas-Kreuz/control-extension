@@ -78,7 +78,7 @@ export class TrainSelector {
         ...(transitTrainDto?.direction !== undefined ? { direction: transitTrainDto.direction } : {}),
         ...(trackType !== undefined ? { trackType } : {}),
         ...(trainDto.trainyardId !== undefined && trainDto.trainyardId !== ''
-          ? { trainyardId: Number(trainDto.trainyardId) }
+          ? { trainyardId: trainDto.trainyardId }
           : {}),
       };
       this.trainMap.set(train.id, train);

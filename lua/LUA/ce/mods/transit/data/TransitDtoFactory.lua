@@ -85,24 +85,24 @@ local function toTransitLineSegmentDto(lineSegment)
     }
 end
 
-local function toTransitLineDto(line, ceType)
+local function toTransitLineDto(line, ceType, isSelected)
     local alias = (ceType == TransitCeTypes.LineName) and "lineNames" or "lines"
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies(alias)
     local dto = {
         ceType = ceType,
         id = line.id or line.nr,
     }
-    if SyncPolicy.shouldPublishField(fieldPolicies, "nr", false) then
+    if SyncPolicy.shouldPublishField(fieldPolicies, "nr", isSelected) then
         dto.nr = line.nr
     else
         dto.nr = ""
     end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "trafficType", false) then
+    if SyncPolicy.shouldPublishField(fieldPolicies, "trafficType", isSelected) then
         dto.trafficType = line.trafficType
     else
         dto.trafficType = ""
     end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "lineSegments", false) then
+    if SyncPolicy.shouldPublishField(fieldPolicies, "lineSegments", isSelected) then
         local lineSegments = {}
         for _, lineSegment in pairs(line.lineSegments or {}) do
             table.insert(lineSegments, toTransitLineSegmentDto(lineSegment))
@@ -114,19 +114,22 @@ local function toTransitLineDto(line, ceType)
     return dto
 end
 
-local function toTransitModuleSettingDto(setting)
+local function toTransitModuleSettingDto(setting, _, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("moduleSettings")
     local dto           = {
         ceType = TransitCeTypes.ModuleSetting,
         name = setting.name,
     }
-    dto.category        = SyncPolicy.shouldPublishField(fieldPolicies, "category", false) and setting.category or ""
-    dto.description     = SyncPolicy.shouldPublishField(fieldPolicies, "description", false) and setting.description or
+    dto.category        = SyncPolicy.shouldPublishField(fieldPolicies, "category", isSelected)
+        and setting.category or ""
+    dto.description     = SyncPolicy.shouldPublishField(fieldPolicies, "description", isSelected)
+        and setting.description or
     ""
-    dto.eepFunction     = SyncPolicy.shouldPublishField(fieldPolicies, "eepFunction", false) and setting.eepFunction or
+    dto.eepFunction     = SyncPolicy.shouldPublishField(fieldPolicies, "eepFunction", isSelected)
+        and setting.eepFunction or
     ""
-    dto.type            = SyncPolicy.shouldPublishField(fieldPolicies, "type", false) and setting.type or ""
-    if SyncPolicy.shouldPublishField(fieldPolicies, "value", false) then
+    dto.type            = SyncPolicy.shouldPublishField(fieldPolicies, "type", isSelected) and setting.type or ""
+    if SyncPolicy.shouldPublishField(fieldPolicies, "value", isSelected) then
         dto.value = setting.value
     else
         dto.value = false
@@ -134,30 +137,30 @@ local function toTransitModuleSettingDto(setting)
     return dto
 end
 
-local function toTransitTrainDto(transitTrain)
+local function toTransitTrainDto(transitTrain, _, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
     local dto           = {
         ceType = TransitCeTypes.TransitTrain,
         id = transitTrain.id,
     }
-    dto.line            = SyncPolicy.shouldPublishField(fieldPolicies, "line", false)
+    dto.line            = SyncPolicy.shouldPublishField(fieldPolicies, "line", isSelected)
         and (transitTrain.getLine and transitTrain:getLine() or transitTrain.line) or ""
-    dto.destination     = SyncPolicy.shouldPublishField(fieldPolicies, "destination", false)
+    dto.destination     = SyncPolicy.shouldPublishField(fieldPolicies, "destination", isSelected)
         and (transitTrain.getDestination and transitTrain:getDestination() or transitTrain.destination) or ""
-    dto.direction       = SyncPolicy.shouldPublishField(fieldPolicies, "direction", false)
+    dto.direction       = SyncPolicy.shouldPublishField(fieldPolicies, "direction", isSelected)
         and (transitTrain.getDirection and transitTrain:getDirection() or transitTrain.direction) or ""
     return dto
 end
 
-local function createDto(ceType, keyId, value, toDto)
-    local dto = toDto(value, ceType)
+local function createDto(ceType, keyId, value, toDto, isSelected)
+    local dto = toDto(value, ceType, isSelected == true)
     return ceType, keyId, dto[keyId], dto
 end
 
-local function createDtoList(ceType, keyId, values, createSingleDto)
+local function createDtoList(ceType, keyId, values, createSingleDto, isSelectedByValue)
     local dtos = {}
     for key, value in pairs(values) do
-        local _, _, _, dto = createSingleDto(value)
+        local _, _, _, dto = createSingleDto(value, isSelectedByValue and isSelectedByValue(value) or false)
         dtos[key] = dto
     end
     return ceType, keyId, dtos
@@ -172,33 +175,33 @@ function TransitDtoFactory.createStationDtoList(stations)
     return createDtoList(TransitCeTypes.Station, "id", stations, TransitDtoFactory.createStationDto)
 end
 
-function TransitDtoFactory.createLineDto(line)
-    return createDto(TransitCeTypes.Line, "id", line, toTransitLineDto)
+function TransitDtoFactory.createLineDto(line, isSelected)
+    return createDto(TransitCeTypes.Line, "id", line, toTransitLineDto, isSelected)
 end
 
-function TransitDtoFactory.createLineDtoList(lines)
-    return createDtoList(TransitCeTypes.Line, "id", lines, TransitDtoFactory.createLineDto)
+function TransitDtoFactory.createLineDtoList(lines, isSelectedByValue)
+    return createDtoList(TransitCeTypes.Line, "id", lines, TransitDtoFactory.createLineDto, isSelectedByValue)
 end
 
-function TransitDtoFactory.createModuleSettingDto(setting)
-    return createDto(TransitCeTypes.ModuleSetting, "name", setting, toTransitModuleSettingDto)
+function TransitDtoFactory.createModuleSettingDto(setting, isSelected)
+    return createDto(TransitCeTypes.ModuleSetting, "name", setting, toTransitModuleSettingDto, isSelected)
 end
 
-function TransitDtoFactory.createModuleSettingDtoList(settings)
+function TransitDtoFactory.createModuleSettingDtoList(settings, isSelectedByValue)
     return createDtoList(TransitCeTypes.ModuleSetting, "name", settings,
-                         TransitDtoFactory.createModuleSettingDto)
+                         TransitDtoFactory.createModuleSettingDto, isSelectedByValue)
 end
 
-function TransitDtoFactory.createLineNameDto(line)
-    return createDto(TransitCeTypes.LineName, "id", line, toTransitLineDto)
+function TransitDtoFactory.createLineNameDto(line, isSelected)
+    return createDto(TransitCeTypes.LineName, "id", line, toTransitLineDto, isSelected)
 end
 
-function TransitDtoFactory.createLineNameDtoList(lines)
-    return createDtoList(TransitCeTypes.LineName, "id", lines, TransitDtoFactory.createLineNameDto)
+function TransitDtoFactory.createLineNameDtoList(lines, isSelectedByValue)
+    return createDtoList(TransitCeTypes.LineName, "id", lines, TransitDtoFactory.createLineNameDto, isSelectedByValue)
 end
 
-function TransitDtoFactory.createTransitTrainDto(transitTrain)
-    return createDto(TransitCeTypes.TransitTrain, "id", transitTrain, toTransitTrainDto)
+function TransitDtoFactory.createTransitTrainDto(transitTrain, isSelected)
+    return createDto(TransitCeTypes.TransitTrain, "id", transitTrain, toTransitTrainDto, isSelected)
 end
 
 return TransitDtoFactory

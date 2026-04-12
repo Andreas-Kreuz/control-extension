@@ -3,10 +3,12 @@ import { DynamicDataProvider } from '../../eep/server-data/dynamic/DynamicDataPr
 import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService';
 import RoadSelector from './RoadSelector';
 import {
+  CeTypes,
   IntersectionRoom,
   IntersectionLaneRoom,
   IntersectionSwitchingRoom,
   IntersectionTrafficLightRoom,
+  RoadModuleSettingRoom,
   TrafficLightModelRoom,
 } from '@ce/web-shared';
 import { Server } from 'socket.io';
@@ -19,27 +21,55 @@ export default class RoadDataService implements DynamicRoomService {
     this.roomDataProviders.push({
       roomType: IntersectionRoom,
       id: 'IntersectionRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getIntersections()),
+      dynamicInterest: { ceType: CeTypes.RoadIntersection, idOfRoom: (room: string) => IntersectionRoom.idOfRoom(room) },
+      jsonCreator: (room: string) => JSON.stringify(this.selector.getIntersection(IntersectionRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: IntersectionLaneRoom,
       id: 'IntersectionLaneRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getIntersectionLanes()),
+      dynamicInterest: {
+        ceType: CeTypes.RoadIntersectionLane,
+        idOfRoom: (room: string) => IntersectionLaneRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string) => JSON.stringify(this.selector.getIntersectionLane(IntersectionLaneRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: IntersectionSwitchingRoom,
       id: 'IntersectionSwitchingRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getIntersectionSwitchings()),
+      dynamicInterest: {
+        ceType: CeTypes.RoadIntersectionSwitching,
+        idOfRoom: (room: string) => IntersectionSwitchingRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string) =>
+        JSON.stringify(this.selector.getIntersectionSwitching(IntersectionSwitchingRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: IntersectionTrafficLightRoom,
       id: 'IntersectionTrafficLightRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getIntersectionTrafficLights()),
+      dynamicInterest: {
+        ceType: CeTypes.RoadIntersectionTrafficLight,
+        idOfRoom: (room: string) => IntersectionTrafficLightRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string) =>
+        JSON.stringify(this.selector.getIntersectionTrafficLight(IntersectionTrafficLightRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TrafficLightModelRoom,
       id: 'TrafficLightModelRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getTrafficLightModels()),
+      dynamicInterest: {
+        ceType: CeTypes.RoadSignalTypeDefinition,
+        idOfRoom: (room: string) => TrafficLightModelRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string) => JSON.stringify(this.selector.getTrafficLightModel(TrafficLightModelRoom.idOfRoom(room)) ?? null),
+    });
+    this.roomDataProviders.push({
+      roomType: RoadModuleSettingRoom,
+      id: 'RoadModuleSettingRoom',
+      dynamicInterest: {
+        ceType: CeTypes.RoadModuleSetting,
+        idOfRoom: (room: string) => RoadModuleSettingRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string) => JSON.stringify(this.selector.getModuleSetting(RoadModuleSettingRoom.idOfRoom(room)) ?? null),
     });
   }
 

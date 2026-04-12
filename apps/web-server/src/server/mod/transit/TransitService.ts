@@ -4,11 +4,15 @@ import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService
 import TransitSettingsSelector from './TransitSettingsSelector';
 import TransitSelector from './TransitSelector';
 import {
+  CeTypes,
   TransitLineListRoom,
   TransitLineDetailsRoom,
+  TransitLineNameRoom,
+  TransitModuleSettingRoom,
   TransitStationListRoom,
   TransitStationDetailsRoom,
   TransitSettingsRoom,
+  TransitTrainRoom,
 } from '@ce/web-shared';
 import { Server } from 'socket.io';
 
@@ -35,9 +39,13 @@ export default class TransitService implements DynamicRoomService {
     this.roomDataProviders.push({
       roomType: TransitLineDetailsRoom,
       id: 'TransitLineDetailsRoom',
+      dynamicInterest: {
+        ceType: CeTypes.TransitLine,
+        idOfRoom: (room: string) => TransitLineDetailsRoom.idOfRoom(room),
+      },
       jsonCreator: (room: string): string => {
         const lineId = TransitLineDetailsRoom.idOfRoom(room);
-        return JSON.stringify(this.transitSelector.getTransitLines()[lineId] ?? null);
+        return JSON.stringify(this.transitSelector.getTransitLine(lineId) ?? null);
       },
     });
     this.roomDataProviders.push({
@@ -50,10 +58,42 @@ export default class TransitService implements DynamicRoomService {
     this.roomDataProviders.push({
       roomType: TransitStationDetailsRoom,
       id: 'TransitStationDetailsRoom',
+      dynamicInterest: {
+        ceType: CeTypes.TransitStation,
+        idOfRoom: (room: string) => TransitStationDetailsRoom.idOfRoom(room),
+      },
       jsonCreator: (room: string): string => {
         const stationId = TransitStationDetailsRoom.idOfRoom(room);
-        return JSON.stringify(this.transitSelector.getTransitStations()[stationId] ?? null);
+        return JSON.stringify(this.transitSelector.getTransitStation(stationId) ?? null);
       },
+    });
+    this.roomDataProviders.push({
+      roomType: TransitLineNameRoom,
+      id: 'TransitLineNameRoom',
+      dynamicInterest: {
+        ceType: CeTypes.TransitLineName,
+        idOfRoom: (room: string) => TransitLineNameRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string): string => JSON.stringify(this.transitSelector.getTransitLineName(TransitLineNameRoom.idOfRoom(room)) ?? null),
+    });
+    this.roomDataProviders.push({
+      roomType: TransitTrainRoom,
+      id: 'TransitTrainRoom',
+      dynamicInterest: {
+        ceType: CeTypes.TransitTrain,
+        idOfRoom: (room: string) => TransitTrainRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string): string => JSON.stringify(this.transitSelector.getTransitTrain(TransitTrainRoom.idOfRoom(room)) ?? null),
+    });
+    this.roomDataProviders.push({
+      roomType: TransitModuleSettingRoom,
+      id: 'TransitModuleSettingRoom',
+      dynamicInterest: {
+        ceType: CeTypes.TransitModuleSetting,
+        idOfRoom: (room: string) => TransitModuleSettingRoom.idOfRoom(room),
+      },
+      jsonCreator: (room: string): string =>
+        JSON.stringify(this.publicTransportSettingsSelector.getSetting(TransitModuleSettingRoom.idOfRoom(room)) ?? null),
     });
   }
 

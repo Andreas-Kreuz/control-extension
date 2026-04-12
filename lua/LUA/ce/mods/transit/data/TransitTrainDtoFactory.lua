@@ -21,14 +21,14 @@ local fieldPlaceholders = {
     direction = "",
 }
 
-function TransitTrainDtoFactory.createFullDto(transitTrain)
+function TransitTrainDtoFactory.createFullDto(transitTrain, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
     local dto = {
         ceType = CE_TYPE,
         id = transitTrain.id,
     }
     for field, getter in pairs(fieldGetters) do
-        if SyncPolicy.shouldPublishField(fieldPolicies, field, false) then
+        if SyncPolicy.shouldPublishField(fieldPolicies, field, isSelected == true) then
             dto[field] = getter(transitTrain) or fieldPlaceholders[field]
         else
             dto[field] = fieldPlaceholders[field]
@@ -37,7 +37,7 @@ function TransitTrainDtoFactory.createFullDto(transitTrain)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function TransitTrainDtoFactory.createPatchDto(transitTrain, dirtyFields)
+function TransitTrainDtoFactory.createPatchDto(transitTrain, dirtyFields, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
     local dto = {
         ceType = CE_TYPE,
@@ -45,7 +45,7 @@ function TransitTrainDtoFactory.createPatchDto(transitTrain, dirtyFields)
     }
     for field in pairs(dirtyFields) do
         local getter = fieldGetters[field]
-        if getter and SyncPolicy.shouldPublishField(fieldPolicies, field, false) then
+        if getter and SyncPolicy.shouldPublishField(fieldPolicies, field, isSelected == true) then
             dto[field] = getter(transitTrain)
         end
     end

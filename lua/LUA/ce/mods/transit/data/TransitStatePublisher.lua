@@ -34,10 +34,15 @@ function TransitStatePublisher.syncState()
         end
     end
     if TransitOptionsRegistry.isPublishEnabled("lines") then
-        DataChangeBus.fireListChange(TransitDtoFactory.createLineDtoList(data.publicTransportLines))
+        DataChangeBus.fireListChange(TransitDtoFactory.createLineDtoList(data.publicTransportLines, function (line)
+            return DynamicUpdateRegistry.isSelected(TransitCeTypes.Line, tostring(line.id or line.nr))
+        end))
     end
     if TransitOptionsRegistry.isPublishEnabled("moduleSettings") then
-        DataChangeBus.fireListChange(TransitDtoFactory.createModuleSettingDtoList(data.publicTransportSettings))
+        DataChangeBus.fireListChange(TransitDtoFactory.createModuleSettingDtoList(data.publicTransportSettings,
+                                                                                  function (setting)
+            return DynamicUpdateRegistry.isSelected(TransitCeTypes.ModuleSetting, tostring(setting.name))
+        end))
     end
     LineRegistry.fireChangeLinesEvent()
 

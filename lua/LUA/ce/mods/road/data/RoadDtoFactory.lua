@@ -13,9 +13,8 @@ local function copyTable(values)
     return copy
 end
 
-local function toIntersectionDto(intersection)
+local function toIntersectionDto(intersection, isSelected)
     local fieldPolicies  = RoadOptionsRegistry.getFieldPublishPolicies("intersections")
-    local isSelected     = false
     local dto            = {
         ceType = RoadCeTypes.Intersection,
         id = intersection.id,
@@ -39,9 +38,8 @@ local function toIntersectionDto(intersection)
     return dto
 end
 
-local function toIntersectionLaneDto(lane)
+local function toIntersectionLaneDto(lane, isSelected)
     local fieldPolicies            = RoadOptionsRegistry.getFieldPublishPolicies("intersectionLanes")
-    local isSelected               = false
     local dto                      = {
         ceType = RoadCeTypes.IntersectionLane,
         id = lane.id,
@@ -73,9 +71,8 @@ local function toIntersectionLaneDto(lane)
     return dto
 end
 
-local function toIntersectionSwitchingDto(switching)
+local function toIntersectionSwitchingDto(switching, isSelected)
     local fieldPolicies = RoadOptionsRegistry.getFieldPublishPolicies("intersectionSwitchings")
-    local isSelected    = false
     local dto           = {
         ceType = RoadCeTypes.IntersectionSwitching,
         id = switching.id,
@@ -109,9 +106,8 @@ local function toIntersectionTrafficLightAxisStructureDto(axisStructure)
     }
 end
 
-local function toIntersectionTrafficLightDto(trafficLight)
+local function toIntersectionTrafficLightDto(trafficLight, isSelected)
     local fieldPolicies = RoadOptionsRegistry.getFieldPublishPolicies("intersectionTrafficLights")
-    local isSelected    = false
     local dto           = {
         ceType = RoadCeTypes.IntersectionTrafficLight,
         id = trafficLight.id,
@@ -145,9 +141,8 @@ local function toIntersectionTrafficLightDto(trafficLight)
     return dto
 end
 
-local function toIntersectionModuleSettingDto(setting)
+local function toIntersectionModuleSettingDto(setting, isSelected)
     local fieldPolicies = RoadOptionsRegistry.getFieldPublishPolicies("moduleSettings")
-    local isSelected    = false
     local dto           = {
         ceType = RoadCeTypes.ModuleSetting,
         name = setting.name,
@@ -167,61 +162,64 @@ local function toIntersectionModuleSettingDto(setting)
     return dto
 end
 
-local function createDto(ceType, keyId, value, toDto)
-    local dto = toDto(value)
+local function createDto(ceType, keyId, value, toDto, isSelected)
+    local dto = toDto(value, isSelected == true)
     return ceType, keyId, dto[keyId], dto
 end
 
-local function createDtoList(ceType, keyId, values, createSingleDto)
+local function createDtoList(ceType, keyId, values, createSingleDto, isSelectedByValue)
     local dtos = {}
     for key, value in pairs(values) do
-        local _, _, _, dto = createSingleDto(value)
+        local _, _, _, dto = createSingleDto(value, isSelectedByValue and isSelectedByValue(value) or false)
         dtos[key] = dto
     end
     return ceType, keyId, dtos
 end
 
-function RoadDtoFactory.createIntersectionDto(intersection)
-    return createDto(RoadCeTypes.Intersection, "id", intersection, toIntersectionDto)
+function RoadDtoFactory.createIntersectionDto(intersection, isSelected)
+    return createDto(RoadCeTypes.Intersection, "id", intersection, toIntersectionDto, isSelected)
 end
 
-function RoadDtoFactory.createIntersectionDtoList(intersections)
-    return createDtoList(RoadCeTypes.Intersection, "id", intersections, RoadDtoFactory.createIntersectionDto)
+function RoadDtoFactory.createIntersectionDtoList(intersections, isSelectedByValue)
+    return createDtoList(RoadCeTypes.Intersection, "id", intersections, RoadDtoFactory.createIntersectionDto,
+                         isSelectedByValue)
 end
 
-function RoadDtoFactory.createIntersectionLaneDto(lane)
-    return createDto(RoadCeTypes.IntersectionLane, "id", lane, toIntersectionLaneDto)
+function RoadDtoFactory.createIntersectionLaneDto(lane, isSelected)
+    return createDto(RoadCeTypes.IntersectionLane, "id", lane, toIntersectionLaneDto, isSelected)
 end
 
-function RoadDtoFactory.createIntersectionLaneDtoList(lanes)
-    return createDtoList(RoadCeTypes.IntersectionLane, "id", lanes, RoadDtoFactory.createIntersectionLaneDto)
+function RoadDtoFactory.createIntersectionLaneDtoList(lanes, isSelectedByValue)
+    return createDtoList(RoadCeTypes.IntersectionLane, "id", lanes, RoadDtoFactory.createIntersectionLaneDto,
+                         isSelectedByValue)
 end
 
-function RoadDtoFactory.createIntersectionSwitchingDto(switching)
-    return createDto(RoadCeTypes.IntersectionSwitching, "id", switching, toIntersectionSwitchingDto)
+function RoadDtoFactory.createIntersectionSwitchingDto(switching, isSelected)
+    return createDto(RoadCeTypes.IntersectionSwitching, "id", switching, toIntersectionSwitchingDto, isSelected)
 end
 
-function RoadDtoFactory.createIntersectionSwitchingDtoList(switchings)
+function RoadDtoFactory.createIntersectionSwitchingDtoList(switchings, isSelectedByValue)
     return createDtoList(RoadCeTypes.IntersectionSwitching, "id", switchings,
-                         RoadDtoFactory.createIntersectionSwitchingDto)
+                         RoadDtoFactory.createIntersectionSwitchingDto, isSelectedByValue)
 end
 
-function RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight)
-    return createDto(RoadCeTypes.IntersectionTrafficLight, "id", trafficLight, toIntersectionTrafficLightDto)
+function RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight, isSelected)
+    return createDto(RoadCeTypes.IntersectionTrafficLight, "id", trafficLight, toIntersectionTrafficLightDto,
+                     isSelected)
 end
 
-function RoadDtoFactory.createIntersectionTrafficLightDtoList(trafficLights)
+function RoadDtoFactory.createIntersectionTrafficLightDtoList(trafficLights, isSelectedByValue)
     return createDtoList(RoadCeTypes.IntersectionTrafficLight, "id", trafficLights,
-                         RoadDtoFactory.createIntersectionTrafficLightDto)
+                         RoadDtoFactory.createIntersectionTrafficLightDto, isSelectedByValue)
 end
 
-function RoadDtoFactory.createIntersectionModuleSettingDto(setting)
-    return createDto(RoadCeTypes.ModuleSetting, "name", setting, toIntersectionModuleSettingDto)
+function RoadDtoFactory.createIntersectionModuleSettingDto(setting, isSelected)
+    return createDto(RoadCeTypes.ModuleSetting, "name", setting, toIntersectionModuleSettingDto, isSelected)
 end
 
-function RoadDtoFactory.createIntersectionModuleSettingDtoList(settings)
+function RoadDtoFactory.createIntersectionModuleSettingDtoList(settings, isSelectedByValue)
     return createDtoList(RoadCeTypes.ModuleSetting, "name", settings,
-                         RoadDtoFactory.createIntersectionModuleSettingDto)
+                         RoadDtoFactory.createIntersectionModuleSettingDto, isSelectedByValue)
 end
 
 return RoadDtoFactory
