@@ -14,7 +14,7 @@ export interface AppCardBgProps {
   additionalChips?: ReactNode[];
   to?: string;
   icon?: string;
-  image: string;
+  image?: string;
   small?: boolean;
   expanded?: boolean;
   selected?: boolean;

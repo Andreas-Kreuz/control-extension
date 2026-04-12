@@ -36,7 +36,6 @@ const TrainListEntryCard = ({ train, selected, onSelect, children }: TrainListEn
       title={train.id}
       additionalChips={additionalChips}
       icon={getIconName(train.trainType)}
-      image={getImageName(train.trackType ?? 'train')}
       selected={selected}
       expanded={selected}
       setExpanded={() => onSelect()}
