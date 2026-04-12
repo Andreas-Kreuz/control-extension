@@ -40,6 +40,10 @@ function MobileTabs({ sections }: { sections: DetailSection[] }) {
   const [activeTab, setActiveTab] = useState(0);
   const safeTab = Math.min(activeTab, sections.length - 1);
 
+  if (sections.length === 1) {
+    return <Stack>{sections[0]?.component}</Stack>;
+  }
+
   return (
     <Stack>
       <Tabs
