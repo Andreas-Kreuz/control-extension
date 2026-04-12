@@ -30,10 +30,12 @@ function RoadStatePublisher.syncState()
         DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes))
     end
     if RoadOptionsRegistry.isPublishEnabled("intersectionSwitchings") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionSwitchingDtoList(crossingData.intersectionSwitchings))
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionSwitchingDtoList(crossingData
+        .intersectionSwitchings))
     end
     if RoadOptionsRegistry.isPublishEnabled("intersectionTrafficLights") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionTrafficLightDtoList(crossingData.intersectionTrafficLights))
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionTrafficLightDtoList(crossingData
+        .intersectionTrafficLights))
     end
     if RoadOptionsRegistry.isPublishEnabled("moduleSettings") then
         DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionModuleSettingDtoList(moduleSettings))

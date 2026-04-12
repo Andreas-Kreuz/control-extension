@@ -115,12 +115,12 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
-                        currentSwitching = "S1",
+                        currentSwitching = "",   -- onselection, never selected
                         manualSwitching = "S2",
-                        nextSwitching = "S3",
-                        ready = true,
-                        timeForGreen = 15,
-                        staticCams = { "Cam 1" }
+                        nextSwitching = "",      -- onselection, never selected
+                        ready = false,           -- onselection, never selected
+                        timeForGreen = 0,        -- onselection, never selected
+                        staticCams = {}          -- onselection, never selected
                     }, intersectionDto)
         assert.equals("ce.mods.road.IntersectionLane", laneCeType)
         assert.equals("id", laneKeyId)
@@ -130,13 +130,13 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
-                        phase = "GREEN",
+                        phase = "",              -- onselection, never selected
                         vehicleMultiplier = 2,
                         eepSaveId = 5,
                         type = "NORMAL",
                         countType = "TRACKS",
-                        waitingTrains = { "T1" },
-                        waitingForGreenCyclesCount = 4,
+                        waitingTrains = {},      -- onselection, never selected
+                        waitingForGreenCyclesCount = 0, -- onselection, never selected
                         directions = { "LEFT" },
                         switchings = { "S1" },
                         tracks = { 10 }
@@ -159,7 +159,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = 2,
                         signalId = 2,
                         modelId = "road",
-                        currentPhase = "GREEN",
+                        currentPhase = "",       -- onselection, never selected
                         intersectionId = 1,
                         lightStructures = {
                             ["0"] = {

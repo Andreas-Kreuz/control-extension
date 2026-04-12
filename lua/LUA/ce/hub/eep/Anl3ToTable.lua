@@ -18,7 +18,7 @@ local Anl3ToTable = {}
 -- Only 2-byte UTF-8 sequences (U+0080..U+00FF) map to Latin-1;
 -- anything outside that range is left unchanged.
 local function utf8ToLatin1(str)
-    return str:gsub("[\xC2\xC3][\x80-\xBF]", function(seq)
+    return str:gsub("[\xC2\xC3][\x80-\xBF]", function (seq)
         local b1, b2 = seq:byte(1), seq:byte(2)
         local cp = (b1 - 0xC0) * 64 + (b2 - 0x80)
         return string.char(cp)

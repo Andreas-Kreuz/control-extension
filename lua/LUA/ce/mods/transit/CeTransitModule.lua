@@ -15,7 +15,8 @@ local TableUtils = require("ce.hub.util.TableUtils")
 function CeTransitModule.loadSettingsFromSlot(eepSaveId) return TransitSettings.loadSettingsFromSlot(eepSaveId) end
 
 function CeTransitModule.setOptions(options)
-    local mergedOptions = TableUtils.deepMerge(TransitOptionDefaults.create(), TransitOptionsRegistry.copyTable(options or {}))
+    local mergedOptions = TableUtils.deepMerge(TransitOptionDefaults.create(),
+                                               TransitOptionsRegistry.copyTable(options or {}))
     TransitOptionsRegistry.setOptions(mergedOptions)
     return CeTransitModule
 end

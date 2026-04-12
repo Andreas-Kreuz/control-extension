@@ -21,7 +21,7 @@ local function buildPlatformsDto(routePlatforms)
         table.sort(platformDto.routes)
         table.insert(result, platformDto)
     end
-    table.sort(result, function(a, b) return a.nr < b.nr end)
+    table.sort(result, function (a, b) return a.nr < b.nr end)
     return result
 end
 
@@ -116,14 +116,16 @@ end
 
 local function toTransitModuleSettingDto(setting)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("moduleSettings")
-    local dto = {
+    local dto           = {
         ceType = TransitCeTypes.ModuleSetting,
         name = setting.name,
     }
-    dto.category    = SyncPolicy.shouldPublishField(fieldPolicies, "category", false)    and setting.category    or ""
-    dto.description = SyncPolicy.shouldPublishField(fieldPolicies, "description", false) and setting.description or ""
-    dto.eepFunction = SyncPolicy.shouldPublishField(fieldPolicies, "eepFunction", false) and setting.eepFunction or ""
-    dto.type        = SyncPolicy.shouldPublishField(fieldPolicies, "type", false)        and setting.type        or ""
+    dto.category        = SyncPolicy.shouldPublishField(fieldPolicies, "category", false) and setting.category or ""
+    dto.description     = SyncPolicy.shouldPublishField(fieldPolicies, "description", false) and setting.description or
+    ""
+    dto.eepFunction     = SyncPolicy.shouldPublishField(fieldPolicies, "eepFunction", false) and setting.eepFunction or
+    ""
+    dto.type            = SyncPolicy.shouldPublishField(fieldPolicies, "type", false) and setting.type or ""
     if SyncPolicy.shouldPublishField(fieldPolicies, "value", false) then
         dto.value = setting.value
     else
@@ -134,15 +136,15 @@ end
 
 local function toTransitTrainDto(transitTrain)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
-    local dto = {
+    local dto           = {
         ceType = TransitCeTypes.TransitTrain,
         id = transitTrain.id,
     }
-    dto.line        = SyncPolicy.shouldPublishField(fieldPolicies, "line", false)
+    dto.line            = SyncPolicy.shouldPublishField(fieldPolicies, "line", false)
         and (transitTrain.getLine and transitTrain:getLine() or transitTrain.line) or ""
-    dto.destination = SyncPolicy.shouldPublishField(fieldPolicies, "destination", false)
+    dto.destination     = SyncPolicy.shouldPublishField(fieldPolicies, "destination", false)
         and (transitTrain.getDestination and transitTrain:getDestination() or transitTrain.destination) or ""
-    dto.direction   = SyncPolicy.shouldPublishField(fieldPolicies, "direction", false)
+    dto.direction       = SyncPolicy.shouldPublishField(fieldPolicies, "direction", false)
         and (transitTrain.getDirection and transitTrain:getDirection() or transitTrain.direction) or ""
     return dto
 end

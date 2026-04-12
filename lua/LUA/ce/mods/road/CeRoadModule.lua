@@ -15,7 +15,8 @@ local TableUtils = require("ce.hub.util.TableUtils")
 function CeRoadModule.loadSettingsFromSlot(eepSaveId) return IntersectionSettings.loadSettingsFromSlot(eepSaveId) end
 
 function CeRoadModule.setOptions(options)
-    local mergedOptions = TableUtils.deepMerge(RoadOptionDefaults.create(), RoadOptionsRegistry.copyTable(options or {}))
+    local mergedOptions = TableUtils.deepMerge(RoadOptionDefaults.create(),
+                                               RoadOptionsRegistry.copyTable(options or {}))
     RoadOptionsRegistry.setOptions(mergedOptions)
     return CeRoadModule
 end

@@ -12,7 +12,7 @@ local function sortedKeys(tb)
     for key in pairs(tb or {}) do
         keys[#keys + 1] = key
     end
-    table.sort(keys, function(left, right) return tostring(left) < tostring(right) end)
+    table.sort(keys, function (left, right) return tostring(left) < tostring(right) end)
     return keys
 end
 
