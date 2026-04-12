@@ -10,6 +10,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
   const projectRoot = Cypress.config('projectRoot');
   const validDir = `${projectRoot}/cypress/io`;
   const emptyDir = `${projectRoot}/cypress/io-empty`;
+  // Intentionally missing directory to verify the "invalid EEP directory" server state.
   const nonexistentDir = `${projectRoot}/cypress/io-nonexistent`;
   const pairingRequired = { value: true };
 
@@ -28,9 +29,9 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       }
     });
 
-    cy.get('body').should(($body) => {
-      expect($body.find('.MuiTouchRipple-rippleVisible')).to.have.length(0);
-      expect($body.find('.Mui-focusVisible')).to.have.length(0);
+    cy.get('body').should(() => {
+      expect(Cypress.$('body').find('.MuiTouchRipple-rippleVisible')).to.have.length(0);
+      expect(Cypress.$('body').find('.Mui-focusVisible')).to.have.length(0);
     });
   }
 

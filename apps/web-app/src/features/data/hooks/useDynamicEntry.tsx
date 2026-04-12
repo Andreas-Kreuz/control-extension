@@ -1,13 +1,13 @@
 ﻿import { useState } from 'react';
-import { useDynamicRoomHandler } from '../../../shared/socket/useRoomHandler';
-import { DynamicRoom } from '@ce/web-shared';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { DomainRoom } from '@ce/web-shared';
 
-const noopRoom = new DynamicRoom('__noop__');
+const noopRoom = new DomainRoom('__noop__');
 
-function useDynamicEntry(room: DynamicRoom | undefined, entryId: string): Record<string, unknown> | undefined {
+function useDomainEntry(room: DomainRoom | undefined, entryId: string): Record<string, unknown> | undefined {
   const [entry, setEntry] = useState<Record<string, unknown> | undefined>(undefined);
 
-  useDynamicRoomHandler(
+  useDomainRoomHandler(
     room ?? noopRoom,
     entryId,
     (payload: string) => {
@@ -20,4 +20,4 @@ function useDynamicEntry(room: DynamicRoom | undefined, entryId: string): Record
   return room ? entry : undefined;
 }
 
-export default useDynamicEntry;
+export default useDomainEntry;

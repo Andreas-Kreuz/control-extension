@@ -1,4 +1,5 @@
 export enum SettingsEvent {
+  // System room for settings and admin state updates.
   Room = '[Settings Event]',
   ChangeDir = '[Settings Event] Change Dir',
   ChangePairingRequired = '[Settings Event] Change Pairing Required',

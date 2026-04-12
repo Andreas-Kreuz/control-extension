@@ -1,5 +1,5 @@
-import { DynamicDataProvider } from '../../eep/server-data/dynamic/DynamicDataProvider';
-import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService';
+import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
+import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import DynamicInterestService from '../../eep/server-data/dynamic/DynamicInterestService';
 import { RollingStockSelector } from './RollingStockSelector';
 import { TrainSelector } from './TrainSelector';
@@ -19,8 +19,8 @@ const jsonInterestTtlMs = 5000;
 const jsonDataTimeoutMs = 1000;
 const waitForDynamicDataPollMs = 25;
 
-export default class TrainUpdateService implements DynamicRoomService {
-  private roomDataProviders: DynamicDataProvider[] = [];
+export default class TrainUpdateService implements DomainRoomService {
+  private roomDataProviders: DomainDataProvider[] = [];
   private rollingStockSelector = new RollingStockSelector();
   private trainSelector = new TrainSelector(this.rollingStockSelector);
 

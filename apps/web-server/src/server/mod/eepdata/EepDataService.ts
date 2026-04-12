@@ -1,6 +1,6 @@
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { DynamicDataProvider } from '../../eep/server-data/dynamic/DynamicDataProvider';
-import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService';
+import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
+import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import EepDataSelector from './EepDataSelector';
 import {
   AuxiliaryTrackRoom,
@@ -23,8 +23,8 @@ import {
 } from '@ce/web-shared';
 import { Server } from 'socket.io';
 
-export default class EepDataService implements DynamicRoomService {
-  private roomDataProviders: DynamicDataProvider[] = [];
+export default class EepDataService implements DomainRoomService {
+  private roomDataProviders: DomainDataProvider[] = [];
   private selector = new EepDataSelector();
 
   constructor(private io: Server) {

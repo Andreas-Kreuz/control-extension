@@ -221,16 +221,16 @@ export default class AppEffects {
 
   private registerMods(eepDataEffects: EepDataEffects, eepService: EepService) {
     // register dynamic rooms services
-    eepDataEffects.registerDynamicRoom(
+    eepDataEffects.registerDomainRoom(
       new TrainUpdateService(this.io, this.router, this.dynamicInterestService ?? undefined),
     );
-    eepDataEffects.registerDynamicRoom(new TransitService(this.io));
-    eepDataEffects.registerDynamicRoom(new VersionService(this.io));
-    eepDataEffects.registerDynamicRoom(new ScenarioService(this.io));
-    eepDataEffects.registerDynamicRoom(new TimeService(this.io));
-    eepDataEffects.registerDynamicRoom(new WeatherService(this.io));
-    eepDataEffects.registerDynamicRoom(new EepDataService(this.io));
-    eepDataEffects.registerDynamicRoom(new RoadDataService(this.io));
+    eepDataEffects.registerDomainRoom(new TransitService(this.io));
+    eepDataEffects.registerDomainRoom(new VersionService(this.io));
+    eepDataEffects.registerDomainRoom(new ScenarioService(this.io));
+    eepDataEffects.registerDomainRoom(new TimeService(this.io));
+    eepDataEffects.registerDomainRoom(new WeatherService(this.io));
+    eepDataEffects.registerDomainRoom(new EepDataService(this.io));
+    eepDataEffects.registerDomainRoom(new RoadDataService(this.io));
 
     // register mods
     registerLogMod(this.io, this.socketService, eepService, this.debug);

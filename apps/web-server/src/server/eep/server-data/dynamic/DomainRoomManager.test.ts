@@ -1,9 +1,9 @@
 import * as assert from 'node:assert/strict';
 import DynamicInterestRegistry from './DynamicInterestRegistry';
 import DynamicInterestService from './DynamicInterestService';
-import DynamicRoomManager from './DynamicRoomManager';
-import { DynamicDataProvider } from './DynamicDataProvider';
-import { DynamicRoom } from '@ce/web-shared';
+import DomainRoomManager from './DomainRoomManager';
+import { DomainDataProvider } from './DomainDataProvider';
+import { DomainRoom } from '@ce/web-shared';
 
 async function runTest(name: string, fn: () => void | Promise<void>): Promise<void> {
   try {
@@ -23,7 +23,7 @@ function createManager(commands: string[]) {
   };
   const interestRegistry = new DynamicInterestRegistry((command) => commands.push(command));
   const interestService = new DynamicInterestService(interestRegistry);
-  return new DynamicRoomManager(io as never, interestService);
+  return new DomainRoomManager(io as never, interestService);
 }
 
 function createSocket(id: string) {
@@ -37,9 +37,9 @@ function createSocket(id: string) {
   };
 }
 
-function registerDetailProvider(manager: DynamicRoomManager): DynamicRoom {
-  const roomType = new DynamicRoom('TestDetail');
-  const provider: DynamicDataProvider = {
+function registerDetailProvider(manager: DomainRoomManager): DomainRoom {
+  const roomType = new DomainRoom('TestDetail');
+  const provider: DomainDataProvider = {
     roomType,
     id: 'TestDetailRoom',
     dynamicInterest: {
@@ -99,8 +99,8 @@ function testDisconnectReleasesAllSocketInterests(): void {
 }
 
 export async function run(): Promise<void> {
-  await runTest('dynamic room manager shares interest across room subscribers', testJoinAndLeaveRetainSharedInterest);
-  await runTest('dynamic room manager releases socket interests on disconnect', testDisconnectReleasesAllSocketInterests);
+  await runTest('domain room manager shares interest across room subscribers', testJoinAndLeaveRetainSharedInterest);
+  await runTest('domain room manager releases socket interests on disconnect', testDisconnectReleasesAllSocketInterests);
 }
 
 if (require.main === module) {

@@ -1,4 +1,5 @@
 export enum CommandEvent {
+  // System room for command-related coordination.
   Room = '[Command Event]',
   Send = '[Command Event] Send',
   ChangeCamToStatic = '[Command Event] Change Cam',

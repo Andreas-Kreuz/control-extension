@@ -1,4 +1,4 @@
-import { DynamicInterestBinding } from './DynamicDataProvider';
+import { DynamicInterestBinding } from './DomainDataProvider';
 import DynamicInterestRegistry from './DynamicInterestRegistry';
 import { Socket } from 'socket.io';
 

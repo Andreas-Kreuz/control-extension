@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDynamicRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import Versions from '../lib/Versions';
 import { VersionRoom, VersionDto } from '@ce/web-shared';
 
@@ -17,7 +17,7 @@ export default function useVersionInfo(): Versions {
     luaVersion: '?',
   });
 
-  useDynamicRoomHandler(VersionRoom, 'VersionRoom', (payload: string) => {
+  useDomainRoomHandler(VersionRoom, 'VersionRoom', (payload: string) => {
     const data: Record<string, VersionDto> = JSON.parse(payload);
     if (data.versionInfo) {
       setVersions({

@@ -2,9 +2,9 @@ import SocketService from '../../clientio/SocketService';
 import { CacheService } from './CacheService';
 import EepDataEvent from './EepDataEvent';
 import EepDataReducer from './EepDataStore';
-import DynamicRoomManager from './dynamic/DynamicRoomManager';
+import DomainRoomManager from './dynamic/DomainRoomManager';
 import DynamicInterestService from './dynamic/DynamicInterestService';
-import DynamicRoomService from './dynamic/DynamicRoomService';
+import DomainRoomService from './dynamic/DomainRoomService';
 import JsonApiRoomObserver from './static/JsonApiUpdateService';
 import { RoomEvent, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
@@ -13,7 +13,7 @@ import { Server, Socket } from 'socket.io';
 export default class EepDataEffects {
   private debug = false;
   private store = new EepDataReducer();
-  private stateController: DynamicRoomManager;
+  private stateController: DomainRoomManager;
   private jsonApiController: JsonApiRoomObserver;
   private refreshSettings = { pending: true, inProgress: false };
 
@@ -28,14 +28,14 @@ export default class EepDataEffects {
     console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
 
     this.socketService.addOnSocketConnectedCallback((socket: Socket) => this.socketConnected(socket));
-    this.stateController = new DynamicRoomManager(io, dynamicInterestService);
+    this.stateController = new DomainRoomManager(io, dynamicInterestService);
     this.jsonApiController = new JsonApiRoomObserver(router, io, cacheService);
 
     setInterval(() => this.refreshStateIfRequired(), 50);
   }
 
-  registerDynamicRoom(dynamicRoomService: DynamicRoomService) {
-    this.stateController.registerService(dynamicRoomService);
+  registerDomainRoom(domainRoomService: DomainRoomService) {
+    this.stateController.registerService(domainRoomService);
   }
 
   private socketConnected(socket: Socket) {

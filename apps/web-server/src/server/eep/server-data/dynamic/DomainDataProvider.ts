@@ -1,12 +1,12 @@
-import { DynamicRoom } from '@ce/web-shared';
+import { DomainRoom } from '@ce/web-shared';
 
 export interface DynamicInterestBinding {
   ceType: string;
   idOfRoom?: (roomName: string) => string;
 }
 
-export interface DynamicDataProvider {
-  roomType: DynamicRoom;
+export interface DomainDataProvider {
+  roomType: DomainRoom;
   id: string;
   jsonCreator: (roomName: string) => string;
   dynamicInterest?: DynamicInterestBinding;

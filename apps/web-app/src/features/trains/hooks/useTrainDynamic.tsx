@@ -1,11 +1,11 @@
 ﻿import { useState } from 'react';
 import { TrainDto, TrainRoom } from '@ce/web-shared';
-import { useDynamicRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 
 function useTrainDynamic(trainId: string): TrainDto | undefined {
   const [train, setTrain] = useState<TrainDto | undefined>(undefined);
 
-  useDynamicRoomHandler(
+  useDomainRoomHandler(
     TrainRoom,
     trainId,
     (payload: string) => {

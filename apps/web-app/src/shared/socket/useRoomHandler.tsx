@@ -1,20 +1,20 @@
 import { ApiDataRoom, PairingStatus, RoomEvent } from '@ce/web-shared';
-import { DynamicRoom } from '@ce/web-shared';
+import { DomainRoom } from '@ce/web-shared';
 import { useEffect, useRef, useState } from 'react';
 import { useSocket } from '../../app/hooks/useSocket';
 import { useSocketIsConnected } from '../../app/hooks/useSocketConnection';
 import { useSocketPairingStatus } from '../../app/hooks/useSocketPairing';
 import useDebug from './useDebug';
 
-export function useDynamicRoomHandler(
-  dynRoom: DynamicRoom,
+export function useDomainRoomHandler(
+  domainRoom: DomainRoom,
   element: string,
   handler: (data: any) => any,
   cleanUpHandler?: () => void,
 ): void {
   return useRoomHandler(
-    dynRoom.roomId(element),
-    [{ eventName: dynRoom.eventId(element), handler: handler }],
+    domainRoom.roomId(element),
+    [{ eventName: domainRoom.eventId(element), handler: handler }],
     cleanUpHandler,
   );
 }

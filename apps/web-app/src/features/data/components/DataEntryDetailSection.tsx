@@ -5,7 +5,7 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { detailRoomForCeType } from '@ce/web-shared';
-import useDynamicEntry from '../hooks/useDynamicEntry';
+import useDomainEntry from '../hooks/useDynamicEntry';
 import useTypeEntries from '../hooks/useTypeEntries';
 
 function formatValue(value: unknown): string {
@@ -20,7 +20,7 @@ interface DataEntryDetailSectionProps {
 
 function DataEntryDetailSection({ ceType, entryId }: DataEntryDetailSectionProps) {
   const entriesMap = useTypeEntries(ceType);
-  const dynamicEntry = useDynamicEntry(detailRoomForCeType(ceType), entryId);
+  const dynamicEntry = useDomainEntry(detailRoomForCeType(ceType), entryId);
 
   const entry = dynamicEntry ?? entriesMap[entryId];
 
