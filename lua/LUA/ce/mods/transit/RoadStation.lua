@@ -190,4 +190,6 @@ function RoadStation.forName(name) return allStations[name] or RoadStation:new(n
 
 function RoadStation.showTippText() for _, station in pairs(allStations) do station:updateDisplays() end end
 
+function RoadStation.getAll() return allStations end
+
 return RoadStation

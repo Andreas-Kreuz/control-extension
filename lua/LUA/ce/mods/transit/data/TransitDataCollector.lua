@@ -1,5 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitDataCollector ...") end
 local Line = require("ce.mods.transit.Line")
+local RoadStation = require("ce.mods.transit.RoadStation")
 local TransitSettings = require("ce.mods.transit.TransitSettings")
 
 local TransitDataCollector = {}
@@ -19,7 +20,7 @@ end
 
 function TransitDataCollector.collectTransitData()
     return {
-        publicTransportStations = {},
+        publicTransportStations = RoadStation.getAll(),
         publicTransportLines = Line.getLines(),
         publicTransportSettings = TransitDataCollector.collectModuleSettings()
     }

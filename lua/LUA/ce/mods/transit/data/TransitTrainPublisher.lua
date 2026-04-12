@@ -3,6 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitTrainPub
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
 local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
+local TransitOptionsRegistry = require("ce.mods.transit.options.TransitOptionsRegistry")
 local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
 local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
 
@@ -16,6 +17,11 @@ local function hasPayloadFields(dto)
 end
 
 function TransitTrainPublisher.syncState()
+    if not TransitOptionsRegistry.isPublishEnabled("transitTrains") then
+        TransitTrainRegistry.clearPendingChanges()
+        return {}
+    end
+
     for trainId in pairs(TransitTrainRegistry.getRemovedIds()) do
         DataChangeBus.fireDataRemoved(TransitTrainDtoFactory.createRefDto(trainId))
     end

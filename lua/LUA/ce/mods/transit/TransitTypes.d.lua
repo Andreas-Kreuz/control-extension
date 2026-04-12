@@ -112,3 +112,4 @@
 ---@field new fun(self: RoadStation, name: string, eepSaveId: number):RoadStation
 ---@field forName fun(name: string):RoadStation
 ---@field showTippText fun():nil
+---@field getAll fun():table<string, RoadStation>
