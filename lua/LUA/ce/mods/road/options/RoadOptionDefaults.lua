@@ -5,7 +5,7 @@ local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadOptionDefaults = {}
 
 -- NOTE: data collection cannot be disabled per ceType — the entire module is skipped on loading.
--- Only publish and field-level policies (always / onselection / never) are configurable here.
+-- Only publish and field-level policies (always / oninterest / never) are configurable here.
 function RoadOptionDefaults.create()
     return {
         ceTypes = {
@@ -24,11 +24,11 @@ function RoadOptionDefaults.create()
                 fieldPublish = {
                     name = "always",
                     manualSwitching = "always",
-                    currentSwitching = "onselection",
-                    nextSwitching = "onselection",
-                    ready = "onselection",
-                    staticCams = "onselection",
-                    timeForGreen = "onselection"
+                    currentSwitching = "oninterest",
+                    nextSwitching = "oninterest",
+                    ready = "oninterest",
+                    staticCams = "oninterest",
+                    timeForGreen = "oninterest"
                 }
             },
             intersectionLanes = {
@@ -58,9 +58,9 @@ function RoadOptionDefaults.create()
                     tracks = "always",
                     type = "always",
                     vehicleMultiplier = "always",
-                    phase = "onselection",
-                    waitingForGreenCyclesCount = "onselection",
-                    waitingTrains = "onselection"
+                    phase = "oninterest",
+                    waitingForGreenCyclesCount = "oninterest",
+                    waitingTrains = "oninterest"
                 }
             },
             intersectionSwitchings = {
@@ -94,7 +94,7 @@ function RoadOptionDefaults.create()
                     lightStructures = "always",
                     modelId = "always",
                     signalId = "always",
-                    currentPhase = "onselection"
+                    currentPhase = "oninterest"
                 }
             },
             moduleSettings = {

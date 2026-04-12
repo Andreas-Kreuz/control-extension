@@ -24,8 +24,8 @@ insulate("ce.mods.road.CeRoadModule", function ()
         assert.equals(CeRoadModule, CeRoadModule.setOptions({}))
     end)
 
-    it("intersection DTO: always fields are populated, onselection fields are empty by default", function ()
-        -- Road factory hardcodes isSelected=false, so onselection fields never appear in default state
+    it("intersection DTO: always fields are populated, oninterest fields are empty by default", function ()
+        -- Road factory hardcodes isSelected=false, so oninterest fields never appear in default state
         require("ce.mods.road.CeRoadModule")
         local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 
@@ -33,14 +33,14 @@ insulate("ce.mods.road.CeRoadModule", function ()
 
         assert.equals("A", dto.name)              -- "always" by default -> populated
         assert.equals("S2", dto.manualSwitching)  -- "always" by default -> populated
-        assert.equals("", dto.currentSwitching)   -- "onselection" by default, never selected -> empty
-        assert.equals("", dto.nextSwitching)      -- "onselection" by default, never selected -> empty
-        assert.is_false(dto.ready)                -- "onselection" by default, never selected -> false
-        assert.equals(0, dto.timeForGreen)        -- "onselection" by default, never selected -> 0
-        assert.same({}, dto.staticCams)           -- "onselection" by default, never selected -> {}
+        assert.equals("", dto.currentSwitching)   -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.nextSwitching)      -- "oninterest" by default, never selected -> empty
+        assert.is_false(dto.ready)                -- "oninterest" by default, never selected -> false
+        assert.equals(0, dto.timeForGreen)        -- "oninterest" by default, never selected -> 0
+        assert.same({}, dto.staticCams)           -- "oninterest" by default, never selected -> {}
     end)
 
-    it("intersection DTO: onselection fields are populated after setOptions with always", function ()
+    it("intersection DTO: oninterest fields are populated after setOptions with always", function ()
         local CeRoadModule = require("ce.mods.road.CeRoadModule")
         local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 

@@ -33,7 +33,7 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         local _, _, _, dto = TransitDtoFactory.createStationDto(station, false)
 
         assert.same({ { nr = 2, routes = { "Route10" } } }, dto.platforms) -- "always" -> populated
-        assert.same({}, dto.queue)                                         -- "onselection", not selected -> empty
+        assert.same({}, dto.queue)                                         -- "oninterest", not selected -> empty
     end)
 
     it("station DTO: queue present when selected (default options)", function ()
@@ -45,7 +45,7 @@ insulate("ce.mods.transit.CeTransitModule", function ()
 
         local _, _, _, dto = TransitDtoFactory.createStationDto(station, true)
 
-        -- "onselection" + selected -> populated
+        -- "oninterest" + selected -> populated
         assert.same({
                         { trainName = "T1", line = "10", destination = "Central", timeInMinutes = 3, platform = "1" }
                     }, dto.queue)

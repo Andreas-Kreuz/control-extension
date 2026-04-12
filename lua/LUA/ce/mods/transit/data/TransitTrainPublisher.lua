@@ -1,7 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitTrainPublisher ...") end
 
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitOptionsRegistry = require("ce.mods.transit.options.TransitOptionsRegistry")
 local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
@@ -27,13 +27,13 @@ function TransitTrainPublisher.syncState()
     end
 
     for _, transitTrain in pairs(TransitTrainRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(TransitCeTypes.TransitTrain, transitTrain.id)
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(TransitCeTypes.TransitTrain, transitTrain.id)
+        local isSelected = InterestSyncRegistry.isSelected(TransitCeTypes.TransitTrain, transitTrain.id)
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(TransitCeTypes.TransitTrain, transitTrain.id)
         if transitTrain.needsFullSend or needsInitialSend then
             DataChangeBus.fireDataChanged(TransitTrainDtoFactory.createFullDto(transitTrain, isSelected))
             transitTrain.needsFullSend = false
             transitTrain:resetDirty()
-            if isSelected then DynamicUpdateRegistry.markSent(TransitCeTypes.TransitTrain, transitTrain.id) end
+            if isSelected then InterestSyncRegistry.markSent(TransitCeTypes.TransitTrain, transitTrain.id) end
         elseif transitTrain:hasDirtyFields() then
             local ceType, keyId, key, dto = TransitTrainDtoFactory.createPatchDto(transitTrain,
                                                                                   transitTrain.dirtyFields,

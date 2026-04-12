@@ -33,13 +33,13 @@ end
 
 function SignalUpdater.runUpdate()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
     if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
     local fields = HubOptionsRegistry.getFieldUpdatePolicies("signals")
 
     for _, signal in pairs(SignalRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
         local position = EEPGetSignal(signal.id)
         signal:setPosition(position)
         signal:setWaitingVehiclesCount(EEPGetSignalTrainsCount(signal.id) or 0)

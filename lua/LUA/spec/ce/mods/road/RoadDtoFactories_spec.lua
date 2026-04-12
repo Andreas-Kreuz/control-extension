@@ -119,12 +119,12 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
-                        currentSwitching = "",   -- onselection, never selected
+                        currentSwitching = "",   -- oninterest, never selected
                         manualSwitching = "S2",
-                        nextSwitching = "",      -- onselection, never selected
-                        ready = false,           -- onselection, never selected
-                        timeForGreen = 0,        -- onselection, never selected
-                        staticCams = {}          -- onselection, never selected
+                        nextSwitching = "",      -- oninterest, never selected
+                        ready = false,           -- oninterest, never selected
+                        timeForGreen = 0,        -- oninterest, never selected
+                        staticCams = {}          -- oninterest, never selected
                     }, intersectionDto)
         assert.same({
                         ceType = "ce.mods.road.Intersection",
@@ -145,13 +145,13 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
-                        phase = "",              -- onselection, never selected
+                        phase = "",              -- oninterest, never selected
                         vehicleMultiplier = 2,
                         eepSaveId = 5,
                         type = "NORMAL",
                         countType = "TRACKS",
-                        waitingTrains = {},      -- onselection, never selected
-                        waitingForGreenCyclesCount = 0, -- onselection, never selected
+                        waitingTrains = {},      -- oninterest, never selected
+                        waitingForGreenCyclesCount = 0, -- oninterest, never selected
                         directions = { "LEFT" },
                         switchings = { "S1" },
                         tracks = { 10 }
@@ -190,7 +190,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = 2,
                         signalId = 2,
                         modelId = "road",
-                        currentPhase = "",       -- onselection, never selected
+                        currentPhase = "",       -- oninterest, never selected
                         intersectionId = 1,
                         lightStructures = {
                             ["0"] = {

@@ -36,17 +36,17 @@ end
 
 function SignalPublisher.syncState()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
     for _, signal in pairs(SignalRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Signal, tostring(signal.id))
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Signal, tostring(signal.id))
         if HubOptionsRegistry.isPublishEnabled("signals") and
             (signal.needsFullSend or signal:hasDirtyFields() or needsInitialSend) then
             if signal.needsFullSend or needsInitialSend then
                 DataChangeBus.fireDataChanged(SignalDtoFactory.createSignalDto(signal, isSelected))
-                if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Signal, tostring(signal.id)) end
+                if isSelected then InterestSyncRegistry.markSent(HubCeTypes.Signal, tostring(signal.id)) end
             else
                 local ceType, keyId, key, dto = SignalDtoFactory.createSignalDto(signal, isSelected)
                 if hasPayloadFields(dto) then

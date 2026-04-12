@@ -1,6 +1,6 @@
 import * as assert from 'node:assert/strict';
-import DynamicInterestRegistry from './DynamicInterestRegistry';
-import DynamicInterestService from './DynamicInterestService';
+import InterestSyncRegistry from './InterestSyncRegistry';
+import InterestSyncService from './InterestSyncService';
 import DomainRoomManager from './DomainRoomManager';
 import { DomainDataProvider } from './DomainDataProvider';
 import { DomainRoom } from '@ce/web-shared';
@@ -21,8 +21,8 @@ function createManager(commands: string[]) {
       emit: () => undefined,
     }),
   };
-  const interestRegistry = new DynamicInterestRegistry((command) => commands.push(command));
-  const interestService = new DynamicInterestService(interestRegistry);
+  const interestRegistry = new InterestSyncRegistry((command) => commands.push(command));
+  const interestService = new InterestSyncService(interestRegistry);
   return new DomainRoomManager(io as never, interestService);
 }
 
@@ -42,7 +42,7 @@ function registerDetailProvider(manager: DomainRoomManager): DomainRoom {
   const provider: DomainDataProvider = {
     roomType,
     id: 'TestDetailRoom',
-    dynamicInterest: {
+    onInterest: {
       ceType: 'ce.test.Detail',
       idOfRoom: (roomName: string) => roomType.idOfRoom(roomName),
     },
@@ -66,15 +66,15 @@ function testJoinAndLeaveRetainSharedInterest(): void {
   manager.onJoinRoom(socketA as never, roomName);
   manager.onJoinRoom(socketB as never, roomName);
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.test.Detail|Entry-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.test.Detail|Entry-1']);
 
   manager.onLeaveRoom(socketA as never, roomName);
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.test.Detail|Entry-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.test.Detail|Entry-1']);
 
   manager.onLeaveRoom(socketB as never, roomName);
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.test.Detail|Entry-1',
-    'HubDynamicData.stopUpdatesFor|ce.test.Detail|Entry-1',
+    'HubInterestSync.startSyncFor|ce.test.Detail|Entry-1',
+    'HubInterestSync.stopSyncFor|ce.test.Detail|Entry-1',
   ]);
 }
 
@@ -91,10 +91,10 @@ function testDisconnectReleasesAllSocketInterests(): void {
   manager.onSocketClose(socket as never);
 
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.test.Detail|Entry-A',
-    'HubDynamicData.startUpdatesFor|ce.test.Detail|Entry-B',
-    'HubDynamicData.stopUpdatesFor|ce.test.Detail|Entry-A',
-    'HubDynamicData.stopUpdatesFor|ce.test.Detail|Entry-B',
+    'HubInterestSync.startSyncFor|ce.test.Detail|Entry-A',
+    'HubInterestSync.startSyncFor|ce.test.Detail|Entry-B',
+    'HubInterestSync.stopSyncFor|ce.test.Detail|Entry-A',
+    'HubInterestSync.stopSyncFor|ce.test.Detail|Entry-B',
   ]);
 }
 

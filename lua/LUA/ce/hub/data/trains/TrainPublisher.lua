@@ -1,7 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainPublisher ...") end
 
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local TrainDtoFactory = require("ce.hub.data.trains.TrainDtoFactory")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
@@ -28,14 +28,14 @@ function TrainPublisher.syncState()
     end
 
     for _, train in pairs(TrainRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Train, train.id)
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Train, train.id)
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Train, train.id)
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Train, train.id)
 
         if train.needsFullSend or needsInitialSend then
             DataChangeBus.fireDataChanged(TrainDtoFactory.createFullDto(train, isSelected))
             train.needsFullSend = false
             train:resetDirty()
-            if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Train, train.id) end
+            if isSelected then InterestSyncRegistry.markSent(HubCeTypes.Train, train.id) end
         elseif train:hasDirtyFields() then
             local ceType, keyId, key, dto = TrainDtoFactory.createPatchDto(train, train.dirtyFields, isSelected)
             if hasPayloadFields(dto) then

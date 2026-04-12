@@ -4,7 +4,7 @@ local SyncPolicy = {}
 
 local validFieldPolicies = {
     always = true,
-    onselection = true,
+    oninterest = true,
     never = true
 }
 
@@ -43,16 +43,16 @@ end
 
 function SyncPolicy.shouldUpdateField(fieldPolicies, fieldName, isSelected)
     local policy = SyncPolicy.getFieldPolicy(fieldPolicies, fieldName)
-    return policy == "always" or (policy == "onselection" and isSelected == true)
+    return policy == "always" or (policy == "oninterest" and isSelected == true)
 end
 
 function SyncPolicy.shouldPublishField(fieldPolicies, fieldName, isSelected)
     local policy = SyncPolicy.getFieldPolicy(fieldPolicies, fieldName)
-    return policy == "always" or (policy == "onselection" and isSelected == true)
+    return policy == "always" or (policy == "oninterest" and isSelected == true)
 end
 
 function SyncPolicy.shouldPublishPlaceholder(fieldPolicies, fieldName, isSelected)
-    return SyncPolicy.getFieldPolicy(fieldPolicies, fieldName) == "onselection" and isSelected ~= true
+    return SyncPolicy.getFieldPolicy(fieldPolicies, fieldName) == "oninterest" and isSelected ~= true
 end
 
 return SyncPolicy

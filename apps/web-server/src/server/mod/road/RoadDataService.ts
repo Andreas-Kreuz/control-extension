@@ -21,13 +21,13 @@ export default class RoadDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: IntersectionRoom,
       id: 'IntersectionRoom',
-      dynamicInterest: { ceType: CeTypes.RoadIntersection, idOfRoom: (room: string) => IntersectionRoom.idOfRoom(room) },
+      onInterest: { ceType: CeTypes.RoadIntersection, idOfRoom: (room: string) => IntersectionRoom.idOfRoom(room) },
       jsonCreator: (room: string) => JSON.stringify(this.selector.getIntersection(IntersectionRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: IntersectionLaneRoom,
       id: 'IntersectionLaneRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.RoadIntersectionLane,
         idOfRoom: (room: string) => IntersectionLaneRoom.idOfRoom(room),
       },
@@ -36,7 +36,7 @@ export default class RoadDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: IntersectionSwitchingRoom,
       id: 'IntersectionSwitchingRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.RoadIntersectionSwitching,
         idOfRoom: (room: string) => IntersectionSwitchingRoom.idOfRoom(room),
       },
@@ -46,7 +46,7 @@ export default class RoadDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: IntersectionTrafficLightRoom,
       id: 'IntersectionTrafficLightRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.RoadIntersectionTrafficLight,
         idOfRoom: (room: string) => IntersectionTrafficLightRoom.idOfRoom(room),
       },
@@ -56,7 +56,7 @@ export default class RoadDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TrafficLightModelRoom,
       id: 'TrafficLightModelRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.RoadSignalTypeDefinition,
         idOfRoom: (room: string) => TrafficLightModelRoom.idOfRoom(room),
       },
@@ -65,7 +65,7 @@ export default class RoadDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RoadModuleSettingRoom,
       id: 'RoadModuleSettingRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.RoadModuleSetting,
         idOfRoom: (room: string) => RoadModuleSettingRoom.idOfRoom(room),
       },

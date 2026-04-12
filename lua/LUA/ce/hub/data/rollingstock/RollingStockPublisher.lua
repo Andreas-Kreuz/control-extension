@@ -1,7 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockPublisher ...") end
 
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
@@ -27,14 +27,14 @@ function RollingStockPublisher.syncState()
     end
 
     for _, rs in pairs(RollingStockRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.RollingStock, rs.id)
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.RollingStock, rs.id)
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.RollingStock, rs.id)
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.RollingStock, rs.id)
 
         if rs.needsFullSend or needsInitialSend then
             DataChangeBus.fireDataChanged(RollingStockDtoFactory.createFullDto(rs, isSelected))
             rs.needsFullSend = false
             rs:resetDirty()
-            if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.RollingStock, rs.id) end
+            if isSelected then InterestSyncRegistry.markSent(HubCeTypes.RollingStock, rs.id) end
         elseif rs:hasDirtyFields() then
             local ceType, keyId, key, dto = RollingStockDtoFactory.createPatchDto(rs, rs.dirtyFields, isSelected)
             if hasPayloadFields(dto) then

@@ -7,7 +7,7 @@ local ContactPublisher = {}
 
 function ContactPublisher.syncState()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
     if not HubOptionsRegistry.isPublishEnabled("contacts") then
@@ -20,19 +20,19 @@ function ContactPublisher.syncState()
     for contactId in pairs(addedIds) do
         local contact = ContactRegistry.getAll()[contactId]
         if contact then
-            local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Contact, contactId)
+            local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Contact, contactId)
             DataChangeBus.fireDataAdded(ContactDtoFactory.createFullDto(contact, isSelected))
             contact.needsFullSend = false
         end
     end
 
     for _, contact in pairs(ContactRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Contact, contact.id)
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Contact, contact.id)
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Contact, contact.id)
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Contact, contact.id)
         if not addedIds[contact.id] and (contact.needsFullSend or needsInitialSend) then
             DataChangeBus.fireDataChanged(ContactDtoFactory.createFullDto(contact, isSelected))
             contact.needsFullSend = false
-            if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Contact, contact.id) end
+            if isSelected then InterestSyncRegistry.markSent(HubCeTypes.Contact, contact.id) end
         end
     end
 

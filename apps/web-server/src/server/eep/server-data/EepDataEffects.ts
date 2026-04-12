@@ -3,7 +3,7 @@ import { CacheService } from './CacheService';
 import EepDataEvent from './EepDataEvent';
 import EepDataReducer from './EepDataStore';
 import DomainRoomManager from './dynamic/DomainRoomManager';
-import DynamicInterestService from './dynamic/DynamicInterestService';
+import InterestSyncService from './dynamic/InterestSyncService';
 import DomainRoomService from './dynamic/DomainRoomService';
 import JsonApiRoomObserver from './static/JsonApiUpdateService';
 import { RoomEvent, ServerStatusEvent } from '@ce/web-shared';
@@ -22,13 +22,13 @@ export default class EepDataEffects {
     io: Server,
     private socketService: SocketService,
     private cacheService: CacheService,
-    dynamicInterestService?: DynamicInterestService,
+    interestSyncService?: InterestSyncService,
   ) {
     this.store.init(this.cacheService.readCache());
     console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
 
     this.socketService.addOnSocketConnectedCallback((socket: Socket) => this.socketConnected(socket));
-    this.stateController = new DomainRoomManager(io, dynamicInterestService);
+    this.stateController = new DomainRoomManager(io, interestSyncService);
     this.jsonApiController = new JsonApiRoomObserver(router, io, cacheService);
 
     setInterval(() => this.refreshStateIfRequired(), 50);

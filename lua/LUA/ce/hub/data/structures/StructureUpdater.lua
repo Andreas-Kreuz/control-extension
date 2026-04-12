@@ -21,13 +21,13 @@ end
 
 function StructureUpdater.runUpdate()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
 
     local fields = HubOptionsRegistry.getFieldUpdatePolicies("structures")
     for _, structure in pairs(StructureRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure,
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure,
                                                             tostring(structure.id or structure.name))
         if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
             local _, tag = EEPStructureGetTagText(structure.name)

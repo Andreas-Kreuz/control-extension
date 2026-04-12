@@ -1,5 +1,5 @@
 import * as assert from 'node:assert/strict';
-import DynamicInterestRegistry from './DynamicInterestRegistry';
+import InterestSyncRegistry from './InterestSyncRegistry';
 
 async function runTest(name: string, fn: () => void | Promise<void>): Promise<void> {
   try {
@@ -13,28 +13,28 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
 
 function testRetainOnlyStartsOnceForSameInterest(): void {
   const commands: string[] = [];
-  const registry = new DynamicInterestRegistry((command) => {
+  const registry = new InterestSyncRegistry((command) => {
     commands.push(command);
   });
 
   registry.retainToken('socket:a|room:Train/ICE-1', 'ce.hub.Train', 'ICE-1');
   registry.retainToken('socket:b|room:Train/ICE-1', 'ce.hub.Train', 'ICE-1');
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.hub.Train|ICE-1']);
 
   registry.releaseToken('socket:a|room:Train/ICE-1');
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.hub.Train|ICE-1']);
 
   registry.releaseToken('socket:b|room:Train/ICE-1');
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1',
-    'HubDynamicData.stopUpdatesFor|ce.hub.Train|ICE-1',
+    'HubInterestSync.startSyncFor|ce.hub.Train|ICE-1',
+    'HubInterestSync.stopSyncFor|ce.hub.Train|ICE-1',
   ]);
 }
 
 async function testLeasedTokenRefreshesUntilTtlExpires(): Promise<void> {
   const commands: string[] = [];
-  const registry = new DynamicInterestRegistry((command) => {
+  const registry = new InterestSyncRegistry((command) => {
     commands.push(command);
   });
 
@@ -43,19 +43,19 @@ async function testLeasedTokenRefreshesUntilTtlExpires(): Promise<void> {
   registry.touchLeasedToken('json:ce.hub.RollingStock:RS-1', 'ce.hub.RollingStock', 'RS-1', 40);
   await new Promise((resolve) => setTimeout(resolve, 20));
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.RollingStock|RS-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.hub.RollingStock|RS-1']);
 
   await new Promise((resolve) => setTimeout(resolve, 60));
 
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.hub.RollingStock|RS-1',
-    'HubDynamicData.stopUpdatesFor|ce.hub.RollingStock|RS-1',
+    'HubInterestSync.startSyncFor|ce.hub.RollingStock|RS-1',
+    'HubInterestSync.stopSyncFor|ce.hub.RollingStock|RS-1',
   ]);
 }
 
 function testRetainPerRoomOnlyStopsAfterLastRoomSubscription(): void {
   const commands: string[] = [];
-  const registry = new DynamicInterestRegistry((command) => {
+  const registry = new InterestSyncRegistry((command) => {
     commands.push(command);
   });
 
@@ -63,18 +63,18 @@ function testRetainPerRoomOnlyStopsAfterLastRoomSubscription(): void {
   registry.retainToken('socket:b|room:train-details|ICE-1', 'ce.hub.Train', 'ICE-1');
   registry.retainToken('socket:a|room:sidebar|ICE-1', 'ce.hub.Train', 'ICE-1');
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.hub.Train|ICE-1']);
 
   registry.releaseToken('socket:a|room:train-details|ICE-1');
   registry.releaseToken('socket:b|room:train-details|ICE-1');
 
-  assert.deepEqual(commands, ['HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1']);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.hub.Train|ICE-1']);
 
   registry.releaseToken('socket:a|room:sidebar|ICE-1');
 
   assert.deepEqual(commands, [
-    'HubDynamicData.startUpdatesFor|ce.hub.Train|ICE-1',
-    'HubDynamicData.stopUpdatesFor|ce.hub.Train|ICE-1',
+    'HubInterestSync.startSyncFor|ce.hub.Train|ICE-1',
+    'HubInterestSync.stopSyncFor|ce.hub.Train|ICE-1',
   ]);
 }
 

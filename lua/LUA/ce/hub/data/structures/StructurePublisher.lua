@@ -14,7 +14,7 @@ end
 
 function StructurePublisher.syncState()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
     if not HubOptionsRegistry.isPublishEnabled("structures") then
         StructureRegistry.clearPendingChanges()
@@ -27,7 +27,7 @@ function StructurePublisher.syncState()
     for structureId in pairs(addedIds) do
         local structure = StructureRegistry.forId(structureId)
         if structure then
-            local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
+            local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
             DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure, isSelected))
             structure.needsFullSend = false
             structure:resetDirty()
@@ -39,14 +39,14 @@ function StructurePublisher.syncState()
     end
 
     for structureId, structure in pairs(StructureRegistry.getAll()) do
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
-        local needsInitialSend = DynamicUpdateRegistry.needsInitialSend(HubCeTypes.Structure, tostring(structure.id))
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Structure, tostring(structure.id))
         if not addedIds[structureId]
             and (structure.needsFullSend or structure:hasDirtyFields() or needsInitialSend) then
             if structure.needsFullSend or needsInitialSend then
                 DataChangeBus.fireDataChanged(StructureDtoFactory.createFullDto(structure, isSelected))
                 structure.needsFullSend = false
-                if isSelected then DynamicUpdateRegistry.markSent(HubCeTypes.Structure, tostring(structure.id)) end
+                if isSelected then InterestSyncRegistry.markSent(HubCeTypes.Structure, tostring(structure.id)) end
             else
                 local ceType, keyId, key, dto = StructureDtoFactory.createPatchDto(structure, structure.dirtyFields,
                                                                                    isSelected)

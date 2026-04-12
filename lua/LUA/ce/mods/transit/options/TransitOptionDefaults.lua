@@ -5,7 +5,7 @@ local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitOptionDefaults = {}
 
 -- NOTE: data collection cannot be disabled per ceType — the entire module is skipped on loading.
--- Only publish and field-level policies (always / onselection / never) are configurable here.
+-- Only publish and field-level policies (always / oninterest / never) are configurable here.
 function TransitOptionDefaults.create()
     return {
         ceTypes = {
@@ -14,11 +14,11 @@ function TransitOptionDefaults.create()
                 publish = true,
                 fieldUpdates = {
                     platforms = "always",
-                    queue = "onselection"
+                    queue = "oninterest"
                 },
                 fieldPublish = {
                     platforms = "always",
-                    queue = "onselection"
+                    queue = "oninterest"
                 }
             },
             lines = {

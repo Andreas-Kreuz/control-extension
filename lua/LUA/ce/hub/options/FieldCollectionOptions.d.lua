@@ -1,2 +1,2 @@
 ---@class FieldCollectionOptions
----@field policy "always"|"onselection"|"never"|nil
+---@field policy "always"|"oninterest"|"never"|nil

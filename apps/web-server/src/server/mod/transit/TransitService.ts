@@ -39,7 +39,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitLineDetailsRoom,
       id: 'TransitLineDetailsRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.TransitLine,
         idOfRoom: (room: string) => TransitLineDetailsRoom.idOfRoom(room),
       },
@@ -58,7 +58,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitStationDetailsRoom,
       id: 'TransitStationDetailsRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.TransitStation,
         idOfRoom: (room: string) => TransitStationDetailsRoom.idOfRoom(room),
       },
@@ -70,7 +70,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitLineNameRoom,
       id: 'TransitLineNameRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.TransitLineName,
         idOfRoom: (room: string) => TransitLineNameRoom.idOfRoom(room),
       },
@@ -79,7 +79,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitTrainRoom,
       id: 'TransitTrainRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.TransitTrain,
         idOfRoom: (room: string) => TransitTrainRoom.idOfRoom(room),
       },
@@ -88,7 +88,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitModuleSettingRoom,
       id: 'TransitModuleSettingRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.TransitModuleSetting,
         idOfRoom: (room: string) => TransitModuleSettingRoom.idOfRoom(room),
       },

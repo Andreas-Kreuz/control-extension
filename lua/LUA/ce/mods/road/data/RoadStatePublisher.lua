@@ -1,6 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadStatePublisher ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local Intersection = require("ce.mods.road.Intersection")
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
@@ -24,7 +24,7 @@ function RoadStatePublisher.syncState()
 
     local crossingData = RoadDataCollector.collectCrossings(Intersection.allIntersections)
     local moduleSettings = RoadDataCollector.collectModuleSettings()
-    local function byCeTypeAndId(ceType, id) return DynamicUpdateRegistry.isSelected(ceType, tostring(id)) end
+    local function byCeTypeAndId(ceType, id) return InterestSyncRegistry.isSelected(ceType, tostring(id)) end
 
     if RoadOptionsRegistry.isPublishEnabled("intersections") then
         DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionDtoList(crossingData.intersections,

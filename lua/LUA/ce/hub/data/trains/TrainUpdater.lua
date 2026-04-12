@@ -11,7 +11,7 @@ TrainUpdater.debug = CeStartWithDebug or false
 function TrainUpdater.runUpdate()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local SyncPolicy = require("ce.hub.sync.SyncPolicy")
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("trains") then return end
     local fieldPolicies = HubOptionsRegistry.getFieldUpdatePolicies("trains")
@@ -19,7 +19,7 @@ function TrainUpdater.runUpdate()
 
     for trainName, train in pairs(TrainRegistry.getAll()) do
         local info = TrainDiscoveryCache.get(trainName) or {}
-        local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.Train, tostring(train.id or train.name or ""))
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Train, tostring(train.id or train.name or ""))
         if TrainUpdater.debug then print(string.format("[#TrainUpdater] updating train %s", trainName)) end
 
         if SyncPolicy.shouldUpdateField(fieldPolicies, "route", isSelected) then

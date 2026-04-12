@@ -1,6 +1,6 @@
 import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
 import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
-import DynamicInterestService from '../../eep/server-data/dynamic/DynamicInterestService';
+import InterestSyncService from '../../eep/server-data/dynamic/InterestSyncService';
 import { RollingStockSelector } from './RollingStockSelector';
 import { TrainSelector } from './TrainSelector';
 import { State } from '../../eep/server-data/EepDataStore';
@@ -27,7 +27,7 @@ export default class TrainUpdateService implements DomainRoomService {
   constructor(
     private io: Server,
     private router: express.Router,
-    private dynamicInterestService?: DynamicInterestService,
+    private interestSyncService?: InterestSyncService,
   ) {
     this.roomDataProviders.push({
       roomType: TrainListRoom,
@@ -40,7 +40,7 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TrainRoom,
       id: 'TrainRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.HubTrain,
         idOfRoom: (roomName: string) => TrainRoom.idOfRoom(roomName),
       },
@@ -52,7 +52,7 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RollingStockRoom,
       id: 'RollingStockRoom',
-      dynamicInterest: {
+      onInterest: {
         ceType: CeTypes.HubRollingStock,
         idOfRoom: (roomName: string) => RollingStockRoom.idOfRoom(roomName),
       },
@@ -139,7 +139,7 @@ export default class TrainUpdateService implements DomainRoomService {
       }
 
       const token = 'json:' + CeTypes.HubTrain + ':' + trainId;
-      this.dynamicInterestService?.touchLeasedToken(token, CeTypes.HubTrain, trainId, jsonInterestTtlMs);
+      this.interestSyncService?.touchLeasedToken(token, CeTypes.HubTrain, trainId, jsonInterestTtlMs);
       const train = await this.waitForDynamicData(() => this.trainSelector.getTrain(trainId));
       if (!train) {
         res.status(504).json({ error: 'timeout' });
@@ -156,7 +156,7 @@ export default class TrainUpdateService implements DomainRoomService {
       }
 
       const token = 'json:' + CeTypes.HubRollingStock + ':' + rollingStockId;
-      this.dynamicInterestService?.touchLeasedToken(token, CeTypes.HubRollingStock, rollingStockId, jsonInterestTtlMs);
+      this.interestSyncService?.touchLeasedToken(token, CeTypes.HubRollingStock, rollingStockId, jsonInterestTtlMs);
       const rollingStock = await this.waitForDynamicData(() =>
         this.rollingStockSelector.getRollingStock(rollingStockId),
       );
