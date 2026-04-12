@@ -7,7 +7,7 @@ local AkLine = setmetatable({
                                 saveSettings = TransitSettings.saveSettings,
                                 setShowDepartureTippText = TransitSettings.setShowDepartureTippText,
                             }, {
-                                __index = function (t, k)
+                                __index = function (_, k)
                                     return settingsFields[k] and TransitSettings[k] or Line[k]
                                 end,
                                 __newindex = function (t, k, v)

@@ -10,7 +10,7 @@ local Crossing = setmetatable({
                                   setShowSequenceOnSignal = IntersectionSettings.setShowSequenceOnSignal,
                                   setShowSignalIdOnSignal = IntersectionSettings.setShowSignalIdOnSignal,
                               }, {
-                                  __index = function (t, k)
+                                  __index = function (_, k)
                                       return settingsFields[k] and IntersectionSettings[k] or Intersection[k]
                                   end,
                                   __newindex = function (t, k, v)
