@@ -11,25 +11,31 @@ const version = packageJson.version;
 const packageDir = path.join(repoRoot, 'lua', 'modell-pakete');
 const packageName = `control-extension-for-eep-${version}-installer.zip`;
 const packagePath = path.join(packageDir, packageName);
+const compatPackageName = `ak-compat-layer-for-control-extension-${version}-installer.zip`;
+const compatPackagePath = path.join(packageDir, compatPackageName);
 
 if (!existsSync(packageDir)) {
   console.error(`[find-release-assets] Missing package directory: ${packageDir}`);
   process.exit(1);
 }
 
-if (!existsSync(packagePath)) {
-  const availablePackages = readdirSync(packageDir).filter((entry) => entry.endsWith('.zip'));
-  console.error(`[find-release-assets] Missing EEP release package: ${packagePath}`);
-  if (availablePackages.length > 0) {
-    console.error(`[find-release-assets] Available zip packages: ${availablePackages.join(', ')}`);
+for (const p of [packagePath, compatPackagePath]) {
+  if (!existsSync(p)) {
+    const availablePackages = readdirSync(packageDir).filter((entry) => entry.endsWith('.zip'));
+    console.error(`[find-release-assets] Missing EEP release package: ${p}`);
+    if (availablePackages.length > 0) {
+      console.error(`[find-release-assets] Available zip packages: ${availablePackages.join(', ')}`);
+    }
+    process.exit(1);
   }
-  process.exit(1);
 }
 
 const githubOutput = process.env.GITHUB_OUTPUT;
 const outputs = {
   eep_package_path: packagePath,
-  eep_package_name: path.basename(packagePath),
+  eep_package_name: packageName,
+  compat_package_path: compatPackagePath,
+  compat_package_name: compatPackageName,
 };
 
 for (const [key, value] of Object.entries(outputs)) {

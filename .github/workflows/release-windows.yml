@@ -137,6 +137,7 @@ jobs:
           if-no-files-found: error
           path: |
             ${{ steps.assets.outputs.eep_package_path }}
+            ${{ steps.assets.outputs.compat_package_path }}
 
       - name: Create or update draft GitHub Release
         uses: softprops/action-gh-release@v2
@@ -145,8 +146,24 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: ${{ inputs.release_tag }}
           draft: true
+          body: |
+            ## Neue Funtionen
+
+            - ⭐
+
+            ## Behobene Fehler
+
+            - 🐞
+
+            ## Installationspakete (siehe Assests)
+
+            - **`${{ steps.assets.outputs.eep_package_name }}`** – Haupt-Installationspaket der Control Extension für EEP. Enthält Server, Lua-Hub, Data Bridge und Web-App.
+            - **`${{ steps.assets.outputs.compat_package_name }}`** – Kompatibilitätsschicht für bestehende Anlagen, die auf der Lua-Bibliothek von Andreas Kreuz basieren.
+
+            Weitere Informationen und Dokumentation: https://andreas-kreuz.github.io/control-extension/
           files: |
             ${{ steps.assets.outputs.eep_package_path }}
+            ${{ steps.assets.outputs.compat_package_path }}
           fail_on_unmatched_files: true
           generate_release_notes: false
         env:

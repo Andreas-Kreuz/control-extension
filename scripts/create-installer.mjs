@@ -51,6 +51,7 @@ function searchFiles(baseDir, subdirectory, excludePatterns) {
 // ---------------------------------------------------------------------------
 
 const INSTALLER_NAME = `control-extension-for-eep-${version}-installer`;
+const COMPAT_INSTALLER_NAME = `ak-compat-layer-for-control-extension-${version}-installer`;
 
 const packages = [
   {
@@ -119,6 +120,15 @@ const packages = [
   },
 ];
 
+const compatPackages = [
+  {
+    eepVersion: '13,2',
+    germanName: 'AK Compat-Layer für Control Extension',
+    germanDescription: 'Kompatibilitäts-Bibliotheken: ak.road und ak.public-transport als dünne Schicht über ce.mods',
+    sources: [{ subdirectory: 'LUA\\ak', exclude: [] }],
+  },
+];
+
 // ---------------------------------------------------------------------------
 // Content generators
 // ---------------------------------------------------------------------------
@@ -175,38 +185,43 @@ function createZip(sourceDir, zipPath) {
 // ---------------------------------------------------------------------------
 
 const outputDir = path.join(luaDir, 'modell-pakete');
-const installationDir = path.join(outputDir, INSTALLER_NAME);
 
-// Wipe and recreate installer directory
-rmSync(installationDir, { recursive: true, force: true });
-mkdirSync(installationDir, { recursive: true });
+function buildInstaller(installerName, pkgs) {
+  const installationDir = path.join(outputDir, installerName);
+  rmSync(installationDir, { recursive: true, force: true });
+  mkdirSync(installationDir, { recursive: true });
 
-for (const [index, pkg] of packages.entries()) {
-  const label = String(index).padStart(2, '0');
-  const pkgDir = path.join(installationDir, `Install_${label}`);
-  mkdirSync(pkgDir, { recursive: true });
+  for (const [index, pkg] of pkgs.entries()) {
+    const label = String(index).padStart(2, '0');
+    const pkgDir = path.join(installationDir, `Install_${label}`);
+    mkdirSync(pkgDir, { recursive: true });
 
-  const allFiles = [];
-  for (const source of pkg.sources) {
-    allFiles.push(...searchFiles(luaDir, source.subdirectory, source.exclude));
+    const allFiles = [];
+    for (const source of pkg.sources) {
+      allFiles.push(...searchFiles(luaDir, source.subdirectory, source.exclude));
+    }
+
+    if (allFiles.length === 0) {
+      console.error(`[create-installer] ERROR: no files found for package "${pkg.germanName}"`);
+      process.exit(1);
+    }
+
+    for (const { absolutePath, fileName } of allFiles) {
+      cpSync(absolutePath, path.join(pkgDir, fileName));
+    }
+
+    writeFileSync(path.join(pkgDir, 'install.ini'), generateInstallIni(allFiles, pkg.eepVersion), 'latin1');
+    console.log(`[create-installer] Package ${label}: ${pkg.germanName} (${allFiles.length} files)`);
   }
 
-  if (allFiles.length === 0) {
-    console.error(`[create-installer] ERROR: no files found for package "${pkg.germanName}"`);
-    process.exit(1);
-  }
+  writeFileSync(path.join(installationDir, 'Installation.eep'), generateInstallationEep(pkgs), 'latin1');
 
-  for (const { absolutePath, fileName } of allFiles) {
-    cpSync(absolutePath, path.join(pkgDir, fileName));
-  }
-
-  writeFileSync(path.join(pkgDir, 'install.ini'), generateInstallIni(allFiles, pkg.eepVersion), 'latin1');
-  console.log(`[create-installer] Package ${label}: ${pkg.germanName} (${allFiles.length} files)`);
+  const zipPath = path.join(outputDir, `${installerName}.zip`);
+  createZip(installationDir, zipPath);
+  return zipPath;
 }
 
-writeFileSync(path.join(installationDir, 'Installation.eep'), generateInstallationEep(packages), 'latin1');
-
-const zipPath = path.join(outputDir, `${INSTALLER_NAME}.zip`);
-createZip(installationDir, zipPath);
+buildInstaller(INSTALLER_NAME, packages);
+buildInstaller(COMPAT_INSTALLER_NAME, compatPackages);
 
 console.log('[create-installer] Done.');
