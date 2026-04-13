@@ -7,6 +7,8 @@ import {
   CeTypes,
   ContactRoom,
   IntersectionRoom,
+  IntersectionLaneRoom,
+  IntersectionTrafficLightRoom,
   RoadModuleSettingRoom,
   SignalRoom,
   TransitLineDetailsRoom,
@@ -87,7 +89,53 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
   roadService.getUpdaters()[0]?.updateFromState({
     ceTypes: {
       [CeTypes.RoadIntersection]: {
-        I1: { id: 'I1', name: 'Crossing 1' },
+        I1: { id: 1, name: 'Crossing 1' },
+      },
+      [CeTypes.RoadIntersectionLane]: {
+        L1: {
+          id: '1-L1',
+          intersectionId: 1,
+          name: 'Lane 1',
+          phase: 'GREEN',
+          vehicleMultiplier: 2,
+          eepSaveId: 5,
+          type: 'NORMAL',
+          countType: 'TRACKS',
+          waitingTrains: ['Train 1'],
+          waitingForGreenCyclesCount: 4,
+          directions: ['LEFT'],
+          switchings: ['S1'],
+          tracks: [10],
+        },
+      },
+      [CeTypes.RoadIntersectionTrafficLight]: {
+        TL1: {
+          id: 2,
+          signalId: 2,
+          modelId: 'road',
+          currentPhase: 'GREEN',
+          intersectionId: 1,
+          lightStructures: {
+            '0': {
+              structureRed: 'Red',
+              structureGreen: 'Green',
+              structureYellow: 'Yellow',
+              structureRequest: 'Request',
+            },
+          },
+          axisStructures: [
+            {
+              structureName: 'Axis',
+              axisName: 'Signal',
+              positionDefault: 0,
+              positionRed: 1,
+              positionGreen: 2,
+              positionYellow: 3,
+              positionPedestrian: 4,
+              positionRedYellow: 5,
+            },
+          ],
+        },
       },
       [CeTypes.RoadModuleSetting]: {
         Show: { name: 'Show', category: 'Display', description: 'Show', eepFunction: 'fn', type: 'boolean', value: true },
@@ -122,6 +170,8 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
   } as never);
 
   const intersectionProvider = providerById(roadService, 'IntersectionRoom');
+  const laneProvider = providerById(roadService, 'IntersectionLaneRoom');
+  const trafficLightProvider = providerById(roadService, 'IntersectionTrafficLightRoom');
   const roadModuleSettingProvider = providerById(roadService, 'RoadModuleSettingRoom');
   const lineProvider = providerById(transitService, 'TransitLineDetailsRoom');
   const lineNameProvider = providerById(transitService, 'TransitLineNameRoom');
@@ -129,9 +179,52 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
   const trainProvider = providerById(transitService, 'TransitTrainRoom');
   const transitModuleSettingProvider = providerById(transitService, 'TransitModuleSettingRoom');
 
-  assert.deepEqual(JSON.parse(intersectionProvider.jsonCreator(IntersectionRoom.roomId('I1'))), {
-    id: 'I1',
+  assert.deepEqual(JSON.parse(intersectionProvider.jsonCreator(IntersectionRoom.roomId('1'))), {
+    id: 1,
     name: 'Crossing 1',
+    staticCams: [],
+  });
+  assert.deepEqual(JSON.parse(laneProvider.jsonCreator(IntersectionLaneRoom.roomId('1-L1'))), {
+    id: '1-L1',
+    intersectionId: 1,
+    name: 'Lane 1',
+    phase: 'GREEN',
+    vehicleMultiplier: 2,
+    eepSaveId: 5,
+    type: 'NORMAL',
+    countType: 'TRACKS',
+    waitingTrains: ['Train 1'],
+    waitingForGreenCyclesCount: 4,
+    directions: ['LEFT'],
+    switchings: ['S1'],
+    tracks: [10],
+  });
+  assert.deepEqual(JSON.parse(trafficLightProvider.jsonCreator(IntersectionTrafficLightRoom.roomId('2'))), {
+    id: 2,
+    signalId: 2,
+    modelId: 'road',
+    currentPhase: 'GREEN',
+    intersectionId: 1,
+    lightStructures: {
+      '0': {
+        structureRed: 'Red',
+        structureGreen: 'Green',
+        structureYellow: 'Yellow',
+        structureRequest: 'Request',
+      },
+    },
+    axisStructures: [
+      {
+        structureName: 'Axis',
+        axisName: 'Signal',
+        positionDefault: 0,
+        positionRed: 1,
+        positionGreen: 2,
+        positionYellow: 3,
+        positionPedestrian: 4,
+        positionRedYellow: 5,
+      },
+    ],
   });
   assert.deepEqual(JSON.parse(roadModuleSettingProvider.jsonCreator(RoadModuleSettingRoom.roomId('Show'))), {
     name: 'Show',

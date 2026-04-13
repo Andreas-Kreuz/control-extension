@@ -41,7 +41,7 @@ export default class RoadSelector {
         nextSwitching: dto.nextSwitching,
         ready: dto.ready,
         timeForGreen: dto.timeForGreen,
-        staticCams: dto.staticCams,
+        staticCams: dto.staticCams ?? [],
       }),
     );
 
@@ -133,7 +133,7 @@ export default class RoadSelector {
     const result: Record<string, TDto> = {};
     Object.values(dict).forEach((dto: TLua) => {
       const mapped = mapper(dto);
-      result[(mapped as { id: string }).id] = mapped;
+      result[String((mapped as { id: string | number }).id)] = mapped;
     });
     return result;
   }

@@ -2,16 +2,16 @@
 // Room: intersection-lanes
 export interface IntersectionLaneLuaDto {
   id: string;
-  intersectionId: string;
+  intersectionId: number;
   name: string;
-  phase: number;
+  phase: string;
   vehicleMultiplier: number;
   eepSaveId: number;
   type: string;
   countType: string;
-  waitingTrains: number;
+  waitingTrains: string[];
   waitingForGreenCyclesCount: number;
   directions: string[];
   switchings: string[];
-  tracks: string[];
+  tracks: number[];
 }
