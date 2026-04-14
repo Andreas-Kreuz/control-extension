@@ -95,7 +95,7 @@ function HubOptionDefaults.create()
                     light = "always",
                     smoke = "always",
                     fire = "always",
-                    gsbname = "onselection"
+                    gsbname = "oninterest"
                 }
             },
             scenario = {
@@ -166,7 +166,7 @@ function HubOptionDefaults.create()
                 fieldUpdates = {},
                 fieldPublish = {
                     luaFn = "always",
-                    tipTxt = "onselection"
+                    tipTxt = "oninterest"
                 }
             },
             tramTracks = {
@@ -203,13 +203,13 @@ function HubOptionDefaults.create()
                     length = "always",
                     trackType = "always",
                     movesForward = "always",
-                    speed = "onselection",
-                    targetSpeed = "onselection",
-                    couplingFront = "onselection",
-                    couplingRear = "onselection",
-                    active = "onselection",
-                    inTrainyard = "onselection",
-                    trainyardId = "onselection"
+                    speed = "oninterest",
+                    targetSpeed = "oninterest",
+                    couplingFront = "oninterest",
+                    couplingRear = "oninterest",
+                    active = "oninterest",
+                    inTrainyard = "oninterest",
+                    trainyardId = "oninterest"
                 }
             },
             rollingStocks = {
@@ -230,21 +230,21 @@ function HubOptionDefaults.create()
                     trackType = "always",
                     hookStatus = "always",
                     hookGlueMode = "always",
-                    surfaceTexts = "onselection",
-                    trackId = "onselection",
-                    trackDistance = "onselection",
-                    trackDirection = "onselection",
-                    trackSystem = "onselection",
-                    posX = "onselection",
-                    posY = "onselection",
-                    posZ = "onselection",
-                    mileage = "onselection",
+                    surfaceTexts = "oninterest",
+                    trackId = "oninterest",
+                    trackDistance = "oninterest",
+                    trackDirection = "oninterest",
+                    trackSystem = "oninterest",
+                    posX = "oninterest",
+                    posY = "oninterest",
+                    posZ = "oninterest",
+                    mileage = "oninterest",
                     orientationForward = "always",
                     smoke = "always",
                     active = "always",
-                    rotX = "onselection",
-                    rotY = "onselection",
-                    rotZ = "onselection"
+                    rotX = "oninterest",
+                    rotY = "oninterest",
+                    rotZ = "oninterest"
                 },
                 fieldPublish = {
                     trainName = "always",
@@ -261,21 +261,21 @@ function HubOptionDefaults.create()
                     hookStatus = "always",
                     hookGlueMode = "always",
                     surfaceTexts = "always",
-                    trackId = "onselection",
-                    trackDistance = "onselection",
-                    trackDirection = "onselection",
-                    trackSystem = "onselection",
-                    posX = "onselection",
-                    posY = "onselection",
-                    posZ = "onselection",
-                    mileage = "onselection",
-                    orientationForward = "onselection",
-                    smoke = "onselection",
-                    active = "onselection",
-                    rotX = "onselection",
-                    rotY = "onselection",
-                    rotZ = "onselection",
-                    xmlModel = "onselection"
+                    trackId = "oninterest",
+                    trackDistance = "oninterest",
+                    trackDirection = "oninterest",
+                    trackSystem = "oninterest",
+                    posX = "oninterest",
+                    posY = "oninterest",
+                    posZ = "oninterest",
+                    mileage = "oninterest",
+                    orientationForward = "oninterest",
+                    smoke = "oninterest",
+                    active = "oninterest",
+                    rotX = "oninterest",
+                    rotY = "oninterest",
+                    rotZ = "oninterest",
+                    xmlModel = "oninterest"
                 }
             }
         }

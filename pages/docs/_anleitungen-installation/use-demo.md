@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Demo-Anlage öffnen
 subtitle: Starte den Server, öffne die Web App auf einem zweiten Gerät und teste die Control Extension mit einer Demo-Anlage.
 type: Anleitung
-img: '/assets/thumbnails/eep-web-startseite.png'
+img: '/assets/generated/home--eep-web-startseite.png'
 date: 2026-04-11
 permalink: docs/anleitungen-installation/use-demo
 tags: [Installation]

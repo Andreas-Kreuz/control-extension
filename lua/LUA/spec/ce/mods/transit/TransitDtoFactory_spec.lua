@@ -32,7 +32,7 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
         }
         local ceType, keyId, key, lineDto = TransitDtoFactory.createLineDto(line)
         local stationCeType, stationKeyId, stationKey, stationDto =
-            TransitDtoFactory.createStationDto({ id = "Station A", name = "ignored" })
+            TransitDtoFactory.createStationDto({ name = "Station A" })
         local settingsCeType, settingsKeyId, settingsDtos =
             TransitDtoFactory.createModuleSettingDtoList({
                 {
@@ -75,7 +75,13 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
         assert.equals("ce.mods.transit.Station", stationCeType)
         assert.equals("id", stationKeyId)
         assert.equals("Station A", stationKey)
-        assert.same({ ceType = "ce.mods.transit.Station", id = "Station A" }, stationDto)
+        assert.same({
+                        ceType = "ce.mods.transit.Station",
+                        id = "Station A",
+                        name = "Station A",
+                        platforms = {},  -- always policy, but no routePlatforms supplied
+                        queue = {}       -- oninterest, not selected
+                    }, stationDto)
         assert.equals("ce.mods.transit.ModuleSetting", settingsCeType)
         assert.equals("name", settingsKeyId)
         assert.same({

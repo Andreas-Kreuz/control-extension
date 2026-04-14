@@ -1,11 +1,11 @@
 ﻿import { useState } from 'react';
 import { RollingStockDto, RollingStockRoom } from '@ce/web-shared';
-import { useDynamicRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 
 function useRollingStockDynamic(rollingStockId: string): RollingStockDto | undefined {
   const [rollingStock, setRollingStock] = useState<RollingStockDto | undefined>(undefined);
 
-  useDynamicRoomHandler(
+  useDomainRoomHandler(
     RollingStockRoom,
     rollingStockId,
     (payload: string) => {

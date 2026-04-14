@@ -1,8 +1,11 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadStatePublisher ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local Intersection = require("ce.mods.road.Intersection")
-local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
+local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
+local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
 
 ---@class RoadStatePublisher
 RoadStatePublisher = {}
@@ -21,18 +24,38 @@ function RoadStatePublisher.syncState()
 
     local crossingData = RoadDataCollector.collectCrossings(Intersection.allIntersections)
     local moduleSettings = RoadDataCollector.collectModuleSettings()
+    local function byCeTypeAndId(ceType, id) return InterestSyncRegistry.isSelected(ceType, tostring(id)) end
 
-    DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionDtoList(crossingData.intersections))
-    DataChangeBus.fireListChange(
-        RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes)
-    )
-    DataChangeBus.fireListChange(
-        RoadDtoFactory.createIntersectionSwitchingDtoList(crossingData.intersectionSwitchings)
-    )
-    DataChangeBus.fireListChange(
-        RoadDtoFactory.createIntersectionTrafficLightDtoList(crossingData.intersectionTrafficLights)
-    )
-    DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionModuleSettingDtoList(moduleSettings))
+    if RoadOptionsRegistry.isPublishEnabled("intersections") then
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionDtoList(crossingData.intersections,
+                                                                             function (intersection)
+            return byCeTypeAndId(RoadCeTypes.Intersection, intersection.id)
+        end))
+    end
+    if RoadOptionsRegistry.isPublishEnabled("intersectionLanes") then
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes,
+                                                                                 function (lane)
+            return byCeTypeAndId(RoadCeTypes.IntersectionLane, lane.id)
+        end))
+    end
+    if RoadOptionsRegistry.isPublishEnabled("intersectionSwitchings") then
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionSwitchingDtoList(crossingData
+        .intersectionSwitchings, function (switching)
+            return byCeTypeAndId(RoadCeTypes.IntersectionSwitching, switching.id)
+        end))
+    end
+    if RoadOptionsRegistry.isPublishEnabled("intersectionTrafficLights") then
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionTrafficLightDtoList(crossingData
+        .intersectionTrafficLights, function (trafficLight)
+            return byCeTypeAndId(RoadCeTypes.IntersectionTrafficLight, trafficLight.id)
+        end))
+    end
+    if RoadOptionsRegistry.isPublishEnabled("moduleSettings") then
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionModuleSettingDtoList(moduleSettings,
+                                                                                          function (setting)
+            return byCeTypeAndId(RoadCeTypes.ModuleSetting, setting.name)
+        end))
+    end
 
     return {}
 end

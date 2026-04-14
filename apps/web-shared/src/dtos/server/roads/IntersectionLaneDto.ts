@@ -1,16 +1,16 @@
 // Produced by: apps/web-server/src/server/mod/road/RoadSelector.ts
 export interface IntersectionLaneDto {
   id: string;
-  intersectionId: string;
+  intersectionId: number;
   name: string;
-  phase: number;
+  phase: string;
   vehicleMultiplier: number;
   eepSaveId: number;
   type: string;
   countType: string;
-  waitingTrains: number;
+  waitingTrains: string[];
   waitingForGreenCyclesCount: number;
   directions: string[];
   switchings: string[];
-  tracks: string[];
+  tracks: number[];
 }

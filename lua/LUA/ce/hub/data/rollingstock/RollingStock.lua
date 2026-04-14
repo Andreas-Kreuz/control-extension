@@ -47,7 +47,7 @@ local RollingStock = {}
 
 -- Field update policies (see RollingStockStaticDtoTypes.d.lua / RollingStockDynamicDtoTypes.d.lua):
 --   always   -> real value always included in DTO
---   ondemand -> real value only when DynamicUpdateRegistry.isSelected; placeholder (0/false/"") otherwise
+--   ondemand -> real value only when InterestSyncRegistry.isSelected; placeholder (0/false/"") otherwise
 --   never    -> always placeholder, never sent to clients
 
 local function markDirty(rollingStock, fieldName)

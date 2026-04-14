@@ -54,14 +54,14 @@ Nach der Installation findest Du die Server-Anwendung in Deiner EEP-Installation
 
 2. Falls der Server Deine EEP-Installation nicht automatisch findet, wähle das passende EEP-Verzeichnis im Server-Fenster aus.
 
-   ![EEP-Verzeichnis wählen](../../assets/tutorial/eep-web-installation/02-server-verzeichnis-falsch.png)
+   ![EEP-Verzeichnis wählen](../../assets/generated/server--02-server-verzeichnis-falsch.png)
 
 3. Ist das Verzeichnis korrekt gewählt, dann kann der Server Daten empfangen
    - Wurde bereits eine Anlage genutzt, die mit der Control Extension läuft, dann werden deren Daten angezeigt:
-     ![EEP-Verzeichnis gefunden](../../assets/tutorial/eep-web-installation/02-server-verzeichnis-ok-daten-da.png)
+     ![EEP-Verzeichnis gefunden](../../assets/generated/server--02-server-verzeichnis-ok-daten-da.png)
 
    - Wenn noch keine Anlage mit Control Extension im Lua Code gestartet wurde, dann erscheint ein Hinweis, dass du noch die Control-Extension in Lua einbinden musst:
-     ![EEP-Verzeichnis gefunden](../../assets/tutorial/eep-web-installation/02-server-verzeichnis-ok.png)
+     ![EEP-Verzeichnis gefunden](../../assets/generated/server--02-server-verzeichnis-ok.png)
 
 ## Geschafft
 

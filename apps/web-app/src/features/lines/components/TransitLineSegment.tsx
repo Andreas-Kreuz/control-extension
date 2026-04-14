@@ -52,21 +52,19 @@ const TransitLineSegment = (props: TransitLineSegmentProps) => {
       </Typography>
       <List dense>
         {segment.stations.map((s, index) => (
-          <>
-            <MyListItem>
-              <ListItemText primary={s.station.name} secondary={(index === 0 ? '' : '+ ') + s.timeToStation + ' min'} />
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  textAlign: 'center',
-                }}
-              >
-                {(index === 0 && <TripOriginIcon />) || (index === segment.stations.length - 1 && <PlaceIcon />) || (
-                  <RadioButtonUncheckedIcon />
-                )}
-              </ListItemIcon>
-            </MyListItem>
-          </>
+          <MyListItem key={`${segment.id}-${s.name}-${index}`}>
+            <ListItemText primary={s.name} secondary={(index === 0 ? '' : '+ ') + s.timeToStation + ' min'} />
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                textAlign: 'center',
+              }}
+            >
+              {(index === 0 && <TripOriginIcon />) || (index === segment.stations.length - 1 && <PlaceIcon />) || (
+                <RadioButtonUncheckedIcon />
+              )}
+            </ListItemIcon>
+          </MyListItem>
         ))}
       </List>
     </>

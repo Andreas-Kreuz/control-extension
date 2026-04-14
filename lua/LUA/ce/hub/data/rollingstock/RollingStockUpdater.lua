@@ -10,7 +10,7 @@ RollingStockUpdater.debug = CeStartWithDebug or false
 
 function RollingStockUpdater.runUpdate()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("rollingStocks") then return end
     local fieldPolicies = HubOptionsRegistry.getFieldUpdatePolicies("rollingStocks")
@@ -27,7 +27,7 @@ function RollingStockUpdater.runUpdate()
             if rsName then
                 local rs = RollingStockRegistry.forName(rsName)
                 local selectionKey = tostring(rs.id or rsName)
-                local isSelected = DynamicUpdateRegistry.isSelected(HubCeTypes.RollingStock, selectionKey)
+                local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.RollingStock, selectionKey)
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "trainName", isSelected) then
                     rs:setTrainName(train.name)
                 end

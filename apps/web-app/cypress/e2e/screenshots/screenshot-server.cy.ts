@@ -1,15 +1,16 @@
 import EepSimulator from '../../test-helpers/eep-simulator';
-import { createScreenshots } from './createScreenshots';
+import { createScreenshots, prepareForScreenshot } from './createScreenshots';
+import { generatedScreenshotPath } from './generatedScreenshotPath';
 
 export const screenShotsizes = [['ipad-2', 'landscape']];
 
 describe('Server Screenshots', () => createScreenshots(tests, screenShotsizes));
 
 function tests(size: string, _closestSelector: string, simulator: EepSimulator) {
-  const path = `assets/tutorial/eep-web-installation`;
   const projectRoot = Cypress.config('projectRoot');
   const validDir = `${projectRoot}/cypress/io`;
   const emptyDir = `${projectRoot}/cypress/io-empty`;
+  // Intentionally missing directory to verify the "invalid EEP directory" server state.
   const nonexistentDir = `${projectRoot}/cypress/io-nonexistent`;
   const pairingRequired = { value: true };
 
@@ -21,6 +22,19 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
     cy.get('#responsive-dialog-title').should('not.exist');
   }
 
+  function waitForScreenshotVisualState() {
+    cy.get('#choose-dir-button').then(($button) => {
+      if ($button.is(':focus')) {
+        cy.wrap($button).blur();
+      }
+    });
+
+    cy.get('body').should(() => {
+      expect(Cypress.$('body').find('.MuiTouchRipple-rippleVisible')).to.have.length(0);
+      expect(Cypress.$('body').find('.Mui-focusVisible')).to.have.length(0);
+    });
+  }
+
   before(() => {
     cy.readFile(simulator.fileNames.serverIsRunning, { timeout: 20000 }).should('exist');
     chooseDirectory(validDir);
@@ -29,7 +43,6 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       .then((value) => {
         pairingRequired.value = Boolean(value);
       });
-    cy.wait(1000);
   });
 
   after(() => {
@@ -49,20 +62,22 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
   describe('screenshot', () => {
     it('/ server nonexistingdir ' + size, () => {
       chooseDirectory(nonexistentDir);
-      cy.wait(500);
       cy.contains('Bevor es losgeht, muss Du nur noch den Ordner von EEP angeben.');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
-      cy.screenshot(`${path}/02-server-verzeichnis-falsch`);
+      waitForScreenshotVisualState();
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/server', '02-server-verzeichnis-falsch'));
     });
 
     it('/ server emptydir ' + size, () => {
       simulator.clearPersistedState(emptyDir);
       chooseDirectory(emptyDir);
       cy.reload();
-      cy.wait(500);
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
       cy.contains('Es wurden keine Daten von EEP gesammelt');
-      cy.screenshot(`${path}/02-server-verzeichnis-ok`);
+      waitForScreenshotVisualState();
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/server', '02-server-verzeichnis-ok'));
     });
 
     it('/ server ok ' + size, () => {
@@ -70,13 +85,14 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       simulator.reset();
       simulator.eepEvent('eep-version-complete.json');
       cy.reload();
-      cy.wait(500);
       cy.contains('Bereitgestellte Daten');
       cy.contains('ce.server.ApiEntries');
       cy.contains('ce.hub.EepVersion');
       cy.contains('aus 2 Events');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
-      cy.screenshot(`${path}/02-server-verzeichnis-ok-daten-da`);
+      waitForScreenshotVisualState();
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/server', '02-server-verzeichnis-ok-daten-da'));
     });
   });
 }

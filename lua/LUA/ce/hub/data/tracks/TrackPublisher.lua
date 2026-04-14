@@ -15,7 +15,7 @@ local aliases = {
 
 function TrackPublisher.syncState()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-    local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 
     for alias, trackType in pairs(aliases) do
         if HubOptionsRegistry.isPublishEnabled(alias) then
@@ -29,7 +29,7 @@ function TrackPublisher.syncState()
             for trackId in pairs(TrackRegistry.getChangedIds(trackType)) do
                 local track = TrackRegistry.get(trackType, trackId)
                 if track then
-                    local isSelected = DynamicUpdateRegistry.isSelected(TrackDtoFactory.ceTypeForTrackType(trackType),
+                    local isSelected = InterestSyncRegistry.isSelected(TrackDtoFactory.ceTypeForTrackType(trackType),
                                                                         tostring(track.id))
                     DataChangeBus.fireDataChanged(TrackDtoFactory.createTrackDto(trackType, track, isSelected))
                 end
@@ -38,9 +38,9 @@ function TrackPublisher.syncState()
             for _, track in pairs(TrackRegistry.getAll(trackType)) do
                 local ceType = TrackDtoFactory.ceTypeForTrackType(trackType)
                 local trackId = tostring(track.id)
-                if DynamicUpdateRegistry.needsInitialSend(ceType, trackId) then
+                if InterestSyncRegistry.needsInitialSend(ceType, trackId) then
                     DataChangeBus.fireDataChanged(TrackDtoFactory.createTrackDto(trackType, track, true))
-                    DynamicUpdateRegistry.markSent(ceType, trackId)
+                    InterestSyncRegistry.markSent(ceType, trackId)
                 end
             end
         end

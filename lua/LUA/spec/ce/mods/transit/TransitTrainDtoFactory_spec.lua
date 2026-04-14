@@ -13,7 +13,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
             getLine = function () return "10" end,
             getDestination = function () return "Central" end,
             getDirection = function () return "North" end,
-        })
+        }, true)
 
         assert.equals("ce.mods.transit.TransitTrain", ceType)
         assert.equals("id", keyId)
@@ -35,7 +35,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
             getLine = function () return "10" end,
             getDestination = function () return "Central" end,
             getDirection = function () return "North" end,
-        }, { destination = true })
+        }, { destination = true }, true)
 
         assert.same({
                         ceType = "ce.mods.transit.TransitTrain",

@@ -48,4 +48,5 @@
 - Check affected specs under `lua/LUA/spec` first
 - After changes, run luacheck + busted if runtime is available
 - If runtime unavailable, verify statically and state what could not be executed
+- After changes run `yarn lint:lua` and fix all warnings before considering work done — max line length is 120 chars
 - After changes run `yarn format:lua` if only Lua files are affected

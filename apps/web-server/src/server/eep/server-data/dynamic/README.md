@@ -1,5 +1,5 @@
 # dynamic-data
 
-Ein `DynamicRoomService` ist eine Möglichkeit Daten für bestimmte Räume dynamisch bereitzustellen.
-Benötigte Daten werden durch die `DynamicDataUpdater` anhand des States berechnet und mittels `DynamicDataProvider`
+Ein `DomainRoomService` ist eine Möglichkeit Daten für bestimmte fachliche Räume bereitzustellen.
+Benötigte Daten werden durch die `StateDataUpdater` anhand des States berechnet und mittels `DomainDataProvider`
 bereitgestellt.

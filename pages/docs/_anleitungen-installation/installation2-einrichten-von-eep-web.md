@@ -3,7 +3,7 @@ layout: page_with_toc
 title: Web-App einrichten
 type: Tutorial
 subtitle: Erfahre wie Du Control Extension Server und Control Extension Web App einrichtest und benutzt.
-img: '/assets/thumbnails/eep-web-startseite.png'
+img: '/assets/generated/home--eep-web-startseite.png'
 permalink: docs/anleitungen-installation/einrichten-von-eep-web
 hide: false
 date: 2017-09-08
@@ -53,11 +53,11 @@ published: false
 
 2. Falls der Control Extension Server das Programm nicht findet, wähle das Verzeichnis Deiner EEP-Installation:
 
-   ![Verzeichnis wählen](../../assets/tutorial/eep-web-installation/02-server-verzeichnis-falsch.png)
+   ![Verzeichnis wählen](../../assets/generated/server--02-server-verzeichnis-falsch.png)
 
 3. So sollte es aussehen, wenn der Control Extension Server das Verzeichnis findet:
 
-   ![Verzeichnis wählen](../../assets/tutorial/eep-web-installation/02-server-verzeichnis-ok.png)
+   ![Verzeichnis wählen](../../assets/generated/server--02-server-verzeichnis-ok.png)
 
    🍀 Du hast es bis hierhin geschafft, nun wünsche ich viel Spaß beim Benutzen von `http://localhost:3000`.
 

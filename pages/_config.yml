@@ -84,7 +84,7 @@ highlighter: rouge
 
 # Where things are
 source: .
-destination: docs/_site
+destination: ../_site
 collections_dir: docs/
 plugins_dir: docs/_plugins
 layouts_dir: docs/_layouts

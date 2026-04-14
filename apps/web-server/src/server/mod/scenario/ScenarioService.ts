@@ -1,12 +1,12 @@
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { DynamicDataProvider } from '../../eep/server-data/dynamic/DynamicDataProvider';
-import DynamicRoomService from '../../eep/server-data/dynamic/DynamicRoomService';
+import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
+import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import ScenarioSelector from './ScenarioSelector';
 import { ScenarioRoom } from '@ce/web-shared';
 import { Server } from 'socket.io';
 
-export default class ScenarioService implements DynamicRoomService {
-  private roomDataProviders: DynamicDataProvider[] = [];
+export default class ScenarioService implements DomainRoomService {
+  private roomDataProviders: DomainDataProvider[] = [];
   private scenarioSelector = new ScenarioSelector();
 
   constructor(private io: Server) {

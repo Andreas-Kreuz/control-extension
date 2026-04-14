@@ -1,6 +1,6 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.data.DynamicUpdateRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.InterestSyncRegistry ...") end
 
-local DynamicUpdateRegistry = {}
+local InterestSyncRegistry = {}
 
 local selectedByCeType = {}
 local pendingInitialSendByCeType = {}
@@ -12,7 +12,7 @@ local function ensureCeTypeTable(container, ceType)
     return container[ceType]
 end
 
-function DynamicUpdateRegistry.startUpdatesFor(ceType, key)
+function InterestSyncRegistry.startSyncFor(ceType, key)
     assert(type(ceType) == "string", "Need 'ceType' as string")
     assert(type(key) == "string", "Need 'key' as string")
 
@@ -20,7 +20,7 @@ function DynamicUpdateRegistry.startUpdatesFor(ceType, key)
     ensureCeTypeTable(pendingInitialSendByCeType, ceType)[key] = true
 end
 
-function DynamicUpdateRegistry.stopUpdatesFor(ceType, key)
+function InterestSyncRegistry.stopSyncFor(ceType, key)
     assert(type(ceType) == "string", "Need 'ceType' as string")
     assert(type(key) == "string", "Need 'key' as string")
 
@@ -28,23 +28,23 @@ function DynamicUpdateRegistry.stopUpdatesFor(ceType, key)
     if pendingInitialSendByCeType[ceType] then pendingInitialSendByCeType[ceType][key] = nil end
 end
 
-function DynamicUpdateRegistry.isSelected(ceType, key)
+function InterestSyncRegistry.isSelected(ceType, key)
     return selectedByCeType[ceType] and selectedByCeType[ceType][key] == true or false
 end
 
-function DynamicUpdateRegistry.needsInitialSend(ceType, key)
+function InterestSyncRegistry.needsInitialSend(ceType, key)
     return pendingInitialSendByCeType[ceType] and pendingInitialSendByCeType[ceType][key] == true or false
 end
 
-function DynamicUpdateRegistry.markSent(ceType, key)
+function InterestSyncRegistry.markSent(ceType, key)
     if pendingInitialSendByCeType[ceType] then
         pendingInitialSendByCeType[ceType][key] = nil
     end
 end
 
-function DynamicUpdateRegistry.clearAll()
+function InterestSyncRegistry.clearAll()
     selectedByCeType = {}
     pendingInitialSendByCeType = {}
 end
 
-return DynamicUpdateRegistry
+return InterestSyncRegistry

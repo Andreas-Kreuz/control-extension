@@ -29,35 +29,35 @@ published: false
 Es gibt 4 Arten von Priorisierungen für Fahrspuren. Nur eine davon kann gleichzeitig verwendet werden:
 
 <ul class="list-unstyled">
-  <li class="media mt-5">
-    <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-wartezeit.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
-    <div class="media-body">
+  <li class="d-flex align-items-start mt-5">
+    <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-wartezeit.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
+    <div class="flex-grow-1">
       <h5 class="mt-0">Priorisierung nach Wartezeit</h5>
       Werden die Fahrzeuge nicht anhand von unten stehenden Mechanismen erkannt, so erfolgt die Priorisierung dieser Fahrspur anhand der Wartezeit. Die Wartezeit wird immer um eins hochgezählt, wenn diese Fahrspur beim Ändern der Ampelschaltung rot bekommt. Sie wird auf 0 zurükgesetzt, wenn die Ampel grün bekommt.<br><br>
       Wenn Du <strong>keine</strong> Priorisierung einrichtest, dann werden die Fahrspuren anhand ihrer Wartezeit geschaltet.
     </div>
 
   </li>
-  <li class="media mt-5">
-    <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-kontaktpunkt.png" width="128" height="128" alt="Zählen von Fahrzeugen">
-    <div class="media-body">
+  <li class="d-flex align-items-start mt-5">
+    <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-kontaktpunkt.png" width="128" height="128" alt="Zählen von Fahrzeugen">
+    <div class="flex-grow-1">
       <h5 class="mt-0">Zählen von Fahrzeugen</h5>
       Wenn Du die Anzahl der Fahrzeuge einer Fahrspur mit Kontaktpunkten zählst, bekommst Du die bestmögliche Erkennung für mehrere Fahrzeuge.<br><br>
       Setze für jeder Fahrspur zwei Kontaktpunkte: Den ersten vor der Ampel, der der Fahrspur sagt, dass sich ein weiteres Fahrzeug vor der Ampel befindet. Den zweiten nach der Ampel, der der Fahrspur sagt, dass sich ein Fahrzeug weniger an der Ampel befindet.
     </div>
 
   </li>
-  <li class="media mt-5">
-    <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-signal.png" width="128" height="128" alt="Erkennen von Fahrzeugen am roten Signal">
-    <div class="media-body">
+  <li class="d-flex align-items-start mt-5">
+    <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-signal.png" width="128" height="128" alt="Erkennen von Fahrzeugen am roten Signal">
+    <div class="flex-grow-1">
       <h5 class="mt-0">Erkennen von Fahrzeugen am roten Signal  (nicht empfohlen)</h5>
       Du kannst den Verkehr einer Fahrspur erkennen, wenn sie an einer roten Ampel stehen. Die Funktion erkennt Fahrzeuge, die <strong>zwischen dem Vor- und Hauptsignal einer roten Ampel</strong> stehen - intern wird regelmäßig <code>EEPGetSignalTrainsCount</code> abgefragt.<br>
       Diese Variante wird nicht empfohlen, weil die Fahrzeuge nur zwischen Vor- und Hauptsignal gezählt werden. Ist dieser Abstand zu kurz, werden nicht genügend Fahrzeuge gezählt, ist er zu lang, fahren zu viele Fahrzeuge nach dem Schalten auf rot durch.
     </div>
   </li>
-  <li class="media mt-5">
-    <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-strasse.png" width="128" height="128" alt="Erkennen von Fahrzeugen auf Straße">
-    <div class="media-body">
+  <li class="d-flex align-items-start mt-5">
+    <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-strasse.png" width="128" height="128" alt="Erkennen von Fahrzeugen auf Straße">
+    <div class="flex-grow-1">
       <h5 class="mt-0">Erkennen von Fahrzeugen auf Straße (nicht empfohlen)</h5>
       Du kannst die Ampelschaltung einer Fahrspur priorisieren, indem Du prüfst, ob auf dem Straßenstück vor der Ampel ein Fahrzeug steht - intern wird dazu <code>EEPRegisterRoadTrack</code> verwendet.<br>
       Diese Variante wird nicht empfohlen, weil sie nicht mehrere Fahrzeuge auf einem Straßenstück erkennt und daher die anstehende Fahrzeugschlange nicht korrekt ist.
@@ -84,9 +84,9 @@ Durch das Einbeziehen der Wartezeit wird sichergestellt, dass jede Fahrspur ber�
 
 ![Erkennen mit Tracks](../../assets/tutorial/tutorial3/reservierung-strasse.jpg)
 
-<div class="media mb-5">
-  <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-strasse.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
-  <div class="media-body">
+<div class="d-flex align-items-start mb-5">
+  <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-strasse.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
+  <div class="flex-grow-1">
     Erkenne eine belegte Fahrspur daran, ob sich ein Fahrzeug auf dem Straßenstück vor dem Signal befindet.
   </div>
 </div>
@@ -114,9 +114,9 @@ Durch das Einbeziehen der Wartezeit wird sichergestellt, dass jede Fahrspur ber�
 
 ![Erkennen mit Signal](../../assets/tutorial/tutorial3/reservierung-signal.jpg)
 
-<div class="media mb-5">
-  <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-signal.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
-  <div class="media-body">
+<div class="d-flex align-items-start mb-5">
+  <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-signal.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
+  <div class="flex-grow-1">
     Erkenne eine belegte Fahrspur anhand der Fahrzeuge die am <strong>roten</strong> Signal warten.
   </div>
 </div>
@@ -133,9 +133,9 @@ lane:useSignalForQueue()
 
 ![Erkennen mit Kontaktpunkten](../../assets/tutorial/tutorial3/reservierung-zaehler.jpg)
 
-<div class="media mb-5">
-  <img class="img-thumbnail mr-3" src="../../assets/tutorial/tutorial3/erkennung-kontaktpunkt.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
-  <div class="media-body">
+<div class="d-flex align-items-start mb-5">
+  <img class="img-thumbnail me-3" src="../../assets/tutorial/tutorial3/erkennung-kontaktpunkt.png" width="128" height="128" alt="Priorisierung nach Wartezeit">
+  <div class="flex-grow-1">
     Wenn Du die Anzahl der Fahrzeuge einer Fahrspur mit Kontaktpunkten zählst, bekommst Du die bestmögliche Erkennung für mehrere Fahrzeuge.
   </div>
 </div>

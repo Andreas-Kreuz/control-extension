@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { useDynamicRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import TimeDesc from '../model/TimeDesc';
 import { RuntimeStatisticsDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeDto } from '@ce/web-shared';
 
@@ -46,7 +46,7 @@ function useStatistics() {
   const [moduleInitTimes, setModuleInitTimes] = useState<TimeDesc[]>([]);
   const [controllerUpdateTimes, setControllerUpdateTimes] = useState<TimeDesc[][]>([]);
 
-  useDynamicRoomHandler(
+  useDomainRoomHandler(
     RuntimeStatisticsRoom,
     'RuntimeStatisticsRoom',
     (payload: string) => {

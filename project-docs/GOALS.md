@@ -71,6 +71,7 @@ siehe [lua/LUA/ce/mods/road/README.md](../lua/LUA/ce/mods/road/README.md)
 - [x] Moduloptionen speichern in der Web App
 - [x] Manuelle Ampelsteuerung in der Web App
 - [x] Kameras für Kreuzungen speichern
+- [ ] <https://de.wikipedia.org/wiki/Signalzeitenplan> / <https://de.wikipedia.org/wiki/Signallageplan> umsetzen
 
 ## Ziele für das ÖPNV-Modul `ce/transit`
 

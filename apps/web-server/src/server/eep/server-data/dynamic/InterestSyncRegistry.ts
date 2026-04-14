@@ -7,7 +7,7 @@ function interestKeyOf(ceType: string, id: string): string {
   return ceType + '|' + id;
 }
 
-export default class DynamicInterestRegistry {
+export default class InterestSyncRegistry {
   private tokenToInterest = new Map<string, InterestDescriptor>();
   private tokenTimers = new Map<string, NodeJS.Timeout>();
   private interestCounts = new Map<string, number>();
@@ -30,7 +30,7 @@ export default class DynamicInterestRegistry {
     this.interestCounts.set(key, count + 1);
 
     if (count === 0) {
-      this.queueCommand('HubDynamicData.startUpdatesFor|' + ceType + '|' + id);
+      this.queueCommand('HubInterestSync.startSyncFor|' + ceType + '|' + id);
     }
   }
 
@@ -50,7 +50,7 @@ export default class DynamicInterestRegistry {
     const count = this.interestCounts.get(key) ?? 0;
     if (count <= 1) {
       this.interestCounts.delete(key);
-      this.queueCommand('HubDynamicData.stopUpdatesFor|' + existing.ceType + '|' + existing.id);
+      this.queueCommand('HubInterestSync.stopSyncFor|' + existing.ceType + '|' + existing.id);
     } else {
       this.interestCounts.set(key, count - 1);
     }

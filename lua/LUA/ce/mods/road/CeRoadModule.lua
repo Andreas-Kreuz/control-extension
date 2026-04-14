@@ -8,8 +8,18 @@ CeRoadModule.name = "ce.mods.road.CeRoadModule"
 CeRoadModule.CeTypes = require("ce.mods.road.data.RoadCeTypes")
 local Intersection = require("ce.mods.road.Intersection")
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+local RoadOptionDefaults = require("ce.mods.road.options.RoadOptionDefaults")
+local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
+local TableUtils = require("ce.hub.util.TableUtils")
 
 function CeRoadModule.loadSettingsFromSlot(eepSaveId) return IntersectionSettings.loadSettingsFromSlot(eepSaveId) end
+
+function CeRoadModule.setOptions(options)
+    local mergedOptions = TableUtils.deepMerge(RoadOptionDefaults.create(),
+                                               RoadOptionsRegistry.copyTable(options or {}))
+    RoadOptionsRegistry.setOptions(mergedOptions)
+    return CeRoadModule
+end
 
 function CeRoadModule.init()
     if not CeRoadModule.enabled or initialized then return end

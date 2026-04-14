@@ -2,6 +2,7 @@ import { IntersectionLuaDto } from '../../ce/dto/roads/IntersectionLuaDto';
 import { IntersectionLaneLuaDto } from '../../ce/dto/roads/IntersectionLaneLuaDto';
 import { IntersectionSwitchingLuaDto } from '../../ce/dto/roads/IntersectionSwitchingLuaDto';
 import { IntersectionTrafficLightLuaDto } from '../../ce/dto/roads/IntersectionTrafficLightLuaDto';
+import { SettingLuaDto } from '../../ce/dto/settings/SettingLuaDto';
 import { TrafficLightModelLuaDto } from '../../ce/dto/traffic-light-models/TrafficLightModelLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import {
@@ -10,6 +11,7 @@ import {
   IntersectionLaneDto,
   IntersectionSwitchingDto,
   IntersectionTrafficLightDto,
+  SettingDto,
   TrafficLightModelDto,
 } from '@ce/web-shared';
 
@@ -20,6 +22,7 @@ export default class RoadSelector {
   private intersectionSwitchings: Record<string, IntersectionSwitchingDto> = {};
   private intersectionTrafficLights: Record<string, IntersectionTrafficLightDto> = {};
   private trafficLightModels: Record<string, TrafficLightModelDto> = {};
+  private moduleSettings: Record<string, SettingDto<unknown>> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState) {
@@ -38,7 +41,7 @@ export default class RoadSelector {
         nextSwitching: dto.nextSwitching,
         ready: dto.ready,
         timeForGreen: dto.timeForGreen,
-        staticCams: dto.staticCams,
+        staticCams: dto.staticCams ?? [],
       }),
     );
 
@@ -103,6 +106,21 @@ export default class RoadSelector {
         positionOffBlinking: dto.positionOffBlinking,
       }),
     );
+
+    this.moduleSettings = {};
+    if (state.ceTypes[CeTypes.RoadModuleSetting]) {
+      const dict = state.ceTypes[CeTypes.RoadModuleSetting] as unknown as Record<string, SettingLuaDto<unknown>>;
+      Object.values(dict).forEach((dto) => {
+        this.moduleSettings[dto.name] = {
+          name: dto.name,
+          category: dto.category,
+          description: dto.description,
+          eepFunction: dto.eepFunction,
+          type: dto.type,
+          value: dto.value,
+        };
+      });
+    }
   }
 
   private mapCeType<TLua, TDto>(
@@ -115,7 +133,7 @@ export default class RoadSelector {
     const result: Record<string, TDto> = {};
     Object.values(dict).forEach((dto: TLua) => {
       const mapped = mapper(dto);
-      result[(mapped as { id: string }).id] = mapped;
+      result[String((mapped as { id: string | number }).id)] = mapped;
     });
     return result;
   }
@@ -123,6 +141,13 @@ export default class RoadSelector {
   getIntersections = (): Record<string, IntersectionDto> => this.intersections;
   getIntersectionLanes = (): Record<string, IntersectionLaneDto> => this.intersectionLanes;
   getIntersectionSwitchings = (): Record<string, IntersectionSwitchingDto> => this.intersectionSwitchings;
+  getIntersectionSwitching = (id: string): IntersectionSwitchingDto | undefined => this.intersectionSwitchings[id];
   getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightDto> => this.intersectionTrafficLights;
+  getIntersectionTrafficLight = (id: string): IntersectionTrafficLightDto | undefined => this.intersectionTrafficLights[id];
+  getIntersection = (id: string): IntersectionDto | undefined => this.intersections[id];
+  getIntersectionLane = (id: string): IntersectionLaneDto | undefined => this.intersectionLanes[id];
   getTrafficLightModels = (): Record<string, TrafficLightModelDto> => this.trafficLightModels;
+  getTrafficLightModel = (id: string): TrafficLightModelDto | undefined => this.trafficLightModels[id];
+  getModuleSettings = (): Record<string, SettingDto<unknown>> => this.moduleSettings;
+  getModuleSetting = (id: string): SettingDto<unknown> | undefined => this.moduleSettings[id];
 }

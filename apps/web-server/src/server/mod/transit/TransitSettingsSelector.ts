@@ -32,4 +32,6 @@ export default class TransitSettingsSelector {
   }
 
   getSettings = () => this.settings;
+  getSetting = (name: string): SettingDto<unknown> | undefined =>
+    this.settings.settings.find((setting) => setting.name === name);
 }

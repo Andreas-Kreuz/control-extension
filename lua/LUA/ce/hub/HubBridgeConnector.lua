@@ -2,7 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.HubBridgeConnector ...") end
 local HubBridgeConnector = {}
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
-local DynamicUpdateRegistry = require("ce.hub.data.DynamicUpdateRegistry")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 local function registerStatePublisher(pub, aliases)
@@ -49,12 +49,12 @@ end
 
 function HubBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand(
-        "HubDynamicData.startUpdatesFor",
-        DynamicUpdateRegistry.startUpdatesFor
+        "HubInterestSync.startSyncFor",
+        InterestSyncRegistry.startSyncFor
     )
     ServerExchangeCoordinator.registerAllowedCommand(
-        "HubDynamicData.stopUpdatesFor",
-        DynamicUpdateRegistry.stopUpdatesFor
+        "HubInterestSync.stopSyncFor",
+        InterestSyncRegistry.stopSyncFor
     )
 end
 

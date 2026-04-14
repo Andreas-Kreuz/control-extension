@@ -18,7 +18,7 @@ if (jekyllClean.error || jekyllClean.status !== 0) {
 }
 
 const docsArtifacts = [
-  'pages/docs/_site',
+  '_site',
   'pages/.sass-cache',
   '.sass-cache',
   ...readdirSync(repoRoot).filter((entry) => entry.startsWith('.jekyll')),

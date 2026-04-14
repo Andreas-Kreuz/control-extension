@@ -1,6 +1,6 @@
 ﻿import { TrackType, TrainListDto, TrainListRoom } from '@ce/web-shared';
 import { createContext, Dispatch, ReactNode, useContext, useReducer } from 'react';
-import { useDynamicRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import useDebug from '../../../shared/socket/useDebug';
 
 export interface State {
@@ -44,7 +44,7 @@ export const TrainProvider = (props: { children: ReactNode }) => {
     const trains = Object.values(data).sort((a, b) => a.id.localeCompare(b.id, 'de'));
     dispatch({ type: 'trains updated', trains: trains });
   };
-  useDynamicRoomHandler(TrainListRoom, state.trackType, trainDispatcher);
+  useDomainRoomHandler(TrainListRoom, state.trackType, trainDispatcher);
 
   return (
     <TrainContext.Provider value={state}>

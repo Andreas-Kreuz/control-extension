@@ -147,7 +147,7 @@ jobs:
           name: ${{ inputs.release_tag }}
           draft: true
           body: |
-            ## Neue Funtionen
+            ## Neue Funktionen
 
             - ⭐
 
@@ -156,9 +156,8 @@ jobs:
             - 🐞
 
             ## Installationspakete (siehe Assests)
-
-            - **`${{ steps.assets.outputs.eep_package_name }}`** – Haupt-Installationspaket der Control Extension für EEP. Enthält Server, Lua-Hub, Data Bridge und Web-App.
-            - **`${{ steps.assets.outputs.compat_package_name }}`** – Kompatibilitätsschicht für bestehende Anlagen, die auf der Lua-Bibliothek von Andreas Kreuz basieren.
+            - **`${{ steps.assets.outputs.eep_package_name }}`** – Haupt-Installationspaket der Control Extension für EEP. Enthält Server, Lua-Hub, Data Bridge und Web-App. - Wird benötigt.
+            - `${{ steps.assets.outputs.compat_package_name }}` – Kompatibilitätsschicht für bestehende Anlagen, die auf der Lua-Bibliothek von Andreas Kreuz basieren - nur installieren, wenn du weißt, was du tust.
 
             Weitere Informationen und Dokumentation: https://andreas-kreuz.github.io/control-extension/
           files: |

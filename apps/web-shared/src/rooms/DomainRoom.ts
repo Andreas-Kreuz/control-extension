@@ -1,4 +1,4 @@
-export class DynamicRoom {
+export class DomainRoom {
   private dataPrefix: string;
   private dataPostfix: string;
   private roomPrefix: string;
@@ -40,4 +40,4 @@ export class DynamicRoom {
   }
 }
 
-export default DynamicRoom;
+export default DomainRoom;

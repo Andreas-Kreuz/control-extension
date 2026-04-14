@@ -1,4 +1,4 @@
-export { DynamicRoom } from './DynamicRoom';
+export { DomainRoom } from './DomainRoom';
 export {
   ApiDataRoom,
   TrainListRoom,
@@ -9,4 +9,4 @@ export {
   TransitStationListRoom,
   TransitStationDetailsRoom,
   TransitSettingsRoom,
-} from './DynamicRooms';
+} from './DomainRoomRegistry';

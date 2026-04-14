@@ -42,3 +42,13 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
   - Dafür wird ein eigener Installer bereitgestellt: `ak-compat-layer-for-control-extension-<VERSION>-installer.zip`
   - `[Using_ak_compat_layer.md](/lua/LUA/ce/Using_ak_compat_layer.md)` beschreibt, wie man bisherige Anlagen mit Ampelsteuerung weiterverwenden kann.
   - Es wird trotzdem mittelfristig empfohlen, auf die neue Struktur umzustellen.
+
+## **Control Extension v0.0.4** Vorschauversion
+
+### Neu
+
+- ⭐ Haltestellenanzeige für Linien
+
+### Dokumentation
+
+- 📖 Neue App Ansicht auf der Dokumentationsseite
