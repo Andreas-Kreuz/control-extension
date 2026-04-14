@@ -85,121 +85,116 @@ img: '/assets/headers/SourceCode.png'
 </span>
 
 <div class="showcase-carousel-bleed">
-  <div
-    id="showcaseCarousel"
-    class="carousel slide showcase-carousel"
-    data-bs-ride="carousel"
-    data-bs-interval="false"
-  >
-  <div class="carousel-indicators showcase-carousel-indicators">
+  <div id="showcaseCarousel" class="carousel slide showcase-carousel" data-bs-ride="carousel" data-bs-interval="false">
+    <div class="carousel-indicators showcase-carousel-indicators">
+      <button
+        type="button"
+        data-bs-target="#showcaseCarousel"
+        data-bs-slide-to="0"
+        class="active"
+        aria-current="true"
+        aria-label="Karte 1"
+      ></button>
+      <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="1" aria-label="Karte 2"></button>
+      <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="2" aria-label="Karte 3"></button>
+      <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="3" aria-label="Karte 4"></button>
+    </div>
+
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <div class="showcase-panel">
+          <div class="showcase-card">
+            <div class="showcase-kicker">Fahrzeuge</div>
+            <h2>Fahrzeugverbände im Blick</h2>
+            <p class="lead">
+              Verfolge die Eigenschaftsänderungen deiner Fahrzeuge oder setze die Kamera direkt auf ein Fahrzeug.
+            </p>
+          </div>
+          <div class="showcase-image">
+            <div class="app-in-phone">
+              <img
+                src="{{ site.baseurl }}/assets/generated/trains-acros-schweiger-hb3--detail--iphone-xr.png"
+                alt="Train view from the web app captured on an iPhone XR viewport"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <div class="showcase-panel">
+          <div class="showcase-card">
+            <div class="showcase-kicker">Kreuzungen</div>
+            <h2>Schalte Ampelphasen</h2>
+            <p class="lead">
+              Schau dir an, welche Ampelphase grade aktiv ist, schalte selbst oder springe zu den für diese Kreuzung
+              hinterlegten Kameras.
+            </p>
+          </div>
+          <div class="showcase-image">
+            <div class="app-in-phone">
+              <img
+                src="{{ site.baseurl }}/assets/generated/road-1--detail--iphone-xr.png"
+                alt="Intersection detail from the web app captured on an iPhone XR viewport"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <div class="showcase-panel">
+          <div class="showcase-card">
+            <div class="showcase-kicker">ÖPNV-Linien</div>
+            <h2>Fahrplaninformationen</h2>
+            <p class="lead">
+              Zeige die Haltestellen deiner Bus und Tramlinien an. Du kannst beide Richtungen frei gestalten oder eine
+              Ringlinie erstellen.
+            </p>
+          </div>
+          <div class="showcase-image">
+            <div class="app-in-phone">
+              <img
+                src="{{ site.baseurl }}/assets/generated/transit-lines-4--detail--iphone-xr.png"
+                alt="Transit line detail from the web app captured on an iPhone XR viewport"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <div class="showcase-panel">
+          <div class="showcase-card">
+            <div class="showcase-kicker">ÖPNV-Haltestellen</div>
+            <h2>Haltestellen-Information</h2>
+            <p class="lead">
+              Zeige an, an welchem Steig die nächsten Fahrzeuge der einzelnen Bus- oder Tram-Linien abfahren.
+            </p>
+          </div>
+          <div class="showcase-image">
+            <div class="app-in-phone">
+              <img
+                src="{{ site.baseurl }}/assets/generated/transit-stations-zentralforum--detail--iphone-xr.png"
+                alt="Transit station detail from the web app captured on an iPhone XR viewport"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <button
+      class="carousel-control-prev showcase-carousel-control showcase-carousel-control-prev"
       type="button"
-      data-bs-target="#showcaseCarousel"
-      data-bs-slide-to="0"
-      class="active"
-      aria-current="true"
-      aria-label="Karte 1"
-    ></button>
-    <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="1" aria-label="Karte 2"></button>
-    <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="2" aria-label="Karte 3"></button>
-    <button type="button" data-bs-target="#showcaseCarousel" data-bs-slide-to="3" aria-label="Karte 4"></button>
-  </div>
-
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <div class="showcase-panel">
-        <div class="showcase-card">
-          <div class="showcase-kicker">Fahrzeuge</div>
-          <h2>Fahrzeugverbände im Blick</h2>
-          <p class="lead">
-            Verfolge die Eigenschaftsänderungen deiner Fahrzeuge oder setze die Kamera direkt auf ein Fahrzeug.
-          </p>
-        </div>
-        <div class="showcase-image">
-          <div class="app-in-phone">
-            <img
-              src="{{ site.baseurl }}/assets/generated/trains-acros-schweiger-hb3--detail--iphone-xr.png"
-              alt="Train view from the web app captured on an iPhone XR viewport"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="carousel-item">
-      <div class="showcase-panel">
-        <div class="showcase-card">
-          <div class="showcase-kicker">Kreuzungen</div>
-          <h2>Schalte Ampelphasen</h2>
-          <p class="lead">
-            Schau dir an, welche Ampelphase grade aktiv ist, schalte selbst oder springe zu den für diese Kreuzung
-            hinterlegten Kameras.
-          </p>
-        </div>
-        <div class="showcase-image">
-          <div class="app-in-phone">
-            <img
-              src="{{ site.baseurl }}/assets/generated/road-1--detail--iphone-xr.png"
-              alt="Intersection detail from the web app captured on an iPhone XR viewport"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="carousel-item">
-      <div class="showcase-panel">
-        <div class="showcase-card">
-          <div class="showcase-kicker">ÖPNV-Linien</div>
-          <h2>Fahrplaninformationen</h2>
-          <p class="lead">
-            Zeige die Haltestellen deiner Bus und Tramlinien an. Du kannst beide Richtungen frei gestalten oder einer
-            Ringlinie erstellen.
-          </p>
-        </div>
-        <div class="showcase-image">
-          <div class="app-in-phone">
-            <img
-              src="{{ site.baseurl }}/assets/generated/transit-lines-4--detail--iphone-xr.png"
-              alt="Transit line detail from the web app captured on an iPhone XR viewport"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="carousel-item">
-      <div class="showcase-panel">
-        <div class="showcase-card">
-          <div class="showcase-kicker">ÖPNV-Haltestellen</div>
-          <h2>Haltestellen-Information</h2>
-          <p class="lead">
-            Zeige an, an welchem Steig die nächsten Fahrzeuge der einzelnen Bus- oder Tram-Linien abfahren.
-          </p>
-        </div>
-        <div class="showcase-image">
-          <div class="app-in-phone">
-            <img
-              src="{{ site.baseurl }}/assets/generated/transit-stations-zentralforum--detail--iphone-xr.png"
-              alt="Transit station detail from the web app captured on an iPhone XR viewport"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <button
-    class="carousel-control-prev showcase-carousel-control showcase-carousel-control-prev"
-    type="button"
-    aria-label="Vorherige Karte"
-    onclick="
-      showcaseCarouselPrev();
-      return false;
-    "
-  >
-    <span class="showcase-carousel-control-icon" aria-hidden="true"></span>
-  </button>
+      aria-label="Vorherige Karte"
+      onclick="
+        showcaseCarouselPrev();
+        return false;
+      "
+    >
+      <span class="showcase-carousel-control-icon" aria-hidden="true"></span>
+    </button>
     <button
       class="carousel-control-next showcase-carousel-control showcase-carousel-control-next"
       type="button"
