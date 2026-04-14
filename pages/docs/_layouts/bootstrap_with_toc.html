@@ -3,15 +3,16 @@
   <head>
     {% include head-content.html %}
     <style>
-      .jumbotron {
+      .page-hero {
         background-color: transparent;
       }
     </style>
   </head>
   <body
-    data-spy="scroll"
-    data-target="#navbar-example2"
-    data-offset="10"
+    data-bs-spy="scroll"
+    data-bs-target="#navbar-example2"
+    data-bs-offset="10"
+    tabindex="0"
     style="background:
    url('{{ site.baseurl }}/assets/img/landing-page.jpg');
    background-size: 50rem;
@@ -24,7 +25,7 @@
       <div class="container">
         <div class="row">
           <div class="col col-sm-8 col-md-6 m-0">
-            <div class="jumbotron jumbotron-fluid">
+            <div class="page-hero py-5">
               <h1 class="display-4">{{ page.title }}</h1>
               {% if page.subtitle %}
               <p class="lead">{{ page.subtitle }}</p>
