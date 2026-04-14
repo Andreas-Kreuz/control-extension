@@ -8,6 +8,19 @@ body.carousel-page {
   overflow: hidden;
 }
 
+.showcase-carousel-bleed {
+  left: 50%;
+  margin-left: -50vw;
+  position: relative;
+  width: 100vw;
+}
+
+.showcase-carousel-bleed .showcase-carousel {
+  margin: 0;
+  max-width: none;
+  width: 100vw;
+}
+
 .showcase-panel {
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -195,6 +208,16 @@ body.carousel-page {
 @media (max-width: 767.98px) {
   body.carousel-page {
     overflow: auto;
+  }
+
+  .showcase-carousel-bleed {
+    left: 0;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .showcase-carousel-bleed .showcase-carousel {
+    width: 100%;
   }
 
   .showcase-panel {
