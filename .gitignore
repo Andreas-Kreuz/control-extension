@@ -101,9 +101,10 @@ desktop.ini
 _site
 .sass-cache
 .jekyll*
-/pages/docs/_site
+/pages/_site
 /pages/.sass-cache
 /pages/.jekyll*
+/pages/assets/generated/
 /pages/AGENTS.md
 /pages/ARCHITECTURE.md
 /pages/CHANGELOG.md

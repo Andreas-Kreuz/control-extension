@@ -14,6 +14,42 @@ const getClosestSelector = (size: string) => {
   return '.MuiListItem-root';
 };
 
+export const prepareForScreenshot = () => {
+  cy.document().then((document) => {
+    const existingStyle = document.getElementById('screenshot-viewport-styles');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    const style = document.createElement('style');
+    style.id = 'screenshot-viewport-styles';
+    style.textContent = `
+      html {
+        scrollbar-width: none;
+        overflow: hidden;
+      }
+
+      body {
+        -ms-overflow-style: none;
+        overflow: hidden;
+      }
+
+      html,
+      body,
+      #root {
+        max-width: 100vw;
+      }
+
+      ::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+  });
+};
+
 export const createScreenshots = (
   tests: (size: string, closestSelector: string, simulator: EepSimulator) => void,
   screenShotsizes?: string[][],

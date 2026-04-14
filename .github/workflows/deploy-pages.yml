@@ -23,6 +23,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -32,6 +44,9 @@ jobs:
           ruby-version: '3.3'
           bundler-cache: true
           working-directory: pages
+
+      - name: Generate Pages screenshots
+        run: node ./scripts/run-update-doc-assets.mjs
 
       - name: Build site
         env:

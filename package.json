@@ -20,7 +20,7 @@
     "clean:lua": "node ./scripts/clean-lua.mjs",
     "clean:web": "yarn workspace @ce/web-app run clean && yarn workspace @ce/web-shared run clean && yarn workspace @ce/web-server run clean",
     "dev:app": "yarn workspace @ce/web-shared run build && node ./scripts/run-parallel.mjs \"yarn workspace @ce/web-server run dev\" \"yarn workspace @ce/web-app run dev\"",
-    "dev:docs": "node ./scripts/run-jekyll.mjs serve --livereload",
+    "dev:docs": "node ./scripts/run-update-doc-assets.mjs && node ./scripts/run-jekyll.mjs serve --livereload",
     "dev:storybook": "yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run dev:storybook",
     "dev:docs:updatepngs": "node ./scripts/run-update-doc-assets.mjs",
     "format": "yarn run format:apps && yarn run format:lua",

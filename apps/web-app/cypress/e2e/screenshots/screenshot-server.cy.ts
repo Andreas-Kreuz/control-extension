@@ -1,12 +1,12 @@
 import EepSimulator from '../../test-helpers/eep-simulator';
-import { createScreenshots } from './createScreenshots';
+import { createScreenshots, prepareForScreenshot } from './createScreenshots';
+import { generatedScreenshotPath } from './generatedScreenshotPath';
 
 export const screenShotsizes = [['ipad-2', 'landscape']];
 
 describe('Server Screenshots', () => createScreenshots(tests, screenShotsizes));
 
 function tests(size: string, _closestSelector: string, simulator: EepSimulator) {
-  const path = `assets/tutorial/eep-web-installation`;
   const projectRoot = Cypress.config('projectRoot');
   const validDir = `${projectRoot}/cypress/io`;
   const emptyDir = `${projectRoot}/cypress/io-empty`;
@@ -65,7 +65,8 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.contains('Bevor es losgeht, muss Du nur noch den Ordner von EEP angeben.');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
       waitForScreenshotVisualState();
-      cy.screenshot(`${path}/02-server-verzeichnis-falsch`);
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/server', '02-server-verzeichnis-falsch'));
     });
 
     it('/ server emptydir ' + size, () => {
@@ -75,7 +76,8 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
       cy.contains('Es wurden keine Daten von EEP gesammelt');
       waitForScreenshotVisualState();
-      cy.screenshot(`${path}/02-server-verzeichnis-ok`);
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/server', '02-server-verzeichnis-ok'));
     });
 
     it('/ server ok ' + size, () => {
@@ -89,7 +91,8 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       cy.contains('aus 2 Events');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');
       waitForScreenshotVisualState();
-      cy.screenshot(`${path}/02-server-verzeichnis-ok-daten-da`);
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/server', '02-server-verzeichnis-ok-daten-da'));
     });
   });
 }

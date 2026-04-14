@@ -1,5 +1,6 @@
 import EepSimulator from '../../test-helpers/eep-simulator';
-import { createScreenshots } from './createScreenshots';
+import { createScreenshots, prepareForScreenshot } from './createScreenshots';
+import { generatedScreenshotPath } from './generatedScreenshotPath';
 
 export const screenShotsizes = [['ipad-2', 'landscape']];
 
@@ -68,7 +69,6 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
   beforeEach(() => {});
 
   describe('screenshot', () => {
-    const path = `assets/doc/${size}-home`;
     it('/ log open ' + size, () => {
       simulator.reset();
       writeLogLines(initialLogLines);
@@ -77,12 +77,14 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       waitForLogLines(initialLogLines.length, initialLogLines[initialLogLines.length - 1]);
       writeLogLines(appendedLogLines);
       waitForLogLines(initialLogLines.length + appendedLogLines.length, appendedLogLines[appendedLogLines.length - 1]);
-      cy.screenshot(`${path}-log`);
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/old', 'log-open', size));
     });
     it('/ log closed ' + size, () => {
       cy.visit('/old');
       waitForHome();
-      cy.screenshot(`${path}-log-closed`);
+      prepareForScreenshot();
+      cy.screenshot(generatedScreenshotPath('/old', 'log-closed', size));
     });
   });
 }
