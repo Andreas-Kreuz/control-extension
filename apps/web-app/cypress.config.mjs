@@ -33,6 +33,14 @@ export default defineConfig({
     baseUrl: 'http://localhost:3001',
     testIsolation: false,
     setupNodeEvents(on) {
+      on('before:browser:launch', (browser = {}, launchOptions) => {
+        if (browser.family === 'chromium' || browser.name === 'electron') {
+          launchOptions.args.push('--force-device-scale-factor=2');
+        }
+
+        return launchOptions;
+      });
+
       on('task', {
         deleteEepLogFile(fileName) {
           rm(fileName, () => {});
