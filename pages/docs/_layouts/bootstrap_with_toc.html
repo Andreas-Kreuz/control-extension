@@ -8,21 +8,20 @@
       }
     </style>
   </head>
-  <body
-    data-bs-spy="scroll"
-    data-bs-target="#navbar-example2"
-    data-bs-offset="10"
-    tabindex="0"
-    style="background:
-   url('{{ site.baseurl }}/assets/img/landing-page.jpg');
-   background-size: 50rem;
-   background-position: right -18rem;
-   background-repeat: no-repeat;
-   "
-  >
+  <body>
     {% include navbar.html %}
-    <div class="container-fluid">
-      <div class="container">
+    <div class="container-fluid position-relative">
+      <div
+        class="d-md-block position-absolute top-0 start-0 w-100 h-100"
+        style="background:
+        url('{{ site.baseurl }}/assets/img/landing-page.jpg');
+        background-size: 50rem;
+        background-position: right -22rem;
+        background-repeat: no-repeat;
+        "
+      ></div>
+      <div class="d-md-none" style="height: 200px; background-color: transparent"></div>
+      <div class="container position-relative">
         <div class="row">
           <div class="col col-sm-8 col-md-6 m-0">
             <div class="page-hero py-5">
@@ -35,8 +34,29 @@
         </div>
       </div>
 
-      {{ content }}
+      <div class="position-relative">{{ content }}</div>
     </div>
     {% include footer.html %} {% include scripts.html %}
+    <script>
+      (function () {
+        var originalHash = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : '';
+
+        document
+          .querySelectorAll('article h1[id], article h2[id], article h3[id], article h4[id]')
+          .forEach(function (heading) {
+            if (heading.id.indexOf('section-') !== 0) {
+              heading.id = 'section-' + heading.id;
+            }
+          });
+
+        if (originalHash && originalHash.indexOf('section-') !== 0) {
+          var renamedTarget = document.getElementById('section-' + originalHash);
+          if (renamedTarget) {
+            renamedTarget.scrollIntoView();
+            window.history.replaceState(null, '', '#section-' + originalHash);
+          }
+        }
+      })();
+    </script>
   </body>
 </html>

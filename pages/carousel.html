@@ -122,108 +122,21 @@ published: true
       <button
         class="carousel-control-prev showcase-carousel-control showcase-carousel-control-prev"
         type="button"
+        data-bs-target="#showcaseCarousel"
+        data-bs-slide="prev"
         aria-label="Vorherige Karte"
-        onclick="
-          showcaseCarouselPrev();
-          return false;
-        "
       >
         <span class="showcase-carousel-control-icon" aria-hidden="true"></span>
       </button>
       <button
         class="carousel-control-next showcase-carousel-control showcase-carousel-control-next"
         type="button"
+        data-bs-target="#showcaseCarousel"
+        data-bs-slide="next"
         aria-label="Nächste Karte"
-        onclick="
-          showcaseCarouselNext();
-          return false;
-        "
       >
         <span class="showcase-carousel-control-icon" aria-hidden="true"></span>
       </button>
     </div>
-    <script>
-      (function initShowcaseCarousel() {
-        var items = [];
-        var indicatorButtons = [];
-        var activeIndex = 0;
-
-        function showSlide(index) {
-          if (!items.length) {
-            return;
-          }
-
-          activeIndex = (index + items.length) % items.length;
-
-          items.forEach(function (item, itemIndex) {
-            item.classList.toggle('active', itemIndex === activeIndex);
-          });
-
-          indicatorButtons.forEach(function (button, buttonIndex) {
-            var isActive = buttonIndex === activeIndex;
-            button.classList.toggle('active', isActive);
-            if (isActive) {
-              button.setAttribute('aria-current', 'true');
-            } else {
-              button.removeAttribute('aria-current');
-            }
-          });
-        }
-
-        window.showcaseCarouselPrev = function () {
-          showSlide(activeIndex - 1);
-        };
-
-        window.showcaseCarouselNext = function () {
-          showSlide(activeIndex + 1);
-        };
-
-        window.showcaseCarouselGoTo = function (index) {
-          showSlide(index);
-        };
-
-        function setup() {
-          var carouselElement = document.getElementById('showcaseCarousel');
-          if (!carouselElement) {
-            return false;
-          }
-
-          items = Array.prototype.slice.call(carouselElement.querySelectorAll('.carousel-item'));
-          indicatorButtons = Array.prototype.slice.call(
-            carouselElement.querySelectorAll('.showcase-carousel-indicators [data-bs-slide-to]'),
-          );
-          activeIndex = items.findIndex(function (item) {
-            return item.classList.contains('active');
-          });
-
-          if (!items.length) {
-            return false;
-          }
-
-          if (activeIndex < 0) {
-            activeIndex = 0;
-          }
-
-          indicatorButtons.forEach(function (button) {
-            if (button.dataset.boundCarousel) {
-              return;
-            }
-
-            button.dataset.boundCarousel = 'true';
-            button.addEventListener('click', function (event) {
-              event.preventDefault();
-              window.showcaseCarouselGoTo(Number(button.getAttribute('data-bs-slide-to')));
-            });
-          });
-
-          showSlide(activeIndex);
-          return true;
-        }
-
-        if (!setup()) {
-          window.addEventListener('load', setup, { once: true });
-        }
-      })();
-    </script>
   </body>
 </html>

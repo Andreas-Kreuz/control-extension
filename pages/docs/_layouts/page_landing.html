@@ -8,25 +8,30 @@
       }
     </style>
   </head>
-  <body
-    style="background:
-    url('{{ site.baseurl }}/assets/img/landing-page.jpg');
-    background-size: 50rem;
-    background-position: right -18rem;
-    background-repeat: no-repeat;
-    "
-  >
+  <body>
     {% include navbar.html %}
-    <div class="container">
-      <div class="row">
-        <div class="col col-sm-8 col-md-6 m-0">
-          <div class="page-hero py-5">
-            <h1 class="display-4">{{ page.title }}</h1>
-            <p class="lead">{{ page.subtitle }}</p>
+    <div class="container-fluid position-relative overflow-hidden">
+      <div
+        class="d-md-block position-absolute top-0 start-0 w-100 h-100"
+        style="background:
+        url('{{ site.baseurl }}/assets/img/landing-page.jpg');
+        background-size: 50rem;
+        background-position: right -22rem;
+        background-repeat: no-repeat;
+        "
+      ></div>
+      <div class="d-md-none" style="height: 10rem; background-color: transparent"></div>
+      <div class="container position-relative">
+        <div class="row">
+          <div class="col col-sm-8 col-md-6 m-0">
+            <div class="page-hero py-5">
+              <h1 class="display-4">{{ page.title }}</h1>
+              <p class="lead">{{ page.subtitle }}</p>
+            </div>
           </div>
         </div>
+        {{ content }}
       </div>
-      {{ content }}
     </div>
     {% include footer.html %} {% include scripts.html %}
   </body>
