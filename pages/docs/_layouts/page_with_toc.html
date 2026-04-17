@@ -2,18 +2,20 @@
 layout: bootstrap_with_toc
 ---
 
-<article>
-  <div class="row">
-    <div class="col-lg-3 order-lg-12 br-lg-0 pe-lg-0">
-      <aside id="my-toc-navbar" class="toc-right toc-sidebar">
-        <nav class="toc-panel" aria-labelledby="toc-title">
-          <div id="toc-title" class="toc-title">Inhalt</div>
-          <div class="toc-list">
-            {% include toc-bootstrap-nav-list.html html=content h_max=4 %}
-          </div>
-        </nav>
-      </aside>
+<article class="container position-relative">
+  <div class="row g-4">
+    <div class="col-12 col-lg-3 order-1 order-lg-2">
+      <div class="sticky-lg-top">
+        <aside id="my-toc-navbar" class="toc-sidebar overflow-y-auto ps-3 py-3 mb-4 mb-lg-0 border-start">
+          <nav aria-labelledby="toc-title">
+            <div id="toc-title" class="toc-title">Inhalt</div>
+            <div class="toc-list">
+              {% include toc-bootstrap-nav-list.html html=content h_max=4 %}
+            </div>
+          </nav>
+        </aside>
+      </div>
     </div>
-    <div class="col-lg-9 order-lg-1">{{ content }}</div>
+    <div class="col-12 col-lg-9 order-2 order-lg-1">{{ content }}</div>
   </div>
 </article>
