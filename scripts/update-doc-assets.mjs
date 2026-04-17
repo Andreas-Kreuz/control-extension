@@ -11,6 +11,7 @@ const docsRoot = path.join(pagesRoot, 'docs');
 const generatedAssetsRoot = path.join(pagesRoot, 'assets', 'generated');
 const screenshotsRoot = path.join(repoRoot, 'apps', 'web-app', 'cypress', 'screenshots');
 const generatedAssetUrlPattern = /\/assets\/generated\/([a-z0-9][a-z0-9.-]*\.png)/g;
+const force = process.argv.includes('--force');
 
 async function collectFiles(directoryPath, predicate) {
   const entries = await readdir(directoryPath, { withFileTypes: true });
@@ -70,8 +71,12 @@ async function collectReferencedGeneratedAssets() {
 
 async function collectGeneratedScreenshotSources() {
   if (!existsSync(screenshotsRoot)) {
-    console.error(`Screenshot source directory does not exist: ${screenshotsRoot}`);
-    process.exit(1);
+    if (force) {
+      console.error(`Screenshot source directory does not exist: ${screenshotsRoot}`);
+      process.exit(1);
+    }
+
+    return new Map();
   }
 
   const screenshotFiles = await collectFiles(screenshotsRoot, isGeneratedScreenshotSource);
@@ -92,7 +97,10 @@ async function collectGeneratedScreenshotSources() {
 }
 
 async function prepareGeneratedAssetsDirectory() {
-  await rm(generatedAssetsRoot, { recursive: true, force: true });
+  if (force) {
+    await rm(generatedAssetsRoot, { recursive: true, force: true });
+  }
+
   await mkdir(generatedAssetsRoot, { recursive: true });
 }
 
@@ -103,16 +111,23 @@ async function main() {
   await prepareGeneratedAssetsDirectory();
 
   const copiedFiles = [];
+  const keptFiles = [];
 
   for (const assetUrl of referencedUrls) {
     const fileName = path.basename(assetUrl);
     const sourceFile = generatedSources.get(fileName);
+    const targetFile = path.join(generatedAssetsRoot, fileName);
 
     if (!sourceFile) {
+      if (!force && existsSync(targetFile)) {
+        keptFiles.push(fileName);
+        continue;
+      }
+
       throw new Error(`Missing generated screenshot for referenced asset: ${assetUrl}`);
     }
 
-    await copyFile(sourceFile, path.join(generatedAssetsRoot, fileName));
+    await copyFile(sourceFile, targetFile);
     copiedFiles.push(fileName);
   }
 
@@ -120,6 +135,13 @@ async function main() {
   copiedFiles.forEach((fileName) => {
     console.log(`  staged: assets/generated/${fileName}`);
   });
+
+  if (keptFiles.length > 0) {
+    console.log(`Kept ${keptFiles.length} existing generated Pages asset file(s).`);
+    keptFiles.forEach((fileName) => {
+      console.log(`  kept: assets/generated/${fileName}`);
+    });
+  }
 }
 
 await main();

@@ -46,7 +46,7 @@ jobs:
           working-directory: pages
 
       - name: Generate Pages screenshots
-        run: node ./scripts/run-update-doc-assets.mjs
+        run: yarn run build:docs:assets:force
 
       - name: Build site
         env:

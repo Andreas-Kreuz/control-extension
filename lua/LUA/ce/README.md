@@ -1,5 +1,5 @@
 ---
-layout: page_landing
+layout: page_with_toc
 title: Control Extension
 subtitle: Hier findest du Informationen zur Control Extension
 permalink: lua/LUA/ce/

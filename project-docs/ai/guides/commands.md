@@ -7,9 +7,13 @@ All root scripts: `yarn ce-help`
 ## Build & Run
 
 ```bash
-yarn build          # Build all (web-shared → web-app → web-server)
-yarn dev:app        # Dev mode: server + app in parallel
-yarn run:app        # Build then run server
+yarn build                    # Build all (web-shared → web-app → web-server)
+yarn build:docs:assets        # Generate missing docs screenshot/assets
+yarn build:docs:assets:force  # Force-regenerate docs screenshot/assets
+yarn dev:app                  # Dev mode: server + app in parallel
+yarn dev:docs                 # Incremental docs server with LiveReload, creates missing assets
+yarn dev:docs:manual          # Docs server with manual refresh, creates missing assets
+yarn run:app                  # Build then run server
 ```
 
 ## Test

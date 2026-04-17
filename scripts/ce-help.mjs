@@ -14,7 +14,11 @@ const groups = [
     title: 'dev',
     targets: [
       { name: 'dev:app', description: 'App und Server im Entwicklungsmodus starten (automatischer re-build)' },
-      { name: 'dev:docs', description: 'Jekyll-Doku-Server mit Live-Reload starten' },
+      {
+        name: 'dev:docs',
+        description: 'Inkrementellen Jekyll-Doku-Server mit Live-Reload starten und fehlende Assets erzeugen',
+      },
+      { name: 'dev:docs:manual', description: 'Jekyll-Doku-Server mit manueller Aktualisierung starten' },
       { name: 'dev:storybook', description: 'Storybook der Web-App für isolierte UI-Entwicklung starten' },
     ],
   },
@@ -26,6 +30,8 @@ const groups = [
     title: 'build',
     targets: [
       { name: 'build', description: 'App und Server für den lokalen Einsatz bauen' },
+      { name: 'build:docs:assets', description: 'Fehlende generierte Doku-Assets erzeugen' },
+      { name: 'build:docs:assets:force', description: 'Generierte Doku-Assets vollständig neu erzeugen' },
       { name: 'build:exe', description: 'Windows-EXE der App und des Servers bauen' },
       { name: 'build:release', description: 'App und Server sowie Lua als Release für EEP bauen' },
       { name: 'clean', description: 'Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen' },

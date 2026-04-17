@@ -96,42 +96,45 @@ Im Projektverzeichnis `C:\GitHub\control-extension` steht dir eine Reihe von yar
 
 ## Root-Yarn-Kommandos
 
-| Target              | Abhängigkeiten                                       | Kurzbeschreibung                                                                           |
-| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `install` (builtin) | keine                                                | Installiert alle Abhängigkeiten nach dem Klonen.                                           |
-| `ce-help`           | keine                                                | Diese Übersicht anzeigen.                                                                  |
-| `tools:check`       | keine                                                | Erforderliche externe Werkzeuge in `PATH` prüfen und bei Bedarf Install-Hinweise anzeigen. |
-| `dev:app`           | keine                                                | App und Server im Entwicklungsmodus starten (automatischer re-build).                      |
-| `dev:docs`          | keine                                                | Jekyll-Doku-Server mit Live-Reload starten.                                                |
-| `dev:storybook`     | keine                                                | Storybook der Web-App für isolierte UI-Entwicklung starten.                                |
-| `run:app`           | `build`                                              | App und Server mit `build` bauen und starten (ohne re-build).                              |
-| `build`             | keine                                                | App und Server für den lokalen Einsatz bauen.                                              |
-| `build:exe`         | keine                                                | Windows-EXE von App und Server bauen; auf macOS bewusst nicht unterstützt.                 |
-| `build:release`     | `check`, `build:exe`                                 | App und Server sowie Lua als Release für EEP bauen; Windows-Paketierung nur unter Windows. |
-| `clean`             | keine                                                | Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen.                             |
-| `clean:docs`        | keine                                                | Jekyll-Build- und Cache-Artefakte der Doku entfernen.                                      |
-| `clean:lua`         | keine                                                | Temporäre Lua-Coverage- und Testartefakte entfernen.                                       |
-| `clean:web`         | keine                                                | Temporäre Artefakte von Web-App, Web-Server und `web-shared` entfernen.                    |
-| `format`            | `format:apps`, `format:lua`                          | Gesamtes Repository formatieren.                                                           |
-| `format:apps`       | keine                                                | App und Server sowie nicht-Lua-Dateien mit Prettier formatieren.                           |
-| `format:lua`        | keine                                                | Lua-Dateien mit dem VSCode Lua Language Server formatieren.                                |
-| `lint`              | `lint:lua`, `lint:server`, `lint:app`, `lint:shared` | Alle statischen Checks für Lua, App, Server und Shared ausführen.                          |
-| `lint:app`          | keine                                                | Führt ESLint für die Web-App aus.                                                          |
-| `lint:lua`          | keine                                                | `luacheck` auf `lua/LUA` ausführen.                                                        |
-| `lint:server`       | keine                                                | ESLint für den Web-Server ausführen.                                                       |
-| `lint:shared`       | keine                                                | ESLint für `web-shared` ausführen.                                                         |
-| `lint:web`          | keine                                                | Alle statischen Checks für Web-App, Web-Server und `web-shared` ausführen.                 |
-| `test`              | `test:lua`, `test:server`, `test:app`, `test:docs`   | Alle implementierten Tests und Validierungen ausführen.                                    |
-| `test:lua`          | keine                                                | Lua-Tests mit `busted` schnell ohne Coverage ausführen.                                    |
-| `test:lua:coverage` | keine                                                | Lua-Tests mit `busted` und Coverage ausführen.                                             |
-| `test:server`       | keine                                                | Server-Tests nach TypeScript-Build ausführen.                                              |
-| `test:app`          | keine                                                | Web-App-E2E-Tests headless ausführen.                                                      |
-| `test:app:ui`       | keine                                                | Interaktive Cypress-E2E-Umgebung starten.                                                  |
-| `test:docs`         | keine                                                | Jekyll-Doku zur Validierung bauen.                                                         |
-| `test:web`          | keine                                                | Server-Tests und Web-App-E2E-Tests ausführen.                                              |
-| `check:lua`         | `lint:lua`, `test:lua`                               | Lua-Lint und Lua-Tests als Qualitätsgate ausführen.                                        |
-| `check:web`         | `lint:web`, `test:web`                               | Web-Lints sowie Server- und App-Tests als Qualitätsgate ausführen.                         |
-| `check`             | `tools:check`, `lint`, `test`                        | Manuelle Vorabprüfung vor `build:release` (`tools:check` + `lint` + `test`).               |
+| Target                    | Abhängigkeiten                                       | Kurzbeschreibung                                                                           |
+| ------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `install` (builtin)       | keine                                                | Installiert alle Abhängigkeiten nach dem Klonen.                                           |
+| `ce-help`                 | keine                                                | Diese Übersicht anzeigen.                                                                  |
+| `tools:check`             | keine                                                | Erforderliche externe Werkzeuge in `PATH` prüfen und bei Bedarf Install-Hinweise anzeigen. |
+| `dev:app`                 | keine                                                | App und Server im Entwicklungsmodus starten (automatischer re-build).                      |
+| `dev:docs`                | keine                                                | Inkrementellen Jekyll-Doku-Server mit Live-Reload starten und fehlende Assets erzeugen.    |
+| `dev:docs:manual`         | keine                                                | Jekyll-Doku-Server mit manueller Aktualisierung starten und fehlende Assets erzeugen.      |
+| `dev:storybook`           | keine                                                | Storybook der Web-App für isolierte UI-Entwicklung starten.                                |
+| `run:app`                 | `build`                                              | App und Server mit `build` bauen und starten (ohne re-build).                              |
+| `build`                   | keine                                                | App und Server für den lokalen Einsatz bauen.                                              |
+| `build:docs:assets`       | keine                                                | Fehlende generierte Doku-Assets erzeugen.                                                  |
+| `build:docs:assets:force` | keine                                                | Generierte Doku-Assets vollständig neu erzeugen.                                           |
+| `build:exe`               | keine                                                | Windows-EXE von App und Server bauen; auf macOS bewusst nicht unterstützt.                 |
+| `build:release`           | `check`, `build:exe`                                 | App und Server sowie Lua als Release für EEP bauen; Windows-Paketierung nur unter Windows. |
+| `clean`                   | keine                                                | Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen.                             |
+| `clean:docs`              | keine                                                | Jekyll-Build- und Cache-Artefakte der Doku entfernen.                                      |
+| `clean:lua`               | keine                                                | Temporäre Lua-Coverage- und Testartefakte entfernen.                                       |
+| `clean:web`               | keine                                                | Temporäre Artefakte von Web-App, Web-Server und `web-shared` entfernen.                    |
+| `format`                  | `format:apps`, `format:lua`                          | Gesamtes Repository formatieren.                                                           |
+| `format:apps`             | keine                                                | App und Server sowie nicht-Lua-Dateien mit Prettier formatieren.                           |
+| `format:lua`              | keine                                                | Lua-Dateien mit dem VSCode Lua Language Server formatieren.                                |
+| `lint`                    | `lint:lua`, `lint:server`, `lint:app`, `lint:shared` | Alle statischen Checks für Lua, App, Server und Shared ausführen.                          |
+| `lint:app`                | keine                                                | Führt ESLint für die Web-App aus.                                                          |
+| `lint:lua`                | keine                                                | `luacheck` auf `lua/LUA` ausführen.                                                        |
+| `lint:server`             | keine                                                | ESLint für den Web-Server ausführen.                                                       |
+| `lint:shared`             | keine                                                | ESLint für `web-shared` ausführen.                                                         |
+| `lint:web`                | keine                                                | Alle statischen Checks für Web-App, Web-Server und `web-shared` ausführen.                 |
+| `test`                    | `test:lua`, `test:server`, `test:app`, `test:docs`   | Alle implementierten Tests und Validierungen ausführen.                                    |
+| `test:lua`                | keine                                                | Lua-Tests mit `busted` schnell ohne Coverage ausführen.                                    |
+| `test:lua:coverage`       | keine                                                | Lua-Tests mit `busted` und Coverage ausführen.                                             |
+| `test:server`             | keine                                                | Server-Tests nach TypeScript-Build ausführen.                                              |
+| `test:app`                | keine                                                | Web-App-E2E-Tests headless ausführen.                                                      |
+| `test:app:ui`             | keine                                                | Interaktive Cypress-E2E-Umgebung starten.                                                  |
+| `test:docs`               | keine                                                | Jekyll-Doku zur Validierung bauen.                                                         |
+| `test:web`                | keine                                                | Server-Tests und Web-App-E2E-Tests ausführen.                                              |
+| `check:lua`               | `lint:lua`, `test:lua`                               | Lua-Lint und Lua-Tests als Qualitätsgate ausführen.                                        |
+| `check:web`               | `lint:web`, `test:web`                               | Web-Lints sowie Server- und App-Tests als Qualitätsgate ausführen.                         |
+| `check`                   | `tools:check`, `lint`, `test`                        | Manuelle Vorabprüfung vor `build:release` (`tools:check` + `lint` + `test`).               |
 
 ## Typische Workflows
 
