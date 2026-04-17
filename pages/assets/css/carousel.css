@@ -6,7 +6,7 @@ body {
 }
 
 body.carousel-page {
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .showcase-carousel-bleed {
@@ -19,25 +19,21 @@ body.carousel-page {
 .showcase-carousel-bleed .showcase-carousel {
   margin: 0;
   max-width: none;
-  width: 100vw;
+  width: 100%;
 }
 
 .showcase-panel {
+  --showcase-panel-margin: clamp(1rem, 6.25vw, 5rem);
+
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 1.5rem;
   /* Bottom shadow placement: tweak the vertical offset / blur / spread here to soften or extend the lower fade. */
-  box-shadow: 0 3rem 3rem rgba(0, 0, 0, 0.2);
-  display: grid;
-  grid-template-columns: 1fr;
-  min-height: calc(100vh - 10rem);
-  margin: 5rem;
+  box-shadow: 0 1.25rem 1.5rem rgba(0, 0, 0, 0.2);
+  min-height: calc(100vh - (2 * var(--showcase-panel-margin)));
+  margin: var(--showcase-panel-margin);
   overflow: hidden;
-  width: calc(100% - 10rem);
-}
-
-.showcase-card {
-  padding: 2rem;
+  width: calc(100% - (2 * var(--showcase-panel-margin)));
 }
 
 .showcase-kicker {
@@ -68,12 +64,7 @@ body.carousel-page {
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.5), transparent 42%),
     linear-gradient(135deg, #f5f7fc 0%, #edf0fb 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
   text-align: center;
-  height: 100%;
 }
 
 .showcase-carousel-wrap {
@@ -81,22 +72,12 @@ body.carousel-page {
 }
 
 .showcase-carousel {
-  height: 100%;
   margin: 0;
-  max-width: none;
   padding: 0;
-  position: relative;
-  width: 100%;
-}
-
-.showcase-carousel .carousel-inner {
-  height: 100%;
-  overflow: hidden;
 }
 
 .showcase-carousel .carousel-item {
   display: none;
-  height: 100%;
   padding: 0;
 }
 
@@ -110,28 +91,13 @@ body.carousel-page {
 
 .showcase-carousel-control {
   -webkit-appearance: none;
-  align-items: center;
   background: transparent;
   border: none !important;
+  bottom: auto;
   box-shadow: none !important;
-  display: flex;
-  height: 3.5rem;
-  justify-content: center;
   opacity: 1;
   outline: none !important;
-  padding: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3.5rem;
   z-index: 2;
-}
-
-.showcase-carousel-control-prev {
-  left: 3rem;
-}
-
-.showcase-carousel-control-next {
-  right: 3rem;
 }
 
 .showcase-carousel-control-icon {
@@ -143,10 +109,10 @@ body.carousel-page {
   box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.2);
   color: #fff;
   display: inline-flex;
-  height: 3rem;
+  height: clamp(2.5rem, 3.75vw, 3rem);
   justify-content: center;
   position: relative;
-  width: 3rem;
+  width: clamp(2.5rem, 3.75vw, 3rem);
 }
 
 .showcase-carousel-control:hover .showcase-carousel-control-icon,
@@ -159,8 +125,8 @@ body.carousel-page {
   border-top: 0.2rem solid currentColor;
   content: '';
   display: block;
-  height: 0.9rem;
-  width: 0.9rem;
+  height: clamp(0.75rem, 1.125vw, 0.9rem);
+  width: clamp(0.75rem, 1.125vw, 0.9rem);
 }
 
 .showcase-carousel-control-prev .showcase-carousel-control-icon::before {
@@ -191,59 +157,4 @@ body.carousel-page {
 
 .showcase-carousel-indicators .active {
   background-color: rgba(0, 0, 0, 0.85);
-}
-
-@media (min-width: 992px) {
-  .showcase-panel {
-    align-items: center;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .showcase-card {
-    padding: 3rem;
-  }
-
-  .showcase-image {
-    padding: 2rem;
-  }
-}
-
-@media (max-width: 767.98px) {
-  body.carousel-page {
-    overflow-y: auto;
-  }
-
-  .showcase-carousel-bleed .showcase-carousel {
-    width: 100%;
-  }
-
-  .showcase-panel {
-    height: auto;
-    margin: 1rem;
-    min-height: calc(100vh - 2rem);
-    width: calc(100vw - 2rem);
-  }
-
-  .showcase-carousel-control {
-    height: 2.5rem;
-    width: 2.5rem;
-  }
-
-  .showcase-carousel-control-prev {
-    left: 0.5rem;
-  }
-
-  .showcase-carousel-control-next {
-    right: 0.5rem;
-  }
-
-  .showcase-carousel-control-icon {
-    height: 2.5rem;
-    width: 2.5rem;
-  }
-
-  .showcase-carousel-control-icon::before {
-    height: 0.75rem;
-    width: 0.75rem;
-  }
 }

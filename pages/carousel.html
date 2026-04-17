@@ -15,11 +15,7 @@ published: true
     <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/carousel.css" />
   </head>
   <body class="carousel-page">
-    <div
-      id="showcaseCarousel"
-      class="carousel slide showcase-carousel"
-      data-bs-ride="carousel"
-    >
+    <div id="showcaseCarousel" class="carousel slide showcase-carousel position-relative w-100" data-bs-ride="carousel">
       <div class="carousel-indicators showcase-carousel-indicators">
         <button
           type="button"
@@ -36,15 +32,15 @@ published: true
 
       <div class="carousel-inner">
         <div class="carousel-item active">
-          <div class="showcase-panel">
-            <div class="showcase-card">
+          <div class="showcase-panel d-flex flex-column flex-lg-row align-items-lg-stretch">
+            <div class="showcase-card col-12 col-lg-6 d-flex flex-column justify-content-center p-4 p-lg-5">
               <div class="showcase-kicker">Fahrzeuge</div>
               <h2>Fahrzeugverbände im Blick</h2>
               <p class="lead">
                 Verfolge die Eigenschaftsänderungen deiner Fahrzeuge oder setze die Kamera direkt auf ein Fahrzeug.
               </p>
             </div>
-            <div class="showcase-image">
+            <div class="showcase-image col-12 col-lg-6 d-flex align-items-center justify-content-center p-4">
               <div class="app-in-phone">
                 <img
                   src="{{ site.baseurl }}/assets/generated/trains-acros-schweiger-hb3--detail--iphone-xr.png"
@@ -56,8 +52,8 @@ published: true
         </div>
 
         <div class="carousel-item">
-          <div class="showcase-panel">
-            <div class="showcase-card">
+          <div class="showcase-panel d-flex flex-column flex-lg-row align-items-lg-stretch">
+            <div class="showcase-card col-12 col-lg-6 d-flex flex-column justify-content-center p-4 p-lg-5">
               <div class="showcase-kicker">Kreuzungen</div>
               <h2>Schalte Ampelphasen</h2>
               <p class="lead">
@@ -65,7 +61,7 @@ published: true
                 hinterlegten Kameras.
               </p>
             </div>
-            <div class="showcase-image">
+            <div class="showcase-image col-12 col-lg-6 d-flex align-items-center justify-content-center p-4">
               <div class="app-in-phone">
                 <img
                   src="{{ site.baseurl }}/assets/generated/road-1--detail--iphone-xr.png"
@@ -77,8 +73,8 @@ published: true
         </div>
 
         <div class="carousel-item">
-          <div class="showcase-panel">
-            <div class="showcase-card">
+          <div class="showcase-panel d-flex flex-column flex-lg-row align-items-lg-stretch">
+            <div class="showcase-card col-12 col-lg-6 d-flex flex-column justify-content-center p-4 p-lg-5">
               <div class="showcase-kicker">ÖPNV-Linien</div>
               <h2>Fahrplaninformationen</h2>
               <p class="lead">
@@ -86,7 +82,7 @@ published: true
                 einer Ringlinie erstellen.
               </p>
             </div>
-            <div class="showcase-image">
+            <div class="showcase-image col-12 col-lg-6 d-flex align-items-center justify-content-center p-4">
               <div class="app-in-phone">
                 <img
                   src="{{ site.baseurl }}/assets/generated/transit-lines-4--detail--iphone-xr.png"
@@ -98,15 +94,15 @@ published: true
         </div>
 
         <div class="carousel-item">
-          <div class="showcase-panel">
-            <div class="showcase-card">
+          <div class="showcase-panel d-flex flex-column flex-lg-row align-items-lg-stretch">
+            <div class="showcase-card col-12 col-lg-6 d-flex flex-column justify-content-center p-4 p-lg-5">
               <div class="showcase-kicker">ÖPNV-Haltestellen</div>
               <h2>Haltestellen-Information</h2>
               <p class="lead">
                 Zeige an, an welchem Steig die nächsten Fahrzeuge der einzelnen Bus- oder Tram-Linien abfahren.
               </p>
             </div>
-            <div class="showcase-image">
+            <div class="showcase-image col-12 col-lg-6 d-flex align-items-center justify-content-center p-4">
               <div class="app-in-phone">
                 <img
                   src="{{ site.baseurl }}/assets/generated/transit-stations-zentralforum--detail--iphone-xr.png"
@@ -119,7 +115,7 @@ published: true
       </div>
 
       <button
-        class="carousel-control-prev showcase-carousel-control showcase-carousel-control-prev"
+        class="carousel-control-prev showcase-carousel-control showcase-carousel-control-prev d-flex align-items-center justify-content-center position-absolute top-50 start-0 translate-middle-y w-auto h-auto p-0 ms-4"
         type="button"
         data-bs-target="#showcaseCarousel"
         data-bs-slide="prev"
@@ -128,7 +124,7 @@ published: true
         <span class="showcase-carousel-control-icon" aria-hidden="true"></span>
       </button>
       <button
-        class="carousel-control-next showcase-carousel-control showcase-carousel-control-next"
+        class="carousel-control-next showcase-carousel-control showcase-carousel-control-next d-flex align-items-center justify-content-center position-absolute top-50 end-0 translate-middle-y w-auto h-auto p-0 me-4"
         type="button"
         data-bs-target="#showcaseCarousel"
         data-bs-slide="next"

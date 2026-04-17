@@ -2,15 +2,9 @@
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 1.5rem;
-  display: grid;
   box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.12);
-  grid-template-columns: 1fr;
   margin-bottom: 2rem;
   overflow: hidden;
-}
-
-.showcase-card {
-  padding: 2rem;
 }
 
 .showcase-kicker {
@@ -35,21 +29,5 @@
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.5), transparent 42%),
     linear-gradient(135deg, #eff6f1 0%, #dfe9e3 100%);
-  padding: 1.5rem;
   text-align: center;
-}
-
-@media (min-width: 992px) {
-  .showcase-panel {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: center;
-  }
-
-  .showcase-card {
-    padding: 3rem;
-  }
-
-  .showcase-image {
-    padding: 2rem;
-  }
 }
