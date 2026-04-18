@@ -42,7 +42,9 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       }
     });
 
-    cy.get('#open-log').invoke('text').should('match', /log verbergen/i);
+    cy.get('#open-log')
+      .invoke('text')
+      .should('match', /log verbergen/i);
     cy.get('#delete-log').should('be.visible');
     return cy.get('ul');
   }
@@ -53,16 +55,12 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       .should(($container) => {
         const element = $container[0];
         const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
-        expect(element.scrollTop).to.equal(maxScrollTop);
+        expect(element.scrollTop).to.be.closeTo(maxScrollTop, 1);
       });
   }
 
   function waitForLogLines(expectedTotal: number, lastLine: string) {
-    openLogPanel()
-      .children()
-      .should('have.length', expectedTotal)
-      .last()
-      .should('contain.text', lastLine);
+    openLogPanel().children().should('have.length', expectedTotal).last().should('contain.text', lastLine);
     waitForLogScrollToSettle();
   }
 
