@@ -80,6 +80,7 @@ function StatisticsDiagram(props: {
   description: string;
   samples: TimeDesc[][];
   initializationSamples: TimeDesc[][];
+  maxValue?: number;
   legendExpanded: boolean;
   onLegendToggle: () => void;
 }) {
@@ -87,7 +88,7 @@ function StatisticsDiagram(props: {
   const initializationEntries = props.initializationSamples[0] ?? [];
   const ids = getIds(samples);
   const legendIds = getIds([initializationEntries, ...samples], ceTypeOf);
-  const max = Math.max(maxTotalOf(samples), totalOf(initializationEntries));
+  const max = props.maxValue ?? Math.max(maxTotalOf(samples), totalOf(initializationEntries));
   const width = 100;
   const height = 42;
   const initializationBarX = 2;

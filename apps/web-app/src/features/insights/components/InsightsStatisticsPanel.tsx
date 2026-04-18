@@ -7,6 +7,7 @@ function InsightsStatisticsPanel(props: {
   description: string;
   samples: TimeDesc[][];
   initializationSamples?: TimeDesc[][];
+  maxValue?: number;
   legendExpanded: boolean;
   onLegendToggle: () => void;
 }) {
@@ -17,6 +18,7 @@ function InsightsStatisticsPanel(props: {
         description={props.description}
         samples={props.samples}
         initializationSamples={props.initializationSamples ?? []}
+        {...(props.maxValue !== undefined ? { maxValue: props.maxValue } : {})}
         legendExpanded={props.legendExpanded}
         onLegendToggle={props.onLegendToggle}
       />
