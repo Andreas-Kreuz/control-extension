@@ -14,12 +14,19 @@ function readJson(relativePath) {
 function writeJson(relativePath, value) {
   const absolutePath = path.join(repoRoot, relativePath);
   const content = `${JSON.stringify(value, null, 2)}\n`;
+  if (readFileSync(absolutePath, 'utf8') === content) {
+    return;
+  }
   writeFileSync(absolutePath, content, 'utf8');
 }
 
 function writeText(relativePath, value) {
   const absolutePath = path.join(repoRoot, relativePath);
-  writeFileSync(absolutePath, `${value}\n`, 'utf8');
+  const content = `${value}\n`;
+  if (readFileSync(absolutePath, 'utf8') === content) {
+    return;
+  }
+  writeFileSync(absolutePath, content, 'utf8');
 }
 
 const rootPackage = readJson('package.json');
