@@ -38,6 +38,18 @@ function combineInitializationTimes(publisherInitTimes: TimeDesc[], moduleInitTi
   return combined.length > 0 ? [combined] : [];
 }
 
+function toSingleSample(entries: TimeDesc[]): TimeDesc[][] {
+  return entries.length > 0 ? [entries] : [];
+}
+
+function entriesWithPrefix(entries: TimeDesc[], prefix: string): TimeDesc[] {
+  return entries.filter((entry) => entry.id.startsWith(prefix));
+}
+
+function entriesWithoutPrefix(entries: TimeDesc[], prefix: string): TimeDesc[] {
+  return entries.filter((entry) => !entry.id.startsWith(prefix));
+}
+
 function useStatistics() {
   const [publisherSyncTimes, setPublisherSyncTimes] = useState<TimeDesc[][]>([]);
   const [publisherInitTimes, setPublisherInitTimes] = useState<TimeDesc[]>([]);
@@ -72,6 +84,12 @@ function useStatistics() {
   return {
     overallTimes: combineOverallTimes(publisherSyncTimes, moduleRunTimes, updateTimes),
     initializationTimes: combineInitializationTimes(publisherInitTimes, moduleInitTimes),
+    discoveryTimes: moduleRunTimes,
+    discoveryInitializationTimes: toSingleSample(moduleInitTimes),
+    updateTimes,
+    updateInitializationTimes: toSingleSample(entriesWithPrefix(publisherInitTimes, 'Update-init/')),
+    publisherTimes: publisherSyncTimes,
+    publisherInitializationTimes: toSingleSample(entriesWithoutPrefix(publisherInitTimes, 'Update-init/')),
     controllerUpdateTimes,
   };
 }

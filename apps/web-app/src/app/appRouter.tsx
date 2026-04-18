@@ -7,6 +7,7 @@ const WebAppLayoutSelector = lazy(() => import('./old/WebAppLayoutSelector'));
 const DataRoute = lazy(() => import('../features/data/DataRoute'));
 const RoadRoute = lazy(() => import('../features/road/RoadRoute'));
 const HomeRoute = lazy(() => import('../features/home/HomeRoute'));
+const InsightsRoute = lazy(() => import('../features/insights/InsightsRoute'));
 const LinesRoute = lazy(() => import('../features/lines/LinesRoute'));
 const ServerRoute = lazy(() => import('../features/server/ServerRoute'));
 const StatisticsRoute = lazy(() => import('../features/statistics/StatisticsRoute'));
@@ -18,6 +19,7 @@ const homeRoutes = [
   { path: '/transit/*', element: <LinesRoute /> },
   { path: '/road/*', element: <RoadRoute /> },
   { path: '/statistics', element: <StatisticsRoute /> },
+  { path: '/insights', element: <InsightsRoute /> },
   { path: '/trains/*', element: <TrainsRoute /> },
   { path: '/data/*', element: <DataRoute /> },
 ];
