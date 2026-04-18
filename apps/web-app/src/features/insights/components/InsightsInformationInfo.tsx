@@ -52,7 +52,7 @@ function InsightsInformationInfo(props: { updateTimes: TimeDesc[][] }) {
           icon: <StorageRoundedIcon sx={{ fontSize: 20 }} />,
           label: 'Daten',
           value: luaDataReceived ? String(apiEntryCount) : '-',
-          href: 'http://192.168.234.81:5173/data',
+          href: '/data',
         },
         {
           icon: <ExtensionRoundedIcon sx={{ fontSize: 20 }} />,

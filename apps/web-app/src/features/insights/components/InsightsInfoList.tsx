@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { ReactNode } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 interface InsightsInfoListItem {
   icon: ReactNode;
@@ -45,7 +46,8 @@ function InsightsInfoListRow(props: InsightsInfoListItem) {
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flex: '0 0 auto', minWidth: 0 }}>
         {props.href ? (
           <Link
-            href={props.href}
+            component={RouterLink}
+            to={props.href}
             variant="caption"
             sx={{ lineHeight: 1.2, overflowWrap: 'anywhere', textAlign: 'right' }}
           >
