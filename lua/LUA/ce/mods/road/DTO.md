@@ -67,6 +67,25 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `ready`            | `boolean`; Beispiel: `false`                      | Status aus `crossing:isGreenPhaseFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                    |
 | `timeForGreen`     | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `IntersectionSequence:new(...)`.                                                                   |
 | `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `EEPSetCamera \| 0 \| <staticCam>` umgesetzt. |
+| `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `IntersectionSequence`-Einträgen der Kreuzung.                                                                                 |
+
+#### `IntersectionPhaseDto`
+
+| Name                | Typ und Wertebereich / Beispiel      | Beschreibung                                                                                          |
+| ------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `id`                | `string`; Beispiel: `K1-S1`          | Zusammengesetzter Schlüssel aus Kreuzungsname und Schaltungsname.                                     |
+| `name`              | `string`; Beispiel: `S1`             | Schaltungsname aus `IntersectionSequence.name`.                                                       |
+| `order`             | `integer >= 1`; Beispiel: `1`        | Reihenfolge aus `crossing:getSequences()`.                                                            |
+| `prio`              | `number`; Beispiel: `4.5`            | Aktuelle Priorität der Schaltung.                                                                     |
+| `greenPhaseSeconds` | `number`; Beispiel: `15`             | Grünzeit dieser Schaltung.                                                                            |
+| `trafficLights`     | `IntersectionPhaseTrafficLightDto[]` | Sortierte Liste der Signale, die in dieser Schaltung grün bzw. fußgänger-/tram-spezifisch aktiv sind. |
+
+#### `IntersectionPhaseTrafficLightDto`
+
+| Name       | Typ und Wertebereich / Beispiel | Beschreibung                                                               |
+| ---------- | ------------------------------- | -------------------------------------------------------------------------- |
+| `signalId` | `integer`; Beispiel: `23`       | Signal-ID aus `TrafficLight.signalId`.                                     |
+| `type`     | `string`; Beispiel: `CAR`       | Rolle des Signals in der Schaltung, z. B. `CAR`, `TRAM` oder `PEDESTRIAN`. |
 
 ### CeType `ce.mods.road.IntersectionSwitching`
 

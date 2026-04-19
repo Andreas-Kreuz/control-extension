@@ -13,6 +13,28 @@ local function copyTable(values)
     return copy
 end
 
+local function copyPhases(phases)
+    local copy = {}
+    for key, phase in pairs(phases or {}) do
+        local trafficLights = {}
+        for tlKey, trafficLight in pairs(phase.trafficLights or {}) do
+            trafficLights[tlKey] = {
+                signalId = trafficLight.signalId,
+                type = trafficLight.type
+            }
+        end
+        copy[key] = {
+            id = phase.id,
+            name = phase.name,
+            order = phase.order,
+            prio = phase.prio,
+            greenPhaseSeconds = phase.greenPhaseSeconds,
+            trafficLights = trafficLights
+        }
+    end
+    return copy
+end
+
 local function toIntersectionDto(intersection, isSelected)
     local fieldPolicies  = RoadOptionsRegistry.getFieldPublishPolicies("intersections")
     local dto            = {
@@ -30,6 +52,8 @@ local function toIntersectionDto(intersection, isSelected)
     intersection.timeForGreen or 0
     dto.staticCams       = SyncPolicy.shouldPublishField(fieldPolicies, "staticCams", isSelected) and
     copyTable(intersection.staticCams) or {}
+    dto.phases           = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
+    copyPhases(intersection.phases) or {}
     if SyncPolicy.shouldPublishField(fieldPolicies, "ready", isSelected) then
         dto.ready = intersection.ready
     else

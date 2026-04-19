@@ -19,6 +19,19 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             ready = true,
             timeForGreen = 15,
             staticCams = { "Cam 1" },
+            phases = {
+                {
+                    id = "A-S1",
+                    name = "S1",
+                    order = 1,
+                    prio = 2,
+                    greenPhaseSeconds = 15,
+                    trafficLights = {
+                        { signalId = 1, type = "CAR" },
+                        { signalId = 3, type = "PEDESTRIAN" }
+                    }
+                }
+            },
             hidden = true
         }
         local lane = {
@@ -120,11 +133,24 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = 1,
                         name = "A",
                         currentSwitching = "",   -- oninterest, never selected
-                        manualSwitching = "S2",
+                        manualSwitching = "",    -- oninterest, never selected
                         nextSwitching = "",      -- oninterest, never selected
                         ready = false,           -- oninterest, never selected
-                        timeForGreen = 0,        -- oninterest, never selected
-                        staticCams = {}          -- oninterest, never selected
+                        timeForGreen = 15,
+                        staticCams = { "Cam 1" },
+                        phases = {
+                            {
+                                id = "A-S1",
+                                name = "S1",
+                                order = 1,
+                                prio = 2,
+                                greenPhaseSeconds = 15,
+                                trafficLights = {
+                                    { signalId = 1, type = "CAR" },
+                                    { signalId = 3, type = "PEDESTRIAN" }
+                                }
+                            }
+                        }
                     }, intersectionDto)
         assert.same({
                         ceType = "ce.mods.road.Intersection",
@@ -135,7 +161,20 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         nextSwitching = "S3",
                         ready = true,
                         timeForGreen = 15,
-                        staticCams = { "Cam 1" }
+                        staticCams = { "Cam 1" },
+                        phases = {
+                            {
+                                id = "A-S1",
+                                name = "S1",
+                                order = 1,
+                                prio = 2,
+                                greenPhaseSeconds = 15,
+                                trafficLights = {
+                                    { signalId = 1, type = "CAR" },
+                                    { signalId = 3, type = "PEDESTRIAN" }
+                                }
+                            }
+                        }
                     }, selectedIntersectionDto)
         assert.equals("ce.mods.road.IntersectionLane", laneCeType)
         assert.equals("id", laneKeyId)
@@ -293,14 +332,71 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                 nextSwitching = "S3",
                 ready = true,
                 timeForGreen = 15,
-                staticCams = { "Cam 1" }
+                staticCams = { "Cam 1" },
+                phases = {}
             }
         }, function (intersection)
             return intersection.id == 1
         end)
 
         assert.same("S1", dtos[1].currentSwitching)
+        assert.same("S2", dtos[1].manualSwitching)
         assert.same("S3", dtos[1].nextSwitching)
         assert.is_true(dtos[1].ready)
+    end)
+
+    it("collects ordered intersection phases with sorted traffic lights", function ()
+        require("ce.hub.eep.EepSimulator")
+        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+
+        local trafficLight1 = {
+            signalId = 1,
+            phase = "RED",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local trafficLight3 = {
+            signalId = 3,
+            phase = "GREEN",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local sequence = {
+            name = "S1",
+            prio = 4,
+            greenPhaseSeconds = 12,
+            lanes = {},
+            trafficLights = {
+                [trafficLight3] = "PEDESTRIAN",
+                [trafficLight1] = "CAR"
+            }
+        }
+        local crossing = {
+            name = "A",
+            staticCams = { "Cam 1" },
+            getCurrentSequence = function () return nil end,
+            getManualSequence = function () return nil end,
+            getNextSequence = function () return nil end,
+            isGreenPhaseFinished = function () return true end,
+            getGreenPhaseSeconds = function () return 15 end,
+            getStaticCams = function (self) return self.staticCams end,
+            getSequences = function () return { sequence } end
+        }
+
+        local data = RoadDataCollector.collectCrossings({ A = crossing })
+
+        assert.same({
+                        id = "A-S1",
+                        name = "S1",
+                        order = 1,
+                        prio = 4,
+                        greenPhaseSeconds = 12,
+                        trafficLights = {
+                            { signalId = 1, type = "CAR" },
+                            { signalId = 3, type = "PEDESTRIAN" }
+                        }
+                    }, data.intersections[1].phases[1])
     end)
 end)

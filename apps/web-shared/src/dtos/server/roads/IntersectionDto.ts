@@ -1,4 +1,18 @@
 // Produced by: apps/web-server/src/server/mod/road/RoadSelector.ts
+export interface IntersectionPhaseTrafficLightDto {
+  signalId: number;
+  type: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
+}
+
+export interface IntersectionPhaseDto {
+  id: string;
+  name: string;
+  order: number;
+  prio: number;
+  greenPhaseSeconds: number;
+  trafficLights: IntersectionPhaseTrafficLightDto[];
+}
+
 export interface IntersectionDto {
   id: number;
   name: string;
@@ -8,4 +22,5 @@ export interface IntersectionDto {
   ready: boolean;
   timeForGreen: number;
   staticCams: string[];
+  phases: IntersectionPhaseDto[];
 }

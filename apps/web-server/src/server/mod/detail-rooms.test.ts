@@ -29,7 +29,10 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
   }
 }
 
-function providerById(service: { getDataProviders: () => Array<{ id: string; jsonCreator: (roomName: string) => string }> }, id: string) {
+function providerById(
+  service: { getDataProviders: () => Array<{ id: string; jsonCreator: (roomName: string) => string }> },
+  id: string,
+) {
   const provider = service.getDataProviders().find((entry) => entry.id === id);
   assert.ok(provider, `Expected provider ${id}`);
   return provider;
@@ -89,7 +92,26 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
   roadService.getUpdaters()[0]?.updateFromState({
     ceTypes: {
       [CeTypes.RoadIntersection]: {
-        I1: { id: 1, name: 'Crossing 1' },
+        I1: {
+          id: 1,
+          name: 'Crossing 1',
+          currentSwitching: 'S1',
+          manualSwitching: '',
+          nextSwitching: 'S2',
+          ready: true,
+          timeForGreen: 15,
+          staticCams: ['Cam 1'],
+          phases: [
+            {
+              id: 'Crossing 1-S1',
+              name: 'S1',
+              order: 1,
+              prio: 2,
+              greenPhaseSeconds: 15,
+              trafficLights: [{ signalId: 2, type: 'CAR' }],
+            },
+          ],
+        },
       },
       [CeTypes.RoadIntersectionLane]: {
         L1: {
@@ -138,7 +160,14 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
         },
       },
       [CeTypes.RoadModuleSetting]: {
-        Show: { name: 'Show', category: 'Display', description: 'Show', eepFunction: 'fn', type: 'boolean', value: true },
+        Show: {
+          name: 'Show',
+          category: 'Display',
+          description: 'Show',
+          eepFunction: 'fn',
+          type: 'boolean',
+          value: true,
+        },
       },
     },
   } as never);
@@ -164,7 +193,14 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
         TT1: { id: 'TT1', line: '1', destination: 'Central' },
       },
       [CeTypes.TransitModuleSetting]: {
-        Next: { name: 'Next', category: 'Display', description: 'Next departures', eepFunction: 'fn', type: 'boolean', value: true },
+        Next: {
+          name: 'Next',
+          category: 'Display',
+          description: 'Next departures',
+          eepFunction: 'fn',
+          type: 'boolean',
+          value: true,
+        },
       },
     },
   } as never);
@@ -182,7 +218,22 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
   assert.deepEqual(JSON.parse(intersectionProvider.jsonCreator(IntersectionRoom.roomId('1'))), {
     id: 1,
     name: 'Crossing 1',
-    staticCams: [],
+    currentSwitching: 'S1',
+    manualSwitching: '',
+    nextSwitching: 'S2',
+    ready: true,
+    timeForGreen: 15,
+    staticCams: ['Cam 1'],
+    phases: [
+      {
+        id: 'Crossing 1-S1',
+        name: 'S1',
+        order: 1,
+        prio: 2,
+        greenPhaseSeconds: 15,
+        trafficLights: [{ signalId: 2, type: 'CAR' }],
+      },
+    ],
   });
   assert.deepEqual(JSON.parse(laneProvider.jsonCreator(IntersectionLaneRoom.roomId('1-L1'))), {
     id: '1-L1',
@@ -270,7 +321,10 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
 export async function run(): Promise<void> {
   await runTest('detail room mapping covers all supported ceTypes', testDetailRoomMappings);
   await runTest('eep data detail rooms return single entries', testEepDataServiceDetailProvidersReturnSingleEntries);
-  await runTest('road and transit detail rooms return single entries', testRoadAndTransitDetailProvidersReturnSingleEntries);
+  await runTest(
+    'road and transit detail rooms return single entries',
+    testRoadAndTransitDetailProvidersReturnSingleEntries,
+  );
 }
 
 if (require.main === module) {

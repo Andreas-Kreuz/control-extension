@@ -10,6 +10,19 @@
 ---@field ready boolean
 ---@field timeForGreen number
 ---@field staticCams table
+---@field phases IntersectionPhaseDto[]
+
+---@class IntersectionPhaseTrafficLightDto
+---@field signalId number
+---@field type string
+
+---@class IntersectionPhaseDto
+---@field id string
+---@field name string
+---@field order number
+---@field prio number
+---@field greenPhaseSeconds number
+---@field trafficLights IntersectionPhaseTrafficLightDto[]
 
 ---@class IntersectionLaneDto
 ---@field ceType string

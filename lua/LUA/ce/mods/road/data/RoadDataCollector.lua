@@ -10,6 +10,26 @@ local function padnum(d)
     return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
 end
 
+local function createPhaseDto(crossing, sequence, order)
+    local trafficLights = {}
+    for trafficLight, type in pairs(sequence.trafficLights) do
+        table.insert(trafficLights, {
+            signalId = trafficLight.signalId,
+            type = type
+        })
+    end
+    table.sort(trafficLights, function (a, b) return a.signalId < b.signalId end)
+
+    return {
+        id = crossing.name .. "-" .. sequence.name,
+        name = sequence.name,
+        order = order,
+        prio = sequence.prio,
+        greenPhaseSeconds = sequence.greenPhaseSeconds,
+        trafficLights = trafficLights
+    }
+end
+
 function RoadDataCollector.collectCrossings(allCrossings)
     local intersections = {}
     local intersectionLanes = {}
@@ -34,12 +54,14 @@ function RoadDataCollector.collectCrossings(allCrossings)
             nextSwitching = crossing:getNextSequence() and crossing:getNextSequence().name or nil,
             ready = crossing:isGreenPhaseFinished(),
             timeForGreen = crossing:getGreenPhaseSeconds(),
-            staticCams = crossing:getStaticCams()
+            staticCams = crossing:getStaticCams(),
+            phases = {}
         }
         table.insert(intersections, intersection)
 
         local trafficLights = {}
-        for _, switching in ipairs(crossing:getSequences()) do
+        for order, switching in ipairs(crossing:getSequences()) do
+            table.insert(intersection.phases, createPhaseDto(crossing, switching, order))
             table.insert(intersectionSwitchings, {
                 id = crossing.name .. "-" .. switching.name,
                 intersectionId = crossing.name,

@@ -42,7 +42,11 @@ export type { ContactDto } from './dtos/server/contacts/ContactDto';
 export type { TrackDto } from './dtos/server/tracks/TrackDto';
 export type { RollingStockTexturesDto } from './dtos/server/trains/RollingStockTexturesDto';
 export type { RollingStockRotationDto } from './dtos/server/trains/RollingStockRotationDto';
-export type { IntersectionDto } from './dtos/server/roads/IntersectionDto';
+export type {
+  IntersectionDto,
+  IntersectionPhaseDto,
+  IntersectionPhaseTrafficLightDto,
+} from './dtos/server/roads/IntersectionDto';
 export type { IntersectionLaneDto } from './dtos/server/roads/IntersectionLaneDto';
 export type { IntersectionSwitchingDto } from './dtos/server/roads/IntersectionSwitchingDto';
 export type { IntersectionTrafficLightDto } from './dtos/server/roads/IntersectionTrafficLightDto';

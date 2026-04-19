@@ -17,18 +17,20 @@ function RoadOptionDefaults.create()
                     manualSwitching = "always",
                     currentSwitching = "always",
                     nextSwitching = "always",
+                    phases = "always",
                     ready = "always",
                     staticCams = "always",
                     timeForGreen = "always"
                 },
                 fieldPublish = {
                     name = "always",
-                    manualSwitching = "always",
+                    manualSwitching = "oninterest",
                     currentSwitching = "oninterest",
                     nextSwitching = "oninterest",
+                    phases = "always",
                     ready = "oninterest",
-                    staticCams = "oninterest",
-                    timeForGreen = "oninterest"
+                    staticCams = "always",
+                    timeForGreen = "always"
                 }
             },
             intersectionLanes = {

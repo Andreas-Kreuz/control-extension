@@ -209,6 +209,30 @@
 ---@field initSequences fun():nil
 ---@field switchSequences fun():nil
 
+---@class IntersectionPhaseTrafficLightDto
+---@field signalId number
+---@field type string
+
+---@class IntersectionPhaseDto
+---@field id string
+---@field name string
+---@field order number
+---@field prio number
+---@field greenPhaseSeconds number
+---@field trafficLights IntersectionPhaseTrafficLightDto[]
+
+---@class IntersectionDto
+---@field ceType string
+---@field id number
+---@field name string
+---@field currentSwitching string|nil
+---@field manualSwitching string|nil
+---@field nextSwitching string|nil
+---@field ready boolean
+---@field timeForGreen number
+---@field staticCams table
+---@field phases IntersectionPhaseDto[]
+
 ---@class RoadDtoFactory
 ---@field createIntersectionDto fun(intersection: table):string,string,string|number,IntersectionDto
 ---@field createIntersectionDtoList fun(intersections: table):string,string,table
