@@ -13,7 +13,7 @@ describe('App Home', () => {
     cy.contains('Ampeln');
     cy.contains('ÖPNV');
     cy.contains('Fuhrpark');
-    cy.contains('Statistik');
+    cy.contains('Einblicke');
   });
 
   it('still renders the home modules after an EEP event', () => {
@@ -24,6 +24,6 @@ describe('App Home', () => {
     cy.contains('Ampeln');
     cy.contains('ÖPNV');
     cy.contains('Fuhrpark');
-    cy.contains('Statistik');
+    cy.contains('Einblicke');
   });
 });

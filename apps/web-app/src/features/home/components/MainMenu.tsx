@@ -33,8 +33,8 @@ function MainMenu() {
         )}
       </AppCardGridContainer>
       <Grid container spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'flex-start', mt: 2 }}>
-        <Button variant="text" startIcon={<BarChartIcon />} onClick={() => navigate('statistics')}>
-          Statistik
+        <Button variant="text" startIcon={<BarChartIcon />} onClick={() => navigate('insights')}>
+          Einblicke
         </Button>
         <Button variant="text" startIcon={<Inventory2Icon />} href="/data">
           Daten
