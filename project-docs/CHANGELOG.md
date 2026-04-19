@@ -48,6 +48,7 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 ### Neu
 
 - ⭐ Haltestellenanzeige für Linien
+- ⭐ Neue Seite mit Einblicken in die App
 
 ### Dokumentation
 
