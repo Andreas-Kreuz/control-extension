@@ -24,7 +24,7 @@ Du findest die aktuelle Version unter Releases auf der GitHub-Seite.
 Gehe auf die Seite mit der neuesten Version [Latest Release](https://github.com/Andreas-Kreuz/control-extension/releases/latest).
 
 Auf dieser Seite lädst du unter **Assets** die ZIP-Datei mit dem Installer für EEP:\
-`control-extension-for-eep-(VERSION)-installer.zip`
+`control-extension-(VERSION).zip`
 
 ## 2. In EEP installieren
 

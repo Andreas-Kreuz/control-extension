@@ -50,8 +50,8 @@ function searchFiles(baseDir, subdirectory, excludePatterns) {
 // Package definitions
 // ---------------------------------------------------------------------------
 
-const INSTALLER_NAME = `control-extension-for-eep-${version}-installer`;
-const COMPAT_INSTALLER_NAME = `ak-compat-layer-for-control-extension-${version}-installer`;
+const INSTALLER_NAME = `control-extension-${version}`;
+const COMPAT_INSTALLER_NAME = `control-extension-${version}-ak-compat`;
 
 const packages = [
   {
