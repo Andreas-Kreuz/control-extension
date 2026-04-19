@@ -309,9 +309,9 @@ end
 ---@return string
 local function getLaneRequestInfoBar(lane)
     local text = ""
-    local max = 10
+    local max = 5
     if lane.tracksUsedForRequest or lane.signalUsedForRequest then
-        text = text .. (lane.queue:isEmpty() and "##########" or "__________")
+        text = text .. (lane.queue:isEmpty() and "#####" or "_____")
     else
         local requests = "X"
         local vehicles = math.min(lane.vehicleCount * lane.fahrzeugMultiplikator, max - 1)
@@ -335,7 +335,7 @@ end
 ---@param self Intersection
 function Intersection:updateLaneTipText()
     local crossing = self
-    local text = fmt.bold(crossing.name) .. "<br>" .. "__________"
+    local text = fmt.bold(crossing.name) .. "<br>" .. "_____"
     for _, lane in pairs(self.lanes) do
         text = TippTextFormatter.appendUpTo1023(text, "<br></j>" .. getLaneRequestInfoBar(lane))
     end
