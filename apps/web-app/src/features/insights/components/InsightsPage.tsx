@@ -61,8 +61,8 @@ function InsightsPage() {
       <AppCardGridContainer sx={{ mt: 3 }}>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <InsightsStatisticsPanel
-            title="Discovery"
-            description="Daten-Erkennung"
+            title="Erkennung"
+            description="Discovery für neue Daten"
             samples={discoveryTimes}
             initializationSamples={discoveryInitializationTimes}
             maxValue={maxStatisticsValue}
@@ -72,8 +72,8 @@ function InsightsPage() {
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <InsightsStatisticsPanel
-            title="Update"
-            description="Daten-Aktualisierung"
+            title="Aktualisierung"
+            description="Update vorhandener Daten"
             samples={updateTimes}
             initializationSamples={updateInitializationTimes}
             maxValue={maxStatisticsValue}
@@ -83,8 +83,8 @@ function InsightsPage() {
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <InsightsStatisticsPanel
-            title="Publisher"
-            description="Daten-Bereitstellung"
+            title="Bereitstellung"
+            description="Publisher kodiert Daten für die Bridge"
             samples={publisherTimes}
             initializationSamples={publisherInitializationTimes}
             maxValue={maxStatisticsValue}
