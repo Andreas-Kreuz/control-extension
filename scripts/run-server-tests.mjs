@@ -12,9 +12,7 @@ const testFiles = readdirSync(buildDir, { recursive: true, withFileTypes: true }
   .filter((entry) => entry.isFile() && entry.name.endsWith('.test.js'))
   .map((entry) => path.join(entry.parentPath ?? entry.path, entry.name))
   .filter((testFile) => {
-    const sourceTestFile = path
-      .join(sourceDir, path.relative(buildDir, testFile))
-      .replace(/\.js$/, '.ts');
+    const sourceTestFile = path.join(sourceDir, path.relative(buildDir, testFile)).replace(/\.js$/, '.ts');
 
     return existsSync(sourceTestFile);
   })

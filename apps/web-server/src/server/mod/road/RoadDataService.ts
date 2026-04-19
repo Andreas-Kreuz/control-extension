@@ -22,7 +22,8 @@ export default class RoadDataService implements DomainRoomService {
       roomType: IntersectionRoom,
       id: 'IntersectionRoom',
       onInterest: { ceType: CeTypes.RoadIntersection, idOfRoom: (room: string) => IntersectionRoom.idOfRoom(room) },
-      jsonCreator: (room: string) => JSON.stringify(this.selector.getIntersection(IntersectionRoom.idOfRoom(room)) ?? null),
+      jsonCreator: (room: string) =>
+        JSON.stringify(this.selector.getIntersection(IntersectionRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: IntersectionLaneRoom,
@@ -31,7 +32,8 @@ export default class RoadDataService implements DomainRoomService {
         ceType: CeTypes.RoadIntersectionLane,
         idOfRoom: (room: string) => IntersectionLaneRoom.idOfRoom(room),
       },
-      jsonCreator: (room: string) => JSON.stringify(this.selector.getIntersectionLane(IntersectionLaneRoom.idOfRoom(room)) ?? null),
+      jsonCreator: (room: string) =>
+        JSON.stringify(this.selector.getIntersectionLane(IntersectionLaneRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: IntersectionSwitchingRoom,
@@ -60,7 +62,8 @@ export default class RoadDataService implements DomainRoomService {
         ceType: CeTypes.RoadSignalTypeDefinition,
         idOfRoom: (room: string) => TrafficLightModelRoom.idOfRoom(room),
       },
-      jsonCreator: (room: string) => JSON.stringify(this.selector.getTrafficLightModel(TrafficLightModelRoom.idOfRoom(room)) ?? null),
+      jsonCreator: (room: string) =>
+        JSON.stringify(this.selector.getTrafficLightModel(TrafficLightModelRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: RoadModuleSettingRoom,
@@ -69,7 +72,8 @@ export default class RoadDataService implements DomainRoomService {
         ceType: CeTypes.RoadModuleSetting,
         idOfRoom: (room: string) => RoadModuleSettingRoom.idOfRoom(room),
       },
-      jsonCreator: (room: string) => JSON.stringify(this.selector.getModuleSetting(RoadModuleSettingRoom.idOfRoom(room)) ?? null),
+      jsonCreator: (room: string) =>
+        JSON.stringify(this.selector.getModuleSetting(RoadModuleSettingRoom.idOfRoom(room)) ?? null),
     });
   }
 

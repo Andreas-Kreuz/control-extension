@@ -13,14 +13,14 @@ export default class DomainRoomManager {
   private roomServices: DomainRoomService[] = [];
   private roomMap: Map<
     DomainRoom,
-      {
-        id: string;
-        jsonCreator: (roomName: string) => string;
-        onInterest?: DomainDataProvider['onInterest'];
-        lastDataCache: Map<string, string>;
-        currentData: Map<string, string>;
-        sockets: Map<Socket, string>;
-      }
+    {
+      id: string;
+      jsonCreator: (roomName: string) => string;
+      onInterest?: DomainDataProvider['onInterest'];
+      lastDataCache: Map<string, string>;
+      currentData: Map<string, string>;
+      sockets: Map<Socket, string>;
+    }
   > = new Map();
 
   constructor(
@@ -105,15 +105,7 @@ export default class DomainRoomManager {
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + eventName);
         socket.emit(eventName, domainRoomSetting.jsonCreator(nameOfRoom));
         if (this.debug)
-          console.log(
-            domainRoomSetting.id,
-            ': sending event',
-            eventName,
-            ' to ',
-            nameOfRoom,
-            ' on socket ',
-            socket.id,
-          );
+          console.log(domainRoomSetting.id, ': sending event', eventName, ' to ', nameOfRoom, ' on socket ', socket.id);
       }
     });
     this.roomServices.forEach((service) => service.onJoinRoom?.(socket, nameOfRoom));

@@ -157,7 +157,9 @@ if (!force) {
     process.exit(0);
   }
 
-  console.log(`[docs:assets] ${missingAssets.length} referenced generated asset file(s) missing; generating screenshots`);
+  console.log(
+    `[docs:assets] ${missingAssets.length} referenced generated asset file(s) missing; generating screenshots`,
+  );
   missingAssets.forEach((assetUrl) => console.log(`  missing: ${assetUrl}`));
 } else {
   console.log('[docs:assets] force mode enabled; rebuilding generated screenshot assets');

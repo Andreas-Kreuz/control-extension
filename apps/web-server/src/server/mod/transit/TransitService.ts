@@ -74,7 +74,8 @@ export default class TransitService implements DomainRoomService {
         ceType: CeTypes.TransitLineName,
         idOfRoom: (room: string) => TransitLineNameRoom.idOfRoom(room),
       },
-      jsonCreator: (room: string): string => JSON.stringify(this.transitSelector.getTransitLineName(TransitLineNameRoom.idOfRoom(room)) ?? null),
+      jsonCreator: (room: string): string =>
+        JSON.stringify(this.transitSelector.getTransitLineName(TransitLineNameRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TransitTrainRoom,
@@ -83,7 +84,8 @@ export default class TransitService implements DomainRoomService {
         ceType: CeTypes.TransitTrain,
         idOfRoom: (room: string) => TransitTrainRoom.idOfRoom(room),
       },
-      jsonCreator: (room: string): string => JSON.stringify(this.transitSelector.getTransitTrain(TransitTrainRoom.idOfRoom(room)) ?? null),
+      jsonCreator: (room: string): string =>
+        JSON.stringify(this.transitSelector.getTransitTrain(TransitTrainRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TransitModuleSettingRoom,
@@ -93,7 +95,9 @@ export default class TransitService implements DomainRoomService {
         idOfRoom: (room: string) => TransitModuleSettingRoom.idOfRoom(room),
       },
       jsonCreator: (room: string): string =>
-        JSON.stringify(this.publicTransportSettingsSelector.getSetting(TransitModuleSettingRoom.idOfRoom(room)) ?? null),
+        JSON.stringify(
+          this.publicTransportSettingsSelector.getSetting(TransitModuleSettingRoom.idOfRoom(room)) ?? null,
+        ),
     });
   }
 

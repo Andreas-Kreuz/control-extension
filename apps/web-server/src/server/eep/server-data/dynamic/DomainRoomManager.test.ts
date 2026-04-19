@@ -100,7 +100,10 @@ function testDisconnectReleasesAllSocketInterests(): void {
 
 export async function run(): Promise<void> {
   await runTest('domain room manager shares interest across room subscribers', testJoinAndLeaveRetainSharedInterest);
-  await runTest('domain room manager releases socket interests on disconnect', testDisconnectReleasesAllSocketInterests);
+  await runTest(
+    'domain room manager releases socket interests on disconnect',
+    testDisconnectReleasesAllSocketInterests,
+  );
 }
 
 if (require.main === module) {
