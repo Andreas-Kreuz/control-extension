@@ -73,7 +73,7 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
           const details = detailsIntersection(i);
           return [
             { title: 'Modus & Schaltung', component: <IntersectionControlSection intersection={details} /> },
-            { title: 'Phasen', component: <IntersectionPhasesSection intersection={details} /> },
+            // { title: 'Phasen', component: <IntersectionPhasesSection intersection={details} /> },
             { title: 'Kameras', component: <IntersectionCamsSection intersection={details} /> },
           ];
         }}

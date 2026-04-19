@@ -20,6 +20,9 @@ local function copyPhases(phases)
         for tlKey, trafficLight in pairs(phase.trafficLights or {}) do
             trafficLights[tlKey] = {
                 signalId = trafficLight.signalId,
+                signalKind = trafficLight.signalKind,
+                signalKey = trafficLight.signalKey,
+                signalName = trafficLight.signalName,
                 type = trafficLight.type,
                 trafficSignalName = trafficLight.trafficSignalName,
                 pedestrianSignalName = trafficLight.pedestrianSignalName,

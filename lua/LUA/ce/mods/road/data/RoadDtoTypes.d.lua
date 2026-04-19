@@ -14,6 +14,9 @@
 
 ---@class IntersectionPhaseTrafficLightDto
 ---@field signalId number
+---@field signalKind string
+---@field signalKey string
+---@field signalName string|nil
 ---@field type string
 ---@field trafficSignalName string|nil
 ---@field pedestrianSignalName string|nil

@@ -2,6 +2,9 @@
 // Room: intersections
 export interface IntersectionPhaseTrafficLightLuaDto {
   signalId: number;
+  signalKind?: 'TRAFFIC' | 'PEDESTRIAN';
+  signalKey?: string;
+  signalName?: string;
   type: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
   trafficSignalName?: string;
   pedestrianSignalName?: string;

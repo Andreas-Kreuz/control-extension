@@ -13,15 +13,25 @@ end
 local function createPhaseDto(crossing, sequence, order)
     local trafficLights = {}
     for trafficLight, type in pairs(sequence.trafficLights) do
+        local signalKind = type == "PEDESTRIAN" and "PEDESTRIAN" or "TRAFFIC"
+        local signalName = signalKind == "PEDESTRIAN" and trafficLight.pedestrianSignalName or
+            trafficLight.trafficSignalName
         table.insert(trafficLights, {
             signalId = trafficLight.signalId,
+            signalKind = signalKind,
+            signalKey = tostring(trafficLight.signalId) .. ":" .. signalKind,
+            signalName = signalName,
             type = type,
             trafficSignalName = trafficLight.trafficSignalName,
             pedestrianSignalName = trafficLight.pedestrianSignalName,
             use = trafficLight.use
         })
     end
-    table.sort(trafficLights, function (a, b) return a.signalId < b.signalId end)
+    table.sort(trafficLights, function (a, b)
+        if (a.signalName or "") ~= (b.signalName or "") then return (a.signalName or "") < (b.signalName or "") end
+        if a.signalId ~= b.signalId then return a.signalId < b.signalId end
+        return a.signalKind < b.signalKind
+    end)
 
     return {
         id = crossing.name .. "-" .. sequence.name,

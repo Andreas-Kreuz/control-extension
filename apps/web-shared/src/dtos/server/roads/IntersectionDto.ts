@@ -1,6 +1,9 @@
 // Produced by: apps/web-server/src/server/mod/road/RoadSelector.ts
 export interface IntersectionPhaseTrafficLightDto {
   signalId: number;
+  signalKind?: 'TRAFFIC' | 'PEDESTRIAN';
+  signalKey?: string;
+  signalName?: string;
   type: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
   trafficSignalName?: string;
   pedestrianSignalName?: string;

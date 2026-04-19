@@ -15,26 +15,42 @@ function phaseWidth(phase: IntersectionPhase) {
   return Math.max(minPhaseWidth, phase.greenPhaseSeconds * 8);
 }
 
-function signalRowsFor(phases: IntersectionPhase[]) {
-  const rows = new Map<number, IntersectionPhaseTrafficLight>();
-  phases.forEach((phase) => {
-    phase.trafficLights.forEach((trafficLight) => {
-      if (!rows.has(trafficLight.signalId)) rows.set(trafficLight.signalId, trafficLight);
-    });
-  });
-  return Array.from(rows.values()).sort((a, b) => a.signalId - b.signalId);
+function signalKindFor(trafficLight: IntersectionPhaseTrafficLight) {
+  return trafficLight.signalKind ?? (trafficLight.type === 'PEDESTRIAN' ? 'PEDESTRIAN' : 'TRAFFIC');
 }
 
-function phaseHasSignal(phase: IntersectionPhase, signalId: number) {
-  return phase.trafficLights.some((trafficLight) => trafficLight.signalId === signalId);
+function signalKeyFor(trafficLight: IntersectionPhaseTrafficLight) {
+  return trafficLight.signalKey ?? `${trafficLight.signalId}:${signalKindFor(trafficLight)}`;
+}
+
+function signalNameFor(trafficLight: IntersectionPhaseTrafficLight) {
+  if (trafficLight.signalName !== undefined) return trafficLight.signalName;
+  if (signalKindFor(trafficLight) === 'PEDESTRIAN') return trafficLight.pedestrianSignalName ?? '';
+  return trafficLight.trafficSignalName ?? '';
+}
+
+function signalRowsFor(phases: IntersectionPhase[]) {
+  const rows = new Map<string, IntersectionPhaseTrafficLight>();
+  phases.forEach((phase) => {
+    phase.trafficLights.forEach((trafficLight) => {
+      const signalKey = signalKeyFor(trafficLight);
+      if (!rows.has(signalKey)) rows.set(signalKey, trafficLight);
+    });
+  });
+  return Array.from(rows.values()).sort(
+    (a, b) =>
+      signalNameFor(a).localeCompare(signalNameFor(b), undefined, { numeric: true }) ||
+      a.signalId - b.signalId ||
+      signalKindFor(a).localeCompare(signalKindFor(b)),
+  );
+}
+
+function phaseHasSignal(phase: IntersectionPhase, signalKey: string) {
+  return phase.trafficLights.some((trafficLight) => signalKeyFor(trafficLight) === signalKey);
 }
 
 function signalRowNames(trafficLight: IntersectionPhaseTrafficLight) {
-  if (trafficLight.use === 'PEDESTRIAN_ONLY') return [trafficLight.pedestrianSignalName ?? ''];
-  if (trafficLight.use === 'TRAFFIC_AND_PEDESTRIAN') {
-    return [trafficLight.trafficSignalName ?? '', trafficLight.pedestrianSignalName ?? ''];
-  }
-  return [trafficLight.trafficSignalName ?? ''];
+  return [signalNameFor(trafficLight)];
 }
 
 function signalTooltipName(trafficLight: IntersectionPhaseTrafficLight) {
@@ -98,48 +114,48 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
               );
             })}
           </Box>
-          {signalRows.map((trafficLight) => (
-            <Box key={trafficLight.signalId} sx={{ display: 'flex', alignItems: 'center', height: rowHeight }}>
-              <Stack
-                sx={{
-                  width: rowLabelWidth,
-                  pr: 1,
-                  textAlign: 'right',
-                  color: 'text.secondary',
-                  flexShrink: 0,
-                  lineHeight: 1.1,
-                }}
-              >
-                {signalRowNames(trafficLight).map((name, index) => (
-                  <Typography key={`${trafficLight.signalId}-${index}`} variant="caption" noWrap>
-                    {name}
-                  </Typography>
-                ))}
-              </Stack>
-              {phases.map((phase) => {
-                const green = phaseHasSignal(phase, trafficLight.signalId);
-                const stateLabel = phaseStateLabel(intersection, phase);
-                return (
-                  <Tooltip
-                    key={`${phase.id}-${trafficLight.signalId}`}
-                    title={signalTooltipText(trafficLight, green, phase)}
-                  >
-                    <Box
-                      sx={{
-                        width: phaseWidth(phase),
-                        height: 16,
-                        bgcolor: green ? '#7cb342' : '#e9552a',
-                        borderLeft: 1,
-                        borderRight: stateLabel ? 2 : 0,
-                        borderColor: stateLabel ? theme.palette.primary.main : 'rgba(255,255,255,0.5)',
-                        boxShadow: stateLabel ? `inset 0 0 0 2px ${theme.palette.primary.main}` : undefined,
-                      }}
-                    />
-                  </Tooltip>
-                );
-              })}
-            </Box>
-          ))}
+          {signalRows.map((trafficLight) => {
+            const signalKey = signalKeyFor(trafficLight);
+            return (
+              <Box key={signalKey} sx={{ display: 'flex', alignItems: 'center', height: rowHeight }}>
+                <Stack
+                  sx={{
+                    width: rowLabelWidth,
+                    pr: 1,
+                    textAlign: 'right',
+                    color: 'text.secondary',
+                    flexShrink: 0,
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {signalRowNames(trafficLight).map((name, index) => (
+                    <Typography key={`${signalKey}-${index}`} variant="caption" noWrap>
+                      {name}
+                    </Typography>
+                  ))}
+                </Stack>
+                {phases.map((phase) => {
+                  const green = phaseHasSignal(phase, signalKey);
+                  const stateLabel = phaseStateLabel(intersection, phase);
+                  return (
+                    <Tooltip key={`${phase.id}-${signalKey}`} title={signalTooltipText(trafficLight, green, phase)}>
+                      <Box
+                        sx={{
+                          width: phaseWidth(phase),
+                          height: 16,
+                          bgcolor: green ? '#7cb342' : '#e9552a',
+                          borderLeft: 1,
+                          borderRight: stateLabel ? 2 : 0,
+                          borderColor: stateLabel ? theme.palette.primary.main : 'rgba(255,255,255,0.5)',
+                          boxShadow: stateLabel ? `inset 0 0 0 2px ${theme.palette.primary.main}` : undefined,
+                        }}
+                      />
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            );
+          })}
         </Box>
       </Box>
     </Stack>

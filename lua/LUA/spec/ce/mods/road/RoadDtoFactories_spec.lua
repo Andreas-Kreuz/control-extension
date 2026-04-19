@@ -27,9 +27,20 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                     prio = 2,
                     greenPhaseSeconds = 15,
                     trafficLights = {
-                        { signalId = 1, type = "CAR", trafficSignalName = "K1", use = "TRAFFIC_ONLY" },
+                        {
+                                        signalId = 1,
+                                        signalKind = "TRAFFIC",
+                                        signalKey = "1:TRAFFIC",
+                                        signalName = "K1",
+                                        type = "CAR",
+                                        trafficSignalName = "K1",
+                                        use = "TRAFFIC_ONLY"
+                                    },
                         {
                             signalId = 3,
+                            signalKind = "PEDESTRIAN",
+                            signalKey = "3:PEDESTRIAN",
+                            signalName = "F1",
                             type = "PEDESTRIAN",
                             pedestrianSignalName = "F1",
                             use = "PEDESTRIAN_ONLY"
@@ -154,9 +165,20 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                 prio = 2,
                                 greenPhaseSeconds = 15,
                                 trafficLights = {
-                                    { signalId = 1, type = "CAR", trafficSignalName = "K1", use = "TRAFFIC_ONLY" },
+                                    {
+                                        signalId = 1,
+                                        signalKind = "TRAFFIC",
+                                        signalKey = "1:TRAFFIC",
+                                        signalName = "K1",
+                                        type = "CAR",
+                                        trafficSignalName = "K1",
+                                        use = "TRAFFIC_ONLY"
+                                    },
                                     {
                                         signalId = 3,
+                                        signalKind = "PEDESTRIAN",
+                                        signalKey = "3:PEDESTRIAN",
+                                        signalName = "F1",
                                         type = "PEDESTRIAN",
                                         pedestrianSignalName = "F1",
                                         use = "PEDESTRIAN_ONLY"
@@ -183,9 +205,20 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                 prio = 2,
                                 greenPhaseSeconds = 15,
                                 trafficLights = {
-                                    { signalId = 1, type = "CAR", trafficSignalName = "K1", use = "TRAFFIC_ONLY" },
+                                    {
+                                        signalId = 1,
+                                        signalKind = "TRAFFIC",
+                                        signalKey = "1:TRAFFIC",
+                                        signalName = "K1",
+                                        type = "CAR",
+                                        trafficSignalName = "K1",
+                                        use = "TRAFFIC_ONLY"
+                                    },
                                     {
                                         signalId = 3,
+                                        signalKind = "PEDESTRIAN",
+                                        signalKey = "3:PEDESTRIAN",
+                                        signalName = "F1",
                                         type = "PEDESTRIAN",
                                         pedestrianSignalName = "F1",
                                         use = "PEDESTRIAN_ONLY"
@@ -422,12 +455,23 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         prio = 4,
                         greenPhaseSeconds = 12,
                         trafficLights = {
-                            { signalId = 1, type = "CAR", trafficSignalName = "K1", use = "TRAFFIC_ONLY" },
                             {
                                 signalId = 3,
+                                signalKind = "PEDESTRIAN",
+                                signalKey = "3:PEDESTRIAN",
+                                signalName = "F1",
                                 type = "PEDESTRIAN",
                                 pedestrianSignalName = "F1",
                                 use = "PEDESTRIAN_ONLY"
+                            },
+                            {
+                                signalId = 1,
+                                signalKind = "TRAFFIC",
+                                signalKey = "1:TRAFFIC",
+                                signalName = "K1",
+                                type = "CAR",
+                                trafficSignalName = "K1",
+                                use = "TRAFFIC_ONLY"
                             }
                         }
                     }, data.intersections[1].phases[1])

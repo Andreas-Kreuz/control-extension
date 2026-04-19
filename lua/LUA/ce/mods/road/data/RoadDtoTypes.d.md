@@ -33,6 +33,9 @@
 | Name                   | Typ           |
 | ---------------------- | ------------- |
 | `signalId`             | `number`      |
+| `signalKind`           | `string`      |
+| `signalKey`            | `string`      |
+| `signalName`           | `string\|nil` |
 | `type`                 | `string`      |
 | `trafficSignalName`    | `string\|nil` |
 | `pedestrianSignalName` | `string\|nil` |
