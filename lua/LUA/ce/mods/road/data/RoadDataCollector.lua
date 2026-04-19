@@ -15,7 +15,10 @@ local function createPhaseDto(crossing, sequence, order)
     for trafficLight, type in pairs(sequence.trafficLights) do
         table.insert(trafficLights, {
             signalId = trafficLight.signalId,
-            type = type
+            type = type,
+            trafficSignalName = trafficLight.trafficSignalName,
+            pedestrianSignalName = trafficLight.pedestrianSignalName,
+            use = trafficLight.use
         })
     end
     table.sort(trafficLights, function (a, b) return a.signalId < b.signalId end)
@@ -82,6 +85,9 @@ function RoadDataCollector.collectCrossings(allCrossings)
             local trafficLight = {
                 id = tl.signalId,
                 signalId = tl.signalId,
+                trafficSignalName = tl.trafficSignalName,
+                pedestrianSignalName = tl.pedestrianSignalName,
+                use = tl.use,
                 modelId = tl.trafficLightModel.name,
                 currentPhase = tl.phase,
                 intersectionId = intersectionIdCounter,
@@ -196,6 +202,14 @@ function RoadDataCollector.collectModuleSettings()
             type = "boolean",
             value = IntersectionSettings.showModelInfoOnSignal,
             eepFunction = "IntersectionSettings.setShowModelInfoOnSignal"
+        },
+        {
+            category = "Tipp-Texte fuer Ampeln",
+            name = "Kurzname und Farbe",
+            description = "Zeigt den farbigen Ampelnamen und die aktuelle Farbe",
+            type = "boolean",
+            value = IntersectionSettings.showNameAndSequenceOnSignal,
+            eepFunction = "IntersectionSettings.setShowNameAndSequenceOnSignal"
         },
         {
             category = "Tipp-Texte fuer Ampeln",

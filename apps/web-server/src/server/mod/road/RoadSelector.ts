@@ -83,6 +83,9 @@ export default class RoadSelector {
       (dto) => ({
         id: dto.id,
         signalId: dto.signalId,
+        ...(dto.trafficSignalName !== undefined ? { trafficSignalName: dto.trafficSignalName } : {}),
+        ...(dto.pedestrianSignalName !== undefined ? { pedestrianSignalName: dto.pedestrianSignalName } : {}),
+        use: dto.use,
         modelId: dto.modelId,
         currentPhase: dto.currentPhase,
         intersectionId: dto.intersectionId,

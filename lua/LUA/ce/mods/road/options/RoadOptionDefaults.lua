@@ -88,14 +88,20 @@ function RoadOptionDefaults.create()
                     intersectionId = "always",
                     lightStructures = "always",
                     modelId = "always",
-                    signalId = "always"
+                    pedestrianSignalName = "always",
+                    signalId = "always",
+                    trafficSignalName = "always",
+                    use = "always"
                 },
                 fieldPublish = {
                     axisStructures = "always",
                     intersectionId = "always",
                     lightStructures = "always",
                     modelId = "always",
+                    pedestrianSignalName = "always",
                     signalId = "always",
+                    trafficSignalName = "always",
+                    use = "always",
                     currentPhase = "oninterest"
                 }
             },

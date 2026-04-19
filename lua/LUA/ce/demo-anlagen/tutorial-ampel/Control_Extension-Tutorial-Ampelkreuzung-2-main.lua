@@ -49,14 +49,14 @@ end
 --    |    +----------------------- Legt eine neue Ampel an
 --    |    |                +------ Signal-ID dieser Ampel
 --    |    |                |   +-- Modell dieser Ampel - weiss wo rot, gelb und gruen / Fussgaenger ist
-local K1 = TrafficLight:new("K1/F1", 07, TrafficLightModel.JS2_3er_mit_FG)
+local K1 = TrafficLight:new("K1", 07, TrafficLightModel.JS2_3er_mit_FG)
 -- Ampel K1 ist gleichzeitig eine Fußgängerampel
-local K2 = TrafficLight:new("K2/F2", 08, TrafficLightModel.JS2_3er_mit_FG)
-local K3 = TrafficLight:new("K3/F3", 09, TrafficLightModel.JS2_3er_mit_FG)
-local K4 = TrafficLight:new("K4/F4", 10, TrafficLightModel.JS2_3er_mit_FG)
-local K5 = TrafficLight:new("K5/F5", 12, TrafficLightModel.JS2_3er_mit_FG)
+local K2 = TrafficLight:new("K2", 08, TrafficLightModel.JS2_3er_mit_FG)
+local K3 = TrafficLight:new("K3", 09, TrafficLightModel.JS2_3er_mit_FG)
+local K4 = TrafficLight:new("K4", 10, TrafficLightModel.JS2_3er_mit_FG)
+local K5 = TrafficLight:new("K5", 12, TrafficLightModel.JS2_3er_mit_FG)
 local K6 = TrafficLight:new("K6", 13, TrafficLightModel.JS2_3er_ohne_FG) -- dies ist keine Fußgängerampel
-local K7 = TrafficLight:new("K7/F6", 11, TrafficLightModel.JS2_3er_mit_FG)
+local K7 = TrafficLight:new("K7", 11, TrafficLightModel.JS2_3er_mit_FG)
 
 -- Ampeln für die Straßenbahn nutzen die Lichtfunktion der einzelnen Immobilien
 local S1 = TrafficLight:new("S1", 14, TrafficLightModel.Unsichtbar_2er,
@@ -70,13 +70,12 @@ local S2 = TrafficLight:new("S2", 15, TrafficLightModel.Unsichtbar_2er,
                             "#31_Straba Signal anhalten",  --   gelb
                             "#33_Straba Signal A")         --    Anforderung
 
-local F1 =
-    K1 -- Die Fussgängerampel F1 ist die selbe, wie Ampel K1, zeigt aber später "Fußgänger grün"
-local F2 = K2
-local F3 = K3
-local F4 = K4
-local F5 = K5
-local F6 = K7
+local F1 = K1:withPedestrian("F1")
+local F2 = K2:withPedestrian("F2")
+local F3 = K3:withPedestrian("F3")
+local F4 = K4:withPedestrian("F4")
+local F5 = K5:withPedestrian("F5")
+local F6 = K7:withPedestrian("F6")
 
 --   +-----------------------------------------Neue Fahrspur
 --   |        +------------------------------- Name der Fahrspur

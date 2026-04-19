@@ -5,6 +5,7 @@ local IntersectionSettings = {}
 IntersectionSettings.showRequestsOnSignal = false
 IntersectionSettings.showSequenceOnSignal = false
 IntersectionSettings.showModelInfoOnSignal = false
+IntersectionSettings.showNameAndSequenceOnSignal = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showLanesOnStructure = false
 
@@ -18,6 +19,8 @@ function IntersectionSettings.loadSettingsFromSlot(eepSaveId)
         IntersectionSettings.showSequenceOnSignal
     IntersectionSettings.showModelInfoOnSignal = StorageUtility.toboolean(data["modelInfo"]) or
         IntersectionSettings.showModelInfoOnSignal
+    IntersectionSettings.showNameAndSequenceOnSignal = StorageUtility.toboolean(data["nameSeqInfo"]) or
+        IntersectionSettings.showNameAndSequenceOnSignal
     IntersectionSettings.showSignalIdOnSignal = StorageUtility.toboolean(data["sigInfo"]) or
         IntersectionSettings.showSignalIdOnSignal
     IntersectionSettings.showLanesOnStructure = StorageUtility.toboolean(data["laneInfo"]) or
@@ -30,6 +33,7 @@ function IntersectionSettings.saveSettings()
             reqInfo = tostring(IntersectionSettings.showRequestsOnSignal),
             seqInfo = tostring(IntersectionSettings.showSequenceOnSignal),
             modelInfo = tostring(IntersectionSettings.showModelInfoOnSignal),
+            nameSeqInfo = tostring(IntersectionSettings.showNameAndSequenceOnSignal),
             sigInfo = tostring(IntersectionSettings.showSignalIdOnSignal),
             laneInfo = tostring(IntersectionSettings.showLanesOnStructure)
         }
@@ -52,6 +56,12 @@ end
 function IntersectionSettings.setShowSequenceOnSignal(value)
     assert(value == true or value == false)
     IntersectionSettings.showSequenceOnSignal = value
+    IntersectionSettings.saveSettings()
+end
+
+function IntersectionSettings.setShowNameAndSequenceOnSignal(value)
+    assert(value == true or value == false)
+    IntersectionSettings.showNameAndSequenceOnSignal = value
     IntersectionSettings.saveSettings()
 end
 

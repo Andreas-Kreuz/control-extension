@@ -24,18 +24,18 @@ local K10 = TrafficLight:new("K10", 13, TrafficLightModel.JS2_3er_mit_FG)
 local K11 = TrafficLight:new("K11", 15, TrafficLightModel.JS2_3er_mit_FG)
 local K12 = TrafficLight:new("K12", 24, TrafficLightModel.JS2_3er_ohne_FG)
 
-local F1 = K1 -- K1 wird später auch als Fussgaenger-Ampel F1 verwendet
-local F2 = K3 -- K3 wird später auch als Fussgaenger-Ampel F2 verwendet
-local F3 = TrafficLight:new("F3", 20, TrafficLightModel.JS2_2er_nur_FG)
-local F4 = TrafficLight:new("F4", 21, TrafficLightModel.JS2_2er_nur_FG)
-local F5 = K4
-local F6 = K5
-local F7 = K7
-local F8 = K8
-local F9 = TrafficLight:new("F9", 22, TrafficLightModel.JS2_2er_nur_FG)
-local F10 = TrafficLight:new("F10", 23, TrafficLightModel.JS2_2er_nur_FG)
-local F11 = K10
-local F12 = K11
+local F1 = K1:withPedestrian("F1") -- K1 wird später auch als Fussgaenger-Ampel F1 verwendet
+local F2 = K3:withPedestrian("F2") -- K3 wird später auch als Fussgaenger-Ampel F2 verwendet
+local F3 = TrafficLight:newPedestrianOnly("F3", 20, TrafficLightModel.JS2_2er_nur_FG)
+local F4 = TrafficLight:newPedestrianOnly("F4", 21, TrafficLightModel.JS2_2er_nur_FG)
+local F5 = K4:withPedestrian("F5")
+local F6 = K5:withPedestrian("F6")
+local F7 = K7:withPedestrian("F7")
+local F8 = K8:withPedestrian("F8")
+local F9 = TrafficLight:newPedestrianOnly("F9", 22, TrafficLightModel.JS2_2er_nur_FG)
+local F10 = TrafficLight:newPedestrianOnly("F10", 23, TrafficLightModel.JS2_2er_nur_FG)
+local F11 = K10:withPedestrian("F11")
+local F12 = K11:withPedestrian("F12")
 -------------------------------------------------------------------------------
 -- Definiere die Fahrspuren fuer die Kreuzung
 -------------------------------------------------------------------------------

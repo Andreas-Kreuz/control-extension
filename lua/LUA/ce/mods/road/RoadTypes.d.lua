@@ -45,7 +45,9 @@
 
 ---@class TrafficLight
 ---@field type string
----@field name string
+---@field trafficSignalName string|nil
+---@field pedestrianSignalName string|nil
+---@field use string
 ---@field signalId number
 ---@field trafficLightModel TrafficLightModel
 ---@field lightStructures table
@@ -57,6 +59,13 @@
 ---@field sequenceInfo any
 ---@field laneInfo any
 ---@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
+---@field newPedestrianOnly fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
+---@field withPedestrian fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
+---@field asPedestrianOnly fun(self: TrafficLight):TrafficLight
+---@field trafficSignalNameTippText fun(self: TrafficLight):string
+---@field pedestrianSignalNameTippText fun(self: TrafficLight):string
+---@field signalNamesTippText fun(self: TrafficLight):string
+---@field signalNamesText fun(self: TrafficLight):string
 ---@field addLightStructure fun(self: TrafficLight, redStructure?: string, greenStructure?: string,
 --- yellowStructure?: string, requestStructure?: string):nil
 ---@field addAxisStructure fun(self: TrafficLight, structureName: string, axisName: string, positionDefault: number,
@@ -212,6 +221,9 @@
 ---@class IntersectionPhaseTrafficLightDto
 ---@field signalId number
 ---@field type string
+---@field trafficSignalName string|nil
+---@field pedestrianSignalName string|nil
+---@field use string
 
 ---@class IntersectionPhaseDto
 ---@field id string

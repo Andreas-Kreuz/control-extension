@@ -13,6 +13,11 @@ local fmt = require("ce.hub.eep.TippTextFormatter")
 ------------------------------------------------------------------------------------------
 local TrafficLight = {}
 TrafficLight.debug = CeStartWithDebug or false
+TrafficLight.Use = {
+    TRAFFIC_ONLY = "TRAFFIC_ONLY",
+    PEDESTRIAN_ONLY = "PEDESTRIAN_ONLY",
+    TRAFFIC_AND_PEDESTRIAN = "TRAFFIC_AND_PEDESTRIAN"
+}
 local registeredSignals = {}
 local counter = -1
 
@@ -35,7 +40,9 @@ function TrafficLight:new(name, signalId, trafficLightModel, redStructure, green
     EEPShowInfoSignal(signalId, false)
     if signalId < 0 then counter = counter - 1 end
     local o = {
-        name = name,
+        trafficSignalName = name,
+        pedestrianSignalName = nil,
+        use = TrafficLight.Use.TRAFFIC_ONLY,
         signalId = signalId > 0 and signalId or counter,
         trafficLightModel = trafficLightModel,
         phase = signalId > 0 and trafficLightModel:phaseOf(EEPGetSignal(signalId)) or TrafficLightState.RED,
@@ -59,6 +66,26 @@ function TrafficLight:new(name, signalId, trafficLightModel, redStructure, green
 
     registeredSignals[tostring(signalId)] = o
     return o
+end
+
+function TrafficLight:newPedestrianOnly(name, signalId, trafficLightModel, redStructure, greenStructure,
+                                        yellowStructure, requestStructure)
+    return self:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
+                    requestStructure):asPedestrianOnly()
+end
+
+function TrafficLight:withPedestrian(pedestrianSignalName)
+    assert(type(pedestrianSignalName) == "string", "Need 'pedestrianSignalName' as string")
+    self.pedestrianSignalName = pedestrianSignalName
+    self.use = TrafficLight.Use.TRAFFIC_AND_PEDESTRIAN
+    return self
+end
+
+function TrafficLight:asPedestrianOnly()
+    self.pedestrianSignalName = self.pedestrianSignalName or self.trafficSignalName
+    self.trafficSignalName = nil
+    self.use = TrafficLight.Use.PEDESTRIAN_ONLY
+    return self
 end
 
 --- Schaltet das Licht der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grün oder Anforderung
@@ -153,18 +180,77 @@ local function getSignalFunctionsTippText(signalId, trafficLightModel)
     end
 end
 
+function TrafficLight:trafficSignalNameTippText()
+    local name = self.trafficSignalName and "<b>" .. self.trafficSignalName .. "</b>" or ""
+    local phase = self.phase
+    if phase == TrafficLightState.GREEN then
+        return fmt.green(name)
+    elseif phase == TrafficLightState.OFF then
+        return fmt.greyText(name)
+    elseif phase == TrafficLightState.YELLOW or phase == TrafficLightState.REDYELLOW or
+        phase == TrafficLightState.GREENYELLOW or phase == TrafficLightState.OFF_BLINKING then
+        return fmt.bgYellow(name)
+    else
+        return fmt.bgRed(name)
+    end
+end
+
+function TrafficLight:pedestrianSignalNameTippText()
+    local name = self.pedestrianSignalName and "<b>" .. self.pedestrianSignalName .. "</b>" or ""
+    local phase = self.phase
+    if phase == TrafficLightState.PEDESTRIAN then
+        return fmt.green(name)
+    elseif phase == TrafficLightState.OFF or phase == TrafficLightState.OFF_BLINKING then
+        return fmt.greyText(name)
+    else
+        return fmt.bgRed(name)
+    end
+end
+
+function TrafficLight:signalNamesTippText()
+    if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then
+        return self:pedestrianSignalNameTippText()
+    elseif self.use == TrafficLight.Use.TRAFFIC_AND_PEDESTRIAN then
+        return self:trafficSignalNameTippText() .. "<br>" .. self:pedestrianSignalNameTippText()
+    else
+        return self:trafficSignalNameTippText()
+    end
+end
+
+function TrafficLight:signalNamesText()
+    if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then
+        return self.pedestrianSignalName or ""
+    elseif self.use == TrafficLight.Use.TRAFFIC_AND_PEDESTRIAN then
+        return (self.trafficSignalName or "") .. "/" .. (self.pedestrianSignalName or "")
+    else
+        return self.trafficSignalName or ""
+    end
+end
+
 --- Stellt die vorher gesetzten Tipp-Texte dar.
 --
 function TrafficLight:refreshInfo()
     local showSwitching = IntersectionSettings.showSequenceOnSignal
     local showAllSignals = IntersectionSettings.showSignalIdOnSignal
     local showModelInfo = IntersectionSettings.showModelInfoOnSignal
+    local showNameAndColor = IntersectionSettings.showNameAndSequenceOnSignal
     local showRequests = IntersectionSettings.showRequestsOnSignal and self.laneInfo:len() > 0
-    local showInfo = showSwitching or showAllSignals or showModelInfo or showRequests
+    local showInfo = showSwitching or showAllSignals or showModelInfo or showNameAndColor or showRequests
 
     self:showInfoText(showInfo)
     if showInfo then
-        local infoText = fmt.appendUpTo1023("", "<j><b>" .. self.name .. "</b> (Signal " .. self.signalId .. ")</j>")
+        local infoText = "<j>"
+
+        if showNameAndColor and self.phase then
+            local name = showNameAndColor and self:signalNamesTippText() or
+                "<b>" .. self:signalNamesText() .. "</b>"
+            infoText = fmt.appendUpTo1023(infoText, name)
+        else
+            local signalName = self:signalNamesText()
+            infoText = fmt.appendUpTo1023(infoText, signalName .. " (Signal " .. self.signalId .. ")")
+        end
+
+        infoText = fmt.appendUpTo1023(infoText, "<br></j>")
 
         if showModelInfo then
             local signalFunctionsTippText = getSignalFunctionsTippText(self.signalId, self.trafficLightModel)
@@ -177,14 +263,14 @@ function TrafficLight:refreshInfo()
             infoText = fmt.appendUpTo1023(infoText, self.sequenceInfo)
         end
 
-        if showSwitching and self.phase and self.reason then
+        if showSwitching and not showNameAndColor and self.phase and self.reason then
             local title = "<br><br>"
             if infoText:len() > 0 then infoText = fmt.appendUpTo1023(infoText, title) end
             infoText = fmt.appendUpTo1023(infoText, string.format(" %s (%s) ", self.phase, self.reason))
         end
 
         if showRequests then
-            local title = "<br><br><b>" .. "Fahrspur/Wartezeit: " .. "</b>"
+            local title = "<br><b>" .. "Fahrspur/Wartezeit: " .. "</b>"
             if infoText:len() > 0 then infoText = fmt.appendUpTo1023(infoText, title) end
             infoText = fmt.appendUpTo1023(infoText, self.laneInfo)
         end
@@ -205,6 +291,7 @@ end
 function TrafficLight:switchTo(phase, reason)
     assert(type(phase) == "string", "Need 'phase' as string")
     self.phase = phase
+    self.reason = reason
     local lightDbg = self:switchStructureLight()
     local axisDbg = self:switchStructureAxis()
 

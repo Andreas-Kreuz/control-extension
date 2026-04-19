@@ -37,7 +37,7 @@ local function updateLaneSignal(lane, reason)
         local greenTrafficLights = {}
         for trafficLight in pairs(lane.trafficLightsToDriveOn) do
             if Lane.debug then
-                print(string.format("[#Lane] %s can drive on: %s (%s): %s", lane.name, trafficLight.name,
+                print(string.format("[#Lane] %s can drive on: %s (%s): %s", lane.name, trafficLight:signalNamesText(),
                                     trafficLight.phase, tostring(TrafficLightState.canDrive(trafficLight.phase))))
             end
             if TrafficLightState.canDrive(trafficLight.phase) then

@@ -30,10 +30,13 @@
 
 ### `IntersectionPhaseTrafficLightDto`
 
-| Name       | Typ      |
-| ---------- | -------- |
-| `signalId` | `number` |
-| `type`     | `string` |
+| Name                   | Typ           |
+| ---------------------- | ------------- |
+| `signalId`             | `number`      |
+| `type`                 | `string`      |
+| `trafficSignalName`    | `string\|nil` |
+| `pedestrianSignalName` | `string\|nil` |
+| `use`                  | `string`      |
 
 ## CeType `ce.mods.road.IntersectionLane`
 
@@ -73,15 +76,18 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionTrafficLightDto`
 
-| Name              | Typ                                                   |
-| ----------------- | ----------------------------------------------------- |
-| `id`              | `number`                                              |
-| `signalId`        | `number`                                              |
-| `modelId`         | `string`                                              |
-| `currentPhase`    | `string`                                              |
-| `intersectionId`  | `number`                                              |
-| `lightStructures` | `table<string, IntersectionTrafficLightStructureDto>` |
-| `axisStructures`  | `IntersectionTrafficLightAxisStructureDto[]`          |
+| Name                   | Typ                                                   |
+| ---------------------- | ----------------------------------------------------- |
+| `id`                   | `number`                                              |
+| `signalId`             | `number`                                              |
+| `trafficSignalName`    | `string\|nil`                                         |
+| `pedestrianSignalName` | `string\|nil`                                         |
+| `use`                  | `string`                                              |
+| `modelId`              | `string`                                              |
+| `currentPhase`         | `string`                                              |
+| `intersectionId`       | `number`                                              |
+| `lightStructures`      | `table<string, IntersectionTrafficLightStructureDto>` |
+| `axisStructures`       | `IntersectionTrafficLightAxisStructureDto[]`          |
 
 ## CeType `ce.mods.road.ModuleSetting`
 

@@ -21,6 +21,9 @@ export interface IntersectionTrafficLightAxisStructureLuaDto {
 export interface IntersectionTrafficLightLuaDto {
   id: number;
   signalId: number;
+  trafficSignalName?: string;
+  pedestrianSignalName?: string;
+  use: 'TRAFFIC_ONLY' | 'PEDESTRIAN_ONLY' | 'TRAFFIC_AND_PEDESTRIAN';
   modelId: string;
   currentPhase: string;
   intersectionId: number;

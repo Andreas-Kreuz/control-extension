@@ -5,24 +5,46 @@ import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import AppCaption from '../../../shared/components/AppCaption';
 import type Intersection from '../model/Intersection';
-import type { IntersectionPhase } from '../model/Intersection';
+import type { IntersectionPhase, IntersectionPhaseTrafficLight } from '../model/Intersection';
 
-const rowLabelWidth = 56;
+const rowLabelWidth = 72;
 const minPhaseWidth = 96;
-const rowHeight = 28;
+const rowHeight = 38;
 
 function phaseWidth(phase: IntersectionPhase) {
   return Math.max(minPhaseWidth, phase.greenPhaseSeconds * 8);
 }
 
-function signalIdsFor(phases: IntersectionPhase[]) {
-  const ids = new Set<number>();
-  phases.forEach((phase) => phase.trafficLights.forEach((trafficLight) => ids.add(trafficLight.signalId)));
-  return Array.from(ids).sort((a, b) => a - b);
+function signalRowsFor(phases: IntersectionPhase[]) {
+  const rows = new Map<number, IntersectionPhaseTrafficLight>();
+  phases.forEach((phase) => {
+    phase.trafficLights.forEach((trafficLight) => {
+      if (!rows.has(trafficLight.signalId)) rows.set(trafficLight.signalId, trafficLight);
+    });
+  });
+  return Array.from(rows.values()).sort((a, b) => a.signalId - b.signalId);
 }
 
 function phaseHasSignal(phase: IntersectionPhase, signalId: number) {
   return phase.trafficLights.some((trafficLight) => trafficLight.signalId === signalId);
+}
+
+function signalRowNames(trafficLight: IntersectionPhaseTrafficLight) {
+  if (trafficLight.use === 'PEDESTRIAN_ONLY') return [trafficLight.pedestrianSignalName ?? ''];
+  if (trafficLight.use === 'TRAFFIC_AND_PEDESTRIAN') {
+    return [trafficLight.trafficSignalName ?? '', trafficLight.pedestrianSignalName ?? ''];
+  }
+  return [trafficLight.trafficSignalName ?? ''];
+}
+
+function signalTooltipName(trafficLight: IntersectionPhaseTrafficLight) {
+  return signalRowNames(trafficLight).filter(Boolean).join(' / ');
+}
+
+function signalTooltipText(trafficLight: IntersectionPhaseTrafficLight, green: boolean, phase: IntersectionPhase) {
+  const name = signalTooltipName(trafficLight);
+  const state = green ? 'Grün' : 'Rot';
+  return name ? `${name}: ${state} in ${phase.name}` : `${state} in ${phase.name}`;
 }
 
 function phaseStateLabel(intersection: Intersection, phase: IntersectionPhase) {
@@ -35,7 +57,7 @@ function phaseStateLabel(intersection: Intersection, phase: IntersectionPhase) {
 function IntersectionPhasesSection({ intersection }: { intersection: Intersection }) {
   const theme = useTheme();
   const phases = [...(intersection.phases ?? [])].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
-  const signalIds = signalIdsFor(phases);
+  const signalRows = signalRowsFor(phases);
 
   if (phases.length === 0) {
     return (
@@ -76,27 +98,31 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
               );
             })}
           </Box>
-          {signalIds.map((signalId) => (
-            <Box key={signalId} sx={{ display: 'flex', alignItems: 'center', height: rowHeight }}>
-              <Typography
-                variant="caption"
+          {signalRows.map((trafficLight) => (
+            <Box key={trafficLight.signalId} sx={{ display: 'flex', alignItems: 'center', height: rowHeight }}>
+              <Stack
                 sx={{
                   width: rowLabelWidth,
                   pr: 1,
                   textAlign: 'right',
                   color: 'text.secondary',
                   flexShrink: 0,
+                  lineHeight: 1.1,
                 }}
               >
-                K{signalId}
-              </Typography>
+                {signalRowNames(trafficLight).map((name, index) => (
+                  <Typography key={`${trafficLight.signalId}-${index}`} variant="caption" noWrap>
+                    {name}
+                  </Typography>
+                ))}
+              </Stack>
               {phases.map((phase) => {
-                const green = phaseHasSignal(phase, signalId);
+                const green = phaseHasSignal(phase, trafficLight.signalId);
                 const stateLabel = phaseStateLabel(intersection, phase);
                 return (
                   <Tooltip
-                    key={`${phase.id}-${signalId}`}
-                    title={`K${signalId}: ${green ? 'Grün' : 'Rot'} in ${phase.name}`}
+                    key={`${phase.id}-${trafficLight.signalId}`}
+                    title={signalTooltipText(trafficLight, green, phase)}
                   >
                     <Box
                       sx={{

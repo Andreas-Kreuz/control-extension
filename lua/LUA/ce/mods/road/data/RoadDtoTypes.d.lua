@@ -15,6 +15,9 @@
 ---@class IntersectionPhaseTrafficLightDto
 ---@field signalId number
 ---@field type string
+---@field trafficSignalName string|nil
+---@field pedestrianSignalName string|nil
+---@field use string
 
 ---@class IntersectionPhaseDto
 ---@field id string
@@ -67,6 +70,9 @@
 ---@field ceType string
 ---@field id number
 ---@field signalId number
+---@field trafficSignalName string|nil
+---@field pedestrianSignalName string|nil
+---@field use string
 ---@field modelId string
 ---@field currentPhase string
 ---@field intersectionId number

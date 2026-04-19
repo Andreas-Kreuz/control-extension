@@ -20,7 +20,10 @@ local function copyPhases(phases)
         for tlKey, trafficLight in pairs(phase.trafficLights or {}) do
             trafficLights[tlKey] = {
                 signalId = trafficLight.signalId,
-                type = trafficLight.type
+                type = trafficLight.type,
+                trafficSignalName = trafficLight.trafficSignalName,
+                pedestrianSignalName = trafficLight.pedestrianSignalName,
+                use = trafficLight.use
             }
         end
         copy[key] = {
@@ -43,17 +46,17 @@ local function toIntersectionDto(intersection, isSelected)
     }
     dto.name             = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and intersection.name or ""
     dto.currentSwitching = SyncPolicy.shouldPublishField(fieldPolicies, "currentSwitching", isSelected) and
-    intersection.currentSwitching or ""
+        intersection.currentSwitching or ""
     dto.manualSwitching  = SyncPolicy.shouldPublishField(fieldPolicies, "manualSwitching", isSelected) and
-    intersection.manualSwitching or ""
+        intersection.manualSwitching or ""
     dto.nextSwitching    = SyncPolicy.shouldPublishField(fieldPolicies, "nextSwitching", isSelected) and
-    intersection.nextSwitching or ""
+        intersection.nextSwitching or ""
     dto.timeForGreen     = SyncPolicy.shouldPublishField(fieldPolicies, "timeForGreen", isSelected) and
-    intersection.timeForGreen or 0
+        intersection.timeForGreen or 0
     dto.staticCams       = SyncPolicy.shouldPublishField(fieldPolicies, "staticCams", isSelected) and
-    copyTable(intersection.staticCams) or {}
+        copyTable(intersection.staticCams) or {}
     dto.phases           = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
-    copyPhases(intersection.phases) or {}
+        copyPhases(intersection.phases) or {}
     if SyncPolicy.shouldPublishField(fieldPolicies, "ready", isSelected) then
         dto.ready = intersection.ready
     else
@@ -69,29 +72,29 @@ local function toIntersectionLaneDto(lane, isSelected)
         id = lane.id,
     }
     dto.intersectionId             = SyncPolicy.shouldPublishField(fieldPolicies, "intersectionId", isSelected) and
-    lane.intersectionId or 0
+        lane.intersectionId or 0
     dto.name                       = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and
         lane.name or ""
     dto.phase                      = SyncPolicy.shouldPublishField(fieldPolicies, "phase", isSelected) and lane.phase or
-    ""
+        ""
     dto.vehicleMultiplier          = SyncPolicy.shouldPublishField(fieldPolicies, "vehicleMultiplier", isSelected) and
-    lane.vehicleMultiplier or 0
+        lane.vehicleMultiplier or 0
     dto.eepSaveId                  = SyncPolicy.shouldPublishField(fieldPolicies, "eepSaveId", isSelected) and
-    lane.eepSaveId or 0
+        lane.eepSaveId or 0
     dto.type                       = SyncPolicy.shouldPublishField(fieldPolicies, "type", isSelected) and
         lane.type or ""
     dto.countType                  = SyncPolicy.shouldPublishField(fieldPolicies, "countType", isSelected) and
-    lane.countType or ""
+        lane.countType or ""
     dto.waitingTrains              = SyncPolicy.shouldPublishField(fieldPolicies, "waitingTrains", isSelected) and
-    copyTable(lane.waitingTrains) or {}
+        copyTable(lane.waitingTrains) or {}
     dto.waitingForGreenCyclesCount = SyncPolicy.shouldPublishField(fieldPolicies, "waitingForGreenCyclesCount",
-        isSelected) and lane.waitingForGreenCyclesCount or 0
+                                                                   isSelected) and lane.waitingForGreenCyclesCount or 0
     dto.directions                 = SyncPolicy.shouldPublishField(fieldPolicies, "directions", isSelected) and
-    copyTable(lane.directions) or {}
+        copyTable(lane.directions) or {}
     dto.switchings                 = SyncPolicy.shouldPublishField(fieldPolicies, "switchings", isSelected) and
-    copyTable(lane.switchings) or {}
+        copyTable(lane.switchings) or {}
     dto.tracks                     = SyncPolicy.shouldPublishField(fieldPolicies, "tracks", isSelected) and
-    copyTable(lane.tracks) or {}
+        copyTable(lane.tracks) or {}
     return dto
 end
 
@@ -102,7 +105,7 @@ local function toIntersectionSwitchingDto(switching, isSelected)
         id = switching.id,
     }
     dto.intersectionId  = SyncPolicy.shouldPublishField(fieldPolicies, "intersectionId", isSelected) and
-    switching.intersectionId or ""
+        switching.intersectionId or ""
     dto.name            = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and switching.name or ""
     dto.prio            = SyncPolicy.shouldPublishField(fieldPolicies, "prio", isSelected) and switching.prio or 0
     return dto
@@ -131,19 +134,25 @@ local function toIntersectionTrafficLightAxisStructureDto(axisStructure)
 end
 
 local function toIntersectionTrafficLightDto(trafficLight, isSelected)
-    local fieldPolicies = RoadOptionsRegistry.getFieldPublishPolicies("intersectionTrafficLights")
-    local dto           = {
+    local fieldPolicies      = RoadOptionsRegistry.getFieldPublishPolicies("intersectionTrafficLights")
+    local dto                = {
         ceType = RoadCeTypes.IntersectionTrafficLight,
         id = trafficLight.id,
     }
-    dto.signalId        = SyncPolicy.shouldPublishField(fieldPolicies, "signalId", isSelected) and
+    dto.signalId             = SyncPolicy.shouldPublishField(fieldPolicies, "signalId", isSelected) and
         trafficLight.signalId or 0
-    dto.modelId         = SyncPolicy.shouldPublishField(fieldPolicies, "modelId", isSelected) and
+    dto.trafficSignalName    = SyncPolicy.shouldPublishField(fieldPolicies, "trafficSignalName", isSelected) and
+        trafficLight.trafficSignalName or ""
+    dto.pedestrianSignalName = SyncPolicy.shouldPublishField(fieldPolicies, "pedestrianSignalName", isSelected) and
+        trafficLight.pedestrianSignalName or ""
+    dto.use                  = SyncPolicy.shouldPublishField(fieldPolicies, "use", isSelected) and
+        trafficLight.use or ""
+    dto.modelId              = SyncPolicy.shouldPublishField(fieldPolicies, "modelId", isSelected) and
         trafficLight.modelId or ""
-    dto.currentPhase    = SyncPolicy.shouldPublishField(fieldPolicies, "currentPhase", isSelected) and
-    trafficLight.currentPhase or ""
-    dto.intersectionId  = SyncPolicy.shouldPublishField(fieldPolicies, "intersectionId", isSelected) and
-    trafficLight.intersectionId or 0
+    dto.currentPhase         = SyncPolicy.shouldPublishField(fieldPolicies, "currentPhase", isSelected) and
+        trafficLight.currentPhase or ""
+    dto.intersectionId       = SyncPolicy.shouldPublishField(fieldPolicies, "intersectionId", isSelected) and
+        trafficLight.intersectionId or 0
     if SyncPolicy.shouldPublishField(fieldPolicies, "lightStructures", isSelected) then
         local lightStructures = {}
         for key, lightStructure in pairs(trafficLight.lightStructures or {}) do
@@ -174,9 +183,9 @@ local function toIntersectionModuleSettingDto(setting, isSelected)
     dto.category        = SyncPolicy.shouldPublishField(fieldPolicies, "category", isSelected) and
         setting.category or ""
     dto.description     = SyncPolicy.shouldPublishField(fieldPolicies, "description", isSelected) and setting
-    .description or ""
+        .description or ""
     dto.eepFunction     = SyncPolicy.shouldPublishField(fieldPolicies, "eepFunction", isSelected) and setting
-    .eepFunction or ""
+        .eepFunction or ""
     dto.type            = SyncPolicy.shouldPublishField(fieldPolicies, "type", isSelected) and setting.type or ""
     if SyncPolicy.shouldPublishField(fieldPolicies, "value", isSelected) then
         dto.value = setting.value

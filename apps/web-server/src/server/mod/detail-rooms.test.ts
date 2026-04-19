@@ -108,7 +108,7 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
               order: 1,
               prio: 2,
               greenPhaseSeconds: 15,
-              trafficLights: [{ signalId: 2, type: 'CAR' }],
+              trafficLights: [{ signalId: 2, type: 'CAR', trafficSignalName: 'K1', use: 'TRAFFIC_ONLY' }],
             },
           ],
         },
@@ -134,6 +134,8 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
         TL1: {
           id: 2,
           signalId: 2,
+          trafficSignalName: 'K1',
+          use: 'TRAFFIC_ONLY',
           modelId: 'road',
           currentPhase: 'GREEN',
           intersectionId: 1,
@@ -231,7 +233,7 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
         order: 1,
         prio: 2,
         greenPhaseSeconds: 15,
-        trafficLights: [{ signalId: 2, type: 'CAR' }],
+        trafficLights: [{ signalId: 2, type: 'CAR', trafficSignalName: 'K1', use: 'TRAFFIC_ONLY' }],
       },
     ],
   });
@@ -253,6 +255,8 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
   assert.deepEqual(JSON.parse(trafficLightProvider.jsonCreator(IntersectionTrafficLightRoom.roomId('2'))), {
     id: 2,
     signalId: 2,
+    trafficSignalName: 'K1',
+    use: 'TRAFFIC_ONLY',
     modelId: 'road',
     currentPhase: 'GREEN',
     intersectionId: 1,
