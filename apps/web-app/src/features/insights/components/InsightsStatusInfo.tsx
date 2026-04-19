@@ -88,11 +88,11 @@ function InsightsStatusInfo() {
 
   const items: InsightsStatusInfoItem[] = [
     {
-      label: 'EEP',
-      detail: isConnected ? (eepDataUpToDate ? 'OK' : 'Daten nicht aktuell') : 'Server nicht erreichbar',
-      statusText: isConnected ? (eepDataUpToDate ? 'OK' : 'Pausiert') : 'Nicht verbunden',
-      componentIcon: 'eep',
-      badgeIcon: isConnected ? (eepDataUpToDate ? 'ok' : 'paused') : 'disconnected',
+      label: 'Server',
+      detail: isConnected ? 'OK' : 'Server nicht erreichbar',
+      statusText: isConnected ? 'OK' : 'Nicht verbunden',
+      componentIcon: 'server',
+      badgeIcon: isConnected ? 'ok' : 'disconnected',
     },
     {
       label: 'Bridge',
@@ -106,11 +106,11 @@ function InsightsStatusInfo() {
       badgeIcon: isConnected ? (luaDataReceived ? 'ok' : 'paused') : 'disconnected',
     },
     {
-      label: 'Server',
-      detail: isConnected ? 'OK' : 'Server nicht erreichbar',
-      statusText: isConnected ? 'OK' : 'Nicht verbunden',
-      componentIcon: 'server',
-      badgeIcon: isConnected ? 'ok' : 'disconnected',
+      label: 'EEP',
+      detail: isConnected ? (eepDataUpToDate ? 'OK' : 'Daten nicht aktuell') : 'Server nicht erreichbar',
+      statusText: isConnected ? (eepDataUpToDate ? 'OK' : 'Pausiert') : 'Nicht verbunden',
+      componentIcon: 'eep',
+      badgeIcon: isConnected ? (eepDataUpToDate ? 'ok' : 'paused') : 'disconnected',
     },
   ];
 

@@ -18,14 +18,14 @@ function InsightsVersionInfo() {
           value: versions.appVersion,
         },
         {
-          icon: <TrainRoundedIcon sx={{ fontSize: 20 }} />,
-          label: 'EEP',
-          value: versions.eepVersion,
-        },
-        {
           icon: <TerminalRoundedIcon sx={{ fontSize: 20 }} />,
           label: 'Lua',
           value: versions.luaVersion,
+        },
+        {
+          icon: <TrainRoundedIcon sx={{ fontSize: 20 }} />,
+          label: 'EEP',
+          value: versions.eepVersion,
         },
       ]}
     />
