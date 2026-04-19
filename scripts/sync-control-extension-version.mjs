@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,7 +23,7 @@ function writeJson(relativePath, value) {
 function writeText(relativePath, value) {
   const absolutePath = path.join(repoRoot, relativePath);
   const content = `${value}\n`;
-  if (readFileSync(absolutePath, 'utf8') === content) {
+  if (existsSync(absolutePath) && readFileSync(absolutePath, 'utf8') === content) {
     return;
   }
   writeFileSync(absolutePath, content, 'utf8');
