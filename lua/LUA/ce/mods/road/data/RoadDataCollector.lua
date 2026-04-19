@@ -182,25 +182,33 @@ end
 function RoadDataCollector.collectModuleSettings()
     return {
         {
-            category = "Tipp-Texte fuer Kreuzungen",
-            name = "Anforderungen einblenden",
-            description = "Zeigt fuer alle Ampeln einen TippText mit den Anforderungen",
+            category = "Tipp-Texte fuer Ampeln",
+            name = "Wartende Fahrzeuge",
+            description = "Jede Ampel zeigt die wartenden Fahrzeuge",
             type = "boolean",
             value = IntersectionSettings.showRequestsOnSignal,
             eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Kreuzungen",
-            name = "Schaltungen einblenden",
-            description = "Zeigt fuer alle Ampeln einen TippText mit den Schaltungen",
+            category = "Tipp-Texte fuer Ampeln",
+            name = "Modellinformation",
+            description = "Zeigt das Ampelmodell und seine Schaltungen",
+            type = "boolean",
+            value = IntersectionSettings.showModelInfoOnSignal,
+            eepFunction = "IntersectionSettings.setShowModelInfoOnSignal"
+        },
+        {
+            category = "Tipp-Texte fuer Ampeln",
+            name = "Phasen",
+            description = "Zeige die aktuelle Schaltung dieser Ampel in den Ampelphasen",
             type = "boolean",
             value = IntersectionSettings.showSequenceOnSignal,
             eepFunction = "IntersectionSettings.setShowSequenceOnSignal"
         },
         {
             category = "Tipp-Texte fuer Kreuzungen",
-            name = "Fahrspurzaehler einblenden",
-            description = "Zeigt die Belegung der Fahrspuren an einer Kreuzung",
+            name = "Kreuzungsübersicht einblenden",
+            description = "Zeigt Fahrspuren und deren Schaltung",
             type = "boolean",
             value = IntersectionSettings.showLanesOnStructure,
             eepFunction = "IntersectionSettings.setShowLanesOnStructure"

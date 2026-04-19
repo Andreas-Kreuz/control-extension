@@ -4,6 +4,7 @@ local StorageUtility = require("ce.hub.util.StorageUtility")
 local IntersectionSettings = {}
 IntersectionSettings.showRequestsOnSignal = false
 IntersectionSettings.showSequenceOnSignal = false
+IntersectionSettings.showModelInfoOnSignal = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showLanesOnStructure = false
 
@@ -15,6 +16,8 @@ function IntersectionSettings.loadSettingsFromSlot(eepSaveId)
         IntersectionSettings.showRequestsOnSignal
     IntersectionSettings.showSequenceOnSignal = StorageUtility.toboolean(data["seqInfo"]) or
         IntersectionSettings.showSequenceOnSignal
+    IntersectionSettings.showModelInfoOnSignal = StorageUtility.toboolean(data["modelInfo"]) or
+        IntersectionSettings.showModelInfoOnSignal
     IntersectionSettings.showSignalIdOnSignal = StorageUtility.toboolean(data["sigInfo"]) or
         IntersectionSettings.showSignalIdOnSignal
     IntersectionSettings.showLanesOnStructure = StorageUtility.toboolean(data["laneInfo"]) or
@@ -26,6 +29,7 @@ function IntersectionSettings.saveSettings()
         local data = {
             reqInfo = tostring(IntersectionSettings.showRequestsOnSignal),
             seqInfo = tostring(IntersectionSettings.showSequenceOnSignal),
+            modelInfo = tostring(IntersectionSettings.showModelInfoOnSignal),
             sigInfo = tostring(IntersectionSettings.showSignalIdOnSignal),
             laneInfo = tostring(IntersectionSettings.showLanesOnStructure)
         }
@@ -36,6 +40,12 @@ end
 function IntersectionSettings.setShowRequestsOnSignal(value)
     assert(value == true or value == false)
     IntersectionSettings.showRequestsOnSignal = value
+    IntersectionSettings.saveSettings()
+end
+
+function IntersectionSettings.setShowModelInfoOnSignal(value)
+    assert(value == true or value == false)
+    IntersectionSettings.showModelInfoOnSignal = value
     IntersectionSettings.saveSettings()
 end
 

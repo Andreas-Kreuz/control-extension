@@ -158,15 +158,18 @@ end
 function TrafficLight:refreshInfo()
     local showSwitching = IntersectionSettings.showSequenceOnSignal
     local showAllSignals = IntersectionSettings.showSignalIdOnSignal
+    local showModelInfo = IntersectionSettings.showModelInfoOnSignal
     local showRequests = IntersectionSettings.showRequestsOnSignal and self.laneInfo:len() > 0
-    local showInfo = showSwitching or showAllSignals or showRequests
+    local showInfo = showSwitching or showAllSignals or showModelInfo or showRequests
 
     self:showInfoText(showInfo)
     if showInfo then
         local infoText = fmt.appendUpTo1023("", "<j><b>" .. self.name .. "</b> (Signal " .. self.signalId .. ")</j>")
 
-        local signalFunctionsTippText = getSignalFunctionsTippText(self.signalId, self.trafficLightModel)
-        infoText = fmt.appendUpTo1023(infoText, "<br>" .. signalFunctionsTippText)
+        if showModelInfo then
+            local signalFunctionsTippText = getSignalFunctionsTippText(self.signalId, self.trafficLightModel)
+            infoText = fmt.appendUpTo1023(infoText, "<br>" .. signalFunctionsTippText)
+        end
 
         if showSwitching and self.sequenceInfo then
             local title = "<br><br><b>" .. "Schaltung: " .. "</b>"
