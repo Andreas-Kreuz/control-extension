@@ -9,16 +9,34 @@ local TransitTrainDtoFactory = {}
 local CE_TYPE = TransitCeTypes.TransitTrain
 local KEY_ID = "id"
 
+local function buildNextStationsDto(transitTrain)
+    local nextStations = transitTrain.getNextStations
+        and transitTrain:getNextStations() or transitTrain.nextStations or {}
+    local result = {}
+    for _, entry in ipairs(nextStations) do
+        table.insert(result, {
+            station = {
+                name = entry.station and entry.station.name or "",
+                platform = entry.platform or "1"
+            },
+            departureInMinutes = entry.departureInMinutes
+        })
+    end
+    return result
+end
+
 local fieldGetters = {
     line = function (t) return t:getLine() end,
     destination = function (t) return t:getDestination() end,
     direction = function (t) return t:getDirection() end,
+    nextStations = buildNextStationsDto,
 }
 
 local fieldPlaceholders = {
     line = "",
     destination = "",
     direction = "",
+    nextStations = {},
 }
 
 function TransitTrainDtoFactory.createFullDto(transitTrain, isSelected)

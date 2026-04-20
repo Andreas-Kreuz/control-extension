@@ -43,11 +43,20 @@
 ---@field value boolean
 ---@field eepFunction string
 
+---@class TransitTrainNextStationStationDto
+---@field name string
+---@field platform string
+
+---@class TransitTrainNextStationDto
+---@field station TransitTrainNextStationStationDto
+---@field departureInMinutes number
+
 ---@class TransitTrainDto
 ---@field id string
 ---@field line string|nil
 ---@field destination string|nil
 ---@field direction string|nil
+---@field nextStations TransitTrainNextStationDto[]
 
 ---@class TransitDtoFactory
 ---@field createStationDto fun(station: table, isSelected?: boolean):string,string,string|number,TransitStationDto

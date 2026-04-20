@@ -90,6 +90,17 @@ export default class TransitSelector {
           ...(dto.line !== undefined ? { line: dto.line } : {}),
           ...(dto.destination !== undefined ? { destination: dto.destination } : {}),
           ...(dto.direction !== undefined ? { direction: dto.direction } : {}),
+          ...(dto.nextStations !== undefined
+            ? {
+                nextStations: dto.nextStations.map((entry) => ({
+                  station: {
+                    name: entry.station.name,
+                    platform: entry.station.platform,
+                  },
+                  departureInMinutes: entry.departureInMinutes,
+                })),
+              }
+            : {}),
         };
       });
     }

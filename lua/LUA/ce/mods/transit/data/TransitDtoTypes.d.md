@@ -46,3 +46,19 @@
 | `nr`           | `string`                  |
 | `trafficType`  | `string`                  |
 | `lineSegments` | `TransitLineSegmentDto[]` |
+
+## CeType `ce.mods.transit.TransitTrain`
+
+- Key-ID: `id`
+- DtoFactory: `ce.mods.transit.data.TransitTrainDtoFactory.createFullDto`
+
+| Name           | Typ                            |
+| -------------- | ------------------------------ |
+| `id`           | `string`                       |
+| `line`         | `string`                       |
+| `destination`  | `string`                       |
+| `direction`    | `string`                       |
+| `nextStations` | `TransitTrainNextStationDto[]` |
+
+`nextStations` wird per Default nur fuer selektierte Zuege veroeffentlicht (`oninterest`).
+Ein Eintrag hat die Form `{ station = { name = string, platform = string }, departureInMinutes = number }`.

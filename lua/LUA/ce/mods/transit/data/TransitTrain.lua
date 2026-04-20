@@ -9,6 +9,32 @@ local function markDirty(transitTrain, fieldName)
     transitTrain.dirtyFields[fieldName] = true
 end
 
+local function normalizeNextStations(nextStations)
+    local normalized = {}
+    for _, entry in ipairs(nextStations or {}) do
+        if #normalized >= 5 then break end
+        table.insert(normalized, {
+            station = entry.station,
+            platform = tostring(entry.platform or "1"),
+            departureInMinutes = entry.departureInMinutes
+        })
+    end
+    return normalized
+end
+
+local function nextStationsEqual(left, right)
+    if #left ~= #right then return false end
+    for index, leftEntry in ipairs(left) do
+        local rightEntry = right[index]
+        local leftStationName = leftEntry.station and leftEntry.station.name or nil
+        local rightStationName = rightEntry.station and rightEntry.station.name or nil
+        if leftStationName ~= rightStationName then return false end
+        if leftEntry.platform ~= rightEntry.platform then return false end
+        if leftEntry.departureInMinutes ~= rightEntry.departureInMinutes then return false end
+    end
+    return true
+end
+
 ---@param hubTrain Train
 function TransitTrain:new(hubTrain)
     assert(type(self) == "table", "Call this method with ':'")
@@ -20,6 +46,7 @@ function TransitTrain:new(hubTrain)
         line = nil,
         destination = nil,
         direction = nil,
+        nextStations = {},
         dirtyFields = {},
         needsFullSend = true
     }
@@ -119,6 +146,28 @@ function TransitTrain:updateDirection(direction)
     local oldDirection = self.direction
     self.direction = direction
     if oldDirection ~= direction then markDirty(self, "direction") end
+end
+
+function TransitTrain:setNextStations(nextStations)
+    assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
+    assert(type(nextStations) == "nil" or type(nextStations) == "table", "Need 'nextStations' as table|nil")
+    local normalized = normalizeNextStations(nextStations)
+    for _, entry in ipairs(normalized) do
+        assert(type(entry.station) == "table" and entry.station.type == "RoadStation",
+               "Need 'station' as RoadStation")
+        assert(type(entry.platform) == "string", "Need 'platform' as string")
+        assert(type(entry.departureInMinutes) == "number", "Need 'departureInMinutes' as number")
+    end
+
+    if not nextStationsEqual(self.nextStations, normalized) then
+        self.nextStations = normalized
+        markDirty(self, "nextStations")
+    end
+end
+
+function TransitTrain:getNextStations()
+    assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
+    return normalizeNextStations(self.nextStations)
 end
 
 function TransitTrain:changeDestination(destination, line)

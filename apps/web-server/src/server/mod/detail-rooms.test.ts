@@ -192,7 +192,12 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
         },
       },
       [CeTypes.TransitTrain]: {
-        TT1: { id: 'TT1', line: '1', destination: 'Central' },
+        TT1: {
+          id: 'TT1',
+          line: '1',
+          destination: 'Central',
+          nextStations: [{ station: { name: 'Station A', platform: '2' }, departureInMinutes: 3 }],
+        },
       },
       [CeTypes.TransitModuleSetting]: {
         Next: {
@@ -311,6 +316,7 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
     id: 'TT1',
     line: '1',
     destination: 'Central',
+    nextStations: [{ station: { name: 'Station A', platform: '2' }, departureInMinutes: 3 }],
   });
   assert.deepEqual(JSON.parse(transitModuleSettingProvider.jsonCreator(TransitModuleSettingRoom.roomId('Next'))), {
     name: 'Next',

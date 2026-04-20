@@ -144,6 +144,28 @@ end
 ---@return RoadStation|nil
 function LineSegment:getFirstStation() if #self.stationInfos > 0 then return self.stationInfos[1].station end end
 
+local function platformFor(info)
+    local station = info.station
+    local destKey = info.lineNr .. "->" .. info.destination
+    if station.routePlatforms and station.routePlatforms[destKey] and station.routePlatforms[destKey].platform then
+        return station.routePlatforms[destKey].platform
+    end
+    return "1"
+end
+
+local function updateTransitTrainNextStations(train, infoList, departureOffset)
+    local nextStations = {}
+    for _, info in ipairs(infoList) do
+        if #nextStations >= 5 then break end
+        table.insert(nextStations, {
+            station = info.station,
+            platform = platformFor(info),
+            departureInMinutes = departureOffset + info.totalTime
+        })
+    end
+    TransitTrainRegistry.forTrain(train):setNextStations(nextStations)
+end
+
 ---Will inform the given stations about the train arrival in minutes and all sequential stations with the offset
 ---@param train Train the train which will arrive
 ---@param nextStation RoadStation the first station in the route, where the train will arrive
@@ -158,6 +180,7 @@ function LineSegment:prepareDepartureAt(train, nextStation, timeInMinutes)
 
     timeInMinutes = timeInMinutes or 0
     local infoList = self:nextStationList(train:getRoute(), nextStation, nil)
+    updateTransitTrainNextStations(train, infoList, timeInMinutes)
     for _, info in ipairs(infoList) do
         local station = info.station
         station:trainArrivesIn(train.name, info.destination, info.lineNr, timeInMinutes + info.totalTime)
@@ -178,6 +201,7 @@ function LineSegment:trainDeparted(train, currentStation)
     local oldDestination = transitTrain:getDestination()
     local oldLine = transitTrain:getLine()
     local infoList = self:nextStationList(train:getRoute(), nil, currentStation)
+    updateTransitTrainNextStations(train, infoList, 0)
 
     if currentStation == self:getLastStation() and train:getRoute() == self.routeName and self.nextLineSegmentInfo then
         local nextSegment = self.nextLineSegmentInfo.followingSegment
