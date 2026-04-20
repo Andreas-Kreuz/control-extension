@@ -30,18 +30,29 @@ function AppCardImg(props: AppCardImgProps) {
   );
 
   const stack = (
-    <MuiStack sx={{ flexDirection: { xs: 'row', sm: 'column' } }}>
+    <MuiStack sx={{ flexDirection: { xs: 'row', sm: 'column' }, width: 1 }}>
       {props.image && (
-        <MuiCardMedia
-          component="img"
-          image={props.image}
-          title={props.title}
+        <MuiBox
           sx={{
-            width: { xs: '25%', sm: 1 },
+            aspectRatio: '4 / 3',
+            flex: { xs: '0 0 25%', sm: '0 0 auto' },
+            width: { sm: 1 },
+            overflow: 'hidden',
           }}
-        />
+        >
+          <MuiCardMedia
+            component="img"
+            image={props.image}
+            title={props.title}
+            sx={{
+              width: 1,
+              height: 1,
+              objectFit: 'cover',
+            }}
+          />
+        </MuiBox>
       )}
-      <MuiBox sx={{ p: 2 }}>{contents}</MuiBox>
+      <MuiBox sx={{ p: 2, flex: 1, minWidth: 0 }}>{contents}</MuiBox>
     </MuiStack>
   );
 
@@ -49,13 +60,13 @@ function AppCardImg(props: AppCardImgProps) {
     <MuiCard sx={{ flexGrow: 1, display: 'flex', alignItems: 'stretch', alignContent: 'stretch' }}>
       {(props.to && (
         <MuiCardActionArea
-          sx={{ display: 'flex', alignItems: 'stretch', alignContent: 'stretch' }}
+          sx={{ display: 'flex', alignItems: 'stretch', alignContent: 'stretch', width: 1 }}
           component={RouterLink}
           to={props.to}
         >
           {stack}
         </MuiCardActionArea>
-      )) || <MuiBox sx={{ display: 'flex', alignItems: 'stretch', alignContent: 'stretch' }}>{stack}</MuiBox>}
+      )) || <MuiBox sx={{ display: 'flex', alignItems: 'stretch', alignContent: 'stretch', width: 1 }}>{stack}</MuiBox>}
     </MuiCard>
   );
 }
