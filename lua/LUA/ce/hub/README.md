@@ -106,12 +106,12 @@ ControlExtension
             ceTypes = {
                 trains = {
                     fieldUpdates = {
-                        speed = "onselection",
-                        targetSpeed = "onselection",
+                        speed = "oninterest",
+                        targetSpeed = "oninterest",
                     },
                     fieldPublish = {
                         speed = "always",
-                        targetSpeed = "onselection",
+                        targetSpeed = "oninterest",
                     },
                 },
             },
