@@ -31,49 +31,55 @@ export default class EepDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RuntimeRoom,
       id: 'RuntimeRoom',
+      onInterest: [],
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getRuntime()),
     });
     this.roomDataProviders.push({
       roomType: RuntimeStatisticsRoom,
       id: 'RuntimeStatisticsRoom',
+      onInterest: [],
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getRuntimeStatistics()),
     });
     this.roomDataProviders.push({
       roomType: ModuleRoom,
       id: 'ModuleRoom',
+      onInterest: [],
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getModules()),
     });
     this.roomDataProviders.push({
       roomType: SaveSlotRoom,
       id: 'SaveSlotRoom',
+      onInterest: [],
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getSaveSlots()),
     });
     this.roomDataProviders.push({
       roomType: FreeSlotRoom,
       id: 'FreeSlotRoom',
+      onInterest: [],
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getFreeSlots()),
     });
     this.roomDataProviders.push({
       roomType: SignalRoom,
       id: 'SignalRoom',
-      onInterest: { ceType: CeTypes.HubSignal, idOfRoom: (room: string) => SignalRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubSignal, idOfRoom: (room: string) => SignalRoom.idOfRoom(room) }],
       jsonCreator: (room: string) => JSON.stringify(this.selector.getSignal(SignalRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: WaitingOnSignalRoom,
       id: 'WaitingOnSignalRoom',
+      onInterest: [],
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getWaitingOnSignals()),
     });
     this.roomDataProviders.push({
       roomType: SwitchRoom,
       id: 'SwitchRoom',
-      onInterest: { ceType: CeTypes.HubSwitch, idOfRoom: (room: string) => SwitchRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubSwitch, idOfRoom: (room: string) => SwitchRoom.idOfRoom(room) }],
       jsonCreator: (room: string) => JSON.stringify(this.selector.getSwitch(SwitchRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: StructureRoom,
       id: 'StructureRoom',
-      onInterest: { ceType: CeTypes.HubStructure, idOfRoom: (room: string) => StructureRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubStructure, idOfRoom: (room: string) => StructureRoom.idOfRoom(room) }],
       jsonCreator: (room: string) => {
         const structureId = StructureRoom.idOfRoom(room);
         return JSON.stringify(this.selector.getStructure(structureId) ?? null);
@@ -82,12 +88,13 @@ export default class EepDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: ContactRoom,
       id: 'ContactRoom',
-      onInterest: { ceType: CeTypes.HubContact, idOfRoom: (room: string) => ContactRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubContact, idOfRoom: (room: string) => ContactRoom.idOfRoom(room) }],
       jsonCreator: (room: string) => JSON.stringify(this.selector.getContact(ContactRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TrackRoom,
       id: 'TrackRoom',
+      onInterest: [],
       jsonCreator: (room: string) => {
         const roomName = TrackRoom.idOfRoom(room);
         return JSON.stringify(this.selector.getTracksForRoom(roomName));
@@ -96,38 +103,40 @@ export default class EepDataService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: AuxiliaryTrackRoom,
       id: 'AuxiliaryTrackRoom',
-      onInterest: {
-        ceType: CeTypes.HubAuxiliaryTrack,
-        idOfRoom: (room: string) => AuxiliaryTrackRoom.idOfRoom(room),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.HubAuxiliaryTrack,
+          idOfRoom: (room: string) => AuxiliaryTrackRoom.idOfRoom(room),
+        },
+      ],
       jsonCreator: (room: string) =>
         JSON.stringify(this.selector.getTrack('auxiliary', AuxiliaryTrackRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: ControlTrackRoom,
       id: 'ControlTrackRoom',
-      onInterest: { ceType: CeTypes.HubControlTrack, idOfRoom: (room: string) => ControlTrackRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubControlTrack, idOfRoom: (room: string) => ControlTrackRoom.idOfRoom(room) }],
       jsonCreator: (room: string) =>
         JSON.stringify(this.selector.getTrack('control', ControlTrackRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: RoadTrackRoom,
       id: 'RoadTrackRoom',
-      onInterest: { ceType: CeTypes.HubRoadTrack, idOfRoom: (room: string) => RoadTrackRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubRoadTrack, idOfRoom: (room: string) => RoadTrackRoom.idOfRoom(room) }],
       jsonCreator: (room: string) =>
         JSON.stringify(this.selector.getTrack('road', RoadTrackRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: RailTrackRoom,
       id: 'RailTrackRoom',
-      onInterest: { ceType: CeTypes.HubRailTrack, idOfRoom: (room: string) => RailTrackRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubRailTrack, idOfRoom: (room: string) => RailTrackRoom.idOfRoom(room) }],
       jsonCreator: (room: string) =>
         JSON.stringify(this.selector.getTrack('rail', RailTrackRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TramTrackRoom,
       id: 'TramTrackRoom',
-      onInterest: { ceType: CeTypes.HubTramTrack, idOfRoom: (room: string) => TramTrackRoom.idOfRoom(room) },
+      onInterest: [{ ceType: CeTypes.HubTramTrack, idOfRoom: (room: string) => TramTrackRoom.idOfRoom(room) }],
       jsonCreator: (room: string) =>
         JSON.stringify(this.selector.getTrack('tram', TramTrackRoom.idOfRoom(room)) ?? null),
     });

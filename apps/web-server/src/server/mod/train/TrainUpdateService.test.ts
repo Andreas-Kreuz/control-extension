@@ -54,6 +54,12 @@ function testJsonRoutesLeaseDynamicInterest(): void {
       ttlMs: 5000,
     },
     {
+      token: 'json:' + CeTypes.TransitTrain + ':ICE-1',
+      ceType: CeTypes.TransitTrain,
+      id: 'ICE-1',
+      ttlMs: 5000,
+    },
+    {
       token: 'json:' + CeTypes.HubRollingStock + ':RS-1',
       ceType: CeTypes.HubRollingStock,
       id: 'RS-1',

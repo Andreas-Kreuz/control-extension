@@ -13,6 +13,7 @@ export default class VersionService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: VersionRoom,
       id: 'VersionRoom',
+      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(this.versionSelector.getVersions());
       },

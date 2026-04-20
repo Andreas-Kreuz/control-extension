@@ -16,7 +16,7 @@ export default class DomainRoomManager {
     {
       id: string;
       jsonCreator: (roomName: string) => string;
-      onInterest?: DomainDataProvider['onInterest'];
+      onInterest: DomainDataProvider['onInterest'];
       lastDataCache: Map<string, string>;
       currentData: Map<string, string>;
       sockets: Map<Socket, string>;
@@ -99,7 +99,7 @@ export default class DomainRoomManager {
       if (room.matchesRoom(nameOfRoom)) {
         const eventName = room.eventId(room.idOfRoom(nameOfRoom));
         domainRoomSetting.sockets.set(socket, nameOfRoom);
-        if (domainRoomSetting.onInterest) {
+        if (domainRoomSetting.onInterest.length > 0) {
           this.interestSyncService?.retainRoomInterest(socket, nameOfRoom, domainRoomSetting.onInterest);
         }
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + eventName);
@@ -115,7 +115,7 @@ export default class DomainRoomManager {
     this.roomMap.forEach((domainRoomSetting, room) => {
       if (room.matchesRoom(nameOfRoom)) {
         domainRoomSetting.sockets.delete(socket);
-        if (domainRoomSetting.onInterest) {
+        if (domainRoomSetting.onInterest.length > 0) {
           this.interestSyncService?.releaseRoomInterest(socket, nameOfRoom);
         }
         if (this.debug) console.log(domainRoomSetting.id, ': disconnect ', nameOfRoom, ' from socket ', socket.id);

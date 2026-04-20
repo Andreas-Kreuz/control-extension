@@ -6,7 +6,9 @@ import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
 import Chip from '@mui/material/Chip';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
+import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
@@ -33,6 +35,11 @@ const ListItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
+function hasTransitLineInfo(train: { line?: string }) {
+  const line = (train.line ?? '').trim();
+  return line.length > 0 && line !== '-';
+}
+
 interface TrainsPageProps {
   selectedElement?: string;
 }
@@ -42,6 +49,7 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
   const trackType = useTrackType();
   const setType = setTrackType();
   const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
+  const [lineInfoOnly, setLineInfoOnly] = useState(false);
 
   const [chipData] = useState<readonly ChipData[]>([
     { key: TrackType.Rail, label: 'Gleise' },
@@ -51,6 +59,7 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
     { key: TrackType.Control, label: 'Steuerstrecken' },
   ]);
   const selectedTrackLabel = chipData.find((entry) => entry.key === trackType)?.label;
+  const filteredTrains = lineInfoOnly ? trains.filter(hasTransitLineInfo) : trains;
 
   const filterSlot = (
     <>
@@ -76,6 +85,16 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
           </ListItem>
         ))}
       </Box>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={lineInfoOnly}
+            onChange={(event) => setLineInfoOnly(event.target.checked)}
+            inputProps={{ 'aria-label': 'Nur Fahrzeuge mit Linieninformation anzeigen' }}
+          />
+        }
+        label="Nur mit Linieninformation"
+      />
       <AppPageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</AppPageHeadline>
     </>
   );
@@ -84,15 +103,15 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
     <AppPage>
       <AppPageHeadline>Gleissystem</AppPageHeadline>
       <ListLayout
-        items={trains}
+        items={filteredTrains}
         keyExtractor={(train) => train.id}
         getFilterText={(train) => train.id}
         filterLabel="Zugname filtern"
         emptyMessage={(ft) => (
           <Typography variant="body2">
             {ft
-              ? `Es wurden keine Fahrzeuge mit dem Namen "${ft}" im Gleissystem ${selectedTrackLabel} gefunden.`
-              : `Es wurden keine Fahrzeuge im Gleissystem ${selectedTrackLabel} gefunden. Wähle ein anderes Gleissystem oder füge Fahrzeuge in EEP hinzu.`}
+              ? `Es wurden keine Fahrzeuge mit dem Namen "${ft}" im Gleissystem ${selectedTrackLabel}${lineInfoOnly ? ' mit Linieninformation' : ''} gefunden.`
+              : `Es wurden keine Fahrzeuge im Gleissystem ${selectedTrackLabel}${lineInfoOnly ? ' mit Linieninformation' : ''} gefunden. Wähle ein anderes Gleissystem oder füge Fahrzeuge in EEP hinzu.`}
           </Typography>
         )}
         renderListItem={(train, selected, onSelect) => (
@@ -108,9 +127,11 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
             title: 'Kameras',
             component: <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />,
           },
+          ...(hasTransitLineInfo(train)
+            ? [{ title: 'Linien', component: <TrainLineInfoSection train={train} /> }]
+            : []),
           { title: 'Information', component: <TrainInformationSection train={train} /> },
           { title: 'RollingStock', component: <TrainRollingStockSection trainId={train.id} /> },
-          { title: 'Linien', component: <TrainLineInfoSection train={train} /> },
         ]}
         filterSlot={filterSlot}
         selectedElement={selectedElement}

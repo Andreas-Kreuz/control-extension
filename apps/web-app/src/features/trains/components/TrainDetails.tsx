@@ -55,7 +55,11 @@ const TrainDetails = (props: { train: TrainListDto }) => {
         <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />
       )}
       {tabs[safeTabIndex]?.key === 'linieninformationen' && (
-        <TrainLineInformationView line={currentLine} destination={currentDestination} />
+        <TrainLineInformationView
+          line={currentLine}
+          destination={currentDestination}
+          nextStations={trainDynamic?.nextStations ?? []}
+        />
       )}
     </Stack>
   );

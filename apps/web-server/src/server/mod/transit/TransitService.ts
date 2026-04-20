@@ -25,6 +25,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitSettingsRoom,
       id: 'TransitSettingsRoom',
+      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(this.publicTransportSettingsSelector.getSettings());
       },
@@ -32,6 +33,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitLineListRoom,
       id: 'TransitLineListRoom',
+      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(Object.values(this.transitSelector.getTransitLines()));
       },
@@ -39,10 +41,12 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitLineDetailsRoom,
       id: 'TransitLineDetailsRoom',
-      onInterest: {
-        ceType: CeTypes.TransitLine,
-        idOfRoom: (room: string) => TransitLineDetailsRoom.idOfRoom(room),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.TransitLine,
+          idOfRoom: (room: string) => TransitLineDetailsRoom.idOfRoom(room),
+        },
+      ],
       jsonCreator: (room: string): string => {
         const lineId = TransitLineDetailsRoom.idOfRoom(room);
         return JSON.stringify(this.transitSelector.getTransitLine(lineId) ?? null);
@@ -51,6 +55,7 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitStationListRoom,
       id: 'TransitStationListRoom',
+      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(Object.values(this.transitSelector.getTransitStations()));
       },
@@ -58,10 +63,12 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitStationDetailsRoom,
       id: 'TransitStationDetailsRoom',
-      onInterest: {
-        ceType: CeTypes.TransitStation,
-        idOfRoom: (room: string) => TransitStationDetailsRoom.idOfRoom(room),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.TransitStation,
+          idOfRoom: (room: string) => TransitStationDetailsRoom.idOfRoom(room),
+        },
+      ],
       jsonCreator: (room: string): string => {
         const stationId = TransitStationDetailsRoom.idOfRoom(room);
         return JSON.stringify(this.transitSelector.getTransitStation(stationId) ?? null);
@@ -70,30 +77,36 @@ export default class TransitService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TransitLineNameRoom,
       id: 'TransitLineNameRoom',
-      onInterest: {
-        ceType: CeTypes.TransitLineName,
-        idOfRoom: (room: string) => TransitLineNameRoom.idOfRoom(room),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.TransitLineName,
+          idOfRoom: (room: string) => TransitLineNameRoom.idOfRoom(room),
+        },
+      ],
       jsonCreator: (room: string): string =>
         JSON.stringify(this.transitSelector.getTransitLineName(TransitLineNameRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TransitTrainRoom,
       id: 'TransitTrainRoom',
-      onInterest: {
-        ceType: CeTypes.TransitTrain,
-        idOfRoom: (room: string) => TransitTrainRoom.idOfRoom(room),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.TransitTrain,
+          idOfRoom: (room: string) => TransitTrainRoom.idOfRoom(room),
+        },
+      ],
       jsonCreator: (room: string): string =>
         JSON.stringify(this.transitSelector.getTransitTrain(TransitTrainRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
       roomType: TransitModuleSettingRoom,
       id: 'TransitModuleSettingRoom',
-      onInterest: {
-        ceType: CeTypes.TransitModuleSetting,
-        idOfRoom: (room: string) => TransitModuleSettingRoom.idOfRoom(room),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.TransitModuleSetting,
+          idOfRoom: (room: string) => TransitModuleSettingRoom.idOfRoom(room),
+        },
+      ],
       jsonCreator: (room: string): string =>
         JSON.stringify(
           this.publicTransportSettingsSelector.getSetting(TransitModuleSettingRoom.idOfRoom(room)) ?? null,

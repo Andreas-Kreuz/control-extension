@@ -42,10 +42,36 @@ function registerDetailProvider(manager: DomainRoomManager): DomainRoom {
   const provider: DomainDataProvider = {
     roomType,
     id: 'TestDetailRoom',
-    onInterest: {
-      ceType: 'ce.test.Detail',
-      idOfRoom: (roomName: string) => roomType.idOfRoom(roomName),
-    },
+    onInterest: [
+      {
+        ceType: 'ce.test.Detail',
+        idOfRoom: (roomName: string) => roomType.idOfRoom(roomName),
+      },
+    ],
+    jsonCreator: (roomName: string) => JSON.stringify({ id: roomType.idOfRoom(roomName) }),
+  };
+  manager.registerService({
+    getUpdaters: () => [],
+    getDataProviders: () => [provider],
+  });
+  return roomType;
+}
+
+function registerMultiInterestDetailProvider(manager: DomainRoomManager): DomainRoom {
+  const roomType = new DomainRoom('MultiInterestDetail');
+  const provider: DomainDataProvider = {
+    roomType,
+    id: 'MultiInterestDetailRoom',
+    onInterest: [
+      {
+        ceType: 'ce.test.Detail',
+        idOfRoom: (roomName: string) => roomType.idOfRoom(roomName),
+      },
+      {
+        ceType: 'ce.test.ExtraDetail',
+        idOfRoom: (roomName: string) => roomType.idOfRoom(roomName),
+      },
+    ],
     jsonCreator: (roomName: string) => JSON.stringify({ id: roomType.idOfRoom(roomName) }),
   };
   manager.registerService({
@@ -98,11 +124,33 @@ function testDisconnectReleasesAllSocketInterests(): void {
   ]);
 }
 
+function testJoinAndLeaveRetainMultipleInterestsForOneRoom(): void {
+  const commands: string[] = [];
+  const manager = createManager(commands);
+  const roomType = registerMultiInterestDetailProvider(manager);
+  const socket = createSocket('socket-1');
+  const roomName = roomType.roomId('Entry-1');
+
+  manager.onJoinRoom(socket as never, roomName);
+  manager.onLeaveRoom(socket as never, roomName);
+
+  assert.deepEqual(commands, [
+    'HubInterestSync.startSyncFor|ce.test.Detail|Entry-1',
+    'HubInterestSync.startSyncFor|ce.test.ExtraDetail|Entry-1',
+    'HubInterestSync.stopSyncFor|ce.test.Detail|Entry-1',
+    'HubInterestSync.stopSyncFor|ce.test.ExtraDetail|Entry-1',
+  ]);
+}
+
 export async function run(): Promise<void> {
   await runTest('domain room manager shares interest across room subscribers', testJoinAndLeaveRetainSharedInterest);
   await runTest(
     'domain room manager releases socket interests on disconnect',
     testDisconnectReleasesAllSocketInterests,
+  );
+  await runTest(
+    'domain room manager retains multiple interests for one room',
+    testJoinAndLeaveRetainMultipleInterestsForOneRoom,
   );
 }
 

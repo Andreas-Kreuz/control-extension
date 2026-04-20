@@ -16,7 +16,7 @@ export { TrainType } from './model/trains/TrainType';
 export { TrackType } from './model/trains/TrackType';
 
 export type { TrainListDto } from './dtos/server/trains/TrainListDto';
-export type { TrainDto } from './dtos/server/trains/TrainDto';
+export type { TrainDto, TrainNextStationDto } from './dtos/server/trains/TrainDto';
 export type { RollingStockDto } from './dtos/server/trains/RollingStockDto';
 export type { SettingDto } from './dtos/server/settings/SettingDto';
 export type { SettingsDto } from './dtos/server/settings/SettingsDto';

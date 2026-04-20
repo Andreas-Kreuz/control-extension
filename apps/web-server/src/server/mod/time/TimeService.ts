@@ -13,6 +13,7 @@ export default class TimeService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TimeRoom,
       id: 'TimeRoom',
+      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(this.timeSelector.getTimes());
       },

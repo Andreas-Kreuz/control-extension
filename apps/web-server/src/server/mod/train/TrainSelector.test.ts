@@ -91,9 +91,36 @@ function testTrainSelectorPreservesStringTrainyardId(): void {
   });
 }
 
+function testTrainSelectorMapsTransitNextStations(): void {
+  const selector = new TrainSelector(new RollingStockSelector());
+  selector.updateFromState({
+    ceTypes: {
+      [CeTypes.HubTrain]: {
+        T1: {
+          id: 'T1',
+          name: 'Train 1',
+        },
+      },
+      [CeTypes.TransitTrain]: {
+        T1: {
+          id: 'T1',
+          line: '10',
+          destination: 'Central',
+          nextStations: [{ station: { name: 'Station A', platform: '2' }, departureInMinutes: 3 }],
+        },
+      },
+    },
+  } as never);
+
+  assert.deepEqual(selector.getTrain('T1')?.nextStations, [
+    { station: { name: 'Station A', platform: '2' }, departureInMinutes: 3 },
+  ]);
+}
+
 export async function run(): Promise<void> {
   await runTest('rolling stock selector preserves xmlModel', testRollingStockSelectorPreservesXmlModel);
   await runTest('train selector preserves string trainyardId', testTrainSelectorPreservesStringTrainyardId);
+  await runTest('train selector maps transit next stations', testTrainSelectorMapsTransitNextStations);
 }
 
 if (require.main === module) {

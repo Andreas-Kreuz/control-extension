@@ -11,7 +11,9 @@ function TrainLineInfoSection({ train }: { train: TrainListDto }) {
 
   const line = trainDynamic?.line ?? train.line ?? '-';
   const destination = trainDynamic?.destination ?? train.destination ?? '-';
-  return <TrainLineInformationView line={line} destination={destination} />;
+  return (
+    <TrainLineInformationView line={line} destination={destination} nextStations={trainDynamic?.nextStations ?? []} />
+  );
 }
 
 export default TrainLineInfoSection;

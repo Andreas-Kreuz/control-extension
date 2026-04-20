@@ -16,6 +16,15 @@ export interface TrainDto {
   line?: string;
   destination?: string;
   direction?: string;
+  nextStations?: TrainNextStationDto[];
   trackType?: string;
   trainyardId?: number | string;
+}
+
+export interface TrainNextStationDto {
+  station: {
+    name: string;
+    platform: string;
+  };
+  departureInMinutes: number;
 }
