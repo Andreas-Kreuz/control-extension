@@ -13,6 +13,7 @@ export default class WeatherService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: WeatherRoom,
       id: 'WeatherRoom',
+      onInterest: [],
       jsonCreator: (_room: string): string => JSON.stringify(this.weatherSelector.getWeather()),
     });
   }

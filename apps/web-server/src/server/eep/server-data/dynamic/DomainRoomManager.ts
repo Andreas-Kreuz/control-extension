@@ -13,14 +13,14 @@ export default class DomainRoomManager {
   private roomServices: DomainRoomService[] = [];
   private roomMap: Map<
     DomainRoom,
-      {
-        id: string;
-        jsonCreator: (roomName: string) => string;
-        onInterest?: DomainDataProvider['onInterest'];
-        lastDataCache: Map<string, string>;
-        currentData: Map<string, string>;
-        sockets: Map<Socket, string>;
-      }
+    {
+      id: string;
+      jsonCreator: (roomName: string) => string;
+      onInterest: DomainDataProvider['onInterest'];
+      lastDataCache: Map<string, string>;
+      currentData: Map<string, string>;
+      sockets: Map<Socket, string>;
+    }
   > = new Map();
 
   constructor(
@@ -99,21 +99,13 @@ export default class DomainRoomManager {
       if (room.matchesRoom(nameOfRoom)) {
         const eventName = room.eventId(room.idOfRoom(nameOfRoom));
         domainRoomSetting.sockets.set(socket, nameOfRoom);
-        if (domainRoomSetting.onInterest) {
+        if (domainRoomSetting.onInterest.length > 0) {
           this.interestSyncService?.retainRoomInterest(socket, nameOfRoom, domainRoomSetting.onInterest);
         }
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + eventName);
         socket.emit(eventName, domainRoomSetting.jsonCreator(nameOfRoom));
         if (this.debug)
-          console.log(
-            domainRoomSetting.id,
-            ': sending event',
-            eventName,
-            ' to ',
-            nameOfRoom,
-            ' on socket ',
-            socket.id,
-          );
+          console.log(domainRoomSetting.id, ': sending event', eventName, ' to ', nameOfRoom, ' on socket ', socket.id);
       }
     });
     this.roomServices.forEach((service) => service.onJoinRoom?.(socket, nameOfRoom));
@@ -123,7 +115,7 @@ export default class DomainRoomManager {
     this.roomMap.forEach((domainRoomSetting, room) => {
       if (room.matchesRoom(nameOfRoom)) {
         domainRoomSetting.sockets.delete(socket);
-        if (domainRoomSetting.onInterest) {
+        if (domainRoomSetting.onInterest.length > 0) {
           this.interestSyncService?.releaseRoomInterest(socket, nameOfRoom);
         }
         if (this.debug) console.log(domainRoomSetting.id, ': disconnect ', nameOfRoom, ' from socket ', socket.id);

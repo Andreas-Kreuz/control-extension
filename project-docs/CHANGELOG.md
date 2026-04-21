@@ -53,3 +53,15 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 ### Dokumentation
 
 - 📖 Neue App Ansicht auf der Dokumentationsseite
+
+## **Control Extension v0.0.5** Vorschauversion
+
+### Neu
+
+- ⭐ Anzeige nächster Halte pro Fahrzeug
+- ⭐ Filter für Fahrzeuge mit Linieninformationen
+- ⭐ Neue Tooltips für Ampeln, die nur den Kurznamen und die Schaltung anzeigen
+
+### Bugfixes
+
+- 🐞 Installer enthält keine doppelten Dateien mehr

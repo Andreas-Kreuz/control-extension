@@ -32,6 +32,7 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TrainListRoom,
       id: 'TrainListRoom',
+      onInterest: [],
       jsonCreator: (room: string): string => {
         const trackType = TrainListRoom.idOfRoom(room);
         return JSON.stringify(this.trainSelector.getTrainList(trackType));
@@ -40,10 +41,16 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TrainRoom,
       id: 'TrainRoom',
-      onInterest: {
-        ceType: CeTypes.HubTrain,
-        idOfRoom: (roomName: string) => TrainRoom.idOfRoom(roomName),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.HubTrain,
+          idOfRoom: (roomName: string) => TrainRoom.idOfRoom(roomName),
+        },
+        {
+          ceType: CeTypes.TransitTrain,
+          idOfRoom: (roomName: string) => TrainRoom.idOfRoom(roomName),
+        },
+      ],
       jsonCreator: (room: string): string => {
         const trainId = TrainRoom.idOfRoom(room);
         return JSON.stringify(this.trainSelector.getTrain(trainId) ?? null);
@@ -52,10 +59,12 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RollingStockRoom,
       id: 'RollingStockRoom',
-      onInterest: {
-        ceType: CeTypes.HubRollingStock,
-        idOfRoom: (roomName: string) => RollingStockRoom.idOfRoom(roomName),
-      },
+      onInterest: [
+        {
+          ceType: CeTypes.HubRollingStock,
+          idOfRoom: (roomName: string) => RollingStockRoom.idOfRoom(roomName),
+        },
+      ],
       jsonCreator: (room: string): string => {
         const rollingStockId = RollingStockRoom.idOfRoom(room);
         return JSON.stringify(this.rollingStockSelector.getRollingStock(rollingStockId) ?? null);
@@ -64,6 +73,7 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RollingStockTexturesRoom,
       id: 'RollingStockTexturesRoom',
+      onInterest: [],
       jsonCreator: (room: string): string => {
         const rollingStockId = RollingStockTexturesRoom.idOfRoom(room);
         return JSON.stringify(this.rollingStockSelector.getRollingStockTextures(rollingStockId) ?? null);
@@ -72,6 +82,7 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RollingStockRotationRoom,
       id: 'RollingStockRotationRoom',
+      onInterest: [],
       jsonCreator: (room: string): string => {
         const rollingStockId = RollingStockRotationRoom.idOfRoom(room);
         return JSON.stringify(this.rollingStockSelector.getRollingStockRotation(rollingStockId) ?? null);
@@ -140,6 +151,8 @@ export default class TrainUpdateService implements DomainRoomService {
 
       const token = 'json:' + CeTypes.HubTrain + ':' + trainId;
       this.interestSyncService?.touchLeasedToken(token, CeTypes.HubTrain, trainId, jsonInterestTtlMs);
+      const transitToken = 'json:' + CeTypes.TransitTrain + ':' + trainId;
+      this.interestSyncService?.touchLeasedToken(transitToken, CeTypes.TransitTrain, trainId, jsonInterestTtlMs);
       const train = await this.waitForDynamicData(() => this.trainSelector.getTrain(trainId));
       if (!train) {
         res.status(504).json({ error: 'timeout' });

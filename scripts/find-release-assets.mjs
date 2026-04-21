@@ -9,9 +9,9 @@ const packageJson = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'),
 const version = packageJson.version;
 
 const packageDir = path.join(repoRoot, 'lua', 'modell-pakete');
-const packageName = `control-extension-for-eep-${version}-installer.zip`;
+const packageName = `control-extension-${version}.zip`;
 const packagePath = path.join(packageDir, packageName);
-const compatPackageName = `ak-compat-layer-for-control-extension-${version}-installer.zip`;
+const compatPackageName = `control-extension-${version}-ak-compat.zip`;
 const compatPackagePath = path.join(packageDir, compatPackageName);
 
 if (!existsSync(packageDir)) {

@@ -16,7 +16,7 @@ export { TrainType } from './model/trains/TrainType';
 export { TrackType } from './model/trains/TrackType';
 
 export type { TrainListDto } from './dtos/server/trains/TrainListDto';
-export type { TrainDto } from './dtos/server/trains/TrainDto';
+export type { TrainDto, TrainNextStationDto } from './dtos/server/trains/TrainDto';
 export type { RollingStockDto } from './dtos/server/trains/RollingStockDto';
 export type { SettingDto } from './dtos/server/settings/SettingDto';
 export type { SettingsDto } from './dtos/server/settings/SettingsDto';
@@ -42,7 +42,11 @@ export type { ContactDto } from './dtos/server/contacts/ContactDto';
 export type { TrackDto } from './dtos/server/tracks/TrackDto';
 export type { RollingStockTexturesDto } from './dtos/server/trains/RollingStockTexturesDto';
 export type { RollingStockRotationDto } from './dtos/server/trains/RollingStockRotationDto';
-export type { IntersectionDto } from './dtos/server/roads/IntersectionDto';
+export type {
+  IntersectionDto,
+  IntersectionPhaseDto,
+  IntersectionPhaseTrafficLightDto,
+} from './dtos/server/roads/IntersectionDto';
 export type { IntersectionLaneDto } from './dtos/server/roads/IntersectionLaneDto';
 export type { IntersectionSwitchingDto } from './dtos/server/roads/IntersectionSwitchingDto';
 export type { IntersectionTrafficLightDto } from './dtos/server/roads/IntersectionTrafficLightDto';

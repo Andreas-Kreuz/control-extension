@@ -9,7 +9,9 @@ const getLogList = () => {
     }
   });
 
-  cy.get('#open-log').invoke('text').should('match', /log verbergen/i);
+  cy.get('#open-log')
+    .invoke('text')
+    .should('match', /log verbergen/i);
   cy.get('#delete-log').should('be.visible');
   return cy.get('ul');
 };

@@ -341,7 +341,6 @@ __metadata:
   resolution: "@ce/web-app@workspace:apps/web-app"
   dependencies:
     "@ce/web-shared": "workspace:*"
-    "@chromatic-com/storybook": "npm:^5.1.1"
     "@emotion/react": "npm:^11.14.0"
     "@emotion/styled": "npm:^11.14.1"
     "@fontsource/anek-latin": "npm:^5.2.7"
@@ -419,21 +418,6 @@ __metadata:
     typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
-
-"@chromatic-com/storybook@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "@chromatic-com/storybook@npm:5.1.1"
-  dependencies:
-    "@neoconfetti/react": "npm:^1.0.0"
-    chromatic: "npm:^13.3.4"
-    filesize: "npm:^10.0.12"
-    jsonfile: "npm:^6.1.0"
-    strip-ansi: "npm:^7.1.0"
-  peerDependencies:
-    storybook: ^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0
-  checksum: 10/42887af2a6fdc9cfdada6137c5b1a6c2e9c3f726a6eb9d563037d1bb840e50866bf8ded98da199fb4056af38f873c71c4991a9c6ad86d64c7168d3c2c0b7ed7f
-  languageName: node
-  linkType: hard
 
 "@cypress/request@npm:^3.0.10":
   version: 3.0.10
@@ -1481,13 +1465,6 @@ __metadata:
     "@emnapi/runtime": "npm:^1.7.1"
     "@tybys/wasm-util": "npm:^0.10.1"
   checksum: 10/080e7f2aefb84e09884d21c650a2cbafdf25bfd2634693791b27e36eec0ddaa3c1656a943f8c913ac75879a0b04e68f8a827897ee655ab54a93169accf05b194
-  languageName: node
-  linkType: hard
-
-"@neoconfetti/react@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@neoconfetti/react@npm:1.0.0"
-  checksum: 10/71a623f2df79c773b6693fab3a252ee2d7bb1da4a8986c2d15b5ef25493835c1de64f2e44637faf823970d43d63f32227b09a6605ad23f39bc82c14d810e45cd
   languageName: node
   linkType: hard
 
@@ -3715,25 +3692,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:^13.3.4":
-  version: 13.3.5
-  resolution: "chromatic@npm:13.3.5"
-  peerDependencies:
-    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
-    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
-  peerDependenciesMeta:
-    "@chromatic-com/cypress":
-      optional: true
-    "@chromatic-com/playwright":
-      optional: true
-  bin:
-    chroma: dist/bin.js
-    chromatic: dist/bin.js
-    chromatic-cli: dist/bin.js
-  checksum: 10/d660e926e2763158eb216c12fd443ac909235b62e0855d6485c5ec270cbde8ce6d5467fc9792a988f2cd4c32722efb9899982b26d4bd8265381846c7d7006c21
-  languageName: node
-  linkType: hard
-
 "chromium-pickle-js@npm:^0.2.0":
   version: 0.2.0
   resolution: "chromium-pickle-js@npm:0.2.0"
@@ -5389,13 +5347,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"filesize@npm:^10.0.12":
-  version: 10.1.6
-  resolution: "filesize@npm:10.1.6"
-  checksum: 10/e800837c4fc02303f1944d5a4c7b706df1c5cd95d745181852604fb00a1c2d55d2d3921252722bd2f0c86b59c94edaba23fa224776bbf977455d4034e7be1f45
-  languageName: node
-  linkType: hard
-
 "fill-range@npm:^7.1.1":
   version: 7.1.1
   resolution: "fill-range@npm:7.1.1"
@@ -6951,7 +6902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonfile@npm:^6.0.1, jsonfile@npm:^6.1.0":
+"jsonfile@npm:^6.0.1":
   version: 6.1.0
   resolution: "jsonfile@npm:6.1.0"
   dependencies:

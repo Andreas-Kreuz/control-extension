@@ -94,7 +94,7 @@ Jedes `TrafficLight` verbindet ein bestimmtes Signal anhand der Signal-ID mit ei
 
 | Parameter            | Typ                 | Bedeutung                                                                        |
 | -------------------- | ------------------- | -------------------------------------------------------------------------------- |
-| `name`               | `string`            | Name der Ampel, z.B. "K1", "K2", "F1", "S1", "B1", "L1"                          |
+| `name`               | `string`            | Name des Verkehrssignals, z.B. "K1", "K2", "S1", "B1", "L1"                      |
 | `signalId`           | `number`            | Die Signal-ID im Modul oben                                                      |
 | `trafficLightModel`  | `TrafficLightModel` | Das verknüpfte Modell. Die Ampel muss dieses Modell in 3D nutzen.                |
 | _`redStructure`_     | `string`            | Immobilien-ID in EEP für rot deren Licht eingeschaltet wird (optional)           |
@@ -116,6 +116,17 @@ _Vorschlag für den selbst vergebenen Namen:_
 - `S1`, `S2`, `S3`, ... für Tram
 - `B1`, `B2`, `B3`, ... für Bus
 - `L1`, `L2`, `L3`, ... für unsichtbare Fahrspur-Ampeln
+
+### Fußgängersignale benennen
+
+| Aufruf                                                                              |
+| ----------------------------------------------------------------------------------- |
+| `TrafficLight:new("K1", 12, TrafficLightModel.JS2_3er_mit_FG):withPedestrian("F1")` |
+| `TrafficLight:newPedestrianOnly("F1", 20, TrafficLightModel.JS2_2er_nur_FG)`        |
+| `TrafficLight:new("F1", 20, TrafficLightModel.JS2_2er_nur_FG):asPedestrianOnly()`   |
+
+Eine `TrafficLight` kann ein Verkehrssignal, ein Fußgängersignal oder beides zugleich darstellen.
+Intern werden die Namen als `trafficSignalName` und `pedestrianSignalName` getrennt gespeichert.
 
 ### `TrafficLight:applyToLane()` - Ampel für Fahrspur nutzen
 

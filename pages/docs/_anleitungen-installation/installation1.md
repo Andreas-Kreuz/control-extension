@@ -14,7 +14,7 @@ published: false
 
 ## Herunterladen
 
-- Lade Dir die aktuelle Datei [`control-extension-for-eep-*.zip`](https://github.com/Andreas-Kreuz/control-extension/releases/latest) herunter.
+- Lade Dir die aktuelle Datei [`control-extension-*.zip`](https://github.com/Andreas-Kreuz/control-extension/releases/latest) herunter.
 
 ## Installieren
 

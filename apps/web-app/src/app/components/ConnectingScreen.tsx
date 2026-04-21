@@ -15,18 +15,20 @@ const ConnectingScreen = (props: ConnectingScreenProps) => {
       <MuiPaper sx={{ m: { xs: 1, sm: 'auto' }, p: { xs: 2, md: 4 }, borderRadius: 2 }} variant="outlined">
         <MuiStack sx={{ alignItems: 'center' }} spacing={1}>
           <MuiTypography gutterBottom>
-            Verbinde zum Server für EEP an{' '}
-            <strong style={{ fontWeight: 500, wordBreak: 'break-word' }}>{props.url}</strong> ...
+            Verbindung wird wiederhergestellt{' '}
+            <strong style={{ fontWeight: 500, wordBreak: 'break-word' }}>{props.url}</strong>
           </MuiTypography>
           <MuiCircularProgress />
         </MuiStack>
         <MuiDivider sx={{ my: 2 }} />
-        <MuiTypography gutterBottom>
-          <img src={'/icon-192.png'} style={{ height: 48, float: 'left', marginRight: '1rem' }} />
-          <strong>Hast Du den Server für EEP beendet?</strong>
-          <br />
-          Schließe diese Seite oder starte den Server erneut.
-        </MuiTypography>
+        <MuiStack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+          <img src={'/icon-192.png'} style={{ height: 48 }} />
+          <MuiTypography gutterBottom>
+            <strong>Server versehentlich beendet?</strong>
+            <br />
+            Bitte control-extension-server.exe im Ordner EEP/LUA/ce/ starten.
+          </MuiTypography>
+        </MuiStack>
       </MuiPaper>
     </MuiBackdrop>
   );

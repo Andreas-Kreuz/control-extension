@@ -67,6 +67,28 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `ready`            | `boolean`; Beispiel: `false`                      | Status aus `crossing:isGreenPhaseFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                    |
 | `timeForGreen`     | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `IntersectionSequence:new(...)`.                                                                   |
 | `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `EEPSetCamera \| 0 \| <staticCam>` umgesetzt. |
+| `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `IntersectionSequence`-Einträgen der Kreuzung.                                                                                 |
+
+#### `IntersectionPhaseDto`
+
+| Name                | Typ und Wertebereich / Beispiel      | Beschreibung                                                                                          |
+| ------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `id`                | `string`; Beispiel: `K1-S1`          | Zusammengesetzter Schlüssel aus Kreuzungsname und Schaltungsname.                                     |
+| `name`              | `string`; Beispiel: `S1`             | Schaltungsname aus `IntersectionSequence.name`.                                                       |
+| `order`             | `integer >= 1`; Beispiel: `1`        | Reihenfolge aus `crossing:getSequences()`.                                                            |
+| `prio`              | `number`; Beispiel: `4.5`            | Aktuelle Priorität der Schaltung.                                                                     |
+| `greenPhaseSeconds` | `number`; Beispiel: `15`             | Grünzeit dieser Schaltung.                                                                            |
+| `trafficLights`     | `IntersectionPhaseTrafficLightDto[]` | Sortierte Liste der Signale, die in dieser Schaltung grün bzw. fußgänger-/tram-spezifisch aktiv sind. |
+
+#### `IntersectionPhaseTrafficLightDto`
+
+| Name                   | Typ und Wertebereich / Beispiel              | Beschreibung                                                               |
+| ---------------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| `signalId`             | `integer`; Beispiel: `23`                    | Signal-ID aus `TrafficLight.signalId`.                                     |
+| `type`                 | `string`; Beispiel: `CAR`                    | Rolle des Signals in der Schaltung, z. B. `CAR`, `TRAM` oder `PEDESTRIAN`. |
+| `trafficSignalName`    | `string` oder nicht gesetzt; Beispiel: `K1`  | Name des Verkehrssignals.                                                  |
+| `pedestrianSignalName` | `string` oder nicht gesetzt; Beispiel: `F1`  | Name des Fußgängersignals.                                                 |
+| `use`                  | `string`; Beispiel: `TRAFFIC_AND_PEDESTRIAN` | Interne Nutzung des Signals: Verkehr, Fußgänger oder kombiniert.           |
 
 ### CeType `ce.mods.road.IntersectionSwitching`
 
@@ -92,6 +114,9 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`                                   | `integer`, meist Signal-ID; Beispiel: `95`                                                                                 | Primärschlüssel der Ampel. Bei negativ konfigurierten Signalen wird intern ein eigener negativer Schlüssel verwendet.                                                                                          |
 | `signalId`                             | `integer`; Beispiel: `95`                                                                                                  | Signal-ID aus `TrafficLight:new(name, signalId, ...)`. Positive Werte referenzieren ein EEP-Signal; negative Werte stehen für rein logisch verwaltete Signale.                                                 |
+| `trafficSignalName`                    | `string` oder nicht gesetzt; Beispiel: `K1`                                                                                | Name des Verkehrssignals.                                                                                                                                                                                      |
+| `pedestrianSignalName`                 | `string` oder nicht gesetzt; Beispiel: `F1`                                                                                | Name des Fußgängersignals, wenn die Ampel Fußgänger-Grün unterstützt oder Fußgänger-only ist.                                                                                                                  |
+| `use`                                  | `string`; Beispiel: `TRAFFIC_AND_PEDESTRIAN`                                                                               | Interne Nutzung des Signals: `TRAFFIC_ONLY`, `PEDESTRIAN_ONLY` oder `TRAFFIC_AND_PEDESTRIAN`.                                                                                                                  |
 | `modelId`                              | `string`; Beispiel: `Unsichtbares Signal`                                                                                  | Name des zugeordneten `TrafficLightModel`.                                                                                                                                                                     |
 | `currentPhase`                         | `string`, Werte aus `TrafficLightState`; Beispiel: `Rot`                                                                   | Aktuelle Ampelphase. Bei positiven Signal-IDs initial aus `EEPGetSignal(signalId)` und `TrafficLightModel:phaseOf(...)`, danach aus der Lua-Logik gepflegt. Typische Werte im Snapshot: `Rot`, `Grün`, `Fußg`. |
 | `intersectionId`                       | `integer >= 1`; Beispiel: `1`                                                                                              | Numerische Referenz auf `intersections.id`.                                                                                                                                                                    |

@@ -21,12 +21,12 @@ CeHubModule.setOptions({
             discoveryAndUpdate = true,
             publish = true,
             fieldUpdates = {
-                speed = "onselection",
+                speed = "oninterest",
                 targetSpeed = "never",
             },
             fieldPublish = {
                 speed = "always",
-                targetSpeed = "onselection",
+                targetSpeed = "oninterest",
             },
         },
     },
@@ -41,9 +41,9 @@ Die Default-Optionen liegen zentral in `HubOptionDefaults.lua`.
 
 ## Feld-Policies
 
-- `always`
-- `onselection`
-- `never`
+- `always` - Das Feld wird immer aktualisiert / veröffentlicht.
+- `oninterest` - Das Feld wird nur aktualisiert / veröffentlicht, wenn der Dateneintrag ausgewählt ist.
+- `never` - Das Feld wird nie aktualisiert / veröffentlicht.
 
 ## Legacy
 

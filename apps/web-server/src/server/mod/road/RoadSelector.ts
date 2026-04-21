@@ -35,13 +35,14 @@ export default class RoadSelector {
       CeTypes.RoadIntersection,
       (dto) => ({
         id: dto.id,
-        name: dto.name,
-        currentSwitching: dto.currentSwitching,
-        manualSwitching: dto.manualSwitching,
-        nextSwitching: dto.nextSwitching,
-        ready: dto.ready,
-        timeForGreen: dto.timeForGreen,
+        name: dto.name ?? '',
+        currentSwitching: dto.currentSwitching ?? '',
+        manualSwitching: dto.manualSwitching ?? '',
+        nextSwitching: dto.nextSwitching ?? '',
+        ready: dto.ready ?? false,
+        timeForGreen: dto.timeForGreen ?? 0,
         staticCams: dto.staticCams ?? [],
+        phases: dto.phases ?? [],
       }),
     );
 
@@ -82,6 +83,9 @@ export default class RoadSelector {
       (dto) => ({
         id: dto.id,
         signalId: dto.signalId,
+        ...(dto.trafficSignalName !== undefined ? { trafficSignalName: dto.trafficSignalName } : {}),
+        ...(dto.pedestrianSignalName !== undefined ? { pedestrianSignalName: dto.pedestrianSignalName } : {}),
+        use: dto.use,
         modelId: dto.modelId,
         currentPhase: dto.currentPhase,
         intersectionId: dto.intersectionId,
@@ -143,7 +147,8 @@ export default class RoadSelector {
   getIntersectionSwitchings = (): Record<string, IntersectionSwitchingDto> => this.intersectionSwitchings;
   getIntersectionSwitching = (id: string): IntersectionSwitchingDto | undefined => this.intersectionSwitchings[id];
   getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightDto> => this.intersectionTrafficLights;
-  getIntersectionTrafficLight = (id: string): IntersectionTrafficLightDto | undefined => this.intersectionTrafficLights[id];
+  getIntersectionTrafficLight = (id: string): IntersectionTrafficLightDto | undefined =>
+    this.intersectionTrafficLights[id];
   getIntersection = (id: string): IntersectionDto | undefined => this.intersections[id];
   getIntersectionLane = (id: string): IntersectionLaneDto | undefined => this.intersectionLanes[id];
   getTrafficLightModels = (): Record<string, TrafficLightModelDto> => this.trafficLightModels;

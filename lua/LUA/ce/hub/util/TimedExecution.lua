@@ -1,9 +1,9 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.util.RuntimeRegistry ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.util.TimedExecution ...") end
 
 local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
----@class RuntimeRegistry
-local RuntimeRegistry = {}
+---@class TimedExecution
+local TimedExecution = {}
 
 local function executeAndStoreRunTimeInternal(group, func, ...)
     if not func then return end
@@ -15,18 +15,18 @@ local function executeAndStoreRunTimeInternal(group, func, ...)
     return table.unpack(result)
 end
 
-function RuntimeRegistry.runTimed(group, func, ...)
+function TimedExecution.runTimed(group, func, ...)
     return executeAndStoreRunTimeInternal(group, func, ...)
 end
 
-function RuntimeRegistry.runTimedAndKeep(group, func, ...)
+function TimedExecution.runTimedAndKeep(group, func, ...)
     RuntimeMetrics.keepGroup(group)
     return executeAndStoreRunTimeInternal(group, func, ...)
 end
 
 --- Indirect call of EEP function (or any other function) including time measurement
-function RuntimeRegistry.executeAndStoreRunTime(func, group, ...)
+function TimedExecution.executeAndStoreRunTime(func, group, ...)
     return executeAndStoreRunTimeInternal(group, func, ...)
 end
 
-return RuntimeRegistry
+return TimedExecution

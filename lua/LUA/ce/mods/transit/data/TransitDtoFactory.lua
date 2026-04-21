@@ -149,6 +149,20 @@ local function toTransitTrainDto(transitTrain, _, isSelected)
         and (transitTrain.getDestination and transitTrain:getDestination() or transitTrain.destination) or ""
     dto.direction       = SyncPolicy.shouldPublishField(fieldPolicies, "direction", isSelected)
         and (transitTrain.getDirection and transitTrain:getDirection() or transitTrain.direction) or ""
+    dto.nextStations    = {}
+    if SyncPolicy.shouldPublishField(fieldPolicies, "nextStations", isSelected) then
+        local nextStations = transitTrain.getNextStations
+            and transitTrain:getNextStations() or transitTrain.nextStations or {}
+        for _, entry in ipairs(nextStations) do
+            table.insert(dto.nextStations, {
+                station = {
+                    name = entry.station and entry.station.name or "",
+                    platform = entry.platform or "1"
+                },
+                departureInMinutes = entry.departureInMinutes
+            })
+        end
+    end
     return dto
 end
 

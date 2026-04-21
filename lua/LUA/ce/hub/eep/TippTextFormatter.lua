@@ -11,6 +11,7 @@ local TippTextFormatter = {
     -- <bgrgb=0,0,0> Hintergrundfarbe in 8 Bit RGB Werten (diese Hintergrundfarbe betrifft nur die Schrift)
     bold = function (text) return "<b>" .. text .. "</b>" end,
     grey = function (text) return "<bgrgb=201,201,201><fgrgb=0,0,0>" .. text .. "<bgrgb=255,255,255><fgrgb=0,0,0>" end,
+    greyText = function (text) return "<fgrgb=128,128,128>" .. text .. "<fgrgb=0,0,0>" end,
     green = function (text)
         return "<bgrgb=0,128,0><fgrgb=255,255,255>" .. text .. "<bgrgb=255,255,255><fgrgb=0,0,0>"
     end,

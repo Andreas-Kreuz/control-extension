@@ -45,11 +45,7 @@ function TransitStationDepartureList({
                 width: 1,
               }}
             >
-              <Stack
-                direction="row"
-                spacing={1}
-                sx={{ alignItems: 'baseline', minWidth: 0, flexGrow: 1 }}
-              >
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline', minWidth: 0, flexGrow: 1 }}>
                 <Typography component="span" fontWeight={600} sx={{ minWidth: '2.5rem', textAlign: 'right' }}>
                   {entry.line}
                 </Typography>
@@ -57,13 +53,21 @@ function TransitStationDepartureList({
                   <Typography component="span" sx={{ minWidth: 0, wordBreak: 'break-word', lineHeight: 'inherit' }}>
                     {entry.destination}
                   </Typography>
-                  {showPlatform && <Chip size="small" label={`Steig ${entry.platform}`} sx={{ width: 'fit-content' }} />}
+                  {showPlatform && (
+                    <Chip size="small" label={`Steig ${entry.platform}`} sx={{ width: 'fit-content' }} />
+                  )}
                 </Stack>
               </Stack>
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap', minWidth: '3.5rem', lineHeight: 'inherit' }}
+                sx={{
+                  flexShrink: 0,
+                  textAlign: 'right',
+                  whiteSpace: 'nowrap',
+                  minWidth: '3.5rem',
+                  lineHeight: 'inherit',
+                }}
               >
                 {formatDeparture(entry)}
               </Typography>
@@ -75,11 +79,7 @@ function TransitStationDepartureList({
   );
 }
 
-function TransitStationDepartures({
-  station,
-}: {
-  station: TransitStationDto;
-}) {
+function TransitStationDepartures({ station }: { station: TransitStationDto }) {
   const [activeTab, setActiveTab] = useState(0);
   const queue = useMemo(
     () => [...(station.queue ?? [])].sort((left, right) => left.timeInMinutes - right.timeInMinutes),
@@ -118,10 +118,7 @@ function TransitStationDepartures({
       </Tabs>
       <Divider />
       {selectedTab && (
-        <TransitStationDepartureList
-          departures={selectedTab.departures}
-          showPlatform={selectedTab.showPlatform}
-        />
+        <TransitStationDepartureList departures={selectedTab.departures} showPlatform={selectedTab.showPlatform} />
       )}
     </Stack>
   );

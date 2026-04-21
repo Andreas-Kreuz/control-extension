@@ -5,16 +5,41 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionDto`
 
-| Name               | Typ           |
-| ------------------ | ------------- |
-| `id`               | `number`      |
-| `name`             | `string`      |
-| `currentSwitching` | `string\|nil` |
-| `manualSwitching`  | `string\|nil` |
-| `nextSwitching`    | `string\|nil` |
-| `ready`            | `boolean`     |
-| `timeForGreen`     | `number`      |
-| `staticCams`       | `table`       |
+| Name               | Typ                      |
+| ------------------ | ------------------------ |
+| `id`               | `number`                 |
+| `name`             | `string`                 |
+| `currentSwitching` | `string\|nil`            |
+| `manualSwitching`  | `string\|nil`            |
+| `nextSwitching`    | `string\|nil`            |
+| `ready`            | `boolean`                |
+| `timeForGreen`     | `number`                 |
+| `staticCams`       | `table`                  |
+| `phases`           | `IntersectionPhaseDto[]` |
+
+### `IntersectionPhaseDto`
+
+| Name                | Typ                                  |
+| ------------------- | ------------------------------------ |
+| `id`                | `string`                             |
+| `name`              | `string`                             |
+| `order`             | `number`                             |
+| `prio`              | `number`                             |
+| `greenPhaseSeconds` | `number`                             |
+| `trafficLights`     | `IntersectionPhaseTrafficLightDto[]` |
+
+### `IntersectionPhaseTrafficLightDto`
+
+| Name                   | Typ           |
+| ---------------------- | ------------- |
+| `signalId`             | `number`      |
+| `signalKind`           | `string`      |
+| `signalKey`            | `string`      |
+| `signalName`           | `string\|nil` |
+| `type`                 | `string`      |
+| `trafficSignalName`    | `string\|nil` |
+| `pedestrianSignalName` | `string\|nil` |
+| `use`                  | `string`      |
 
 ## CeType `ce.mods.road.IntersectionLane`
 
@@ -54,15 +79,18 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionTrafficLightDto`
 
-| Name              | Typ                                                   |
-| ----------------- | ----------------------------------------------------- |
-| `id`              | `number`                                              |
-| `signalId`        | `number`                                              |
-| `modelId`         | `string`                                              |
-| `currentPhase`    | `string`                                              |
-| `intersectionId`  | `number`                                              |
-| `lightStructures` | `table<string, IntersectionTrafficLightStructureDto>` |
-| `axisStructures`  | `IntersectionTrafficLightAxisStructureDto[]`          |
+| Name                   | Typ                                                   |
+| ---------------------- | ----------------------------------------------------- |
+| `id`                   | `number`                                              |
+| `signalId`             | `number`                                              |
+| `trafficSignalName`    | `string\|nil`                                         |
+| `pedestrianSignalName` | `string\|nil`                                         |
+| `use`                  | `string`                                              |
+| `modelId`              | `string`                                              |
+| `currentPhase`         | `string`                                              |
+| `intersectionId`       | `number`                                              |
+| `lightStructures`      | `table<string, IntersectionTrafficLightStructureDto>` |
+| `axisStructures`       | `IntersectionTrafficLightAxisStructureDto[]`          |
 
 ## CeType `ce.mods.road.ModuleSetting`
 

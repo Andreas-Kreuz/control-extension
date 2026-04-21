@@ -23,6 +23,7 @@ import AppBackButton from './AppBackButton';
 const DRAWER_WIDTH = 240;
 const RAIL_WIDTH = 80;
 const SIDE_SHEET_WIDTH = 320;
+const DESKTOP_SIDE_SHEET_WIDTH = 'calc((100vw - 240px) / 2)';
 
 export interface NavItem {
   icon: ReactElement;
@@ -70,6 +71,7 @@ function AppLayout({ navItems }: AppLayoutProps) {
   };
 
   const sideSheetPermanent = isDesktop || (isTablet && sideSheetState.permanentOnTablet);
+  const sideSheetWidth = isDesktop ? DESKTOP_SIDE_SHEET_WIDTH : SIDE_SHEET_WIDTH;
   const toolbarVariant = isDesktop ? 'regular' : 'dense';
 
   return (
@@ -180,10 +182,10 @@ function AppLayout({ navItems }: AppLayoutProps) {
             variant="permanent"
             anchor="right"
             sx={{
-              width: SIDE_SHEET_WIDTH,
+              width: sideSheetWidth,
               flexShrink: 0,
               '& .MuiDrawer-paper': {
-                width: SIDE_SHEET_WIDTH,
+                width: sideSheetWidth,
                 boxSizing: 'border-box',
                 overflow: 'hidden',
                 display: 'flex',

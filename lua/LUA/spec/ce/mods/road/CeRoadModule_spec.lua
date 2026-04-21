@@ -16,7 +16,17 @@ insulate("ce.mods.road.CeRoadModule", function ()
         nextSwitching = "S3",
         ready = true,
         timeForGreen = 15,
-        staticCams = { "Cam 1" }
+        staticCams = { "Cam 1" },
+        phases = {
+            {
+                id = "A-S1",
+                name = "S1",
+                order = 1,
+                prio = 1,
+                greenPhaseSeconds = 15,
+                trafficLights = { { signalId = 1, type = "CAR" } }
+            }
+        }
     }
 
     it("returns the module from setOptions for chaining", function ()
@@ -32,12 +42,13 @@ insulate("ce.mods.road.CeRoadModule", function ()
         local _, _, _, dto = RoadDtoFactory.createIntersectionDto(intersection)
 
         assert.equals("A", dto.name)              -- "always" by default -> populated
-        assert.equals("S2", dto.manualSwitching)  -- "always" by default -> populated
+        assert.equals("", dto.manualSwitching)    -- "oninterest" by default, never selected -> empty
         assert.equals("", dto.currentSwitching)   -- "oninterest" by default, never selected -> empty
         assert.equals("", dto.nextSwitching)      -- "oninterest" by default, never selected -> empty
         assert.is_false(dto.ready)                -- "oninterest" by default, never selected -> false
-        assert.equals(0, dto.timeForGreen)        -- "oninterest" by default, never selected -> 0
-        assert.same({}, dto.staticCams)           -- "oninterest" by default, never selected -> {}
+        assert.equals(15, dto.timeForGreen)       -- "always" by default -> populated
+        assert.same({ "Cam 1" }, dto.staticCams)  -- "always" by default -> populated
+        assert.same(intersection.phases, dto.phases)
     end)
 
     it("intersection DTO: oninterest fields are populated after setOptions with always", function ()
@@ -49,10 +60,9 @@ insulate("ce.mods.road.CeRoadModule", function ()
                 intersections = {
                     fieldPublish = {
                         currentSwitching = "always",
+                        manualSwitching = "always",
                         nextSwitching = "always",
-                        ready = "always",
-                        timeForGreen = "always",
-                        staticCams = "always"
+                        ready = "always"
                     }
                 }
             }

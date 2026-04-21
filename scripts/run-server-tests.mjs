@@ -1,15 +1,21 @@
 import { execFileSync } from 'node:child_process';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
+const sourceDir = path.join(repoRoot, 'apps', 'web-server', 'src');
 const buildDir = path.join(repoRoot, 'apps', 'web-server', 'build');
 
 const testFiles = readdirSync(buildDir, { recursive: true, withFileTypes: true })
   .filter((entry) => entry.isFile() && entry.name.endsWith('.test.js'))
   .map((entry) => path.join(entry.parentPath ?? entry.path, entry.name))
+  .filter((testFile) => {
+    const sourceTestFile = path.join(sourceDir, path.relative(buildDir, testFile)).replace(/\.js$/, '.ts');
+
+    return existsSync(sourceTestFile);
+  })
   .sort();
 
 if (testFiles.length === 0) {

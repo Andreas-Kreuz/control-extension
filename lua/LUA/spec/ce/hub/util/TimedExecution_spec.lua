@@ -1,16 +1,16 @@
-insulate("RuntimeRegistry", function ()
+insulate("TimedExecution", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     before_each(function ()
-        clearModule("ce.hub.util.RuntimeRegistry")
+        clearModule("ce.hub.util.TimedExecution")
         clearModule("ce.hub.data.runtime.RuntimeMetrics")
     end)
 
     it("runTimed stores runtime and returns original results", function ()
-        local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
+        local TimedExecution = require("ce.hub.util.TimedExecution")
         local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
-        local first, second = RuntimeRegistry.runTimed("spec.runTimed", function (prefix, value)
+        local first, second = TimedExecution.runTimed("spec.runTimed", function (prefix, value)
                                                            return prefix .. value, value * 2
                                                        end, "v", 3)
 
@@ -23,10 +23,10 @@ insulate("RuntimeRegistry", function ()
     end)
 
     it("runTimedAndKeep keeps groups across resetAll", function ()
-        local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
+        local TimedExecution = require("ce.hub.util.TimedExecution")
         local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
-        RuntimeRegistry.runTimedAndKeep("spec.keep", function () end)
+        TimedExecution.runTimedAndKeep("spec.keep", function () end)
         RuntimeMetrics.resetAll()
 
         local runtime = RuntimeMetrics.get("spec.keep")
@@ -35,10 +35,10 @@ insulate("RuntimeRegistry", function ()
     end)
 
     it("keeps executeAndStoreRunTime compatible", function ()
-        local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
+        local TimedExecution = require("ce.hub.util.TimedExecution")
         local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
-        local result = RuntimeRegistry.executeAndStoreRunTime(function (value)
+        local result = TimedExecution.executeAndStoreRunTime(function (value)
                                                                   return value + 1
                                                               end, "spec.compat", 4)
 

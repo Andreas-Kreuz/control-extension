@@ -16,15 +16,11 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
 function testJsonRoutesLeaseDynamicInterest(): void {
   const touches: Array<{ token: string; ceType: string; id: string; ttlMs: number }> = [];
   const router = express.Router();
-  const service = new TrainUpdateService(
-    {} as never,
-    router,
-    {
-      touchLeasedToken: (token: string, ceType: string, id: string, ttlMs: number) => {
-        touches.push({ token, ceType, id, ttlMs });
-      },
-    } as never,
-  );
+  const service = new TrainUpdateService({} as never, router, {
+    touchLeasedToken: (token: string, ceType: string, id: string, ttlMs: number) => {
+      touches.push({ token, ceType, id, ttlMs });
+    },
+  } as never);
 
   (service as unknown as { trainSelector: { getTrain: (id: string) => { id: string } | undefined } }).trainSelector = {
     getTrain: (id: string) => ({ id }),
@@ -58,6 +54,12 @@ function testJsonRoutesLeaseDynamicInterest(): void {
       ttlMs: 5000,
     },
     {
+      token: 'json:' + CeTypes.TransitTrain + ':ICE-1',
+      ceType: CeTypes.TransitTrain,
+      id: 'ICE-1',
+      ttlMs: 5000,
+    },
+    {
       token: 'json:' + CeTypes.HubRollingStock + ':RS-1',
       ceType: CeTypes.HubRollingStock,
       id: 'RS-1',
@@ -67,7 +69,10 @@ function testJsonRoutesLeaseDynamicInterest(): void {
 }
 
 export async function run(): Promise<void> {
-  await runTest('train update service leases train and rolling stock dynamic interest via shared service', testJsonRoutesLeaseDynamicInterest);
+  await runTest(
+    'train update service leases train and rolling stock dynamic interest via shared service',
+    testJsonRoutesLeaseDynamicInterest,
+  );
 }
 
 if (require.main === module) {

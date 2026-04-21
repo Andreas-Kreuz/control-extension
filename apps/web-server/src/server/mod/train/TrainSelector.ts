@@ -76,6 +76,17 @@ export class TrainSelector {
         ...(transitTrainDto?.line !== undefined ? { line: transitTrainDto.line } : {}),
         ...(transitTrainDto?.destination !== undefined ? { destination: transitTrainDto.destination } : {}),
         ...(transitTrainDto?.direction !== undefined ? { direction: transitTrainDto.direction } : {}),
+        ...(transitTrainDto?.nextStations !== undefined
+          ? {
+              nextStations: transitTrainDto.nextStations.map((entry) => ({
+                station: {
+                  name: entry.station.name,
+                  platform: entry.station.platform,
+                },
+                departureInMinutes: entry.departureInMinutes,
+              })),
+            }
+          : {}),
         ...(trackType !== undefined ? { trackType } : {}),
         ...(trainDto.trainyardId !== undefined && trainDto.trainyardId !== ''
           ? { trainyardId: trainDto.trainyardId }

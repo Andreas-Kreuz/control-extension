@@ -13,18 +13,34 @@ import ListLayout from '../../../shared/layouts/ListLayout';
 import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import useIntersectionSettings from '../hooks/useIntersectionSettings';
 import useIntersections from '../hooks/useIntersections';
+import useSelectedIntersection from '../hooks/useSelectedIntersection';
 import IntersectionControlSection from './IntersectionControlSection';
 import IntersectionCamsSection from './IntersectionCamsSection';
 import IntersectionListItem from './IntersectionListItem';
+import IntersectionPhasesSection from './IntersectionPhasesSection';
+import type Intersection from '../model/Intersection';
 
 interface IntersectionOverviewProps {
-  selectedElement?: string;
+  selectedElement: string | undefined;
 }
 
 function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
   const intersections = useIntersections();
+  const selectedIntersection = useSelectedIntersection(selectedElement);
   const settings = useIntersectionSettings();
   const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
+
+  function detailsIntersection(i: Intersection): Intersection {
+    if (selectedElement !== String(i.id) || selectedIntersection?.id !== i.id) return i;
+
+    return {
+      ...i,
+      ...selectedIntersection,
+      staticCams: selectedIntersection.staticCams.length > 0 ? selectedIntersection.staticCams : i.staticCams,
+      phases: selectedIntersection.phases.length > 0 ? selectedIntersection.phases : i.phases,
+      timeForGreen: selectedIntersection.timeForGreen || i.timeForGreen,
+    };
+  }
 
   return (
     <AppPage>
@@ -53,10 +69,14 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
             {mobileExpansion}
           </AppCardBg>
         )}
-        getDetails={(i) => [
-          { title: 'Modus & Schaltung', component: <IntersectionControlSection intersection={i} /> },
-          { title: 'Kameras', component: <IntersectionCamsSection intersection={i} /> },
-        ]}
+        getDetails={(i) => {
+          const details = detailsIntersection(i);
+          return [
+            { title: 'Modus & Schaltung', component: <IntersectionControlSection intersection={details} /> },
+            // { title: 'Phasen', component: <IntersectionPhasesSection intersection={details} /> },
+            { title: 'Kameras', component: <IntersectionCamsSection intersection={details} /> },
+          ];
+        }}
         selectedElement={selectedElement}
         onSelectedElementChange={handleSelectedElementChange}
       />

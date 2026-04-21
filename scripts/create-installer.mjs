@@ -10,8 +10,237 @@ const rootPackageJson = JSON.parse(readFileSync(path.join(repoRoot, 'package.jso
 const version = rootPackageJson.version;
 
 // ---------------------------------------------------------------------------
+// Package definitions
+// ---------------------------------------------------------------------------
+
+const INSTALLER_NAME = `control-extension-${version}`;
+const COMPAT_INSTALLER_NAME = `control-extension-${version}-ak-compat`;
+
+const packages = [
+  {
+    eepVersion: '13,2',
+    germanName: 'Control Extension für EEP',
+    germanDescription: 'Control Extension mit Verkehrssteuerung, Aufgabenplanung und Modell-Installation',
+    sources: [
+      {
+        subdirectory: 'LUA\\ce',
+        includePatterns: [
+          'LUA/ce/**', // include Control Extension Lua files
+          '!LUA/**/*.md', // ignore all Markdown files
+          '!LUA/ce/databridge/exchange/**', // ignore databridge runtime files
+          'LUA/ce/databridge/exchange/.gitkeep', // keep exchange directory placeholder for EEP
+          '!LUA/ce/databridge/exchange-test', // ignore test exchange directory
+          '!LUA/ce/VERSION', // ignore generated version marker
+          '!LUA/ce/control-extension-server.exe', // ignore generated server binary
+          '!LUA/ce/anlagen', // goes to another package / not part of core installer
+          '!LUA/ce/demo-anlagen', // goes to demo packages
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+    ],
+  },
+  {
+    eepVersion: '13,2',
+    germanName: 'Demo-Anlage (Ampel, ÖPNV)',
+    germanDescription: 'Die Demo-Anlagen für Ampeln und ÖPNV',
+    sources: [
+      {
+        subdirectory: 'LUA\\ce\\demo-anlagen\\ampel',
+        includePatterns: [
+          'LUA/ce/demo-anlagen/ampel/**', // include Ampel demo Lua files
+          '!LUA/**/*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+      {
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Ampel',
+        includePatterns: [
+          'Resourcen/Anlagen/ce/Control_Extension-Demo-Ampel/**', // include Ampel demo EEP resources
+          '!Resourcen/**/*.dds', // ignore EEP/generated texture sidecar files
+          '!*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+      {
+        subdirectory: 'LUA\\ce\\demo-anlagen\\demo-linien',
+        includePatterns: [
+          'LUA/ce/demo-anlagen/demo-linien/**', // include Linien demo Lua files
+          '!LUA/**/*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+      {
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Linien',
+        includePatterns: [
+          'Resourcen/Anlagen/ce/Control_Extension-Demo-Linien/**', // include Linien demo EEP resources
+          '!Resourcen/**/*.dds', // ignore EEP/generated texture sidecar files
+          '!*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+    ],
+  },
+  {
+    eepVersion: '13,2',
+    germanName: 'Demo-Anlage Testen mit EEP (Erweiterte Modelle)',
+    germanDescription: 'Eine Anlage mit Shop-Modellen - mit zwei komplexen Kreuzungen und Ampel-Skripten',
+    sources: [
+      {
+        subdirectory: 'LUA\\ce\\demo-anlagen\\testen',
+        includePatterns: [
+          'LUA/ce/demo-anlagen/testen/**', // include Testen demo Lua files
+          '!LUA/**/*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+      {
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Testen',
+        includePatterns: [
+          'Resourcen/Anlagen/ce/Control_Extension-Demo-Testen/**', // include Testen demo EEP resources
+          '!Resourcen/**/*.dds', // ignore EEP/generated texture sidecar files
+          '!*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+    ],
+  },
+  {
+    eepVersion: '13,2',
+    germanName: 'Tutorial - Aufbau einer Ampelkreuzung',
+    germanDescription: 'Eine Anlage mit einer Kreuzung, die die Verwendung der Lua-Bibliothek erklärt',
+    sources: [
+      {
+        subdirectory: 'LUA\\ce\\demo-anlagen\\tutorial-ampel',
+        includePatterns: [
+          'LUA/ce/demo-anlagen/tutorial-ampel/**', // include tutorial Lua files
+          '!LUA/**/*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+      {
+        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Tutorial-Ampelkreuzung',
+        includePatterns: [
+          'Resourcen/Anlagen/ce/Control_Extension-Tutorial-Ampelkreuzung/**', // include tutorial EEP resources
+          '!Resourcen/**/*.dds', // ignore EEP/generated texture sidecar files
+          '!*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+    ],
+  },
+];
+
+const compatPackages = [
+  {
+    eepVersion: '13,2',
+    germanName: 'AK Compat-Layer für Control Extension',
+    germanDescription: 'Kompatibilitäts-Bibliotheken: ak.road und ak.public-transport als dünne Schicht über ce.mods',
+    sources: [
+      {
+        subdirectory: 'LUA\\ak',
+        includePatterns: [
+          'LUA/ak/**', // include AK compatibility Lua files
+          '!LUA/**/*.md', // ignore all Markdown files
+          '!desktop.ini', // ignore Windows metadata
+        ],
+      },
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
 // File scanning
 // ---------------------------------------------------------------------------
+
+function normalizeInstallPath(filePath) {
+  return filePath.split('\\').join('/').toLowerCase();
+}
+
+function hasGlobChars(pattern) {
+  return pattern.includes('*') || pattern.includes('?');
+}
+
+function segmentMatches(patternSegment, pathSegment) {
+  let regexSource = '';
+
+  for (const char of patternSegment) {
+    if (char === '*') {
+      regexSource += '[^/]*';
+    } else if (char === '?') {
+      regexSource += '[^/]';
+    } else {
+      regexSource += char.replace(/[|\\{}()[\]^$+?.]/g, '\\$&');
+    }
+  }
+
+  return new RegExp(`^${regexSource}$`).test(pathSegment);
+}
+
+function globMatches(pattern, filePath) {
+  const patternSegments = pattern.split('/');
+  const pathSegments = filePath.split('/');
+
+  function matchFrom(patternIndex, pathIndex) {
+    if (patternIndex === patternSegments.length) {
+      return pathIndex === pathSegments.length;
+    }
+
+    const patternSegment = patternSegments[patternIndex];
+
+    if (patternSegment === '**') {
+      for (let nextPathIndex = pathIndex; nextPathIndex <= pathSegments.length; nextPathIndex += 1) {
+        if (matchFrom(patternIndex + 1, nextPathIndex)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    if (pathIndex >= pathSegments.length) {
+      return false;
+    }
+
+    return segmentMatches(patternSegment, pathSegments[pathIndex]) && matchFrom(patternIndex + 1, pathIndex + 1);
+  }
+
+  return matchFrom(0, 0);
+}
+
+function patternMatches(pattern, installPath) {
+  const normalizedPattern = normalizeInstallPath(pattern);
+  const normalizedInstallPath = normalizeInstallPath(installPath);
+
+  if (!normalizedPattern.includes('/')) {
+    const fileName = normalizedInstallPath.split('/').pop();
+    return hasGlobChars(normalizedPattern)
+      ? segmentMatches(normalizedPattern, fileName)
+      : normalizedPattern === fileName;
+  }
+
+  if (!hasGlobChars(normalizedPattern)) {
+    return normalizedInstallPath === normalizedPattern || normalizedInstallPath.startsWith(`${normalizedPattern}/`);
+  }
+
+  return globMatches(normalizedPattern, normalizedInstallPath);
+}
+
+function getInstallPatternDecision(installKey, includePatterns) {
+  let decision = { include: false, pattern: null };
+
+  for (const pattern of includePatterns) {
+    const isExcludePattern = pattern.startsWith('!');
+    const patternWithoutPrefix = isExcludePattern ? pattern.slice(1) : pattern;
+
+    if (patternMatches(patternWithoutPrefix, installKey)) {
+      decision = {
+        include: !isExcludePattern,
+        pattern,
+      };
+    }
+  }
+
+  return decision;
+}
 
 /**
  * Recursively collect all files under baseDir/subdirectory.
@@ -20,9 +249,10 @@ const version = rootPackageJson.version;
  *   fileName     = bare filename                          (for install.ini left-hand side)
  *   absolutePath = full OS path                           (for cpSync)
  *
- * Exclusion: plain substring match on installKey — mirrors Lua string.find plain mode.
+ * includePatterns are gitignore-like: positive patterns include files, !-patterns exclude files,
+ * and later patterns override earlier patterns.
  */
-function searchFiles(baseDir, subdirectory, excludePatterns) {
+function searchFiles(baseDir, subdirectory, includePatterns) {
   const absSubdir = path.join(baseDir, subdirectory);
   const entries = readdirSync(absSubdir, { recursive: true, withFileTypes: true });
 
@@ -34,9 +264,11 @@ function searchFiles(baseDir, subdirectory, excludePatterns) {
     const absolutePath = path.join(entryDir, entry.name);
     const relFromSubdir = path.relative(absSubdir, absolutePath);
     const installKey = subdirectory + '\\' + relFromSubdir.split(path.sep).join('\\');
+    const decision = getInstallPatternDecision(installKey, includePatterns);
 
-    if (excludePatterns.some((p) => installKey.includes(p))) {
-      console.log(`[create-installer] skip: ${installKey}`);
+    if (!decision.include) {
+      const reason = decision.pattern ? `pattern ${decision.pattern}` : 'no include pattern';
+      console.log(`[create-installer] skip: ${installKey} (${reason})`);
       continue;
     }
 
@@ -45,89 +277,6 @@ function searchFiles(baseDir, subdirectory, excludePatterns) {
   }
   return results;
 }
-
-// ---------------------------------------------------------------------------
-// Package definitions
-// ---------------------------------------------------------------------------
-
-const INSTALLER_NAME = `control-extension-for-eep-${version}-installer`;
-const COMPAT_INSTALLER_NAME = `ak-compat-layer-for-control-extension-${version}-installer`;
-
-const packages = [
-  {
-    eepVersion: '13,2',
-    germanName: 'Control Extension für EEP',
-    germanDescription: 'Control Extension mit Verkehrssteuerung, Aufgabenplanung und Modell-Installation',
-    sources: [
-      {
-        subdirectory: 'LUA\\ce',
-        exclude: [
-          'README.md',
-          'commands-to-ce',
-          'events-from-ce',
-          'events-from-ce.pending',
-          'log-from-ce',
-          'ce-version.txt',
-          'server-is-running',
-          'server-state.json',
-          'server-state.counter',
-          'anlagen',
-          'desktop.ini',
-        ],
-      },
-    ],
-  },
-  {
-    eepVersion: '13,2',
-    germanName: 'Demo-Anlage (Ampel, ÖPNV)',
-    germanDescription: 'Die Demo-Anlagen für Ampeln und ÖPNV',
-    sources: [
-      { subdirectory: 'LUA\\ce\\demo-anlagen\\ampel', exclude: ['README.md', 'desktop.ini'] },
-      {
-        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Ampel',
-        exclude: ['.dds', 'README.md', 'desktop.ini'],
-      },
-      { subdirectory: 'LUA\\ce\\demo-anlagen\\demo-linien', exclude: ['.dds', 'README.md', 'desktop.ini'] },
-      {
-        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Linien',
-        exclude: ['.dds', 'README.md', 'desktop.ini'],
-      },
-    ],
-  },
-  {
-    eepVersion: '13,2',
-    germanName: 'Demo-Anlage Testen mit EEP (Erweiterte Modelle)',
-    germanDescription: 'Eine Anlage mit Shop-Modellen - mit zwei komplexen Kreuzungen und Ampel-Skripten',
-    sources: [
-      { subdirectory: 'LUA\\ce\\demo-anlagen\\testen', exclude: ['README.md', 'desktop.ini'] },
-      {
-        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Demo-Testen',
-        exclude: ['.dds', 'README.md', 'desktop.ini'],
-      },
-    ],
-  },
-  {
-    eepVersion: '13,2',
-    germanName: 'Tutorial - Aufbau einer Ampelkreuzung',
-    germanDescription: 'Eine Anlage mit einer Kreuzung, die die Verwendung der Lua-Bibliothek erklärt',
-    sources: [
-      { subdirectory: 'LUA\\ce\\demo-anlagen\\tutorial-ampel', exclude: ['README.md', 'desktop.ini'] },
-      {
-        subdirectory: 'Resourcen\\Anlagen\\ce\\Control_Extension-Tutorial-Ampelkreuzung',
-        exclude: ['.dds', 'README.md', 'desktop.ini'],
-      },
-    ],
-  },
-];
-
-const compatPackages = [
-  {
-    eepVersion: '13,2',
-    germanName: 'AK Compat-Layer für Control Extension',
-    germanDescription: 'Kompatibilitäts-Bibliotheken: ak.road und ak.public-transport als dünne Schicht über ce.mods',
-    sources: [{ subdirectory: 'LUA\\ak', exclude: [] }],
-  },
-];
 
 // ---------------------------------------------------------------------------
 // Content generators
@@ -166,6 +315,43 @@ function generateInstallIni(files, eepVersion) {
 }
 
 // ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+function assertNoDuplicatePayloadFileNames(files, packageLabel, packageName) {
+  const filesByName = new Map();
+
+  for (const file of files) {
+    const fileNameKey = file.fileName.toLowerCase();
+    const existingFiles = filesByName.get(fileNameKey);
+
+    if (existingFiles) {
+      existingFiles.push(file);
+    } else {
+      filesByName.set(fileNameKey, [file]);
+    }
+  }
+
+  const duplicateGroups = [...filesByName.values()].filter((group) => group.length > 1);
+
+  if (duplicateGroups.length === 0) {
+    return;
+  }
+
+  console.error(`[create-installer] ERROR: duplicate payload filenames in Install_${packageLabel} "${packageName}"`);
+  console.error('[create-installer] Installer payload is flat per Install_XX; duplicates would overwrite each other.');
+
+  for (const group of duplicateGroups) {
+    console.error(`[create-installer]   ${group[0].fileName}`);
+    for (const file of group) {
+      console.error(`[create-installer]     ${file.installKey}`);
+    }
+  }
+
+  process.exit(1);
+}
+
+// ---------------------------------------------------------------------------
 // ZIP creation
 // ---------------------------------------------------------------------------
 
@@ -198,13 +384,15 @@ function buildInstaller(installerName, pkgs) {
 
     const allFiles = [];
     for (const source of pkg.sources) {
-      allFiles.push(...searchFiles(luaDir, source.subdirectory, source.exclude));
+      allFiles.push(...searchFiles(luaDir, source.subdirectory, source.includePatterns));
     }
 
     if (allFiles.length === 0) {
       console.error(`[create-installer] ERROR: no files found for package "${pkg.germanName}"`);
       process.exit(1);
     }
+
+    assertNoDuplicatePayloadFileNames(allFiles, label, pkg.germanName);
 
     for (const { absolutePath, fileName } of allFiles) {
       cpSync(absolutePath, path.join(pkgDir, fileName));
