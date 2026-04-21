@@ -7,7 +7,7 @@ local RuntimeDataCollector = require("ce.hub.data.runtime.RuntimeDataCollector")
 local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
-local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
+local TimedExecution = require("ce.hub.util.TimedExecution")
 
 local MainLoopRunner = {}
 MainLoopRunner.debug = CeStartWithDebug or false
@@ -15,8 +15,8 @@ MainLoopRunner.debug = CeStartWithDebug or false
 local modulesInitialized = false
 local initializedStatePublisherNames = {}
 local ioCycleIndex = -1
-local runTimed = RuntimeRegistry.runTimed
-local runTimedAndKeep = RuntimeRegistry.runTimedAndKeep
+local runTimed = TimedExecution.runTimed
+local runTimedAndKeep = TimedExecution.runTimedAndKeep
 
 local function copyRuntimeEntries(runtimeEntries)
     local copy = {}

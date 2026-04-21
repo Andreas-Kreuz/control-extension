@@ -31,16 +31,16 @@ local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
 local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
 local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
 local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
-local RuntimeRegistry = require("ce.hub.util.RuntimeRegistry")
+local TimedExecution = require("ce.hub.util.TimedExecution")
 
 local anl3Path = nil
 
 local function tk(group, func)
-    RuntimeRegistry.runTimedAndKeep(group, func)
+    TimedExecution.runTimedAndKeep(group, func)
 end
 
 local function tu(group, func)
-    RuntimeRegistry.runTimed(group, func)
+    TimedExecution.runTimed(group, func)
 end
 
 local function runInitialDataDiscovery()

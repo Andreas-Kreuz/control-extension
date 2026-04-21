@@ -32,7 +32,7 @@ insulate("MainLoopRunner", function ()
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.databridge.DataStoreFileWriter")
         clearModule("ce.hub.publish.DataChangeBus")
-        clearModule("ce.hub.util.RuntimeRegistry")
+        clearModule("ce.hub.util.TimedExecution")
     end
 
     before_each(function ()

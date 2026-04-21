@@ -89,7 +89,7 @@ Die Neuseite bezieht sich auf `control-extension\lua\LUA\ce`.
 | 1:1 | `require("ak.storage.StorageUtility")`     | `require("ce.hub.util.StorageUtility")`       | Persistenz-Helfer.           |
 | 1:1 | `require("ak.util.TableUtils")`            | `require("ce.hub.util.TableUtils")`           | Tabellen-Helfer.             |
 | 1:1 | `require("ak.util.Queue")`                 | `require("ce.hub.util.Queue")`                | Queue.                       |
-| 1:1 | `require("ak.util.RuntimeRegistry")`       | `require("ce.hub.util.RuntimeRegistry")`      | Laufzeit-Registry.           |
+| 1:1 | `require("ak.util.RuntimeRegistry")`       | `require("ce.hub.util.TimedExecution")`       | Laufzeitmessung.             |
 | 1:1 | `ak/core/MainLoopRunner.lua`               | `ce/hub/MainLoopRunner.lua`                   | Hauptschleifen-Ausfuehrung.  |
 | 1:1 | `ak/core/VersionInfo.lua`                  | `ce/hub/data/version/VersionInfo.lua`         | Versionsinformation.         |
 | 1:1 | `ak/train/Train.lua`                       | `ce/hub/data/trains/Train.lua`                | Zugobjekt.                   |

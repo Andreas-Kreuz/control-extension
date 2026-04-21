@@ -13,7 +13,7 @@
         clearModule("ce.hub.HubBridgeConnector")
         clearModule("ce.hub.CeHubModule")
         clearModule("ce.hub.data.runtime.RuntimeMetrics")
-        clearModule("ce.hub.util.RuntimeRegistry")
+        clearModule("ce.hub.util.TimedExecution")
         clearModule("ce.hub.data.tracks.TracksStatePublisher")
         clearModule("ce.hub.data.trains.TrainStatePublisher")
         clearModule("ce.hub.data.rollingstock.RollingStockStatePublisher")
