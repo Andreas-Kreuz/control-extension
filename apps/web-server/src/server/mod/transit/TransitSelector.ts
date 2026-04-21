@@ -2,14 +2,14 @@ import { TransitLineLuaDto } from '../../ce/dto/transit/TransitLineLuaDto';
 import { TransitStationLuaDto } from '../../ce/dto/transit/TransitStationLuaDto';
 import { TransitTrainLuaDto } from '../../ce/dto/transit/TransitTrainLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, TransitLineDto, TransitStationDto } from '@ce/web-shared';
+import { CeTypes, TransitLineDto, TransitStationDto, TransitTrainDto } from '@ce/web-shared';
 
 export default class TransitSelector {
   private lastState?: fromEepData.State;
   private transitLines: Record<string, TransitLineDto> = {};
   private transitLineNames: Record<string, TransitLineDto> = {};
   private transitStations: Record<string, TransitStationDto> = {};
-  private transitTrains: Record<string, TransitTrainLuaDto> = {};
+  private transitTrains: Record<string, TransitTrainDto> = {};
 
   private mapLineDto(line: TransitLineLuaDto): TransitLineDto {
     return {
@@ -26,6 +26,26 @@ export default class TransitSelector {
           timeToStation: st.timeToStation,
         })),
       })),
+    };
+  }
+
+  private mapTrainDto(train: TransitTrainLuaDto): TransitTrainDto {
+    return {
+      id: train.id,
+      ...(train.line !== undefined ? { line: train.line } : {}),
+      ...(train.destination !== undefined ? { destination: train.destination } : {}),
+      ...(train.direction !== undefined ? { direction: train.direction } : {}),
+      ...(train.nextStations !== undefined
+        ? {
+            nextStations: train.nextStations.map((entry) => ({
+              station: {
+                name: entry.station.name,
+                platform: entry.station.platform,
+              },
+              departureInMinutes: entry.departureInMinutes,
+            })),
+          }
+        : {}),
     };
   }
 
@@ -85,23 +105,7 @@ export default class TransitSelector {
       const dict = state.ceTypes[CeTypes.TransitTrain] as unknown as Record<string, TransitTrainLuaDto>;
       this.transitTrains = {};
       Object.values(dict).forEach((dto: TransitTrainLuaDto) => {
-        this.transitTrains[dto.id] = {
-          id: dto.id,
-          ...(dto.line !== undefined ? { line: dto.line } : {}),
-          ...(dto.destination !== undefined ? { destination: dto.destination } : {}),
-          ...(dto.direction !== undefined ? { direction: dto.direction } : {}),
-          ...(dto.nextStations !== undefined
-            ? {
-                nextStations: dto.nextStations.map((entry) => ({
-                  station: {
-                    name: entry.station.name,
-                    platform: entry.station.platform,
-                  },
-                  departureInMinutes: entry.departureInMinutes,
-                })),
-              }
-            : {}),
-        };
+        this.transitTrains[dto.id] = this.mapTrainDto(dto);
       });
     }
   }
@@ -112,6 +116,6 @@ export default class TransitSelector {
   getTransitLineName = (id: string): TransitLineDto | undefined => this.transitLineNames[id];
   getTransitStations = (): Record<string, TransitStationDto> => this.transitStations;
   getTransitStation = (id: string): TransitStationDto | undefined => this.transitStations[id];
-  getTransitTrains = (): Record<string, TransitTrainLuaDto> => this.transitTrains;
-  getTransitTrain = (id: string): TransitTrainLuaDto | undefined => this.transitTrains[id];
+  getTransitTrains = (): Record<string, TransitTrainDto> => this.transitTrains;
+  getTransitTrain = (id: string): TransitTrainDto | undefined => this.transitTrains[id];
 }

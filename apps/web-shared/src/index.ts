@@ -55,6 +55,7 @@ export type { TransitLineDto } from './dtos/server/transit/TransitLineDto';
 export type { TransitLineSegmentDto } from './dtos/server/transit/TransitLineSegmentDto';
 export type { TransitLineSegmentStationDto } from './dtos/server/transit/TransitLineSegmentStationDto';
 export type { TransitStationDto } from './dtos/server/transit/TransitStationDto';
+export type { TransitTrainDto, TransitTrainNextStationDto } from './dtos/server/transit/TransitTrainDto';
 
 export { DomainRoom } from './rooms/DomainRoom';
 export { ApiDataRoom } from './rooms/DomainRoomRegistry';

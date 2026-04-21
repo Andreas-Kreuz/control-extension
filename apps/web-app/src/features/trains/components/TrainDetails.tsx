@@ -8,6 +8,7 @@ import TrainCamerasView from './TrainCamerasView';
 import TrainInformationView from './TrainInformationView';
 import TrainLineInformationView from './TrainLineInformationView';
 import TrainRollingStockView from './TrainRollingStockView';
+import useTransitTrain from '../hooks/useTransitTrain';
 import useTrainDynamic from '../hooks/useTrainDynamic';
 import useTrainRollingStock from '../hooks/useTrainRollingStock';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
@@ -16,11 +17,12 @@ const TrainDetails = (props: { train: TrainListDto }) => {
   const [activeTab, setActiveTab] = useState(0);
   const train = props.train;
   const trainDynamic = useTrainDynamic(train.id);
+  const transitTrain = useTransitTrain(train.id);
   const rollingStock = useTrainRollingStock(train.id);
   const transitSettings = useTransitSettings();
   const showTransitTab = Boolean(transitSettings);
-  const currentLine = trainDynamic?.line ?? train.line ?? '-';
-  const currentDestination = trainDynamic?.destination ?? train.destination ?? '-';
+  const currentLine = transitTrain?.line ?? train.line ?? '-';
+  const currentDestination = transitTrain?.destination ?? train.destination ?? '-';
   const tabs = [
     { key: 'information', label: 'Information' },
     { key: 'rolling-stock', label: 'RollingStock' },
@@ -58,7 +60,7 @@ const TrainDetails = (props: { train: TrainListDto }) => {
         <TrainLineInformationView
           line={currentLine}
           destination={currentDestination}
-          nextStations={trainDynamic?.nextStations ?? []}
+          nextStations={transitTrain?.nextStations ?? []}
         />
       )}
     </Stack>

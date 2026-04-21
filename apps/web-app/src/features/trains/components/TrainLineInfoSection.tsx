@@ -1,18 +1,18 @@
 import { TrainListDto } from '@ce/web-shared';
 import TrainLineInformationView from './TrainLineInformationView';
-import useTrainDynamic from '../hooks/useTrainDynamic';
+import useTransitTrain from '../hooks/useTransitTrain';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
 
 function TrainLineInfoSection({ train }: { train: TrainListDto }) {
-  const trainDynamic = useTrainDynamic(train.id);
+  const transitTrain = useTransitTrain(train.id);
   const transitSettings = useTransitSettings();
 
   if (!transitSettings) return null;
 
-  const line = trainDynamic?.line ?? train.line ?? '-';
-  const destination = trainDynamic?.destination ?? train.destination ?? '-';
+  const line = transitTrain?.line ?? train.line ?? '-';
+  const destination = transitTrain?.destination ?? train.destination ?? '-';
   return (
-    <TrainLineInformationView line={line} destination={destination} nextStations={trainDynamic?.nextStations ?? []} />
+    <TrainLineInformationView line={line} destination={destination} nextStations={transitTrain?.nextStations ?? []} />
   );
 }
 
