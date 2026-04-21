@@ -11,7 +11,7 @@ EEP Program (Lua 5.3)
                              apps/web-shared/           (shared TS types/events)
 ```
 
-Each layer is independently usable — higher layers are optional.
+Each layer is independently usable — higher layers are optional. The Lua Hub orchestrates the Data Bridge.
 
 ## Monorepo Structure
 

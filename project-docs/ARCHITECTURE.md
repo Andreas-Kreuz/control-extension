@@ -34,8 +34,8 @@ Jeder Baustein ist eigenständig nutzbar. Höhere Bausteine sind optional.
 
 ### Lua Hub (Baustein 1)
 
-- Unabhängig von Data Bridge, Server und Web App.
-- Wer nur Anlagenlogik in Lua schreiben möchte, braucht ausschließlich den Lua Hub.
+- Laufzeit- und Orchestrierungsanker der Lua-Seite, einschließlich Data-Bridge-Anbindung.
+- Wer nur Anlagenlogik in Lua schreiben möchte, braucht keinen laufenden Server und keine Web App.
 
 ### Data Bridge (Baustein 2)
 
@@ -106,7 +106,7 @@ in dem alle aktuellen Zustände gehalten werden.
 **3. Data Bridge — Transparente Übertragung**
 
 Die Data Bridge überträgt Daten, kennt aber deren Struktur nicht und verändert sie nicht.
-Sie ist ein reiner Transportkanal.
+Sie ist ein reiner Transportkanal, auch wenn sie vom Lua Hub orchestriert wird.
 
 **4. Server — Tailoring für Konsumenten**
 

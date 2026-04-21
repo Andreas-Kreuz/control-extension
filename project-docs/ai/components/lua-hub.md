@@ -5,6 +5,7 @@ Role:
 - capture raw EEP state in Lua
 - create hub DTOs from unchanged EEP data
 - provide registration points for commands and module integration
+- orchestrate the Lua runtime cycle, including Data Bridge
 
 Boundary:
 

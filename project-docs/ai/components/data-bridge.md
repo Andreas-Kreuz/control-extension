@@ -4,6 +4,7 @@ Role:
 
 - file-based transport between Lua and external consumers
 - forwards outgoing events and accepts incoming commands
+- is orchestrated by the Lua Hub
 
 Boundary:
 
