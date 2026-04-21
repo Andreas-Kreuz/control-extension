@@ -31,7 +31,6 @@ const packages = [
           'LUA/ce/databridge/exchange/.gitkeep', // keep exchange directory placeholder for EEP
           '!LUA/ce/databridge/exchange-test', // ignore test exchange directory
           '!LUA/ce/VERSION', // ignore generated version marker
-          '!LUA/ce/control-extension-server.exe', // ignore generated server binary
           '!LUA/ce/anlagen', // goes to another package / not part of core installer
           '!LUA/ce/demo-anlagen', // goes to demo packages
           '!desktop.ini', // ignore Windows metadata
