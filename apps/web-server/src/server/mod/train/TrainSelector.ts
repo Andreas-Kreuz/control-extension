@@ -1,15 +1,17 @@
-import * as fromJsonData from '../../eep/server-data/EepDataStore';
+﻿import * as fromJsonData from '../../eep/server-data/EepDataStore';
 import { TrainLuaDto } from '../../ce/dto/trains/TrainLuaDto';
 import { TransitTrainLuaDto } from '../../ce/dto/transit/TransitTrainLuaDto';
 import { RollingStockSelector } from './RollingStockSelector';
-import { calcTrainType, CeTypes, TrackType, TrainDto, TrainListDto, TrainType } from '@ce/web-shared';
+import { calcTrainType, CeTypes, TrackType, TrainAppDto, TrainListAppDto, TrainType } from '@ce/web-shared';
 
+// Maps Lua train and transit-train DTOs into TrainAppDto and TrainListAppDto.
+// Lua inputs: ce.hub.Train, ce.mods.transit.TransitTrain.
 export class TrainSelector {
   private lastState: Record<string, unknown> | undefined;
   private rollingStockState: Record<string, unknown> | undefined;
   private transitTrainState: Record<string, unknown> | undefined;
-  private trainMap = new Map<string, TrainDto>();
-  private trainListMap = new Map<string, TrainListDto>();
+  private trainMap = new Map<string, TrainAppDto>();
+  private trainListMap = new Map<string, TrainListAppDto>();
 
   constructor(private rollingStockSelector: RollingStockSelector) {}
 
@@ -45,7 +47,7 @@ export class TrainSelector {
       const firstRollingStock = rollingStock[movesForward ? 0 : rollingStock.length - 1];
       const lastRollingStock = rollingStock[movesForward ? rollingStock.length - 1 : 0];
       const trackType = this.getTrackType(trainDto, firstRollingStock, lastRollingStock);
-      const trainListDto: TrainListDto = {
+      const trainListDto: TrainListAppDto = {
         id: trainDto.id,
         name: trainDto.name ?? trainDto.id,
         route: trainDto.route ?? '',
@@ -60,7 +62,7 @@ export class TrainSelector {
       };
       this.trainListMap.set(trainListDto.id, trainListDto);
 
-      const train: TrainDto = {
+      const train: TrainAppDto = {
         id: trainDto.id,
         name: trainDto.name ?? trainDto.id,
         route: trainDto.route ?? '',
@@ -100,17 +102,17 @@ export class TrainSelector {
     this.transitTrainState = nextTransitTrainState;
   };
 
-  getTrainList(trackType: string): TrainListDto[] {
+  getTrainList(trackType: string): TrainListAppDto[] {
     return Array.from(this.trainListMap.values())
       .filter((train) => train.trackType === trackType)
       .sort((left, right) => left.id.localeCompare(right.id, 'de'));
   }
 
-  getTrain(id: string): TrainDto | undefined {
+  getTrain(id: string): TrainAppDto | undefined {
     return this.trainMap.get(id);
   }
 
-  getAllTrains(): Record<string, TrainDto> {
+  getAllTrains(): Record<string, TrainAppDto> {
     return Object.fromEntries(this.trainMap.entries());
   }
 

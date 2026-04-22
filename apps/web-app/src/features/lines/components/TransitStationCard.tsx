@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import Chip from '@mui/material/Chip';
 import AppCardBg from '../../../shared/components/AppCardBg';
-import type { TransitStationDto } from '@ce/web-shared';
+import type { TransitStationAppDto } from '@ce/web-shared';
 
 interface TransitStationCardProps {
-  station: TransitStationDto;
+  station: TransitStationAppDto;
   selected: boolean;
   onSelect: () => void;
   children?: ReactNode;

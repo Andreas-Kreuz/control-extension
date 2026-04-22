@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import type { TransitStationDto, TransitStationQueueEntryDto } from '@ce/web-shared';
+﻿import { useMemo, useState } from 'react';
+import type { TransitStationAppDto, TransitStationQueueEntryAppDto } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
@@ -10,7 +10,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
-function formatDeparture(entry: TransitStationQueueEntryDto) {
+function formatDeparture(entry: TransitStationQueueEntryAppDto) {
   if (entry.timeInMinutes <= 0) return '0 min';
   return `${entry.timeInMinutes} min`;
 }
@@ -19,7 +19,7 @@ function TransitStationDepartureList({
   departures,
   showPlatform,
 }: {
-  departures: TransitStationQueueEntryDto[];
+  departures: TransitStationQueueEntryAppDto[];
   showPlatform: boolean;
 }) {
   if (departures.length === 0) {
@@ -79,7 +79,7 @@ function TransitStationDepartureList({
   );
 }
 
-function TransitStationDepartures({ station }: { station: TransitStationDto }) {
+function TransitStationDepartures({ station }: { station: TransitStationAppDto }) {
   const [activeTab, setActiveTab] = useState(0);
   const queue = useMemo(
     () => [...(station.queue ?? [])].sort((left, right) => left.timeInMinutes - right.timeInMinutes),

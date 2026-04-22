@@ -1,11 +1,11 @@
-import ModuleSetting from './ModuleSetting';
-import { SettingsDto } from '@ce/web-shared';
+﻿import ModuleSetting from './ModuleSetting';
+import { SettingsAppDto } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Typography from '@mui/material/Typography';
 
-const ModuleSettings = (props: { settings: SettingsDto }) => {
+const ModuleSettings = (props: { settings: SettingsAppDto }) => {
   const categories = props.settings.settings
     .map((s) => s.category)
     .filter((value, index, array) => array.indexOf(value) === index);

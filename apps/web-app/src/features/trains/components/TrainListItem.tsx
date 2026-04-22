@@ -1,4 +1,4 @@
-import { TrainListDto } from '@ce/web-shared';
+﻿import { TrainListAppDto } from '@ce/web-shared';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
@@ -6,7 +6,7 @@ import { trainIconFor } from '../lib/trainIconFor';
 import { ListItemIcon } from '@mui/material';
 
 interface TrainListItemProps {
-  train: TrainListDto;
+  train: TrainListAppDto;
   selected: boolean;
   onSelect: () => void;
 }

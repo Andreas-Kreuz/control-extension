@@ -3,7 +3,7 @@ import InterestSyncRegistry from './InterestSyncRegistry';
 import InterestSyncService from './InterestSyncService';
 import DomainRoomManager from './DomainRoomManager';
 import { DomainDataProvider } from './DomainDataProvider';
-import { DomainRoom } from '@ce/web-shared';
+import { CeTypeRoom, DomainRoom, TrainRoom } from '@ce/web-shared';
 
 async function runTest(name: string, fn: () => void | Promise<void>): Promise<void> {
   try {
@@ -15,10 +15,10 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
   }
 }
 
-function createManager(commands: string[]) {
+function createManager(commands: string[], emittedEvents: Array<{ roomName: string; eventName: string; payload: string }> = []) {
   const io = {
-    to: () => ({
-      emit: () => undefined,
+    to: (roomName: string) => ({
+      emit: (eventName: string, payload: string) => emittedEvents.push({ roomName, eventName, payload }),
     }),
   };
   const interestRegistry = new InterestSyncRegistry((command) => commands.push(command));
@@ -142,6 +142,78 @@ function testJoinAndLeaveRetainMultipleInterestsForOneRoom(): void {
   ]);
 }
 
+function testCeTypeRoomServesRawEntriesDynamically(): void {
+  const commands: string[] = [];
+  const emittedEvents: Array<{ roomName: string; eventName: string; payload: string }> = [];
+  const manager = createManager(commands, emittedEvents);
+  const socket = createSocket('socket-1');
+  const room = new CeTypeRoom('ce.test.Raw');
+  const roomName = room.roomId('Entry-1');
+
+  manager.onStateChange({
+    currentState: () => ({
+      eventCounter: 1,
+      ceTypes: { 'ce.test.Raw': { 'Entry-1': { id: 'Entry-1', value: 1 } } },
+    }),
+  } as never);
+  manager.onJoinRoom(socket as never, roomName);
+
+  assert.deepEqual(socket.events, [
+    {
+      eventName: room.eventId('Entry-1'),
+      payload: JSON.stringify({ id: 'Entry-1', value: 1 }),
+    },
+  ]);
+  assert.deepEqual(commands, ['HubInterestSync.startSyncFor|ce.test.Raw|Entry-1']);
+
+  manager.onStateChange({
+    currentState: () => ({
+      eventCounter: 2,
+      ceTypes: { 'ce.test.Raw': { 'Entry-1': { id: 'Entry-1', value: 2 } } },
+    }),
+  } as never);
+
+  assert.deepEqual(emittedEvents, [
+    {
+      roomName,
+      eventName: room.eventId('Entry-1'),
+      payload: JSON.stringify({ id: 'Entry-1', value: 2 }),
+    },
+  ]);
+
+  manager.onLeaveRoom(socket as never, roomName);
+  assert.deepEqual(commands, [
+    'HubInterestSync.startSyncFor|ce.test.Raw|Entry-1',
+    'HubInterestSync.stopSyncFor|ce.test.Raw|Entry-1',
+  ]);
+}
+
+function testAppDomainRoomUsesCentralInterestRegistry(): void {
+  const commands: string[] = [];
+  const manager = createManager(commands);
+  const provider: DomainDataProvider = {
+    roomType: TrainRoom,
+    id: 'TrainRoom',
+    jsonCreator: (roomName: string) => JSON.stringify({ id: TrainRoom.idOfRoom(roomName) }),
+  };
+  manager.registerService({
+    getUpdaters: () => [],
+    getDataProviders: () => [provider],
+  });
+
+  const socket = createSocket('socket-1');
+  const roomName = TrainRoom.roomId('Train-1');
+  manager.onJoinRoom(socket as never, roomName);
+  manager.onLeaveRoom(socket as never, roomName);
+
+  assert.deepEqual(commands, [
+    'HubInterestSync.startSyncFor|ce.hub.Train|Train-1',
+    'HubInterestSync.startSyncFor|ce.mods.transit.TransitTrain|Train-1',
+    'HubInterestSync.stopSyncFor|ce.hub.Train|Train-1',
+    'HubInterestSync.stopSyncFor|ce.mods.transit.TransitTrain|Train-1',
+  ]);
+}
+
 export async function run(): Promise<void> {
   await runTest('domain room manager shares interest across room subscribers', testJoinAndLeaveRetainSharedInterest);
   await runTest(
@@ -152,6 +224,8 @@ export async function run(): Promise<void> {
     'domain room manager retains multiple interests for one room',
     testJoinAndLeaveRetainMultipleInterestsForOneRoom,
   );
+  await runTest('domain room manager serves dynamic ceType rooms', testCeTypeRoomServesRawEntriesDynamically);
+  await runTest('domain room manager uses central app room interest registry', testAppDomainRoomUsesCentralInterestRegistry);
 }
 
 if (require.main === module) {

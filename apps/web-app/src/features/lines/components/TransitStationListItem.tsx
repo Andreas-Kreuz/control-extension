@@ -1,14 +1,14 @@
-import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
+﻿import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import Avatar from '@mui/material/Avatar';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
-import type { TransitStationDto } from '@ce/web-shared';
+import type { TransitStationAppDto } from '@ce/web-shared';
 
 interface TransitStationListItemProps {
-  station: TransitStationDto;
+  station: TransitStationAppDto;
   selected: boolean;
   onSelect: () => void;
 }

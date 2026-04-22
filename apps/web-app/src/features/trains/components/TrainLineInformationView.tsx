@@ -1,4 +1,4 @@
-import type { TrainNextStationDto } from '@ce/web-shared';
+﻿import type { TrainNextStationAppDto } from '@ce/web-shared';
 import { Fragment } from 'react';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RouteIcon from '@mui/icons-material/Route';
@@ -13,12 +13,12 @@ import Stack from '@mui/material/Stack';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-function formatDeparture(entry: TrainNextStationDto) {
+function formatDeparture(entry: TrainNextStationAppDto) {
   if (entry.departureInMinutes <= 0) return '0 min';
   return `${entry.departureInMinutes} min`;
 }
 
-function TrainNextStationList({ nextStations }: { nextStations: TrainNextStationDto[] }) {
+function TrainNextStationList({ nextStations }: { nextStations: TrainNextStationAppDto[] }) {
   if (nextStations.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
@@ -95,7 +95,7 @@ function TrainNextStationList({ nextStations }: { nextStations: TrainNextStation
 function TrainLineInformationView(props: {
   line?: string;
   destination?: string;
-  nextStations?: TrainNextStationDto[];
+  nextStations?: TrainNextStationAppDto[];
 }) {
   const rows = [
     { label: 'Linie', value: props.line ?? '-', icon: RouteIcon },

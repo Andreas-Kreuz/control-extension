@@ -1,10 +1,12 @@
-import { TimeLuaDto } from '../../ce/dto/time/TimeLuaDto';
+﻿import { TimeLuaDto } from '../../ce/dto/time/TimeLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, TimeDto } from '@ce/web-shared';
+import { CeTypes, TimeAppDto } from '@ce/web-shared';
 
+// Maps Lua time DTOs into TimeAppDto.
+// Lua input: ce.hub.Time.
 export default class TimeSelector {
   private lastState?: fromEepData.State;
-  private times: Record<string, TimeDto> = {};
+  private times: Record<string, TimeAppDto> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState || !state.ceTypes[CeTypes.HubTime]) {
@@ -25,5 +27,5 @@ export default class TimeSelector {
     });
   }
 
-  getTimes = (): Record<string, TimeDto> => this.times;
+  getTimes = (): Record<string, TimeAppDto> => this.times;
 }

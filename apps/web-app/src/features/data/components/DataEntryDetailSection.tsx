@@ -4,7 +4,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { detailRoomForCeType } from '@ce/web-shared';
+import { CeTypeRoom } from '@ce/web-shared';
 import useDomainEntry from '../hooks/useDomainEntry';
 import useTypeEntries from '../hooks/useTypeEntries';
 
@@ -20,7 +20,7 @@ interface DataEntryDetailSectionProps {
 
 function DataEntryDetailSection({ ceType, entryId }: DataEntryDetailSectionProps) {
   const entriesMap = useTypeEntries(ceType);
-  const domainEntry = useDomainEntry(detailRoomForCeType(ceType), entryId);
+  const domainEntry = useDomainEntry(useMemo(() => new CeTypeRoom(ceType), [ceType]), entryId);
 
   const entry = domainEntry ?? entriesMap[entryId];
 

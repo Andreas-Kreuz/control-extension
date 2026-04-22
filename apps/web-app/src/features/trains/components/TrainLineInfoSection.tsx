@@ -1,9 +1,9 @@
-import { TrainListDto } from '@ce/web-shared';
+﻿import { TrainListAppDto } from '@ce/web-shared';
 import TrainLineInformationView from './TrainLineInformationView';
 import useTransitTrain from '../hooks/useTransitTrain';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
 
-function TrainLineInfoSection({ train }: { train: TrainListDto }) {
+function TrainLineInfoSection({ train }: { train: TrainListAppDto }) {
   const transitTrain = useTransitTrain(train.id);
   const transitSettings = useTransitSettings();
 

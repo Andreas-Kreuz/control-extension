@@ -1,4 +1,4 @@
-import EepSimulator from '../../test-helpers/eep-simulator';
+﻿import EepSimulator from '../../test-helpers/eep-simulator';
 
 const simulator = new EepSimulator();
 const projectRoot = Cypress.config('projectRoot');
@@ -26,7 +26,7 @@ describe('Server Tests "/server"', () => {
       .then((value) => {
         pairingRequired.value = Boolean(value);
       });
-    cy.contains('ce.server.ApiEntries');
+    cy.contains('server.api-entries');
     cy.contains('ce.hub.EepVersion');
     cy.contains('aus 2 Events');
   });

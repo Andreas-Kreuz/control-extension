@@ -1,10 +1,10 @@
-import { RollingStockDto } from '@ce/web-shared';
+﻿import { RollingStockAppDto } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 
-function TrainRollingStockView(props: { rollingStock: RollingStockDto[] | undefined }) {
+function TrainRollingStockView(props: { rollingStock: RollingStockAppDto[] | undefined }) {
   const { rollingStock } = props;
 
   if (!rollingStock?.length) {
@@ -20,7 +20,7 @@ function TrainRollingStockView(props: { rollingStock: RollingStockDto[] | undefi
   );
 }
 
-function RollingStockRow(props: { rollingStock: RollingStockDto }) {
+function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
   const { rollingStock } = props;
   const textureText = formatTextureTexts(rollingStock.surfaceTexts);
 
@@ -75,7 +75,7 @@ function RowCell(props: { label: string; value: string; multiline?: boolean }) {
   );
 }
 
-function formatTextureTexts(surfaceTexts: RollingStockDto['surfaceTexts']): string {
+function formatTextureTexts(surfaceTexts: RollingStockAppDto['surfaceTexts']): string {
   const entries = Object.entries(surfaceTexts ?? {});
   if (entries.length === 0) {
     return '-';

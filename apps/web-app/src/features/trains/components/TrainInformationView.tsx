@@ -1,4 +1,4 @@
-import { TrainListDto } from '@ce/web-shared';
+﻿import { TrainListAppDto } from '@ce/web-shared';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import LabelIcon from '@mui/icons-material/Label';
 import SpeedIcon from '@mui/icons-material/Speed';
@@ -7,7 +7,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
-function TrainInformationView(props: { train: TrainListDto; targetSpeed?: number }) {
+function TrainInformationView(props: { train: TrainListAppDto; targetSpeed?: number }) {
   const { train, targetSpeed } = props;
   const infoRows = [
     { label: 'Name des Zuges', value: train.name || '-', icon: LabelIcon },

@@ -1,6 +1,6 @@
-﻿import { CeTypes } from '@ce/web-shared';
+import { IntersectionListRoom } from '@ce/web-shared';
 import { useState } from 'react';
-import { useApiDataRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import type Intersection from '../model/Intersection';
 
 function normalizeIntersection(intersection: Partial<Intersection>): Intersection {
@@ -20,7 +20,7 @@ function normalizeIntersection(intersection: Partial<Intersection>): Intersectio
 function useIntersections(): Intersection[] {
   const [intersections, setIntersections] = useState<Intersection[]>([]);
 
-  useApiDataRoomHandler(CeTypes.RoadIntersection, (payload: string) => {
+  useDomainRoomHandler(IntersectionListRoom, 'All', (payload: string) => {
     const data: Record<string, Partial<Intersection>> = JSON.parse(payload);
     setIntersections(Object.values(data).map(normalizeIntersection));
   });

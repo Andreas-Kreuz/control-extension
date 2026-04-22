@@ -14,11 +14,11 @@ Lua DtoFactory  <--comment cross-reference-->  *LuaDto (this directory)
       |
       | Selector.ts (transformation / stability layer)
       v
-*Dto      [web-shared/src/dtos/server/]        stable client contract
+*AppDto   [web-shared/src/dtos/app/]           stable client contract
       |
       | socket.io JSON
       v
-Web-App receives *Dto
+Web-App receives *AppDto
       |
       | React store (only if extra transformation is needed)
       v
@@ -28,9 +28,9 @@ View models  [web-app/src/.../model/]          UI-specific
 ## Rules
 
 - **LuaDtos are server-internal only.** They must never be emitted directly to clients.
-- **Selectors are the only bridge** between LuaDto and the client-facing `*Dto` in `web-shared`.
+- **Selectors are the only bridge** between LuaDto/ceType and the client-facing `*AppDto` in `web-shared`.
   They provide the stability layer: if Lua changes its output format, only the selector changes —
-  client contracts in `web-shared/src/dtos/server/` remain stable.
+  client contracts in `web-shared/src/dtos/app/` and app-facing room/API names remain stable.
 - **Each LuaDto file** contains a comment pointing to the corresponding Lua DtoFactory source.
 - **Each Lua DtoFactory** contains a comment pointing back to its TypeScript LuaDto counterpart.
 

@@ -1,8 +1,8 @@
-import { TransitStationDto } from '@ce/web-shared';
+﻿import { TransitStationAppDto } from '@ce/web-shared';
 
 export interface TransitStationLuaDto {
   id: string;
-  name?: TransitStationDto['name'];
-  platforms?: TransitStationDto['platforms'];
-  queue?: TransitStationDto['queue'];
+  name?: TransitStationAppDto['name'];
+  platforms?: TransitStationAppDto['platforms'];
+  queue?: TransitStationAppDto['queue'];
 }

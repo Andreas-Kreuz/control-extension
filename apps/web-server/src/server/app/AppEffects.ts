@@ -11,9 +11,6 @@ import { registerLogMod } from '../mod/log/registerLogMod';
 import TransitService from '../mod/transit/TransitService';
 import TrainUpdateService from '../mod/train/TrainUpdateService';
 import VersionService from '../mod/version/VersionService';
-import ScenarioService from '../mod/scenario/ScenarioService';
-import TimeService from '../mod/time/TimeService';
-import WeatherService from '../mod/weather/WeatherService';
 import EepDataService from '../mod/eepdata/EepDataService';
 import RoadDataService from '../mod/road/RoadDataService';
 import AppConfig from './config/AppConfig';
@@ -226,9 +223,6 @@ export default class AppEffects {
     );
     eepDataEffects.registerDomainRoom(new TransitService(this.io));
     eepDataEffects.registerDomainRoom(new VersionService(this.io));
-    eepDataEffects.registerDomainRoom(new ScenarioService(this.io));
-    eepDataEffects.registerDomainRoom(new TimeService(this.io));
-    eepDataEffects.registerDomainRoom(new WeatherService(this.io));
     eepDataEffects.registerDomainRoom(new EepDataService(this.io));
     eepDataEffects.registerDomainRoom(new RoadDataService(this.io));
 

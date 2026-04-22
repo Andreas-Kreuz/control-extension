@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { CeTypes, type TransitStationDto } from '@ce/web-shared';
-import { useApiDataRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { TransitStationListRoom, type TransitStationAppDto } from '@ce/web-shared';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 
-function useStations(): TransitStationDto[] {
-  const [stations, setStations] = useState<TransitStationDto[]>([]);
+function useStations(): TransitStationAppDto[] {
+  const [stations, setStations] = useState<TransitStationAppDto[]>([]);
 
-  useApiDataRoomHandler(CeTypes.TransitStation, (payload: string) => {
-    const data = JSON.parse(payload) as Record<string, TransitStationDto>;
-    setStations(Object.values(data));
+  useDomainRoomHandler(TransitStationListRoom, 'All', (payload: string) => {
+    const data = JSON.parse(payload) as TransitStationAppDto[];
+    setStations(data);
   });
 
   return stations;

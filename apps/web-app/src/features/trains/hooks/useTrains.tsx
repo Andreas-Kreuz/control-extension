@@ -1,7 +1,7 @@
-import { TrainListDto } from '@ce/web-shared';
+﻿import { TrainListAppDto } from '@ce/web-shared';
 import { useTrain } from '../providers/TrainProvider';
 
-function useTrains(): TrainListDto[] {
+function useTrains(): TrainListAppDto[] {
   const trainStore = useTrain();
   return trainStore?.trainList || [];
 }

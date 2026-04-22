@@ -1,7 +1,7 @@
-import ExtensionRoundedIcon from '@mui/icons-material/ExtensionRounded';
+﻿import ExtensionRoundedIcon from '@mui/icons-material/ExtensionRounded';
 import SpeedRoundedIcon from '@mui/icons-material/SpeedRounded';
 import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
-import { ModuleDto, ModuleRoom } from '@ce/web-shared';
+import { ModuleAppDto, ModuleRoom } from '@ce/web-shared';
 import { useState } from 'react';
 import { useServerStatus } from '../../status/hooks/useServerInfo';
 import TimeDesc from '../../statistics/model/TimeDesc';
@@ -27,7 +27,7 @@ function useModuleCount(): number | undefined {
     ModuleRoom,
     'ModuleRoom',
     (payload: string) => {
-      const modules: Record<string, ModuleDto> = JSON.parse(payload);
+      const modules: Record<string, ModuleAppDto> = JSON.parse(payload);
       setModuleCount(Object.keys(modules).length);
     },
     () => setModuleCount(undefined),

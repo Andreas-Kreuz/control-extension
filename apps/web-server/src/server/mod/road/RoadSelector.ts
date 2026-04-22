@@ -1,4 +1,4 @@
-import { IntersectionLuaDto } from '../../ce/dto/roads/IntersectionLuaDto';
+﻿import { IntersectionLuaDto } from '../../ce/dto/roads/IntersectionLuaDto';
 import { IntersectionLaneLuaDto } from '../../ce/dto/roads/IntersectionLaneLuaDto';
 import { IntersectionSwitchingLuaDto } from '../../ce/dto/roads/IntersectionSwitchingLuaDto';
 import { IntersectionTrafficLightLuaDto } from '../../ce/dto/roads/IntersectionTrafficLightLuaDto';
@@ -7,22 +7,24 @@ import { TrafficLightModelLuaDto } from '../../ce/dto/traffic-light-models/Traff
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import {
   CeTypes,
-  IntersectionDto,
-  IntersectionLaneDto,
-  IntersectionSwitchingDto,
-  IntersectionTrafficLightDto,
-  SettingDto,
-  TrafficLightModelDto,
+  IntersectionAppDto,
+  IntersectionLaneAppDto,
+  IntersectionSwitchingAppDto,
+  IntersectionTrafficLightAppDto,
+  SettingAppDto,
+  TrafficLightModelAppDto,
 } from '@ce/web-shared';
 
+// Maps Lua road DTOs into road AppDtos and road setting AppDtos.
+// Lua inputs: ce.mods.road.Intersection, lanes, switchings, lights, settings.
 export default class RoadSelector {
   private lastState?: fromEepData.State;
-  private intersections: Record<string, IntersectionDto> = {};
-  private intersectionLanes: Record<string, IntersectionLaneDto> = {};
-  private intersectionSwitchings: Record<string, IntersectionSwitchingDto> = {};
-  private intersectionTrafficLights: Record<string, IntersectionTrafficLightDto> = {};
-  private trafficLightModels: Record<string, TrafficLightModelDto> = {};
-  private moduleSettings: Record<string, SettingDto<unknown>> = {};
+  private intersections: Record<string, IntersectionAppDto> = {};
+  private intersectionLanes: Record<string, IntersectionLaneAppDto> = {};
+  private intersectionSwitchings: Record<string, IntersectionSwitchingAppDto> = {};
+  private intersectionTrafficLights: Record<string, IntersectionTrafficLightAppDto> = {};
+  private trafficLightModels: Record<string, TrafficLightModelAppDto> = {};
+  private moduleSettings: Record<string, SettingAppDto<unknown>> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState) {
@@ -30,7 +32,7 @@ export default class RoadSelector {
     }
     this.lastState = state;
 
-    this.intersections = this.mapCeType<IntersectionLuaDto, IntersectionDto>(
+    this.intersections = this.mapCeType<IntersectionLuaDto, IntersectionAppDto>(
       state,
       CeTypes.RoadIntersection,
       (dto) => ({
@@ -46,7 +48,7 @@ export default class RoadSelector {
       }),
     );
 
-    this.intersectionLanes = this.mapCeType<IntersectionLaneLuaDto, IntersectionLaneDto>(
+    this.intersectionLanes = this.mapCeType<IntersectionLaneLuaDto, IntersectionLaneAppDto>(
       state,
       CeTypes.RoadIntersectionLane,
       (dto) => ({
@@ -66,7 +68,7 @@ export default class RoadSelector {
       }),
     );
 
-    this.intersectionSwitchings = this.mapCeType<IntersectionSwitchingLuaDto, IntersectionSwitchingDto>(
+    this.intersectionSwitchings = this.mapCeType<IntersectionSwitchingLuaDto, IntersectionSwitchingAppDto>(
       state,
       CeTypes.RoadIntersectionSwitching,
       (dto) => ({
@@ -77,7 +79,7 @@ export default class RoadSelector {
       }),
     );
 
-    this.intersectionTrafficLights = this.mapCeType<IntersectionTrafficLightLuaDto, IntersectionTrafficLightDto>(
+    this.intersectionTrafficLights = this.mapCeType<IntersectionTrafficLightLuaDto, IntersectionTrafficLightAppDto>(
       state,
       CeTypes.RoadIntersectionTrafficLight,
       (dto) => ({
@@ -94,7 +96,7 @@ export default class RoadSelector {
       }),
     );
 
-    this.trafficLightModels = this.mapCeType<TrafficLightModelLuaDto, TrafficLightModelDto>(
+    this.trafficLightModels = this.mapCeType<TrafficLightModelLuaDto, TrafficLightModelAppDto>(
       state,
       CeTypes.RoadSignalTypeDefinition,
       (dto) => ({
@@ -142,17 +144,17 @@ export default class RoadSelector {
     return result;
   }
 
-  getIntersections = (): Record<string, IntersectionDto> => this.intersections;
-  getIntersectionLanes = (): Record<string, IntersectionLaneDto> => this.intersectionLanes;
-  getIntersectionSwitchings = (): Record<string, IntersectionSwitchingDto> => this.intersectionSwitchings;
-  getIntersectionSwitching = (id: string): IntersectionSwitchingDto | undefined => this.intersectionSwitchings[id];
-  getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightDto> => this.intersectionTrafficLights;
-  getIntersectionTrafficLight = (id: string): IntersectionTrafficLightDto | undefined =>
+  getIntersections = (): Record<string, IntersectionAppDto> => this.intersections;
+  getIntersectionLanes = (): Record<string, IntersectionLaneAppDto> => this.intersectionLanes;
+  getIntersectionSwitchings = (): Record<string, IntersectionSwitchingAppDto> => this.intersectionSwitchings;
+  getIntersectionSwitching = (id: string): IntersectionSwitchingAppDto | undefined => this.intersectionSwitchings[id];
+  getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightAppDto> => this.intersectionTrafficLights;
+  getIntersectionTrafficLight = (id: string): IntersectionTrafficLightAppDto | undefined =>
     this.intersectionTrafficLights[id];
-  getIntersection = (id: string): IntersectionDto | undefined => this.intersections[id];
-  getIntersectionLane = (id: string): IntersectionLaneDto | undefined => this.intersectionLanes[id];
-  getTrafficLightModels = (): Record<string, TrafficLightModelDto> => this.trafficLightModels;
-  getTrafficLightModel = (id: string): TrafficLightModelDto | undefined => this.trafficLightModels[id];
-  getModuleSettings = (): Record<string, SettingDto<unknown>> => this.moduleSettings;
-  getModuleSetting = (id: string): SettingDto<unknown> | undefined => this.moduleSettings[id];
+  getIntersection = (id: string): IntersectionAppDto | undefined => this.intersections[id];
+  getIntersectionLane = (id: string): IntersectionLaneAppDto | undefined => this.intersectionLanes[id];
+  getTrafficLightModels = (): Record<string, TrafficLightModelAppDto> => this.trafficLightModels;
+  getTrafficLightModel = (id: string): TrafficLightModelAppDto | undefined => this.trafficLightModels[id];
+  getModuleSettings = (): Record<string, SettingAppDto<unknown>> => this.moduleSettings;
+  getModuleSetting = (id: string): SettingAppDto<unknown> | undefined => this.moduleSettings[id];
 }

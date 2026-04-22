@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { TrainListDto } from '@ce/web-shared';
+﻿import { useState } from 'react';
+import { TrainListAppDto } from '@ce/web-shared';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
@@ -13,7 +13,7 @@ import useTrainDynamic from '../hooks/useTrainDynamic';
 import useTrainRollingStock from '../hooks/useTrainRollingStock';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
 
-const TrainDetails = (props: { train: TrainListDto }) => {
+const TrainDetails = (props: { train: TrainListAppDto }) => {
   const [activeTab, setActiveTab] = useState(0);
   const train = props.train;
   const trainDynamic = useTrainDynamic(train.id);

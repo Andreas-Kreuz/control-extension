@@ -1,6 +1,6 @@
 import { alphabeticalSort } from '../../../clientio/alphabeticalSort';
 import * as fromEepStore from '../EepDataStore';
-import { CeTypes, DataType } from '@ce/web-shared';
+import { DataType } from '@ce/web-shared';
 
 export interface ServerData {
   rooms: Record<string, unknown>;
@@ -15,6 +15,8 @@ const initialData: ServerData = {
   urls: [],
   urlJson: JSON.stringify([]),
 };
+
+const serverApiEntriesName = 'server.api-entries';
 
 export default class JsonApiReducer {
   private data = initialData;
@@ -49,26 +51,13 @@ export default class JsonApiReducer {
     }
 
     dataTypes.push({
-      name: CeTypes.ServerStats,
+      name: serverApiEntriesName,
       checksum: state.eventCounter.toString(),
-      url: urlPrefix + CeTypes.ServerStats,
-      count: 1,
-      updated: true,
-    });
-    data.roomToJson[CeTypes.ServerStats] = JSON.stringify({
-      eepDataUpToDate: dataTypes.length > 1,
-      luaDataReceived: dataTypes.length > 1,
-      apiEntryCount: dataTypes.length + 1,
-    });
-
-    dataTypes.push({
-      name: CeTypes.ServerApiEntries,
-      checksum: state.eventCounter.toString(),
-      url: urlPrefix + CeTypes.ServerApiEntries,
+      url: urlPrefix + serverApiEntriesName,
       count: dataTypes.length + 1,
       updated: true,
     });
-    data.roomToJson[CeTypes.ServerApiEntries] = JSON.stringify(dataTypes);
+    data.roomToJson[serverApiEntriesName] = JSON.stringify(dataTypes);
 
     data.urls = dataTypes.map((dt) => dt.name).sort(alphabeticalSort);
     data.urlJson = JSON.stringify(data.urls);
@@ -107,6 +96,7 @@ export default class JsonApiReducer {
   getUrlJson(): string {
     return this.data.urlJson;
   }
+
   getUrls(): string[] {
     return this.data.urls;
   }

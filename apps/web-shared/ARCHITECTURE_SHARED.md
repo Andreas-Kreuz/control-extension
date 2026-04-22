@@ -19,14 +19,17 @@ und Änderungen am gemeinsamen Modell wirken sich automatisch auf beide Konsumen
 ### DTOs (Data Transfer Objects)
 
 ```text
-src/dtos/server/       *Dto-Interfaces — stabiler Vertrag zwischen Server und Web App
+src/dtos/app/          *AppDto-Interfaces — stabiler Vertrag zwischen Server und Web App
+src/rooms/             stabile App-Räume und dynamische CeTypeRoom-Unterstützung
 ```
 
-Diese `*Dto`-Typen sind der **stabile Client-Vertrag**: Der Server befüllt sie über Selectors
-aus internen LuaDtos; die Web App empfängt sie über Socket.IO oder REST.
+Diese `*AppDto`-Typen sind der **stabile Client-Vertrag**: Der Server befüllt sie über Selectors
+aus internen `*LuaDto`-Typen; die Web App empfängt sie über Socket.IO oder REST.
 
 Lua-interne Änderungen (neue Felder, umbenannte Schlüssel) werden durch die Server-Selectors
-abgefangen — der `*Dto`-Vertrag in `web-shared` bleibt davon entkoppelt und damit stabil.
+abgefangen — der `*AppDto`-Vertrag und die wenigen App-`DomainRoom`s in `web-shared` bleiben davon
+entkoppelt und damit stabil. Rohe Lua-`ceType`-Daten werden nur über `CeTypeRoom` im generischen
+Daten-Explorer verwendet.
 
 ### Events und Räume
 
@@ -50,7 +53,7 @@ Es ist eine reine Typen- und Vertragsbibliothek ohne Laufzeitlogik.
 
 ## Änderungsregel
 
-Wenn sich ein exportierter Raum, ein `keyId` oder DTO-Felder ändern, müssen
+Wenn sich ein exportierter App-Room, ein `keyId` oder `*AppDto`-Felder ändern, müssen
 Server und Web App gemeinsam geprüft und synchron gehalten werden.
 
 Lua-seitige Änderungen an DtoFactories erfordern keine Anpassung in `web-shared`,

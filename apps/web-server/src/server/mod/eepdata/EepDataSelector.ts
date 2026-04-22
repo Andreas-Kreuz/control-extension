@@ -1,4 +1,4 @@
-import { RuntimeLuaDto } from '../../ce/dto/runtime/RuntimeLuaDto';
+﻿import { RuntimeLuaDto } from '../../ce/dto/runtime/RuntimeLuaDto';
 import { ModuleLuaDto } from '../../ce/dto/modules/ModuleLuaDto';
 import { DataSlotLuaDto } from '../../ce/dto/data-slots/DataSlotLuaDto';
 import { SignalLuaDto } from '../../ce/dto/signals/SignalLuaDto';
@@ -11,17 +11,17 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
 import {
   CeTypes,
-  RuntimeDto,
-  RuntimeStatisticsDto,
-  RuntimeStatisticsTimeDto,
-  ModuleDto,
-  DataSlotDto,
-  SignalDto,
-  WaitingOnSignalDto,
-  SwitchDto,
-  StructureDto,
-  ContactDto,
-  TrackDto,
+  RuntimeAppDto,
+  RuntimeStatisticsAppDto,
+  RuntimeStatisticsTimeAppDto,
+  ModuleAppDto,
+  DataSlotAppDto,
+  SignalAppDto,
+  WaitingOnSignalAppDto,
+  SwitchAppDto,
+  StructureAppDto,
+  ContactAppDto,
+  TrackAppDto,
   trackTypeForCeType,
 } from '@ce/web-shared';
 
@@ -96,29 +96,32 @@ const runtimeStatisticsHistoryLimit = 10;
 
 interface RuntimeStatisticsSample {
   eventCounter: number;
-  publisherSyncTimes: RuntimeStatisticsTimeDto[];
-  moduleRunTimes: RuntimeStatisticsTimeDto[];
-  updateTimes: RuntimeStatisticsTimeDto[];
-  controllerUpdateTimes: RuntimeStatisticsTimeDto[];
+  publisherSyncTimes: RuntimeStatisticsTimeAppDto[];
+  moduleRunTimes: RuntimeStatisticsTimeAppDto[];
+  updateTimes: RuntimeStatisticsTimeAppDto[];
+  controllerUpdateTimes: RuntimeStatisticsTimeAppDto[];
 }
 
+// Maps Lua hub DTOs into EEP data AppDtos and runtime statistics AppDtos.
+// Lua inputs: ce.hub.Runtime, Module, DataSlot, Signal, Switch, Structure.
+// Also maps Contact, track ceTypes, and waiting-on-signal DTOs.
 export default class EepDataSelector {
   private lastState?: fromEepData.State;
-  private runtime: Record<string, RuntimeDto> = {};
+  private runtime: Record<string, RuntimeAppDto> = {};
   private runtimeStatisticsHistory: RuntimeStatisticsSample[] = [];
-  private runtimeStatisticsInitialization: RuntimeStatisticsDto['initialization'] = {
+  private runtimeStatisticsInitialization: RuntimeStatisticsAppDto['initialization'] = {
     publisherInitTimes: [],
     moduleInitTimes: [],
   };
-  private modules: Record<string, ModuleDto> = {};
-  private saveSlots: Record<string, DataSlotDto> = {};
-  private freeSlots: Record<string, DataSlotDto> = {};
-  private signals: Record<string, SignalDto> = {};
-  private waitingOnSignals: Record<string, WaitingOnSignalDto> = {};
-  private switches: Record<string, SwitchDto> = {};
-  private structures: Record<string, StructureDto> = {};
-  private contacts: Record<string, ContactDto> = {};
-  private tracks: Record<string, Record<string, TrackDto>> = {};
+  private modules: Record<string, ModuleAppDto> = {};
+  private saveSlots: Record<string, DataSlotAppDto> = {};
+  private freeSlots: Record<string, DataSlotAppDto> = {};
+  private signals: Record<string, SignalAppDto> = {};
+  private waitingOnSignals: Record<string, WaitingOnSignalAppDto> = {};
+  private switches: Record<string, SwitchAppDto> = {};
+  private structures: Record<string, StructureAppDto> = {};
+  private contacts: Record<string, ContactAppDto> = {};
+  private tracks: Record<string, Record<string, TrackAppDto>> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState) {
@@ -126,7 +129,7 @@ export default class EepDataSelector {
     }
     this.lastState = state;
 
-    this.runtime = this.mapCeType<RuntimeLuaDto, RuntimeDto>(state, CeTypes.HubRuntime, (dto) => ({
+    this.runtime = this.mapCeType<RuntimeLuaDto, RuntimeAppDto>(state, CeTypes.HubRuntime, (dto) => ({
       id: dto.id,
       count: dto.count,
       time: dto.time,
@@ -134,25 +137,25 @@ export default class EepDataSelector {
     }));
     this.updateRuntimeStatistics(state.eventCounter, this.runtime);
 
-    this.modules = this.mapCeType<ModuleLuaDto, ModuleDto>(state, CeTypes.HubModule, (dto) => ({
+    this.modules = this.mapCeType<ModuleLuaDto, ModuleAppDto>(state, CeTypes.HubModule, (dto) => ({
       id: dto.id,
       name: dto.name,
       enabled: dto.enabled,
     }));
 
-    this.saveSlots = this.mapCeType<DataSlotLuaDto, DataSlotDto>(state, CeTypes.HubSaveSlot, (dto) => ({
+    this.saveSlots = this.mapCeType<DataSlotLuaDto, DataSlotAppDto>(state, CeTypes.HubSaveSlot, (dto) => ({
       id: dto.id,
       name: dto.name,
       data: dto.data,
     }));
 
-    this.freeSlots = this.mapCeType<DataSlotLuaDto, DataSlotDto>(state, CeTypes.HubFreeSlot, (dto) => ({
+    this.freeSlots = this.mapCeType<DataSlotLuaDto, DataSlotAppDto>(state, CeTypes.HubFreeSlot, (dto) => ({
       id: dto.id,
       name: dto.name,
       data: dto.data,
     }));
 
-    this.signals = this.mapCeType<SignalLuaDto, SignalDto>(state, CeTypes.HubSignal, (dto) => ({
+    this.signals = this.mapCeType<SignalLuaDto, SignalAppDto>(state, CeTypes.HubSignal, (dto) => ({
       id: dto.id,
       position: dto.position,
       tag: dto.tag,
@@ -164,7 +167,7 @@ export default class EepDataSelector {
       ...optionalProperty('activeFunction', dto.activeFunction),
     }));
 
-    this.waitingOnSignals = this.mapCeType<WaitingOnSignalLuaDto, WaitingOnSignalDto>(
+    this.waitingOnSignals = this.mapCeType<WaitingOnSignalLuaDto, WaitingOnSignalAppDto>(
       state,
       CeTypes.HubWaitingOnSignal,
       (dto) => ({
@@ -176,13 +179,13 @@ export default class EepDataSelector {
       }),
     );
 
-    this.switches = this.mapCeType<SwitchLuaDto, SwitchDto>(state, CeTypes.HubSwitch, (dto) => ({
+    this.switches = this.mapCeType<SwitchLuaDto, SwitchAppDto>(state, CeTypes.HubSwitch, (dto) => ({
       id: dto.id,
       position: dto.position,
       tag: dto.tag,
     }));
 
-    this.structures = this.mapCeType<StructureLuaDto, StructureDto>(state, CeTypes.HubStructure, (dto) => ({
+    this.structures = this.mapCeType<StructureLuaDto, StructureAppDto>(state, CeTypes.HubStructure, (dto) => ({
       id: dto.id,
       name: dto.name,
       pos_x: dto.pos_x,
@@ -200,7 +203,7 @@ export default class EepDataSelector {
       ...optionalProperty('gsbname', dto.gsbname),
     }));
 
-    this.contacts = this.mapCeType<ContactLuaDto, ContactDto>(state, CeTypes.HubContact, (dto) => ({
+    this.contacts = this.mapCeType<ContactLuaDto, ContactAppDto>(state, CeTypes.HubContact, (dto) => ({
       id: dto.id,
       ...optionalProperty('luaFn', dto.luaFn),
       ...optionalProperty('tipTxt', dto.tipTxt),
@@ -210,7 +213,7 @@ export default class EepDataSelector {
     for (const ceType of Object.keys(state.ceTypes)) {
       const trackType = trackTypeForCeType(ceType);
       if (!trackType) continue;
-      this.tracks[trackType] = this.mapCeType<TrackLuaDto, TrackDto>(state, ceType, (dto) => ({
+      this.tracks[trackType] = this.mapCeType<TrackLuaDto, TrackAppDto>(state, ceType, (dto) => ({
         id: dto.id,
         ...optionalProperty('reserved', dto.reserved),
         ...optionalProperty('reservedByTrainName', dto.reservedByTrainName),
@@ -233,7 +236,7 @@ export default class EepDataSelector {
     return result;
   }
 
-  private updateRuntimeStatistics(eventCounter: number, runtime: Record<string, RuntimeDto>): void {
+  private updateRuntimeStatistics(eventCounter: number, runtime: Record<string, RuntimeAppDto>): void {
     if (Object.keys(runtime).length === 0) {
       this.runtimeStatisticsHistory = [];
       this.runtimeStatisticsInitialization = { publisherInitTimes: [], moduleInitTimes: [] };
@@ -300,10 +303,10 @@ export default class EepDataSelector {
   }
 
   private toRuntimeStatisticsTime(
-    runtime: Record<string, RuntimeDto>,
+    runtime: Record<string, RuntimeAppDto>,
     runtimeKeys: string[],
     label: string,
-  ): RuntimeStatisticsTimeDto {
+  ): RuntimeStatisticsTimeAppDto {
     const runtimeEntry = runtimeKeys.map((runtimeKey) => runtime[runtimeKey]).find((entry) => entry !== undefined);
     return {
       id: label,
@@ -321,8 +324,8 @@ export default class EepDataSelector {
   }
 
   private runtimeStatisticsTimeListsEqual(
-    left: RuntimeStatisticsTimeDto[],
-    right: RuntimeStatisticsTimeDto[],
+    left: RuntimeStatisticsTimeAppDto[],
+    right: RuntimeStatisticsTimeAppDto[],
   ): boolean {
     if (left.length !== right.length) {
       return false;
@@ -339,12 +342,12 @@ export default class EepDataSelector {
     return true;
   }
 
-  private cloneRuntimeStatisticsTimeList(list: RuntimeStatisticsTimeDto[]): RuntimeStatisticsTimeDto[] {
+  private cloneRuntimeStatisticsTimeList(list: RuntimeStatisticsTimeAppDto[]): RuntimeStatisticsTimeAppDto[] {
     return list.map((entry) => ({ ...entry }));
   }
 
-  getRuntime = (): Record<string, RuntimeDto> => this.runtime;
-  getRuntimeStatistics = (): RuntimeStatisticsDto => ({
+  getRuntime = (): Record<string, RuntimeAppDto> => this.runtime;
+  getRuntimeStatistics = (): RuntimeStatisticsAppDto => ({
     history: {
       publisherSyncTimes: this.runtimeStatisticsHistory.map((sample) =>
         this.cloneRuntimeStatisticsTimeList(sample.publisherSyncTimes),
@@ -365,19 +368,19 @@ export default class EepDataSelector {
       moduleInitTimes: this.cloneRuntimeStatisticsTimeList(this.runtimeStatisticsInitialization.moduleInitTimes),
     },
   });
-  getModules = (): Record<string, ModuleDto> => this.modules;
-  getSaveSlots = (): Record<string, DataSlotDto> => this.saveSlots;
-  getFreeSlots = (): Record<string, DataSlotDto> => this.freeSlots;
-  getSignals = (): Record<string, SignalDto> => this.signals;
-  getSignal = (id: string): SignalDto | undefined => this.signals[id];
-  getWaitingOnSignals = (): Record<string, WaitingOnSignalDto> => this.waitingOnSignals;
-  getSwitches = (): Record<string, SwitchDto> => this.switches;
-  getSwitch = (id: string): SwitchDto | undefined => this.switches[id];
-  getStructures = (): Record<string, StructureDto> => this.structures;
-  getStructure = (id: string): StructureDto | undefined => this.structures[id];
-  getContacts = (): Record<string, ContactDto> => this.contacts;
-  getContact = (id: string): ContactDto | undefined => this.contacts[id];
-  getTracksForRoom = (trackType: string): Record<string, TrackDto> => this.tracks[trackType] ?? {};
-  getTrack = (trackType: string, id: string): TrackDto | undefined => this.tracks[trackType]?.[id];
+  getModules = (): Record<string, ModuleAppDto> => this.modules;
+  getSaveSlots = (): Record<string, DataSlotAppDto> => this.saveSlots;
+  getFreeSlots = (): Record<string, DataSlotAppDto> => this.freeSlots;
+  getSignals = (): Record<string, SignalAppDto> => this.signals;
+  getSignal = (id: string): SignalAppDto | undefined => this.signals[id];
+  getWaitingOnSignals = (): Record<string, WaitingOnSignalAppDto> => this.waitingOnSignals;
+  getSwitches = (): Record<string, SwitchAppDto> => this.switches;
+  getSwitch = (id: string): SwitchAppDto | undefined => this.switches[id];
+  getStructures = (): Record<string, StructureAppDto> => this.structures;
+  getStructure = (id: string): StructureAppDto | undefined => this.structures[id];
+  getContacts = (): Record<string, ContactAppDto> => this.contacts;
+  getContact = (id: string): ContactAppDto | undefined => this.contacts[id];
+  getTracksForRoom = (trackType: string): Record<string, TrackAppDto> => this.tracks[trackType] ?? {};
+  getTrack = (trackType: string, id: string): TrackAppDto | undefined => this.tracks[trackType]?.[id];
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);
 }

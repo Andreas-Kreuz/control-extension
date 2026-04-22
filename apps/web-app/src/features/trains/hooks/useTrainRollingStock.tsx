@@ -1,9 +1,9 @@
-import { RollingStockDto } from '@ce/web-shared';
+﻿import { RollingStockAppDto } from '@ce/web-shared';
 import { useEffect, useState } from 'react';
 import { useSocketUrl } from '../../../app/hooks/useSocketUrl';
 
-function useTrainRollingStock(trainId: string): RollingStockDto[] | undefined {
-  const [rollingStock, setRollingStock] = useState<RollingStockDto[] | undefined>(undefined);
+function useTrainRollingStock(trainId: string): RollingStockAppDto[] | undefined {
+  const [rollingStock, setRollingStock] = useState<RollingStockAppDto[] | undefined>(undefined);
   const socketUrl = useSocketUrl();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ function useTrainRollingStock(trainId: string): RollingStockDto[] | undefined {
           return;
         }
 
-        const data = (await response.json()) as RollingStockDto[];
+        const data = (await response.json()) as RollingStockAppDto[];
         setRollingStock(data);
       } catch (error) {
         if ((error as Error).name === 'AbortError') {

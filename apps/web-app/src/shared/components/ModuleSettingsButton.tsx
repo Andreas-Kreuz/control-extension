@@ -1,5 +1,5 @@
-import ModuleSettings from './ModuleSettings';
-import { SettingsDto } from '@ce/web-shared';
+﻿import ModuleSettings from './ModuleSettings';
+import { SettingsAppDto } from '@ce/web-shared';
 import CloseIcon from '@mui/icons-material/CloseOutlined';
 import TuneIcon from '@mui/icons-material/TuneOutlined';
 import AppBar from '@mui/material/AppBar';
@@ -24,7 +24,7 @@ const Transition = forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function ModuleSettingsButton(props: { settings?: SettingsDto }) {
+function ModuleSettingsButton(props: { settings?: SettingsAppDto }) {
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.up('sm'));
   const [open, setOpen] = useState(false);

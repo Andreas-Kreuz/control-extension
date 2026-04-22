@@ -1,8 +1,8 @@
-import Stack from '@mui/material/Stack';
+﻿import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import type { TransitStationDto } from '@ce/web-shared';
+import type { TransitStationAppDto } from '@ce/web-shared';
 
-function TransitStationOverviewSection({ station }: { station: TransitStationDto }) {
+function TransitStationOverviewSection({ station }: { station: TransitStationAppDto }) {
   return (
     <Stack spacing={1} sx={{ p: 2 }}>
       <Typography variant="body2" color="text.secondary">

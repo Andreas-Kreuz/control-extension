@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { TrainListDto, TrainType } from '@ce/web-shared';
+﻿import type { ReactNode } from 'react';
+import { TrainListAppDto, TrainType } from '@ce/web-shared';
 import AppCardBg from '../../../shared/components/AppCardBg';
 import { trainIconFor } from '../lib/trainIconFor';
 import { getTrainChips } from '../lib/trainDetails';
@@ -22,7 +22,7 @@ const getImageName = (trackType: string): string => {
 };
 
 interface TrainListEntryCardProps {
-  train: TrainListDto;
+  train: TrainListAppDto;
   selected: boolean;
   onSelect: () => void;
   children?: ReactNode;

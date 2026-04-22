@@ -1,12 +1,12 @@
-import { useSocket } from '../../app/hooks/useSocket';
-import { CommandEvent, SettingDto } from '@ce/web-shared';
+﻿import { useSocket } from '../../app/hooks/useSocket';
+import { CommandEvent, SettingAppDto } from '@ce/web-shared';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import FormHelperText from '@mui/material/FormHelperText';
 import Switch from '@mui/material/Switch';
 import { useState } from 'react';
 
-const ModuleSetting = (props: { setting: SettingDto<unknown> }) => {
+const ModuleSetting = (props: { setting: SettingAppDto<unknown> }) => {
   const socket = useSocket();
   const [checked, setChecked] = useState(props.setting.value as boolean);
   const handleChange = () => {

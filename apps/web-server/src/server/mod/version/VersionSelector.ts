@@ -1,10 +1,12 @@
-import { VersionLuaDto } from '../../ce/dto/version/VersionLuaDto';
+﻿import { VersionLuaDto } from '../../ce/dto/version/VersionLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, VersionDto } from '@ce/web-shared';
+import { CeTypes, VersionAppDto } from '@ce/web-shared';
 
+// Maps Lua version DTOs into VersionAppDto.
+// Lua input: ce.hub.EepVersion.
 export default class VersionSelector {
   private lastState?: fromEepData.State;
-  private versions: Record<string, VersionDto> = {};
+  private versions: Record<string, VersionAppDto> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState || !state.ceTypes[CeTypes.HubEepVersion]) {
@@ -24,5 +26,5 @@ export default class VersionSelector {
     });
   }
 
-  getVersions = (): Record<string, VersionDto> => this.versions;
+  getVersions = (): Record<string, VersionAppDto> => this.versions;
 }
