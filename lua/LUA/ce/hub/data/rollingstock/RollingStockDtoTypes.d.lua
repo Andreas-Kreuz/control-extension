@@ -32,7 +32,7 @@
 ---@field rotX number -- ondemand: placeholder 0 when not subscribed
 ---@field rotY number -- ondemand: placeholder 0 when not subscribed
 ---@field rotZ number -- ondemand: placeholder 0 when not subscribed
----@field xmlModel string|nil -- oninterest
+---@field xmlModel string|nil
 
 ---@class RollingStockDtoFactory
 ---@field createFullDto fun(stock: RollingStock, isSubscribed: boolean|nil):string,string,string,RollingStockDto

@@ -55,6 +55,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getY = function () return 2 end,
             getZ = function () return 3 end,
             getMileage = function () return 4 end,
+            getXmlModel = function () return "SCHIENE\\STRASSENBAHN\\GT4_WG_A_01_MA1.3dm" end,
         }
 
         local trainCeType, trainKeyId, trainKey, trainDto =
@@ -115,6 +116,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
         assert.equals(1.23, rsDto.rotX)
         assert.equals(2.35, rsDto.rotY)
         assert.equals(3.46, rsDto.rotZ)
+        assert.equals("SCHIENE\\STRASSENBAHN\\GT4_WG_A_01_MA1.3dm", rsDto.xmlModel)
     end)
 
     it("uses placeholder values for ondemand fields when not subscribed", function ()

@@ -275,7 +275,7 @@ function HubOptionDefaults.create()
                     rotX = "oninterest",
                     rotY = "oninterest",
                     rotZ = "oninterest",
-                    xmlModel = "oninterest"
+                    xmlModel = "always"
                 }
             }
         }

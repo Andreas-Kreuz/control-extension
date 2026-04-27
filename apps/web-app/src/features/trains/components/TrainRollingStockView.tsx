@@ -47,6 +47,7 @@ function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
       >
         <RowCell label="Name" value={rollingStock.name} />
         <RowCell label="TagText" value={rollingStock.tag || '-'} />
+        <RowCell label="XML Model" value={rollingStock.xmlModel || '-'} />
         <RowCell label="TextureTexts" value={textureText} multiline={textureText.includes('\n')} />
       </Box>
     </ListItem>

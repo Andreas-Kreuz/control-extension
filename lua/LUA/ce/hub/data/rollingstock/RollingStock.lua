@@ -584,7 +584,9 @@ end
 
 function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local oldXmlModel = self.xmlModel
     self.xmlModel = model
+    if oldXmlModel ~= model then markDirty(self, "xmlModel") end
 end
 
 function RollingStock:resetDirty()
