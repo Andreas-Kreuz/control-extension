@@ -12,6 +12,7 @@
 ---@field hubTrain Train
 ---@field line string|nil
 ---@field destination string|nil
+---@field origin string|nil
 ---@field direction string|nil
 ---@field nextStations TransitTrainNextStation[]
 ---@field dirtyFields table<string, boolean>
@@ -24,6 +25,9 @@
 ---@field setDestination fun(self: TransitTrain, destination: string):nil
 ---@field getDestination fun(self: TransitTrain):string|nil
 ---@field updateDestination fun(self: TransitTrain, destination: string|nil):nil
+---@field setOrigin fun(self: TransitTrain, origin: string):nil
+---@field getOrigin fun(self: TransitTrain):string|nil
+---@field updateOrigin fun(self: TransitTrain, origin: string|nil):nil
 ---@field setDirection fun(self: TransitTrain, direction: string):nil
 ---@field getDirection fun(self: TransitTrain):string|nil
 ---@field updateDirection fun(self: TransitTrain, direction: string|nil):nil

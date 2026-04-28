@@ -62,6 +62,7 @@ function RollingStock:new(o)
     assert(o.rollingStockName, "Provide a rollingStockName")
     assert(type(o.rollingStockName) == "string", "Need 'o.id' as string")
     o.id = o.rollingStockName
+    local xmlModel = o.xmlModel
 
     self.__index = self
     setmetatable(o, self)
@@ -92,7 +93,6 @@ function RollingStock:new(o)
     end
 
     o.type = "RollingStock"
-    o.model = RollingStockModels.modelFor(o.id)
     o.trainName = ""
     o.positionInTrain = -1
     o.couplingFront = couplingFront or 1
@@ -120,7 +120,8 @@ function RollingStock:new(o)
     o.rotX = rotationOk and round2(rotX) or 0
     o.rotY = rotationOk and round2(rotY) or 0
     o.rotZ = rotationOk and round2(rotZ) or 0
-    o.xmlModel = nil
+    o.xmlModel = xmlModel
+    o.model = RollingStockModels.modelFor(o.id, o.xmlModel)
     o.dirtyFields = {}
     o.needsFullSend = true
     return o
@@ -586,6 +587,7 @@ function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
     self.xmlModel = model
+    self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
 end
 

@@ -28,6 +28,7 @@ end
 local fieldGetters = {
     line = function (t) return t:getLine() end,
     destination = function (t) return t:getDestination() end,
+    origin = function (t) return t:getOrigin() end,
     direction = function (t) return t:getDirection() end,
     nextStations = buildNextStationsDto,
 }
@@ -35,6 +36,7 @@ local fieldGetters = {
 local fieldPlaceholders = {
     line = "",
     destination = "",
+    origin = "",
     direction = "",
     nextStations = {},
 }

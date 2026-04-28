@@ -35,6 +35,8 @@ insulate("Line Management Ring Line", function ()
 
         Line.scheduleDeparture("train1", RoadStation.forName("C"), 4)
         local scheduledNextStations = transitTrain1:getNextStations()
+        local scheduledOrigin = transitTrain1:getOrigin()
+        it("train1 gets origin from detected line segment", function () assert.are.equal("A", scheduledOrigin) end)
         it("train1 stores scheduled next stations", function ()
             assert.are.equal(3, #scheduledNextStations)
             assert.are.equal("C", scheduledNextStations[1].station.name)
@@ -181,10 +183,12 @@ insulate("Line Management 4 Line segments", function ()
 
             Line.trainDeparted("train4", RoadStation.forName("Hauptbahnhof"))
             local route2 = train4:getRoute()
+            local origin2 = transitTrain4:getOrigin()
             local queue = RoadStation.forName("Hauptbahnhof").queue
             local queueLength = #queue.entriesByArrival
             local queueText = RoadStation.queueToText(queue)
             it("", function () assert.are.equal("Linie 10: Tram in Richtung Striesen", route2) end)
+            it("sets origin after changing to next section", function () assert.are.equal("Messe Dresden", origin2) end)
             it("", function () assert.are.equal(4, queueLength) end)
             it("", function ()
                 assert.are.equal(

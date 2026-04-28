@@ -50,3 +50,7 @@
 - If runtime unavailable, verify statically and state what could not be executed
 - After changes run `yarn lint:lua` and fix all warnings before considering work done — max line length is 120 chars
 - After changes run `yarn format:lua` if only Lua files are affected
+
+## Rolling Stock Models
+
+- [lua-rollingstock-models.md](lua-rollingstock-models.md): EEP rolling stock model metadata, axis names, texture text extraction

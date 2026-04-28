@@ -45,6 +45,7 @@ function TransitTrain:new(hubTrain)
         hubTrain = hubTrain,
         line = nil,
         destination = nil,
+        origin = nil,
         direction = nil,
         nextStations = {},
         dirtyFields = {},
@@ -70,6 +71,15 @@ local function writeValueToRollingStock(trainName, key, value)
     end
 end
 
+local function updateRollingStockModels(trainName, updateModel)
+    local carCount = EEPGetRollingstockItemsCount(trainName)
+    for i = 0, carCount - 1 do
+        local rollingStockName = EEPGetRollingstockItemName(trainName, i)
+        local model = RollingStockRegistry.forName(rollingStockName).model
+        updateModel(model, rollingStockName)
+    end
+end
+
 function TransitTrain:setLine(line)
     assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
     assert("string" == type(line) or "number" == type(line), "Provide 'line' as 'string' or 'number'")
@@ -77,11 +87,9 @@ function TransitTrain:setLine(line)
     local oldLine = self.line
     self.line = line
     writeValueToRollingStock(self.id, TagKeys.Train.line, line)
-    local carCount = EEPGetRollingstockItemsCount(self.id)
-    for i = 0, carCount - 1 do
-        local rollingStockName = EEPGetRollingstockItemName(self.id, i)
-        RollingStockRegistry.forName(rollingStockName).model:setLine(rollingStockName, line)
-    end
+    updateRollingStockModels(self.id, function(model, rollingStockName)
+        model:setLine(rollingStockName, line)
+    end)
     if oldLine ~= line then markDirty(self, "line") end
 end
 
@@ -105,11 +113,9 @@ function TransitTrain:setDestination(destination)
     local oldDestination = self.destination
     self.destination = destination
     writeValueToRollingStock(self.id, TagKeys.Train.destination, destination)
-    local carCount = EEPGetRollingstockItemsCount(self.id)
-    for i = 0, carCount - 1 do
-        local rollingStockName = EEPGetRollingstockItemName(self.id, i)
-        RollingStockRegistry.forName(rollingStockName).model:setDestination(rollingStockName, destination)
-    end
+    updateRollingStockModels(self.id, function(model, rollingStockName)
+        model:setDestination(rollingStockName, destination)
+    end)
     if oldDestination ~= destination then markDirty(self, "destination") end
 end
 
@@ -124,6 +130,30 @@ function TransitTrain:updateDestination(destination)
     local oldDestination = self.destination
     self.destination = destination
     if oldDestination ~= destination then markDirty(self, "destination") end
+end
+
+function TransitTrain:setOrigin(origin)
+    assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
+    assert(type(origin) == "string", "Need 'origin' as string")
+    local oldOrigin = self.origin
+    self.origin = origin
+    updateRollingStockModels(self.id, function(model, rollingStockName)
+        model:setOrigin(rollingStockName, origin)
+    end)
+    if oldOrigin ~= origin then markDirty(self, "origin") end
+end
+
+function TransitTrain:getOrigin()
+    assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
+    return self.origin
+end
+
+function TransitTrain:updateOrigin(origin)
+    assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
+    assert(type(origin) == "nil" or type(origin) == "string", "Need 'origin' as string|nil")
+    local oldOrigin = self.origin
+    self.origin = origin
+    if oldOrigin ~= origin then markDirty(self, "origin") end
 end
 
 function TransitTrain:setDirection(direction)
@@ -163,6 +193,11 @@ function TransitTrain:setNextStations(nextStations)
         self.nextStations = normalized
         markDirty(self, "nextStations")
     end
+    local firstNextStation = normalized[1]
+    local nextStop = firstNextStation and firstNextStation.station.name or ""
+    updateRollingStockModels(self.id, function(model, rollingStockName)
+        model:setNextStop(rollingStockName, nextStop)
+    end)
 end
 
 function TransitTrain:getNextStations()

@@ -12,7 +12,7 @@ insulate("parse rollingstockname", function ()
     local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
     local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 
-    RollingStockModels.addModelByName("MyModel", RollingStockModel:new({ myMarker = "MODEL A" }))
+    RollingStockModels.addModel("MyModel", "MODEL_A.3dm", RollingStockModel:new({ myMarker = "MODEL A" }))
     RollingStockModels.assignModel("MyModel;005", RollingStockModel:new({ myMarker = "MODEL B" }))
 
     local stock1 = RollingStockRegistry.forName("MyModel;003")
@@ -23,4 +23,18 @@ insulate("parse rollingstockname", function ()
 
     it("MODEL A", function () assert.equals("MODEL A", stock1.model["myMarker"]) end)
     it("MODEL B", function () assert.equals("MODEL B", stock2.model["myMarker"]) end)
+end)
+
+insulate("refresh model by XML model", function ()
+    local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+    local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
+    local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
+
+    RollingStockModels.addModel("MyModel", "MODEL_A.3dm", RollingStockModel:new({ myMarker = "MODEL A" }))
+    RollingStockModels.addModel("OtherModel", "MODEL_XML.3dm", RollingStockModel:new({ myMarker = "MODEL XML" }))
+
+    local stock = RollingStockRegistry.forName("MyModel;003")
+    stock:setXmlModel("MODEL_XML.3dm")
+
+    it("MODEL XML", function () assert.equals("MODEL XML", stock.model["myMarker"]) end)
 end)

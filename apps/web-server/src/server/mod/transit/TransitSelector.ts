@@ -36,6 +36,7 @@ export default class TransitSelector {
       id: train.id,
       ...(train.line !== undefined ? { line: train.line } : {}),
       ...(train.destination !== undefined ? { destination: train.destination } : {}),
+      ...(train.origin !== undefined ? { origin: train.origin } : {}),
       ...(train.direction !== undefined ? { direction: train.direction } : {}),
       ...(train.nextStations !== undefined
         ? {

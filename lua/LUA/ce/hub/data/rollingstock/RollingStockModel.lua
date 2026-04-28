@@ -1,5 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockModel ...") end
 
+-- Model metadata extraction: project-docs/ai/guides/lua-rollingstock-models.md
 local RollingStockModel = {}
 
 function RollingStockModel:new(o)
@@ -20,6 +21,20 @@ function RollingStockModel:setDestination(rollingStockName, destination)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
     assert(type(destination) == "string", "Need 'destination' as string")
+    -- Overwrite me
+end
+
+function RollingStockModel:setOrigin(rollingStockName, origin)
+    assert(type(self) == "table", "Call this method with ':'")
+    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+    assert(type(origin) == "string", "Need 'origin' as string")
+    -- Overwrite me
+end
+
+function RollingStockModel:setNextStop(rollingStockName, nextStop)
+    assert(type(self) == "table", "Call this method with ':'")
+    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+    assert(type(nextStop) == "string", "Need 'nextStop' as string")
     -- Overwrite me
 end
 

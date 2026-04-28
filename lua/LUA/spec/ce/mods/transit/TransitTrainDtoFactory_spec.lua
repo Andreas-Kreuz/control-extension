@@ -12,6 +12,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
             id = "T1",
             getLine = function () return "10" end,
             getDestination = function () return "Central" end,
+            getOrigin = function () return "Depot" end,
             getDirection = function () return "North" end,
             getNextStations = function ()
                 return {
@@ -32,6 +33,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
                         id = "T1",
                         line = "10",
                         destination = "Central",
+                        origin = "Depot",
                         direction = "North",
                         nextStations = {
                             {
@@ -49,6 +51,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
             id = "T1",
             getLine = function () return "10" end,
             getDestination = function () return "Central" end,
+            getOrigin = function () return "Depot" end,
             getDirection = function () return "North" end,
             getNextStations = function ()
                 return {
@@ -71,6 +74,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
             id = "T1",
             getLine = function () return "10" end,
             getDestination = function () return "Central" end,
+            getOrigin = function () return "Depot" end,
             getDirection = function () return "North" end,
         }, { destination = true }, true)
 

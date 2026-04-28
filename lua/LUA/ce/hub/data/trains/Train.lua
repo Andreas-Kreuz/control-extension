@@ -3,7 +3,6 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
 local TableUtils = require("ce.hub.util.TableUtils")
 
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
 local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
@@ -329,8 +328,7 @@ function Train:openDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        local model = RollingStockModels.modelFor(rollingStockName)
-        model:openDoors(rollingStockName)
+        RollingStockRegistry.forName(rollingStockName):openDoors()
     end
 end
 
@@ -338,8 +336,7 @@ function Train:closeDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        local model = RollingStockModels.modelFor(rollingStockName)
-        model:closeDoors(rollingStockName)
+        RollingStockRegistry.forName(rollingStockName):closeDoors()
     end
 end
 

@@ -207,6 +207,8 @@ function LineSegment:trainDeparted(train, currentStation)
         local nextSegment = self.nextLineSegmentInfo.followingSegment
         train:setRoute(nextSegment.routeName)
         transitTrain:changeDestination(nextSegment.destination, nextSegment.line.nr)
+        local origin = nextSegment:getFirstStation()
+        if origin then transitTrain:setOrigin(origin.name) end
     end
 
     for _, info in ipairs(infoList) do

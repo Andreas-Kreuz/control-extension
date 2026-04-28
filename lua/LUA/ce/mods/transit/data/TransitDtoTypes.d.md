@@ -57,6 +57,7 @@
 | `id`           | `string`                       |
 | `line`         | `string`                       |
 | `destination`  | `string`                       |
+| `origin`       | `string`                       |
 | `direction`    | `string`                       |
 | `nextStations` | `TransitTrainNextStationDto[]` |
 

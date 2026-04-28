@@ -48,6 +48,8 @@ local function checkLine(train)
                 for _, segment in pairs(line.lineSegments) do
                     if segment.routeName == routeName then
                         transitTrain:changeDestination(segment.destination, line.nr)
+                        local origin = segment:getFirstStation()
+                        if origin then transitTrain:setOrigin(origin.name) end
                     end
                 end
             end
@@ -73,6 +75,8 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
         if line then
             local lineSegment = line.lineSegments[routeName]
             if lineSegment then
+                local origin = lineSegment:getFirstStation()
+                if origin then transitTrain:setOrigin(origin.name) end
                 lineSegment:prepareDepartureAt(train, station, timeInMinutes)
             else
                 print("[#Line] Could not find lineSegment for route: " .. routeName)
@@ -103,12 +107,14 @@ function Line.trainDeparted(trainName, station)
         if line then
             local lineSegment = line.lineSegments[routeName]
             if lineSegment then
+                local origin = lineSegment:getFirstStation()
+                if origin then transitTrain:setOrigin(origin.name) end
                 lineSegment:trainDeparted(train, station)
             else
-                print("[#Line] Could not find lineSegment for route: " .. routeName)
+                print("[#Line] Could not find lineSegment for route: '" .. routeName .. "' for train: " .. trainName)
             end
         else
-            print("[#Line] Could not find trains line: " .. lineName)
+            print("[#Line] Could not find trains line: " .. lineName .. " for train: " .. trainName)
         end
     else
         print("[#Line] Train has no line: " .. trainName)

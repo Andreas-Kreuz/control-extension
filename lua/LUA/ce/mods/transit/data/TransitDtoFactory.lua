@@ -147,6 +147,8 @@ local function toTransitTrainDto(transitTrain, _, isSelected)
         and (transitTrain.getLine and transitTrain:getLine() or transitTrain.line) or ""
     dto.destination     = SyncPolicy.shouldPublishField(fieldPolicies, "destination", isSelected)
         and (transitTrain.getDestination and transitTrain:getDestination() or transitTrain.destination) or ""
+    dto.origin          = SyncPolicy.shouldPublishField(fieldPolicies, "origin", isSelected)
+        and (transitTrain.getOrigin and transitTrain:getOrigin() or transitTrain.origin) or ""
     dto.direction       = SyncPolicy.shouldPublishField(fieldPolicies, "direction", isSelected)
         and (transitTrain.getDirection and transitTrain:getDirection() or transitTrain.direction) or ""
     dto.nextStations    = {}

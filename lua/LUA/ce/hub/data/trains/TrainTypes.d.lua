@@ -61,6 +61,8 @@
 ---@field new fun(self: RollingStockModel, o?: table):RollingStockModel
 ---@field setLine fun(self: RollingStockModel, rollingStockName: string, line: string):nil
 ---@field setDestination fun(self: RollingStockModel, rollingStockName: string, destination: string):nil
+---@field setOrigin fun(self: RollingStockModel, rollingStockName: string, origin: string):nil
+---@field setNextStop fun(self: RollingStockModel, rollingStockName: string, nextStop: string):nil
 ---@field setStations fun(self: RollingStockModel, rollingStockName: string, stations: string):nil
 ---@field setWagonNr fun(self: RollingStockModel, rollingStockName: string, wagonNumber: string):nil
 ---@field openDoors fun(self: RollingStockModel, rollingStockName: string):nil
