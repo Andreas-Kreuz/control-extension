@@ -4,8 +4,8 @@ local TableUtils = require("ce.hub.util.TableUtils")
 
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 local StorageUtility = require("ce.hub.util.StorageUtility")
-local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
-local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
+local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
+local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 
 local Train = {}
 

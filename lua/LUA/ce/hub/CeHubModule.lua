@@ -1,4 +1,5 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
+require("ce.hub.eep.EepCompatibilityApi")
 
 ---@class CeHubModule: CeModule
 CeHubModule = {}
@@ -112,7 +113,6 @@ end
 
 function CeHubModule.init()
     if not CeHubModule.enabled or initialized then return end
-    if type(EEPLng) ~= "string" or EEPLng == "" then rawset(_G, "EEPLng", "GER") end
     HubBridgeConnector.registerStatePublishers()
     HubBridgeConnector.registerFunctions()
     runAnl3Discovery()

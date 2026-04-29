@@ -2,9 +2,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainUpdater ..."
 
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
+local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
 
-local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
+local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 local TrainUpdater = {}
 TrainUpdater.debug = CeStartWithDebug or false
 
