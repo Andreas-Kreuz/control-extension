@@ -10,6 +10,7 @@ export interface TrainAppDto {
   targetSpeed: number;
   couplingFront: number;
   couplingRear: number;
+  lights: Record<string, boolean>;
   active: boolean;
   inTrainyard: boolean;
   movesForward: boolean;

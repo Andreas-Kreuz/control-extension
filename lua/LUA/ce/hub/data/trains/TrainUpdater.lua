@@ -49,6 +49,9 @@ function TrainUpdater.runUpdate()
             local ok, trainCouplingRear = EEPGetTrainCouplingRear(train.name)
             if ok then train:setCouplingRear(trainCouplingRear) end
         end
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "lights", isSelected) and EEPGetTrainLight then
+            train:updateLights()
+        end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
             train:setActive(activeTrain == train.name)
         end

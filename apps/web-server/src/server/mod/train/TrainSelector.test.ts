@@ -91,11 +91,29 @@ function testTrainSelectorPreservesStringTrainyardId(): void {
     targetSpeed: 0,
     couplingFront: 0,
     couplingRear: 0,
+    lights: { '0': false, '1': false, '2': false, '3': false },
     active: false,
     inTrainyard: false,
     movesForward: true,
     trainyardId: 'Depot-A',
   });
+}
+
+function testTrainSelectorMapsLights(): void {
+  const selector = new TrainSelector(new RollingStockSelector());
+  selector.updateFromState({
+    ceTypes: {
+      [CeTypes.HubTrain]: {
+        T1: {
+          id: 'T1',
+          name: 'Train 1',
+          lights: { '0': true, '1': false, '2': true, '3': false },
+        },
+      },
+    },
+  } as never);
+
+  assert.deepEqual(selector.getTrain('T1')?.lights, { '0': true, '1': false, '2': true, '3': false });
 }
 
 function testRollingStockSelectorNormalizesLuaArraysToOneBasedRecords(): void {
@@ -201,6 +219,7 @@ export async function run(): Promise<void> {
     testRollingStockSelectorMapsMergedLuaPatchAxisValues,
   );
   await runTest('train selector preserves string trainyardId', testTrainSelectorPreservesStringTrainyardId);
+  await runTest('train selector maps lights', testTrainSelectorMapsLights);
   await runTest('train selector maps transit next stations', testTrainSelectorMapsTransitNextStations);
 }
 

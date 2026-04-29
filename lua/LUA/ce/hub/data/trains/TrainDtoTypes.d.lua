@@ -13,6 +13,7 @@
 ---@field targetSpeed number -- ondemand: placeholder 0 when not subscribed
 ---@field couplingFront number -- ondemand: placeholder 0 when not subscribed
 ---@field couplingRear number -- ondemand: placeholder 0 when not subscribed
+---@field lights table<string, boolean> -- ondemand: placeholder false by source when not subscribed
 ---@field active boolean -- ondemand: placeholder false when not subscribed
 ---@field inTrainyard boolean -- ondemand: placeholder false when not subscribed
 ---@field trainyardId string|number -- ondemand: placeholder "" when not subscribed

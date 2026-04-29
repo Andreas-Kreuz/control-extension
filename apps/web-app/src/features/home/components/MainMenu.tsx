@@ -1,5 +1,6 @@
 import BarChartIcon from '@mui/icons-material/BarChart';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import TrainIcon from '@mui/icons-material/Train';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Link as RouterLink } from 'react-router-dom';
@@ -37,6 +38,9 @@ function MainMenu() {
         </Button>
         <Button variant="text" startIcon={<Inventory2Icon />} component={RouterLink} to="/data">
           Daten
+        </Button>
+        <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
+          Aktiver Zug
         </Button>
       </Grid>
     </AppPage>

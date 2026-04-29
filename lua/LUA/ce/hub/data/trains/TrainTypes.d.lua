@@ -12,6 +12,7 @@
 ---@field length number
 ---@field couplingFront number
 ---@field couplingRear number
+---@field lights table<string, boolean>
 ---@field active boolean
 ---@field trainyardId number|nil
 ---@field inTrainyard boolean
@@ -41,6 +42,9 @@
 ---@field getCouplingFront fun(self: Train):number
 ---@field setCouplingRear fun(self: Train, couplingRear: number):nil
 ---@field getCouplingRear fun(self: Train):number
+---@field setLights fun(self: Train, lights: table<string, boolean>):nil
+---@field updateLights fun(self: Train):nil
+---@field getLights fun(self: Train):table<string, boolean>
 ---@field setActive fun(self: Train, active: boolean):nil
 ---@field getActive fun(self: Train):boolean
 ---@field setTrainyard fun(self: Train, inTrainyard: boolean, trainyardId: number|nil):nil

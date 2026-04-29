@@ -7,6 +7,7 @@ export {
   RuntimeStatisticsRoom,
   ModuleRoom,
   VersionRoom,
+  ScenarioRoom,
   TrainListRoom,
   TrainRoom,
   RollingStockRoom,

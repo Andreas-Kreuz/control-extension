@@ -2,10 +2,8 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
 import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import ScenarioSelector from './ScenarioSelector';
-import { DomainRoom } from '@ce/web-shared';
+import { ScenarioRoom } from '@ce/web-shared';
 import { Server } from 'socket.io';
-
-const ScenarioRoom = new DomainRoom('App.Scenario');
 
 export default class ScenarioService implements DomainRoomService {
   private roomDataProviders: DomainDataProvider[] = [];

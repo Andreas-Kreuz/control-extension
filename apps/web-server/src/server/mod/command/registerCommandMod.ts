@@ -96,11 +96,51 @@ export const registerCommandMod = (
           return;
         }
 
-        const command =
-          'EEPRollingstockSetAxisByNumber|' + action.rollingStockName + '|' + axisNumber + '|' + value;
+        const command = 'EEPRollingstockSetAxisByNumber|' + action.rollingStockName + '|' + axisNumber + '|' + value;
         queueCommand(command);
       },
     );
+
+    socket.on(CommandEvent.SetTrainSpeed, (action: { trainName: string; speed: number }) => {
+      if (!socketService.ensureApprovedSocket(socket, CommandEvent.SetTrainSpeed)) {
+        return;
+      }
+
+      const speed = Math.min(250, Math.max(-250, Math.round(Number(action.speed))));
+      if (!action.trainName || !Number.isFinite(speed)) {
+        return;
+      }
+
+      queueCommand('EEPSetTrainSpeed|' + action.trainName + '|' + speed + '|true');
+    });
+
+    socket.on(
+      CommandEvent.SetTrainCoupling,
+      (action: { trainName: string; position: 'front' | 'rear'; enabled: boolean }) => {
+        if (!socketService.ensureApprovedSocket(socket, CommandEvent.SetTrainCoupling)) {
+          return;
+        }
+        if (!action.trainName || (action.position !== 'front' && action.position !== 'rear')) {
+          return;
+        }
+
+        const commandName = action.position === 'front' ? 'EEPSetTrainCouplingFront' : 'EEPSetTrainCouplingRear';
+        queueCommand(commandName + '|' + action.trainName + '|' + (action.enabled === true));
+      },
+    );
+
+    socket.on(CommandEvent.SetTrainLight, (action: { trainName: string; source: number; enabled: boolean }) => {
+      if (!socketService.ensureApprovedSocket(socket, CommandEvent.SetTrainLight)) {
+        return;
+      }
+
+      const source = Math.round(Number(action.source));
+      if (!action.trainName || !Number.isFinite(source) || source < 0 || source > 3) {
+        return;
+      }
+
+      queueCommand('EEPSetTrainLight|' + action.trainName + '|' + (action.enabled === true) + '|' + source);
+    });
   };
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));

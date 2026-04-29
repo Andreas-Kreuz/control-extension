@@ -8,6 +8,7 @@ local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
 local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 
 local Train = {}
+local TRAIN_LIGHT_SOURCES = { 0, 1, 2, 3 }
 
 -- Field update policies (see TrainStaticDtoTypes.d.lua / TrainDynamicDtoTypes.d.lua):
 --   always   => real value always included in DTO
@@ -16,6 +17,16 @@ local Train = {}
 
 local function markDirty(train, fieldName)
     train.dirtyFields[fieldName] = true
+end
+
+local function getTrainLights(trainName)
+    local lights = {}
+    for _, source in ipairs(TRAIN_LIGHT_SOURCES) do
+        local ok, enabled = false, false
+        if EEPGetTrainLight then ok, enabled = EEPGetTrainLight(trainName, source) end
+        lights[tostring(source)] = ok and enabled == true or false
+    end
+    return lights
 end
 
 
@@ -37,6 +48,7 @@ function Train:new(o)
     local _, couplingRear = false, nil
     if EEPGetTrainCouplingRear then _, couplingRear = EEPGetTrainCouplingRear(o.name) end
     local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
+    local lights = getTrainLights(o.name)
     local inTrainyard, trainyardId = false, nil
     if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(o.name) end
     assert(haveTrain, o.name)
@@ -52,6 +64,7 @@ function Train:new(o)
     o.targetSpeed = targetSpeed or speed
     o.couplingFront = couplingFront or 0
     o.couplingRear = couplingRear or 0
+    o.lights = lights
     o.active = activeTrain == o.name
     o.inTrainyard = inTrainyard == true
     o.trainyardId = inTrainyard and trainyardId or nil
@@ -238,6 +251,30 @@ function Train:getCouplingRear()
     return self.couplingRear
 end
 
+function Train:setLights(lights)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(lights) == "table", "Need 'lights' as table")
+    local changed = false
+    for _, source in ipairs(TRAIN_LIGHT_SOURCES) do
+        local key = tostring(source)
+        local value = lights[key] == true
+        if self.lights[key] ~= value then
+            self.lights[key] = value
+            changed = true
+        end
+    end
+    if changed then markDirty(self, "lights") end
+end
+
+function Train:updateLights()
+    self:setLights(getTrainLights(self.name))
+end
+
+function Train:getLights()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.lights
+end
+
 function Train:setActive(active)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(active) == "boolean", "Need 'active' as boolean")
@@ -360,6 +397,7 @@ function Train:toJsonStatic()
         targetSpeed = self:getTargetSpeed(),
         couplingFront = self:getCouplingFront(),
         couplingRear = self:getCouplingRear(),
+        lights = self:getLights(),
         active = self:getActive(),
         inTrainyard = self:getInTrainyard(),
         trainyardId = self:getTrainyardId(),

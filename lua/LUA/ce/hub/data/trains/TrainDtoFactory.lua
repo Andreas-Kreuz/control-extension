@@ -48,6 +48,11 @@ local function toFullDto(train, isSelected)
     elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "couplingRear", isSelected) then
         dto.couplingRear = 0
     end
+    if SyncPolicy.shouldPublishField(fieldPolicies, "lights", isSelected) then
+        dto.lights = train:getLights()
+    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "lights", isSelected) then
+        dto.lights = { ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false }
+    end
     if SyncPolicy.shouldPublishField(fieldPolicies, "active", isSelected) then
         dto.active = train:getActive()
     elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "active", isSelected) then
@@ -71,6 +76,7 @@ local placeHolders = {
     targetSpeed = 0,
     couplingFront = 0,
     couplingRear = 0,
+    lights = { ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false },
     active = false,
     inTrainyard = false,
     trainyardId = "",
@@ -87,6 +93,7 @@ local fieldGetters = {
     targetSpeed = function (t) return t:getTargetSpeed() end,
     couplingFront = function (t) return t:getCouplingFront() end,
     couplingRear = function (t) return t:getCouplingRear() end,
+    lights = function (t) return t:getLights() end,
     active = function (t) return t:getActive() end,
     inTrainyard = function (t) return t:getInTrainyard() end,
     trainyardId = function (t) return t:getTrainyardId() end,

@@ -193,6 +193,7 @@ function HubOptionDefaults.create()
                     targetSpeed = "always",
                     couplingFront = "always",
                     couplingRear = "always",
+                    lights = "always",
                     active = "always",
                     inTrainyard = "always",
                     trainyardId = "always"
@@ -207,6 +208,7 @@ function HubOptionDefaults.create()
                     targetSpeed = "oninterest",
                     couplingFront = "oninterest",
                     couplingRear = "oninterest",
+                    lights = "oninterest",
                     active = "oninterest",
                     inTrainyard = "oninterest",
                     trainyardId = "oninterest"

@@ -72,6 +72,7 @@ export class TrainSelector {
         targetSpeed: trainDto.targetSpeed ?? 0,
         couplingFront: trainDto.couplingFront ?? 0,
         couplingRear: trainDto.couplingRear ?? 0,
+        lights: { '0': false, '1': false, '2': false, '3': false, ...(trainDto.lights ?? {}) },
         active: trainDto.active ?? false,
         inTrainyard: trainDto.inTrainyard ?? false,
         movesForward,

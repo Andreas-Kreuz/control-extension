@@ -25,6 +25,12 @@ local function registerIfFunction(fName, f)
     end
 end
 
+local function coerceCommandArg(value)
+    if value == "true" then return true end
+    if value == "false" then return false end
+    return value
+end
+
 --- Adding an accepted function
 ---NOTE: acceptedFunctions are typically added via the Modules BridgeConnector
 ---@param fName string @using the name of the function as called from EEP-Web
@@ -63,6 +69,9 @@ function IncomingCommandExecutor.executeCommandSafely(functionAndArgs)
     if not f then
         print(string.format("[#IncomingCommandExecutor] Command '%s' is not allowed", fName))
         return
+    end
+    for index, value in ipairs(args) do
+        args[index] = coerceCommandArg(value)
     end
     local status, error = pcall(f, table.unpack(args))
     if not status then print(error) end

@@ -13,6 +13,7 @@ import TrainUpdateService from '../mod/train/TrainUpdateService';
 import VersionService from '../mod/version/VersionService';
 import EepDataService from '../mod/eepdata/EepDataService';
 import RoadDataService from '../mod/road/RoadDataService';
+import ScenarioService from '../mod/scenario/ScenarioService';
 import AppConfig from './config/AppConfig';
 import AppReducer from './config/AppData';
 import CommandLineParser from './config/CommandLineParser';
@@ -223,6 +224,7 @@ export default class AppEffects {
     );
     eepDataEffects.registerDomainRoom(new TransitService(this.io));
     eepDataEffects.registerDomainRoom(new VersionService(this.io));
+    eepDataEffects.registerDomainRoom(new ScenarioService(this.io));
     eepDataEffects.registerDomainRoom(new EepDataService(this.io));
     eepDataEffects.registerDomainRoom(new RoadDataService(this.io));
 

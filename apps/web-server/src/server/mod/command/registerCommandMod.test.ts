@@ -13,6 +13,63 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
 }
 
 function testSetRollingStockAxisQueuesClampedCommand(): void {
+  const { commands, handlers } = setupCommandHandlers();
+
+  handlers.get(CommandEvent.SetRollingStockAxis)?.({
+    rollingStockName: 'RS-1',
+    axisNumber: 2.2,
+    value: 101.7,
+  });
+
+  assert.deepEqual(commands, ['EEPRollingstockSetAxisByNumber|RS-1|2|100']);
+}
+
+function testSetTrainSpeedQueuesClampedTargetSpeedCommand(): void {
+  const { commands, handlers } = setupCommandHandlers();
+
+  handlers.get(CommandEvent.SetTrainSpeed)?.({
+    trainName: '#Train-1',
+    speed: 260.2,
+  });
+
+  assert.deepEqual(commands, ['EEPSetTrainSpeed|#Train-1|250|true']);
+}
+
+function testSetTrainCouplingQueuesFrontAndRearCommands(): void {
+  const { commands, handlers } = setupCommandHandlers();
+
+  handlers.get(CommandEvent.SetTrainCoupling)?.({
+    trainName: '#Train-1',
+    position: 'front',
+    enabled: true,
+  });
+  handlers.get(CommandEvent.SetTrainCoupling)?.({
+    trainName: '#Train-1',
+    position: 'rear',
+    enabled: false,
+  });
+
+  assert.deepEqual(commands, ['EEPSetTrainCouplingFront|#Train-1|true', 'EEPSetTrainCouplingRear|#Train-1|false']);
+}
+
+function testSetTrainLightQueuesValidatedLightCommand(): void {
+  const { commands, handlers } = setupCommandHandlers();
+
+  handlers.get(CommandEvent.SetTrainLight)?.({
+    trainName: '#Train-1',
+    source: 2.1,
+    enabled: true,
+  });
+  handlers.get(CommandEvent.SetTrainLight)?.({
+    trainName: '#Train-1',
+    source: 4,
+    enabled: false,
+  });
+
+  assert.deepEqual(commands, ['EEPSetTrainLight|#Train-1|true|2']);
+}
+
+function setupCommandHandlers() {
   const commands: string[] = [];
   const handlers = new Map<string, (action: unknown) => void>();
   const socket = {
@@ -29,17 +86,17 @@ function testSetRollingStockAxisQueuesClampedCommand(): void {
   };
 
   registerCommandMod({} as never, socketService as never, eepService as never, false);
-  handlers.get(CommandEvent.SetRollingStockAxis)?.({
-    rollingStockName: 'RS-1',
-    axisNumber: 2.2,
-    value: 101.7,
-  });
-
-  assert.deepEqual(commands, ['EEPRollingstockSetAxisByNumber|RS-1|2|100']);
+  return { commands, handlers };
 }
 
 export async function run(): Promise<void> {
   await runTest('set rolling stock axis queues clamped command', testSetRollingStockAxisQueuesClampedCommand);
+  await runTest(
+    'set train speed queues clamped target-speed command',
+    testSetTrainSpeedQueuesClampedTargetSpeedCommand,
+  );
+  await runTest('set train coupling queues front and rear commands', testSetTrainCouplingQueuesFrontAndRearCommands);
+  await runTest('set train light queues validated light command', testSetTrainLightQueuesValidatedLightCommand);
 }
 
 if (require.main === module) {

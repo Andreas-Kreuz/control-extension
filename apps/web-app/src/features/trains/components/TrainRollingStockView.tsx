@@ -52,11 +52,6 @@ function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
       <Box
         sx={{
           width: 1,
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          '@container (min-width: 560px)': {
-            gridTemplateColumns: 'minmax(160px, 1fr) minmax(180px, 1fr) minmax(260px, 2fr)',
-          },
           gap: 2,
         }}
       >
@@ -179,16 +174,18 @@ function AxisSlider(props: {
         gridTemplateColumns: '1fr',
         gap: 1,
         alignItems: 'center',
-        '@container (min-width: 560px)': {
-          gridTemplateColumns: 'minmax(120px, 1fr) minmax(160px, 1fr)',
+        '@container (min-width: 260px)': {
+          gridTemplateColumns: 'minmax(140px, 1fr) minmax(120px, 1fr)',
         },
       }}
     >
       <Typography variant="body2" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
         {props.name}
       </Typography>
+      <Typography variant="caption" color="text.secondary">
+        Achse {props.axisNumber}
+      </Typography>
       <Slider
-        size="small"
         min={0}
         max={100}
         value={value}

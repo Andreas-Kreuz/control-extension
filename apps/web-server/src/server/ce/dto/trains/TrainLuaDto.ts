@@ -13,6 +13,7 @@ export interface TrainLuaDto {
   targetSpeed?: number;
   couplingFront?: number;
   couplingRear?: number;
+  lights?: Record<string, boolean>;
   active?: boolean;
   inTrainyard?: boolean;
   trainyardId?: number | string;

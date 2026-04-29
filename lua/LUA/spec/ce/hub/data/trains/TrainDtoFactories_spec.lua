@@ -21,6 +21,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getTargetSpeed = function () return 4 end,
             getCouplingFront = function () return 1 end,
             getCouplingRear = function () return 2 end,
+            getLights = function () return { ["0"] = true, ["1"] = false, ["2"] = true, ["3"] = false } end,
             getActive = function () return true end,
             getTrainyardId = function () return 9 end,
             getInTrainyard = function () return false end,
@@ -80,6 +81,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
                         targetSpeed = 4,
                         couplingFront = 1,
                         couplingRear = 2,
+                        lights = { ["0"] = true, ["1"] = false, ["2"] = true, ["3"] = false },
                         active = true,
                         trainyardId = 9,
                         inTrainyard = false,
@@ -139,6 +141,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getTargetSpeed = function () return 88 end,
             getCouplingFront = function () return 5 end,
             getCouplingRear = function () return 6 end,
+            getLights = function () return { ["0"] = true, ["1"] = true, ["2"] = true, ["3"] = true } end,
             getActive = function () return true end,
             getTrainyardId = function () return 7 end,
             getInTrainyard = function () return true end,
@@ -151,6 +154,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
         assert.equals(0, dto.targetSpeed)
         assert.equals(0, dto.couplingFront)
         assert.equals(0, dto.couplingRear)
+        assert.same({ ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false }, dto.lights)
         assert.equals(false, dto.active)
         assert.equals(false, dto.inTrainyard)
         assert.equals("", dto.trainyardId)

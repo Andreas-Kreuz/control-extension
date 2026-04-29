@@ -66,6 +66,7 @@ export { ServerStatsRoom } from './rooms/DomainRoomRegistry';
 export { RuntimeStatisticsRoom } from './rooms/DomainRoomRegistry';
 export { ModuleRoom } from './rooms/DomainRoomRegistry';
 export { VersionRoom } from './rooms/DomainRoomRegistry';
+export { ScenarioRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionListRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionSwitchingListRoom } from './rooms/DomainRoomRegistry';
