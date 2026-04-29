@@ -11,6 +11,7 @@ Project:
 
 Lua guides:
 
+- Always read [encoding/rules.md](encoding/rules.md) before modifying `.lua` files.
 - [guides/lua-runtime.md](guides/lua-runtime.md): pure Lua/EEP — runtime, EepOriginalApi, state, error handling, commands, testing
 - [guides/lua-databridge.md](guides/lua-databridge.md): file-based transport — event/command exchange, encoding, command registration
 - [guides/lua-server-contract.md](guides/lua-server-contract.md): DTO sync — ceType/keyId changes, rename checklist, contract direction
