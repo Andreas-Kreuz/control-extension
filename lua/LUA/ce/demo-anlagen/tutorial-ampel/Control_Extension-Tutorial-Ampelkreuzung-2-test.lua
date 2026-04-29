@@ -63,7 +63,7 @@ os:resetQueueFromSignal()
 assert(1 == os.queue:size())
 
 for i = 1, 10 do
-    print("[#Test] run nr. " .. i)
+    print(string.format("[#Test] run nr. %s", i))
     run()
     run()
     run()

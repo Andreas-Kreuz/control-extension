@@ -297,9 +297,15 @@ function TrafficLight:switchTo(phase, reason)
 
     local sigIndex = self.trafficLightModel:signalIndexOf(self.phase)
     if (self.debug or TrafficLight.debug) then
-        print(
-            string.format("[TrafficLight    ] Schalte Ampel %04d auf %s (%01d)", self.signalId, self.phase, sigIndex) ..
-            lightDbg .. axisDbg .. " - " .. reason)
+        print(string.format(
+            "[TrafficLight    ] Schalte Ampel %04d auf %s (%01d)%s%s - %s",
+            self.signalId,
+            self.phase,
+            sigIndex,
+            lightDbg,
+            axisDbg,
+            reason
+        ))
     end
     self:switchSignal(sigIndex)
     self:changed()
@@ -369,14 +375,18 @@ function TrafficLight:showRequestOnSignal(hasRequest)
     end
 
     if (self.debug or TrafficLight.debug) and lightDbg ~= "" then
-        print(string.format("[TrafficLight    ] Schalte Ampel %04d", self.signalId) .. lightDbg)
+        print(string.format("[TrafficLight    ] Schalte Ampel %04d%s", self.signalId, lightDbg))
     end
     self:refreshInfo()
 end
 
 function TrafficLight:print()
-    print(string.format("[TrafficLight    ] Ampel %04d: %s (%s)", self.signalId, self.phase,
-                        self.trafficLightModel.name))
+    print(string.format(
+        "[TrafficLight    ] Ampel %04d: %s (%s)",
+        self.signalId,
+        self.phase,
+        self.trafficLightModel.name
+    ))
 end
 
 function TrafficLight:changed() for lane in pairs(self.lanes) do lane:trafficLightChanged(self) end end

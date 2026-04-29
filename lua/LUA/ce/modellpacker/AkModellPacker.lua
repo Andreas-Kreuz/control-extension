@@ -6,10 +6,13 @@ function AkModellPacker.writeFile(fileName, content)
     io.output(file)
     io.write(content)
     io.close(file)
-    print("[#ModellPacker] ----- Start " .. fileName ..
-        " --------------------------------------------------------------\n" .. content ..
-        " -------------------- Ende " .. fileName ..
-        " --------------------------------------------------------------")
+    print(string.format(
+        "[#ModellPacker] ----- Start %s --------------------\n" ..
+        "%s -------------------- Ende %s --------------------",
+        fileName,
+        content,
+        fileName
+    ))
 end
 
 function AkModellPacker.searchFiles(filePaths, baseDirectory, subdirectory)
@@ -17,12 +20,12 @@ function AkModellPacker.searchFiles(filePaths, baseDirectory, subdirectory)
     local currentDirectory = baseDirectory .. "\\" .. subdirectory
     if os.execute([[dir ]] .. currentDirectory .. [[ /b /a-d >nul]]) then
         for file in io.popen([[dir ]] .. currentDirectory .. [[ /b /a-d ]]):lines() do
-            print("[#ModellPacker] " .. subdirectory .. "\\" .. file)
+            print(string.format("[#ModellPacker] %s\\%s", subdirectory, file))
             filePaths[subdirectory .. "\\" .. file] = file
             fileFound = true
         end
     else
-        print("[#ModellPacker] " .. [[Ordner nicht gefunden: "]] .. currentDirectory .. [["]])
+        print(string.format("[#ModellPacker] Ordner nicht gefunden: \"%s\"", currentDirectory))
     end
     for directory in io.popen([[dir "]] .. currentDirectory .. [[" /b /ad]]):lines() do
         local sub_files = AkModellPacker.searchFiles(filePaths, baseDirectory, subdirectory .. "\\" .. directory)

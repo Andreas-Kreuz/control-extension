@@ -128,8 +128,14 @@ function LineSegment:nextStationList(routeName, nextStation, currentStation)
         if currentStation or index > 1 then total = total + info.timeToStation end
         info.totalTime = total
         if LineSegment.debug then
-            print("[#LineSegment] " .. info.lineNr .. "->" .. info.destination .. " " .. info.station.name .. " (" ..
-                info.totalTime .. ") " .. info.timeToStation)
+            print(string.format(
+                "[#LineSegment] %s->%s %s (%s) %s",
+                info.lineNr,
+                info.destination,
+                info.station.name,
+                info.totalTime,
+                info.timeToStation
+            ))
         end
     end
 

@@ -79,13 +79,13 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
                 if origin then transitTrain:setOrigin(origin.name) end
                 lineSegment:prepareDepartureAt(train, station, timeInMinutes)
             else
-                print("[#Line] Could not find lineSegment for route: " .. routeName)
+                print(string.format("[#Line] Could not find lineSegment for route: %s", routeName))
             end
         else
-            print("[#Line] Could not find trains line: " .. lineName)
+            print(string.format("[#Line] Could not find trains line: %s", lineName))
         end
     else
-        print("[#Line] Train has no line: " .. trainName)
+        print(string.format("[#Line] Train has no line: %s", trainName))
     end
 end
 
@@ -111,13 +111,17 @@ function Line.trainDeparted(trainName, station)
                 if origin then transitTrain:setOrigin(origin.name) end
                 lineSegment:trainDeparted(train, station)
             else
-                print("[#Line] Could not find lineSegment for route: '" .. routeName .. "' for train: " .. trainName)
+                print(string.format(
+                    "[#Line] Could not find lineSegment for route: '%s' for train: %s",
+                    routeName,
+                    trainName
+                ))
             end
         else
-            print("[#Line] Could not find trains line: " .. lineName .. " for train: " .. trainName)
+            print(string.format("[#Line] Could not find trains line: %s for train: %s", lineName, trainName))
         end
     else
-        print("[#Line] Train has no line: " .. trainName)
+        print(string.format("[#Line] Train has no line: %s", trainName))
     end
 end
 

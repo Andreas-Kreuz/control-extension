@@ -59,16 +59,24 @@ function RoadStation:trainArrivesIn(trainName, destination, lineNr, timeInMinute
         platform = self.routePlatforms[destKey].platform
     else
         -- if RoadStation.debug then
-        print("[#RoadStation] " .. self.name ..
-            " NO PLATFORM FOR TRAIN: " .. trainName ..
-            (destKey and " (" .. destKey .. ")" or ""))
+        print(string.format(
+            "[#RoadStation] %s NO PLATFORM FOR TRAIN: %s%s",
+            self.name,
+            trainName,
+            (destKey and string.format(" (%s)", destKey) or "")
+        ))
         platform = "1"
         -- end
     end
 
     if RoadStation.debug then
-        print(string.format("[#RoadStation] %s: Planning Arrival of %s in %d min on platform %s", self.name,
-                            trainName, timeInMinutes, platform))
+        print(string.format(
+            "[#RoadStation] %s: Planning Arrival of %s in %d min on platform %s",
+            self.name,
+            trainName,
+            timeInMinutes,
+            platform
+        ))
     end
 
     self.queue:push(trainName, destination, lineNr, timeInMinutes, platform)
@@ -116,12 +124,16 @@ end
 
 function RoadStation:updateDisplays()
     for platform, displays in pairs(self.displays) do
-        if RoadStation.debug then print("[#RoadStation] update display for platform " .. platform) end
+        if RoadStation.debug then print(string.format("[#RoadStation] update display for platform %s", platform)) end
         local entries = self.queue:getTrainEntries(platform ~= "ALL" and platform or nil)
         for _, display in ipairs(displays) do
             if RoadStation.debug then
-                print("[#RoadStation] " .. self.name .. " update display for platform " .. display.structure ..
-                    " with " .. #entries .. " entries")
+                print(string.format(
+                    "[#RoadStation] %s update display for platform %s with %s entries",
+                    self.name,
+                    display.structure,
+                    #entries
+                ))
             end
             display.model.displayEntries(display.structure, entries, self.name, platform)
         end

@@ -66,7 +66,7 @@ function RollingStockResourceParser.parseFile(path)
 
     local file = io.open(path, "r")
     if not file then
-        print("Rolling stock resource ini file not found: " .. path)
+        print(string.format("Rolling stock resource ini file not found: %s", path))
         return emptyInfo()
     end
 
@@ -85,7 +85,7 @@ function RollingStockResourceParser.parseFirstExistingFile(paths)
         end
     end
 
-    print("Rolling stock resource ini file not found: " .. table.concat(paths or {}, " or "))
+    print(string.format("Rolling stock resource ini file not found: %s", table.concat(paths or {}, " or ")))
     return emptyInfo()
 end
 

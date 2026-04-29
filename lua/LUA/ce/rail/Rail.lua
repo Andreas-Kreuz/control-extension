@@ -210,7 +210,7 @@ function RailCrossing:closeForRoute(trainName, route)
     local alreadyBlocked = false
     for fs, _ in pairs(self.routen) do
         alreadyBlocked = true
-        print("[#Rail] Bahnuebergang bereits blockiert durch: " .. fs.name)
+        print(string.format("[#Rail] Bahnuebergang bereits blockiert durch: %s", fs.name))
     end
     self.routen[route] = true
 
@@ -239,7 +239,7 @@ function RailCrossing:openForRoute(trainName, route)
     local stillBlocked = false
     for fs, _ in pairs(self.routen) do
         stillBlocked = true
-        print("[#Rail] Bahnuebergang noch blockiert durch: " .. fs.name)
+        print(string.format("[#Rail] Bahnuebergang noch blockiert durch: %s", fs.name))
     end
 
     if not stillBlocked then
@@ -308,8 +308,11 @@ end
 
 function AkBlock:getRoutesToCurrentTrainDirection()
     if not self.trainDirection then
-        print("[#Rail] ERROR: Train in Block \"" .. self.name ..
-            "\" has no direction set in \"enterReservedBlock()\"\n" .. debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Train in Block \"%s\" has no direction set in \"enterReservedBlock()\"\n%s",
+            self.name,
+            debug.traceback()
+        ))
         return {}
     end
     return self.routes[self.trainDirection] or {}
@@ -317,7 +320,7 @@ end
 
 function AkBlock:findFreeRoute()
     if not self.taken then
-        print("[#Rail] ERROR: Block \"" .. self.name .. "\" war nicht belegt!" .. "\n" .. debug.traceback())
+        print(string.format("[#Rail] ERROR: Block \"%s\" war nicht belegt!\n%s", self.name, debug.traceback()))
     end
     for _, route in ipairs(self:getRoutesToCurrentTrainDirection()) do
         assert(route.block1 == self)
@@ -362,8 +365,12 @@ end
 function AkBlock:reserve(trainName)
     assert(trainName)
     if (self.taken) then
-        print("[#Rail] ERROR: Block \"" .. self.name .. "\" already locked by " ..
-            (self.trainName and self.trainName or "UNKNOWN TRAIN") .. "\n" .. debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Block \"%s\" already locked by %s\n%s",
+            self.name,
+            (self.trainName and self.trainName or "UNKNOWN TRAIN"),
+            debug.traceback()
+        ))
     end
     self.taken = true
     self.trainName = trainName
@@ -374,12 +381,16 @@ function AkBlock:enterReservedBlock(trainName, trainDirection)
     assert(trainName)
     assert(trainDirection)
     if trainName ~= self.trainName then
-        print("[#Rail] ERROR: Block " .. self.name .. " reserved for .: " ..
-            (self.trainName and self.trainName or "UNKNOWN TRAIN") .. " but entered by: " ..
-            (trainName and trainName or "UNKNOWN TRAIN") .. "\n" .. debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Block %s reserved for .: %s but entered by: %s\n%s",
+            self.name,
+            (self.trainName and self.trainName or "UNKNOWN TRAIN"),
+            (trainName and trainName or "UNKNOWN TRAIN"),
+            debug.traceback()
+        ))
     end
     if not self.taken then
-        print("[#Rail] ERROR: Block \"" .. self.name .. "\" was not reserved!" .. "\n" .. debug.traceback())
+        print(string.format("[#Rail] ERROR: Block \"%s\" was not reserved!\n%s", self.name, debug.traceback()))
     end
     self.taken = true
     self.trainName = trainName
@@ -400,12 +411,15 @@ end
 function AkBlock:leaveBlock(trainName)
     assert(trainName)
     if self.trainName ~= trainName then
-        print(
-            "[#Rail] ERROR: Block \"" .. self.name .. "\" left by wrong train:" ..
-            " \n...... expected to leave: " ..
-            (self.trainName and self.trainName or "UNBEKANNT") ..
-            " \n...... left the block:    " .. trainName .. "\n" ..
-            debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Block \"%s\" left by wrong train: \n" ..
+            "...... expected to leave: %s \n" ..
+            "...... left the block:    %s\n%s",
+            self.name,
+            (self.trainName and self.trainName or "UNBEKANNT"),
+            trainName,
+            debug.traceback()
+        ))
     end
     self.taken = false
     self.trainName = nil
@@ -417,7 +431,13 @@ function AkBlock:addStopMarker(akSignal) self.stopMarkers[akSignal] = true end
 
 function AkBlock:getAllStopMarkers() return self.stopMarkers end
 
-function AkBlock:print() print(self.name .. ": " .. (self.taken and ("belegt von " .. self.trainName) or ("frei"))) end
+function AkBlock:print()
+    print(string.format(
+        "%s: %s",
+        self.name,
+        (self.taken and string.format("belegt von %s", self.trainName) or ("frei"))
+    ))
+end
 
 function AkBlock:formattedText()
     local text = self.name .. ": "
@@ -503,9 +523,9 @@ function AkRoute:conflictsWith(otherRoute) return self.conflicts[otherRoute] and
 
 --- Schreibt die Konflikte der anderen Fahrstrassen
 function AkRoute:printConflicts()
-    print("[#Rail] Konflikte fuer: " .. self.name)
+    print(string.format("[#Rail] Konflikte fuer: %s", self.name))
     for otherRoute, _ in pairs(self.conflicts) do
-        print("[#Rail]  - " .. otherRoute.name .. " - " .. (otherRoute.taken and "belegt" or "frei"))
+        print(string.format("[#Rail]  - %s - %s", otherRoute.name, (otherRoute.taken and "belegt" or "frei")))
     end
 end
 
@@ -549,13 +569,21 @@ end
 function AkRoute:lockRoute(trainName)
     assert(trainName)
     if self.trainName ~= trainName then
-        print("[#Rail] ERROR: Switching route \"" .. self.name .. "\"" .. "\n reserved for ...: " ..
-            (self.trainName or "UNKNOWN TRAIN") .. "\n but switched for: " .. (trainName or [[UNKNOWN TRAIN]]) ..
-            "\n" .. debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Switching route \"%s\"\n reserved for ...: %s\n but switched for: %s\n%s",
+            self.name,
+            (self.trainName or "UNKNOWN TRAIN"),
+            (trainName or [[UNKNOWN TRAIN]]),
+            debug.traceback()
+        ))
     end
     if self.block2.taken then
-        print("[#Rail] ERROR: Switching route \"" .. self.name .. "\"" .. "\n Block " .. self.block2.name ..
-            " already locked." .. "\n" .. debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Switching route \"%s\"\n Block %s already locked.\n%s",
+            self.name,
+            self.block2.name,
+            debug.traceback()
+        ))
     end
 
     self.block2:reserve(trainName)
@@ -581,9 +609,15 @@ end
 function AkRoute:unlockRoute(trainName)
     pdbg(dbg.fs_schaltung, "Gebe Fahrstrasse: \"" .. self.name .. "\" nach Verlassen von " .. trainName .. " frei.")
     if self.trainName ~= trainName then
-        print("[#Rail] ERROR: Route \"" .. self.name .. "\" unlocking by unexpected train" .. "\n reserved for: " ..
-            (self.trainName and self.trainName or "UNKNOWN TRAIN") .. "\n unlocked by : " ..
-            (trainName and trainName or "UNKNOWN TRAIN") .. "\n" .. debug.traceback())
+        print(string.format(
+            "[#Rail] ERROR: Route \"%s\" unlocking by unexpected train\n" ..
+            " reserved for: %s\n" ..
+            " unlocked by : %s\n%s",
+            self.name,
+            (self.trainName and self.trainName or "UNKNOWN TRAIN"),
+            (trainName and trainName or "UNKNOWN TRAIN"),
+            debug.traceback()
+        ))
     end
 
     local maxOpeningTime = 0

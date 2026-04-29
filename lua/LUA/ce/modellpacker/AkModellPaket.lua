@@ -46,9 +46,9 @@ function AkModellPaket:addFiles(baseDirectory, prefix, subdirectory, pathExclusi
 
     for path, file in pairs(newPaths) do
         if pathExclusionPattern and AkModellPaket.excludePath(path, pathExclusionPattern) then
-            print("[#ModellPaket] Ueberspringe: " .. path)
+            print(string.format("[#ModellPaket] Ueberspringe: %s", path))
         else
-            print("[#ModellPaket] Fuege Datei hinzu: " .. path)
+            print(string.format("[#ModellPaket] Fuege Datei hinzu: %s", path))
             self.installationPaths[prefix .. path] = file
             self.modelPaths[baseDirectory .. "\\" .. path] = file
         end
