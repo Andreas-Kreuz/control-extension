@@ -32,9 +32,7 @@ local destinationTextureTexts = {
 }
 
 local function formatLineTextureText(line)
-    if #line == 1 then return " " .. line .. " " end
-    if #line == 2 then return line .. " " end
-    return line
+    return "  " .. line .. "  "
 end
 
 local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
