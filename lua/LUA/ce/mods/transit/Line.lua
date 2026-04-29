@@ -7,6 +7,8 @@ local Line = {}
 Line.debug = CeDebugLoad or false
 ---@type table<string, Line>
 local lines = {}
+---@type table<string, LineSegment>
+local lineSegmentsByRouteName = {}
 
 function Line.forName(name)
     local LineRegistry = require("ce.mods.transit.LineRegistry")
@@ -33,28 +35,51 @@ function Line:addSection(routeName, destination)
     assert(type(self) == "table" and self.type == "Line", "Call this method with ':'")
     assert(type(routeName) == "string", "Need 'routeName' as string")
     assert(type(destination) == "string", "Need 'destination' as string")
+    local existingSegment = lineSegmentsByRouteName[routeName]
+    if existingSegment then
+        print(string.format(
+            "[#Line] EEP route '%s' is already assigned to line '%s' and destination '%s'",
+            routeName,
+            existingSegment.line.nr,
+            existingSegment.destination
+        ))
+        return existingSegment
+    end
+
     local lineSegment = LineSegment:new(routeName, self, destination)
     self.lineSegments[routeName] = lineSegment
+    lineSegmentsByRouteName[routeName] = lineSegment
     return lineSegment
 end
 
-local function checkLine(train)
-    if train then
-        local transitTrain = TransitTrainRegistry.forTrain(train)
-        local lineName = transitTrain:getLine()
-        local routeName = train:getRoute()
-        if not lineName then
-            for _, line in pairs(lines) do
-                for _, segment in pairs(line.lineSegments) do
-                    if segment.routeName == routeName then
-                        transitTrain:changeDestination(segment.destination, line.nr)
-                        local origin = segment:getFirstStation()
-                        if origin then transitTrain:setOrigin(origin.name) end
-                    end
-                end
-            end
-        end
+local function lineSegmentForTrainRoute(train)
+    -- A raw EEPSetTrainRoute() changes only EEP state. Contact points pull that route back into transit state.
+    local routeName = train:getRoute()
+    local routeOk, eepRouteName = EEPGetTrainRoute(train.name)
+    if routeOk and type(eepRouteName) == "string" then
+        routeName = eepRouteName
+        if routeName ~= train:getRoute() then train:updateRoute(routeName) end
     end
+    assert(type(routeName) == "string", "Need 'routeName' as string")
+
+    local lineSegment = lineSegmentsByRouteName[routeName]
+    if not lineSegment then
+        print(string.format("[#Line] Could not find lineSegment for route: '%s' for train: %s", routeName, train.name))
+        return nil
+    end
+
+    local transitTrain = TransitTrainRegistry.forTrain(train)
+    local lineName = lineSegment.line.nr
+    local destination = lineSegment.destination
+
+    if transitTrain:getLine() ~= lineName or transitTrain:getDestination() ~= destination then
+        transitTrain:changeDestination(destination, lineName)
+    end
+
+    local origin = lineSegment:getFirstStation()
+    if origin then transitTrain:setOrigin(origin.name) end
+
+    return lineSegment, transitTrain
 end
 
 function Line.scheduleDeparture(trainName, station, timeInMinutes)
@@ -64,29 +89,8 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
     assert(type(timeInMinutes) == "number", "Need 'timeInMinutes' as number")
 
     local train = TrainRegistry.forName(trainName)
-    local routeName = train:getRoute()
-    checkLine(train)
-    local transitTrain = TransitTrainRegistry.forTrain(train)
-    local lineName = transitTrain:getLine()
-    assert(type(routeName) == "string", "Need 'routeName' as string")
-
-    if lineName then
-        local line = lines[lineName]
-        if line then
-            local lineSegment = line.lineSegments[routeName]
-            if lineSegment then
-                local origin = lineSegment:getFirstStation()
-                if origin then transitTrain:setOrigin(origin.name) end
-                lineSegment:prepareDepartureAt(train, station, timeInMinutes)
-            else
-                print(string.format("[#Line] Could not find lineSegment for route: %s", routeName))
-            end
-        else
-            print(string.format("[#Line] Could not find trains line: %s", lineName))
-        end
-    else
-        print(string.format("[#Line] Train has no line: %s", trainName))
-    end
+    local lineSegment = lineSegmentForTrainRoute(train)
+    if lineSegment then lineSegment:prepareDepartureAt(train, station, timeInMinutes) end
 end
 
 function Line.trainDeparted(trainName, station)
@@ -95,34 +99,11 @@ function Line.trainDeparted(trainName, station)
     assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
 
     local train = TrainRegistry.forName(trainName)
-    local routeName = train:getRoute()
-    checkLine(train)
-    local transitTrain = TransitTrainRegistry.forTrain(train)
-    local lineName = transitTrain:getLine()
-    assert(type(routeName) == "string", "Need 'routeName' as string")
+    local lineSegment, transitTrain = lineSegmentForTrainRoute(train)
+    if not lineSegment then return end
 
-    if lineName then
-        station:trainLeft(trainName, transitTrain:getDestination(), lineName)
-        local line = lines[lineName]
-        if line then
-            local lineSegment = line.lineSegments[routeName]
-            if lineSegment then
-                local origin = lineSegment:getFirstStation()
-                if origin then transitTrain:setOrigin(origin.name) end
-                lineSegment:trainDeparted(train, station)
-            else
-                print(string.format(
-                    "[#Line] Could not find lineSegment for route: '%s' for train: %s",
-                    routeName,
-                    trainName
-                ))
-            end
-        else
-            print(string.format("[#Line] Could not find trains line: %s for train: %s", lineName, trainName))
-        end
-    else
-        print(string.format("[#Line] Train has no line: %s", trainName))
-    end
+    station:trainLeft(trainName, transitTrain:getDestination(), transitTrain:getLine())
+    lineSegment:trainDeparted(train, station)
 end
 
 function Line:toJsonStatic()
