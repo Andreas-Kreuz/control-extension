@@ -145,15 +145,30 @@ insulate("axis and texture metadata", function ()
 end)
 
 insulate("refresh model by XML model", function ()
-    local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-    local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
-    local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
+    local printStub
 
-    RollingStockModels.addModel("MyModel", "MODEL_A.3dm", RollingStockModel:new({ myMarker = "MODEL A" }))
-    RollingStockModels.addModel("OtherModel", "MODEL_XML.3dm", RollingStockModel:new({ myMarker = "MODEL XML" }))
+    before_each(function ()
+        printStub = stub(_G, "print")
+    end)
 
-    local stock = RollingStockRegistry.forName("MyModel;003")
-    stock:setXmlModel("MODEL_XML.3dm")
+    after_each(function ()
+        if printStub then
+            printStub:revert()
+            printStub = nil
+        end
+    end)
 
-    it("MODEL XML", function () assert.equals("MODEL XML", stock.model["myMarker"]) end)
+    it("MODEL XML", function ()
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
+        local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
+
+        RollingStockModels.addModel("MyModel", "MODEL_A.3dm", RollingStockModel:new({ myMarker = "MODEL A" }))
+        RollingStockModels.addModel("OtherModel", "MODEL_XML.3dm", RollingStockModel:new({ myMarker = "MODEL XML" }))
+
+        local stock = RollingStockRegistry.forName("MyModel;003")
+        stock:setXmlModel("MODEL_XML.3dm")
+
+        assert.equals("MODEL XML", stock.model["myMarker"])
+    end)
 end)

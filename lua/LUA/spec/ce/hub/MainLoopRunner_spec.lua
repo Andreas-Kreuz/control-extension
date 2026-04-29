@@ -2,6 +2,7 @@ insulate("MainLoopRunner", function ()
     require("ce.hub.eep.EepSimulator")
 
     local function clearModule(name) package.loaded[name] = nil end
+    local printStub
 
     local function resetCoreModules()
         clearModule("ce.ControlExtension")
@@ -36,14 +37,21 @@ insulate("MainLoopRunner", function ()
     end
 
     before_each(function ()
+        printStub = stub(_G, "print")
         resetCoreModules()
         require("ce.hub.eep.EepSimulator")
         local IoInit = require("ce.databridge.IoInit")
         IoInit.initialize = function () end
     end)
 
+    after_each(function ()
+        if printStub then
+            printStub:revert()
+            printStub = nil
+        end
+    end)
+
     it("runs modules, state publishers and io on every ControlExtension cycle", function ()
-        stub(_G, "print") -- suppress print output for this test
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local ControlExtension = require("ce.ControlExtension")
         local ModuleRegistry = require("ce.hub.ModuleRegistry")
@@ -223,7 +231,8 @@ insulate("MainLoopRunner", function ()
         IncomingCommandFileReader.readAndExecuteIncomingCommands = function () end
         DataStoreFileWriter.write = function () end
 
-        local printStub = stub(_G, "print", function (message)
+        printStub:revert()
+        printStub = stub(_G, "print", function (message)
             table.insert(printedMessages, tostring(message))
         end)
 
@@ -231,7 +240,6 @@ insulate("MainLoopRunner", function ()
             MainLoopRunner.runCycle(5, {}, {}, { debug = true, enableServer = false, enableDataStoreJson = true })
         end)
 
-        printStub:revert()
         if not ok then error(err) end
 
         local runCycleLog

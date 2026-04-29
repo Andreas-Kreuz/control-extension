@@ -42,6 +42,9 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getHookGlueMode = function () return 3 end,
             getActive = function () return false end,
             getTextureTexts = function () return { ["1"] = "Line", ["2"] = "" } end,
+            getAxisNames = function () return { ["2"] = "Fahrer" } end,
+            getAxisValues = function () return { ["2"] = 75 } end,
+            getTextureNames = function () return { ["1"] = "Fahrziel" } end,
             getRotX = function () return 1.23 end,
             getRotY = function () return 2.35 end,
             getRotZ = function () return 3.46 end,
@@ -102,6 +105,9 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
         assert.equals(2, rsDto.hookStatus)
         assert.equals(3, rsDto.hookGlueMode)
         assert.same({ ["1"] = "Line", ["2"] = "" }, rsDto.surfaceTexts)
+        assert.same({ ["2"] = "Fahrer" }, rsDto.axisNames)
+        assert.same({ ["2"] = 75 }, rsDto.axisValues)
+        assert.same({ ["1"] = "Fahrziel" }, rsDto.textureNames)
         assert.equals(99, rsDto.trackId)
         assert.equals(10.5, rsDto.trackDistance)
         assert.equals(1, rsDto.trackDirection)

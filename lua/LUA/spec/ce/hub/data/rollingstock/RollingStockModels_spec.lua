@@ -85,9 +85,9 @@ insulate("GT6 8 7ND display updates", function ()
         wagon:setWagonNr("Wagen1", "201")
 
         assert.same({
-            { rollingStockName = "Wagen1", surfaceNumber = 22, text = " 7 " },
-            { rollingStockName = "Wagen1", surfaceNumber = 22, text = "10 " },
-            { rollingStockName = "Wagen1", surfaceNumber = 4, text = "Central" },
+            { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  7  " },
+            { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  10  " },
+            { rollingStockName = "Wagen1", surfaceNumber = 5, text = "Central" },
             { rollingStockName = "Wagen1", surfaceNumber = 6, text = "" },
             { rollingStockName = "Wagen1", surfaceNumber = 18, text = "Central" },
             { rollingStockName = "Wagen1", surfaceNumber = 16, text = "Depot" },

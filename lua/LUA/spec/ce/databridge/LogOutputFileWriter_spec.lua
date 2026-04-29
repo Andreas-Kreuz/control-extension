@@ -12,14 +12,14 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
     local originalOsDate = os.date
 
     local function installSimpleGlobals()
-        assert = function (v, message)
+        _G.assert = function (v, message)
             if not v then originalError(message and message or "Assertion failed.", 0) end
             return v
         end
-        error = function (message, level) originalError(message, level and level or 1) end
-        print = function () end
-        warn = function () end
-        clearlog = function () end
+        _G.error = function (message, level) originalError(message, level and level or 1) end
+        _G.print = function () end
+        _G.warn = function () end
+        _G.clearlog = function () end
     end
 
     before_each(function ()
@@ -27,21 +27,21 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
         clearModule("ce.databridge.IncomingCommandExecutor")
         clearModule("ce.databridge.LogOutputFileWriter")
         io.open = originalIoOpen
-        assert = originalAssert
-        error = originalError
-        print = originalPrint
-        warn = originalWarn
-        clearlog = originalClearlog
+        _G.assert = originalAssert
+        _G.error = originalError
+        _G.print = originalPrint
+        _G.warn = originalWarn
+        _G.clearlog = originalClearlog
         os.date = originalOsDate
     end)
 
     after_each(function ()
         io.open = originalIoOpen
-        assert = originalAssert
-        error = originalError
-        print = originalPrint
-        warn = originalWarn
-        clearlog = originalClearlog
+        _G.assert = originalAssert
+        _G.error = originalError
+        _G.print = originalPrint
+        _G.warn = originalWarn
+        _G.clearlog = originalClearlog
         os.date = originalOsDate
     end)
 

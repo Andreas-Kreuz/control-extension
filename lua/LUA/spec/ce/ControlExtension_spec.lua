@@ -2,8 +2,10 @@ insulate("ControlExtension", function ()
     local function clearModule(name)
         package.loaded[name] = nil
     end
+    local printStub
 
     before_each(function ()
+        printStub = stub(_G, "print")
         clearModule("ce.ControlExtension")
         clearModule("ce.hub.ControlExtensionHub")
         clearModule("ce.hub.ModuleRegistry")
@@ -12,6 +14,11 @@ insulate("ControlExtension", function ()
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.databridge.IncomingCommandExecutor")
         require("ce.hub.eep.EepSimulator")
+    end)
+
+    after_each(function ()
+        printStub:revert()
+        printStub = nil
     end)
 
     it("delegates registration to ModuleRegistry and runtime control to ControlExtensionHub", function ()
