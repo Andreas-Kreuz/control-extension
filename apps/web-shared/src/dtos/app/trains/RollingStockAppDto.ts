@@ -25,7 +25,10 @@ export interface RollingStockAppDto {
   orientationForward: boolean;
   smoke: number;
   active: boolean;
+  axisNames: Record<string, string>;
+  axisValues: Record<string, number>;
   surfaceTexts: Record<string, string>;
+  textureNames: Record<string, string>;
   rotX: number;
   rotY: number;
   rotZ: number;

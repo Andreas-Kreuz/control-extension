@@ -367,6 +367,16 @@ function EEPRollingstockGetAxis(rollingstockName, axisName)
     return Runtime.callEEPRollingstockGetAxis(rollingstockName, axisName)
 end
 
+--- Bewegt die mittels Achsnummer benannte Achse des benannten Rollmaterials in eine gewuenschte Position.
+function EEPRollingstockSetAxisByNumber(rollingstockName, axisNumber, axisPosition)
+    return Runtime.callEEPRollingstockSetAxisByNumber(rollingstockName, axisNumber, axisPosition)
+end
+
+--- Ermittelt die aktuelle Position einer mittels Achsnummer benannten Achse des benannten Rollmaterials.
+function EEPRollingstockGetAxisByNumber(rollingstockName, axisNumber)
+    return Runtime.callEEPRollingstockGetAxisByNumber(rollingstockName, axisNumber)
+end
+
 --- Laedt einen Wert aus einem Datenslot.
 --- Ab: EEP 11.
 function EEPLoadData(slot) return Runtime.callEEPLoadData(slot) end

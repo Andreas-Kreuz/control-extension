@@ -88,6 +88,9 @@ function RollingStockUpdater.runUpdate()
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "surfaceTexts", isSelected) then
                     rs:updateTextureTexts()
                 end
+                if isSelected or SyncPolicy.shouldUpdateField(fieldPolicies, "axisValues", isSelected) then
+                    rs:updateAxisValues()
+                end
                 if (SyncPolicy.shouldUpdateField(fieldPolicies, "rotX", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotY", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotZ", isSelected))

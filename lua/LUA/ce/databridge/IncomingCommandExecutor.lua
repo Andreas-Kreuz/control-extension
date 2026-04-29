@@ -41,6 +41,7 @@ registerIfFunction("EEPRollingstockSetActive", EEPRollingstockSetActive)
 registerIfFunction("EEPActivateCtrlDesk", EEPActivateCtrlDesk)
 registerIfFunction("EEPShowInfoTextBottom", EEPShowInfoTextBottom)
 registerIfFunction("EEPShowInfoTextTop", EEPShowInfoTextTop)
+registerIfFunction("EEPRollingstockSetAxisByNumber", EEPRollingstockSetAxisByNumber)
 
 -- Accept all EEP*Set functions
 for name, value in pairs(_G) do

@@ -94,6 +94,13 @@ local function create(simulator, globals)
             if rollingStock.smokeEnabled == nil then rollingStock.smokeEnabled = false end
             if rollingStock.rotation == nil then rollingStock.rotation = { rotX = 0, rotY = 0, rotZ = 0 } end
             if rollingStock.userCamera == nil then rollingStock.userCamera = nil end
+            local axisValuesByNumber = rollingStock.axisValuesByNumber or rollingStock.axisValues or {}
+            rollingStock.axisValuesByNumber = {}
+            for axisNumber, axisValue in pairs(axisValuesByNumber) do
+                local numericAxisNumber = tonumber(axisNumber)
+                if numericAxisNumber then rollingStock.axisValuesByNumber[numericAxisNumber] = axisValue end
+            end
+            rollingStock.axisValues = nil
             return rollingStock
         end
 
@@ -106,6 +113,7 @@ local function create(simulator, globals)
             textureTextBySurfaceNumber = {},
             hookEnabled = false,
             fixedLoad = false,
+            axisValuesByNumber = {},
             userCamera = nil
         }
     end
@@ -757,6 +765,23 @@ local function create(simulator, globals)
     function Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter) end
 
     function Runtime.callEEPRollingstockGetAxis(rollingstockName, axisName) end
+
+    function Runtime.callEEPRollingstockSetAxisByNumber(rollingstockName, axisNumber, axisPosition)
+        local rollingStock = getOrCreateRollingStockEntry(rollingstockName)
+        rollingStock.axisValuesByNumber = rollingStock.axisValuesByNumber or {}
+        rollingStock.axisValuesByNumber[tonumber(axisNumber)] = tonumber(axisPosition)
+        return true
+    end
+
+    function Runtime.callEEPRollingstockGetAxisByNumber(rollingstockName, axisNumber)
+        local rollingStock = select(1, getRollingStockTrainContext(rollingstockName))
+        if not rollingStock or not rollingStock.axisValuesByNumber then return false, nil end
+
+        local value = rollingStock.axisValuesByNumber[tonumber(axisNumber)]
+        if value == nil then return false, nil end
+
+        return true, value
+    end
 
     function Runtime.callEEPLoadData(slot)
         return

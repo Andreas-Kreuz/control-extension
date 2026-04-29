@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStock ...") end
 
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
+local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local TableUtils = require("ce.hub.util.TableUtils")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
@@ -39,6 +40,39 @@ local function collectTextureTexts(rollingStockName)
         surfaceNumber = surfaceNumber + 1
     end
     return surfaceTexts
+end
+
+local function copyTableWithStringKeys(values)
+    local copy = {}
+    for key, value in pairs(values or {}) do copy[tostring(key)] = value end
+    return copy
+end
+
+local function sortedNumberKeys(values)
+    local keys = {}
+    for key in pairs(values or {}) do
+        local numberKey = tonumber(key)
+        if numberKey then keys[#keys + 1] = numberKey end
+    end
+    table.sort(keys)
+    return keys
+end
+
+local function collectAxisValues(rollingStockName, modelInfo)
+    if not EEPRollingstockGetAxisByNumber then return {} end
+
+    local axisValues = {}
+    local axisNumbers = sortedNumberKeys(modelInfo and modelInfo.axisNames or {})
+    if #axisNumbers == 0 then
+        for axisNumber = 1, 10 do axisNumbers[#axisNumbers + 1] = axisNumber end
+    end
+
+    for _, axisNumber in ipairs(axisNumbers) do
+        local ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
+        if ok then axisValues[tostring(axisNumber)] = tonumber(axisValue) or 0 end
+    end
+
+    return axisValues
 end
 
 ---@class RollingStock
@@ -109,6 +143,8 @@ function RollingStock:new(o)
     o.hookGlueMode = hookGlueOk and hookGlueMode or 0
     o.active = activeRollingStock == o.id
     o.textureTexts = collectTextureTexts(o.id)
+    o.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    o.axisValues = collectAxisValues(o.id, o.modelInfo)
     o.trackId = trackId or -1
     o.trackDistance = tonumber(string.format("%.2f", trackDistance or -1)) or -1
     o.trackDirection = trackDirection or -1
@@ -379,6 +415,35 @@ function RollingStock:updateTextureTexts()
     self:setTextureTexts(collectTextureTexts(self.rollingStockName))
 end
 
+function RollingStock:setAxisValues(axisValues)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(axisValues) == "table", "Need 'axisValues' as table")
+    local nextAxisValues = copyTableWithStringKeys(axisValues)
+    local oldAxisValues = self.axisValues or {}
+    self.axisValues = nextAxisValues
+    if not TableUtils.sameDictEntries(oldAxisValues, nextAxisValues) then markDirty(self, "axisValues") end
+end
+
+function RollingStock:getAxisValues()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return copyTableWithStringKeys(self.axisValues or {})
+end
+
+function RollingStock:updateAxisValues()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+end
+
+function RollingStock:getAxisNames()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.axisNames or {})
+end
+
+function RollingStock:getTextureNames()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.textureNames or {})
+end
+
 function RollingStock:setRotation(rotX, rotY, rotZ)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(rotX) == "number", "Need 'rotX' as number")
@@ -586,9 +651,15 @@ end
 function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
+    local oldAxisNames = self:getAxisNames()
+    local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
     self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
+    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
+    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
+    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
+    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
 function RollingStock:resetDirty()
@@ -621,6 +692,9 @@ function RollingStock:toJsonStatic()
         hookStatus = self:getHookStatus(),
         hookGlueMode = self:getHookGlueMode(),
         active = self:getActive(),
+        axisNames = self:getAxisNames(),
+        axisValues = self:getAxisValues(),
+        textureNames = self:getTextureNames(),
         nr = self:getWagonNr(),
         trackId = self:getTrackId(),
         trackDistance = self:getTrackDistance(),

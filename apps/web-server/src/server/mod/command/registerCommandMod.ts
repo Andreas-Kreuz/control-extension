@@ -82,6 +82,25 @@ export const registerCommandMod = (
       const command = action.func + '|' + action.newValue;
       queueCommand(command);
     });
+
+    socket.on(
+      CommandEvent.SetRollingStockAxis,
+      (action: { rollingStockName: string; axisNumber: number; value: number }) => {
+        if (!socketService.ensureApprovedSocket(socket, CommandEvent.SetRollingStockAxis)) {
+          return;
+        }
+
+        const axisNumber = Math.round(Number(action.axisNumber));
+        const value = Math.min(100, Math.max(0, Math.round(Number(action.value))));
+        if (!action.rollingStockName || !Number.isFinite(axisNumber) || !Number.isFinite(value)) {
+          return;
+        }
+
+        const command =
+          'EEPRollingstockSetAxisByNumber|' + action.rollingStockName + '|' + axisNumber + '|' + value;
+        queueCommand(command);
+      },
+    );
   };
 
   socketService.addOnSocketConnectedCallback((socket: Socket) => socketConnected(socket));

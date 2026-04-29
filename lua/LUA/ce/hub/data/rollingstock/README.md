@@ -8,6 +8,12 @@
   Domain-Objekt mit Getter/Setter und Dirty-Tracking
 - `RollingStockRegistry`
   hält alle bekannten Fahrzeuge nach ID
+- `RollingStockModel`
+  modellbezogene Verhaltens-Hooks wie Türen, Linie und Ziel
+- `RollingStockModelInfo`
+  gemeinsame, aus Ressourcen gelesene Modell-Metadaten wie Achsnamen und TextureText-Namen
+- `RollingStockModelInfoRegistry`
+  cached `RollingStockModelInfo` nach XML-/3dm-Modellpfad
 - `RollingStockUpdater`
   liest Fahrzeugzustand aus EEP und schreibt Änderungen in die Domain-Objekte
 - `RollingStockPublisher`

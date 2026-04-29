@@ -23,7 +23,7 @@ export default class DomainRoomManager {
       onInterest: OnInterestBinding[];
       lastDataCache: Map<string, string>;
       currentData: Map<string, string>;
-      sockets: Map<Socket, string>;
+      sockets: Map<Socket, Set<string>>;
     }
   > = new Map();
 
@@ -75,7 +75,9 @@ export default class DomainRoomManager {
 
         // Which rooms need an update
         const roomNames: Map<string, boolean> = new Map();
-        roomSockets.forEach((nameOfRoom) => roomNames.set(nameOfRoom, true));
+        roomSockets.forEach((namesOfRooms) => {
+          namesOfRooms.forEach((nameOfRoom) => roomNames.set(nameOfRoom, true));
+        });
 
         // Calculate the new data
         roomNames.forEach((_, nameOfRoom) => {
@@ -109,7 +111,10 @@ export default class DomainRoomManager {
       if (room.matchesRoom(nameOfRoom)) {
         matchedDomainRoom = true;
         const eventName = room.eventId(room.idOfRoom(nameOfRoom));
-        domainRoomSetting.sockets.set(socket, nameOfRoom);
+        socket.join(nameOfRoom);
+        const socketRooms = domainRoomSetting.sockets.get(socket) ?? new Set<string>();
+        socketRooms.add(nameOfRoom);
+        domainRoomSetting.sockets.set(socket, socketRooms);
         if (domainRoomSetting.onInterest.length > 0) {
           this.interestSyncService?.retainRoomInterest(socket, nameOfRoom, domainRoomSetting.onInterest);
         }
@@ -130,7 +135,12 @@ export default class DomainRoomManager {
     this.roomMap.forEach((domainRoomSetting, room) => {
       if (room.matchesRoom(nameOfRoom)) {
         matchedDomainRoom = true;
-        domainRoomSetting.sockets.delete(socket);
+        socket.leave(nameOfRoom);
+        const socketRooms = domainRoomSetting.sockets.get(socket);
+        socketRooms?.delete(nameOfRoom);
+        if (!socketRooms || socketRooms.size === 0) {
+          domainRoomSetting.sockets.delete(socket);
+        }
         if (domainRoomSetting.onInterest.length > 0) {
           this.interestSyncService?.releaseRoomInterest(socket, nameOfRoom);
         }
@@ -159,6 +169,7 @@ export default class DomainRoomManager {
       return;
     }
 
+    socket.join(roomName);
     let setting = this.ceTypeRoomSockets.get(roomName);
     if (!setting) {
       setting = { ...parsedRoom, sockets: new Set<Socket>() };
@@ -183,6 +194,7 @@ export default class DomainRoomManager {
       return;
     }
 
+    socket.leave(roomName);
     setting.sockets.delete(socket);
     this.interestSyncService?.releaseRoomInterest(socket, roomName);
     if (setting.sockets.size === 0) {

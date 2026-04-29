@@ -17,7 +17,10 @@
 ---@field trackType string|nil
 ---@field hookStatus number
 ---@field hookGlueMode number
+---@field axisNames table<string,string>
+---@field axisValues table<string,number>
 ---@field surfaceTexts table<string,string>
+---@field textureNames table<string,string>
 ---@field trackId number -- ondemand: placeholder 0 when not subscribed
 ---@field trackDistance number -- ondemand: placeholder 0 when not subscribed
 ---@field trackDirection number -- ondemand: placeholder 0 when not subscribed

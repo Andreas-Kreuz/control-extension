@@ -6,4 +6,5 @@ export enum CommandEvent {
   ChangeCamToTrain = '[Command Event] Change Cam to Train',
   ChangeCamToRollingStock = '[Command Event] Change Cam to RollingStock',
   ChangeSetting = '[Command Event] Change Setting',
+  SetRollingStockAxis = '[Command Event] Set RollingStock Axis',
 }

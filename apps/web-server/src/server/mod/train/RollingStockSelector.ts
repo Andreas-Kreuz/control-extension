@@ -56,7 +56,10 @@ export class RollingStockSelector {
         orientationForward: rsDto.orientationForward ?? true,
         smoke: rsDto.smoke ?? 0,
         active: rsDto.active ?? false,
-        surfaceTexts: { ...(rsDto.surfaceTexts ?? {}) },
+        axisNames: normalizeNumberRecord(rsDto.axisNames),
+        axisValues: normalizeNumberRecord(rsDto.axisValues),
+        surfaceTexts: normalizeNumberRecord(rsDto.surfaceTexts),
+        textureNames: normalizeNumberRecord(rsDto.textureNames),
         rotX: rsDto.rotX ?? 0,
         rotY: rsDto.rotY ?? 0,
         rotZ: rsDto.rotZ ?? 0,
@@ -70,7 +73,8 @@ export class RollingStockSelector {
       if (rsDto.surfaceTexts !== undefined) {
         this.rollingStockTexturesMap.set(rsDto.id, {
           id: rsDto.id,
-          surfaceTexts: { ...rsDto.surfaceTexts },
+          surfaceTexts: normalizeNumberRecord(rsDto.surfaceTexts),
+          textureNames: normalizeNumberRecord(rsDto.textureNames),
         });
       }
 
@@ -127,4 +131,12 @@ export class RollingStockSelector {
   getAllRollingStockRotation(): Record<string, RollingStockRotationAppDto> {
     return Object.fromEntries(this.rollingStockRotationMap.entries());
   }
+}
+
+function normalizeNumberRecord<T>(value: Record<string, T> | T[] | undefined): Record<string, T> {
+  if (Array.isArray(value)) {
+    return Object.fromEntries(value.map((entry, index) => [String(index + 1), entry]));
+  }
+
+  return { ...(value ?? {}) };
 }

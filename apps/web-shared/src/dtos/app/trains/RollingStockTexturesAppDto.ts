@@ -3,4 +3,5 @@
 export interface RollingStockTexturesAppDto {
   id: string;
   surfaceTexts: Record<string, string>;
+  textureNames: Record<string, string>;
 }

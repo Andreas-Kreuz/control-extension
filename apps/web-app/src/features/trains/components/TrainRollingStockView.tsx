@@ -1,8 +1,12 @@
-﻿import { RollingStockAppDto } from '@ce/web-shared';
+import { CommandEvent, RollingStockAppDto } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
+import { useSocket } from '../../../app/hooks/useSocket';
+import useRollingStockDynamic from '../hooks/useRollingStockDynamic';
 
 function TrainRollingStockView(props: { rollingStock: RollingStockAppDto[] | undefined }) {
   const { rollingStock } = props;
@@ -21,8 +25,19 @@ function TrainRollingStockView(props: { rollingStock: RollingStockAppDto[] | und
 }
 
 function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
-  const { rollingStock } = props;
-  const textureText = formatTextureTexts(rollingStock.surfaceTexts);
+  const dynamicRollingStock = useRollingStockDynamic(props.rollingStock.id);
+  const rollingStock = dynamicRollingStock ?? props.rollingStock;
+  const socket = useSocket();
+  const textureEntries = sortedNumberKeys(rollingStock.textureNames, rollingStock.surfaceTexts);
+  const axisEntries = sortedNumberKeys(rollingStock.axisNames, rollingStock.axisValues);
+
+  const setAxis = (axisNumber: number, value: number) => {
+    socket.emit(CommandEvent.SetRollingStockAxis, {
+      rollingStockName: rollingStock.name,
+      axisNumber,
+      value,
+    });
+  };
 
   return (
     <ListItem
@@ -48,7 +63,8 @@ function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
         <RowCell label="Name" value={rollingStock.name} />
         <RowCell label="TagText" value={rollingStock.tag || '-'} />
         <RowCell label="XML Model" value={rollingStock.xmlModel || '-'} />
-        <RowCell label="TextureTexts" value={textureText} multiline={textureText.includes('\n')} />
+        <TextureTextList entries={textureEntries} rollingStock={rollingStock} />
+        <AxisList entries={axisEntries} rollingStock={rollingStock} onSetAxis={setAxis} />
       </Box>
     </ListItem>
   );
@@ -76,13 +92,130 @@ function RowCell(props: { label: string; value: string; multiline?: boolean }) {
   );
 }
 
-function formatTextureTexts(surfaceTexts: RollingStockAppDto['surfaceTexts']): string {
-  const entries = Object.entries(surfaceTexts ?? {});
-  if (entries.length === 0) {
-    return '-';
+function TextureTextList(props: { entries: number[]; rollingStock: RollingStockAppDto }) {
+  if (props.entries.length === 0) {
+    return <RowCell label="TextureTexts" value="-" />;
   }
 
-  return entries.map(([key, value]) => `${key}: ${value}`).join('\n');
+  return (
+    <Box sx={{ minWidth: 0, textAlign: 'left', justifySelf: 'stretch' }}>
+      <Typography variant="caption" color="text.secondary" align="left">
+        TextureTexts
+      </Typography>
+      <Box sx={{ display: 'grid', gap: 0.5 }}>
+        {props.entries.map((textureNumber) => (
+          <Typography
+            key={textureNumber}
+            variant="body2"
+            component="div"
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: '4ch minmax(100px, 1fr) minmax(80px, 1fr)',
+              gap: 1,
+              minWidth: 0,
+            }}
+          >
+            <Box component="span" sx={{ fontVariantNumeric: 'tabular-nums', textAlign: 'right' }}>
+              {textureNumber}:
+            </Box>
+            <Box component="span" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {props.rollingStock.textureNames?.[String(textureNumber)] ?? `TextureText ${textureNumber}`}
+            </Box>
+            <Box component="span" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {props.rollingStock.surfaceTexts?.[String(textureNumber)] ?? ''}
+            </Box>
+          </Typography>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function AxisList(props: {
+  entries: number[];
+  rollingStock: RollingStockAppDto;
+  onSetAxis: (axisNumber: number, value: number) => void;
+}) {
+  if (props.entries.length === 0) {
+    return <RowCell label="Achsen" value="-" />;
+  }
+
+  return (
+    <Box sx={{ minWidth: 0, textAlign: 'left', justifySelf: 'stretch' }}>
+      <Typography variant="caption" color="text.secondary" align="left">
+        Achsen
+      </Typography>
+      <Box sx={{ display: 'grid', gap: 1 }}>
+        {props.entries.map((axisNumber) => (
+          <AxisSlider
+            key={axisNumber}
+            axisNumber={axisNumber}
+            name={props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`}
+            value={props.rollingStock.axisValues?.[String(axisNumber)] ?? 0}
+            onSetAxis={props.onSetAxis}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function AxisSlider(props: {
+  axisNumber: number;
+  name: string;
+  value: number;
+  onSetAxis: (axisNumber: number, value: number) => void;
+}) {
+  const [value, setValue] = useState(props.value);
+
+  useEffect(() => {
+    setValue(props.value);
+  }, [props.value]);
+
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: 1,
+        alignItems: 'center',
+        '@container (min-width: 560px)': {
+          gridTemplateColumns: 'minmax(120px, 1fr) minmax(160px, 1fr)',
+        },
+      }}
+    >
+      <Typography variant="body2" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {props.name}
+      </Typography>
+      <Slider
+        size="small"
+        min={0}
+        max={100}
+        value={value}
+        valueLabelDisplay="auto"
+        onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
+        onChangeCommitted={(_, nextValue) => {
+          const committedValue = Array.isArray(nextValue) ? nextValue[0] : nextValue;
+          props.onSetAxis(props.axisNumber, committedValue);
+        }}
+        sx={{ width: 1, justifySelf: 'start' }}
+      />
+    </Box>
+  );
+}
+
+function sortedNumberKeys(...records: Array<Record<string, unknown> | undefined>): number[] {
+  const numbers = new Set<number>();
+  records.forEach((record) => {
+    Object.keys(record ?? {}).forEach((key) => {
+      const numberKey = Number(key);
+      if (Number.isFinite(numberKey)) {
+        numbers.add(numberKey);
+      }
+    });
+  });
+
+  return Array.from(numbers).sort((left, right) => left - right);
 }
 
 export default TrainRollingStockView;

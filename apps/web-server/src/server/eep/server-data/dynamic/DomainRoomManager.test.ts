@@ -3,7 +3,7 @@ import InterestSyncRegistry from './InterestSyncRegistry';
 import InterestSyncService from './InterestSyncService';
 import DomainRoomManager from './DomainRoomManager';
 import { DomainDataProvider } from './DomainDataProvider';
-import { CeTypeRoom, DomainRoom, TrainRoom } from '@ce/web-shared';
+import { CeTypeRoom, DomainRoom, RollingStockRoom, TrainRoom } from '@ce/web-shared';
 
 async function runTest(name: string, fn: () => void | Promise<void>): Promise<void> {
   try {
@@ -28,12 +28,22 @@ function createManager(commands: string[], emittedEvents: Array<{ roomName: stri
 
 function createSocket(id: string) {
   const events: Array<{ eventName: string; payload: string }> = [];
+  const joinedRooms: string[] = [];
+  const leftRooms: string[] = [];
   return {
     id,
+    join: (roomName: string) => {
+      joinedRooms.push(roomName);
+    },
+    leave: (roomName: string) => {
+      leftRooms.push(roomName);
+    },
     emit: (eventName: string, payload: string) => {
       events.push({ eventName, payload });
     },
     events,
+    joinedRooms,
+    leftRooms,
   };
 }
 
@@ -142,6 +152,44 @@ function testJoinAndLeaveRetainMultipleInterestsForOneRoom(): void {
   ]);
 }
 
+function testOneSocketReceivesUpdatesForMultipleDomainRooms(): void {
+  const commands: string[] = [];
+  const emittedEvents: Array<{ roomName: string; eventName: string; payload: string }> = [];
+  const manager = createManager(commands, emittedEvents);
+  const roomType = registerDetailProvider(manager);
+  const socket = createSocket('socket-1');
+  const roomA = roomType.roomId('Entry-A');
+  const roomB = roomType.roomId('Entry-B');
+
+  manager.onJoinRoom(socket as never, roomA);
+  manager.onJoinRoom(socket as never, roomB);
+
+  assert.deepEqual(socket.joinedRooms, [roomA, roomB]);
+
+  manager.onStateChange({
+    currentState: () => ({
+      eventCounter: 1,
+      ceTypes: {},
+    }),
+  } as never);
+
+  assert.deepEqual(
+    emittedEvents.sort((left, right) => left.roomName.localeCompare(right.roomName)),
+    [
+      {
+        roomName: roomA,
+        eventName: roomType.eventId('Entry-A'),
+        payload: JSON.stringify({ id: 'Entry-A' }),
+      },
+      {
+        roomName: roomB,
+        eventName: roomType.eventId('Entry-B'),
+        payload: JSON.stringify({ id: 'Entry-B' }),
+      },
+    ],
+  );
+}
+
 function testCeTypeRoomServesRawEntriesDynamically(): void {
   const commands: string[] = [];
   const emittedEvents: Array<{ roomName: string; eventName: string; payload: string }> = [];
@@ -206,11 +254,38 @@ function testAppDomainRoomUsesCentralInterestRegistry(): void {
   manager.onJoinRoom(socket as never, roomName);
   manager.onLeaveRoom(socket as never, roomName);
 
+  assert.deepEqual(socket.joinedRooms, [roomName]);
+  assert.deepEqual(socket.leftRooms, [roomName]);
+
   assert.deepEqual(commands, [
     'HubInterestSync.startSyncFor|ce.hub.Train|Train-1',
     'HubInterestSync.startSyncFor|ce.mods.transit.TransitTrain|Train-1',
     'HubInterestSync.stopSyncFor|ce.hub.Train|Train-1',
     'HubInterestSync.stopSyncFor|ce.mods.transit.TransitTrain|Train-1',
+  ]);
+}
+
+function testRollingStockRoomUsesRollingStockInterest(): void {
+  const commands: string[] = [];
+  const manager = createManager(commands);
+  const provider: DomainDataProvider = {
+    roomType: RollingStockRoom,
+    id: 'RollingStockRoom',
+    jsonCreator: (roomName: string) => JSON.stringify({ id: RollingStockRoom.idOfRoom(roomName) }),
+  };
+  manager.registerService({
+    getUpdaters: () => [],
+    getDataProviders: () => [provider],
+  });
+
+  const socket = createSocket('socket-1');
+  const roomName = RollingStockRoom.roomId('#AxisStock;001');
+  manager.onJoinRoom(socket as never, roomName);
+  manager.onLeaveRoom(socket as never, roomName);
+
+  assert.deepEqual(commands, [
+    'HubInterestSync.startSyncFor|ce.hub.RollingStock|#AxisStock;001',
+    'HubInterestSync.stopSyncFor|ce.hub.RollingStock|#AxisStock;001',
   ]);
 }
 
@@ -224,8 +299,13 @@ export async function run(): Promise<void> {
     'domain room manager retains multiple interests for one room',
     testJoinAndLeaveRetainMultipleInterestsForOneRoom,
   );
+  await runTest(
+    'domain room manager updates multiple rooms on one socket',
+    testOneSocketReceivesUpdatesForMultipleDomainRooms,
+  );
   await runTest('domain room manager serves dynamic ceType rooms', testCeTypeRoomServesRawEntriesDynamically);
   await runTest('domain room manager uses central app room interest registry', testAppDomainRoomUsesCentralInterestRegistry);
+  await runTest('domain room manager uses rolling stock interest for rolling stock rooms', testRollingStockRoomUsesRollingStockInterest);
 }
 
 if (require.main === module) {

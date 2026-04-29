@@ -25,6 +25,79 @@ insulate("parse rollingstockname", function ()
     it("MODEL B", function () assert.equals("MODEL B", stock2.model["myMarker"]) end)
 end)
 
+insulate("axis and texture metadata", function ()
+    require("ce.hub.eep.EepSimulator")
+
+    it("includes axis names, texture names and axis values in dto", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
+
+        EEPRollingstockSetAxisByNumber("AxisStock", 2, 75)
+        local stock = RollingStock:new({ rollingStockName = "AxisStock" })
+        stock.modelInfo = RollingStockModelInfo:new({
+            axisNames = { [2] = "Fahrer" },
+            textureNames = { [1] = "Fahrziel" }
+        })
+        stock:updateAxisValues()
+
+        local _, _, _, dto = RollingStockDtoFactory.createFullDto(stock, true)
+
+        assert.equals("Fahrer", dto.axisNames["2"])
+        assert.equals(75, dto.axisValues["2"])
+        assert.equals("Fahrziel", dto.textureNames["1"])
+    end)
+
+    it("fallback probes the first ten axis numbers without model metadata", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+
+        EEPRollingstockSetAxisByNumber("FallbackAxisStock", 7, 42)
+        local stock = RollingStock:new({ rollingStockName = "FallbackAxisStock" })
+        stock:updateAxisValues()
+
+        assert.equals(42, stock:getAxisValues()["7"])
+    end)
+
+    it("refreshes axis values in the updater for selected rolling stock", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        HubOptionsRegistry.setOptions({
+            ceTypes = {
+                rollingStocks = {
+                    ceType = HubCeTypes.RollingStock,
+                    discoveryAndUpdate = true,
+                    fieldUpdates = { axisValues = "never" }
+                }
+            }
+        })
+
+        EepSimulator.simulateAddTrain("AxisUpdateTrain", "AxisUpdateStock")
+        local train = TrainRegistry.forName("AxisUpdateTrain")
+        train:setRollingStockCount(1)
+        TrainRegistry.setRollingStockNames("AxisUpdateTrain", { ["0"] = "AxisUpdateStock" })
+        EEPRollingstockSetAxisByNumber("AxisUpdateStock", 2, 10)
+
+        local stock = RollingStockRegistry.forName("AxisUpdateStock")
+        stock:resetDirty()
+        InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "AxisUpdateStock")
+
+        EEPRollingstockSetAxisByNumber("AxisUpdateStock", 2, 80)
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(80, stock:getAxisValues()["2"])
+        assert.is_true(stock.dirtyFields.axisValues)
+
+        InterestSyncRegistry.clearAll()
+        HubOptionsRegistry.reset()
+    end)
+end)
+
 insulate("refresh model by XML model", function ()
     local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
     local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
