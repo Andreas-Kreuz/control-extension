@@ -58,17 +58,62 @@ local function sortedNumberKeys(values)
     return keys
 end
 
-local function collectAxisValues(rollingStockName, modelInfo)
-    if not EEPRollingstockGetAxisByNumber then return {} end
+local function currentEepLanguage()
+    local language = type(EEPLng) == "string" and string.upper(EEPLng) or ""
+    if language == "ENG" or language == "GER" or language == "POL" or language == "FRA" then return language end
+    return "GER"
+end
 
+local function axisNameForNumber(modelInfo, axisNumber)
+    if not modelInfo then return nil end
+
+    if type(modelInfo.getAxisName) == "function" then
+        return modelInfo:getAxisName(axisNumber, currentEepLanguage())
+    end
+
+    local axisNames = modelInfo.axisNames or {}
+    return axisNames[tonumber(axisNumber)]
+end
+
+local function sortedAxisNumbers(modelInfo)
+    local numbers = {}
+    local byNumber = {}
+
+    local function addKeys(values)
+        for _, numberKey in ipairs(sortedNumberKeys(values)) do
+            if not byNumber[numberKey] then
+                byNumber[numberKey] = true
+                numbers[#numbers + 1] = numberKey
+            end
+        end
+    end
+
+    addKeys(modelInfo and modelInfo.axisNames or {})
+    for _, languageAxisNames in pairs(modelInfo and modelInfo.axisNamesByLanguage or {}) do
+        addKeys(languageAxisNames)
+    end
+
+    table.sort(numbers)
+    return numbers
+end
+
+local function collectAxisValues(rollingStockName, modelInfo)
     local axisValues = {}
-    local axisNumbers = sortedNumberKeys(modelInfo and modelInfo.axisNames or {})
-    if #axisNumbers == 0 then
+    local axisNumbers = sortedAxisNumbers(modelInfo)
+    local hasAxisMetadata = #axisNumbers > 0
+    if not hasAxisMetadata then
         for axisNumber = 1, 10 do axisNumbers[#axisNumbers + 1] = axisNumber end
     end
 
     for _, axisNumber in ipairs(axisNumbers) do
-        local ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
+        local ok, axisValue = false, nil
+        if type(EEPRollingstockGetAxisByNumber) == "function" then
+            ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
+        end
+        if not ok and hasAxisMetadata and type(EEPRollingstockGetAxis) == "function" then
+            local axisName = axisNameForNumber(modelInfo, axisNumber)
+            if axisName then ok, axisValue = EEPRollingstockGetAxis(rollingStockName, axisName) end
+        end
         if ok then axisValues[tostring(axisNumber)] = tonumber(axisValue) or 0 end
     end
 
@@ -432,6 +477,36 @@ end
 function RollingStock:updateAxisValues()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+end
+
+function RollingStock:setAxisByNumber(axisNumber, axisValue)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    axisNumber = tonumber(axisNumber)
+    axisValue = tonumber(axisValue)
+    if not axisNumber or not axisValue then return false end
+
+    if type(EEPRollingstockSetAxisByNumber) == "function" then
+        local ok = EEPRollingstockSetAxisByNumber(self.rollingStockName, axisNumber, axisValue)
+        if ok then return true end
+    end
+
+    return self:setAxisByNameFallback(axisNumber, axisValue)
+end
+
+function RollingStock:setAxisByNameFallback(axisNumber, axisValue)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    axisNumber = tonumber(axisNumber)
+    axisValue = tonumber(axisValue)
+    if not axisNumber or not axisValue then return false end
+    if type(EEPRollingstockSetAxis) ~= "function" then return false end
+
+    local axisName = axisNameForNumber(self.modelInfo, axisNumber)
+    if not axisName then
+        print(string.format("[#RollingStock] No axis name for %s axis %s", self.rollingStockName, tostring(axisNumber)))
+        return false
+    end
+
+    return EEPRollingstockSetAxis(self.rollingStockName, axisName, axisValue) == true
 end
 
 function RollingStock:getAxisNames()

@@ -58,6 +58,52 @@ insulate("axis and texture metadata", function ()
         assert.equals(42, stock:getAxisValues()["7"])
     end)
 
+    it("reads axis values by localized axis name when ByNumber is unavailable", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
+        local originalGetAxisByNumber = _G.EEPRollingstockGetAxisByNumber
+        local originalEEPLng = _G.EEPLng
+        _G.EEPLng = "ENG"
+        _G.EEPRollingstockGetAxisByNumber = nil
+
+        EEPRollingstockSetAxis("NameAxisStock", "Driver", 66)
+        local stock = RollingStock:new({ rollingStockName = "NameAxisStock" })
+        stock.modelInfo = RollingStockModelInfo:new({
+            axisNames = { [2] = "Fahrer" },
+            axisNamesByLanguage = { ENG = { [2] = "Driver" }, GER = { [2] = "Fahrer" } }
+        })
+        stock:updateAxisValues()
+
+        _G.EEPRollingstockGetAxisByNumber = originalGetAxisByNumber
+        _G.EEPLng = originalEEPLng
+
+        assert.equals(66, stock:getAxisValues()["2"])
+    end)
+
+    it("sets axis values by localized axis name when ByNumber is unavailable", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
+        local originalSetAxisByNumber = _G.EEPRollingstockSetAxisByNumber
+        local originalEEPLng = _G.EEPLng
+        _G.EEPLng = "ENG"
+        _G.EEPRollingstockSetAxisByNumber = nil
+
+        local stock = RollingStock:new({ rollingStockName = "SetNameAxisStock" })
+        stock.modelInfo = RollingStockModelInfo:new({
+            axisNames = { [2] = "Fahrer" },
+            axisNamesByLanguage = { ENG = { [2] = "Driver" }, GER = { [2] = "Fahrer" } }
+        })
+
+        assert.is_true(stock:setAxisByNumber(2, 33))
+        local ok, value = EEPRollingstockGetAxis("SetNameAxisStock", "Driver")
+
+        _G.EEPRollingstockSetAxisByNumber = originalSetAxisByNumber
+        _G.EEPLng = originalEEPLng
+
+        assert.is_true(ok)
+        assert.equals(33, value)
+    end)
+
     it("refreshes axis values in the updater for selected rolling stock", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local HubCeTypes = require("ce.hub.data.HubCeTypes")

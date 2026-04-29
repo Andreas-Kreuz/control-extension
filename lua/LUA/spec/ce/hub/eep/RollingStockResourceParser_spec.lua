@@ -11,6 +11,8 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
         }, "\n"))
 
         assert.equals("Fahrer", info.axisNames[2])
+        assert.equals("driver", info.axisNamesByLanguage.ENG[1])
+        assert.equals("Fahrer", info.axisNamesByLanguage.GER[2])
         assert.equals("1.Fahrziel Vorn", info.textureNames[1])
         assert.equals("Verkehrsgesellschaft", info.textureNames[25])
         assert.is_nil(info.axisNames[1])

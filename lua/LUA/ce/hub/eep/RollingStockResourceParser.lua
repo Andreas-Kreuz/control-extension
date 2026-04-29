@@ -5,6 +5,7 @@ local RollingStockResourceParser = {}
 local function emptyInfo()
     return {
         axisNames = {},
+        axisNamesByLanguage = {},
         textureNames = {}
     }
 end
@@ -33,9 +34,13 @@ local function iniPathForXmlModel(xmlModel)
 end
 
 local function parseLine(line, info)
-    local axisNumber, axisName = line:match("^%s*MovAxis(%d+)_GER%s*=%s*(.-)%s*$")
-    if axisNumber and axisName then
-        info.axisNames[tonumber(axisNumber)] = unquote(axisName)
+    local axisNumber, language, axisName = line:match("^%s*MovAxis(%d+)_(%a+)%s*=%s*(.-)%s*$")
+    if axisNumber and axisName and
+        (language == "ENG" or language == "GER" or language == "POL" or language == "FRA") then
+        local number = tonumber(axisNumber)
+        info.axisNamesByLanguage[language] = info.axisNamesByLanguage[language] or {}
+        info.axisNamesByLanguage[language][number] = unquote(axisName)
+        if language == "GER" then info.axisNames[number] = info.axisNamesByLanguage[language][number] end
         return
     end
 

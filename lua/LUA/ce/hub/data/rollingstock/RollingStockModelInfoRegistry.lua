@@ -14,6 +14,7 @@ function RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
     local info = RollingStockModelInfo:new({
         xmlModel = xmlModel,
         axisNames = parsedInfo.axisNames or {},
+        axisNamesByLanguage = parsedInfo.axisNamesByLanguage or {},
         textureNames = parsedInfo.textureNames or {}
     })
     cachedByXmlModel[key] = info

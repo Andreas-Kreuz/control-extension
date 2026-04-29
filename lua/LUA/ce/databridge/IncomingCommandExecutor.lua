@@ -25,6 +25,15 @@ local function registerIfFunction(fName, f)
     end
 end
 
+local function setRollingStockAxisByNumber(rollingStockName, axisNumber, axisValue)
+    local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+    return RollingStockRegistry.forName(rollingStockName):setAxisByNameFallback(axisNumber, axisValue)
+end
+
+if not _G.EEPRollingstockSetAxisByNumber then
+    rawset(_G, "EEPRollingstockSetAxisByNumber", setRollingStockAxisByNumber)
+end
+
 --- Adding an accepted function
 ---NOTE: acceptedFunctions are typically added via the Modules BridgeConnector
 ---@param fName string @using the name of the function as called from EEP-Web
@@ -41,7 +50,6 @@ registerIfFunction("EEPRollingstockSetActive", EEPRollingstockSetActive)
 registerIfFunction("EEPActivateCtrlDesk", EEPActivateCtrlDesk)
 registerIfFunction("EEPShowInfoTextBottom", EEPShowInfoTextBottom)
 registerIfFunction("EEPShowInfoTextTop", EEPShowInfoTextTop)
-registerIfFunction("EEPRollingstockSetAxisByNumber", EEPRollingstockSetAxisByNumber)
 
 -- Accept all EEP*Set functions
 for name, value in pairs(_G) do

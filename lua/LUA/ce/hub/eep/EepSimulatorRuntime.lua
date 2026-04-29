@@ -663,10 +663,10 @@ local function create(simulator, globals)
         local secondsSinceMidnight = math.floor(totalSeconds % 86400)
         if secondsSinceMidnight < 0 then secondsSinceMidnight = secondsSinceMidnight + 86400 end
 
-        EEPTime = secondsSinceMidnight
-        EEPTimeH = math.floor(secondsSinceMidnight / 3600)
-        EEPTimeM = math.floor((secondsSinceMidnight % 3600) / 60)
-        EEPTimeS = secondsSinceMidnight % 60
+        rawset(_G, "EEPTime", secondsSinceMidnight)
+        rawset(_G, "EEPTimeH", math.floor(secondsSinceMidnight / 3600))
+        rawset(_G, "EEPTimeM", math.floor((secondsSinceMidnight % 3600) / 60))
+        rawset(_G, "EEPTimeS", secondsSinceMidnight % 60)
     end
 
     function Runtime.callEEPSetTime(stunde, minute, seconds)
@@ -762,9 +762,22 @@ local function create(simulator, globals)
 
     function Runtime.callEEPRollingstockSetSlot(rsName, slot) end
 
-    function Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter) end
+    function Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter)
+        local rollingStock = getOrCreateRollingStockEntry(rollingstockName)
+        rollingStock.axisValuesByName = rollingStock.axisValuesByName or {}
+        rollingStock.axisValuesByName[axisName] = tonumber(axisPosition)
+        return true
+    end
 
-    function Runtime.callEEPRollingstockGetAxis(rollingstockName, axisName) end
+    function Runtime.callEEPRollingstockGetAxis(rollingstockName, axisName)
+        local rollingStock = select(1, getRollingStockTrainContext(rollingstockName))
+        if not rollingStock or not rollingStock.axisValuesByName then return false, nil end
+
+        local value = rollingStock.axisValuesByName[axisName]
+        if value == nil then return false, nil end
+
+        return true, value
+    end
 
     function Runtime.callEEPRollingstockSetAxisByNumber(rollingstockName, axisNumber, axisPosition)
         local rollingStock = getOrCreateRollingStockEntry(rollingstockName)

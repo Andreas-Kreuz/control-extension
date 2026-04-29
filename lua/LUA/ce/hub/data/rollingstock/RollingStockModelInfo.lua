@@ -7,6 +7,7 @@ local RollingStockModelInfo = {}
 function RollingStockModelInfo:new(o)
     o = o or {}
     o.axisNames = o.axisNames or {}
+    o.axisNamesByLanguage = o.axisNamesByLanguage or {}
     o.textureNames = o.textureNames or {}
     self.__index = self
     setmetatable(o, self)
@@ -15,6 +16,17 @@ end
 
 function RollingStockModelInfo:getAxisNames()
     return TableUtils.deepcopy(self.axisNames or {})
+end
+
+function RollingStockModelInfo:getAxisNamesByLanguage()
+    return TableUtils.deepcopy(self.axisNamesByLanguage or {})
+end
+
+function RollingStockModelInfo:getAxisName(axisNumber, language)
+    local languageKey = language or "GER"
+    local axisNamesByLanguage = self.axisNamesByLanguage or {}
+    local languageAxisNames = axisNamesByLanguage[languageKey] or axisNamesByLanguage.GER or {}
+    return languageAxisNames[tonumber(axisNumber)]
 end
 
 function RollingStockModelInfo:getTextureNames()
