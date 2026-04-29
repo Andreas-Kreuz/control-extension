@@ -65,3 +65,10 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 ### Bugfixes
 
 - 🐞 Installer enthält keine doppelten Dateien mehr
+
+## **Control Extension v0.0.6** Vorschauversion
+
+### Neu
+
+- ⭐ Anzeige von Texturenamen und Inhalten
+- ⭐ Anzeige von Achsen und Setzen von Achsen pro Rollmaterial
