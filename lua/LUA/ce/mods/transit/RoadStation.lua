@@ -88,6 +88,11 @@ function RoadStation:trainLeft(trainName, destination, lineNr)
     self:updateDisplays()
 end
 
+function RoadStation:removeTrain(trainName)
+    assert(type(trainName) == "string", "Need 'trainName' as string")
+    if self.queue:removeTrain(trainName) then self:updateDisplays() end
+end
+
 ---Sets the platform for trains of a certain segment
 ---@param segment LineSegment
 ---@param platform number

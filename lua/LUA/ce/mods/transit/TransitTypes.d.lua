@@ -34,6 +34,7 @@
 ---@field setNextStations fun(self: TransitTrain, nextStations: TransitTrainNextStation[]|nil):nil
 ---@field getNextStations fun(self: TransitTrain):TransitTrainNextStation[]
 ---@field changeDestination fun(self: TransitTrain, destination: string, line: string|number):nil
+---@field clearTransitInfo fun(self: TransitTrain):nil
 ---@field resetDirty fun(self: TransitTrain):nil
 ---@field hasDirtyFields fun(self: TransitTrain):boolean
 
@@ -70,6 +71,7 @@
 ---@field addStop fun(self: LineSegment, platform: Platform, timeToStation?: number):nil
 ---@field setNextSection fun(self: LineSegment, newLineSegment: LineSegment, timeInMinutes: number):nil
 ---@field getAllSegments fun(self: LineSegment):LineSegment[]
+---@field hasStation fun(self: LineSegment, station: RoadStation):boolean
 ---@field nextStationList fun(self: LineSegment, routeName: string, nextStation?: RoadStation, currentStation?: RoadStation):table[]
 ---@field getLastStation fun(self: LineSegment):RoadStation|nil
 ---@field getFirstStation fun(self: LineSegment):RoadStation|nil
@@ -94,6 +96,7 @@
 ---@field new fun(self: StationQueue):StationQueue
 ---@field push fun(self: StationQueue, trainName: string, destination: string, line: string, timeInMinutes: number, platform?: string):nil
 ---@field pop fun(self: StationQueue, trainName: string, destination: string, line: string):nil
+---@field removeTrain fun(self: StationQueue, trainName: string):boolean
 ---@field getTrainEntries fun(self: StationQueue, platform?: string):table
 
 ---@class Platform
@@ -116,6 +119,7 @@
 ---@field queueToText fun(queue: StationQueue):string
 ---@field trainArrivesIn fun(self: RoadStation, trainName: string, destination: string, lineNr: string, timeInMinutes: number):nil
 ---@field trainLeft fun(self: RoadStation, trainName: string, destination: string, lineNr: string):nil
+---@field removeTrain fun(self: RoadStation, trainName: string):nil
 ---@field setPlatform fun(self: RoadStation, segment: LineSegment, platform: number):nil
 ---@field updateRoutesOnPlatform fun(self: RoadStation, platformName: string):nil
 ---@field updateDisplays fun(self: RoadStation):nil

@@ -78,6 +78,18 @@ function LineSegment:getAllSegments()
     return segments
 end
 
+function LineSegment:hasStation(station)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(station) == "table" and station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
+
+    for _, segmentInfo in ipairs(self:getAllSegments()) do
+        for _, stationInfo in ipairs(segmentInfo.segment.stationInfos) do
+            if stationInfo.station == station then return true end
+        end
+    end
+    return false
+end
+
 ---comment
 ---@param routeName string
 ---@param nextStation? RoadStation use this to schedule the departure at the next station

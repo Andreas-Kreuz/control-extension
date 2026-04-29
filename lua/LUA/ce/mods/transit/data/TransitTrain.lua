@@ -211,6 +211,15 @@ function TransitTrain:changeDestination(destination, line)
     self:setDestination(destination)
 end
 
+function TransitTrain:clearTransitInfo()
+    assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
+    self:setNextStations({})
+    self:setLine("")
+    self:setDestination("")
+    self:setOrigin("")
+    self:updateDirection(nil)
+end
+
 function TransitTrain:resetDirty()
     self.dirtyFields = {}
 end

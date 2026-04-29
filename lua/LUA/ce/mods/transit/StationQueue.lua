@@ -63,6 +63,25 @@ function StationQueue:pop(trainName, destination, line)
     return entry
 end
 
+function StationQueue:removeTrain(trainName)
+    assert(type(self) == "table" and self.type == "StationQueue", "Call this method with ':'")
+    assert(type(trainName) == "string", "Need 'trainName' as string")
+
+    local removed = false
+    local newEntriesByArrival = {}
+    for _, key in ipairs(self.entriesByArrival) do
+        local entry = self.entries[key]
+        if entry and entry.trainName == trainName then
+            self.entries[key] = nil
+            removed = true
+        else
+            table.insert(newEntriesByArrival, key)
+        end
+    end
+    self.entriesByArrival = newEntriesByArrival
+    return removed
+end
+
 local function filterBy(stationInfo, platform)
     local filteredTrainList = {}
     for _, key in ipairs(stationInfo.entriesByArrival) do
