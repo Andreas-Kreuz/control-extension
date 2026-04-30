@@ -22,7 +22,7 @@ import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
 import AppPage from '../../../shared/layouts/AppPage';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
@@ -51,14 +51,62 @@ const optimisticSwitchTimeoutMs = 5000;
 
 function SelectedTrainDashboard() {
   const scenario = useSelectedScenario();
-  const activeRollingStock = useRollingStock(scenario?.activeRollingStock ?? '');
-  const trainId = activeRollingStock?.trainName || scenario?.activeTrain || '';
+  const [selectionSource, setSelectionSource] = useState<'train' | 'rollingStock' | undefined>();
+  const previousSelection = useRef<{ activeTrain: string; activeRollingStock: string }>({
+    activeTrain: '',
+    activeRollingStock: '',
+  });
+  const selectedTrainName = scenario?.activeTrain ?? '';
+  const selectedRollingStockName = scenario?.activeRollingStock ?? '';
+  const activeRollingStock = useRollingStock(selectedRollingStockName);
+  const effectiveSelectionSource =
+    selectionSource ?? (selectedRollingStockName ? 'rollingStock' : selectedTrainName ? 'train' : undefined);
+  const trainId =
+    effectiveSelectionSource === 'rollingStock'
+      ? activeRollingStock && isSelectedRollingStock(activeRollingStock, selectedRollingStockName)
+        ? activeRollingStock.trainName
+        : ''
+      : selectedTrainName;
   const train = useTrainDynamic(trainId);
   const rollingStock = useTrainRollingStock(trainId);
   const transitTrain = useTransitTrain(trainId);
   const transitSettings = useTransitSettings();
-  const selectedRollingStockName = scenario?.activeRollingStock ?? '';
   const cameraRollingStockName = rollingStock?.[0]?.name ?? activeRollingStock?.name ?? train?.name ?? trainId;
+
+  useEffect(() => {
+    const currentSelection = {
+      activeTrain: selectedTrainName,
+      activeRollingStock: selectedRollingStockName,
+    };
+    const previous = previousSelection.current;
+    previousSelection.current = currentSelection;
+
+    setSelectionSource((currentSource) => {
+      if (!previous.activeTrain && !previous.activeRollingStock) {
+        return (
+          currentSource ??
+          (currentSelection.activeRollingStock ? 'rollingStock' : currentSelection.activeTrain ? 'train' : undefined)
+        );
+      }
+      if (currentSelection.activeTrain && currentSelection.activeTrain !== previous.activeTrain) {
+        return 'train';
+      }
+      if (
+        currentSelection.activeRollingStock &&
+        currentSelection.activeRollingStock !== previous.activeRollingStock
+      ) {
+        return 'rollingStock';
+      }
+      if (currentSelection.activeTrain && !currentSelection.activeRollingStock) {
+        return 'train';
+      }
+      if (currentSelection.activeRollingStock && !currentSelection.activeTrain) {
+        return 'rollingStock';
+      }
+
+      return currentSource;
+    });
+  }, [selectedRollingStockName, selectedTrainName]);
 
   if (!scenario?.activeRollingStock && !scenario?.activeTrain) {
     return (
@@ -117,6 +165,10 @@ function SelectedTrainDashboard() {
       </AppCardGridContainer>
     </AppPage>
   );
+}
+
+function isSelectedRollingStock(rollingStock: RollingStockAppDto, selectedRollingStockName: string): boolean {
+  return rollingStock.id === selectedRollingStockName || rollingStock.name === selectedRollingStockName;
 }
 
 function EmptyDashboardState() {

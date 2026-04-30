@@ -14,6 +14,7 @@ function useTrainDynamic(trainId: string): TrainAppDto | undefined {
     }
 
     const controller = new AbortController();
+    setTrain(undefined);
 
     async function loadTrain(): Promise<void> {
       try {

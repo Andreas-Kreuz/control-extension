@@ -7,7 +7,13 @@ function useTrainRollingStock(trainId: string): RollingStockAppDto[] | undefined
   const socketUrl = useSocketUrl();
 
   useEffect(() => {
+    if (!trainId) {
+      setRollingStock(undefined);
+      return;
+    }
+
     const controller = new AbortController();
+    setRollingStock(undefined);
 
     async function loadRollingStock(): Promise<void> {
       try {
