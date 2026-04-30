@@ -15,6 +15,11 @@ function RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
         xmlModel = xmlModel,
         axisNames = parsedInfo.axisNames or {},
         axisNamesByLanguage = parsedInfo.axisNamesByLanguage or {},
+        rawAxisNames = parsedInfo.rawAxisNames or {},
+        rawAxisNamesByLanguage = parsedInfo.rawAxisNamesByLanguage or {},
+        parsed3dmAxes = parsedInfo.parsed3dmAxes or {},
+        visibleAxisInfos = parsedInfo.visibleAxisInfos or {},
+        parserError = parsedInfo.parserError,
         textureNames = parsedInfo.textureNames or {}
     })
     cachedByXmlModel[key] = info

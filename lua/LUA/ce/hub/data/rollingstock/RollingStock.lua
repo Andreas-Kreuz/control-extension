@@ -107,12 +107,12 @@ local function collectAxisValues(rollingStockName, modelInfo)
 
     for _, axisNumber in ipairs(axisNumbers) do
         local ok, axisValue = false, nil
-        if type(EEPRollingstockGetAxisByNumber) == "function" then
-            ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
-        end
-        if not ok and hasAxisMetadata and type(EEPRollingstockGetAxis) == "function" then
+        if hasAxisMetadata and type(EEPRollingstockGetAxis) == "function" then
             local axisName = axisNameForNumber(modelInfo, axisNumber)
             if axisName then ok, axisValue = EEPRollingstockGetAxis(rollingStockName, axisName) end
+        end
+        if not ok and type(EEPRollingstockGetAxisByNumber) == "function" then
+            ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
         end
         if ok then axisValues[tostring(axisNumber)] = tonumber(axisValue) or 0 end
     end
@@ -132,7 +132,6 @@ local RollingStock = {}
 local function markDirty(rollingStock, fieldName)
     rollingStock.dirtyFields[fieldName] = true
 end
-
 
 ---Create a new RollingStock and init it
 ---@param o RollingStock
@@ -484,6 +483,11 @@ function RollingStock:setAxisByNumber(axisNumber, axisValue)
     axisNumber = tonumber(axisNumber)
     axisValue = tonumber(axisValue)
     if not axisNumber or not axisValue then return false end
+
+    if axisNameForNumber(self.modelInfo, axisNumber)
+        and self:setAxisByNameFallback(axisNumber, axisValue) then
+        return true
+    end
 
     if type(EEPRollingstockSetAxisByNumber) == "function" then
         local ok = EEPRollingstockSetAxisByNumber(self.rollingStockName, axisNumber, axisValue)

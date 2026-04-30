@@ -104,6 +104,26 @@ insulate("axis and texture metadata", function ()
         assert.equals(33, value)
     end)
 
+    it("sets axis values by localized axis name before trying ByNumber", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
+
+        local stock = RollingStock:new({ rollingStockName = "PreferNameAxisStock" })
+        stock.modelInfo = RollingStockModelInfo:new({
+            axisNames = { [8] = "Heckfl\252gel" },
+            axisNamesByLanguage = { GER = { [8] = "Heckfl\252gel" } }
+        })
+
+        assert.is_true(stock:setAxisByNumber(8, 44))
+
+        local nameOk, nameValue = EEPRollingstockGetAxis("PreferNameAxisStock", "Heckfl\252gel")
+        local numberOk = EEPRollingstockGetAxisByNumber("PreferNameAxisStock", 8)
+
+        assert.is_true(nameOk)
+        assert.equals(44, nameValue)
+        assert.is_false(numberOk)
+    end)
+
     it("refreshes axis values in the updater for selected rolling stock", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local HubCeTypes = require("ce.hub.data.HubCeTypes")

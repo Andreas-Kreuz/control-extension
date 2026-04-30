@@ -8,6 +8,10 @@ function RollingStockModelInfo:new(o)
     o = o or {}
     o.axisNames = o.axisNames or {}
     o.axisNamesByLanguage = o.axisNamesByLanguage or {}
+    o.rawAxisNames = o.rawAxisNames or {}
+    o.rawAxisNamesByLanguage = o.rawAxisNamesByLanguage or {}
+    o.parsed3dmAxes = o.parsed3dmAxes or {}
+    o.visibleAxisInfos = o.visibleAxisInfos or {}
     o.textureNames = o.textureNames or {}
     self.__index = self
     setmetatable(o, self)
