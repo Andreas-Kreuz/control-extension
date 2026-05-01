@@ -141,18 +141,17 @@ export default class EepService implements CacheService {
     const jsonFile = path.resolve(dir, FileNames.eventsFromCe);
     const jsonReadyFile = path.resolve(dir, FileNames.eventsFromCePending);
 
-    // First start: Read the JSON file - ignore if EEP is ready
+    // First start: only read a payload that EEP explicitly marked as pending.
     if (!this.jsonFileWatcher) {
       performance.mark('eep:start-wait-for-json');
-      this.readJsonFile(jsonFile, jsonReadyFile);
+      if (fs.existsSync(jsonReadyFile)) {
+        this.readJsonFile(jsonFile, jsonReadyFile);
+      }
     }
-
-    // First start: Delete the EEP FINISHED file, so EEP will know we are ready
-    EepService.deleteFileIfExists(jsonReadyFile);
 
     // Watch in the directory, if the file is recreated
     this.jsonFileWatcher = fs.watch(dir, (_eventType: string, filename: string | null) => {
-      // If the jsonReadyFile exists: Read the data and remove the file
+      // If events-from-ce.pending exists: read the payload and remove the marker.
       if (filename === FileNames.eventsFromCePending && fs.existsSync(jsonReadyFile)) {
         // console.log('Reading: ', jsonFile);
         this.readJsonFile(jsonFile, jsonReadyFile);
@@ -178,7 +177,7 @@ export default class EepService implements CacheService {
         'eep:stop-wait-for-json',
       );
 
-      // Delete the EEP FINISHED file, so EEP will know we are ready
+      // Delete events-from-ce.pending, so EEP knows the payload was consumed.
       EepService.deleteFileIfExists(jsonReadyFile);
       performance.mark('eep:start-wait-for-json');
     } catch (err) {
