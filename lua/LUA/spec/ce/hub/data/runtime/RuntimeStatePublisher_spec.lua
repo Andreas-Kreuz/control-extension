@@ -25,8 +25,11 @@ insulate("RuntimeStatePublisher", function ()
         local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
         local published = {}
 
-        DataChangeBus.fireListChange = function (ceType, keyId, list)
-            table.insert(published, { ceType = ceType, keyId = keyId, list = list })
+        DataChangeBus.fireDataChanged = function (ceType, keyId, key, dto)
+            table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end
+        DataChangeBus.fireDataRemoved = function ()
+            error("runtime entries must not be removed when no completed snapshot is available")
         end
 
         RuntimeStatePublisher.syncState()
@@ -48,15 +51,14 @@ insulate("RuntimeStatePublisher", function ()
         assert.equals(1, #published)
         assert.equals("ce.hub.Runtime", published[1].ceType)
         assert.equals("id", published[1].keyId)
+        assert.equals("sample", published[1].key)
         assert.same({
-                        sample = {
-                            ceType = "ce.hub.Runtime",
-                            id = "sample",
-                            count = 2,
-                            time = 4,
-                            lastTime = 1,
-                        }
-                    }, published[1].list)
+                        ceType = "ce.hub.Runtime",
+                        id = "sample",
+                        count = 2,
+                        time = 4,
+                        lastTime = 1,
+                    }, published[1].dto)
 
         RuntimeUpdater.runUpdate()
         RuntimeStatePublisher.syncState()

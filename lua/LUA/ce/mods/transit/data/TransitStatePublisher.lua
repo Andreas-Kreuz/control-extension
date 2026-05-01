@@ -45,8 +45,6 @@ function TransitStatePublisher.syncState()
         end))
     end
     LineRegistry.fireChangeLinesEvent()
-
-    return {}
 end
 
 return TransitStatePublisher

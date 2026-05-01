@@ -5,6 +5,19 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDtoFactory ...
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
+
+---@class RoadDtoFactory
+---@field createIntersectionDto fun(table, boolean?):string,string,string|number,IntersectionDto
+---@field createIntersectionDtoList fun(table, (fun(value: table):boolean)?):string,string,table
+---@field createIntersectionLaneDto fun(table, boolean?):string,string,string|number,IntersectionLaneDto
+---@field createIntersectionLaneDtoList fun(table, (fun(value: table):boolean)?):string,string,table
+---@field createIntersectionSwitchingDto fun(table, boolean?):string,string,string|number,IntersectionSwitchingDto
+---@field createIntersectionSwitchingDtoList fun(table, (fun(value: table):boolean)?):string,string,table
+---@field createIntersectionTrafficLightDto fun(table, boolean?):string,string,string|number,IntersectionTrafficLightDto
+---@field createIntersectionTrafficLightDtoList fun(table, (fun(value: table):boolean)?):string,string,table
+---@field createIntersectionModuleSettingDto fun(table, boolean?):string,string,string|number,
+---IntersectionModuleSettingDto
+---@field createIntersectionModuleSettingDtoList fun(table, (fun(value: table):boolean)?):string,string,table
 local RoadDtoFactory = {}
 
 local function copyTable(values)

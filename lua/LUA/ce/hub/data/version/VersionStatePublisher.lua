@@ -4,7 +4,7 @@ local VersionPublisher = require("ce.hub.data.version.VersionPublisher")
 ---@class VersionStatePublisher
 ---@field name string
 ---@field initialize fun():nil
----@field syncState fun():table
+---@field syncState fun():nil
 VersionStatePublisher = {}
 VersionStatePublisher.enabled = true
 local initialized = false
@@ -19,7 +19,7 @@ end
 function VersionStatePublisher.syncState()
     if not VersionStatePublisher.enabled then return end
     if not initialized then VersionStatePublisher.initialize() end
-    return VersionPublisher.syncState()
+    VersionPublisher.syncState()
 end
 
 return VersionStatePublisher

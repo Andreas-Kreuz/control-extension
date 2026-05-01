@@ -1,9 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackRegistry ...") end
 
----@class Track
----@field id number
----@field reserved boolean
----@field reservedByTrainName string|nil
+local Track = require("ce.hub.data.tracks.Track")
 
 ---@class TrackRegistry
 ---@field add fun(trackType: string, track: Track):nil
@@ -29,7 +26,7 @@ for _, trackType in ipairs(trackTypes) do
 end
 
 function TrackRegistry.add(trackType, track)
-    tracksByType[trackType][tostring(track.id)] = track
+    tracksByType[trackType][tostring(track.id)] = Track:new(track)
 end
 
 function TrackRegistry.get(trackType, trackId)
@@ -43,6 +40,8 @@ function TrackRegistry.getAll(trackType)
 end
 
 function TrackRegistry.markChanged(trackType, trackId)
+    local track = TrackRegistry.get(trackType, trackId)
+    if track and track.markChanged then track:markChanged() end
     changedTrackIdsByType[trackType][tostring(trackId)] = true
 end
 

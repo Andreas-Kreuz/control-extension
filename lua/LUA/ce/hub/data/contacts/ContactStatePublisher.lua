@@ -15,7 +15,7 @@ end
 function ContactStatePublisher.syncState()
     if not ContactStatePublisher.enabled then return end
     if not initialized then ContactStatePublisher.initialize() end
-    return ContactPublisher.syncState()
+    ContactPublisher.syncState()
 end
 
 return ContactStatePublisher

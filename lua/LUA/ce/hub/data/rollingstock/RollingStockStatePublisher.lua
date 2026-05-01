@@ -16,7 +16,7 @@ function RollingStockStatePublisher.syncState()
     if not RollingStockStatePublisher.enabled then return end
     if not initialized then RollingStockStatePublisher.initialize() end
 
-    return RollingStockPublisher.syncState()
+    RollingStockPublisher.syncState()
 end
 
 return RollingStockStatePublisher

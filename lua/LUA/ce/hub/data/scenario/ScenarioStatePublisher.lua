@@ -4,7 +4,7 @@ local ScenarioPublisher = require("ce.hub.data.scenario.ScenarioPublisher")
 ---@class ScenarioStatePublisher
 ---@field name string
 ---@field initialize fun():nil
----@field syncState fun():table
+---@field syncState fun():nil
 ScenarioStatePublisher = {}
 ScenarioStatePublisher.enabled = true
 local initialized = false
@@ -21,7 +21,7 @@ function ScenarioStatePublisher.syncState()
     if not ScenarioStatePublisher.enabled then return end
 
     if not initialized then ScenarioStatePublisher.initialize() end
-    return ScenarioPublisher.syncState()
+    ScenarioPublisher.syncState()
 end
 
 return ScenarioStatePublisher

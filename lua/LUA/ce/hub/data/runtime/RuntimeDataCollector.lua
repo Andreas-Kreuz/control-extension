@@ -1,12 +1,12 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDataCollector ...") end
 
 ---@class RuntimeDataCollector
----@field setLastCycleRuntimeEntries fun(runtimeEntries: table<string, RuntimeEntry>|nil, publishable: boolean):nil
----@field collectRuntimeEntries fun():table<string, RuntimeEntry>|nil
+---@field setLastCycleRuntimeEntries fun(table<string, RuntimeMetricEntry>|nil, boolean):nil
+---@field collectRuntimeEntries fun():table<string, RuntimeMetricEntry>|nil
 ---@field reset fun():nil
 local RuntimeDataCollector = {}
 
----@type table<string, RuntimeDto>|nil
+---@type table<string, RuntimeMetricEntry>|nil
 local lastCycleRuntimeEntries = nil
 local lastCycleRuntimeEntriesPublishable = false
 
@@ -18,14 +18,14 @@ local function deepCopy(value)
     return copy
 end
 
----@param runtimeEntries table<string, RuntimeEntry>|nil
+---@param runtimeEntries table<string, RuntimeMetricEntry>|nil
 ---@param publishable boolean
 function RuntimeDataCollector.setLastCycleRuntimeEntries(runtimeEntries, publishable)
     lastCycleRuntimeEntries = runtimeEntries and deepCopy(runtimeEntries) or nil
     lastCycleRuntimeEntriesPublishable = publishable == true
 end
 
----@return table<string, RuntimeEntry>|nil
+---@return table<string, RuntimeMetricEntry>|nil
 function RuntimeDataCollector.collectRuntimeEntries()
     if not lastCycleRuntimeEntriesPublishable or not lastCycleRuntimeEntries then return nil end
 

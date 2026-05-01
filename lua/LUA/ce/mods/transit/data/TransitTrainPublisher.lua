@@ -19,7 +19,7 @@ end
 function TransitTrainPublisher.syncState()
     if not TransitOptionsRegistry.isPublishEnabled("transitTrains") then
         TransitTrainRegistry.clearPendingChanges()
-        return {}
+        return
     end
 
     for trainId in pairs(TransitTrainRegistry.getRemovedIds()) do
@@ -46,7 +46,6 @@ function TransitTrainPublisher.syncState()
     end
 
     TransitTrainRegistry.clearPendingChanges()
-    return {}
 end
 
 return TransitTrainPublisher

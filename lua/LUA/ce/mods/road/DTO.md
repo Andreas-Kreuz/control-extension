@@ -14,7 +14,7 @@ Diese Datei beschreibt das aktuell aus `lua/LUA/ce/mods/road` erzeugte JSON-Date
 Wichtige Vorbemerkungen:
 
 - Primärquellen sind `TrafficLightModelStatePublisher.lua`, `RoadStatePublisher.lua` und die von ihnen verwendeten Modelle.
-- Beide Collector erzeugen ihre Nutzdaten fachlich über `DataChangeBus.fireListChange(...)`. `syncState()` liefert aktuell selbst nur leere Tabellen zurück.
+- Beide Collector erzeugen ihre Nutzdaten fachlich über `DataChangeBus.fireListChange(...)`. `syncState()` liefert keine Nutzdaten zurück.
 - Der Lua-Collector sendet Listen. Der Web-Server normalisiert diese Listen danach zu Objekt-Mappings nach `keyId` und speichert sie so in `lua/LUA/ce/databridge/exchange/server-state.json`.
 
 ## `TrafficLightModelStatePublisher`

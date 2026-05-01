@@ -1,103 +1,119 @@
--- TypeScript LuaDto: apps/web-server/src/server/ce/dto/structures/StructureLuaDto.ts
+﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/structures/StructureLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDtoFactory ...") end
 
+local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+
+---@class StructureDtoFactory
+---@field createFullDto fun(structure: Structure, isSelected: boolean|nil):string,string,string|number,StructureDto
+---@field createPatchDto fun(structure: Structure, dirtyFields: table<string,boolean>, isSelected: boolean|nil):string,
+---string,string|number,StructureDto
+---@field createRemovalDto fun(structureId: string):string,string,string|number,table
 local StructureDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.Structure
 local KEY_ID = "id"
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
-local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
-
-local placeHolders = {
-    light = false,
-    smoke = false,
-    fire = false,
-}
 
 local function getGsbname(structure)
     if structure.getGsbname then return structure:getGsbname() end
     return structure.gsbname
 end
 
-local function toFullDto(structure, isSelected)
-    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("structures")
-    local dto = {
-        ceType = CE_TYPE,
-        id = structure.id,
-        name = structure.name,
-        pos_x = structure.pos_x,
-        pos_y = structure.pos_y,
-        pos_z = structure.pos_z,
-        rot_x = structure.rot_x,
-        rot_y = structure.rot_y,
-        rot_z = structure.rot_z,
-        modelType = structure.modelType,
-        modelTypeText = structure.modelTypeText,
-    }
-    if SyncPolicy.shouldPublishField(fieldPolicies, "tag", isSelected) then dto.tag = structure:getTag() end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "light", isSelected) then
-        dto.light = structure:getLight()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "light", isSelected) then
-        dto.light = placeHolders.light
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "smoke", isSelected) then
-        dto.smoke = structure:getSmoke()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "smoke", isSelected) then
-        dto.smoke = placeHolders.smoke
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "fire", isSelected) then
-        dto.fire = structure:getFire()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "fire", isSelected) then
-        dto.fire = placeHolders.fire
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "gsbname", isSelected) then
-        local gsbname = getGsbname(structure)
-        if gsbname ~= nil and gsbname ~= "" then
-            dto.gsbname = gsbname
-        end
-    end
-    return dto
-end
-
-local fieldGetters = {
-    tag = function (s) return s:getTag() end,
-    light = function (s) return s:getLight() end,
-    smoke = function (s) return s:getSmoke() end,
-    fire = function (s) return s:getFire() end,
+-- DtoFields: class definition in StructureDtoTypes.d.lua
+local dtoFields = {
+    name = {
+        getValue = function (structure) return structure.name end,
+        placeholder = ""
+    },
+    pos_x = {
+        getValue = function (structure) return structure.pos_x end,
+        placeholder = 0
+    },
+    pos_y = {
+        getValue = function (structure) return structure.pos_y end,
+        placeholder = 0
+    },
+    pos_z = {
+        getValue = function (structure) return structure.pos_z end,
+        placeholder = 0
+    },
+    rot_x = {
+        getValue = function (structure) return structure.rot_x end,
+        placeholder = 0
+    },
+    rot_y = {
+        getValue = function (structure) return structure.rot_y end,
+        placeholder = 0
+    },
+    rot_z = {
+        getValue = function (structure) return structure.rot_z end,
+        placeholder = 0
+    },
+    modelType = {
+        getValue = function (structure) return structure.modelType end,
+        placeholder = 0
+    },
+    modelTypeText = {
+        getValue = function (structure) return structure.modelTypeText end,
+        placeholder = ""
+    },
+    tag = {
+        getValue = function (structure) return structure:getTag() end,
+        placeholder = ""
+    },
+    light = {
+        getValue = function (structure) return structure:getLight() end,
+        placeholder = false
+    },
+    smoke = {
+        getValue = function (structure) return structure:getSmoke() end,
+        placeholder = false
+    },
+    fire = {
+        getValue = function (structure) return structure:getFire() end,
+        placeholder = false
+    },
+    gsbname = {
+        getValue = function (structure)
+            local gsbname = getGsbname(structure)
+            if gsbname ~= nil and gsbname ~= "" then return gsbname end
+            return nil
+        end,
+        placeholder = nil
+    },
 }
 
-local function toPatchDto(structure, dirtyFields, isSelected)
-    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("structures")
-    local dto = {
+local function baseDto(structure)
+    return {
         ceType = CE_TYPE,
-        id = structure.id,
+        id = structure.id
     }
-    for field in pairs(dirtyFields) do
-        local getter = fieldGetters[field]
-        if getter and SyncPolicy.shouldPublishField(fieldPolicies, field, isSelected) then
-            dto[field] = getter(structure)
-        elseif getter and placeHolders[field] ~= nil and SyncPolicy.shouldPublishPlaceholder(fieldPolicies, field,
-                                                                                             isSelected) then
-            dto[field] = placeHolders[field]
-        end
-    end
-    return dto
+end
+
+local function buildFullDto(structure, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("structures")
+    return DtoBuilder.buildFullDto(baseDto(structure), structure, dtoFields, fieldPolicies, isSelected)
+end
+
+local function buildPatchDto(structure, dirtyFields, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("structures")
+    return DtoBuilder.buildPatchDto(baseDto(structure), structure, dirtyFields, dtoFields, fieldPolicies, isSelected)
 end
 
 function StructureDtoFactory.createFullDto(structure, isSelected)
     if isSelected == nil then isSelected = true end
-    local dto = toFullDto(structure, isSelected)
+    local dto = buildFullDto(structure, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
 function StructureDtoFactory.createPatchDto(structure, dirtyFields, isSelected)
     if isSelected == nil then isSelected = true end
-    local dto = toPatchDto(structure, dirtyFields, isSelected)
+    local dto = buildPatchDto(structure, dirtyFields, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function StructureDtoFactory.createRefDto(structureId)
+function StructureDtoFactory.createRemovalDto(structureId)
     local dto = { ceType = CE_TYPE, id = structureId }
     return CE_TYPE, KEY_ID, structureId, dto
 end

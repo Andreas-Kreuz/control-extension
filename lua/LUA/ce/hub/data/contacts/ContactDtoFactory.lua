@@ -1,33 +1,40 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.data.contacts.ContactDtoFactory ...") end
+﻿if CeDebugLoad then print("[#Start] Loading ce.hub.data.contacts.ContactDtoFactory ...") end
 
+local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+
+---@class ContactDtoFactory
+---@field createFullDto fun(contact: Contact, isSelected: boolean|nil):string,string,number,ContactDto
 local ContactDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.Contact
 local KEY_ID = "id"
 
-local function toFullDto(contact, isSelected)
+-- DtoFields: class definition in ContactDtoTypes.d.lua
+local dtoFields = {
+    luaFn = {
+        getValue = function (contact) return contact:getLuaFn() end,
+        placeholder = ""
+    },
+    tipTxt = {
+        getValue = function (contact) return contact:getTipTxt() end,
+        placeholder = ""
+    },
+}
+
+local function buildFullDto(contact, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("contacts")
-    local dto = {
+    return DtoBuilder.buildFullDto({
         ceType = CE_TYPE,
-        id = contact.id,
-    }
-    if SyncPolicy.shouldPublishField(fieldPolicies, "luaFn", isSelected) then dto.luaFn = contact:getLuaFn() end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "tipTxt", isSelected) then dto.tipTxt = contact:getTipTxt() end
-    return dto
+        id = contact.id
+    }, contact, dtoFields, fieldPolicies, isSelected)
 end
 
 function ContactDtoFactory.createFullDto(contact, isSelected)
     if isSelected == nil then isSelected = true end
-    local dto = toFullDto(contact, isSelected)
+    local dto = buildFullDto(contact, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
-end
-
-function ContactDtoFactory.createRefDto(contactId)
-    local dto = { ceType = CE_TYPE, id = contactId }
-    return CE_TYPE, KEY_ID, contactId, dto
 end
 
 return ContactDtoFactory

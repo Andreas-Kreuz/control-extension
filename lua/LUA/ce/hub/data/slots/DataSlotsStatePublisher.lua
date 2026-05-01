@@ -4,7 +4,7 @@ local DataSlotsPublisher = require("ce.hub.data.slots.DataSlotsPublisher")
 ---@class DataSlotsStatePublisher
 ---@field name string
 ---@field initialize fun():nil
----@field syncState fun():table
+---@field syncState fun():nil
 local DataSlotsStatePublisher = {}
 DataSlotsStatePublisher.name = "ce.hub.data.slots.DataSlotsStatePublisher"
 DataSlotsStatePublisher.ceTypes =
@@ -21,7 +21,7 @@ function DataSlotsStatePublisher.syncState()
     -- nothing todo
     if not DataSlotsStatePublisher.enabled then return end
     if not initialized then DataSlotsStatePublisher.initialize() end
-    return DataSlotsPublisher.syncState()
+    DataSlotsPublisher.syncState()
 end
 
 return DataSlotsStatePublisher

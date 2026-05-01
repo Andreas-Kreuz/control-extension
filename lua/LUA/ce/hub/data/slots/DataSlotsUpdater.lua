@@ -7,15 +7,6 @@ local StorageUtility = require("ce.hub.util.StorageUtility")
 
 local DataSlotsUpdater = {}
 
-local lastSlots = {}
-
-local function updateSlot(id, name, data)
-    local oldSlot = lastSlots[id]
-    local newSlot = { id = id, name = name, data = data }
-    if not oldSlot or oldSlot.id ~= id or oldSlot.name ~= name or oldSlot.data ~= data then lastSlots[id] = newSlot end
-    return newSlot
-end
-
 function DataSlotsUpdater.runUpdate()
     if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("saveSlots", "freeSlots") then return end
 
@@ -27,9 +18,9 @@ function DataSlotsUpdater.runUpdate()
         local hResult, data = EEPLoadData(id)
         if hResult then
             local name = DataSlotNameResolver.getSlotName(id) or StorageUtility.getName(id) or "?"
-            filledSlots[id] = updateSlot(id, name, data)
+            filledSlots[id] = { id = id, name = name, data = data }
         else
-            emptySlots[id] = updateSlot(id)
+            emptySlots[id] = { id = id }
         end
     end
 

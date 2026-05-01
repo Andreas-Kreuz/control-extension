@@ -157,6 +157,60 @@ local function isEmbeddedReferenceName(data, previousAxis, offset)
     return distance < 180 or string.find(between, RELATION_NAME_MARKER, 1, true) ~= nil
 end
 
+local function read3dmAxisCandidateAt(data, position)
+    local nameLength = readUint32Le(data, position)
+    if not nameLength or nameLength < 1 or nameLength > 80 then return nil end
+
+    local name = stringAt(data, position + 4, nameLength)
+    if not name or not isAxisRecordName(name) then return nil end
+
+    local previousRecordBytes = string.sub(data, math.max(1, position - 128), position - 1)
+    local previousLocalBytes = string.sub(data, math.max(1, position - 48), position - 1)
+    local hasMatrix = countPlain(previousRecordBytes, FLOAT_ONE_BYTES) >= 3
+    if not hasMatrix or hasWordBytes(previousLocalBytes) then return nil end
+
+    return {
+        offset = position,
+        name = name
+    }
+end
+
+local function collect3dmAxisCandidates(data)
+    local candidates = {}
+    local candidatePositions = {}
+
+    for _, markerPosition in ipairs(markerPositions(data)) do
+        local searchStart = markerPosition + #MATRIX_SIZE_MARKER
+        local searchEnd = math.min(#data - 4, markerPosition + 128)
+        for position = searchStart, searchEnd do
+            if not candidatePositions[position] then
+                local candidate = read3dmAxisCandidateAt(data, position)
+                if candidate then
+                    candidatePositions[position] = true
+                    candidates[#candidates + 1] = candidate
+                end
+            end
+        end
+    end
+
+    return candidates
+end
+
+local function build3dmAxisList(data, candidates)
+    local axes = {}
+    for _, candidate in ipairs(candidates) do
+        if not isEmbeddedReferenceName(data, axes[#axes], candidate.offset) then
+            axes[#axes + 1] = {
+                index = #axes + 1,
+                name = candidate.name,
+                isPublic = string.sub(candidate.name, 1, 1) ~= "_",
+                offset = candidate.offset
+            }
+        end
+    end
+    return axes
+end
+
 local function currentLanguageAxisNames(info, language)
     local axisNamesByLanguage = info.rawAxisNamesByLanguage or info.axisNamesByLanguage or {}
     return axisNamesByLanguage[language or "GER"] or axisNamesByLanguage.GER
@@ -263,47 +317,8 @@ function RollingStockResourceParser.parseFile(path)
 end
 
 function RollingStockResourceParser.parse3dmContent(data)
-    local candidates = {}
-    local candidatePositions = {}
-
-    for _, markerPosition in ipairs(markerPositions(data or "")) do
-        local searchStart = markerPosition + #MATRIX_SIZE_MARKER
-        local searchEnd = math.min(#data - 4, markerPosition + 128)
-        for position = searchStart, searchEnd do
-            if not candidatePositions[position] then
-                local nameLength = readUint32Le(data, position)
-                if nameLength and nameLength >= 1 and nameLength <= 80 then
-                    local name = stringAt(data, position + 4, nameLength)
-                    if name and isAxisRecordName(name) then
-                        local previousRecordBytes = string.sub(data, math.max(1, position - 128), position - 1)
-                        local previousLocalBytes = string.sub(data, math.max(1, position - 48), position - 1)
-                        local hasMatrix = countPlain(previousRecordBytes, FLOAT_ONE_BYTES) >= 3
-                        if hasMatrix and not hasWordBytes(previousLocalBytes) then
-                            candidatePositions[position] = true
-                            candidates[#candidates + 1] = {
-                                offset = position,
-                                name = name
-                            }
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    local axes = {}
-    for _, candidate in ipairs(candidates) do
-        if not isEmbeddedReferenceName(data, axes[#axes], candidate.offset) then
-            axes[#axes + 1] = {
-                index = #axes + 1,
-                name = candidate.name,
-                isPublic = string.sub(candidate.name, 1, 1) ~= "_",
-                offset = candidate.offset
-            }
-        end
-    end
-
-    return axes
+    local content = data or ""
+    return build3dmAxisList(content, collect3dmAxisCandidates(content))
 end
 
 function RollingStockResourceParser.parseFirstExisting3dm(paths)

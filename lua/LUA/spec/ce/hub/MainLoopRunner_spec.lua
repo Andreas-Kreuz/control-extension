@@ -67,7 +67,7 @@ insulate("MainLoopRunner", function ()
         local moduleRunCalls = 0
         local publisherInitCalls = 0
         local publisherSyncCalls = 0
-        local capturedRuntimePublishes = {}
+        local capturedRuntimeEvents = {}
 
         local testModule = {
             id = "spec-test-module-1",
@@ -81,23 +81,15 @@ insulate("MainLoopRunner", function ()
             initialize = function () publisherInitCalls = publisherInitCalls + 1 end,
             syncState = function ()
                 publisherSyncCalls = publisherSyncCalls + 1
-                return {}
             end
         }
 
-        DataChangeBus.fireListChange = function (ceType, keyId, list)
+        DataChangeBus.fireDataChanged = function (ceType, keyId, key, element)
             if ceType ~= "ce.hub.Runtime" then return end
-            table.insert(capturedRuntimePublishes, {
+            capturedRuntimeEvents[#capturedRuntimeEvents + 1] = element or {
                 keyId = keyId,
-                overallCount = list["MainLoopRunner.runCycle-OVERALL"] and
-                    list["MainLoopRunner.runCycle-OVERALL"].count or 0,
-                syncStateCount = list["MainLoopRunner.runCycle-4-syncState"] and
-                    list["MainLoopRunner.runCycle-4-syncState"].count or 0,
-                serverOutputCount = list["MainLoopRunner.runCycle-7-serverOutput"] and
-                    list["MainLoopRunner.runCycle-7-serverOutput"].count or 0,
-                initModuleCount = list["CeModule.spec.TestCeModule.init"] and
-                    list["CeModule.spec.TestCeModule.init"].count or 0
-            })
+                id = key
+            }
         end
         DataChangeBus.printEventCounter = function () end
 
@@ -125,14 +117,16 @@ insulate("MainLoopRunner", function ()
         assert.equals(3, commandReadCalls)
         assert.equals(3, communicateCalls)
         assert.equals(0, dataStoreWriteCalls)
-        assert.equals(2, #capturedRuntimePublishes)
-        assert.equals("id", capturedRuntimePublishes[1].keyId)
-        assert.equals(1, capturedRuntimePublishes[1].overallCount)
-        assert.equals(1, capturedRuntimePublishes[1].syncStateCount)
-        assert.equals(1, capturedRuntimePublishes[2].overallCount)
-        assert.equals(1, capturedRuntimePublishes[2].syncStateCount)
-        assert.equals(1, capturedRuntimePublishes[2].serverOutputCount)
-        assert.equals(1, capturedRuntimePublishes[2].initModuleCount)
+        local runtimeEventsById = {}
+        for _, event in ipairs(capturedRuntimeEvents) do
+            runtimeEventsById[event.id] = runtimeEventsById[event.id] or {}
+            for key, value in pairs(event) do runtimeEventsById[event.id][key] = value end
+        end
+        assert.is_not_nil(runtimeEventsById["MainLoopRunner.runCycle-OVERALL"])
+        assert.equals(1, runtimeEventsById["MainLoopRunner.runCycle-OVERALL"].count)
+        assert.equals(1, runtimeEventsById["MainLoopRunner.runCycle-4-syncState"].count)
+        assert.equals(1, runtimeEventsById["MainLoopRunner.runCycle-7-serverOutput"].count)
+        assert.equals(1, runtimeEventsById["CeModule.spec.TestCeModule.init"].count)
         assert.is_true(RuntimeMetrics.get("StatePublisher.spec.TestStatePublisher.syncState").count == 0)
         assert.equals(0, RuntimeMetrics.get("StatePublisher.spec.TestStatePublisher.syncState").lastTime)
         assert.is_true(RuntimeMetrics.get("CeModule.spec.TestCeModule.init").count > 0)
@@ -162,7 +156,6 @@ insulate("MainLoopRunner", function ()
             initialize = function () end,
             syncState = function ()
                 publisherSyncCalls = publisherSyncCalls + 1
-                return {}
             end
         }
 

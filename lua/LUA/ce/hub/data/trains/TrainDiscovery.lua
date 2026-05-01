@@ -92,15 +92,11 @@ local function updateTracks()
     local trainsOnTrack = {}
 
     for _, trackType in ipairs(trackTypes) do
-        for trackId, track in pairs(TrackRegistry.getAll(trackType)) do
+        for _, track in pairs(TrackRegistry.getAll(trackType)) do
             local _, occupied, trainName = reservedFunctions[trackType](track.id, true)
             local reservedByTrainName = occupied and trainName or nil
 
-            if track.reserved ~= occupied or track.reservedByTrainName ~= reservedByTrainName then
-                track.reserved = occupied
-                track.reservedByTrainName = reservedByTrainName
-                TrackRegistry.markChanged(trackType, trackId)
-            end
+            track:setReservation(occupied == true, reservedByTrainName)
 
             if occupied and trainName then
                 trainsOnTrack[trainName] = trainsOnTrack[trainName] or {}

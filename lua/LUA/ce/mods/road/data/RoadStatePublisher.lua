@@ -56,8 +56,6 @@ function RoadStatePublisher.syncState()
             return byCeTypeAndId(RoadCeTypes.ModuleSetting, setting.name)
         end))
     end
-
-    return {}
 end
 
 return RoadStatePublisher

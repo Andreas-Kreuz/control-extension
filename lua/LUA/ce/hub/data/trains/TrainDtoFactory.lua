@@ -1,146 +1,110 @@
 ﻿ -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/trains/TrainLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDtoFactory ...") end
 
+local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+
+---@class TrainDtoFactory
+---@field createFullDto fun(train: Train, isSubscribed: boolean|nil):string,string,string,TrainDto
+---@field createPatchDto fun(train: Train, dirtyFields: table<string,boolean>, isSubscribed: boolean|nil):string,
+---string,string,TrainDto
+---@field createRemovalDto fun(trainId: string):string,string,string,table
 local TrainDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.Train
 local KEY_ID = "id"
 
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
-local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+-- DtoFields: class definition in TrainDtoTypes.d.lua
+local dtoFields = {
+    name = {
+        getValue = function (train) return train:getName() end,
+        placeholder = ""
+    },
+    route = {
+        getValue = function (train) return train:getRoute() end,
+        placeholder = ""
+    },
+    rollingStockCount = {
+        getValue = function (train) return train:getRollingStockCount() end,
+        placeholder = 0
+    },
+    length = {
+        getValue = function (train) return train:getLength() end,
+        placeholder = 0
+    },
+    trackType = {
+        getValue = function (train) return train:getTrackType() end,
+        placeholder = ""
+    },
+    movesForward = {
+        getValue = function (train) return train:getMovesForward() end,
+        placeholder = false
+    },
+    speed = {
+        getValue = function (train) return train:getSpeed() end,
+        placeholder = 0
+    },
+    targetSpeed = {
+        getValue = function (train) return train:getTargetSpeed() end,
+        placeholder = 0
+    },
+    couplingFront = {
+        getValue = function (train) return train:getCouplingFront() end,
+        placeholder = 0
+    },
+    couplingRear = {
+        getValue = function (train) return train:getCouplingRear() end,
+        placeholder = 0
+    },
+    lights = {
+        getValue = function (train) return train:getLights() end,
+        placeholder = { ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false }
+    },
+    active = {
+        getValue = function (train) return train:getActive() end,
+        placeholder = false
+    },
+    inTrainyard = {
+        getValue = function (train) return train:getInTrainyard() end,
+        placeholder = false
+    },
+    trainyardId = {
+        getValue = function (train) return train:getTrainyardId() end,
+        placeholder = ""
+    },
+}
 
-local function toFullDto(train, isSelected)
-    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("trains")
-    local dto = {
+local function baseDto(train)
+    return {
         ceType = CE_TYPE,
-        id = train:getName(),
-        name = train:getName(),
+        id = train:getName()
     }
-    if SyncPolicy.shouldPublishField(fieldPolicies, "route", isSelected) then dto.route = train:getRoute() end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "rollingStockCount", isSelected) then
-        dto.rollingStockCount = train:getRollingStockCount()
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "length", isSelected) then dto.length = train:getLength() end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "trackType", isSelected) then
-        dto.trackType = train:getTrackType()
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "movesForward", isSelected) then
-        dto.movesForward = train:getMovesForward()
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "speed", isSelected) then
-        dto.speed = train:getSpeed()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "speed", isSelected) then
-        dto.speed = 0
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "targetSpeed", isSelected) then
-        dto.targetSpeed = train:getTargetSpeed()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "targetSpeed", isSelected) then
-        dto.targetSpeed = 0
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "couplingFront", isSelected) then
-        dto.couplingFront = train:getCouplingFront()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "couplingFront", isSelected) then
-        dto.couplingFront = 0
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "couplingRear", isSelected) then
-        dto.couplingRear = train:getCouplingRear()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "couplingRear", isSelected) then
-        dto.couplingRear = 0
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "lights", isSelected) then
-        dto.lights = train:getLights()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "lights", isSelected) then
-        dto.lights = { ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false }
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "active", isSelected) then
-        dto.active = train:getActive()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "active", isSelected) then
-        dto.active = false
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "inTrainyard", isSelected) then
-        dto.inTrainyard = train:getInTrainyard()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "inTrainyard", isSelected) then
-        dto.inTrainyard = false
-    end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "trainyardId", isSelected) then
-        dto.trainyardId = train:getTrainyardId()
-    elseif SyncPolicy.shouldPublishPlaceholder(fieldPolicies, "trainyardId", isSelected) then
-        dto.trainyardId = ""
-    end
-    return dto
 end
 
-local placeHolders = {
-    speed = 0,
-    targetSpeed = 0,
-    couplingFront = 0,
-    couplingRear = 0,
-    lights = { ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false },
-    active = false,
-    inTrainyard = false,
-    trainyardId = "",
-}
-
-local fieldGetters = {
-    name = function (t) return t:getName() end,
-    route = function (t) return t:getRoute() end,
-    rollingStockCount = function (t) return t:getRollingStockCount() end,
-    length = function (t) return t:getLength() end,
-    trackType = function (t) return t:getTrackType() end,
-    movesForward = function (t) return t:getMovesForward() end,
-    speed = function (t) return t:getSpeed() end,
-    targetSpeed = function (t) return t:getTargetSpeed() end,
-    couplingFront = function (t) return t:getCouplingFront() end,
-    couplingRear = function (t) return t:getCouplingRear() end,
-    lights = function (t) return t:getLights() end,
-    active = function (t) return t:getActive() end,
-    inTrainyard = function (t) return t:getInTrainyard() end,
-    trainyardId = function (t) return t:getTrainyardId() end,
-}
-
-local function toPatchDto(train, dirtyFields, isSelected)
+local function buildFullDto(train, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("trains")
-    local dto = {
-        ceType = CE_TYPE,
-        id = train:getName(),
-    }
-    for field in pairs(dirtyFields) do
-        local getter = fieldGetters[field]
-        if getter and SyncPolicy.shouldPublishField(fieldPolicies, field, isSelected) then
-            dto[field] = getter(train)
-        elseif getter and placeHolders[field] ~= nil and SyncPolicy.shouldPublishPlaceholder(fieldPolicies, field,
-                                                                                             isSelected) then
-            dto[field] = placeHolders[field]
-        end
-    end
-    return dto
+    return DtoBuilder.buildFullDto(baseDto(train), train, dtoFields, fieldPolicies, isSelected)
+end
+
+local function buildPatchDto(train, dirtyFields, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("trains")
+    return DtoBuilder.buildPatchDto(baseDto(train), train, dirtyFields, dtoFields, fieldPolicies, isSelected)
 end
 
 function TrainDtoFactory.createFullDto(train, isSelected)
     if isSelected == nil then isSelected = true end
-    local dto = toFullDto(train, isSelected)
+    local dto = buildFullDto(train, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
 function TrainDtoFactory.createPatchDto(train, dirtyFields, isSelected)
     if isSelected == nil then isSelected = true end
-    local dto = toPatchDto(train, dirtyFields, isSelected)
+    local dto = buildPatchDto(train, dirtyFields, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function TrainDtoFactory.createOndemandPlaceholderPatch(train)
-    local dto = {
-        ceType = CE_TYPE,
-        id = train:getName(),
-    }
-    for field, placeholder in pairs(placeHolders) do
-        dto[field] = placeholder
-    end
-    return CE_TYPE, KEY_ID, dto[KEY_ID], dto
-end
-
-function TrainDtoFactory.createRefDto(trainId)
+function TrainDtoFactory.createRemovalDto(trainId)
     local dto = { ceType = CE_TYPE, id = trainId }
     return CE_TYPE, KEY_ID, trainId, dto
 end

@@ -20,7 +20,7 @@ end
 function TracksStatePublisher.syncState()
     if not TracksStatePublisher.enabled then return end
     if not initialized then TracksStatePublisher.initialize() end
-    return TrackPublisher.syncState()
+    TrackPublisher.syncState()
 end
 
 return TracksStatePublisher

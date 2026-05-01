@@ -1,7 +1,17 @@
 ﻿ -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackDtoFactory ...") end
 
+local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+
+---@class TrackDtoFactory
+---@field ceTypeForTrackType fun(trackType: string):string
+---@field createTrackDto fun(trackType: string, track: table, isSelected: boolean|nil):string,string,
+---string|number,TrackDto
+---@field createTrackPatchDto fun(trackType: string, track: table, dirtyFields: table<string, boolean>,
+---isSelected: boolean|nil):string,string,string|number,TrackDto
+---@field createTrackDtoList fun(trackType: string, tracks: table, isSelected: boolean|nil):string,string,table
 local TrackDtoFactory = {}
 
 local KEY_ID = "id"
@@ -12,8 +22,18 @@ local TRACK_CE_TYPES = {
     rail = HubCeTypes.RailTrack,
     tram = HubCeTypes.TramTrack
 }
-local SyncPolicy = require("ce.hub.sync.SyncPolicy")
-local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+
+-- DtoFields: class definition in TrackDtoTypes.d.lua
+local dtoFields = {
+    reserved = {
+        getValue = function (track) return track.reserved end,
+        placeholder = false
+    },
+    reservedByTrainName = {
+        getValue = function (track) return track.reservedByTrainName end,
+        placeholder = ""
+    },
+}
 
 local function ceTypeForTrackType(trackType)
     local ceType = TRACK_CE_TYPES[trackType]
@@ -21,17 +41,20 @@ local function ceTypeForTrackType(trackType)
     return ceType
 end
 
-local function toTrackDto(trackType, track, isSelected)
+local function buildTrackDto(trackType, track, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies(trackType .. "Tracks")
-    local dto = {
+    return DtoBuilder.buildFullDto({
         ceType = ceTypeForTrackType(trackType),
-        id = track.id,
-    }
-    if SyncPolicy.shouldPublishField(fieldPolicies, "reserved", isSelected) then dto.reserved = track.reserved end
-    if SyncPolicy.shouldPublishField(fieldPolicies, "reservedByTrainName", isSelected) then
-        dto.reservedByTrainName = track.reservedByTrainName
-    end
-    return dto
+        id = track.id
+    }, track, dtoFields, fieldPolicies, isSelected)
+end
+
+local function buildTrackPatchDto(trackType, track, dirtyFields, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies(trackType .. "Tracks")
+    return DtoBuilder.buildPatchDto({
+        ceType = ceTypeForTrackType(trackType),
+        id = track.id
+    }, track, dirtyFields, dtoFields, fieldPolicies, isSelected)
 end
 
 function TrackDtoFactory.ceTypeForTrackType(trackType)
@@ -39,7 +62,12 @@ function TrackDtoFactory.ceTypeForTrackType(trackType)
 end
 
 function TrackDtoFactory.createTrackDto(trackType, track, isSelected)
-    local dto = toTrackDto(trackType, track, isSelected == true)
+    local dto = buildTrackDto(trackType, track, isSelected == true)
+    return dto.ceType, KEY_ID, dto[KEY_ID], dto
+end
+
+function TrackDtoFactory.createTrackPatchDto(trackType, track, dirtyFields, isSelected)
+    local dto = buildTrackPatchDto(trackType, track, dirtyFields, isSelected == true)
     return dto.ceType, KEY_ID, dto[KEY_ID], dto
 end
 

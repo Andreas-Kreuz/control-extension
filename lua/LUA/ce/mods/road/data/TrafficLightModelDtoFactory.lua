@@ -2,6 +2,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.TrafficLightModelDtoFactory ...") end
 
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
+
+---@class TrafficLightModelDtoFactory
+---@field createSignalTypeDefinitionDto fun(definition: table):string,string,string|number,SignalTypeDefinitionDto
+---@field createSignalTypeDefinitionDtoList fun(definitions: table):string,string,table
 local TrafficLightModelDtoFactory = {}
 
 local CE_TYPE = RoadCeTypes.SignalTypeDefinition

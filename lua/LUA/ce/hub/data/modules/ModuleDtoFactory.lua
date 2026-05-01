@@ -1,38 +1,78 @@
--- TypeScript LuaDto: apps/web-server/src/server/ce/dto/modules/ModuleLuaDto.ts
+﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/modules/ModuleLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModuleDtoFactory ...") end
 
+local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
+
+---@class ModuleDtoFactory
+---@field createModuleDto fun(moduleOrName: Module|string, module: CeModule|nil):string,string,string|number,ModuleDto
+---@field createModulePatchDto fun(module: Module, dirtyFields: table<string, boolean>):string,string,
+---string|number,ModuleDto
+---@field createRemovalDto fun(moduleId: string):string,string,string,table
+---@field createModuleDtoList fun(modules: table<string, Module>):string,string,table
 local ModuleDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.Module
 local KEY_ID = "id"
 
-local function toModuleDto(moduleName, module)
-    return {
+-- DtoFields: class definition in ModuleDtoTypes.d.lua
+local dtoFields = {
+    name = {
+        getValue = function (module) return module.name end,
+        placeholder = ""
+    },
+    enabled = {
+        getValue = function (module) return module.enabled end,
+        placeholder = false
+    },
+}
+
+local function buildModuleDto(module)
+    return DtoBuilder.buildFullDto({
         ceType = CE_TYPE,
-        id = module.id,
-        name = moduleName,
-        enabled = module.enabled
-    }
+        id = module.id
+    }, module, dtoFields)
 end
 
-function ModuleDtoFactory.createModuleDto(moduleName, module)
-    local dto = toModuleDto(moduleName, module)
+local function buildModulePatchDto(module, dirtyFields)
+    return DtoBuilder.buildPatchDto({
+        ceType = CE_TYPE,
+        id = module.id
+    }, module, dirtyFields, dtoFields)
+end
+
+local function normalizeModule(moduleOrName, module)
+    if module then
+        return {
+            id = module.id,
+            name = moduleOrName,
+            enabled = module.enabled
+        }
+    end
+    return moduleOrName
+end
+
+function ModuleDtoFactory.createModuleDto(moduleOrName, module)
+    local dto = buildModuleDto(normalizeModule(moduleOrName, module))
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
+end
+
+function ModuleDtoFactory.createModulePatchDto(module, dirtyFields)
+    local dto = buildModulePatchDto(module, dirtyFields)
+    return CE_TYPE, KEY_ID, dto[KEY_ID], dto
+end
+
+function ModuleDtoFactory.createRemovalDto(moduleId)
+    return CE_TYPE, KEY_ID, moduleId, { ceType = CE_TYPE, id = moduleId }
 end
 
 function ModuleDtoFactory.createModuleDtoList(modules)
     local modInfoDtos = {}
-    for moduleName, module in pairs(modules) do
-        local _, _, _, dto = ModuleDtoFactory.createModuleDto(moduleName, module)
+    for _, module in pairs(modules) do
+        local _, _, _, dto = ModuleDtoFactory.createModuleDto(module)
         modInfoDtos[module.id] = dto
     end
     return CE_TYPE, KEY_ID, modInfoDtos
-end
-
-function ModuleDtoFactory.createModuleReferenceDto(moduleId)
-    local dto = { ceType = CE_TYPE, id = moduleId }
-    return CE_TYPE, KEY_ID, moduleId, dto
 end
 
 return ModuleDtoFactory

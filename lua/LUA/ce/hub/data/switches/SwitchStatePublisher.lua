@@ -4,7 +4,7 @@ local SwitchPublisher = require("ce.hub.data.switches.SwitchPublisher")
 ---@class SwitchStatePublisher
 ---@field name string
 ---@field initialize fun():nil
----@field syncState fun():table
+---@field syncState fun():nil
 SwitchStatePublisher = {}
 SwitchStatePublisher.enabled = true
 local initialized = false
@@ -20,7 +20,7 @@ function SwitchStatePublisher.syncState()
     if not SwitchStatePublisher.enabled then return end
 
     if not initialized then SwitchStatePublisher.initialize() end
-    return SwitchPublisher.syncState()
+    SwitchPublisher.syncState()
 end
 
 return SwitchStatePublisher

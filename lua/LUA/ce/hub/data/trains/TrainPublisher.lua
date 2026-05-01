@@ -20,11 +20,11 @@ function TrainPublisher.syncState()
 
     if not HubOptionsRegistry.isPublishEnabled("trains") then
         TrainRegistry.clearPendingChanges()
-        return {}
+        return
     end
 
     for trainId in pairs(TrainRegistry.getRemovedIds()) do
-        DataChangeBus.fireDataRemoved(TrainDtoFactory.createRefDto(trainId))
+        DataChangeBus.fireDataRemoved(TrainDtoFactory.createRemovalDto(trainId))
     end
 
     for _, train in pairs(TrainRegistry.getAll()) do
@@ -46,7 +46,6 @@ function TrainPublisher.syncState()
     end
 
     TrainRegistry.clearPendingChanges()
-    return {}
 end
 
 return TrainPublisher
