@@ -36,13 +36,17 @@ insulate("axis and texture metadata", function ()
         EEPRollingstockSetAxisByNumber("AxisStock", 2, 75)
         local stock = RollingStock:new({ rollingStockName = "AxisStock" })
         stock.modelInfo = RollingStockModelInfo:new({
+            axisNamesKnown = true,
             axisNames = { [2] = "Fahrer" },
             textureNames = { [1] = "Fahrziel" }
         })
+        stock.axisNamesKnown = stock.modelInfo:getAxisNamesKnown()
         stock:updateAxisValues()
 
         local _, _, _, dto = RollingStockDtoFactory.createFullDto(stock, true)
 
+        assert.is_true(stock:getAxisNamesKnown())
+        assert.is_true(dto.axisNamesKnown)
         assert.equals("Fahrer", dto.axisNames["2"])
         assert.equals(75, dto.axisValues["2"])
         assert.equals("Fahrziel", dto.textureNames["1"])

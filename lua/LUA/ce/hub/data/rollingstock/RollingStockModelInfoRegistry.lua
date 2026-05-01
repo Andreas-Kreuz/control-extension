@@ -13,6 +13,7 @@ function RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
     local parsedInfo = RollingStockResourceParser.infoForXmlModel(xmlModel)
     local info = RollingStockModelInfo:new({
         xmlModel = xmlModel,
+        axisNamesKnown = parsedInfo.axisNamesKnown == true,
         axisNames = parsedInfo.axisNames or {},
         axisNamesByLanguage = parsedInfo.axisNamesByLanguage or {},
         rawAxisNames = parsedInfo.rawAxisNames or {},

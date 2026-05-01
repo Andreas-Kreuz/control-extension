@@ -23,6 +23,11 @@ local function getXmlModel(stock)
     return stock.xmlModel or XML_MODEL_PLACEHOLDER
 end
 
+local function getAxisNamesKnown(stock)
+    if stock.getAxisNamesKnown then return stock:getAxisNamesKnown() end
+    return stock.axisNamesKnown == true
+end
+
 -- DtoFields: class definition in RollingStockDtoTypes.d.lua
 local dtoFields = {
     name = {
@@ -127,6 +132,10 @@ local dtoFields = {
     },
     active = {
         getValue = function (stock) return stock:getActive() end,
+        placeholder = false
+    },
+    axisNamesKnown = {
+        getValue = function (stock) return getAxisNamesKnown(stock) end,
         placeholder = false
     },
     axisNames = {

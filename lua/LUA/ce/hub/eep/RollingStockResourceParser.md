@@ -4,6 +4,17 @@ This parser reads rolling stock metadata from neighboring `.ini` and `.3dm`
 resource files. Its main job is to produce the EEP-visible axis list used by
 Control Extension.
 
+For rolling stock axis parsing in a real EEP layout, Control Extension needs the
+current `.anl3` file path in the global options. The `.anl3` discovery provides
+the rolling stock XML model paths that are later used to locate neighboring
+`.ini` and `.3dm` resource files.
+
+```lua
+local ControlExtension = require("ce.ControlExtension").setOptions({
+    anl3path = "C:\\Spiele\\Trend\\EEP18\\Resourcen\\Anlagen\\meine-anlage.anl3"
+})
+```
+
 This document is also a research log for the reverse-engineered `.3dm` axis
 parsing. It should contain enough context for future work without needing the
 original investigation chat.

@@ -7,6 +7,7 @@ local RollingStockModelInfo = {}
 function RollingStockModelInfo:new(o)
     o = o or {}
     o.axisNames = o.axisNames or {}
+    o.axisNamesKnown = o.axisNamesKnown == true
     o.axisNamesByLanguage = o.axisNamesByLanguage or {}
     o.rawAxisNames = o.rawAxisNames or {}
     o.rawAxisNamesByLanguage = o.rawAxisNamesByLanguage or {}
@@ -20,6 +21,10 @@ end
 
 function RollingStockModelInfo:getAxisNames()
     return TableUtils.deepcopy(self.axisNames or {})
+end
+
+function RollingStockModelInfo:getAxisNamesKnown()
+    return self.axisNamesKnown == true
 end
 
 function RollingStockModelInfo:getAxisNamesByLanguage()

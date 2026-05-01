@@ -56,6 +56,7 @@ export class RollingStockSelector {
         orientationForward: rsDto.orientationForward ?? true,
         smoke: rsDto.smoke ?? 0,
         active: rsDto.active ?? false,
+        axisNamesKnown: rsDto.axisNamesKnown === true,
         axisNames: normalizeNumberRecord(rsDto.axisNames),
         axisValues: normalizeNumberRecord(rsDto.axisValues),
         surfaceTexts: normalizeNumberRecord(rsDto.surfaceTexts),

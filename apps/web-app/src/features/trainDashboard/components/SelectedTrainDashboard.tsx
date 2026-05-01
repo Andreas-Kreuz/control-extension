@@ -253,11 +253,7 @@ function TrainOverviewPanel(props: {
   return (
     <>
       <Grid size={{ xs: 12, md: 4 }}>
-        <InfoCard
-          train={train}
-          transit={props.transit}
-          onSpeedCommit={(value) => setSpeed(train.name, value)}
-        />
+        <InfoCard train={train} transit={props.transit} onSpeedCommit={(value) => setSpeed(train.name, value)} />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <TrainAssociationCard
@@ -327,11 +323,7 @@ function EmptyDashboardState() {
   );
 }
 
-function InfoCard(props: {
-  train: TrainAppDto;
-  transit?: TransitInfo;
-  onSpeedCommit: (value: number) => void;
-}) {
+function InfoCard(props: { train: TrainAppDto; transit?: TransitInfo; onSpeedCommit: (value: number) => void }) {
   const { train } = props;
 
   return (
@@ -577,9 +569,43 @@ function CameraCard(props: { trainName: string; rollingStockName: string }) {
 
 function MergedAxisCard(props: { rollingStock: RollingStockAppDto[] }) {
   const socket = useSocket();
-  const groups = useMemo(() => groupAxisByName(props.rollingStock), [props.rollingStock]);
+  const canShowTrainAxes =
+    props.rollingStock.length === 1 ||
+    (props.rollingStock.length > 1 && props.rollingStock.every((item) => item.axisNamesKnown === true));
+  const groups = useMemo(
+    () => (canShowTrainAxes ? groupAxisByName(props.rollingStock) : []),
+    [canShowTrainAxes, props.rollingStock],
+  );
   const content =
-    groups.length === 0 ? (
+    !canShowTrainAxes && props.rollingStock.length > 0 ? (
+      <Stack spacing={1}>
+        <Typography color="text.secondary">
+          Achsen im Zugverband sind erst verfügbar, wenn Achsnamen für alle RollingStocks bekannt sind.
+        </Typography>
+        <Typography color="text.secondary" variant="caption">
+          Hinweis: Setze in den Control-Extension-Optionen den anl3path zur aktuellen Anlage, damit Achsnamen aus den
+          Modellressourcen gelesen werden können.
+        </Typography>
+        <Box
+          component="pre"
+          sx={{
+            bgcolor: 'action.hover',
+            borderRadius: 1,
+            color: 'text.secondary',
+            fontFamily: 'monospace',
+            fontSize: '0.75rem',
+            m: 0,
+            overflowWrap: 'anywhere',
+            p: 1,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >{`local ControlExtension =
+require("ce.ControlExtension").setOptions({
+  anl3path = "C:\\\\Spiele\\\\Trend\\\\EEP18\\\\Resourcen\\\\Anlagen\\\\meine-anlage.anl3"
+})`}</Box>
+      </Stack>
+    ) : groups.length === 0 ? (
       <Typography color="text.secondary">Keine Achsen im ausgewählten Zug gefunden.</Typography>
     ) : (
       <Stack spacing={2}>
@@ -697,7 +723,11 @@ function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
         }}
       >
         <OverviewMetric icon={<AssignmentIcon />} label="Tag" value={props.rollingStock.tag || '-'} />
-        <OverviewMetric icon={<FileUploadIcon />} label="Kranhaken" value={formatHookStatus(props.rollingStock.hookStatus)} />
+        <OverviewMetric
+          icon={<FileUploadIcon />}
+          label="Kranhaken"
+          value={formatHookStatus(props.rollingStock.hookStatus)}
+        />
         <OverviewMetric
           icon={<CommitIcon />}
           label="Position im Zug"
@@ -903,6 +933,7 @@ function mergeRollingStockModelInfo(
   return {
     ...staticRollingStock,
     ...dynamicRollingStock,
+    axisNamesKnown: dynamicRollingStock.axisNamesKnown === true || staticRollingStock.axisNamesKnown === true,
     axisNames: nonEmptyRecord(dynamicRollingStock.axisNames)
       ? dynamicRollingStock.axisNames
       : staticRollingStock.axisNames,
@@ -945,7 +976,11 @@ function formatHookStatus(value: number): string {
 }
 
 function formatRollingStockModel(rollingStock: RollingStockAppDto): string {
-  return rollingStock.xmlModel || rollingStock.modelTypeText || (rollingStock.modelType ? String(rollingStock.modelType) : '-');
+  return (
+    rollingStock.xmlModel ||
+    rollingStock.modelTypeText ||
+    (rollingStock.modelType ? String(rollingStock.modelType) : '-')
+  );
 }
 
 function formatLength(value: number): string {

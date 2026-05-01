@@ -65,6 +65,19 @@ function EEPMain()
 end
 ```
 
+### Anlagenpfad fuer Achsnamen
+
+Wenn die Control Extension Achsen von RollingStocks auswerten soll, muss der Pfad
+zur aktuellen `.anl3`-Datei gesetzt werden. Darueber findet der Hub die
+XML-/3dm-Modellpfade der RollingStocks und kann anschließend die passenden
+`.ini`- und `.3dm`-Ressourcen fuer Achsnamen parsen.
+
+```lua
+local ControlExtension = require("ce.ControlExtension").setOptions({
+    anl3path = "C:\\Spiele\\Trend\\EEP18\\Resourcen\\Anlagen\\meine-anlage.anl3"
+})
+```
+
 ### Control Server starten
 
 Ist dein EEP in `C:\Trend\EEP18` installiert, dann findest du den Control Server in `C:\Trend\EEP18\LUA\ce\control-extension-server.exe`.

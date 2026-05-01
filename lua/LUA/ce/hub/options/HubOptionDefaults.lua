@@ -245,6 +245,7 @@ function HubOptionDefaults.create()
                     orientationForward = "always",
                     smoke = "always",
                     active = "always",
+                    axisNamesKnown = "always",
                     rotX = "oninterest",
                     rotY = "oninterest",
                     rotZ = "oninterest"
@@ -278,6 +279,7 @@ function HubOptionDefaults.create()
                     orientationForward = "oninterest",
                     smoke = "oninterest",
                     active = "oninterest",
+                    axisNamesKnown = "always",
                     rotX = "oninterest",
                     rotY = "oninterest",
                     rotZ = "oninterest",

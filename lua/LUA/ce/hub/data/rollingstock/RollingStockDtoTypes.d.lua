@@ -17,6 +17,7 @@
 ---@field trackType string|nil
 ---@field hookStatus number
 ---@field hookGlueMode number
+---@field axisNamesKnown boolean
 ---@field axisNames table<string,string>
 ---@field axisValues table<string,number>
 ---@field surfaceTexts table<string,string>

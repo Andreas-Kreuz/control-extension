@@ -23,6 +23,7 @@ function testRollingStockSelectorPreservesXmlModel(): void {
           id: 'RS1',
           name: 'Wagon 1',
           xmlModel: 'rollingstock/model.xml',
+          axisNamesKnown: true,
           axisNames: { '2': 'Fahrer' },
           axisValues: { '2': 75 },
           textureNames: { '1': 'Fahrziel' },
@@ -56,6 +57,7 @@ function testRollingStockSelectorPreservesXmlModel(): void {
     orientationForward: true,
     smoke: 0,
     active: false,
+    axisNamesKnown: true,
     axisNames: { '2': 'Fahrer' },
     axisValues: { '2': 75 },
     surfaceTexts: {},
@@ -135,6 +137,7 @@ function testRollingStockSelectorNormalizesLuaArraysToOneBasedRecords(): void {
 
   assert.deepEqual(selector.getRollingStock('RS1')?.textureNames, { '1': 'Front', '2': 'Side' });
   assert.deepEqual(selector.getRollingStock('RS1')?.surfaceTexts, { '1': 'A', '2': 'B' });
+  assert.equal(selector.getRollingStock('RS1')?.axisNamesKnown, false);
   assert.deepEqual(selector.getRollingStock('RS1')?.axisNames, { '1': 'Driver' });
   assert.deepEqual(selector.getRollingStock('RS1')?.axisValues, { '1': 50 });
 }

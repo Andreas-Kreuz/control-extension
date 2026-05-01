@@ -11,6 +11,7 @@ insulate("ce.hub.data.rollingstock.RollingStockModelInfoRegistry", function ()
         local infoForXmlModelStub = stub(Parser, "infoForXmlModel", function ()
             calls = calls + 1
             return {
+                axisNamesKnown = true,
                 axisNames = { [2] = "Fahrer" },
                 textureNames = { [1] = "Fahrziel" }
             }
@@ -23,6 +24,7 @@ insulate("ce.hub.data.rollingstock.RollingStockModelInfoRegistry", function ()
 
         assert.equals(1, calls)
         assert.equals(first, second)
+        assert.is_true(first:getAxisNamesKnown())
         assert.equals("Fahrer", first.axisNames[2])
         assert.equals("Fahrziel", first.textureNames[1])
     end)

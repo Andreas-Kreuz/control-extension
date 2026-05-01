@@ -75,6 +75,12 @@ local function axisNameForNumber(modelInfo, axisNumber)
     return axisNames[tonumber(axisNumber)]
 end
 
+local function axisNamesKnownForModelInfo(modelInfo)
+    if not modelInfo then return false end
+    if type(modelInfo.getAxisNamesKnown) == "function" then return modelInfo:getAxisNamesKnown() end
+    return modelInfo.axisNamesKnown == true
+end
+
 local function sortedAxisNumbers(modelInfo)
     local numbers = {}
     local byNumber = {}
@@ -143,6 +149,7 @@ end
 ---@field z number
 ---@field model RollingStockModel
 ---@field modelInfo table|nil
+---@field axisNamesKnown boolean
 ---@field axisValues table<string, number>
 ---@field tag string
 ---@field orientationForward boolean
@@ -199,6 +206,7 @@ end
 ---@field setAxisByNumber fun(self: RollingStock, axisNumber: number|string, axisValue: number|string):boolean
 ---@field setAxisByNameFallback fun(self: RollingStock, axisNumber: number|string, axisValue: number|string):boolean
 ---@field getAxisNames fun(self: RollingStock):table<string, string>
+---@field getAxisNamesKnown fun(self: RollingStock):boolean
 ---@field getTextureNames fun(self: RollingStock):table<string, string>
 ---@field setRotation fun(self: RollingStock, rotX: number, rotY: number, rotZ: number):nil
 ---@field getRotX fun(self: RollingStock):number
@@ -296,6 +304,7 @@ function RollingStock:new(o)
     o.active = activeRollingStock == o.id
     o.textureTexts = collectTextureTexts(o.id)
     o.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    o.axisNamesKnown = axisNamesKnownForModelInfo(o.modelInfo)
     o.axisValues = collectAxisValues(o.id, o.modelInfo)
     o.trackId = trackId or -1
     o.trackDistance = tonumber(string.format("%.2f", trackDistance or -1)) or -1
@@ -626,6 +635,11 @@ function RollingStock:getAxisNames()
     return copyTableWithStringKeys(self.modelInfo and self.modelInfo.axisNames or {})
 end
 
+function RollingStock:getAxisNamesKnown()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.axisNamesKnown == true
+end
+
 function RollingStock:getTextureNames()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     return copyTableWithStringKeys(self.modelInfo and self.modelInfo.textureNames or {})
@@ -839,12 +853,15 @@ function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
     local oldAxisNames = self:getAxisNames()
+    local oldAxisNamesKnown = self:getAxisNamesKnown()
     local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
     self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
     self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
+    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
     self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
+    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
     if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
     if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
@@ -879,6 +896,7 @@ function RollingStock:toJsonStatic()
         hookStatus = self:getHookStatus(),
         hookGlueMode = self:getHookGlueMode(),
         active = self:getActive(),
+        axisNamesKnown = self:getAxisNamesKnown(),
         axisNames = self:getAxisNames(),
         axisValues = self:getAxisValues(),
         textureNames = self:getTextureNames(),

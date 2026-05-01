@@ -29,6 +29,7 @@ export interface RollingStockLuaDto {
   smoke?: number;
   active?: boolean;
   // axes
+  axisNamesKnown?: boolean;
   axisNames?: Record<string, string> | string[];
   axisValues?: Record<string, number> | number[];
   // textures

@@ -26,6 +26,7 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
 
         assert.equals("Fahrer", info.axisNames[1])
         assert.equals("Heckfl\252gel", info.axisNames[2])
+        assert.is_true(info.axisNamesKnown)
         assert.equals("Fahrer", info.axisNamesByLanguage.GER[1])
         assert.equals("Heckfl\252gel", info.axisNamesByLanguage.GER[2])
         assert.equals("Heckfl\252gel", info.rawAxisNames[8])
@@ -72,6 +73,7 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
         assert.equals("Aus-Kohlenstaub_Ein", info.axisNames[1])
         assert.equals("Schlusstafel_H", info.axisNames[2])
         assert.equals("Schlusstafel_V", info.axisNames[3])
+        assert.is_true(info.axisNamesKnown)
     end)
 
     it("prints a message and returns empty info for missing ini files", function ()
@@ -89,6 +91,7 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
             "not-existing/RollingStockResourceParser_spec_fallback.ini"
         assert.equals(expectedMessage, printCalls[1])
         assert.is_nil(next(info.axisNames))
+        assert.is_false(info.axisNamesKnown)
         assert.is_nil(next(info.textureNames))
     end)
 

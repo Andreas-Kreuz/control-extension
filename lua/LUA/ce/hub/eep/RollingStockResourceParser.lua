@@ -28,6 +28,7 @@ local RELATION_NAME_MARKER = string.char(189, 55, 134, 53)
 
 local function emptyInfo()
     return {
+        axisNamesKnown = false,
         axisNames = {},
         axisNamesByLanguage = {},
         rawAxisNames = {},
@@ -253,6 +254,7 @@ end
 
 local function applyVisibleAxisNames(info)
     info.visibleAxisInfos = buildVisibleAxisInfos(info, "GER")
+    info.axisNamesKnown = #info.visibleAxisInfos > 0
     info.axisNames = {}
     info.axisNamesByLanguage = {}
 
