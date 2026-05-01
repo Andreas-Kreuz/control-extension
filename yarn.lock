@@ -365,6 +365,7 @@ __metadata:
     "@vitest/browser": "npm:^4.1.0"
     "@vitest/coverage-v8": "npm:^4.1.0"
     cypress: "npm:^15.12.0"
+    eslint: "npm:^10.0.3"
     playwright: "npm:^1.58.2"
     prettier: "npm:^3.8.1"
     react: "npm:^19.2.4"
@@ -415,6 +416,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ce/web-shared@workspace:apps/web-shared"
   dependencies:
+    eslint: "npm:^10.0.3"
     typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
