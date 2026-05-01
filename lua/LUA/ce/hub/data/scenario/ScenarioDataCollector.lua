@@ -1,5 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioDataCollector ...") end
 
+---@class ScenarioDataCollector
+---@field collectScenario fun():table
 local ScenarioDataCollector = {}
 
 local function callOptional(fn, ...)

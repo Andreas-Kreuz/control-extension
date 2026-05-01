@@ -1,5 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDataCollector ...") end
 
+---@class StructureDataCollector
+---@field collectInitialStructures fun():table
+---@field refreshDirtyStructures fun(existingStructures: table):table
 local StructureDataCollector = {}
 
 local MAX_STRUCTURES = 5000

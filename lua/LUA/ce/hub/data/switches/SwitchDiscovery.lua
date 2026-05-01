@@ -4,6 +4,9 @@ local Switch = require("ce.hub.data.switches.Switch")
 local SwitchRegistry = require("ce.hub.data.switches.SwitchRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
+---@class SwitchDiscovery
+---@field runInitialDiscovery fun():nil
+---@field runDiscovery fun():nil
 local SwitchDiscovery = {}
 
 local MAX_SWITCHES = 1000

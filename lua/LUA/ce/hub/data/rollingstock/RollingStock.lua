@@ -121,7 +121,115 @@ local function collectAxisValues(rollingStockName, modelInfo)
 end
 
 ---@class RollingStock
+---@field values table<string, string>
+---@field id string
+---@field rollingStockName string
+---@field type string
+---@field trainName string
+---@field positionInTrain integer
+---@field couplingFront integer
+---@field couplingRear integer
+---@field modelType integer
+---@field modelTypeText string
+---@field propelled boolean
+---@field length number
+---@field mileage number
+---@field trackId integer
+---@field trackDistance number
+---@field trackDirection integer
+---@field trackSystem integer
+---@field x number
+---@field y number
+---@field z number
+---@field model RollingStockModel
+---@field modelInfo table|nil
+---@field axisValues table<string, number>
+---@field tag string
+---@field orientationForward boolean
+---@field smoke number
+---@field hookStatus number
+---@field hookGlueMode number
+---@field active boolean
+---@field textureTexts table<string, string>
+---@field rotX number
+---@field rotY number
+---@field rotZ number
+---@field trackType string|nil
 ---@field xmlModel string|nil
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
+---@field new fun(self: RollingStock, o: RollingStock):RollingStock
+---@field setValue fun(self: RollingStock, key: string, value: string):nil
+---@field getValue fun(self: RollingStock, key: string):string
+---@field save fun(self: RollingStock, clearCurrentInfo?: boolean):nil
+---@field setLine fun(self: RollingStock, line: string):nil
+---@field setDestination fun(self: RollingStock, destination: string):nil
+---@field setStations fun(self: RollingStock, stations: string):nil
+---@field setWagonNr fun(self: RollingStock, nr: string):nil
+---@field getWagonNr fun(self: RollingStock):string
+---@field setTrainName fun(self: RollingStock, trainName: string):nil
+---@field getTrainName fun(self: RollingStock):string
+---@field setPositionInTrain fun(self: RollingStock, positionInTrain: number):nil
+---@field getPositionInTrain fun(self: RollingStock):number
+---@field getLength fun(self: RollingStock):number
+---@field setLength fun(self: RollingStock, length: number):nil
+---@field getModelType fun(self: RollingStock):number
+---@field setModelType fun(self: RollingStock, modelType: number):nil
+---@field getModelTypeText fun(self: RollingStock):string
+---@field getTag fun(self: RollingStock):string
+---@field setTag fun(self: RollingStock, tag: string):nil
+---@field getPropelled fun(self: RollingStock):boolean
+---@field setPropelled fun(self: RollingStock, propelled: boolean):nil
+---@field setOrientationForward fun(self: RollingStock, orientationForward: boolean):nil
+---@field getOrientationForward fun(self: RollingStock):boolean
+---@field setSmoke fun(self: RollingStock, smoke: number):nil
+---@field getSmoke fun(self: RollingStock):number
+---@field setHookStatus fun(self: RollingStock, hookStatus: number):nil
+---@field getHookStatus fun(self: RollingStock):number
+---@field setHookGlueMode fun(self: RollingStock, hookGlueMode: number):nil
+---@field getHookGlueMode fun(self: RollingStock):number
+---@field setActive fun(self: RollingStock, active: boolean):nil
+---@field getActive fun(self: RollingStock):boolean
+---@field setTextureTexts fun(self: RollingStock, textureTexts: table<string, string>):nil
+---@field getTextureTexts fun(self: RollingStock):table<string, string>
+---@field updateTextureTexts fun(self: RollingStock):nil
+---@field setAxisValues fun(self: RollingStock, axisValues: table<string, number>):nil
+---@field getAxisValues fun(self: RollingStock):table<string, number>
+---@field updateAxisValues fun(self: RollingStock):nil
+---@field setAxisByNumber fun(self: RollingStock, axisNumber: number|string, axisValue: number|string):boolean
+---@field setAxisByNameFallback fun(self: RollingStock, axisNumber: number|string, axisValue: number|string):boolean
+---@field getAxisNames fun(self: RollingStock):table<string, string>
+---@field getTextureNames fun(self: RollingStock):table<string, string>
+---@field setRotation fun(self: RollingStock, rotX: number, rotY: number, rotZ: number):nil
+---@field getRotX fun(self: RollingStock):number
+---@field getRotY fun(self: RollingStock):number
+---@field getRotZ fun(self: RollingStock):number
+---@field setCouplingFront fun(self: RollingStock, couplingFront: number):nil
+---@field getCouplingFront fun(self: RollingStock):number
+---@field setCouplingRear fun(self: RollingStock, couplingRear: number):nil
+---@field getCouplingRear fun(self: RollingStock):number
+---@field getTrackId fun(self: RollingStock):number
+---@field setTrack fun(self: RollingStock, trackId: number, trackDistance: number,
+---trackDirection: number, trackSystem: number):nil
+---@field getTrackDistance fun(self: RollingStock):number
+---@field getTrackDirection fun(self: RollingStock):number
+---@field getTrackSystem fun(self: RollingStock):number
+---@field setTrackType fun(self: RollingStock, trackType: string):nil
+---@field getTrackType fun(self: RollingStock):string|nil
+---@field setPosition fun(self: RollingStock, x: number, y: number, z: number):nil
+---@field getX fun(self: RollingStock):number
+---@field getY fun(self: RollingStock):number
+---@field getZ fun(self: RollingStock):number
+---@field setMileage fun(self: RollingStock, mileage: number):nil
+---@field getMileage fun(self: RollingStock):number
+---@field getXmlModel fun(self: RollingStock):string|nil
+---@field setXmlModel fun(self: RollingStock, model: string|nil):nil
+---@field resetDirty fun(self: RollingStock):nil
+---@field hasDirtyFields fun(self: RollingStock):boolean
+---@field openDoors fun(self: RollingStock):nil
+---@field closeDoors fun(self: RollingStock):nil
+---@field toJsonStatic fun(self: RollingStock):table
+---@field toJsonDynamic fun(self: RollingStock):table
 local RollingStock = {}
 
 -- Field update policies (see RollingStockStaticDtoTypes.d.lua / RollingStockDynamicDtoTypes.d.lua):

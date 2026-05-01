@@ -3,6 +3,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalUpdater ..
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
+---@class SignalUpdater
+---@field runUpdate fun(options: table|nil):nil
 local SignalUpdater = {}
 
 local EEPGetSignal = _G.EEPGetSignal or function () return 0 end

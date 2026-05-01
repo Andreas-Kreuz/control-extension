@@ -1,5 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureStatePublisher ...") end
 local StructurePublisher = require("ce.hub.data.structures.StructurePublisher")
+
+---@class StructureStatePublisher
+---@field name string
+---@field initialize fun():nil
+---@field syncState fun():table
 StructureStatePublisher = {}
 StructureStatePublisher.enabled = true
 local initialized = false

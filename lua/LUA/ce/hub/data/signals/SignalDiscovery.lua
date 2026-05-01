@@ -4,6 +4,10 @@ local Signal = require("ce.hub.data.signals.Signal")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
+---@class SignalDiscovery
+---@field initFromAnl3 fun(tableOfAnl3: table|nil):nil
+---@field runInitialDiscovery fun():nil
+---@field runDiscovery fun():nil
 local SignalDiscovery = {}
 
 local MAX_SIGNALS = 1000

@@ -3,6 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalPublisher 
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local SignalDtoFactory = require("ce.hub.data.signals.SignalDtoFactory")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+
+---@class SignalPublisher
+---@field syncState fun(options: table|nil):table
 local SignalPublisher = {}
 
 local EEPGetSignalTrainName = _G.EEPGetSignalTrainName or function () return nil end

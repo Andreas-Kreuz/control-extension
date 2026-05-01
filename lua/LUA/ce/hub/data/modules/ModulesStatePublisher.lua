@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModulesStatePubl
 local ModulesPublisher = require("ce.hub.data.modules.ModulesPublisher")
 
 ---@class ModulesStatePublisher
+---@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():table
 ModulesStatePublisher = {}

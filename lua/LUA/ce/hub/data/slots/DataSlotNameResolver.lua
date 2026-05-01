@@ -1,4 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotNameResolver ...") end
+
+---@class DataSlotNameResolver
+---@field updateSlotNames fun():nil
+---@field getSlotName fun(slot: string|number):string|nil
 local DataSlotNameResolver = {}
 
 local function isModuleAvailable(name)

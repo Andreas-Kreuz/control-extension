@@ -3,6 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackPublisher ..
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local TrackDtoFactory = require("ce.hub.data.tracks.TrackDtoFactory")
 local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
+
+---@class TrackPublisher
+---@field syncState fun(options: table|nil):table
 local TrackPublisher = {}
 
 local aliases = {

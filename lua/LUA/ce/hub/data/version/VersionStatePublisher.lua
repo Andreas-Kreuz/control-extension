@@ -1,5 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionStatePublisher ...") end
 local VersionPublisher = require("ce.hub.data.version.VersionPublisher")
+
+---@class VersionStatePublisher
+---@field name string
+---@field initialize fun():nil
+---@field syncState fun():table
 VersionStatePublisher = {}
 VersionStatePublisher.enabled = true
 local initialized = false

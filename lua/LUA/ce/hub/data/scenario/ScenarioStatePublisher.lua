@@ -1,6 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioStatePublisher ...") end
 local ScenarioPublisher = require("ce.hub.data.scenario.ScenarioPublisher")
 
+---@class ScenarioStatePublisher
+---@field name string
+---@field initialize fun():nil
+---@field syncState fun():table
 ScenarioStatePublisher = {}
 ScenarioStatePublisher.enabled = true
 local initialized = false

@@ -3,6 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructurePubl
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+
+---@class StructurePublisher
+---@field syncState fun(options: table|nil):table
 local StructurePublisher = {}
 
 local function hasPayloadFields(dto)

@@ -4,6 +4,8 @@ local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local SwitchDtoFactory = require("ce.hub.data.switches.SwitchDtoFactory")
 local SwitchRegistry = require("ce.hub.data.switches.SwitchRegistry")
 
+---@class SwitchPublisher
+---@field syncState fun():table
 local SwitchPublisher = {}
 
 function SwitchPublisher.syncState()

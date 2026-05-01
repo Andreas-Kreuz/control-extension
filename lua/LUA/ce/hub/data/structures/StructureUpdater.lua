@@ -3,6 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureUpda
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
+---@class StructureUpdater
+---@field runInitialUpdate fun(options: table|nil):nil
+---@field runUpdate fun(options: table|nil):nil
 local StructureUpdater = {}
 
 local EEPStructureGetLight = _G.EEPStructureGetLight or function () end

@@ -12,22 +12,15 @@
 ---@alias TrainTrackIds table<string, number>
 ---@alias TrainTracksByTrain table<string, TrainTrackIds>
 ---@alias TrainTracksByType table<string, TrainTracksByTrain>
+---@alias TrainUpdateInfo table<string, any>
 ---@alias TrainUpdateInfos table<string, TrainUpdateInfo>
----@alias TrainInfosFn fun(d: TrainNameSet, dt: TrainNameSet, m: TrainNameSet, tt: TrainTracksByType):TrainUpdateInfos
+---@alias TrainInfosFn fun(d: TrainNameSet, dt: TrainNameSet, m: TrainNameSet, tt: TrainTracksByType): TrainUpdateInfos
 ---@class InternalDataStore: EventListener
 ---@field ceTypes InternalDataStoreCeTypes
----@field reset fun():nil
----@field getCeType fun(ceType: string):DataStoreCeType|nil
----@field get fun(ceType: string, key: string|number):DataStoreElement|nil
----@field fireEvent fun(event: DataChangeEvent):nil
-
----@class CeModule
----@field id string
----@field enabled boolean
----@field name string
----@field init fun():nil
----@field run fun():nil
----@field setOptions fun(options: table):nil
+---@field reset fun(): nil
+---@field getCeType fun(ceType: string): DataStoreCeType|nil
+---@field get fun(ceType: string, key: string|number): DataStoreElement|nil
+---@field fireEvent fun(event: DataChangeEvent): nil
 
 ---@class DataBridgeConnector
----@field registerStatePublishers fun():nil
+---@field registerStatePublishers fun(): nil

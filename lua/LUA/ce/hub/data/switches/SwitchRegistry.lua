@@ -1,5 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchRegistry ...") end
 
+---@class SwitchRegistry
+---@field has fun(switchId: number):boolean
+---@field add fun(switch: Switch):nil
+---@field get fun(switchId: number):Switch|nil
+---@field getAll fun():table<number, Switch>
 local SwitchRegistry = {}
 
 ---@type table<number, Switch>

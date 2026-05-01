@@ -1,5 +1,20 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackRegistry ...") end
 
+---@class Track
+---@field id number
+---@field reserved boolean
+---@field reservedByTrainName string|nil
+
+---@class TrackRegistry
+---@field add fun(trackType: string, track: Track):nil
+---@field get fun(trackType: string, trackId: string|number):Track|nil
+---@field getAll fun(trackType: string):table<string, Track>
+---@field markChanged fun(trackType: string, trackId: string|number):nil
+---@field getChangedIds fun(trackType: string):table<string, boolean>
+---@field clearChanged fun(trackType: string):nil
+---@field markInitialListPending fun(trackType: string):nil
+---@field isInitialListPending fun(trackType: string):boolean
+---@field clearInitialListPending fun(trackType: string):nil
 local TrackRegistry = {}
 
 local trackTypes = { "auxiliary", "control", "road", "rail", "tram" }

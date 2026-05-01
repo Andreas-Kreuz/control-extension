@@ -1,5 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeRegistry ...") end
 
+---@class RuntimeRegistry
+---@field set fun(entries: table<string, RuntimeEntry>|nil):nil
+---@field get fun():table<string, RuntimeEntry>|nil
 local RuntimeRegistry = {}
 
 local runtimeEntries = nil

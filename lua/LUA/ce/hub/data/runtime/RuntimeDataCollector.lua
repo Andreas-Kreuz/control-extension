@@ -1,5 +1,9 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDataCollector ...") end
 
+---@class RuntimeDataCollector
+---@field setLastCycleRuntimeEntries fun(runtimeEntries: table<string, RuntimeEntry>|nil, publishable: boolean):nil
+---@field collectRuntimeEntries fun():table<string, RuntimeEntry>|nil
+---@field reset fun():nil
 local RuntimeDataCollector = {}
 
 ---@type table<string, RuntimeDto>|nil

@@ -4,6 +4,10 @@ local Structure = require("ce.hub.data.structures.Structure")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
+---@class StructureDiscovery
+---@field initFromAnl3 fun(tableOfAnl3: table|nil):nil
+---@field runInitialDiscovery fun():nil
+---@field runDiscovery fun():nil
 local StructureDiscovery = {}
 
 local MAX_STRUCTURES = 50000

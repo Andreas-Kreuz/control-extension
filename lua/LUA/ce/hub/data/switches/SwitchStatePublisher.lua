@@ -1,5 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchStatePublisher ...") end
 local SwitchPublisher = require("ce.hub.data.switches.SwitchPublisher")
+
+---@class SwitchStatePublisher
+---@field name string
+---@field initialize fun():nil
+---@field syncState fun():table
 SwitchStatePublisher = {}
 SwitchStatePublisher.enabled = true
 local initialized = false
