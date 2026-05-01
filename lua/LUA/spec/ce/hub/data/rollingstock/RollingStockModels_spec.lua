@@ -85,20 +85,20 @@ insulate("GT6 8 7ND display updates", function ()
         wagon:setWagonNr("Wagen1", "201")
 
         assert.same({
-            { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  7  " },
-            { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  10  " },
-            { rollingStockName = "Wagen1", surfaceNumber = 5, text = "Central" },
-            { rollingStockName = "Wagen1", surfaceNumber = 6, text = "" },
-            { rollingStockName = "Wagen1", surfaceNumber = 18, text = "Central" },
-            { rollingStockName = "Wagen1", surfaceNumber = 16, text = "Depot" },
-            { rollingStockName = "Wagen1", surfaceNumber = 6, text = "Market" },
-            { rollingStockName = "Wagen1", surfaceNumber = 17, text = "Market" },
-            { rollingStockName = "Wagen1", surfaceNumber = 23, text = "201" },
-            { rollingStockName = "Wagen1", surfaceNumber = 24, text = "201" },
-        }, textureCalls)
+                        { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  7  " },
+                        { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  10  " },
+                        { rollingStockName = "Wagen1", surfaceNumber = 5,  text = "Central" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 6,  text = "" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 18, text = "Central" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 16, text = "Depot" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 6,  text = "Market" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 17, text = "Market" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 23, text = "201" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 24, text = "201" },
+                    }, textureCalls)
         assert.same({
-            { rollingStockName = "Wagen1", axisName = "Linie Fahrziel", axisPosition = 100 },
-        }, axisCalls)
+                        { rollingStockName = "Wagen1", axisName = "Linie Fahrziel", axisPosition = 100 },
+                    }, axisCalls)
     end)
 
     it("does not set display textures on wagon 3", function ()
@@ -142,23 +142,23 @@ insulate("GT4 destination list display", function ()
         gtA:setDestination("GT_A_1", "Central")
 
         assert.same({
-            {
-                rollingStockName = "GT_A_1",
-                surfaceNumber = 3,
-                text = "Depot\n" .. nextStopPrefix .. "\n"
-            },
-            {
-                rollingStockName = "GT_A_1",
-                surfaceNumber = 3,
-                text = "Depot\n" .. nextStopPrefix .. "Market\n"
-            },
-            { rollingStockName = "GT_A_1", surfaceNumber = 2, text = "Central" },
-            {
-                rollingStockName = "GT_A_1",
-                surfaceNumber = 3,
-                text = "Depot\n" .. nextStopPrefix .. "Market\nCentral"
-            },
-        }, textureCalls)
+                        {
+                            rollingStockName = "GT_A_1",
+                            surfaceNumber = 3,
+                            text = "Depot\n" .. nextStopPrefix .. "\n"
+                        },
+                        {
+                            rollingStockName = "GT_A_1",
+                            surfaceNumber = 3,
+                            text = "Depot\n" .. nextStopPrefix .. "Market\n"
+                        },
+                        { rollingStockName = "GT_A_1", surfaceNumber = 2, text = "Central" },
+                        {
+                            rollingStockName = "GT_A_1",
+                            surfaceNumber = 3,
+                            text = "Depot\n" .. nextStopPrefix .. "Market\nCentral"
+                        },
+                    }, textureCalls)
     end)
 
     it("keeps GT A destination list state per rolling stock", function ()
@@ -170,27 +170,27 @@ insulate("GT4 destination list display", function ()
         gtA:setDestination("GT_A_2", "Central")
 
         assert.same({
-            {
-                rollingStockName = "GT_A_1",
-                surfaceNumber = 3,
-                text = "Depot\n" .. nextStopPrefix .. "\n"
-            },
-            {
-                rollingStockName = "GT_A_2",
-                surfaceNumber = 3,
-                text = "Harbor\n" .. nextStopPrefix .. "\n"
-            },
-            {
-                rollingStockName = "GT_A_1",
-                surfaceNumber = 3,
-                text = "Depot\n" .. nextStopPrefix .. "Market\n"
-            },
-            { rollingStockName = "GT_A_2", surfaceNumber = 2, text = "Central" },
-            {
-                rollingStockName = "GT_A_2",
-                surfaceNumber = 3,
-                text = "Harbor\n" .. nextStopPrefix .. "\nCentral"
-            },
-        }, textureCalls)
+                        {
+                            rollingStockName = "GT_A_1",
+                            surfaceNumber = 3,
+                            text = "Depot\n" .. nextStopPrefix .. "\n"
+                        },
+                        {
+                            rollingStockName = "GT_A_2",
+                            surfaceNumber = 3,
+                            text = "Harbor\n" .. nextStopPrefix .. "\n"
+                        },
+                        {
+                            rollingStockName = "GT_A_1",
+                            surfaceNumber = 3,
+                            text = "Depot\n" .. nextStopPrefix .. "Market\n"
+                        },
+                        { rollingStockName = "GT_A_2", surfaceNumber = 2, text = "Central" },
+                        {
+                            rollingStockName = "GT_A_2",
+                            surfaceNumber = 3,
+                            text = "Harbor\n" .. nextStopPrefix .. "\nCentral"
+                        },
+                    }, textureCalls)
     end)
 end)

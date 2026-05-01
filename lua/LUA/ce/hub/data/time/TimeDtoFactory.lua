@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/time/TimeLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/time/TimeLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -39,16 +39,16 @@ local dtoFields = {
 
 local function buildTimeDto(timeData)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = timeData.id
-    }, timeData, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = timeData.id
+                                   }, timeData, dtoFields)
 end
 
 local function buildTimePatchDto(timeData, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = timeData.id
-    }, timeData, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = timeData.id
+                                    }, timeData, dirtyFields, dtoFields)
 end
 
 function TimeDtoFactory.createFullDto(timeData)

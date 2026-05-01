@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/framedata/FrameDataLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/framedata/FrameDataLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -31,16 +31,16 @@ local dtoFields = {
 
 local function buildFrameDataDto(entry)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = entry.id
-    }, entry, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = entry.id
+                                   }, entry, dtoFields)
 end
 
 local function buildFrameDataPatchDto(entry, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = entry.id
-    }, entry, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = entry.id
+                                    }, entry, dirtyFields, dtoFields)
 end
 
 function FrameDataDtoFactory.createFullDto(entry)

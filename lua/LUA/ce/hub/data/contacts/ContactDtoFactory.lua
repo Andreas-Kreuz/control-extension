@@ -1,4 +1,4 @@
-﻿if CeDebugLoad then print("[#Start] Loading ce.hub.data.contacts.ContactDtoFactory ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.contacts.ContactDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
@@ -26,9 +26,9 @@ local dtoFields = {
 local function buildFullDto(contact, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("contacts")
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = contact.id
-    }, contact, dtoFields, fieldPolicies, isSelected)
+                                       ceType = CE_TYPE,
+                                       id = contact.id
+                                   }, contact, dtoFields, fieldPolicies, isSelected)
 end
 
 function ContactDtoFactory.createFullDto(contact, isSelected)

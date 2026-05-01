@@ -43,7 +43,7 @@ end
 
 function TrafficLightModelDtoFactory.createSignalTypeDefinitionDto(definition)
     local dto = toSignalTypeDefinitionDto(definition)
-    return CE_TYPE, KEY_ID, dto[KEY_ID], dto
+    return CE_TYPE, KEY_ID, dto.id, dto
 end
 
 function TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList(definitions)

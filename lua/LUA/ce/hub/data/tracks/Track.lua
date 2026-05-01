@@ -6,6 +6,11 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.Track ...") end
 ---@field reservedByTrainName string|nil
 ---@field dirtyFields table<string, boolean>
 ---@field needsFullSend boolean
+---@field new fun(self: Track, o: table):Track
+---@field setReservation fun(self: Track, reserved: boolean, reservedByTrainName: string|nil):nil
+---@field markChanged fun(self: Track):nil
+---@field resetDirty fun(self: Track):nil
+---@field hasDirtyFields fun(self: Track):boolean
 local Track = {}
 
 local function markDirty(track, fieldName)

@@ -27,9 +27,10 @@ insulate("FrameDataStatePublisher", function ()
         local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
         local published = {}
 
-        DataChangeBus.fireDataChanged = function (ceType, keyId, key, dto)
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
             table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
-        end
+        end)
+        finally(function () fireDataChangedStub:revert() end)
 
         FrameDataUpdater.runUpdate()
         FrameDataStatePublisher.syncState()
@@ -57,9 +58,10 @@ insulate("FrameDataStatePublisher", function ()
         local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")
         local published = {}
 
-        DataChangeBus.fireDataChanged = function (ceType, keyId, key, dto)
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
             table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
-        end
+        end)
+        finally(function () fireDataChangedStub:revert() end)
 
         FrameDataRegistry.set({
             {

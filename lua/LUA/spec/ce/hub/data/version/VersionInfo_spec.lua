@@ -7,16 +7,11 @@ insulate("VersionInfo", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.version.VersionInfo")
-        io.open = originalIoOpen
-    end)
-
-    after_each(function ()
-        io.open = originalIoOpen
     end)
 
     it("reads the program version lazily and caches it", function ()
         local openCalls = 0
-        io.open = function (fileName, mode)
+        local ioOpenStub = stub(io, "open", function (fileName, mode)
             if fileName ~= "LUA/ce/VERSION" then return originalIoOpen(fileName, mode) end
 
             openCalls = openCalls + 1
@@ -27,7 +22,8 @@ insulate("VersionInfo", function ()
                 read = function () return "9.9.9" end,
                 close = function () end
             }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local VersionInfo = require("ce.hub.data.version.VersionInfo")
 
@@ -37,10 +33,11 @@ insulate("VersionInfo", function ()
     end)
 
     it("returns a fallback text if the version file is missing", function ()
-        io.open = function (fileName, mode)
+        local ioOpenStub = stub(io, "open", function (fileName, mode)
             if fileName == "LUA/ce/VERSION" then return nil end
             return originalIoOpen(fileName, mode)
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local VersionInfo = require("ce.hub.data.version.VersionInfo")
 

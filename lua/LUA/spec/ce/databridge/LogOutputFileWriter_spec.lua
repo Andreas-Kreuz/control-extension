@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 insulate("ce.databridge.LogOutputFileWriter", function ()
     require("ce.hub.eep.EepSimulator")
 
@@ -12,46 +13,52 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
     local originalOsDate = os.date
 
     local function installSimpleGlobals()
-        _G.assert = function (v, message)
+        local assertStub = stub(_G, "assert", function (v, message)
             if not v then originalError(message and message or "Assertion failed.", 0) end
             return v
-        end
-        _G.error = function (message, level) originalError(message, level and level or 1) end
-        _G.print = function () end
-        _G.warn = function () end
-        _G.clearlog = function () end
+        end)
+        local errorStub = stub(_G, "error", function (message, level) originalError(message, level and level or 1) end)
+        local printStub = stub(_G, "print", function () end)
+        local warnStub = stub(_G, "warn", function () end)
+        local clearlogStub = stub(_G, "clearlog", function () end)
+
+        return { assertStub, errorStub, printStub, warnStub, clearlogStub }
+    end
+
+    local function revertStubs(stubs)
+        for i = #stubs, 1, -1 do stubs[i]:revert() end
     end
 
     before_each(function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.IncomingCommandExecutor")
         clearModule("ce.databridge.LogOutputFileWriter")
-        io.open = originalIoOpen
-        _G.assert = originalAssert
-        _G.error = originalError
-        _G.print = originalPrint
-        _G.warn = originalWarn
-        _G.clearlog = originalClearlog
-        os.date = originalOsDate
+        rawset(io, "open", originalIoOpen)
+        rawset(_G, "assert", originalAssert)
+        rawset(_G, "error", originalError)
+        rawset(_G, "print", originalPrint)
+        rawset(_G, "warn", originalWarn)
+        rawset(_G, "clearlog", originalClearlog)
+        rawset(os, "date", originalOsDate)
     end)
 
     after_each(function ()
-        io.open = originalIoOpen
-        _G.assert = originalAssert
-        _G.error = originalError
-        _G.print = originalPrint
-        _G.warn = originalWarn
-        _G.clearlog = originalClearlog
-        os.date = originalOsDate
+        rawset(io, "open", originalIoOpen)
+        rawset(_G, "assert", originalAssert)
+        rawset(_G, "error", originalError)
+        rawset(_G, "print", originalPrint)
+        rawset(_G, "warn", originalWarn)
+        rawset(_G, "clearlog", originalClearlog)
+        rawset(os, "date", originalOsDate)
     end)
 
     it("writes newline-terminated log entries and reset markers", function ()
         local logWrites = {}
         local logOpenModes = {}
 
-        installSimpleGlobals()
-        os.date = function () return "" end
-        io.open = function (name, mode)
+        local simpleGlobalStubs = installSimpleGlobals()
+        local osDateStub = stub(os, "date", function () return "" end)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/log-from-ce" then
@@ -69,7 +76,10 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
                 flush = function () end,
                 close = function () end
             }
-        end
+        end)
+        finally(function () revertStubs(simpleGlobalStubs) end)
+        finally(function () osDateStub:revert() end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local LogOutputFileWriter = require("ce.databridge.LogOutputFileWriter")
@@ -90,8 +100,8 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
     it("registers wrapped print and keeps assert fail-loud", function ()
         local openCalls = {}
 
-        installSimpleGlobals()
-        io.open = function (name, mode)
+        local simpleGlobalStubs = installSimpleGlobals()
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/log-from-ce" then
@@ -100,7 +110,9 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
 
             table.insert(openCalls, { name = name, mode = mode })
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () revertStubs(simpleGlobalStubs) end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")

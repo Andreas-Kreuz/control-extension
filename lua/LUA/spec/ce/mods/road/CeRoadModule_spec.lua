@@ -41,13 +41,13 @@ insulate("ce.mods.road.CeRoadModule", function ()
 
         local _, _, _, dto = RoadDtoFactory.createIntersectionDto(intersection)
 
-        assert.equals("A", dto.name)              -- "always" by default -> populated
-        assert.equals("", dto.manualSwitching)    -- "oninterest" by default, never selected -> empty
-        assert.equals("", dto.currentSwitching)   -- "oninterest" by default, never selected -> empty
-        assert.equals("", dto.nextSwitching)      -- "oninterest" by default, never selected -> empty
-        assert.is_false(dto.ready)                -- "oninterest" by default, never selected -> false
-        assert.equals(15, dto.timeForGreen)       -- "always" by default -> populated
-        assert.same({ "Cam 1" }, dto.staticCams)  -- "always" by default -> populated
+        assert.equals("A", dto.name)             -- "always" by default -> populated
+        assert.equals("", dto.manualSwitching)   -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.currentSwitching)  -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.nextSwitching)     -- "oninterest" by default, never selected -> empty
+        assert.is_false(dto.ready)               -- "oninterest" by default, never selected -> false
+        assert.equals(15, dto.timeForGreen)      -- "always" by default -> populated
+        assert.same({ "Cam 1" }, dto.staticCams) -- "always" by default -> populated
         assert.same(intersection.phases, dto.phases)
     end)
 
@@ -75,7 +75,7 @@ insulate("ce.mods.road.CeRoadModule", function ()
         assert.is_true(dto.ready)
         assert.equals(15, dto.timeForGreen)
         assert.same({ "Cam 1" }, dto.staticCams)
-        assert.equals("A", dto.name)  -- unspecified "always" field stays
+        assert.equals("A", dto.name) -- unspecified "always" field stays
         assert.equals("S2", dto.manualSwitching)
     end)
 

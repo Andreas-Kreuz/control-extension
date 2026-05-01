@@ -3,7 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackRegistry ...
 local Track = require("ce.hub.data.tracks.Track")
 
 ---@class TrackRegistry
----@field add fun(trackType: string, track: Track):nil
+---@field add fun(trackType: string, track: table):nil
 ---@field get fun(trackType: string, trackId: string|number):Track|nil
 ---@field getAll fun(trackType: string):table<string, Track>
 ---@field markChanged fun(trackType: string, trackId: string|number):nil

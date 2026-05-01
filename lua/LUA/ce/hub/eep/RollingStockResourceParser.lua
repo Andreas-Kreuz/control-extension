@@ -274,6 +274,7 @@ local function parseLine(line, info)
     if axisNumber and axisName and
         (language == "ENG" or language == "GER" or language == "POL" or language == "FRA") then
         local number = tonumber(axisNumber)
+        if not number then return end
         info.rawAxisNamesByLanguage[language] = info.rawAxisNamesByLanguage[language] or {}
         info.rawAxisNamesByLanguage[language][number] = unquote(axisName)
         info.axisNamesByLanguage[language] = info.axisNamesByLanguage[language] or {}

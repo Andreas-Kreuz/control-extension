@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/scenario/ScenarioLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/scenario/ScenarioLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -57,16 +57,16 @@ local dtoFields = {
 
 local function buildScenarioDto(scenario)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = scenario.id or ENTRY_ID
-    }, scenario, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = scenario.id or ENTRY_ID
+                                   }, scenario, dtoFields)
 end
 
 local function buildScenarioPatchDto(scenario, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = scenario.id or ENTRY_ID
-    }, scenario, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = scenario.id or ENTRY_ID
+                                    }, scenario, dirtyFields, dtoFields)
 end
 
 function ScenarioDtoFactory.createFullDto(scenario)

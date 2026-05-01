@@ -31,7 +31,7 @@ function StructureUpdater.runUpdate()
     local fields = HubOptionsRegistry.getFieldUpdatePolicies("structures")
     for _, structure in pairs(StructureRegistry.getAll()) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure,
-                                                            tostring(structure.id or structure.name))
+                                                           tostring(structure.id or structure.name))
         if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
             local _, tag = EEPStructureGetTagText(structure.name)
             structure:setTag(tag or "")

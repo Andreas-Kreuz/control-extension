@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/structures/StructureLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/structures/StructureLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")

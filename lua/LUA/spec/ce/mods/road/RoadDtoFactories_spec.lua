@@ -28,14 +28,14 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                     greenPhaseSeconds = 15,
                     trafficLights = {
                         {
-                                        signalId = 1,
-                                        signalKind = "TRAFFIC",
-                                        signalKey = "1:TRAFFIC",
-                                        signalName = "K1",
-                                        type = "CAR",
-                                        trafficSignalName = "K1",
-                                        use = "TRAFFIC_ONLY"
-                                    },
+                            signalId = 1,
+                            signalKind = "TRAFFIC",
+                            signalKey = "1:TRAFFIC",
+                            signalName = "K1",
+                            type = "CAR",
+                            trafficSignalName = "K1",
+                            use = "TRAFFIC_ONLY"
+                        },
                         {
                             signalId = 3,
                             signalKind = "PEDESTRIAN",

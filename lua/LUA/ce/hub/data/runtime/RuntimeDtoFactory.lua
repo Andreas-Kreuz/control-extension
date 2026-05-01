@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/runtime/RuntimeLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/runtime/RuntimeLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -33,16 +33,16 @@ local dtoFields = {
 
 local function buildRuntimeDto(runtimeEntry)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = runtimeEntry.id
-    }, runtimeEntry, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = runtimeEntry.id
+                                   }, runtimeEntry, dtoFields)
 end
 
 local function buildRuntimePatchDto(runtimeEntry, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = runtimeEntry.id
-    }, runtimeEntry, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = runtimeEntry.id
+                                    }, runtimeEntry, dirtyFields, dtoFields)
 end
 
 function RuntimeDtoFactory.createFullDto(runtimeEntry)

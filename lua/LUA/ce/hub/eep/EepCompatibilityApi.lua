@@ -41,13 +41,19 @@ EEPRollingstockGetTagText = EEPRollingstockGetTagText or function () end
 
 -- EEP 13.2
 EepCompatibilityApi.EEPGetTrainLength = EEPGetTrainLength or function (trainName)
-    local rollingStockCount = EEPGetRollingstockItemsCount(trainName)
+    ---@type fun(trainName: string):number
+    local getRollingStockItemsCount = EEPGetRollingstockItemsCount
+    ---@type fun(trainName: string, position: number):string
+    local getRollingStockItemName = EEPGetRollingstockItemName
+    ---@type fun(rollingStockName: string):boolean, number
+    local getRollingStockLength = EEPRollingstockGetLength
+    local rollingStockCount = getRollingStockItemsCount(trainName)
     local ok = rollingStockCount > 0
     local length = 0
     if ok then
         for i = 0, (rollingStockCount - 1) do
-            local rollingStockName = EEPGetRollingstockItemName(trainName, i)
-            local _, rslength = EEPRollingstockGetLength(rollingStockName)
+            local rollingStockName = getRollingStockItemName(trainName, i)
+            local _, rslength = getRollingStockLength(rollingStockName)
             length = length + rslength
         end
     end

@@ -79,8 +79,8 @@ insulate("ce.mods.transit.data.TransitDtoFactory", function ()
                         ceType = "ce.mods.transit.Station",
                         id = "Station A",
                         name = "Station A",
-                        platforms = {},  -- always policy, but no routePlatforms supplied
-                        queue = {}       -- oninterest, not selected
+                        platforms = {}, -- always policy, but no routePlatforms supplied
+                        queue = {}      -- oninterest, not selected
                     }, stationDto)
         assert.equals("ce.mods.transit.ModuleSetting", settingsCeType)
         assert.equals("name", settingsKeyId)

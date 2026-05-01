@@ -53,7 +53,7 @@ local function publishWaitingOnSignals()
             waitingOnSignal:resetDirty()
         elseif waitingOnSignal:hasDirtyFields() then
             local ceType, keyId, key, dto = SignalDtoFactory.createWaitingOnSignalPatchDto(waitingOnSignal,
-                                                                                          waitingOnSignal.dirtyFields)
+                                                                                           waitingOnSignal.dirtyFields)
             if hasPayloadFields(dto) then DataChangeBus.fireDataChanged(ceType, keyId, key, dto) end
             waitingOnSignal:resetDirty()
         end
@@ -89,7 +89,6 @@ function SignalPublisher.syncState()
         publishWaitingOnSignalRemovals()
         publishWaitingOnSignals()
     end
-
 end
 
 return SignalPublisher

@@ -37,15 +37,13 @@ insulate("ce.mods.transit.TransitSettings", function ()
         local TransitSettings = require("ce.mods.transit.TransitSettings")
         local RoadStation = require("ce.mods.transit.RoadStation")
         local refreshCalls = 0
-        local oldShowTippText = RoadStation.showTippText
 
-        RoadStation.showTippText = function () refreshCalls = refreshCalls + 1 end
+        local showTippTextStub = stub(RoadStation, "showTippText", function () refreshCalls = refreshCalls + 1 end)
+        finally(function () showTippTextStub:revert() end)
 
         TransitSettings.loadSettingsFromSlot(24)
         TransitSettings.setShowDepartureTippText(true)
 
         assert.equals(1, refreshCalls)
-
-        RoadStation.showTippText = oldShowTippText
     end)
 end)

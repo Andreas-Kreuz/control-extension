@@ -124,10 +124,10 @@ local function toTransitModuleSettingDto(setting, _, isSelected)
         and setting.category or ""
     dto.description     = SyncPolicy.shouldPublishField(fieldPolicies, "description", isSelected)
         and setting.description or
-    ""
+        ""
     dto.eepFunction     = SyncPolicy.shouldPublishField(fieldPolicies, "eepFunction", isSelected)
         and setting.eepFunction or
-    ""
+        ""
     dto.type            = SyncPolicy.shouldPublishField(fieldPolicies, "type", isSelected) and setting.type or ""
     if SyncPolicy.shouldPublishField(fieldPolicies, "value", isSelected) then
         dto.value = setting.value

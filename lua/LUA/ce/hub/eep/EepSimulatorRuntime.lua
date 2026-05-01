@@ -1,3 +1,4 @@
+---@diagnostic disable: unused-local
 if CeDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulatorRuntime ...") end
 
 local Store = require("ce.hub.eep.EepSimulatorStore")
@@ -1390,8 +1391,6 @@ local function create(simulator, globals)
         state.camera.rotZ = rotZ
         return true
     end
-
-    function Runtime.callEEPRollingstockGetSmoke(rollingstockName) return true, 0 end
 
     function Runtime.callEEPRollingstockSetSmoke(rollingstockName, status)
         getOrCreateRollingStockEntry(rollingstockName).smokeEnabled = status == true or status == 1

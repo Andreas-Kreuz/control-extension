@@ -80,9 +80,9 @@ local waitingOnSignalDtoFields = {
 local function buildSignalDto(signal, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("signals")
     return DtoBuilder.buildFullDto({
-        ceType = SIGNAL_CE_TYPE,
-        id = signal.id
-    }, signal, signalDtoFields, fieldPolicies, isSelected)
+                                       ceType = SIGNAL_CE_TYPE,
+                                       id = signal.id
+                                   }, signal, signalDtoFields, fieldPolicies, isSelected)
 end
 
 function SignalDtoFactory.createSignalDto(signal, isSelected)
@@ -92,16 +92,16 @@ end
 
 local function buildWaitingOnSignalDto(waiting)
     return DtoBuilder.buildFullDto({
-        ceType = WAITING_CE_TYPE,
-        id = waiting.id
-    }, waiting, waitingOnSignalDtoFields)
+                                       ceType = WAITING_CE_TYPE,
+                                       id = waiting.id
+                                   }, waiting, waitingOnSignalDtoFields)
 end
 
 local function buildWaitingOnSignalPatchDto(waiting, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = WAITING_CE_TYPE,
-        id = waiting.id
-    }, waiting, dirtyFields, waitingOnSignalDtoFields)
+                                        ceType = WAITING_CE_TYPE,
+                                        id = waiting.id
+                                    }, waiting, dirtyFields, waitingOnSignalDtoFields)
 end
 
 function SignalDtoFactory.createWaitingOnSignalDto(waiting)

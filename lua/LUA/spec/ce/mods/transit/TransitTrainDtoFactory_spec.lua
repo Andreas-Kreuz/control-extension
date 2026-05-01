@@ -1,5 +1,28 @@
 insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local function createNextStations()
+        return {
+            {
+                station = {
+                    name = "Central",
+                    type = "RoadStation"
+                },
+                platform = "2",
+                departureInMinutes = 3
+            }
+        }
+    end
+
+    local function createTransitTrain()
+        return {
+            id = "T1",
+            getLine = function () return "10" end,
+            getDestination = function () return "Central" end,
+            getOrigin = function () return "Depot" end,
+            getDirection = function () return "North" end,
+            getNextStations = createNextStations,
+        }
+    end
 
     before_each(function ()
         clearModule("ce.mods.transit.data.TransitTrainDtoFactory")
@@ -8,22 +31,7 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
     it("creates full transit train DTOs", function ()
         local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
 
-        local ceType, keyId, key, dto = TransitTrainDtoFactory.createFullDto({
-            id = "T1",
-            getLine = function () return "10" end,
-            getDestination = function () return "Central" end,
-            getOrigin = function () return "Depot" end,
-            getDirection = function () return "North" end,
-            getNextStations = function ()
-                return {
-                    {
-                        station = { name = "Central", type = "RoadStation" },
-                        platform = "2",
-                        departureInMinutes = 3
-                    }
-                }
-            end,
-        }, true)
+        local ceType, keyId, key, dto = TransitTrainDtoFactory.createFullDto(createTransitTrain(), true)
 
         assert.equals("ce.mods.transit.TransitTrain", ceType)
         assert.equals("id", keyId)
@@ -47,36 +55,16 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
     it("uses empty next stations for unselected full transit train DTOs", function ()
         local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
 
-        local _, _, _, dto = TransitTrainDtoFactory.createFullDto({
-            id = "T1",
-            getLine = function () return "10" end,
-            getDestination = function () return "Central" end,
-            getOrigin = function () return "Depot" end,
-            getDirection = function () return "North" end,
-            getNextStations = function ()
-                return {
-                    {
-                        station = { name = "Central", type = "RoadStation" },
-                        platform = "2",
-                        departureInMinutes = 3
-                    }
-                }
-            end,
-        }, false)
+        local _, _, _, dto = TransitTrainDtoFactory.createFullDto(createTransitTrain(), false)
 
         assert.same({}, dto.nextStations)
     end)
 
     it("creates patch transit train DTOs", function ()
         local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
+        local transitTrain = createTransitTrain()
 
-        local _, _, _, dto = TransitTrainDtoFactory.createPatchDto({
-            id = "T1",
-            getLine = function () return "10" end,
-            getDestination = function () return "Central" end,
-            getOrigin = function () return "Depot" end,
-            getDirection = function () return "North" end,
-        }, { destination = true }, true)
+        local _, _, _, dto = TransitTrainDtoFactory.createPatchDto(transitTrain, { destination = true }, true)
 
         assert.same({
                         ceType = "ce.mods.transit.TransitTrain",
@@ -87,19 +75,9 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
 
     it("creates selected next station patch DTOs", function ()
         local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
+        local transitTrain = createTransitTrain()
 
-        local _, _, _, dto = TransitTrainDtoFactory.createPatchDto({
-            id = "T1",
-            getNextStations = function ()
-                return {
-                    {
-                        station = { name = "Central", type = "RoadStation" },
-                        platform = "2",
-                        departureInMinutes = 3
-                    }
-                }
-            end,
-        }, { nextStations = true }, true)
+        local _, _, _, dto = TransitTrainDtoFactory.createPatchDto(transitTrain, { nextStations = true }, true)
 
         assert.same({
                         ceType = "ce.mods.transit.TransitTrain",
@@ -115,19 +93,9 @@ insulate("ce.mods.transit.data.TransitTrainDtoFactory", function ()
 
     it("omits next station patch DTOs when unselected", function ()
         local TransitTrainDtoFactory = require("ce.mods.transit.data.TransitTrainDtoFactory")
+        local transitTrain = createTransitTrain()
 
-        local _, _, _, dto = TransitTrainDtoFactory.createPatchDto({
-            id = "T1",
-            getNextStations = function ()
-                return {
-                    {
-                        station = { name = "Central", type = "RoadStation" },
-                        platform = "2",
-                        departureInMinutes = 3
-                    }
-                }
-            end,
-        }, { nextStations = true }, false)
+        local _, _, _, dto = TransitTrainDtoFactory.createPatchDto(transitTrain, { nextStations = true }, false)
 
         assert.same({
                         ceType = "ce.mods.transit.TransitTrain",

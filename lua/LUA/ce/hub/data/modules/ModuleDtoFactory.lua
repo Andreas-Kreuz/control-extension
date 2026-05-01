@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/modules/ModuleLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/modules/ModuleLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModuleDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -29,16 +29,16 @@ local dtoFields = {
 
 local function buildModuleDto(module)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = module.id
-    }, module, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = module.id
+                                   }, module, dtoFields)
 end
 
 local function buildModulePatchDto(module, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = module.id
-    }, module, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = module.id
+                                    }, module, dirtyFields, dtoFields)
 end
 
 local function normalizeModule(moduleOrName, module)

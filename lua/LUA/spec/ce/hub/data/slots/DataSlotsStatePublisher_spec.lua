@@ -1,5 +1,6 @@
 insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local eepLoadDataStub
 
     before_each(function ()
         clearModule("ce.hub.data.slots.DataSlotsStatePublisher")
@@ -12,14 +13,14 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         clearModule("ce.hub.data.slots.DataSlotsRegistry")
         clearModule("ce.hub.data.slots.DataSlotsUpdater")
 
-        stub(_G, "EEPLoadData", function (id)
+        eepLoadDataStub = stub(_G, "EEPLoadData", function (id)
             if id == 1 then return true, "payload-1" end
             return false, nil
         end)
     end)
 
     after_each(function ()
-        _G.EEPLoadData:revert()
+        eepLoadDataStub:revert()
     end)
 
     it("fires save-slot and free-slot ceTypes with the existing wire format", function ()
@@ -29,12 +30,15 @@ insulate("ce.hub.data.slots.DataSlotsStatePublisher", function ()
         local StorageUtility = require("ce.hub.util.StorageUtility")
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
-        DataSlotNameResolver.updateSlotNames = function () end
-        DataSlotNameResolver.getSlotName = function (id)
+        local updateSlotNamesStub = stub(DataSlotNameResolver, "updateSlotNames", function () end)
+        local getSlotNameStub = stub(DataSlotNameResolver, "getSlotName", function (id)
             if id == 1 then return "Named Slot" end
             return nil
-        end
-        StorageUtility.getName = function () return nil end
+        end)
+        local getNameStub = stub(StorageUtility, "getName", function () return nil end)
+        finally(function () updateSlotNamesStub:revert() end)
+        finally(function () getSlotNameStub:revert() end)
+        finally(function () getNameStub:revert() end)
 
         DataSlotsUpdater.runUpdate()
         DataSlotsStatePublisher.syncState()

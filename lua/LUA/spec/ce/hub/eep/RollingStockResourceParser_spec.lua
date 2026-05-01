@@ -3,12 +3,12 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
 
     it("extracts German axis and texture names", function ()
         local info = Parser.parseContent(table.concat({
-            '[FileInfo]',
-            'MovAxis1_ENG = "driver"',
-            'MovAxis2_GER	 = "Fahrer"',
-            'TexText1_GER = "1.Fahrziel Vorn"',
-            'TexText25_GER = "Verkehrsgesellschaft"'
-        }, "\n"))
+                                                          "[FileInfo]",
+                                                          'MovAxis1_ENG = "driver"',
+                                                          'MovAxis2_GER	 = "Fahrer"',
+                                                          'TexText1_GER = "1.Fahrziel Vorn"',
+                                                          'TexText25_GER = "Verkehrsgesellschaft"'
+                                                      }, "\n"))
 
         assert.equals("Fahrer", info.axisNames[2])
         assert.equals("driver", info.axisNamesByLanguage.ENG[1])
@@ -20,9 +20,9 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
 
     it("builds compact visible axis names from ini names", function ()
         local info = Parser.applyVisibleAxisNames(Parser.parseContent(table.concat({
-            'MovAxis8_GER = "Heckfl\252gel"',
-            'MovAxis2_GER = "Fahrer"'
-        }, "\n")))
+                                                                                       'MovAxis8_GER = "Heckfl\252gel"',
+                                                                                       'MovAxis2_GER = "Fahrer"'
+                                                                                   }, "\n")))
 
         assert.equals("Fahrer", info.axisNames[1])
         assert.equals("Heckfl\252gel", info.axisNames[2])
@@ -62,10 +62,10 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
             rawAxisNames = {},
             rawAxisNamesByLanguage = {},
             parsed3dmAxes = {
-                { index = 12, name = "Schlusstafel_V", isPublic = true },
-                { index = 13, name = "Schlusstafel_H", isPublic = true },
+                { index = 12, name = "Schlusstafel_V",      isPublic = true },
+                { index = 13, name = "Schlusstafel_H",      isPublic = true },
                 { index = 14, name = "Aus-Kohlenstaub_Ein", isPublic = true },
-                { index = 15, name = "_internal", isPublic = false }
+                { index = 15, name = "_internal",           isPublic = false }
             }
         })
 
@@ -76,15 +76,13 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
 
     it("prints a message and returns empty info for missing ini files", function ()
         local printCalls = {}
-        local originalPrint = _G.print
-        _G.print = function (message) printCalls[#printCalls + 1] = message end
+        local printStub = stub(_G, "print", function (message) printCalls[#printCalls + 1] = message end)
+        finally(function () printStub:revert() end)
 
         local info = Parser.parseFirstExistingFile({
             "not-existing/RollingStockResourceParser_spec.ini",
             "not-existing/RollingStockResourceParser_spec_fallback.ini"
         })
-
-        _G.print = originalPrint
 
         local expectedMessage = "Rolling stock resource ini file not found: " ..
             "not-existing/RollingStockResourceParser_spec.ini or " ..

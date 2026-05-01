@@ -3,6 +3,7 @@ insulate("MainLoopRunner", function ()
 
     local function clearModule(name) package.loaded[name] = nil end
     local printStub
+    local ioInitInitializeStub
 
     local function resetCoreModules()
         clearModule("ce.ControlExtension")
@@ -41,13 +42,17 @@ insulate("MainLoopRunner", function ()
         resetCoreModules()
         require("ce.hub.eep.EepSimulator")
         local IoInit = require("ce.databridge.IoInit")
-        IoInit.initialize = function () end
+        ioInitInitializeStub = stub(IoInit, "initialize", function () end)
     end)
 
     after_each(function ()
         if printStub then
             printStub:revert()
             printStub = nil
+        end
+        if ioInitInitializeStub then
+            ioInitInitializeStub:revert()
+            ioInitInitializeStub = nil
         end
     end)
 
@@ -84,24 +89,32 @@ insulate("MainLoopRunner", function ()
             end
         }
 
-        DataChangeBus.fireDataChanged = function (ceType, keyId, key, element)
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, element)
             if ceType ~= "ce.hub.Runtime" then return end
             capturedRuntimeEvents[#capturedRuntimeEvents + 1] = element or {
                 keyId = keyId,
                 id = key
             }
-        end
-        DataChangeBus.printEventCounter = function () end
+        end)
+        local printEventCounterStub = stub(DataChangeBus, "printEventCounter", function () end)
 
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function ()
-            commandReadCalls = commandReadCalls + 1
-        end
-        ServerExchangeCoordinator.isServerReady = function () return true end
-        ServerExchangeCoordinator.runServerOutputCycle = function ()
+        local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
+                                                        function ()
+                                                            commandReadCalls = commandReadCalls + 1
+                                                        end)
+        local isServerReadyStub = stub(ServerExchangeCoordinator, "isServerReady", function () return true end)
+        local runServerOutputCycleStub = stub(ServerExchangeCoordinator, "runServerOutputCycle", function ()
             communicateCalls = communicateCalls + 1
             return { encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01 }
-        end
-        DataStoreFileWriter.write = function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end
+        end)
+        local writeStub = stub(DataStoreFileWriter, "write",
+                               function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end)
+        finally(function () fireDataChangedStub:revert() end)
+        finally(function () printEventCounterStub:revert() end)
+        finally(function () readAndExecuteIncomingCommandsStub:revert() end)
+        finally(function () isServerReadyStub:revert() end)
+        finally(function () runServerOutputCycleStub:revert() end)
+        finally(function () writeStub:revert() end)
 
         ModuleRegistry.registerModules(testModule)
         StatePublisherRegistry.registerStatePublishers(testStatePublisher)
@@ -159,13 +172,16 @@ insulate("MainLoopRunner", function ()
             end
         }
 
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function ()
-            commandReadCalls = commandReadCalls + 1
-        end
-        ServerExchangeCoordinator.runServerOutputCycle = function ()
+        local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
+                                                        function ()
+                                                            commandReadCalls = commandReadCalls + 1
+                                                        end)
+        local runServerOutputCycleStub = stub(ServerExchangeCoordinator, "runServerOutputCycle", function ()
             communicateCalls = communicateCalls + 1
             return { encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01 }
-        end
+        end)
+        finally(function () readAndExecuteIncomingCommandsStub:revert() end)
+        finally(function () runServerOutputCycleStub:revert() end)
 
         ModuleRegistry.registerModules(testModule)
         StatePublisherRegistry.registerStatePublishers(testStatePublisher)
@@ -192,17 +208,24 @@ insulate("MainLoopRunner", function ()
         local commandReadCalls = 0
         local communicateCalls = 0
 
-        DataChangeBus.fireListChange = function () end
-        DataChangeBus.printEventCounter = function () end
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function () end)
+        local printEventCounterStub = stub(DataChangeBus, "printEventCounter", function () end)
 
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function ()
-            commandReadCalls = commandReadCalls + 1
-        end
-        ServerExchangeCoordinator.runServerOutputCycle = function ()
+        local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
+                                                        function ()
+                                                            commandReadCalls = commandReadCalls + 1
+                                                        end)
+        local runServerOutputCycleStub = stub(ServerExchangeCoordinator, "runServerOutputCycle", function ()
             communicateCalls = communicateCalls + 1
             return { encodeTime = 0.003, writeTime = 0.004, totalTime = 0.01 }
-        end
-        DataStoreFileWriter.write = function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end
+        end)
+        local writeStub = stub(DataStoreFileWriter, "write",
+                               function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end)
+        finally(function () fireListChangeStub:revert() end)
+        finally(function () printEventCounterStub:revert() end)
+        finally(function () readAndExecuteIncomingCommandsStub:revert() end)
+        finally(function () runServerOutputCycleStub:revert() end)
+        finally(function () writeStub:revert() end)
 
         MainLoopRunner.runCycle(5, {}, {}, { enableServer = false, enableDataStoreJson = true })
         MainLoopRunner.runCycle(5, {}, {}, { enableServer = false, enableDataStoreJson = true })
@@ -219,10 +242,15 @@ insulate("MainLoopRunner", function ()
         local DataStoreFileWriter = require("ce.databridge.DataStoreFileWriter")
         local printedMessages = {}
 
-        DataChangeBus.fireListChange = function () end
-        DataChangeBus.printEventCounter = function () end
-        IncomingCommandFileReader.readAndExecuteIncomingCommands = function () end
-        DataStoreFileWriter.write = function () end
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function () end)
+        local printEventCounterStub = stub(DataChangeBus, "printEventCounter", function () end)
+        local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
+                                                        function () end)
+        local writeStub = stub(DataStoreFileWriter, "write", function () end)
+        finally(function () fireListChangeStub:revert() end)
+        finally(function () printEventCounterStub:revert() end)
+        finally(function () readAndExecuteIncomingCommandsStub:revert() end)
+        finally(function () writeStub:revert() end)
 
         printStub:revert()
         printStub = stub(_G, "print", function (message)
@@ -266,14 +294,16 @@ insulate("MainLoopRunner", function ()
 
         ModuleRegistry.registerModules(testModule)
         ControlExtension.setPauseEepDuringInitialization(true)
-        MainLoopRunner.runCycle = function ()
+        local runCycleStub = stub(MainLoopRunner, "runCycle", function ()
             assert.equals(1, #pauseCalls)
             assert.equals(1, pauseCalls[1])
             return 0
-        end
-        stub(_G, "EEPPause", function (value)
+        end)
+        local eepPauseStub = stub(_G, "EEPPause", function (value)
             table.insert(pauseCalls, value)
         end)
+        finally(function () runCycleStub:revert() end)
+        finally(function () eepPauseStub:revert() end)
 
         ControlExtension.runTasks(5)
 

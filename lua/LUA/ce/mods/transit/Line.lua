@@ -142,6 +142,7 @@ function Line.trainDeparted(trainName, station)
     local train = TrainRegistry.forName(trainName)
     local lineSegment, transitTrain = lineSegmentForTrainAtStation(train, station)
     if not lineSegment then return end
+    ---@cast transitTrain TransitTrain
 
     station:trainLeft(trainName, transitTrain:getDestination(), transitTrain:getLine())
     lineSegment:trainDeparted(train, station)

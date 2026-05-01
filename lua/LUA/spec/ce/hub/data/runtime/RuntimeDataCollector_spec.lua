@@ -21,6 +21,7 @@ insulate("RuntimeDataCollector", function ()
             }, true)
 
         local firstSnapshot = RuntimeDataCollector.collectRuntimeEntries()
+        ---@cast firstSnapshot table
         assert.same({
                         sample = { id = "sample", count = 2, time = 4, lastTime = 1 }
                     }, firstSnapshot)

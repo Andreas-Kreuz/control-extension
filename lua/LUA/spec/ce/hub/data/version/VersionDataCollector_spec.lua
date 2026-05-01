@@ -17,7 +17,8 @@ insulate("ce.hub.data.version.VersionDataCollector", function ()
         local VersionInfo = require("ce.hub.data.version.VersionInfo")
         local VersionDataCollector = require("ce.hub.data.version.VersionDataCollector")
 
-        VersionInfo.getProgramVersion = function () return "1.2.3" end
+        local getProgramVersionStub = stub(VersionInfo, "getProgramVersion", function () return "1.2.3" end)
+        finally(function () getProgramVersionStub:revert() end)
 
         assert.same({
                         eepVersion = "18.1",

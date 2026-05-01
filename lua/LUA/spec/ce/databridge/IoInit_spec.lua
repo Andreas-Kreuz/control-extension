@@ -18,7 +18,8 @@ insulate("ce.databridge.IoInit", function ()
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local LogOutputFileWriter = require("ce.databridge.LogOutputFileWriter")
 
-        LogOutputFileWriter.initialize = function () table.insert(calls, "log") end
+        local initializeStub = stub(LogOutputFileWriter, "initialize", function () table.insert(calls, "log") end)
+        finally(function () initializeStub:revert() end)
 
         clearModule("ce.databridge.IoInit")
         local IoInit = require("ce.databridge.IoInit")

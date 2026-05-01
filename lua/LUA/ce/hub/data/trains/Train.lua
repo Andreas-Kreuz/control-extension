@@ -29,7 +29,7 @@ local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 ---@field occupiedTracks table<string, number>
 ---@field dirtyFields table<string, boolean>
 ---@field needsFullSend boolean
----@field new fun(self: Train, o: Train):Train
+---@field new fun(self: Train, o: table):Train
 ---@field load fun(self: Train):table<string, string>
 ---@field save fun(self: Train, clearCurrentInfo?: boolean):nil
 ---@field getName fun(self: Train):string
@@ -94,7 +94,7 @@ end
 
 
 ---Create a new train with the given object
----@param o Train must contain a string o.name
+---@param o table must contain a string o.name
 function Train:new(o)
     assert(type(self) == "table", "Call this method with ':'")
     assert(o, "Provide a train object")

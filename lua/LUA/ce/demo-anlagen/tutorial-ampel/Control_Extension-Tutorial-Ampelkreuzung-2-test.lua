@@ -58,9 +58,11 @@ end
 EepSimulator.simulateQueueTrainOnSignal(14, "#Zug1")
 EEPSetTrainRoute("#Zug1", "Meine Route 1")
 
-assert(true == os.signalUsedForRequest)
-os:resetQueueFromSignal()
-assert(1 == os.queue:size())
+local signalLane = os
+---@cast signalLane Lane
+assert(true == signalLane.signalUsedForRequest)
+signalLane:resetQueueFromSignal()
+assert(1 == signalLane.queue:size())
 
 for i = 1, 10 do
     print(string.format("[#Test] run nr. %s", i))

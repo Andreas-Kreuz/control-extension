@@ -43,6 +43,7 @@ local fieldPlaceholders = {
 
 function TransitTrainDtoFactory.createFullDto(transitTrain, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
+    ---@type table<string, any>
     local dto = {
         ceType = CE_TYPE,
         id = transitTrain.id,
@@ -59,6 +60,7 @@ end
 
 function TransitTrainDtoFactory.createPatchDto(transitTrain, dirtyFields, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
+    ---@type table<string, any>
     local dto = {
         ceType = CE_TYPE,
         id = transitTrain.id,

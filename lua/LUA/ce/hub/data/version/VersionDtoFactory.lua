@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/version/VersionLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/version/VersionLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -37,16 +37,16 @@ local dtoFields = {
 
 local function buildVersionDto(versionInfo)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = ENTRY_ID
-    }, versionInfo, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = ENTRY_ID
+                                   }, versionInfo, dtoFields)
 end
 
 local function buildVersionPatchDto(versionInfo, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = ENTRY_ID
-    }, versionInfo, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = ENTRY_ID
+                                    }, versionInfo, dirtyFields, dtoFields)
 end
 
 function VersionDtoFactory.createFullDto(versionInfo)

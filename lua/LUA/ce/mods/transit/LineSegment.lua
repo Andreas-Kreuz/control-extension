@@ -56,6 +56,7 @@ function LineSegment:setNextSection(newLineSegment, timeInMinutes)
     self.nextLineSegmentInfo = { followingSegment = newLineSegment, timeInMinutes = timeInMinutes }
 end
 
+---@return { segment: LineSegment, timeInMinutes: number }[]
 function LineSegment:getAllSegments()
     assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
     local viewed = {}
@@ -218,6 +219,8 @@ function LineSegment:trainDeparted(train, currentStation)
     local transitTrain = TransitTrainRegistry.forTrain(train)
     local oldDestination = transitTrain:getDestination()
     local oldLine = transitTrain:getLine()
+    ---@cast oldDestination string
+    ---@cast oldLine string
     local infoList = self:nextStationList(train:getRoute(), nil, currentStation)
     updateTransitTrainNextStations(train, infoList, 0)
 

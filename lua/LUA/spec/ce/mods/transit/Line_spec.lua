@@ -61,6 +61,7 @@ insulate("Line Management Ring Line", function ()
     end)
 
     insulate("LineSegments", function ()
+        ---@type { segment: LineSegment, timeInMinutes: number }[]
         local segments = ringLineSegment:getAllSegments()
         it("Got 1 line segments", function () assert.are.equal(1, #segments) end)
         it("1st line ok", function () assert.are.equal(ringLineSegment, segments[1].segment) end)
@@ -205,6 +206,7 @@ insulate("Line Management 4 Line segments", function ()
     end)
 
     insulate("LineSegments", function ()
+        ---@type { segment: LineSegment, timeInMinutes: number }[]
         local segments = linie10Messe:getAllSegments()
 
         it("Got 4 line segments", function () assert.are.equal(4, #segments) end)

@@ -87,7 +87,7 @@ function TransitTrain:setLine(line)
     local oldLine = self.line
     self.line = line
     writeValueToRollingStock(self.id, TagKeys.Train.line, line)
-    updateRollingStockModels(self.id, function(model, rollingStockName)
+    updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setLine(rollingStockName, line)
     end)
     if oldLine ~= line then markDirty(self, "line") end
@@ -113,7 +113,7 @@ function TransitTrain:setDestination(destination)
     local oldDestination = self.destination
     self.destination = destination
     writeValueToRollingStock(self.id, TagKeys.Train.destination, destination)
-    updateRollingStockModels(self.id, function(model, rollingStockName)
+    updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setDestination(rollingStockName, destination)
     end)
     if oldDestination ~= destination then markDirty(self, "destination") end
@@ -137,7 +137,7 @@ function TransitTrain:setOrigin(origin)
     assert(type(origin) == "string", "Need 'origin' as string")
     local oldOrigin = self.origin
     self.origin = origin
-    updateRollingStockModels(self.id, function(model, rollingStockName)
+    updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setOrigin(rollingStockName, origin)
     end)
     if oldOrigin ~= origin then markDirty(self, "origin") end
@@ -195,7 +195,7 @@ function TransitTrain:setNextStations(nextStations)
     end
     local firstNextStation = normalized[1]
     local nextStop = firstNextStation and firstNextStation.station.name or ""
-    updateRollingStockModels(self.id, function(model, rollingStockName)
+    updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setNextStop(rollingStockName, nextStop)
     end)
 end

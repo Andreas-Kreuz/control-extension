@@ -9,10 +9,7 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.DataStoreFileWriter")
-        io.open = originalIoOpen
     end)
-
-    after_each(function () io.open = originalIoOpen end)
 
     it("writes DataStore.ceTypes as json to ak-eep-lib-store.json in the exchange directory", function ()
         local writtenContent
@@ -20,7 +17,7 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
         local closeCalled = false
         local openCalls = {}
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/ak-eep-lib-store.json" then
@@ -36,7 +33,8 @@ insulate("ce.databridge.DataStoreFileWriter", function ()
                 flush = function () flushCalled = true end,
                 close = function () closeCalled = true end
             }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local DataStore = require("ce.hub.publish.InternalDataStore")
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")

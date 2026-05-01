@@ -7,21 +7,19 @@ insulate("ce.hub.data.rollingstock.RollingStockModelInfoRegistry", function ()
 
     it("caches parsed info by xml model", function ()
         local Parser = require("ce.hub.eep.RollingStockResourceParser")
-        local originalInfoForXmlModel = Parser.infoForXmlModel
         local calls = 0
-        Parser.infoForXmlModel = function ()
+        local infoForXmlModelStub = stub(Parser, "infoForXmlModel", function ()
             calls = calls + 1
             return {
                 axisNames = { [2] = "Fahrer" },
                 textureNames = { [1] = "Fahrziel" }
             }
-        end
+        end)
+        finally(function () infoForXmlModelStub:revert() end)
 
         local Registry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
         local first = Registry.infoForXmlModel("Model.3dm")
         local second = Registry.infoForXmlModel("Model.3dm")
-
-        Parser.infoForXmlModel = originalInfoForXmlModel
 
         assert.equals(1, calls)
         assert.equals(first, second)

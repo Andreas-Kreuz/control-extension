@@ -146,7 +146,7 @@ end
 ---@field axisValues table<string, number>
 ---@field tag string
 ---@field orientationForward boolean
----@field smoke number
+---@field smoke number|boolean
 ---@field hookStatus number
 ---@field hookGlueMode number
 ---@field active boolean
@@ -158,7 +158,7 @@ end
 ---@field xmlModel string|nil
 ---@field dirtyFields table<string, boolean>
 ---@field needsFullSend boolean
----@field new fun(self: RollingStock, o: RollingStock):RollingStock
+---@field new fun(self: RollingStock, o: table):RollingStock
 ---@field setValue fun(self: RollingStock, key: string, value: string):nil
 ---@field getValue fun(self: RollingStock, key: string):string
 ---@field save fun(self: RollingStock, clearCurrentInfo?: boolean):nil
@@ -182,8 +182,8 @@ end
 ---@field setPropelled fun(self: RollingStock, propelled: boolean):nil
 ---@field setOrientationForward fun(self: RollingStock, orientationForward: boolean):nil
 ---@field getOrientationForward fun(self: RollingStock):boolean
----@field setSmoke fun(self: RollingStock, smoke: number):nil
----@field getSmoke fun(self: RollingStock):number
+---@field setSmoke fun(self: RollingStock, smoke: number|boolean):nil
+---@field getSmoke fun(self: RollingStock):number|boolean
 ---@field setHookStatus fun(self: RollingStock, hookStatus: number):nil
 ---@field getHookStatus fun(self: RollingStock):number
 ---@field setHookGlueMode fun(self: RollingStock, hookGlueMode: number):nil
@@ -242,7 +242,7 @@ local function markDirty(rollingStock, fieldName)
 end
 
 ---Create a new RollingStock and init it
----@param o RollingStock
+---@param o table
 ---@return RollingStock
 function RollingStock:new(o)
     assert(o.rollingStockName, "Provide a rollingStockName")
@@ -499,7 +499,7 @@ end
 
 function RollingStock:setSmoke(smoke)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    assert(type(smoke) == "number", "Need 'smoke' as number")
+    assert(type(smoke) == "number" or type(smoke) == "boolean", "Need 'smoke' as number|boolean")
     local oldSmoke = self.smoke
     self.smoke = smoke
     if oldSmoke ~= smoke then markDirty(self, "smoke") end

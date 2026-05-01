@@ -15,7 +15,8 @@ insulate("ControlExtensionHub IO init", function ()
     it("calls IoInit.initialize while requiring ControlExtensionHub", function ()
         local initCalls = 0
         local IoInit = require("ce.databridge.IoInit")
-        IoInit.initialize = function () initCalls = initCalls + 1 end
+        local initializeStub = stub(IoInit, "initialize", function () initCalls = initCalls + 1 end)
+        finally(function () initializeStub:revert() end)
 
         require("ce.hub.ControlExtensionHub")
 
@@ -25,11 +26,13 @@ insulate("ControlExtensionHub IO init", function ()
     it("does not call IoInit.initialize again from ControlExtension.initTasks", function ()
         local initCalls = 0
         local IoInit = require("ce.databridge.IoInit")
-        IoInit.initialize = function () initCalls = initCalls + 1 end
+        local initializeStub = stub(IoInit, "initialize", function () initCalls = initCalls + 1 end)
+        finally(function () initializeStub:revert() end)
 
         local ControlExtension = require("ce.ControlExtension")
         local MainLoopRunner = require("ce.hub.MainLoopRunner")
-        MainLoopRunner.initModules = function () end
+        local initModulesStub = stub(MainLoopRunner, "initModules", function () end)
+        finally(function () initModulesStub:revert() end)
 
         ControlExtension.initTasks()
 
@@ -39,12 +42,15 @@ insulate("ControlExtensionHub IO init", function ()
     it("does not call IoInit.initialize again from ControlExtension.runTasks", function ()
         local initCalls = 0
         local IoInit = require("ce.databridge.IoInit")
-        IoInit.initialize = function () initCalls = initCalls + 1 end
+        local initializeStub = stub(IoInit, "initialize", function () initCalls = initCalls + 1 end)
+        finally(function () initializeStub:revert() end)
 
         local ControlExtension = require("ce.ControlExtension")
         local MainLoopRunner = require("ce.hub.MainLoopRunner")
-        MainLoopRunner.areModulesInitialized = function () return true end
-        MainLoopRunner.runCycle = function () return 0 end
+        local areModulesInitializedStub = stub(MainLoopRunner, "areModulesInitialized", function () return true end)
+        local runCycleStub = stub(MainLoopRunner, "runCycle", function () return 0 end)
+        finally(function () areModulesInitializedStub:revert() end)
+        finally(function () runCycleStub:revert() end)
 
         ControlExtension.runTasks(5)
 

@@ -32,16 +32,16 @@ local dtoFields = {
 
 local function buildDataSlotDto(ceType, slot)
     return DtoBuilder.buildFullDto({
-        ceType = ceType,
-        id = slot.id
-    }, slot, dtoFields)
+                                       ceType = ceType,
+                                       id = slot.id
+                                   }, slot, dtoFields)
 end
 
 local function buildDataSlotPatchDto(ceType, slot, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = ceType,
-        id = slot.id
-    }, slot, dirtyFields, dtoFields)
+                                        ceType = ceType,
+                                        id = slot.id
+                                    }, slot, dirtyFields, dtoFields)
 end
 
 function DataSlotDtoFactory.createFullDto(ceType, slot)

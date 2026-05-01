@@ -8,16 +8,13 @@ insulate("ce.databridge.FunctionNameWriter", function ()
     before_each(function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.FunctionNameWriter")
-        io.open = originalIoOpen
     end)
-
-    after_each(function () io.open = originalIoOpen end)
 
     it("writes the sorted global names to ak-runtime-functions.txt in the exchange directory", function ()
         local openCalls = {}
         local writtenContent
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" and
                 name ~= "exchange-dir/ak-runtime-functions.txt" then
@@ -34,7 +31,8 @@ insulate("ce.databridge.FunctionNameWriter", function ()
                 flush = function () end,
                 close = function () end
             }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local FunctionNameWriter = require("ce.databridge.FunctionNameWriter")

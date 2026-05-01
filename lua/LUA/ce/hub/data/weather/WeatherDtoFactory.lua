@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/weather/WeatherLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/weather/WeatherLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.weather.WeatherDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -55,16 +55,16 @@ local dtoFields = {
 
 local function buildWeatherDto(weather)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = weather.id
-    }, weather, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = weather.id
+                                   }, weather, dtoFields)
 end
 
 local function buildWeatherPatchDto(weather, dirtyFields)
     return DtoBuilder.buildPatchDto({
-        ceType = CE_TYPE,
-        id = weather.id
-    }, weather, dirtyFields, dtoFields)
+                                        ceType = CE_TYPE,
+                                        id = weather.id
+                                    }, weather, dirtyFields, dtoFields)
 end
 
 function WeatherDtoFactory.createFullDto(weather)

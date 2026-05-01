@@ -1,4 +1,4 @@
-﻿-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/switches/SwitchLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/switches/SwitchLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -25,9 +25,9 @@ local dtoFields = {
 
 local function buildSwitchDto(switch)
     return DtoBuilder.buildFullDto({
-        ceType = CE_TYPE,
-        id = switch.id
-    }, switch, dtoFields)
+                                       ceType = CE_TYPE,
+                                       id = switch.id
+                                   }, switch, dtoFields)
 end
 
 function SwitchDtoFactory.createSwitchDto(switch)

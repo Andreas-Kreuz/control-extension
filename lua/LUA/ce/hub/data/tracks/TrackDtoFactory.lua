@@ -1,4 +1,4 @@
-﻿ -- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
+-- TypeScript LuaDto: apps/web-server/src/server/ce/dto/tracks/TrackLuaDto.ts
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
@@ -44,17 +44,17 @@ end
 local function buildTrackDto(trackType, track, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies(trackType .. "Tracks")
     return DtoBuilder.buildFullDto({
-        ceType = ceTypeForTrackType(trackType),
-        id = track.id
-    }, track, dtoFields, fieldPolicies, isSelected)
+                                       ceType = ceTypeForTrackType(trackType),
+                                       id = track.id
+                                   }, track, dtoFields, fieldPolicies, isSelected)
 end
 
 local function buildTrackPatchDto(trackType, track, dirtyFields, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies(trackType .. "Tracks")
     return DtoBuilder.buildPatchDto({
-        ceType = ceTypeForTrackType(trackType),
-        id = track.id
-    }, track, dirtyFields, dtoFields, fieldPolicies, isSelected)
+                                        ceType = ceTypeForTrackType(trackType),
+                                        id = track.id
+                                    }, track, dirtyFields, dtoFields, fieldPolicies, isSelected)
 end
 
 function TrackDtoFactory.ceTypeForTrackType(trackType)

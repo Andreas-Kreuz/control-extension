@@ -1,4 +1,4 @@
-﻿if CeDebugLoad then print("[#Start] Loading ce.hub.data.DtoBuilder ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.data.DtoBuilder ...") end
 
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 

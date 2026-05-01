@@ -37,11 +37,15 @@
 
 - Install dependencies: `yarn`
 - Available root scripts: `yarn ce-help`
-- Lint: `luacheck --config lua/.luacheckrc lua/LUA`
-- Test: `busted --config-file lua/.busted --verbose --`
-- Test with coverage: `busted --config-file lua/.busted --verbose --coverage --`
-- Format: `yarn format:lua` (uses `scripts/format-lua-with-sumneko.mjs`, excludes `anlagen`/`demo-anlagen` dirs)
-- Format uses locally installed VSCode Lua Language Server (`sumneko.lua`); set `VSCODE_EXTENSIONS` if non-standard path
+- Lint: `yarn lint:lua` (`.luacheckrc` is in `lua/`)
+- Lint fallback or single files: `luacheck --config lua/.luacheckrc lua/LUA`
+- Test: `yarn test:lua` (`.busted` is in `lua/`)
+- Test fallback or single files: `busted --config-file lua/.busted --verbose --`
+- Format: `yarn format:lua` (uses `scripts/format-lua-with-sumneko.mjs`; set `VSCODE_EXTENSIONS` for non-standard extension paths)
+- Check: `yarn check:lua`
+- Coverage: `yarn test:lua:coverage`
+- Windows/Codex: run external commands through `cmd /c`, e.g. `cmd /c yarn run check:lua`. If Lua 5.3 appears missing,
+  verify with `cmd /c lua -v`; it may be reported missing because sandboxed Node spawns need approval.
 
 ## Testing
 
