@@ -111,8 +111,8 @@ function TrainLineInformationView(props: {
         }}
       >
         {rows.map((row) => (
-          <ListItem key={row.label}>
-            <ListItemIcon>
+          <ListItem key={row.label} sx={{ alignItems: 'flex-start' }}>
+            <ListItemIcon sx={{ mt: 0.5 }}>
               <row.icon />
             </ListItemIcon>
             <ListItemText primary={row.value} secondary={row.label} />

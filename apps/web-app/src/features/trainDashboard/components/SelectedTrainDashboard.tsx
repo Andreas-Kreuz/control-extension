@@ -1,26 +1,31 @@
 import { CommandEvent, RollingStockAppDto, TrainAppDto } from '@ce/web-shared';
-import AltRouteIcon from '@mui/icons-material/AltRoute';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import CommitIcon from '@mui/icons-material/Commit';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DirectionsRailwayIcon from '@mui/icons-material/DirectionsRailway';
-import HighlightIcon from '@mui/icons-material/Highlight';
-import LinkIcon from '@mui/icons-material/Link';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import RouteIcon from '@mui/icons-material/Route';
 import SpeedIcon from '@mui/icons-material/Speed';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
+import TuneIcon from '@mui/icons-material/Tune';
 import VideocamIcon from '@mui/icons-material/Videocam';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
@@ -41,13 +46,19 @@ import useSetTrainLight from '../hooks/useSetTrainLight';
 import useSetTrainSpeed from '../hooks/useSetTrainSpeed';
 
 const trainLightSources = [
-  { source: 0, label: 'Fahrlicht', description: 'Innenraum' },
-  { source: 1, label: 'Blinker links', description: 'Links' },
-  { source: 2, label: 'Blinker rechts', description: 'Rechts' },
-  { source: 3, label: 'Bremslicht-Automatik', description: 'Auto' },
+  { source: 0, label: 'Fahrlicht', enabledLabel: 'Ein' },
+  { source: 3, label: 'Bremslicht', enabledLabel: 'Ein' },
+  { source: 1, label: 'Blinker links', enabledLabel: 'Ein' },
+  { source: 2, label: 'Blinker rechts', enabledLabel: 'Ein' },
 ];
 
 const optimisticSwitchTimeoutMs = 5000;
+
+type TransitInfo = {
+  line: string;
+  destination: string;
+  nextStations: NonNullable<TrainAppDto['nextStations']>;
+};
 
 function SelectedTrainDashboard() {
   const scenario = useSelectedScenario();
@@ -72,6 +83,7 @@ function SelectedTrainDashboard() {
   const transitTrain = useTransitTrain(trainId);
   const transitSettings = useTransitSettings();
   const cameraRollingStockName = rollingStock?.[0]?.name ?? activeRollingStock?.name ?? train?.name ?? trainId;
+  const trainRollingStock = rollingStock ?? [];
 
   useEffect(() => {
     const currentSelection = {
@@ -91,10 +103,7 @@ function SelectedTrainDashboard() {
       if (currentSelection.activeTrain && currentSelection.activeTrain !== previous.activeTrain) {
         return 'train';
       }
-      if (
-        currentSelection.activeRollingStock &&
-        currentSelection.activeRollingStock !== previous.activeRollingStock
-      ) {
+      if (currentSelection.activeRollingStock && currentSelection.activeRollingStock !== previous.activeRollingStock) {
         return 'rollingStock';
       }
       if (currentSelection.activeTrain && !currentSelection.activeRollingStock) {
@@ -130,63 +139,54 @@ function SelectedTrainDashboard() {
     );
   }
 
+  const transitNextStations = transitTrain?.nextStations ?? train.nextStations ?? [];
+  const showTransitSection = Boolean(
+    transitSettings &&
+    (transitTrain?.line ||
+      train.line ||
+      transitTrain?.destination ||
+      train.destination ||
+      transitNextStations.length > 0),
+  );
+  const showRollingStockSection = trainRollingStock.length > 0;
+
   return (
     <AppPage>
       <AppPageHeadline>Aktiver Zug</AppPageHeadline>
-      <AppCardGridContainer>
-        <Grid size={{ xs: 12, xl: 8 }}>
-          <TrainStatusCard train={train} selectedRollingStockName={selectedRollingStockName} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, xl: 4 }}>
-          <CameraCard trainName={train.name} rollingStockName={cameraRollingStockName} />
-        </Grid>
-        <Grid size={{ xs: 12, md: transitSettings ? 6 : 12, xl: transitSettings ? 4 : 12 }}>
-          <RouteCard train={train} showTransit={Boolean(transitSettings)} transitLine={transitTrain?.line} />
-        </Grid>
-        {transitSettings && (
-          <Grid size={{ xs: 12, xl: 8 }}>
-            <Card>
-              <CardHeader avatar={<AltRouteIcon color="primary" />} title="Nächste Stationen" />
-              <Divider />
-              <TrainLineInformationView
-                line={transitTrain?.line ?? train.line ?? '-'}
-                destination={transitTrain?.destination ?? train.destination ?? '-'}
-                nextStations={transitTrain?.nextStations ?? train.nextStations ?? []}
-              />
-            </Card>
+      <Stack spacing={2}>
+        <AppCardGridContainer>
+          <TrainOverviewPanel
+            train={train}
+            rollingStock={trainRollingStock}
+            selectedRollingStockName={selectedRollingStockName}
+            transit={
+              showTransitSection
+                ? {
+                    line: transitTrain?.line ?? train.line ?? '-',
+                    destination: transitTrain?.destination ?? train.destination ?? '-',
+                    nextStations: transitNextStations,
+                  }
+                : undefined
+            }
+          />
+          {showRollingStockSection && (
+            <RollingStockGrid rollingStock={trainRollingStock} selectedRollingStockName={selectedRollingStockName} />
+          )}
+          <Grid size={{ xs: 12 }}>
+            <CameraCard trainName={train.name} rollingStockName={cameraRollingStockName} />
           </Grid>
-        )}
-        <Grid size={{ xs: 12 }}>
-          <MergedAxisCard rollingStock={rollingStock ?? []} />
-        </Grid>
-        <Grid size={{ xs: 12 }}>
-          <RollingStockGrid rollingStock={rollingStock ?? []} selectedRollingStockName={selectedRollingStockName} />
-        </Grid>
-      </AppCardGridContainer>
+        </AppCardGridContainer>
+      </Stack>
     </AppPage>
   );
 }
 
-function isSelectedRollingStock(rollingStock: RollingStockAppDto, selectedRollingStockName: string): boolean {
-  return rollingStock.id === selectedRollingStockName || rollingStock.name === selectedRollingStockName;
-}
-
-function EmptyDashboardState() {
-  return (
-    <Card>
-      <CardContent>
-        <Stack spacing={1}>
-          <Typography variant="h6">Kein Zug in EEP ausgewählt</Typography>
-          <Typography color="text.secondary">
-            Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
-          </Typography>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TrainStatusCard(props: { train: TrainAppDto; selectedRollingStockName: string }) {
+function TrainOverviewPanel(props: {
+  train: TrainAppDto;
+  rollingStock: RollingStockAppDto[];
+  selectedRollingStockName: string;
+  transit?: TransitInfo;
+}) {
   const { train } = props;
   const setSpeed = useSetTrainSpeed();
   const setCoupling = useSetTrainCoupling();
@@ -251,110 +251,254 @@ function TrainStatusCard(props: { train: TrainAppDto; selectedRollingStockName: 
   }, [train.name, train.couplingFront, train.couplingRear, train.lights]);
 
   return (
+    <>
+      <Grid size={{ xs: 12, md: 4 }}>
+        <InfoCard
+          train={train}
+          transit={props.transit}
+          onSpeedCommit={(value) => setSpeed(train.name, value)}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 4 }}>
+        <TrainAssociationCard
+          couplingFront={couplingFront}
+          couplingRear={couplingRear}
+          lights={lights}
+          onCouplingChange={(side, checked) => {
+            const value = checked ? 1 : 2;
+            if (side === 'front') {
+              setCouplingFront(value);
+              setOptimisticState((previous) => ({
+                ...previous,
+                trainName: train.name,
+                couplingFront: { value, changedAt: Date.now() },
+              }));
+            } else {
+              setCouplingRear(value);
+              setOptimisticState((previous) => ({
+                ...previous,
+                trainName: train.name,
+                couplingRear: { value, changedAt: Date.now() },
+              }));
+            }
+            setCoupling(train.name, side, checked);
+          }}
+          onLightChange={(source, checked) => {
+            const sourceKey = String(source);
+            setLights((previous) => ({
+              ...previous,
+              [sourceKey]: checked,
+            }));
+            setOptimisticState((previous) => ({
+              ...previous,
+              trainName: train.name,
+              lights: {
+                ...previous.lights,
+                [sourceKey]: { value: checked, changedAt: Date.now() },
+              },
+            }));
+            setLight(train.name, source, checked);
+          }}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, md: 4 }}>
+        <MergedAxisCard rollingStock={props.rollingStock} />
+      </Grid>
+    </>
+  );
+}
+
+function isSelectedRollingStock(rollingStock: RollingStockAppDto, selectedRollingStockName: string): boolean {
+  return rollingStock.id === selectedRollingStockName || rollingStock.name === selectedRollingStockName;
+}
+
+function EmptyDashboardState() {
+  return (
+    <Card>
+      <CardContent>
+        <Stack spacing={1}>
+          <Typography variant="h6">Kein Zug in EEP ausgewählt</Typography>
+          <Typography color="text.secondary">
+            Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
+          </Typography>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+function InfoCard(props: {
+  train: TrainAppDto;
+  transit?: TransitInfo;
+  onSpeedCommit: (value: number) => void;
+}) {
+  const { train } = props;
+
+  return (
     <Card sx={{ height: 1 }}>
       <CardHeader
         avatar={<DirectionsRailwayIcon color="primary" />}
         title={train.name}
-        subheader={props.selectedRollingStockName ? `RollingStock: ${props.selectedRollingStockName}` : train.route}
+        titleTypographyProps={{ variant: 'subtitle1' }}
+      />
+      <Divider />
+      <List
+        dense
+        sx={{
+          '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
+        }}
+      >
+        <OverviewMetric icon={<RouteIcon />} label="EEP-Route" value={train.route || '-'} />
+        <OverviewMetric icon={<SpeedIcon />} label="Geschwindigkeit" value={`${train.speed} km/h`} />
+        <ListItem sx={{ alignItems: 'flex-start' }}>
+          <SpeedSlider value={train.targetSpeed} onCommit={props.onSpeedCommit} />
+        </ListItem>
+      </List>
+      {props.transit && (
+        <>
+          <Divider />
+          <TrainLineInformationView
+            line={props.transit.line}
+            destination={props.transit.destination}
+            nextStations={props.transit.nextStations}
+          />
+        </>
+      )}
+    </Card>
+  );
+}
+
+function TrainAssociationCard(props: {
+  couplingFront: number;
+  couplingRear: number;
+  lights: Record<string, boolean>;
+  onCouplingChange: (side: 'front' | 'rear', checked: boolean) => void;
+  onLightChange: (source: number, checked: boolean) => void;
+}) {
+  return (
+    <Card sx={{ height: 1 }}>
+      <CardHeader
+        avatar={<TuneIcon color="primary" />}
+        title="Fahrzeugverband"
+        titleTypographyProps={{ variant: 'subtitle1' }}
       />
       <Divider />
       <CardContent>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'minmax(220px, 1fr) minmax(280px, 2fr)' },
-            gap: 3,
-          }}
-        >
-          <Stack spacing={1.5}>
-            <Metric icon={<SpeedIcon />} label="Ist-Geschwindigkeit" value={`${train.speed} km/h`} />
-            <Metric icon={<SpeedIcon />} label="Zielgeschwindigkeit" value={`${train.targetSpeed} km/h`} />
-            <Metric icon={<LinkIcon />} label="Kupplung vorne" value={formatCoupling(couplingFront)} />
-            <Metric icon={<LinkIcon />} label="Kupplung hinten" value={formatCoupling(couplingRear)} />
-          </Stack>
-          <Stack spacing={3}>
-            <SpeedSlider value={train.targetSpeed} onCommit={(value) => setSpeed(train.name, value)} />
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={couplingFront === 1}
-                    disabled={couplingFront === 0}
-                    onChange={(event) => {
-                      const value = event.target.checked ? 1 : 2;
-                      setCouplingFront(value);
-                      setOptimisticState((previous) => ({
-                        ...previous,
-                        trainName: train.name,
-                        couplingFront: { value, changedAt: Date.now() },
-                      }));
-                      setCoupling(train.name, 'front', event.target.checked);
-                    }}
-                  />
-                }
-                label="Kupplung vorne"
+        <Stack spacing={3}>
+          <ControlGrid>
+            <CouplingSegmentedControl
+              value={props.couplingFront}
+              disabled={props.couplingFront === 0}
+              label="Kupplung vorne"
+              onChange={(checked) => props.onCouplingChange('front', checked)}
+            />
+            <CouplingSegmentedControl
+              value={props.couplingRear}
+              disabled={props.couplingRear === 0}
+              label="Kupplung hinten"
+              onChange={(checked) => props.onCouplingChange('rear', checked)}
+            />
+            {trainLightSources.map((entry) => (
+              <LightSegmentedControl
+                key={entry.source}
+                checked={props.lights?.[String(entry.source)] === true}
+                label={entry.label}
+                enabledLabel={entry.enabledLabel}
+                onChange={(checked) => props.onLightChange(entry.source, checked)}
               />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={couplingRear === 1}
-                    disabled={couplingRear === 0}
-                    onChange={(event) => {
-                      const value = event.target.checked ? 1 : 2;
-                      setCouplingRear(value);
-                      setOptimisticState((previous) => ({
-                        ...previous,
-                        trainName: train.name,
-                        couplingRear: { value, changedAt: Date.now() },
-                      }));
-                      setCoupling(train.name, 'rear', event.target.checked);
-                    }}
-                  />
-                }
-                label="Kupplung hinten"
-              />
-            </Stack>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1 }}>
-              {trainLightSources.map((entry) => (
-                <FormControlLabel
-                  key={entry.source}
-                  control={
-                    <Switch
-                      checked={lights?.[String(entry.source)] === true}
-                      onChange={(event) => {
-                        const source = String(entry.source);
-                        const { checked } = event.target;
-                        setLights((previous) => ({
-                          ...previous,
-                          [source]: checked,
-                        }));
-                        setOptimisticState((previous) => ({
-                          ...previous,
-                          trainName: train.name,
-                          lights: {
-                            ...previous.lights,
-                            [source]: { value: checked, changedAt: Date.now() },
-                          },
-                        }));
-                        setLight(train.name, entry.source, checked);
-                      }}
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body2">{entry.label}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {entry.description}
-                      </Typography>
-                    </Box>
-                  }
-                />
-              ))}
-            </Box>
-          </Stack>
-        </Box>
+            ))}
+          </ControlGrid>
+        </Stack>
       </CardContent>
     </Card>
+  );
+}
+
+function ControlGrid(props: { children: ReactNode }) {
+  return <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 1 }}>{props.children}</Box>;
+}
+
+function ControlTile(props: { children: ReactNode; sx?: object }) {
+  return (
+    <Box
+      sx={{
+        alignItems: 'center',
+        display: 'flex',
+        minHeight: 72,
+        minWidth: 0,
+        px: 1.5,
+        py: 1,
+        width: 1,
+        ...props.sx,
+      }}
+    >
+      {props.children}
+    </Box>
+  );
+}
+
+function CouplingSegmentedControl(props: {
+  value: number;
+  disabled?: boolean;
+  label: string;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <ControlTile>
+      <Box sx={{ minWidth: 0, width: 1 }}>
+        <Typography variant="subtitle2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {props.label}
+        </Typography>
+        <ToggleButtonGroup
+          disabled={props.disabled}
+          exclusive
+          fullWidth
+          size="small"
+          value={props.value === 1 ? 'on' : 'off'}
+          onChange={(_event, value: 'off' | 'on' | null) => {
+            if (value !== null) {
+              props.onChange(value === 'on');
+            }
+          }}
+          sx={{ mt: 1 }}
+        >
+          <ToggleButton value="off">Aus</ToggleButton>
+          <ToggleButton value="on">Ein</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+    </ControlTile>
+  );
+}
+
+function LightSegmentedControl(props: {
+  checked: boolean;
+  label: string;
+  enabledLabel: string;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <ControlTile>
+      <Box sx={{ minWidth: 0, width: 1 }}>
+        <Typography variant="subtitle2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {props.label}
+        </Typography>
+        <ToggleButtonGroup
+          exclusive
+          fullWidth
+          size="small"
+          value={props.checked ? 'on' : 'off'}
+          onChange={(_event, value: 'off' | 'on' | null) => {
+            if (value !== null) {
+              props.onChange(value === 'on');
+            }
+          }}
+          sx={{ mt: 1 }}
+        >
+          <ToggleButton value="off">Aus</ToggleButton>
+          <ToggleButton value="on">{props.enabledLabel}</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+    </ControlTile>
   );
 }
 
@@ -366,64 +510,67 @@ function SpeedSlider(props: { value: number; onCommit: (value: number) => void }
   }, [props.value]);
 
   return (
-    <Box>
-      <Typography variant="subtitle2" gutterBottom>
-        Zielgeschwindigkeit
-      </Typography>
-      <Slider
-        min={-250}
-        max={250}
-        step={1}
-        marks={[{ value: 0, label: '0' }]}
-        value={value}
-        valueLabelDisplay="auto"
-        onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-        onChangeCommitted={(_, nextValue) => props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-      />
-    </Box>
+    <>
+      <ListItemIcon sx={{ mt: 0.5 }}>
+        <SpeedIcon />
+      </ListItemIcon>
+      <Box sx={{ minWidth: 0, width: 1 }}>
+        <ListItemText primary={`${value} km/h`} secondary="Zielgeschwindigkeit" />
+        <Box sx={{ px: 1 }}>
+          <Slider
+            min={-250}
+            max={250}
+            step={1}
+            value={value}
+            valueLabelDisplay="auto"
+            onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
+            onChangeCommitted={(_, nextValue) => props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
+          />
+        </Box>
+      </Box>
+    </>
   );
 }
 
-function Metric(props: { icon: ReactNode; label: string; value: string }) {
+function OverviewMetric(props: { icon: ReactNode; label: string; value: ReactNode }) {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '2rem minmax(0, 1fr)', gap: 1, alignItems: 'center' }}>
-      <Box sx={{ color: 'text.secondary', display: 'flex' }}>{props.icon}</Box>
-      <Box sx={{ minWidth: 0 }}>
-        <Typography variant="caption" color="text.secondary">
-          {props.label}
-        </Typography>
-        <Typography variant="body1" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {props.value}
-        </Typography>
-      </Box>
-    </Box>
+    <ListItem sx={{ alignItems: 'flex-start' }}>
+      <ListItemIcon sx={{ mt: 0.5 }}>{props.icon}</ListItemIcon>
+      <ListItemText primary={props.value} secondary={props.label} />
+    </ListItem>
+  );
+}
+
+function BreakableModelValue(props: { value: string }) {
+  const parts = props.value.split('\\');
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        <span key={`${part}-${index}`}>
+          {index > 0 && (
+            <>
+              {'\\'}
+              <wbr />
+            </>
+          )}
+          {part}
+        </span>
+      ))}
+    </>
   );
 }
 
 function CameraCard(props: { trainName: string; rollingStockName: string }) {
   return (
     <Card sx={{ height: 1 }}>
-      <CardHeader avatar={<VideocamIcon color="primary" />} title="Kameras" />
+      <CardHeader
+        avatar={<VideocamIcon color="primary" />}
+        title="Kameras"
+        titleTypographyProps={{ variant: 'subtitle1' }}
+      />
       <Divider />
       <TrainCamList trainName={props.trainName} rollingStockName={props.rollingStockName} />
-    </Card>
-  );
-}
-
-function RouteCard(props: { train: TrainAppDto; showTransit: boolean; transitLine?: string }) {
-  return (
-    <Card sx={{ height: 1 }}>
-      <CardHeader avatar={<RouteIcon color="primary" />} title="Route" />
-      <Divider />
-      <CardContent>
-        <Stack spacing={1.5}>
-          <Metric icon={<RouteIcon />} label="EEP-Route" value={props.train.route || '-'} />
-          {props.showTransit && (
-            <Metric icon={<AltRouteIcon />} label="Linie" value={props.transitLine ?? props.train.line ?? '-'} />
-          )}
-          {props.showTransit && <Metric icon={<DashboardIcon />} label="Ziel" value={props.train.destination ?? '-'} />}
-        </Stack>
-      </CardContent>
     </Card>
   );
 }
@@ -431,101 +578,179 @@ function RouteCard(props: { train: TrainAppDto; showTransit: boolean; transitLin
 function MergedAxisCard(props: { rollingStock: RollingStockAppDto[] }) {
   const socket = useSocket();
   const groups = useMemo(() => groupAxisByName(props.rollingStock), [props.rollingStock]);
+  const content =
+    groups.length === 0 ? (
+      <Typography color="text.secondary">Keine Achsen im ausgewählten Zug gefunden.</Typography>
+    ) : (
+      <Stack spacing={2}>
+        {groups.map((group) => (
+          <AxisSlider
+            key={group.name}
+            name={group.name}
+            value={group.value}
+            rollingStockCount={group.targets.length}
+            onCommit={(value) => {
+              group.targets.forEach((target) => {
+                socket.emit(CommandEvent.SetRollingStockAxis, {
+                  rollingStockName: target.rollingStockName,
+                  axisNumber: target.axisNumber,
+                  value,
+                });
+              });
+            }}
+          />
+        ))}
+      </Stack>
+    );
 
   return (
     <Card>
-      <CardHeader avatar={<CommitIcon color="primary" />} title="Achsen im Zugverband" />
+      <CardHeader
+        avatar={<TuneIcon color="primary" />}
+        title="Achsen im Zugverband"
+        titleTypographyProps={{ variant: 'subtitle1' }}
+      />
       <Divider />
-      <CardContent>
-        {groups.length === 0 ? (
-          <Typography color="text.secondary">Keine Achsen im ausgewählten Zug gefunden.</Typography>
-        ) : (
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>
-            {groups.map((group) => (
-              <AxisSlider
-                key={group.name}
-                name={group.name}
-                axisNumbers={uniqueAxisNumbers(group.targets)}
-                value={group.value}
-                mixed={group.mixed}
-                detail={`${group.targets.length} RollingStock`}
-                onCommit={(value) => {
-                  group.targets.forEach((target) => {
-                    socket.emit(CommandEvent.SetRollingStockAxis, {
-                      rollingStockName: target.rollingStockName,
-                      axisNumber: target.axisNumber,
-                      value,
-                    });
-                  });
-                }}
-              />
-            ))}
-          </Box>
-        )}
-      </CardContent>
+      <CardContent>{content}</CardContent>
     </Card>
   );
 }
 
 function RollingStockGrid(props: { rollingStock: RollingStockAppDto[]; selectedRollingStockName: string }) {
+  if (props.rollingStock.length === 0) {
+    return <Typography color="text.secondary">Keine RollingStocks gefunden.</Typography>;
+  }
+
   return (
-    <Card>
-      <CardHeader avatar={<HighlightIcon color="primary" />} title="RollingStock" />
+    <>
+      {props.rollingStock.map((item) => (
+        <RollingStockCards
+          key={item.id}
+          rollingStock={item}
+          selected={props.selectedRollingStockName === item.id || props.selectedRollingStockName === item.name}
+        />
+      ))}
+    </>
+  );
+}
+
+function RollingStockCards(props: { rollingStock: RollingStockAppDto; selected: boolean }) {
+  const dynamicRollingStock = useRollingStockDynamic(props.rollingStock.id);
+  const rollingStock = mergeRollingStockModelInfo(props.rollingStock, dynamicRollingStock);
+  const socket = useSocket();
+  const axisEntries = sortedNumberKeys(rollingStock.axisNames, rollingStock.axisValues);
+  const selected = props.selected || rollingStock.active;
+  const textureEntries = sortedNumberKeys(rollingStock.textureNames, rollingStock.surfaceTexts);
+
+  return (
+    <>
+      <Grid size={{ xs: 12 }}>
+        <RollingStockHeadline rollingStock={rollingStock} selected={selected} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 4 }}>
+        <RollingStockInfoCard rollingStock={rollingStock} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 4 }}>
+        <RollingStockTextureCard entries={textureEntries} rollingStock={rollingStock} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 4 }}>
+        <RollingStockAxisCard
+          axisEntries={axisEntries}
+          rollingStock={rollingStock}
+          onCommit={(axisNumber, value) => {
+            socket.emit(CommandEvent.SetRollingStockAxis, {
+              rollingStockName: rollingStock.name,
+              axisNumber,
+              value,
+            });
+          }}
+        />
+      </Grid>
+    </>
+  );
+}
+
+function RollingStockHeadline(props: { rollingStock: RollingStockAppDto; selected: boolean }) {
+  return (
+    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0, mt: 1 }}>
+      <Typography variant="h6" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {props.rollingStock.name}
+      </Typography>
+      {props.selected && <Chip size="small" color="primary" label="Ausgewählt" />}
+    </Stack>
+  );
+}
+
+function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
+  return (
+    <Card sx={{ height: 1 }}>
+      <CardHeader
+        avatar={<DirectionsRailwayIcon color="primary" />}
+        title="Info"
+        titleTypographyProps={{ variant: 'subtitle1' }}
+      />
+      <Divider />
+      <List
+        dense
+        sx={{
+          '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
+        }}
+      >
+        <OverviewMetric icon={<AssignmentIcon />} label="Tag" value={props.rollingStock.tag || '-'} />
+        <OverviewMetric icon={<FileUploadIcon />} label="Kranhaken" value={formatHookStatus(props.rollingStock.hookStatus)} />
+        <OverviewMetric
+          icon={<CommitIcon />}
+          label="Position im Zug"
+          value={String(props.rollingStock.positionInTrain)}
+        />
+        <OverviewMetric
+          icon={<ViewInArIcon />}
+          label="Modell"
+          value={<BreakableModelValue value={formatRollingStockModel(props.rollingStock)} />}
+        />
+        <OverviewMetric icon={<RouteIcon />} label="Länge" value={formatLength(props.rollingStock.length)} />
+        <OverviewMetric icon={<SpeedIcon />} label="Antrieb" value={props.rollingStock.propelled ? 'Ja' : 'Nein'} />
+        <OverviewMetric
+          icon={<CompareArrowsIcon />}
+          label="Ausrichtung"
+          value={props.rollingStock.orientationForward ? 'Vorwärts' : 'Rückwärts'}
+        />
+      </List>
+    </Card>
+  );
+}
+
+function RollingStockAxisCard(props: {
+  axisEntries: number[];
+  rollingStock: RollingStockAppDto;
+  onCommit: (axisNumber: number, value: number) => void;
+}) {
+  return (
+    <Card sx={{ height: 1 }}>
+      <CardHeader
+        avatar={<TuneIcon color="primary" />}
+        title="Achsen"
+        titleTypographyProps={{ variant: 'subtitle1' }}
+      />
       <Divider />
       <CardContent>
-        {props.rollingStock.length === 0 ? (
-          <Typography color="text.secondary">Keine RollingStocks gefunden.</Typography>
-        ) : (
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>
-            {props.rollingStock.map((item) => (
-              <RollingStockCard
-                key={item.id}
-                rollingStock={item}
-                selected={props.selectedRollingStockName === item.id || props.selectedRollingStockName === item.name}
-              />
-            ))}
-          </Box>
-        )}
+        <AxisList axisEntries={props.axisEntries} rollingStock={props.rollingStock} onCommit={props.onCommit} />
       </CardContent>
     </Card>
   );
 }
 
-function RollingStockCard(props: { rollingStock: RollingStockAppDto; selected: boolean }) {
-  const dynamicRollingStock = useRollingStockDynamic(props.rollingStock.id);
-  const rollingStock = mergeRollingStockModelInfo(props.rollingStock, dynamicRollingStock);
-  const socket = useSocket();
-  const axisEntries = sortedNumberKeys(rollingStock.axisNames, rollingStock.axisValues);
-  const textureEntries = sortedNumberKeys(rollingStock.textureNames, rollingStock.surfaceTexts);
-  const selected = props.selected || rollingStock.active;
-
+function RollingStockTextureCard(props: { entries: number[]; rollingStock: RollingStockAppDto }) {
   return (
-    <Card variant="outlined" sx={{ outline: selected ? '2px solid' : 0, outlineColor: 'primary.main' }}>
+    <Card sx={{ height: 1 }}>
       <CardHeader
-        title={rollingStock.name}
-        subheader={rollingStock.xmlModel || rollingStock.modelTypeText || undefined}
-        action={selected ? <Chip size="small" color="primary" label="Ausgewählt" /> : undefined}
+        avatar={<TextFieldsIcon color="primary" />}
+        title="Texturen"
+        titleTypographyProps={{ variant: 'subtitle1' }}
       />
       <Divider />
       <CardContent>
-        <Stack spacing={2}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1 }}>
-            <Metric icon={<DashboardIcon />} label="Tag" value={rollingStock.tag || '-'} />
-            <Metric icon={<LinkIcon />} label="Hakenstatus" value={formatHookStatus(rollingStock.hookStatus)} />
-          </Box>
-          <AxisList
-            axisEntries={axisEntries}
-            rollingStock={rollingStock}
-            onCommit={(axisNumber, value) => {
-              socket.emit(CommandEvent.SetRollingStockAxis, {
-                rollingStockName: rollingStock.name,
-                axisNumber,
-                value,
-              });
-            }}
-          />
-          <TextureList entries={textureEntries} rollingStock={rollingStock} />
-        </Stack>
+        <TextureList entries={props.entries} rollingStock={props.rollingStock} />
       </CardContent>
     </Card>
   );
@@ -542,13 +767,12 @@ function AxisList(props: {
 
   return (
     <Stack spacing={1}>
-      <Typography variant="subtitle2">Achsen</Typography>
       {props.axisEntries.map((axisNumber) => (
         <AxisSlider
           key={axisNumber}
           name={props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`}
-          axisNumbers={[axisNumber]}
           value={props.rollingStock.axisValues?.[String(axisNumber)] ?? 0}
+          rollingStockCount={1}
           onCommit={(value) => props.onCommit(axisNumber, value)}
         />
       ))}
@@ -558,10 +782,8 @@ function AxisList(props: {
 
 function AxisSlider(props: {
   name: string;
-  axisNumbers?: number[];
   value: number;
-  mixed?: boolean;
-  detail?: string;
+  rollingStockCount: number;
   onCommit: (value: number) => void;
 }) {
   const [value, setValue] = useState(props.value);
@@ -571,27 +793,25 @@ function AxisSlider(props: {
   }, [props.value]);
 
   return (
-    <Box
-      sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'minmax(120px, 1fr) minmax(180px, 2fr)' }, gap: 1 }}
-    >
-      <Box sx={{ minWidth: 0 }}>
+    <Box>
+      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', minWidth: 0 }}>
         <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {props.name}
         </Typography>
-        {(props.axisNumbers?.length || props.mixed || props.detail) && (
-          <Typography variant="caption" color="text.secondary">
-            {[formatAxisNumbers(props.axisNumbers), props.mixed ? 'gemischt' : props.detail].filter(Boolean).join(' · ')}
-          </Typography>
-        )}
+        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
+          {props.rollingStockCount}x
+        </Typography>
+      </Stack>
+      <Box sx={{ px: 1 }}>
+        <Slider
+          min={0}
+          max={100}
+          value={value}
+          valueLabelDisplay="auto"
+          onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
+          onChangeCommitted={(_, nextValue) => props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
+        />
       </Box>
-      <Slider
-        min={0}
-        max={100}
-        value={value}
-        valueLabelDisplay="auto"
-        onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-        onChangeCommitted={(_, nextValue) => props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-      />
     </Box>
   );
 }
@@ -603,29 +823,42 @@ function TextureList(props: { entries: number[]; rollingStock: RollingStockAppDt
 
   return (
     <Box>
-      <Typography variant="subtitle2" gutterBottom>
-        Texturen
-      </Typography>
-      <List dense disablePadding>
-        {props.entries.map((textureNumber) => (
-          <ListItem
-            key={textureNumber}
-            disablePadding
-            sx={{ display: 'grid', gridTemplateColumns: '4ch 1fr 1fr', gap: 1 }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              {textureNumber}
-            </Typography>
-            <Typography variant="body2" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {props.rollingStock.textureNames?.[String(textureNumber)] ?? `TextureText ${textureNumber}`}
-            </Typography>
-            <Typography variant="body2" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {props.rollingStock.surfaceTexts?.[String(textureNumber)] ?? ''}
-            </Typography>
-          </ListItem>
-        ))}
+      <List
+        dense
+        disablePadding
+        sx={{
+          '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
+        }}
+      >
+        {props.entries.map((textureNumber) => {
+          const textureKey = String(textureNumber);
+          const textureName = props.rollingStock.textureNames?.[textureKey] ?? `TextureText ${textureNumber}`;
+          const textureContent = props.rollingStock.surfaceTexts?.[textureKey] ?? '';
+
+          return (
+            <ListItem key={textureNumber} disablePadding sx={{ display: 'block', py: 0.75 }}>
+              <ListItemText
+                primary={<PreservedLineBreaks value={textureContent} />}
+                secondary={`${textureNumber} · ${textureName}`}
+              />
+            </ListItem>
+          );
+        })}
       </List>
     </Box>
+  );
+}
+
+function PreservedLineBreaks(props: { value: string }) {
+  return (
+    <>
+      {props.value.split(/\r?\n/).map((line, index) => (
+        <span key={index}>
+          {index > 0 && <br />}
+          {line}
+        </span>
+      ))}
+    </>
   );
 }
 
@@ -654,21 +887,9 @@ function groupAxisByName(rollingStock: RollingStockAppDto[]) {
       return {
         ...group,
         value: values.size === 1 ? group.targets[0].value : 0,
-        mixed: values.size > 1,
       };
     })
     .sort((left, right) => left.name.localeCompare(right.name, 'de'));
-}
-
-function uniqueAxisNumbers(targets: { axisNumber: number }[]): number[] {
-  return Array.from(new Set(targets.map((target) => target.axisNumber))).sort((left, right) => left - right);
-}
-
-function formatAxisNumbers(axisNumbers: number[] | undefined): string | undefined {
-  if (!axisNumbers?.length) {
-    return undefined;
-  }
-  return axisNumbers.length === 1 ? `Achse ${axisNumbers[0]}` : `Achsen ${axisNumbers.join(', ')}`;
 }
 
 function mergeRollingStockModelInfo(
@@ -710,16 +931,6 @@ function sortedNumberKeys(...records: Array<Record<string, unknown> | undefined>
   return Array.from(numbers).sort((left, right) => left - right);
 }
 
-function formatCoupling(value: number): string {
-  if (value === 1) {
-    return 'Kupplung scharf';
-  }
-  if (value === 2) {
-    return 'Abstoßen';
-  }
-  return 'Unbekannt';
-}
-
 function formatHookStatus(value: number): string {
   if (value === 0) {
     return 'Haken deaktiviert';
@@ -731,6 +942,14 @@ function formatHookStatus(value: number): string {
     return 'Ladegut am Haken';
   }
   return `Hakenstatus ${value}`;
+}
+
+function formatRollingStockModel(rollingStock: RollingStockAppDto): string {
+  return rollingStock.xmlModel || rollingStock.modelTypeText || (rollingStock.modelType ? String(rollingStock.modelType) : '-');
+}
+
+function formatLength(value: number): string {
+  return value ? `${value} m` : '-';
 }
 
 export default SelectedTrainDashboard;
