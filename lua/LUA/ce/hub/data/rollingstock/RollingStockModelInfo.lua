@@ -12,6 +12,7 @@ function RollingStockModelInfo:new(o)
     o.rawAxisNames = o.rawAxisNames or {}
     o.rawAxisNamesByLanguage = o.rawAxisNamesByLanguage or {}
     o.parsed3dmAxes = o.parsed3dmAxes or {}
+    o.parsed3dmAxesKnown = o.parsed3dmAxesKnown == true
     o.visibleAxisInfos = o.visibleAxisInfos or {}
     o.textureNames = o.textureNames or {}
     self.__index = self

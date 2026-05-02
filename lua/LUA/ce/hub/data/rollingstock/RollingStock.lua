@@ -107,6 +107,7 @@ local function collectAxisValues(rollingStockName, modelInfo)
     local axisValues = {}
     local axisNumbers = sortedAxisNumbers(modelInfo)
     local hasAxisMetadata = #axisNumbers > 0
+    if not hasAxisMetadata and axisNamesKnownForModelInfo(modelInfo) then return axisValues end
     if not hasAxisMetadata then
         for axisNumber = 1, 10 do axisNumbers[#axisNumbers + 1] = axisNumber end
     end

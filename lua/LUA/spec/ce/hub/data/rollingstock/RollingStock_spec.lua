@@ -62,6 +62,23 @@ insulate("axis and texture metadata", function ()
         assert.equals(42, stock:getAxisValues()["7"])
     end)
 
+    it("does not fallback probe axis numbers when model metadata says there are no axes", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
+
+        EEPRollingstockSetAxisByNumber("NoAxisStock", 7, 42)
+        local stock = RollingStock:new({ rollingStockName = "NoAxisStock" })
+        stock.modelInfo = RollingStockModelInfo:new({
+            axisNamesKnown = true,
+            axisNames = {}
+        })
+        stock.axisNamesKnown = stock.modelInfo:getAxisNamesKnown()
+        stock:updateAxisValues()
+
+        assert.is_true(stock:getAxisNamesKnown())
+        assert.is_nil(next(stock:getAxisValues()))
+    end)
+
     it("reads axis values by localized axis name when ByNumber is unavailable", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
         local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")

@@ -34,6 +34,7 @@ local function emptyInfo()
         rawAxisNames = {},
         rawAxisNamesByLanguage = {},
         parsed3dmAxes = {},
+        parsed3dmAxesKnown = false,
         visibleAxisInfos = {},
         textureNames = {}
     }
@@ -254,7 +255,7 @@ end
 
 local function applyVisibleAxisNames(info)
     info.visibleAxisInfos = buildVisibleAxisInfos(info, "GER")
-    info.axisNamesKnown = #info.visibleAxisInfos > 0
+    info.axisNamesKnown = #info.visibleAxisInfos > 0 or info.parsed3dmAxesKnown == true
     info.axisNames = {}
     info.axisNamesByLanguage = {}
 
@@ -360,8 +361,10 @@ function RollingStockResourceParser.infoForXmlModel(xmlModel)
     if ok then
         info.parsed3dmAxes = axesOrError
         info.parsed3dmAxisPath = path
+        info.parsed3dmAxesKnown = path ~= nil
     else
         info.parsed3dmAxes = {}
+        info.parsed3dmAxesKnown = false
         info.parserError = tostring(axesOrError)
     end
 

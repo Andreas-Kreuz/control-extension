@@ -19,6 +19,7 @@ function RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
         rawAxisNames = parsedInfo.rawAxisNames or {},
         rawAxisNamesByLanguage = parsedInfo.rawAxisNamesByLanguage or {},
         parsed3dmAxes = parsedInfo.parsed3dmAxes or {},
+        parsed3dmAxesKnown = parsedInfo.parsed3dmAxesKnown == true,
         visibleAxisInfos = parsedInfo.visibleAxisInfos or {},
         parserError = parsedInfo.parserError,
         textureNames = parsedInfo.textureNames or {}

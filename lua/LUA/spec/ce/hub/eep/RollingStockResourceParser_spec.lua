@@ -62,6 +62,7 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
             axisNamesByLanguage = {},
             rawAxisNames = {},
             rawAxisNamesByLanguage = {},
+            parsed3dmAxesKnown = true,
             parsed3dmAxes = {
                 { index = 12, name = "Schlusstafel_V",      isPublic = true },
                 { index = 13, name = "Schlusstafel_H",      isPublic = true },
@@ -73,6 +74,20 @@ insulate("ce.hub.eep.RollingStockResourceParser", function ()
         assert.equals("Aus-Kohlenstaub_Ein", info.axisNames[1])
         assert.equals("Schlusstafel_H", info.axisNames[2])
         assert.equals("Schlusstafel_V", info.axisNames[3])
+        assert.is_true(info.axisNamesKnown)
+    end)
+
+    it("marks axis names known when the parsed 3dm model has no public axes", function ()
+        local info = Parser.applyVisibleAxisNames({
+            axisNames = {},
+            axisNamesByLanguage = {},
+            rawAxisNames = {},
+            rawAxisNamesByLanguage = {},
+            parsed3dmAxesKnown = true,
+            parsed3dmAxes = {}
+        })
+
+        assert.is_nil(next(info.axisNames))
         assert.is_true(info.axisNamesKnown)
     end)
 
