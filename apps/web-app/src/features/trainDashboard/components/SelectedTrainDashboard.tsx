@@ -783,6 +783,7 @@ function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
       <List
         dense
         sx={{
+          pt: 0,
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
@@ -867,6 +868,7 @@ function TextureList(props: { entries: number[]; rollingStock: RollingStockAppDt
         dense
         disablePadding
         sx={{
+          mt: 0,
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
@@ -876,7 +878,7 @@ function TextureList(props: { entries: number[]; rollingStock: RollingStockAppDt
           const textureContent = props.rollingStock.surfaceTexts?.[textureKey] ?? '';
 
           return (
-            <ListItem key={textureNumber} disablePadding sx={{ display: 'block', py: 0.75 }}>
+            <ListItem key={textureNumber} disablePadding sx={{ display: 'block', pt: 0.25 }}>
               <ListItemText
                 primary={<PreservedLineBreaks value={textureContent} />}
                 secondary={`${textureNumber} · ${textureName}`}
