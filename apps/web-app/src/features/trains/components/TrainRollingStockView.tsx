@@ -2,10 +2,9 @@ import { CommandEvent, RollingStockAppDto } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
-import { useEffect, useState } from 'react';
 import { useSocket } from '../../../app/hooks/useSocket';
+import { AxisList } from '../../../shared/components/axises';
 import useRollingStockDynamic from '../hooks/useRollingStockDynamic';
 
 function TrainRollingStockView(props: { rollingStock: RollingStockAppDto[] | undefined }) {
@@ -59,7 +58,7 @@ function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
         <RowCell label="TagText" value={rollingStock.tag || '-'} />
         <RowCell label="XML Model" value={rollingStock.xmlModel || '-'} />
         <TextureTextList entries={textureEntries} rollingStock={rollingStock} />
-        <AxisList entries={axisEntries} rollingStock={rollingStock} onSetAxis={setAxis} />
+        <RollingStockAxisList entries={axisEntries} rollingStock={rollingStock} onSetAxis={setAxis} />
       </Box>
     </ListItem>
   );
@@ -126,7 +125,7 @@ function TextureTextList(props: { entries: number[]; rollingStock: RollingStockA
   );
 }
 
-function AxisList(props: {
+function RollingStockAxisList(props: {
   entries: number[];
   rollingStock: RollingStockAppDto;
   onSetAxis: (axisNumber: number, value: number) => void;
@@ -140,62 +139,13 @@ function AxisList(props: {
       <Typography variant="caption" color="text.secondary" align="left">
         Achsen
       </Typography>
-      <Box sx={{ display: 'grid', gap: 1 }}>
-        {props.entries.map((axisNumber) => (
-          <AxisSlider
-            key={axisNumber}
-            axisNumber={axisNumber}
-            name={props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`}
-            value={props.rollingStock.axisValues?.[String(axisNumber)] ?? 0}
-            onSetAxis={props.onSetAxis}
-          />
-        ))}
-      </Box>
-    </Box>
-  );
-}
-
-function AxisSlider(props: {
-  axisNumber: number;
-  name: string;
-  value: number;
-  onSetAxis: (axisNumber: number, value: number) => void;
-}) {
-  const [value, setValue] = useState(props.value);
-
-  useEffect(() => {
-    setValue(props.value);
-  }, [props.value]);
-
-  return (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        gap: 1,
-        alignItems: 'center',
-        '@container (min-width: 260px)': {
-          gridTemplateColumns: 'minmax(140px, 1fr) minmax(120px, 1fr)',
-        },
-      }}
-    >
-      <Typography variant="body2" sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        {props.name}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        Achse {props.axisNumber}
-      </Typography>
-      <Slider
-        min={0}
-        max={100}
-        value={value}
-        valueLabelDisplay="auto"
-        onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-        onChangeCommitted={(_, nextValue) => {
-          const committedValue = Array.isArray(nextValue) ? nextValue[0] : nextValue;
-          props.onSetAxis(props.axisNumber, committedValue);
-        }}
-        sx={{ width: 1, justifySelf: 'start' }}
+      <AxisList
+        entries={props.entries.map((axisNumber) => ({
+          axisNumber,
+          name: props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`,
+          value: props.rollingStock.axisValues?.[String(axisNumber)] ?? 0,
+        }))}
+        onCommit={props.onSetAxis}
       />
     </Box>
   );

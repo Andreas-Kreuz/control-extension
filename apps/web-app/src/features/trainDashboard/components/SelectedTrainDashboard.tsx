@@ -28,6 +28,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { AxisList, AxisSlider } from '../../../shared/components/axises';
 import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
 import AppPage from '../../../shared/layouts/AppPage';
 import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
@@ -617,7 +618,7 @@ require("ce.ControlExtension").setOptions({
             key={group.name}
             name={group.name}
             value={group.value}
-            rollingStockCount={group.targets.length}
+            trailingLabel={`${group.targets.length}x`}
             onCommit={(value) => {
               group.targets.forEach((target) => {
                 socket.emit(CommandEvent.SetRollingStockAxis, {
@@ -771,7 +772,14 @@ function RollingStockAxisCard(props: {
       />
       <Divider />
       <CardContent>
-        <AxisList axisEntries={props.axisEntries} rollingStock={props.rollingStock} onCommit={props.onCommit} />
+        <AxisList
+          entries={props.axisEntries.map((axisNumber) => ({
+            axisNumber,
+            name: props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`,
+            value: props.rollingStock.axisValues?.[String(axisNumber)] ?? 0,
+          }))}
+          onCommit={props.onCommit}
+        />
       </CardContent>
     </Card>
   );
@@ -790,70 +798,6 @@ function RollingStockTextureCard(props: { entries: number[]; rollingStock: Rolli
         <TextureList entries={props.entries} rollingStock={props.rollingStock} />
       </CardContent>
     </Card>
-  );
-}
-
-function AxisList(props: {
-  axisEntries: number[];
-  rollingStock: RollingStockAppDto;
-  onCommit: (axisNumber: number, value: number) => void;
-}) {
-  if (props.axisEntries.length === 0) {
-    return (
-      <Typography variant="body2" color="text.secondary">
-        Keine Achsen.
-      </Typography>
-    );
-  }
-
-  return (
-    <Stack spacing={1}>
-      {props.axisEntries.map((axisNumber) => (
-        <AxisSlider
-          key={axisNumber}
-          name={props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`}
-          value={props.rollingStock.axisValues?.[String(axisNumber)] ?? 0}
-          rollingStockCount={1}
-          onCommit={(value) => props.onCommit(axisNumber, value)}
-        />
-      ))}
-    </Stack>
-  );
-}
-
-function AxisSlider(props: {
-  name: string;
-  value: number;
-  rollingStockCount: number;
-  onCommit: (value: number) => void;
-}) {
-  const [value, setValue] = useState(props.value);
-
-  useEffect(() => {
-    setValue(props.value);
-  }, [props.value]);
-
-  return (
-    <Box>
-      <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', minWidth: 0 }}>
-        <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {props.name}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>
-          {props.rollingStockCount}x
-        </Typography>
-      </Stack>
-      <Box sx={{ px: 1 }}>
-        <Slider
-          min={0}
-          max={100}
-          value={value}
-          valueLabelDisplay="auto"
-          onChange={(_, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-          onChangeCommitted={(_, nextValue) => props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-        />
-      </Box>
-    </Box>
   );
 }
 
