@@ -20,7 +20,10 @@ interface DataEntrySectionProps {
 
 function DataEntrySection({ ceType, entryId }: DataEntrySectionProps) {
   const entriesMap = useTypeEntries(ceType);
-  const domainEntry = useDomainEntry(useMemo(() => new CeTypeRoom(ceType), [ceType]), entryId);
+  const domainEntry = useDomainEntry(
+    useMemo(() => new CeTypeRoom(ceType), [ceType]),
+    entryId,
+  );
 
   const entry = domainEntry ?? entriesMap[entryId];
 

@@ -1,4 +1,6 @@
-﻿import MyBackgroundImageCard, { BackgroundImageCardProps as MyBackgroundImageCardProps } from '../../shared/components/cards/BackgroundImageCard';
+﻿import MyBackgroundImageCard, {
+  BackgroundImageCardProps as MyBackgroundImageCardProps,
+} from '../../shared/components/cards/BackgroundImageCard';
 import { BrowserRouter } from 'react-router-dom';
 
 export type BackgroundImageCardProps = MyBackgroundImageCardProps;

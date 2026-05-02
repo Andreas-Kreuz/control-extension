@@ -48,13 +48,17 @@ function DataEntriesPage({ selectedElement }: DataEntriesPageProps) {
           </ListItem>
         )}
         renderCard={(item, selected, onSelect, mobileExpansion) => (
-          <BackgroundImageCard title={item.id} image="" selected={selected} expanded={selected} setExpanded={() => onSelect()}>
+          <BackgroundImageCard
+            title={item.id}
+            image=""
+            selected={selected}
+            expanded={selected}
+            setExpanded={() => onSelect()}
+          >
             {mobileExpansion}
           </BackgroundImageCard>
         )}
-        getDetails={(item) => [
-          { title: 'Details', component: <DataEntrySection ceType={ceType} entryId={item.id} /> },
-        ]}
+        getDetails={(item) => [{ title: 'Details', component: <DataEntrySection ceType={ceType} entryId={item.id} /> }]}
         selectedElement={selectedElement}
         onSelectedElementChange={handleSelectedElementChange}
       />

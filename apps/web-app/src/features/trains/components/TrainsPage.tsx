@@ -127,9 +127,7 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
             title: 'Kameras',
             component: <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />,
           },
-          ...(hasTransitLineInfo(train)
-            ? [{ title: 'Linien', component: <TrainLineSection train={train} /> }]
-            : []),
+          ...(hasTransitLineInfo(train) ? [{ title: 'Linien', component: <TrainLineSection train={train} /> }] : []),
           { title: 'Information', component: <TrainInformationSection train={train} /> },
           { title: 'RollingStock', component: <RollingStockSection trainId={train.id} /> },
         ]}

@@ -12,31 +12,34 @@ import TuneIcon from '@mui/icons-material/Tune';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ViewInArIcon from '@mui/icons-material/ViewInAr';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import LabelIcon from '@mui/icons-material/LabelOutlined';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
+import Tooltip from '@mui/material/Tooltip';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { AxisList, AxisSlider } from '../../../shared/components/axises';
+import IconHeaderCard from '../../../shared/components/cards/IconHeaderCard';
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
 import { useSocket } from '../../../app/hooks/useSocket';
-import TrainCamList from '../../trains/components/TrainCamList';
+import useDebug from '../../../shared/socket/useDebug';
 import TrainLineView from '../../trains/components/TrainLineView';
 import useRollingStock from '../../trains/hooks/useRollingStock';
 import useRollingStockDynamic from '../../trains/hooks/useRollingStockDynamic';
+import useSetRollingStockCam from '../../trains/hooks/useSetRollingStockCam';
+import useSetTrainCam from '../../trains/hooks/useSetTrainCam';
 import useTrainDynamic from '../../trains/hooks/useTrainDynamic';
 import useTrainRollingStock from '../../trains/hooks/useTrainRollingStock';
 import useTransitTrain from '../../trains/hooks/useTransitTrain';
@@ -51,6 +54,15 @@ const trainLightSources = [
   { source: 3, label: 'Bremslicht', enabledLabel: 'Ein' },
   { source: 1, label: 'Blinker links', enabledLabel: 'Ein' },
   { source: 2, label: 'Blinker rechts', enabledLabel: 'Ein' },
+];
+
+const trainCameraSources = [
+  { key: 3, label: 'Links oben' },
+  { key: 4, label: 'Rechts oben' },
+  { key: 8, label: 'Führerstand' },
+  { key: -1, label: 'Front' },
+  { key: -2, label: 'Front 2' },
+  { key: 10, label: 'Kabine' },
 ];
 
 const optimisticSwitchTimeoutMs = 5000;
@@ -130,13 +142,11 @@ function SelectedTrainDashboard() {
     return (
       <PageContainer>
         <PageHeadline>Aktiver Zug</PageHeadline>
-        <Card>
-          <CardContent>
-            <Typography variant="body2" color="textSecondary">
-              Zugdaten werden geladen.
-            </Typography>
-          </CardContent>
-        </Card>
+        <IconHeaderCard title="Zugdaten" icon={<DashboardIcon color="primary" />}>
+          <Typography variant="body2" color="textSecondary">
+            Zugdaten werden geladen.
+          </Typography>
+        </IconHeaderCard>
       </PageContainer>
     );
   }
@@ -157,7 +167,14 @@ function SelectedTrainDashboard() {
       <PageHeadline>Aktiver Zug</PageHeadline>
       <Stack spacing={2}>
         <CardGridContainer>
+          <Grid size={{ xs: 12 }}>
+            <TrainHeadline
+              selected={train.active || selectedTrainName === train.id || selectedTrainName === train.name}
+              train={train}
+            />
+          </Grid>
           <TrainOverviewPanel
+            cameraRollingStockName={cameraRollingStockName}
             train={train}
             rollingStock={trainRollingStock}
             selectedRollingStockName={selectedRollingStockName}
@@ -174,16 +191,28 @@ function SelectedTrainDashboard() {
           {showRollingStockSection && (
             <RollingStockGrid rollingStock={trainRollingStock} selectedRollingStockName={selectedRollingStockName} />
           )}
-          <Grid size={{ xs: 12 }} sx={{ display: 'flex' }}>
-            <CameraCard trainName={train.name} rollingStockName={cameraRollingStockName} />
-          </Grid>
         </CardGridContainer>
       </Stack>
     </PageContainer>
   );
 }
 
+function TrainHeadline(props: { selected: boolean; train: TrainAppDto }) {
+  return (
+    <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0, mt: 1 }}>
+      <Typography variant="h6" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        Zug
+        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+          : {props.train.name || '-'}
+        </Box>
+      </Typography>
+      {props.selected && <Chip size="small" color="primary" label="Ausgewählt" />}
+    </Stack>
+  );
+}
+
 function TrainOverviewPanel(props: {
+  cameraRollingStockName: string;
   train: TrainAppDto;
   rollingStock: RollingStockAppDto[];
   selectedRollingStockName: string;
@@ -262,6 +291,8 @@ function TrainOverviewPanel(props: {
           couplingFront={couplingFront}
           couplingRear={couplingRear}
           lights={lights}
+          rollingStockName={props.cameraRollingStockName}
+          trainName={train.name}
           onCouplingChange={(side, checked) => {
             const value = checked ? 1 : 2;
             if (side === 'front') {
@@ -312,16 +343,11 @@ function isSelectedRollingStock(rollingStock: RollingStockAppDto, selectedRollin
 
 function EmptyDashboardState() {
   return (
-    <Card>
-      <CardContent>
-        <Stack spacing={1}>
-          <Typography variant="h6">Kein Zug in EEP ausgewählt</Typography>
-          <Typography variant="body2" color="textSecondary">
-            Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
-          </Typography>
-        </Stack>
-      </CardContent>
-    </Card>
+    <IconHeaderCard title="Kein Zug in EEP ausgewählt" icon={<DashboardIcon color="primary" />}>
+      <Typography variant="body2" color="textSecondary">
+        Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
+      </Typography>
+    </IconHeaderCard>
   );
 }
 
@@ -329,22 +355,18 @@ function InfoCard(props: { train: TrainAppDto; transit?: TransitInfo; onSpeedCom
   const { train } = props;
 
   return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<DirectionsRailwayIcon color="primary" />}
-        title={train.name}
-        slotProps={{ title: { variant: 'subtitle1' } }}
-      />
-      <Divider />
+    <IconHeaderCard title="Zug Info" icon={<DirectionsRailwayIcon color="primary" />}>
       <List
         dense
         sx={{
+          p: 0,
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
+        <OverviewMetric icon={<LabelIcon />} label="Name des Zugs" value={train.name || '-'} />
         <OverviewMetric icon={<RouteIcon />} label="EEP-Route" value={train.route || '-'} />
         <OverviewMetric icon={<SpeedIcon />} label="Geschwindigkeit" value={`${train.speed} km/h`} />
-        <ListItem sx={{ alignItems: 'flex-start' }}>
+        <ListItem sx={{ alignItems: 'flex-start', m: 0, p: 0 }}>
           <SpeedSlider value={train.targetSpeed} onCommit={props.onSpeedCommit} />
         </ListItem>
       </List>
@@ -358,7 +380,7 @@ function InfoCard(props: { train: TrainAppDto; transit?: TransitInfo; onSpeedCom
           />
         </>
       )}
-    </Card>
+    </IconHeaderCard>
   );
 }
 
@@ -366,45 +388,40 @@ function TrainAssociationCard(props: {
   couplingFront: number;
   couplingRear: number;
   lights: Record<string, boolean>;
+  rollingStockName: string;
+  trainName: string;
   onCouplingChange: (side: 'front' | 'rear', checked: boolean) => void;
   onLightChange: (source: number, checked: boolean) => void;
 }) {
   return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<TuneIcon color="primary" />}
-        title="Fahrzeugverband"
-        slotProps={{ title: { variant: 'subtitle1' } }}
-      />
-      <Divider />
-      <CardContent>
-        <Stack spacing={3}>
-          <ControlGrid>
-            <CouplingSegmentedControl
-              value={props.couplingFront}
-              disabled={props.couplingFront === 0}
-              label="Kupplung vorne"
-              onChange={(checked) => props.onCouplingChange('front', checked)}
+    <IconHeaderCard title="Zug steuern" icon={<TuneIcon color="primary" />}>
+      <Stack spacing={3}>
+        <ControlGrid>
+          <CouplingSegmentedControl
+            value={props.couplingFront}
+            disabled={props.couplingFront === 0}
+            label="Kupplung vorne"
+            onChange={(checked) => props.onCouplingChange('front', checked)}
+          />
+          <CouplingSegmentedControl
+            value={props.couplingRear}
+            disabled={props.couplingRear === 0}
+            label="Kupplung hinten"
+            onChange={(checked) => props.onCouplingChange('rear', checked)}
+          />
+          {trainLightSources.map((entry) => (
+            <LightSegmentedControl
+              key={entry.source}
+              checked={props.lights?.[String(entry.source)] === true}
+              label={entry.label}
+              enabledLabel={entry.enabledLabel}
+              onChange={(checked) => props.onLightChange(entry.source, checked)}
             />
-            <CouplingSegmentedControl
-              value={props.couplingRear}
-              disabled={props.couplingRear === 0}
-              label="Kupplung hinten"
-              onChange={(checked) => props.onCouplingChange('rear', checked)}
-            />
-            {trainLightSources.map((entry) => (
-              <LightSegmentedControl
-                key={entry.source}
-                checked={props.lights?.[String(entry.source)] === true}
-                label={entry.label}
-                enabledLabel={entry.enabledLabel}
-                onChange={(checked) => props.onLightChange(entry.source, checked)}
-              />
-            ))}
-          </ControlGrid>
-        </Stack>
-      </CardContent>
-    </Card>
+          ))}
+          <CameraIconControl trainName={props.trainName} rollingStockName={props.rollingStockName} />
+        </ControlGrid>
+      </Stack>
+    </IconHeaderCard>
   );
 }
 
@@ -496,6 +513,47 @@ function LightSegmentedControl(props: {
   );
 }
 
+function CameraIconControl(props: { trainName: string; rollingStockName: string }) {
+  const rollingStock = useRollingStock(props.rollingStockName);
+  const setRollingStockCam = useSetRollingStockCam();
+  const setTrainCam = useSetTrainCam();
+  const debug = useDebug();
+
+  const changeCamera = (key: number) => {
+    switch (key) {
+      case -1:
+      case -2: {
+        if (debug) console.log('                 | CAM SET-', props.rollingStockName, rollingStock);
+        setRollingStockCam(rollingStock, key);
+        setTrainCam(props.trainName, props.rollingStockName, 9);
+        break;
+      }
+      default: {
+        setTrainCam(props.trainName, props.rollingStockName, key);
+      }
+    }
+  };
+
+  return (
+    <ControlTile sx={{ gridColumn: '1 / -1' }}>
+      <Box sx={{ minWidth: 0, width: 1 }}>
+        <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          Kameras
+        </Typography>
+        <Stack direction="row" spacing={0.5} sx={{ mt: 1, overflowX: 'auto' }}>
+          {trainCameraSources.map((camera) => (
+            <Tooltip key={camera.key} title={camera.label}>
+              <IconButton size="small" aria-label={`Kamera ${camera.label}`} onClick={() => changeCamera(camera.key)}>
+                <VideocamIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          ))}
+        </Stack>
+      </Box>
+    </ControlTile>
+  );
+}
+
 function SpeedSlider(props: { value: number; onCommit: (value: number) => void }) {
   const [value, setValue] = useState(props.value);
 
@@ -528,7 +586,7 @@ function SpeedSlider(props: { value: number; onCommit: (value: number) => void }
 
 function OverviewMetric(props: { icon: ReactNode; label: string; value: ReactNode }) {
   return (
-    <ListItem sx={{ alignItems: 'flex-start' }}>
+    <ListItem sx={{ alignItems: 'flex-start', m: 0, p: 0 }}>
       <ListItemIcon sx={{ mt: 0.5 }}>{props.icon}</ListItemIcon>
       <ListItemText primary={props.value} secondary={props.label} />
     </ListItem>
@@ -555,20 +613,6 @@ function BreakableModelValue(props: { value: string }) {
   );
 }
 
-function CameraCard(props: { trainName: string; rollingStockName: string }) {
-  return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<VideocamIcon color="primary" />}
-        title="Kameras"
-        slotProps={{ title: { variant: 'subtitle1' } }}
-      />
-      <Divider />
-      <TrainCamList trainName={props.trainName} rollingStockName={props.rollingStockName} />
-    </Card>
-  );
-}
-
 function MergedAxisCard(props: { rollingStock: RollingStockAppDto[] }) {
   const socket = useSocket();
   const canShowTrainAxes =
@@ -582,7 +626,7 @@ function MergedAxisCard(props: { rollingStock: RollingStockAppDto[] }) {
     !canShowTrainAxes && props.rollingStock.length > 0 ? (
       <Stack spacing={1}>
         <Typography variant="body2" color="textSecondary">
-          Achsen im Zugverband sind erst verfügbar, wenn Achsnamen für alle RollingStocks bekannt sind.
+          Achsen im Zug sind erst verfügbar, wenn Achsnamen für alle RollingStocks bekannt sind.
         </Typography>
         <Typography color="textSecondary" variant="caption">
           Hinweis: Setze in den Control-Extension-Optionen den anl3path zur aktuellen Anlage, damit Achsnamen aus den
@@ -609,7 +653,7 @@ require("ce.ControlExtension").setOptions({
       </Stack>
     ) : groups.length === 0 ? (
       <Typography variant="body2" color="textSecondary">
-        Keine Achsen im ausgewählten Zug gefunden.
+        Kein Fahrzeug in diesem Zug hat Achsen.
       </Typography>
     ) : (
       <Stack spacing={2}>
@@ -634,15 +678,9 @@ require("ce.ControlExtension").setOptions({
     );
 
   return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<TuneIcon color="primary" />}
-        title="Achsen im Zugverband"
-        slotProps={{ title: { variant: 'subtitle1' } }}
-      />
-      <Divider />
-      <CardContent>{content}</CardContent>
-    </Card>
+    <IconHeaderCard title="Achsen des Zugs" icon={<TuneIcon color="primary" />}>
+      {content}
+    </IconHeaderCard>
   );
 }
 
@@ -657,18 +695,25 @@ function RollingStockGrid(props: { rollingStock: RollingStockAppDto[]; selectedR
 
   return (
     <>
-      {props.rollingStock.map((item) => (
+      {props.rollingStock.map((item, index) => (
         <RollingStockCards
           key={item.id}
+          position={index + 1}
           rollingStock={item}
           selected={props.selectedRollingStockName === item.id || props.selectedRollingStockName === item.name}
+          total={props.rollingStock.length}
         />
       ))}
     </>
   );
 }
 
-function RollingStockCards(props: { rollingStock: RollingStockAppDto; selected: boolean }) {
+function RollingStockCards(props: {
+  position: number;
+  rollingStock: RollingStockAppDto;
+  selected: boolean;
+  total: number;
+}) {
   const dynamicRollingStock = useRollingStockDynamic(props.rollingStock.id);
   const rollingStock = mergeRollingStockModelInfo(props.rollingStock, dynamicRollingStock);
   const socket = useSocket();
@@ -679,7 +724,12 @@ function RollingStockCards(props: { rollingStock: RollingStockAppDto; selected: 
   return (
     <>
       <Grid size={{ xs: 12 }}>
-        <RollingStockHeadline rollingStock={rollingStock} selected={selected} />
+        <RollingStockHeadline
+          position={props.position}
+          rollingStock={rollingStock}
+          selected={selected}
+          total={props.total}
+        />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <RollingStockInfoCard rollingStock={rollingStock} />
@@ -704,11 +754,19 @@ function RollingStockCards(props: { rollingStock: RollingStockAppDto; selected: 
   );
 }
 
-function RollingStockHeadline(props: { rollingStock: RollingStockAppDto; selected: boolean }) {
+function RollingStockHeadline(props: {
+  position: number;
+  rollingStock: RollingStockAppDto;
+  selected: boolean;
+  total: number;
+}) {
   return (
     <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0, mt: 1 }}>
       <Typography variant="h6" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        {props.rollingStock.name}
+        Fahrzeug ({props.position}/{props.total})
+        <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+          : {props.rollingStock.name}
+        </Box>
       </Typography>
       {props.selected && <Chip size="small" color="primary" label="Ausgewählt" />}
     </Stack>
@@ -717,20 +775,15 @@ function RollingStockHeadline(props: { rollingStock: RollingStockAppDto; selecte
 
 function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
   return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<DirectionsRailwayIcon color="primary" />}
-        title="Info"
-        slotProps={{ title: { variant: 'subtitle1' } }}
-      />
-      <Divider />
+    <IconHeaderCard title="Fahrzeug Info" icon={<DirectionsRailwayIcon color="primary" />}>
       <List
         dense
         sx={{
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
-        <OverviewMetric icon={<AssignmentIcon />} label="Tag" value={props.rollingStock.tag || '-'} />
+        <OverviewMetric icon={<LabelIcon />} label="Name des Fahrzeugs" value={props.rollingStock.name || '-'} />
+        <OverviewMetric icon={<AssignmentIcon />} label="Tag-Text" value={props.rollingStock.tag || '-'} />
         <OverviewMetric
           icon={<FileUploadIcon />}
           label="Kranhaken"
@@ -739,7 +792,7 @@ function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
         <OverviewMetric
           icon={<CommitIcon />}
           label="Position im Zug"
-          value={String(props.rollingStock.positionInTrain)}
+          value={String(props.rollingStock.positionInTrain + 1)}
         />
         <OverviewMetric
           icon={<ViewInArIcon />}
@@ -754,7 +807,7 @@ function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
           value={props.rollingStock.orientationForward ? 'Vorwärts' : 'Rückwärts'}
         />
       </List>
-    </Card>
+    </IconHeaderCard>
   );
 }
 
@@ -763,41 +816,35 @@ function RollingStockAxisCard(props: {
   rollingStock: RollingStockAppDto;
   onCommit: (axisNumber: number, value: number) => void;
 }) {
+  if (props.axisEntries.length === 0) {
+    return (
+      <IconHeaderCard title="Achsen" icon={<TuneIcon color="primary" />}>
+        <Typography variant="body2" color="textSecondary">
+          Dieses Fahrzeug hat keine Achsen.
+        </Typography>
+      </IconHeaderCard>
+    );
+  }
+
   return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<TuneIcon color="primary" />}
-        title="Achsen"
-        slotProps={{ title: { variant: 'subtitle1' } }}
+    <IconHeaderCard title="Achsen" icon={<TuneIcon color="primary" />}>
+      <AxisList
+        entries={props.axisEntries.map((axisNumber) => ({
+          axisNumber,
+          name: props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`,
+          value: props.rollingStock.axisValues?.[String(axisNumber)] ?? 0,
+        }))}
+        onCommit={props.onCommit}
       />
-      <Divider />
-      <CardContent>
-        <AxisList
-          entries={props.axisEntries.map((axisNumber) => ({
-            axisNumber,
-            name: props.rollingStock.axisNames?.[String(axisNumber)] ?? `Achse ${axisNumber}`,
-            value: props.rollingStock.axisValues?.[String(axisNumber)] ?? 0,
-          }))}
-          onCommit={props.onCommit}
-        />
-      </CardContent>
-    </Card>
+    </IconHeaderCard>
   );
 }
 
 function RollingStockTextureCard(props: { entries: number[]; rollingStock: RollingStockAppDto }) {
   return (
-    <Card sx={{ height: 1, width: 1 }}>
-      <CardHeader
-        avatar={<TextFieldsIcon color="primary" />}
-        title="Texturen"
-        slotProps={{ title: { variant: 'subtitle1' } }}
-      />
-      <Divider />
-      <CardContent>
-        <TextureList entries={props.entries} rollingStock={props.rollingStock} />
-      </CardContent>
-    </Card>
+    <IconHeaderCard title="Aufschriften" icon={<TextFieldsIcon color="primary" />}>
+      <TextureList entries={props.entries} rollingStock={props.rollingStock} />
+    </IconHeaderCard>
   );
 }
 
@@ -805,7 +852,7 @@ function TextureList(props: { entries: number[]; rollingStock: RollingStockAppDt
   if (props.entries.length === 0) {
     return (
       <Typography variant="body2" color="textSecondary">
-        Keine Texturen.
+        Dieses Fahrzeug unterstützt keine Aufschriften.
       </Typography>
     );
   }

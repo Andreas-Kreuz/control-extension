@@ -92,11 +92,7 @@ function TrainNextStationList({ nextStations }: { nextStations: TrainNextStation
   );
 }
 
-function TrainLineView(props: {
-  line?: string;
-  destination?: string;
-  nextStations?: TrainNextStationAppDto[];
-}) {
+function TrainLineView(props: { line?: string; destination?: string; nextStations?: TrainNextStationAppDto[] }) {
   const rows = [
     { label: 'Linie', value: props.line ?? '-', icon: RouteIcon },
     { label: 'Ziel', value: props.destination ?? '-', icon: LocationOnIcon },

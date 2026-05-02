@@ -11,9 +11,7 @@ function TrainLineSection({ train }: { train: TrainListAppDto }) {
 
   const line = transitTrain?.line ?? train.line ?? '-';
   const destination = transitTrain?.destination ?? train.destination ?? '-';
-  return (
-    <TrainLineView line={line} destination={destination} nextStations={transitTrain?.nextStations ?? []} />
-  );
+  return <TrainLineView line={line} destination={destination} nextStations={transitTrain?.nextStations ?? []} />;
 }
 
 export default TrainLineSection;

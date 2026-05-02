@@ -3,6 +3,12 @@ import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Fragment } from 'react';
+import PlainCard from '../../shared/components/cards/PlainCard';
+
+type PlainCardTypographyCombination = {
+  titleVariant: 'h5' | 'h6';
+  subtitleVariant: 'body1' | 'body2' | 'subtitle1' | 'subtitle2' | 'caption';
+};
 
 const typographySamples = [
   { variant: 'h1', text: 'h1. Heading' },
@@ -31,6 +37,22 @@ const typographySamples = [
   { variant: 'caption', text: 'caption text' },
   { variant: 'overline', text: 'overline text' },
 ] as const;
+
+const h5PlainCardTypographyCombinations: PlainCardTypographyCombination[] = [
+  { titleVariant: 'h5', subtitleVariant: 'body1' },
+  { titleVariant: 'h5', subtitleVariant: 'body2' },
+  { titleVariant: 'h5', subtitleVariant: 'subtitle1' },
+  { titleVariant: 'h5', subtitleVariant: 'subtitle2' },
+  { titleVariant: 'h5', subtitleVariant: 'caption' },
+];
+
+const h6PlainCardTypographyCombinations: PlainCardTypographyCombination[] = [
+  { titleVariant: 'h6', subtitleVariant: 'body1' },
+  { titleVariant: 'h6', subtitleVariant: 'body2' },
+  { titleVariant: 'h6', subtitleVariant: 'subtitle1' },
+  { titleVariant: 'h6', subtitleVariant: 'subtitle2' },
+  { titleVariant: 'h6', subtitleVariant: 'caption' },
+];
 
 function formatFontSize(fontSize: string | number) {
   if (typeof fontSize === 'number') {
@@ -104,6 +126,56 @@ function TypographyScale() {
   );
 }
 
+function PlainCardTypographyExample(props: PlainCardTypographyCombination) {
+  const theme = useTheme();
+  const titleStyle = theme.typography[props.titleVariant];
+  const subtitleStyle = theme.typography[props.subtitleVariant];
+  const titleInfo = `${props.titleVariant} (${titleStyle.fontWeight}, ${formatFontSize(titleStyle.fontSize)})`;
+  const subtitleInfo = `${props.subtitleVariant} (${subtitleStyle.fontWeight}, ${formatFontSize(subtitleStyle.fontSize)})`;
+
+  return (
+    <PlainCard>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, p: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <Typography variant={props.titleVariant} sx={{ lineHeight: 1, m: 0 }}>
+            Informationen
+          </Typography>
+          <Typography variant={props.subtitleVariant} sx={{ color: 'text.secondary', lineHeight: 1, m: 0 }}>
+            Datenbestand und Laufzeit
+          </Typography>
+        </Box>
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+          {titleInfo} / {subtitleInfo}
+        </Typography>
+      </Box>
+    </PlainCard>
+  );
+}
+
+function PlainCardTypographyCombinations() {
+  const rows = h5PlainCardTypographyCombinations.map((h5Combination, index) => [
+    h5Combination,
+    h6PlainCardTypographyCombinations[index],
+  ]);
+
+  return (
+    <Box sx={{ alignItems: 'stretch', display: 'grid', gap: 2, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+      {rows.map(([h5Combination, h6Combination], index) => (
+        <Fragment key={index}>
+          <PlainCardTypographyExample
+            key={`${h5Combination.titleVariant}-${h5Combination.subtitleVariant}-${index}`}
+            {...h5Combination}
+          />
+          <PlainCardTypographyExample
+            key={`${h6Combination.titleVariant}-${h6Combination.subtitleVariant}-${index}`}
+            {...h6Combination}
+          />
+        </Fragment>
+      ))}
+    </Box>
+  );
+}
+
 const meta = {
   title: 'Elements/Typography',
   component: TypographyScale,
@@ -113,3 +185,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const PlainCardTypography: Story = {
+  render: () => <PlainCardTypographyCombinations />,
+};

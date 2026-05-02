@@ -21,8 +21,11 @@ function IconHeaderCard(props: IconHeaderCardProps) {
         title={props.title}
         {...(props.subtitle !== undefined ? { subheader: props.subtitle } : {})}
         slotProps={{
-          content: { sx: { display: 'flex', flexDirection: 'column', gap: 0.25 } },
-          title: { variant: 'h5', sx: { lineHeight: 1 } },
+          content: { sx: { display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 } },
+          title: {
+            variant: 'h5',
+            sx: { lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+          },
           subheader: { variant: 'subtitle1', sx: { display: 'block', lineHeight: 1, mt: 0 } },
         }}
       />
