@@ -164,3 +164,4 @@ web-app/src/app/client/modules/intersection/intersection-lane-display/example-sv
 Lua_manual.pdf
 EEP18_Manual_GER.pdf
 package-lock.json
+scripts/internal*

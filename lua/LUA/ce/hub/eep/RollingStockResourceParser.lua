@@ -20,11 +20,11 @@ local RELATION_NAME_MARKER = string.char(189, 55, 134, 53)
 --   Records whose name starts with "_" are internal. Public records are used
 --   as visible axis names only when the .ini file has no MovAxis entries.
 --
--- * EEP exposes visible axes as a compact list numbered from 1..N. Current
---   evidence shows this list is sorted by displayed name, with digits before
---   letters. Therefore axisNames/axisNamesByLanguage produced by infoForXmlModel
---   are compact visible-axis maps, while rawAxisNames/rawAxisNamesByLanguage
---   retain the original INI numbers.
+-- * EEP exposes visible axes as a compact list numbered from 1..N. The axis
+--   picker sorts rows by displayed name, but the number shown beside each row is
+--   the runtime axis number. Therefore axisNames/axisNamesByLanguage produced by
+--   infoForXmlModel are compact source-order maps, while
+--   rawAxisNames/rawAxisNamesByLanguage retain the original INI numbers.
 
 local function emptyInfo()
     return {
@@ -34,6 +34,7 @@ local function emptyInfo()
         rawAxisNames = {},
         rawAxisNamesByLanguage = {},
         parsed3dmAxes = {},
+        parsed3dmControls = {},
         parsed3dmAxesKnown = false,
         visibleAxisInfos = {},
         textureNames = {}
@@ -206,11 +207,120 @@ local function build3dmAxisList(data, candidates)
                 index = #axes + 1,
                 name = candidate.name,
                 isPublic = string.sub(candidate.name, 1, 1) ~= "_",
-                offset = candidate.offset
+                offset = candidate.offset,
+                recordType = "09"
             }
         end
     end
     return axes
+end
+
+local function readLengthPrefixedLabel(data, position)
+    local length = readUint32Le(data, position)
+    if not length or length < 1 or length > 80 then return nil end
+
+    local value = stringAt(data, position + 4, length)
+    if not value then return nil end
+
+    local nextPosition = position + 4 + length
+    while nextPosition % 4 ~= 1 do nextPosition = nextPosition + 1 end
+    return value, nextPosition
+end
+
+local function collect3dm0aControlRecords(data)
+    local records = {}
+    local seenNameOffsets = {}
+
+    for _, markerPosition in ipairs(markerPositions(data)) do
+        local recordOffset = markerPosition - 4
+        if recordOffset >= 1 and readUint32Le(data, recordOffset) == 10 then
+            local nameLengthOffset = recordOffset + 92
+            local nameLength = readUint32Le(data, nameLengthOffset)
+            if nameLength and nameLength >= 1 and nameLength <= 80 then
+                local nameOffset = nameLengthOffset + 4
+                local name = stringAt(data, nameOffset, nameLength)
+                if name and isAxisRecordName(name) and not seenNameOffsets[nameOffset] then
+                    local labels = {}
+                    local nextLabelPosition = nameOffset + nameLength
+                    for _ = 1, 3 do
+                        local labelValue = nil
+                        local labelNextPosition = nil
+                        for padding = 0, 16 do
+                            labelValue, labelNextPosition =
+                                readLengthPrefixedLabel(data, nextLabelPosition + padding)
+                            if labelValue then break end
+                        end
+                        if not labelValue then break end
+                        labels[#labels + 1] = labelValue
+                        nextLabelPosition = labelNextPosition
+                    end
+
+                    seenNameOffsets[nameOffset] = true
+                    records[#records + 1] = {
+                        name = name,
+                        isPublic = string.sub(name, 1, 1) ~= "_",
+                        offset = nameLengthOffset,
+                        recordOffset = recordOffset,
+                        recordType = "0A",
+                        labels = labels
+                    }
+                end
+            end
+        end
+    end
+
+    return records
+end
+
+local function add3dmControl(controls, seenNames, control)
+    if seenNames[control.name] then
+        local existing = controls[seenNames[control.name]]
+        existing.recordTypes[control.recordType] = true
+        if not existing.labels and control.labels then existing.labels = control.labels end
+        return
+    end
+
+    control.index = #controls + 1
+    control.recordTypes = { [control.recordType] = true }
+    seenNames[control.name] = control.index
+    controls[#controls + 1] = control
+end
+
+local function build3dmControlList(axes, records0a)
+    local candidates = {}
+    for _, axis in ipairs(axes or {}) do
+        candidates[#candidates + 1] = {
+            name = axis.name,
+            isPublic = axis.isPublic,
+            sourceNumber = axis.index,
+            offset = axis.offset,
+            recordOffset = axis.recordOffset or axis.offset,
+            recordType = axis.recordType or "09"
+        }
+    end
+    for _, record in ipairs(records0a or {}) do
+        candidates[#candidates + 1] = {
+            name = record.name,
+            isPublic = record.isPublic,
+            sourceNumber = nil,
+            offset = record.offset,
+            recordOffset = record.recordOffset or record.offset,
+            recordType = record.recordType or "0A",
+            labels = record.labels
+        }
+    end
+
+    table.sort(candidates, function (left, right)
+        local leftOffset = left.recordOffset or left.offset or 0
+        local rightOffset = right.recordOffset or right.offset or 0
+        if leftOffset ~= rightOffset then return leftOffset < rightOffset end
+        return (left.recordType or "") < (right.recordType or "")
+    end)
+
+    local controls = {}
+    local seenNames = {}
+    for _, candidate in ipairs(candidates) do add3dmControl(controls, seenNames, candidate) end
+    return controls
 end
 
 local function currentLanguageAxisNames(info, language)
@@ -230,24 +340,119 @@ local function addUniqueName(axisInfos, seenNames, axisName, sourceNumber, sourc
     }
 end
 
+local function public3dmControls(info)
+    local controls = {}
+    local sourceControls = info.parsed3dmControls or {}
+    if #sourceControls == 0 then sourceControls = info.parsed3dmAxes or {} end
+
+    for _, control in ipairs(sourceControls) do
+        if control.isPublic then controls[#controls + 1] = control end
+    end
+
+    return controls
+end
+
+local function find3dmControlMatches(info, languageAxisNames)
+    local exactControls = {}
+    local lowerControls = {}
+    local ambiguousLowerControls = {}
+
+    for _, control in ipairs(public3dmControls(info)) do
+        exactControls[control.name] = exactControls[control.name] or control
+
+        local lowerName = string.lower(control.name)
+        if lowerControls[lowerName] and lowerControls[lowerName].name ~= control.name then
+            ambiguousLowerControls[lowerName] = true
+        else
+            lowerControls[lowerName] = control
+        end
+    end
+
+    local matchesByControl = {}
+    local matchedSourceNumbers = {}
+
+    for _, sourceNumber in ipairs(sortedNumberKeys(languageAxisNames)) do
+        local axisName = languageAxisNames[sourceNumber]
+        local control = exactControls[axisName]
+        local isCaseOnlyMatch = false
+
+        if not control then
+            local lowerName = string.lower(axisName or "")
+            if not ambiguousLowerControls[lowerName] then
+                control = lowerControls[lowerName]
+                isCaseOnlyMatch = control ~= nil
+            end
+        end
+
+        if control and not matchesByControl[control.name] then
+            matchesByControl[control.name] = {
+                axisName = isCaseOnlyMatch and control.name or axisName,
+                sourceNumber = sourceNumber,
+                source = "ini+3dm",
+                source3dmName = control.name,
+                source3dmIndex = control.index or control.sourceNumber,
+                source3dmRecordTypes = control.recordTypes,
+                source3dmRecordType = control.recordType,
+                source3dmOffset = control.offset,
+                caseOnlyMatch = isCaseOnlyMatch
+            }
+            matchedSourceNumbers[sourceNumber] = true
+        end
+    end
+
+    return matchesByControl, matchedSourceNumbers
+end
+
+local function addAxisInfo(axisInfos, seenNames, axisName, sourceNumber, source, extraInfo)
+    if type(axisName) ~= "string" or axisName == "" or seenNames[axisName] then return end
+
+    local axisInfo = {
+        name = axisName,
+        sourceNumber = sourceNumber,
+        source = source
+    }
+
+    for key, value in pairs(extraInfo or {}) do axisInfo[key] = value end
+
+    seenNames[axisName] = true
+    axisInfos[#axisInfos + 1] = axisInfo
+end
+
 local function buildVisibleAxisInfos(info, language)
     local axisInfos = {}
     local seenNames = {}
     local languageAxisNames = currentLanguageAxisNames(info, language)
 
     if tableSize(languageAxisNames) > 0 then
+        local matchesByControl, matchedSourceNumbers = find3dmControlMatches(info, languageAxisNames)
+        for _, control in ipairs(public3dmControls(info)) do
+            local match = matchesByControl[control.name]
+            if match then
+                addAxisInfo(axisInfos, seenNames, match.axisName, match.sourceNumber, match.source, {
+                    source3dmName = match.source3dmName,
+                    source3dmIndex = match.source3dmIndex,
+                    source3dmRecordTypes = match.source3dmRecordTypes,
+                    source3dmRecordType = match.source3dmRecordType,
+                    source3dmOffset = match.source3dmOffset,
+                    caseOnlyMatch = match.caseOnlyMatch
+                })
+            end
+        end
+
         for _, axisNumber in ipairs(sortedNumberKeys(languageAxisNames)) do
-            addUniqueName(axisInfos, seenNames, languageAxisNames[axisNumber], axisNumber, "ini")
+            if not matchedSourceNumbers[axisNumber] then
+                addUniqueName(axisInfos, seenNames, languageAxisNames[axisNumber], axisNumber, "ini")
+            end
         end
     else
-        for _, axis in ipairs(info.parsed3dmAxes or {}) do
-            if axis.isPublic then addUniqueName(axisInfos, seenNames, axis.name, axis.index, "3dm") end
+        for _, control in ipairs(public3dmControls(info)) do
+            addAxisInfo(axisInfos, seenNames, control.name, control.index or control.sourceNumber, "3dm", {
+                source3dmRecordTypes = control.recordTypes,
+                source3dmRecordType = control.recordType,
+                source3dmOffset = control.offset
+            })
         end
     end
-
-    table.sort(axisInfos, function (left, right)
-        return left.name < right.name
-    end)
 
     for index, axis in ipairs(axisInfos) do axis.axisNumber = index end
     return axisInfos
@@ -322,15 +527,20 @@ end
 
 function RollingStockResourceParser.parse3dmContent(data)
     local content = data or ""
-    return build3dmAxisList(content, collect3dmAxisCandidates(content))
+    local axes = build3dmAxisList(content, collect3dmAxisCandidates(content))
+    local controls = build3dmControlList(axes, collect3dm0aControlRecords(content))
+    return axes, controls
 end
 
 function RollingStockResourceParser.parseFirstExisting3dm(paths)
     for _, path in ipairs(paths or {}) do
         local data = readFile(path, "rb")
-        if data then return RollingStockResourceParser.parse3dmContent(data), path end
+        if data then
+            local axes, controls = RollingStockResourceParser.parse3dmContent(data)
+            return axes, controls, path
+        end
     end
-    return {}, nil
+    return {}, {}, nil
 end
 
 function RollingStockResourceParser.parseFirstExistingFile(paths)
@@ -355,15 +565,17 @@ function RollingStockResourceParser.infoForXmlModel(xmlModel)
     info.xmlModel = xmlModel
 
     local primaryModelPath, fallbackModelPath = modelPathForXmlModel(xmlModel)
-    local ok, axesOrError, path = pcall(
+    local ok, axesOrError, controls, path = pcall(
         RollingStockResourceParser.parseFirstExisting3dm,
         { primaryModelPath, fallbackModelPath })
     if ok then
         info.parsed3dmAxes = axesOrError
+        info.parsed3dmControls = controls or {}
         info.parsed3dmAxisPath = path
         info.parsed3dmAxesKnown = path ~= nil
     else
         info.parsed3dmAxes = {}
+        info.parsed3dmControls = {}
         info.parsed3dmAxesKnown = false
         info.parserError = tostring(axesOrError)
     end

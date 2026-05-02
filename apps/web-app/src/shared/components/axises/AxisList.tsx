@@ -32,7 +32,7 @@ function AxisList(props: {
           key={entry.axisNumber}
           name={entry.name}
           value={entry.value}
-          trailingLabel={entry.trailingLabel ?? `(${entry.axisNumber}.)`}
+          trailingLabel={entry.trailingLabel ?? `(#${entry.axisNumber})`}
           onCommit={(value) => props.onCommit(entry.axisNumber, value)}
         />
       ))}

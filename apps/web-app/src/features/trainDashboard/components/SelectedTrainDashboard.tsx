@@ -719,7 +719,7 @@ function RollingStockCards(props: {
   const dynamicRollingStock = useRollingStockDynamic(props.rollingStock.id);
   const rollingStock = mergeRollingStockModelInfo(props.rollingStock, dynamicRollingStock);
   const socket = useSocket();
-  const axisEntries = sortedNumberKeys(rollingStock.axisNames, rollingStock.axisValues);
+  const axisEntries = sortedAxisKeysByName(rollingStock.axisNames, rollingStock.axisValues);
   const selected = props.selected || rollingStock.active;
   const textureEntries = sortedNumberKeys(rollingStock.textureNames, rollingStock.surfaceTexts);
 
@@ -983,6 +983,19 @@ function sortedNumberKeys(...records: Array<Record<string, unknown> | undefined>
   });
 
   return Array.from(numbers).sort((left, right) => left - right);
+}
+
+function sortedAxisKeysByName(
+  axisNames: Record<string, string> | undefined,
+  axisValues: Record<string, unknown> | undefined,
+): number[] {
+  return sortedNumberKeys(axisNames, axisValues).sort((left, right) => {
+    const leftName = axisNames?.[String(left)] ?? `Achse ${left}`;
+    const rightName = axisNames?.[String(right)] ?? `Achse ${right}`;
+    const nameComparison = leftName.localeCompare(rightName, 'de');
+
+    return nameComparison || left - right;
+  });
 }
 
 function formatHookStatus(value: number): string {
