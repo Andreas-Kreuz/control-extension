@@ -15,7 +15,10 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
   }
 }
 
-function createManager(commands: string[], emittedEvents: Array<{ roomName: string; eventName: string; payload: string }> = []) {
+function createManager(
+  commands: string[],
+  emittedEvents: Array<{ roomName: string; eventName: string; payload: string }> = [],
+) {
   const io = {
     to: (roomName: string) => ({
       emit: (eventName: string, payload: string) => emittedEvents.push({ roomName, eventName, payload }),
@@ -304,8 +307,14 @@ export async function run(): Promise<void> {
     testOneSocketReceivesUpdatesForMultipleDomainRooms,
   );
   await runTest('domain room manager serves dynamic ceType rooms', testCeTypeRoomServesRawEntriesDynamically);
-  await runTest('domain room manager uses central app room interest registry', testAppDomainRoomUsesCentralInterestRegistry);
-  await runTest('domain room manager uses rolling stock interest for rolling stock rooms', testRollingStockRoomUsesRollingStockInterest);
+  await runTest(
+    'domain room manager uses central app room interest registry',
+    testAppDomainRoomUsesCentralInterestRegistry,
+  );
+  await runTest(
+    'domain room manager uses rolling stock interest for rolling stock rooms',
+    testRollingStockRoomUsesRollingStockInterest,
+  );
 }
 
 if (require.main === module) {

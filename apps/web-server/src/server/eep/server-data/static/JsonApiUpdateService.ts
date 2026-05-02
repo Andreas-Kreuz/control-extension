@@ -155,7 +155,9 @@ export default class JsonApiUpdateService {
     this.lastTimeOut = setTimeout(() => {
       this.serverStats = { ...this.serverStats, eepDataUpToDate: false };
       const newStatsJsonString = JSON.stringify(this.serverStats);
-      this.io.to(ServerStatsRoom.roomId('ServerStats')).emit(ServerStatsRoom.eventId('ServerStats'), newStatsJsonString);
+      this.io
+        .to(ServerStatsRoom.roomId('ServerStats'))
+        .emit(ServerStatsRoom.eventId('ServerStats'), newStatsJsonString);
     }, 1000);
   }
 }

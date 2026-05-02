@@ -54,7 +54,11 @@ function testDomainRoomRegistryIsMinimal(): void {
 
   assert.equal(source.includes('CeTypes'), false, 'DomainRoomRegistry must not statically map CeTypes');
   assert.equal(source.includes('ApiNames'), false, 'DomainRoomRegistry must not wrap CeTypes via API name aliases');
-  assert.equal(source.includes('detailRoomForCeType'), false, 'DomainRoomRegistry must not expose static ceType mapping');
+  assert.equal(
+    source.includes('detailRoomForCeType'),
+    false,
+    'DomainRoomRegistry must not expose static ceType mapping',
+  );
 }
 
 function testApiNameAliasesRemoved(): void {

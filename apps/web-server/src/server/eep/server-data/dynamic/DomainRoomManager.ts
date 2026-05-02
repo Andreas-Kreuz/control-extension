@@ -44,7 +44,9 @@ export default class DomainRoomManager {
         id: provider.id,
         jsonCreator: provider.jsonCreator,
         onInterest:
-          provider.onInterest !== undefined ? provider.onInterest : this.interestRegistry.bindingsFor(provider.roomType),
+          provider.onInterest !== undefined
+            ? provider.onInterest
+            : this.interestRegistry.bindingsFor(provider.roomType),
         lastDataCache: new Map(),
         currentData: new Map(),
         sockets: new Map(),

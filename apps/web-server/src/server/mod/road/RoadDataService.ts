@@ -2,7 +2,12 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
 import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import RoadSelector from './RoadSelector';
-import { IntersectionRoom, IntersectionListRoom, IntersectionSwitchingListRoom, RoadSettingsRoom } from '@ce/web-shared';
+import {
+  IntersectionRoom,
+  IntersectionListRoom,
+  IntersectionSwitchingListRoom,
+  RoadSettingsRoom,
+} from '@ce/web-shared';
 import { Server } from 'socket.io';
 
 export default class RoadDataService implements DomainRoomService {
