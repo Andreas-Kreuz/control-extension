@@ -53,7 +53,6 @@ const trainLightSources = [
 ];
 
 const optimisticSwitchTimeoutMs = 5000;
-
 type TransitInfo = {
   line: string;
   destination: string;
@@ -132,7 +131,9 @@ function SelectedTrainDashboard() {
         <AppPageHeadline>Aktiver Zug</AppPageHeadline>
         <Card>
           <CardContent>
-            <Typography color="text.secondary">Zugdaten werden geladen.</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Zugdaten werden geladen.
+            </Typography>
           </CardContent>
         </Card>
       </AppPage>
@@ -172,7 +173,7 @@ function SelectedTrainDashboard() {
           {showRollingStockSection && (
             <RollingStockGrid rollingStock={trainRollingStock} selectedRollingStockName={selectedRollingStockName} />
           )}
-          <Grid size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }} sx={{ display: 'flex' }}>
             <CameraCard trainName={train.name} rollingStockName={cameraRollingStockName} />
           </Grid>
         </AppCardGridContainer>
@@ -252,10 +253,10 @@ function TrainOverviewPanel(props: {
 
   return (
     <>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <InfoCard train={train} transit={props.transit} onSpeedCommit={(value) => setSpeed(train.name, value)} />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <TrainAssociationCard
           couplingFront={couplingFront}
           couplingRear={couplingRear}
@@ -297,7 +298,7 @@ function TrainOverviewPanel(props: {
           }}
         />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <MergedAxisCard rollingStock={props.rollingStock} />
       </Grid>
     </>
@@ -314,7 +315,7 @@ function EmptyDashboardState() {
       <CardContent>
         <Stack spacing={1}>
           <Typography variant="h6">Kein Zug in EEP ausgewählt</Typography>
-          <Typography color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
           </Typography>
         </Stack>
@@ -327,11 +328,11 @@ function InfoCard(props: { train: TrainAppDto; transit?: TransitInfo; onSpeedCom
   const { train } = props;
 
   return (
-    <Card sx={{ height: 1 }}>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<DirectionsRailwayIcon color="primary" />}
         title={train.name}
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <List
@@ -368,11 +369,11 @@ function TrainAssociationCard(props: {
   onLightChange: (source: number, checked: boolean) => void;
 }) {
   return (
-    <Card sx={{ height: 1 }}>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<TuneIcon color="primary" />}
         title="Fahrzeugverband"
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <CardContent>
@@ -438,7 +439,7 @@ function CouplingSegmentedControl(props: {
   return (
     <ControlTile>
       <Box sx={{ minWidth: 0, width: 1 }}>
-        <Typography variant="subtitle2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {props.label}
         </Typography>
         <ToggleButtonGroup
@@ -471,7 +472,7 @@ function LightSegmentedControl(props: {
   return (
     <ControlTile>
       <Box sx={{ minWidth: 0, width: 1 }}>
-        <Typography variant="subtitle2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {props.label}
         </Typography>
         <ToggleButtonGroup
@@ -555,11 +556,11 @@ function BreakableModelValue(props: { value: string }) {
 
 function CameraCard(props: { trainName: string; rollingStockName: string }) {
   return (
-    <Card sx={{ height: 1 }}>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<VideocamIcon color="primary" />}
         title="Kameras"
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <TrainCamList trainName={props.trainName} rollingStockName={props.rollingStockName} />
@@ -579,7 +580,7 @@ function MergedAxisCard(props: { rollingStock: RollingStockAppDto[] }) {
   const content =
     !canShowTrainAxes && props.rollingStock.length > 0 ? (
       <Stack spacing={1}>
-        <Typography color="text.secondary">
+        <Typography variant="body2" color="text.secondary">
           Achsen im Zugverband sind erst verfügbar, wenn Achsnamen für alle RollingStocks bekannt sind.
         </Typography>
         <Typography color="text.secondary" variant="caption">
@@ -606,7 +607,9 @@ require("ce.ControlExtension").setOptions({
 })`}</Box>
       </Stack>
     ) : groups.length === 0 ? (
-      <Typography color="text.secondary">Keine Achsen im ausgewählten Zug gefunden.</Typography>
+      <Typography variant="body2" color="text.secondary">
+        Keine Achsen im ausgewählten Zug gefunden.
+      </Typography>
     ) : (
       <Stack spacing={2}>
         {groups.map((group) => (
@@ -630,11 +633,11 @@ require("ce.ControlExtension").setOptions({
     );
 
   return (
-    <Card>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<TuneIcon color="primary" />}
         title="Achsen im Zugverband"
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <CardContent>{content}</CardContent>
@@ -644,7 +647,11 @@ require("ce.ControlExtension").setOptions({
 
 function RollingStockGrid(props: { rollingStock: RollingStockAppDto[]; selectedRollingStockName: string }) {
   if (props.rollingStock.length === 0) {
-    return <Typography color="text.secondary">Keine RollingStocks gefunden.</Typography>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Keine RollingStocks gefunden.
+      </Typography>
+    );
   }
 
   return (
@@ -673,13 +680,13 @@ function RollingStockCards(props: { rollingStock: RollingStockAppDto; selected: 
       <Grid size={{ xs: 12 }}>
         <RollingStockHeadline rollingStock={rollingStock} selected={selected} />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <RollingStockInfoCard rollingStock={rollingStock} />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <RollingStockTextureCard entries={textureEntries} rollingStock={rollingStock} />
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
         <RollingStockAxisCard
           axisEntries={axisEntries}
           rollingStock={rollingStock}
@@ -709,11 +716,11 @@ function RollingStockHeadline(props: { rollingStock: RollingStockAppDto; selecte
 
 function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
   return (
-    <Card sx={{ height: 1 }}>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<DirectionsRailwayIcon color="primary" />}
         title="Info"
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <List
@@ -756,11 +763,11 @@ function RollingStockAxisCard(props: {
   onCommit: (axisNumber: number, value: number) => void;
 }) {
   return (
-    <Card sx={{ height: 1 }}>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<TuneIcon color="primary" />}
         title="Achsen"
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <CardContent>
@@ -772,11 +779,11 @@ function RollingStockAxisCard(props: {
 
 function RollingStockTextureCard(props: { entries: number[]; rollingStock: RollingStockAppDto }) {
   return (
-    <Card sx={{ height: 1 }}>
+    <Card sx={{ height: 1, width: 1 }}>
       <CardHeader
         avatar={<TextFieldsIcon color="primary" />}
         title="Texturen"
-        titleTypographyProps={{ variant: 'subtitle1' }}
+        slotProps={{ title: { variant: 'subtitle1' } }}
       />
       <Divider />
       <CardContent>
@@ -792,7 +799,11 @@ function AxisList(props: {
   onCommit: (axisNumber: number, value: number) => void;
 }) {
   if (props.axisEntries.length === 0) {
-    return <Typography color="text.secondary">Keine Achsen.</Typography>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Keine Achsen.
+      </Typography>
+    );
   }
 
   return (
@@ -848,7 +859,11 @@ function AxisSlider(props: {
 
 function TextureList(props: { entries: number[]; rollingStock: RollingStockAppDto }) {
   if (props.entries.length === 0) {
-    return <Typography color="text.secondary">Keine Texturen.</Typography>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Keine Texturen.
+      </Typography>
+    );
   }
 
   return (
