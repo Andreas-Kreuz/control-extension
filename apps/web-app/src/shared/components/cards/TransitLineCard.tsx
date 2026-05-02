@@ -26,12 +26,21 @@ function TransitLineCard(props: TransitLineCardProps) {
           {props.badge}
         </Typography>
       )}
-      <Box sx={{ minWidth: 0 }}>
-        <Typography variant="h5" sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 }}>
+        <Typography variant="h5" sx={{ lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {props.title}
         </Typography>
         {props.subtitle !== undefined && (
-          <Typography variant="body2" sx={{ color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: 'text.secondary',
+              display: 'block',
+              lineHeight: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
             {props.subtitle}
           </Typography>
         )}

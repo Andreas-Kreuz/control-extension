@@ -24,8 +24,17 @@ export const theme = createTheme({
     },
   },
   typography: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: ['"Anek Latin"', 'sans-serif'].join(','),
+    h5: {
+      fontWeight: 500,
+    },
+    h6: {
+      // fontWeight: 500,
+    },
+    subtitle1: {
+      fontWeight: 300,
+    },
   },
   shape: {
     borderRadius: borderRadius,

@@ -34,12 +34,16 @@ function StatusCard(props: StatusCardProps) {
         >
           {props.icon}
         </Box>
-        <CardContent sx={{ p: 2, width: '100%' }}>
-          <Typography variant="h5">{props.title}</Typography>
-          <Typography gutterBottom variant="body1" sx={{ color: props.statusColor + '.main', fontWeight: 'bold' }}>
+        <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, p: 2, width: '100%' }}>
+          <Typography variant="h5" sx={{ lineHeight: 1 }}>
+            {props.title}
+          </Typography>
+          <Typography variant="subtitle1" sx={{ color: props.statusColor + '.main', fontWeight: 'bold' }}>
             {props.statusText}
           </Typography>
-          <Typography variant="body2">{props.subtitle}</Typography>
+          <Typography variant="caption" sx={{ display: 'block', lineHeight: 1 }}>
+            {props.subtitle}
+          </Typography>
           {props.children}
         </CardContent>
       </Stack>

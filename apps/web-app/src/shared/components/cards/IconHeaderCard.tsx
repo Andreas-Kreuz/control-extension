@@ -20,7 +20,11 @@ function IconHeaderCard(props: IconHeaderCardProps) {
         {...(props.icon !== undefined ? { avatar: props.icon } : {})}
         title={props.title}
         {...(props.subtitle !== undefined ? { subheader: props.subtitle } : {})}
-        slotProps={{ title: { variant: 'subtitle1' } }}
+        slotProps={{
+          content: { sx: { display: 'flex', flexDirection: 'column', gap: 0.25 } },
+          title: { variant: 'h5', sx: { lineHeight: 1 } },
+          subheader: { variant: 'subtitle1', sx: { display: 'block', lineHeight: 1, mt: 0 } },
+        }}
       />
       {!props.headerOnly && props.children !== undefined && (
         <>

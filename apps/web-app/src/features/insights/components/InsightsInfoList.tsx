@@ -96,10 +96,10 @@ function InsightsInfoList(props: { title: string; description: string; items: In
         }}
       >
         <Stack spacing={0.5} sx={{ mb: 0.5 }}>
-          <Typography variant="h6" sx={{ lineHeight: 1 }}>
+          <Typography variant="h5" sx={{ lineHeight: 1 }}>
             {props.title}
           </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1 }}>
+          <Typography variant="subtitle1" sx={{ color: 'text.secondary', lineHeight: 1 }}>
             {props.description}
           </Typography>
         </Stack>

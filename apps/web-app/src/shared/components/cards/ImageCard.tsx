@@ -18,15 +18,17 @@ export interface ImageCardProps {
 
 function ImageCard(props: ImageCardProps) {
   const contents = (
-    <>
-      <MuiTypography variant="h5">{props.title}</MuiTypography>
+    <MuiBox sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+      <MuiTypography variant="h5" sx={{ lineHeight: 1 }}>
+        {props.title}
+      </MuiTypography>
       {props.subtitle && (
-        <MuiTypography variant="body1" sx={{ color: 'text.secondary' }}>
+        <MuiTypography variant="subtitle1" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1 }}>
           {props.subtitle}
         </MuiTypography>
       )}
       {props.id && <MuiChip label={props.id} />}
-    </>
+    </MuiBox>
   );
 
   const stack = (

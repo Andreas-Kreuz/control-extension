@@ -40,6 +40,10 @@ function BackgroundImageCard(props: BackgroundImageCardProps) {
         onClick={handleExpand}
         disableRipple={((props.setExpanded || !props.to) && true) || false}
         sx={{
+          alignItems: 'flex-start',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 0.25,
           p: 2,
           background:
             'radial-gradient(circle at right, ' +
@@ -53,11 +57,11 @@ function BackgroundImageCard(props: BackgroundImageCardProps) {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        <Typography variant="h5" gutterBottom={props.subtitle || props.additionalChips ? true : undefined}>
+        <Typography variant="h5" sx={{ lineHeight: 1 }}>
           {props.title}
         </Typography>
         {props.subtitle && (
-          <Typography variant="h5" gutterBottom={props.additionalChips ? true : undefined}>
+          <Typography variant="subtitle1" sx={{ color: 'text.secondary', lineHeight: 1 }}>
             {props.subtitle}
           </Typography>
         )}
