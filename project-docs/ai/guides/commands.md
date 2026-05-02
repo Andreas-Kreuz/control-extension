@@ -45,6 +45,6 @@ yarn format:lua             # Format Lua via sumneko.lua VSCode extension
 
 - Dev storybook on Windows/PowerShell: `cmd /c yarn dev:storybook`
 - Headless server: `yarn workspace @ce/web-server run run:headless`
-- On Windows/PowerShell, run Yarn through `cmd /c`, e.g. `cmd /c yarn run check:lua`, instead of bare `yarn`.
+- On Windows/PowerShell, run yarn commands through `cmd /c`, e.g. `cmd /c yarn run check:lua`, instead of bare `yarn`.
 
 .luacheckrc and .busted are located in lua/
