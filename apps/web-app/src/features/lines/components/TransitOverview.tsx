@@ -1,13 +1,13 @@
-import { Typography } from '@mui/material';
+﻿import { Typography } from '@mui/material';
 import ModuleSettingsButton from '../../../shared/components/ModuleSettingsButton';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
 import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import useLines from '../hooks/useLines';
 import useTransitSettings from '../hooks/useTransitSettings';
-import TransitLineCard from './TransitLineCard';
-import TransitLineListItem from './TransitLineListItem';
+import TransitLineListCard from './TransitLineListCard';
+import TransitLineItem from './TransitLineItem';
 import TransitLineSegment from './TransitLineSegment';
 
 interface TransitOverviewProps {
@@ -20,25 +20,25 @@ function TransitOverview({ selectedElement }: TransitOverviewProps) {
   const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
 
   return (
-    <AppPage>
-      <AppPageHeadline
+    <PageContainer>
+      <PageHeadline
         {...(settings !== undefined ? { rightSettings: <ModuleSettingsButton settings={settings} /> } : {})}
       >
         ÖPNV
-      </AppPageHeadline>
+      </PageHeadline>
       <ListLayout
         items={lines}
         keyExtractor={(line) => String(line.id)}
         getFilterText={(line) => [line.nr, ...line.lineSegments.map((ls) => ls.destination)].join(' ')}
         filterLabel="Linie filtern"
         renderListItem={(line, selected, onSelect) => (
-          <TransitLineListItem line={line} selected={selected} onSelect={onSelect} />
+          <TransitLineItem line={line} selected={selected} onSelect={onSelect} />
         )}
         emptyMessage={() => <Typography variant="body2">{`Es wurden keine ÖPNV-Linien gefunden.`}</Typography>}
         renderCard={(line, selected, onSelect, mobileExpansion) => (
-          <TransitLineCard line={line} selected={selected} onSelect={onSelect}>
+          <TransitLineListCard line={line} selected={selected} onSelect={onSelect}>
             {mobileExpansion}
-          </TransitLineCard>
+          </TransitLineListCard>
         )}
         getDetails={(line) =>
           line.lineSegments.map((ls) => ({
@@ -49,7 +49,7 @@ function TransitOverview({ selectedElement }: TransitOverviewProps) {
         selectedElement={selectedElement}
         onSelectedElementChange={handleSelectedElementChange}
       />
-    </AppPage>
+    </PageContainer>
   );
 }
 

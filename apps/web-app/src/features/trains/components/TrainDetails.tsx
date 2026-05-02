@@ -6,8 +6,8 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TrainCamerasView from './TrainCamerasView';
 import TrainInformationView from './TrainInformationView';
-import TrainLineInformationView from './TrainLineInformationView';
-import TrainRollingStockView from './TrainRollingStockView';
+import TrainLineView from './TrainLineView';
+import RollingStockView from './RollingStockView';
 import useTransitTrain from '../hooks/useTransitTrain';
 import useTrainDynamic from '../hooks/useTrainDynamic';
 import useTrainRollingStock from '../hooks/useTrainRollingStock';
@@ -52,12 +52,12 @@ const TrainDetails = (props: { train: TrainListAppDto }) => {
           {...(trainDynamic?.targetSpeed !== undefined ? { targetSpeed: trainDynamic.targetSpeed } : {})}
         />
       )}
-      {tabs[safeTabIndex]?.key === 'rolling-stock' && <TrainRollingStockView rollingStock={rollingStock} />}
+      {tabs[safeTabIndex]?.key === 'rolling-stock' && <RollingStockView rollingStock={rollingStock} />}
       {tabs[safeTabIndex]?.key === 'kameras' && (
         <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />
       )}
       {tabs[safeTabIndex]?.key === 'linieninformationen' && (
-        <TrainLineInformationView
+        <TrainLineView
           line={currentLine}
           destination={currentDestination}
           nextStations={transitTrain?.nextStations ?? []}

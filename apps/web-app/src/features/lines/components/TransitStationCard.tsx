@@ -1,7 +1,7 @@
 ﻿import type { ReactNode } from 'react';
 import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import Chip from '@mui/material/Chip';
-import AppCardBg from '../../../shared/components/AppCardBg';
+import BackgroundImageCard from '../../../shared/components/cards/BackgroundImageCard';
 import type { TransitStationAppDto } from '@ce/web-shared';
 
 interface TransitStationCardProps {
@@ -13,7 +13,7 @@ interface TransitStationCardProps {
 
 function TransitStationCard({ station, selected, onSelect, children }: TransitStationCardProps) {
   return (
-    <AppCardBg
+    <BackgroundImageCard
       title={station.name ?? station.id}
       selected={selected}
       expanded={selected}
@@ -28,7 +28,7 @@ function TransitStationCard({ station, selected, onSelect, children }: TransitSt
       ]}
     >
       {children}
-    </AppCardBg>
+    </BackgroundImageCard>
   );
 }
 

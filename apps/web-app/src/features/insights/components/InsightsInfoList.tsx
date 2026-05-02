@@ -1,4 +1,4 @@
-import Box from '@mui/material/Box';
+﻿import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -19,7 +19,7 @@ interface InsightsInfoListItem {
   tooltip?: string;
 }
 
-function InsightsInfoListRow(props: InsightsInfoListItem) {
+function InsightsInfoRow(props: InsightsInfoListItem) {
   const row = (
     <ListItem
       aria-label={props.tooltip}
@@ -104,7 +104,7 @@ function InsightsInfoList(props: { title: string; description: string; items: In
           </Typography>
         </Stack>
         {props.items.map((item) => (
-          <InsightsInfoListRow key={item.label} {...item} />
+          <InsightsInfoRow key={item.label} {...item} />
         ))}
       </List>
     </Box>

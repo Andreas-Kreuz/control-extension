@@ -1,9 +1,9 @@
-import Box from '@mui/material/Box';
+﻿import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
-import AppCaption from '../../../shared/components/AppCaption';
+import TypeCaption from '../../../shared/components/TypeCaption';
 import type Intersection from '../model/Intersection';
 import type { IntersectionPhase, IntersectionPhaseTrafficLight } from '../model/Intersection';
 
@@ -87,7 +87,7 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
 
   return (
     <Stack sx={{ px: 2, pt: 1, pb: 2, minWidth: 0 }}>
-      <AppCaption>Signalzeitenplan</AppCaption>
+      <TypeCaption>Signalzeitenplan</TypeCaption>
       <Box sx={{ mt: 1, overflowX: 'auto' }}>
         <Box sx={{ minWidth: rowLabelWidth + phases.reduce((sum, phase) => sum + phaseWidth(phase), 0) }}>
           <Box sx={{ display: 'flex', ml: `${rowLabelWidth}px` }}>

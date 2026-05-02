@@ -1,7 +1,7 @@
-import Grid from '@mui/material/Grid';
+﻿import Grid from '@mui/material/Grid';
 import { useSocketIsConnected } from '../../../app/hooks/useSocketConnection';
 import { useServerStatus } from '../hooks/useServerInfo';
-import StatusCard from './StatusCard';
+import ConnectionStatusCard from './ConnectionStatusCard';
 
 function StatusPage() {
   const isConnected = useSocketIsConnected();
@@ -10,16 +10,16 @@ function StatusPage() {
   return (
     <Grid container spacing={3} sx={{ width: 'auto', m: 3 }}>
       <Grid size={{ xs: 12 }}>
-        <StatusCard
+        <ConnectionStatusCard
           name="Web-Server"
           icon={isConnected ? 'ok' : 'error'}
           statusColor={isConnected ? 'success' : 'error'}
           statusText={isConnected ? 'OK' : 'Server nicht erreichbar'}
           statusDescription="Diese Webseite zeigt nur aktuelle Informationen an, wenn sie den Web-Server erreicht."
-        ></StatusCard>
+        ></ConnectionStatusCard>
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <StatusCard
+        <ConnectionStatusCard
           name="Data-Bridge"
           icon={isConnected && luaDataReceived ? 'ok' : 'error'}
           statusColor={isConnected && luaDataReceived ? 'success' : 'error'}
@@ -36,7 +36,7 @@ function StatusPage() {
         />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <StatusCard
+        <ConnectionStatusCard
           name="EEP"
           icon={isConnected ? (eepDataUpToDate ? 'ok' : 'time') : 'error'}
           statusColor={isConnected ? (eepDataUpToDate ? 'success' : 'warning') : 'error'}

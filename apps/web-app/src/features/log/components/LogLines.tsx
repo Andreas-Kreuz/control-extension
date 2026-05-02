@@ -1,16 +1,16 @@
-import { useLog } from '../providers/LogProvider';
+﻿import { useLog } from '../providers/LogProvider';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 import { useEffect, useRef } from 'react';
 
-const List = styled('ul')({
+const LogLineList = styled('ul')({
   m: 0,
   p: 0,
   marginBlock: 0,
   paddingInlineStart: 0,
 });
 
-const Entry = styled('li')({
+const LogLineEntry = styled('li')({
   fontSize: 14,
   fontFamily: 'monospace',
   listStyleType: 'none',
@@ -43,11 +43,11 @@ function LogLines() {
         px: 1,
       }}
     >
-      <List>
+      <LogLineList>
         {lines?.map((l) => (
-          <Entry key={l.key}>{l.line}</Entry>
+          <LogLineEntry key={l.key}>{l.line}</LogLineEntry>
         ))}
-      </List>
+      </LogLineList>
       <div ref={messagesEndRef} />
     </Box>
   );

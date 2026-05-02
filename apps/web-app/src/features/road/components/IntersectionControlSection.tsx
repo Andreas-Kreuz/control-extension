@@ -1,4 +1,4 @@
-import Chip from '@mui/material/Chip';
+﻿import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import { useTheme } from '@mui/material/styles';
@@ -6,7 +6,7 @@ import { useSocket } from '../../../app/hooks/useSocket';
 import { RoadEvent } from '@ce/web-shared';
 import Intersection from '../model/Intersection';
 import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
-import AppCaption from '../../../shared/components/AppCaption';
+import TypeCaption from '../../../shared/components/TypeCaption';
 
 function IntersectionControlSection({ intersection: i }: { intersection: Intersection }) {
   const theme = useTheme();
@@ -23,7 +23,7 @@ function IntersectionControlSection({ intersection: i }: { intersection: Interse
 
   return (
     <Stack sx={{ px: 2, pt: 1, pb: 2 }}>
-      <AppCaption>Modus</AppCaption>
+      <TypeCaption>Modus</TypeCaption>
       <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
         <Chip
           label="Auto"
@@ -39,7 +39,7 @@ function IntersectionControlSection({ intersection: i }: { intersection: Interse
         />
       </Stack>
       <Divider sx={{ my: 1 }} />
-      <AppCaption>Schaltung</AppCaption>
+      <TypeCaption>Schaltung</TypeCaption>
       <Stack direction="row" sx={{ pt: 1, flexWrap: 'wrap' }}>
         {switchings.map((s) => {
           const active = i.currentSwitching === s.name;

@@ -1,4 +1,4 @@
-import CamIcon from '@mui/icons-material/Videocam';
+﻿import CamIcon from '@mui/icons-material/Videocam';
 import Alert from '@mui/material/Alert';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -8,9 +8,9 @@ import { styled } from '@mui/material/styles';
 import { useSocket } from '../../../app/hooks/useSocket';
 import { CommandEvent } from '@ce/web-shared';
 import Intersection from '../model/Intersection';
-import AppCaption from '../../../shared/components/AppCaption';
+import TypeCaption from '../../../shared/components/TypeCaption';
 
-const Pre = styled('pre')({ fontSize: 14, whiteSpace: 'normal' });
+const CameraCodeBlock = styled('pre')({ fontSize: 14, whiteSpace: 'normal' });
 
 function IntersectionCamsSection({ intersection: i }: { intersection: Intersection }) {
   const socket = useSocket();
@@ -27,9 +27,9 @@ function IntersectionCamsSection({ intersection: i }: { intersection: Intersecti
         </Typography>
         <Typography variant="body2">
           So hast Du Deine Kreuzung angelegt:
-          <Pre>c1 = Crossing:new(...)</Pre>
+          <CameraCodeBlock>c1 = Crossing:new(...)</CameraCodeBlock>
           Suche Dir nun eine statische Kamera aus und füge ihren Namen wie folgt hinzu:
-          <Pre>c1:addStaticCam('Kameraname')</Pre>
+          <CameraCodeBlock>c1:addStaticCam('Kameraname')</CameraCodeBlock>
         </Typography>
       </Alert>
     );
@@ -37,7 +37,7 @@ function IntersectionCamsSection({ intersection: i }: { intersection: Intersecti
 
   return (
     <Stack sx={{ px: 2, pt: 1, pb: 2 }}>
-      <AppCaption>Kameras</AppCaption>
+      <TypeCaption>Kameras</TypeCaption>
       <Stack direction="row" sx={{ pt: 1, flexWrap: 'wrap' }}>
         {i.staticCams.map((c, j) => (
           <Tooltip key={c} title={c}>

@@ -1,4 +1,4 @@
-import { CommandEvent, RollingStockAppDto, TrainAppDto } from '@ce/web-shared';
+﻿import { CommandEvent, RollingStockAppDto, TrainAppDto } from '@ce/web-shared';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CommitIcon from '@mui/icons-material/Commit';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
@@ -29,12 +29,12 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { AxisList, AxisSlider } from '../../../shared/components/axises';
-import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import CardGridContainer from '../../../shared/layouts/CardGridContainer';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import { useSocket } from '../../../app/hooks/useSocket';
 import TrainCamList from '../../trains/components/TrainCamList';
-import TrainLineInformationView from '../../trains/components/TrainLineInformationView';
+import TrainLineView from '../../trains/components/TrainLineView';
 import useRollingStock from '../../trains/hooks/useRollingStock';
 import useRollingStockDynamic from '../../trains/hooks/useRollingStockDynamic';
 import useTrainDynamic from '../../trains/hooks/useTrainDynamic';
@@ -119,17 +119,17 @@ function SelectedTrainDashboard() {
 
   if (!scenario?.activeRollingStock && !scenario?.activeTrain) {
     return (
-      <AppPage>
-        <AppPageHeadline>Aktiver Zug</AppPageHeadline>
+      <PageContainer>
+        <PageHeadline>Aktiver Zug</PageHeadline>
         <EmptyDashboardState />
-      </AppPage>
+      </PageContainer>
     );
   }
 
   if (!train) {
     return (
-      <AppPage>
-        <AppPageHeadline>Aktiver Zug</AppPageHeadline>
+      <PageContainer>
+        <PageHeadline>Aktiver Zug</PageHeadline>
         <Card>
           <CardContent>
             <Typography variant="body2" color="textSecondary">
@@ -137,7 +137,7 @@ function SelectedTrainDashboard() {
             </Typography>
           </CardContent>
         </Card>
-      </AppPage>
+      </PageContainer>
     );
   }
 
@@ -153,10 +153,10 @@ function SelectedTrainDashboard() {
   const showRollingStockSection = trainRollingStock.length > 0;
 
   return (
-    <AppPage>
-      <AppPageHeadline>Aktiver Zug</AppPageHeadline>
+    <PageContainer>
+      <PageHeadline>Aktiver Zug</PageHeadline>
       <Stack spacing={2}>
-        <AppCardGridContainer>
+        <CardGridContainer>
           <TrainOverviewPanel
             train={train}
             rollingStock={trainRollingStock}
@@ -177,9 +177,9 @@ function SelectedTrainDashboard() {
           <Grid size={{ xs: 12 }} sx={{ display: 'flex' }}>
             <CameraCard trainName={train.name} rollingStockName={cameraRollingStockName} />
           </Grid>
-        </AppCardGridContainer>
+        </CardGridContainer>
       </Stack>
-    </AppPage>
+    </PageContainer>
   );
 }
 
@@ -351,7 +351,7 @@ function InfoCard(props: { train: TrainAppDto; transit?: TransitInfo; onSpeedCom
       {props.transit && (
         <>
           <Divider />
-          <TrainLineInformationView
+          <TrainLineView
             line={props.transit.line}
             destination={props.transit.destination}
             nextStations={props.transit.nextStations}

@@ -1,4 +1,4 @@
-import { useSocket } from '../../../app/hooks/useSocket';
+﻿import { useSocket } from '../../../app/hooks/useSocket';
 import { useRoomHandler } from '../../../shared/socket/useRoomHandler';
 import './ServerHome.css';
 import {
@@ -30,10 +30,10 @@ import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { ComponentType, useEffect, useState } from 'react';
-import QRCodeModule from 'react-qr-code';
+import PairingQrCodeModule from 'react-qr-code';
 
-const QRCode = (
-  'default' in QRCodeModule && QRCodeModule.default ? QRCodeModule.default : QRCodeModule
+const PairingQrCode = (
+  'default' in PairingQrCodeModule && PairingQrCodeModule.default ? PairingQrCodeModule.default : PairingQrCodeModule
 ) as ComponentType<{ value: string; size?: number }>;
 
 function ServerHome() {
@@ -192,7 +192,7 @@ end`;
               <Typography variant="body1">Scanne den QR-Code rechts mit Deinem Tablet oder Smartphone.</Typography>
               <Typography variant="body2">Dein Smartphone muss dazu im selben WLAN sein.</Typography>
             </Box>
-            <QRCode value={webAppUrl} size={64} />
+            <PairingQrCode value={webAppUrl} size={64} />
           </Paper>
           <Paper
             elevation={0}

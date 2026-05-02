@@ -1,14 +1,14 @@
-import Button from '@mui/material/Button';
+﻿import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import AppCardBg from '../../../shared/components/AppCardBg';
+import BackgroundImageCard from '../../../shared/components/cards/BackgroundImageCard';
 import ModuleSettingsButton from '../../../shared/components/ModuleSettingsButton';
-import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import CardGridContainer from '../../../shared/layouts/CardGridContainer';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
 import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import useIntersectionSettings from '../hooks/useIntersectionSettings';
@@ -43,12 +43,12 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
   }
 
   return (
-    <AppPage>
-      <AppPageHeadline
+    <PageContainer>
+      <PageHeadline
         {...(settings !== undefined ? { rightSettings: <ModuleSettingsButton settings={settings} /> } : {})}
       >
         Ampelkreuzungen
-      </AppPageHeadline>
+      </PageHeadline>
       <ListLayout
         items={intersections}
         keyExtractor={(i) => String(i.id)}
@@ -58,7 +58,7 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
           <IntersectionListItem intersection={i} selected={selected} onSelect={onSelect} />
         )}
         renderCard={(i, selected, onSelect, mobileExpansion) => (
-          <AppCardBg
+          <BackgroundImageCard
             title={`Kreuzung ${i.id}`}
             id={i.name}
             image="/assets/card-img-intersection.jpg"
@@ -67,7 +67,7 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
             setExpanded={() => onSelect()}
           >
             {mobileExpansion}
-          </AppCardBg>
+          </BackgroundImageCard>
         )}
         getDetails={(i) => {
           const details = detailsIntersection(i);
@@ -81,8 +81,8 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
         onSelectedElementChange={handleSelectedElementChange}
       />
 
-      {/* <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
-      <AppCardGridContainer>
+      {/* <PageHeadline gutterTop>Hilfe</PageHeadline>
+      <CardGridContainer>
         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <Card>
             <CardActionArea sx={{ p: 2 }} disabled>
@@ -102,8 +102,8 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
             </CardActions>
           </Card>
         </Grid>
-      </AppCardGridContainer> */}
-    </AppPage>
+      </CardGridContainer> */}
+    </PageContainer>
   );
 }
 

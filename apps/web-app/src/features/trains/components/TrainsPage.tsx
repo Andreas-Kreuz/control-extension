@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { TrackType } from '@ce/web-shared';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -11,9 +11,9 @@ import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import CardGridContainer from '../../../shared/layouts/CardGridContainer';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
 import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import setTrackType from '../hooks/useSetTrackType';
@@ -21,9 +21,9 @@ import useTrackType from '../hooks/useTrackType';
 import useTrains from '../hooks/useTrains';
 import TrainCamerasView from './TrainCamerasView';
 import TrainInformationSection from './TrainInformationSection';
-import TrainRollingStockSection from './TrainRollingStockSection';
-import TrainLineInfoSection from './TrainLineInfoSection';
-import TrainListEntryCard from './TrainListEntryCard';
+import RollingStockSection from './RollingStockSection';
+import TrainLineSection from './TrainLineSection';
+import TrainListCard from './TrainListCard';
 import TrainListItem from './TrainListItem';
 
 interface ChipData {
@@ -31,7 +31,7 @@ interface ChipData {
   label: string;
 }
 
-const ListItem = styled('li')(({ theme }) => ({
+const TrackTypeChipItem = styled('li')(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
@@ -75,14 +75,14 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
         }}
       >
         {chipData.map((data) => (
-          <ListItem key={data.key}>
+          <TrackTypeChipItem key={data.key}>
             <Chip
               label={data.label}
               variant="filled"
               color={trackType === data.key ? 'primary' : 'default'}
               onClick={() => setType(data.key)}
             />
-          </ListItem>
+          </TrackTypeChipItem>
         ))}
       </Box>
       <FormControlLabel
@@ -95,13 +95,13 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
         }
         label="Nur mit Linieninformation"
       />
-      <AppPageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</AppPageHeadline>
+      <PageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</PageHeadline>
     </>
   );
 
   return (
-    <AppPage>
-      <AppPageHeadline>Gleissystem</AppPageHeadline>
+    <PageContainer>
+      <PageHeadline>Gleissystem</PageHeadline>
       <ListLayout
         items={filteredTrains}
         keyExtractor={(train) => train.id}
@@ -118,9 +118,9 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
           <TrainListItem train={train} selected={selected} onSelect={onSelect} />
         )}
         renderCard={(train, selected, onSelect, mobileExpansion) => (
-          <TrainListEntryCard train={train} selected={selected} onSelect={onSelect}>
+          <TrainListCard train={train} selected={selected} onSelect={onSelect}>
             {mobileExpansion}
-          </TrainListEntryCard>
+          </TrainListCard>
         )}
         getDetails={(train) => [
           {
@@ -128,18 +128,18 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
             component: <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />,
           },
           ...(hasTransitLineInfo(train)
-            ? [{ title: 'Linien', component: <TrainLineInfoSection train={train} /> }]
+            ? [{ title: 'Linien', component: <TrainLineSection train={train} /> }]
             : []),
           { title: 'Information', component: <TrainInformationSection train={train} /> },
-          { title: 'RollingStock', component: <TrainRollingStockSection trainId={train.id} /> },
+          { title: 'RollingStock', component: <RollingStockSection trainId={train.id} /> },
         ]}
         filterSlot={filterSlot}
         selectedElement={selectedElement}
         onSelectedElementChange={handleSelectedElementChange}
       />
 
-      {/* <AppPageHeadline gutterTop>Hilfe</AppPageHeadline>
-      <AppCardGridContainer>
+      {/* <PageHeadline gutterTop>Hilfe</PageHeadline>
+      <CardGridContainer>
         <Grid size={{ xs: 12 }}>
           <Card>
             <CardActionArea sx={{ p: 2 }} disabled>
@@ -159,8 +159,8 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
             </CardActions>
           </Card>
         </Grid>
-      </AppCardGridContainer> */}
-    </AppPage>
+      </CardGridContainer> */}
+    </PageContainer>
   );
 };
 
