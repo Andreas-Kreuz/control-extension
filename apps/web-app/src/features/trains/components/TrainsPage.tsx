@@ -90,7 +90,7 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
           <Switch
             checked={lineInfoOnly}
             onChange={(event) => setLineInfoOnly(event.target.checked)}
-            inputProps={{ 'aria-label': 'Nur Fahrzeuge mit Linieninformation anzeigen' }}
+            slotProps={{ input: { 'aria-label': 'Nur Fahrzeuge mit Linieninformation anzeigen' } }}
           />
         }
         label="Nur mit Linieninformation"
