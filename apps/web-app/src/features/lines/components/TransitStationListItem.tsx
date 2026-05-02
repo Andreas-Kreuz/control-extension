@@ -28,7 +28,7 @@ function TransitStationListItem({ station, selected, onSelect }: TransitStationL
         <ListItemText
           primary={primaryText}
           secondary={
-            <Typography component="span" variant="body2" color="text.secondary">
+            <Typography component="span" variant="body2" color="textSecondary">
               {platformCount > 0 ? `${platformCount} Steige` : 'Keine Steige hinterlegt'}
             </Typography>
           }

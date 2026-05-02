@@ -6,7 +6,7 @@ function TypeCaption(props: { children: ReactNode; gutterTop?: boolean }) {
     <Typography
       variant="caption"
       gutterBottom
-      color="text.secondary"
+      color="textSecondary"
       sx={{ pt: props.gutterTop ? 2 : 0, display: 'block' }}
     >
       {props.children}

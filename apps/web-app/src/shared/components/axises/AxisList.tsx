@@ -18,7 +18,7 @@ function AxisList(props: {
   if (props.entries.length === 0) {
     return (
       props.emptyContent ?? (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="textSecondary">
           Keine Achsen.
         </Typography>
       )

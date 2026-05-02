@@ -11,7 +11,7 @@ function TrainRollingStockView(props: { rollingStock: RollingStockAppDto[] | und
   const { rollingStock } = props;
 
   if (!rollingStock?.length) {
-    return <Typography color="text.secondary">Keine RollingStocks gefunden.</Typography>;
+    return <Typography color="textSecondary">Keine RollingStocks gefunden.</Typography>;
   }
 
   return (
@@ -67,7 +67,7 @@ function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
 function RowCell(props: { label: string; value: string; multiline?: boolean }) {
   return (
     <Box sx={{ minWidth: 0, textAlign: 'left', justifySelf: 'start' }}>
-      <Typography variant="caption" color="text.secondary" align="left">
+      <Typography variant="caption" color="textSecondary" align="left">
         {props.label}
       </Typography>
       <Typography
@@ -93,7 +93,7 @@ function TextureTextList(props: { entries: number[]; rollingStock: RollingStockA
 
   return (
     <Box sx={{ minWidth: 0, textAlign: 'left', justifySelf: 'stretch' }}>
-      <Typography variant="caption" color="text.secondary" align="left">
+      <Typography variant="caption" color="textSecondary" align="left">
         TextureTexts
       </Typography>
       <Box sx={{ display: 'grid', gap: 0.5 }}>
@@ -136,7 +136,7 @@ function RollingStockAxisList(props: {
 
   return (
     <Box sx={{ minWidth: 0, textAlign: 'left', justifySelf: 'stretch' }}>
-      <Typography variant="caption" color="text.secondary" align="left">
+      <Typography variant="caption" color="textSecondary" align="left">
         Achsen
       </Typography>
       <AxisList

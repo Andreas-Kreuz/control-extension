@@ -17,7 +17,7 @@ function AxisSlider(props: { name: string; value: number; trailingLabel: string;
         <Typography variant="body2" sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {props.name}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, textAlign: 'right' }}>
+        <Typography variant="caption" color="textSecondary" sx={{ flexShrink: 0, textAlign: 'right' }}>
           {props.trailingLabel}
         </Typography>
       </Stack>

@@ -24,7 +24,7 @@ function TransitStationDepartureList({
 }) {
   if (departures.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+      <Typography variant="body2" color="textSecondary" sx={{ p: 2 }}>
         Keine Abfahrten vorhanden.
       </Typography>
     );
@@ -60,7 +60,7 @@ function TransitStationDepartureList({
               </Stack>
               <Typography
                 variant="body2"
-                color="text.secondary"
+                color="textSecondary"
                 sx={{
                   flexShrink: 0,
                   textAlign: 'right',

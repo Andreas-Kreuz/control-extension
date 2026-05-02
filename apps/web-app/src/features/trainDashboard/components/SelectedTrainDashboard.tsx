@@ -132,7 +132,7 @@ function SelectedTrainDashboard() {
         <AppPageHeadline>Aktiver Zug</AppPageHeadline>
         <Card>
           <CardContent>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               Zugdaten werden geladen.
             </Typography>
           </CardContent>
@@ -316,7 +316,7 @@ function EmptyDashboardState() {
       <CardContent>
         <Stack spacing={1}>
           <Typography variant="h6">Kein Zug in EEP ausgewählt</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
           </Typography>
         </Stack>
@@ -581,10 +581,10 @@ function MergedAxisCard(props: { rollingStock: RollingStockAppDto[] }) {
   const content =
     !canShowTrainAxes && props.rollingStock.length > 0 ? (
       <Stack spacing={1}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="textSecondary">
           Achsen im Zugverband sind erst verfügbar, wenn Achsnamen für alle RollingStocks bekannt sind.
         </Typography>
-        <Typography color="text.secondary" variant="caption">
+        <Typography color="textSecondary" variant="caption">
           Hinweis: Setze in den Control-Extension-Optionen den anl3path zur aktuellen Anlage, damit Achsnamen aus den
           Modellressourcen gelesen werden können.
         </Typography>
@@ -608,7 +608,7 @@ require("ce.ControlExtension").setOptions({
 })`}</Box>
       </Stack>
     ) : groups.length === 0 ? (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" color="textSecondary">
         Keine Achsen im ausgewählten Zug gefunden.
       </Typography>
     ) : (
@@ -649,7 +649,7 @@ require("ce.ControlExtension").setOptions({
 function RollingStockGrid(props: { rollingStock: RollingStockAppDto[]; selectedRollingStockName: string }) {
   if (props.rollingStock.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" color="textSecondary">
         Keine RollingStocks gefunden.
       </Typography>
     );
@@ -804,7 +804,7 @@ function RollingStockTextureCard(props: { entries: number[]; rollingStock: Rolli
 function TextureList(props: { entries: number[]; rollingStock: RollingStockAppDto }) {
   if (props.entries.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" color="textSecondary">
         Keine Texturen.
       </Typography>
     );

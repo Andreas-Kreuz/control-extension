@@ -21,7 +21,7 @@ function formatDeparture(entry: TrainNextStationAppDto) {
 function TrainNextStationList({ nextStations }: { nextStations: TrainNextStationAppDto[] }) {
   if (nextStations.length === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+      <Typography variant="body2" color="textSecondary" sx={{ p: 2 }}>
         Keine nächsten Stationen vorhanden.
       </Typography>
     );
@@ -60,7 +60,7 @@ function TrainNextStationList({ nextStations }: { nextStations: TrainNextStation
           <Typography
             component="span"
             variant="body2"
-            color="text.secondary"
+            color="textSecondary"
             sx={{
               ...cellSx(index),
               textAlign: 'right',

@@ -33,7 +33,7 @@ function DataEntryDetailSection({ ceType, entryId }: DataEntryDetailSectionProps
 
   if (!entry) {
     return (
-      <Typography color="text.secondary" sx={{ p: 2 }}>
+      <Typography color="textSecondary" sx={{ p: 2 }}>
         Eintrag wird geladen …
       </Typography>
     );

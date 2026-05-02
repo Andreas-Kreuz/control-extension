@@ -90,7 +90,7 @@ function SideSheetDetail({ sections, onClose }: { sections: DetailSection[]; onC
 function SideSheetPlaceholder() {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', p: 4 }}>
-      <Typography variant="body2" color="text.secondary" align="center">
+      <Typography variant="body2" color="textSecondary" align="center">
         Wähle einen Eintrag
       </Typography>
     </Box>

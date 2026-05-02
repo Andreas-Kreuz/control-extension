@@ -78,7 +78,7 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
   if (phases.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="textSecondary">
           Keine Phasen vorhanden.
         </Typography>
       </Box>
@@ -107,7 +107,7 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
                   <Typography variant="caption" sx={{ display: 'block', fontWeight: 700 }} noWrap>
                     {phase.name}
                   </Typography>
-                  <Typography variant="caption" color={stateLabel ? 'primary' : 'text.secondary'} noWrap>
+                  <Typography variant="caption" color={stateLabel ? 'primary' : 'textSecondary'} noWrap>
                     {stateLabel ?? `${phase.greenPhaseSeconds}s`}
                   </Typography>
                 </Box>
