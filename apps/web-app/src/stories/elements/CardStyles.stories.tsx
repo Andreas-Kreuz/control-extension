@@ -10,6 +10,7 @@ import PlainCard from '../../shared/components/cards/PlainCard';
 import BackgroundImageCard from '../../shared/components/cards/BackgroundImageCard';
 import IconHeaderCard from '../../shared/components/cards/IconHeaderCard';
 import ImageCard from '../../shared/components/cards/ImageCard';
+import OutlinedCard from '../../shared/components/cards/OutlinedCard';
 import StatusCard from '../../shared/components/cards/StatusCard';
 import TransitLineCard from '../../shared/components/cards/TransitLineCard';
 
@@ -93,6 +94,11 @@ function CardStyles() {
         icon={<DashboardIcon color="primary" />}
         headerOnly
       />
+      <OutlinedCard title="Outlined card" description="Title and description header">
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          Content inside an outlined card
+        </Typography>
+      </OutlinedCard>
       <StatusCard
         title="Status strip card"
         statusText="OK"

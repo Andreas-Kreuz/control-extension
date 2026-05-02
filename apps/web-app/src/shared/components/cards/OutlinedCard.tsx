@@ -1,0 +1,29 @@
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import type { ReactNode } from 'react';
+
+export interface OutlinedCardProps {
+  children?: ReactNode;
+  title: ReactNode;
+  description?: ReactNode;
+}
+
+function OutlinedCard(props: OutlinedCardProps) {
+  return (
+    <Card variant="outlined" sx={{ bgcolor: 'transparent', height: 1, minWidth: 0, width: 1 }}>
+      <CardHeader
+        title={props.title}
+        subheader={props.description}
+        slotProps={{
+          content: { sx: { display: 'flex', flexDirection: 'column', gap: '0.25rem' } },
+          title: { variant: 'h5', sx: { lineHeight: 1, m: 0 } },
+          subheader: { variant: 'subtitle1', sx: { color: 'text.secondary', lineHeight: 1, m: 0 } },
+        }}
+      />
+      {props.children !== undefined && <CardContent sx={{ pt: 0 }}>{props.children}</CardContent>}
+    </Card>
+  );
+}
+
+export default OutlinedCard;

@@ -5,7 +5,6 @@ import PageHeadline from '../../../shared/layouts/PageHeadline';
 import useStatistics from '../../statistics/hooks/useStatistics';
 import TimeDesc from '../../statistics/model/TimeDesc';
 import { useState } from 'react';
-import InsightsDashboardPanel from './InsightsDashboardPanel';
 import InsightsRuntimeInfo from './InsightsRuntimeInfo';
 import InsightsStatisticsPanel from './InsightsStatisticsPanel';
 import InsightsStatusInfo from './InsightsStatusInfo';
@@ -43,19 +42,13 @@ function InsightsPage() {
       <PageHeadline>Einblicke</PageHeadline>
       <CardGridContainer>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsDashboardPanel>
-            <InsightsStatusInfo />
-          </InsightsDashboardPanel>
+          <InsightsStatusInfo />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsDashboardPanel>
-            <InsightsVersionInfo />
-          </InsightsDashboardPanel>
+          <InsightsVersionInfo />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsDashboardPanel>
-            <InsightsRuntimeInfo updateTimes={updateTimes} />
-          </InsightsDashboardPanel>
+          <InsightsRuntimeInfo updateTimes={updateTimes} />
         </Grid>
       </CardGridContainer>
       <CardGridContainer sx={{ mt: 3 }}>
