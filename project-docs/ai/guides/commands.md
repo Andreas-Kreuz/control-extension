@@ -13,6 +13,7 @@ yarn build:docs:assets:force  # Force-regenerate docs screenshot/assets
 yarn dev:app                  # Dev mode: server + app in parallel
 yarn dev:docs                 # Incremental docs server with LiveReload, creates missing assets
 yarn dev:docs:manual          # Docs server with manual refresh, creates missing assets
+yarn dev:storybook            # Storybook for the web app
 yarn run:app                  # Build then run server
 ```
 
@@ -42,7 +43,7 @@ yarn format:lua             # Format Lua via sumneko.lua VSCode extension
 
 ## Other
 
-- Dev storybook: `yarn dev:storybook`
+- Dev storybook on Windows/PowerShell: `cmd /c yarn dev:storybook`
 - Headless server: `yarn workspace @ce/web-server run run:headless`
 - On Windows/PowerShell, run Yarn through `cmd /c`, e.g. `cmd /c yarn run check:lua`, instead of bare `yarn`.
 
