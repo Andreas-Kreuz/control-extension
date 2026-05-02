@@ -668,6 +668,8 @@ require("ce.ControlExtension").setOptions({
                 socket.emit(CommandEvent.SetRollingStockAxis, {
                   rollingStockName: target.rollingStockName,
                   axisNumber: target.axisNumber,
+                  axisName: target.axisName,
+                  axisNamesKnown: target.axisNamesKnown,
                   value,
                 });
               });
@@ -745,6 +747,8 @@ function RollingStockCards(props: {
             socket.emit(CommandEvent.SetRollingStockAxis, {
               rollingStockName: rollingStock.name,
               axisNumber,
+              axisName: rollingStock.axisNames?.[String(axisNumber)],
+              axisNamesKnown: rollingStock.axisNamesKnown,
               value,
             });
           }}
@@ -901,7 +905,16 @@ function PreservedLineBreaks(props: { value: string }) {
 function groupAxisByName(rollingStock: RollingStockAppDto[]) {
   const groups = new Map<
     string,
-    { name: string; targets: { rollingStockName: string; axisNumber: number; value: number }[] }
+    {
+      name: string;
+      targets: {
+        rollingStockName: string;
+        axisNumber: number;
+        axisName: string;
+        axisNamesKnown: boolean;
+        value: number;
+      }[];
+    }
   >();
 
   rollingStock.forEach((item) => {
@@ -911,6 +924,8 @@ function groupAxisByName(rollingStock: RollingStockAppDto[]) {
       group.targets.push({
         rollingStockName: item.name,
         axisNumber,
+        axisName: name,
+        axisNamesKnown: item.axisNamesKnown,
         value: item.axisValues?.[String(axisNumber)] ?? 0,
       });
       groups.set(name, group);

@@ -12,7 +12,7 @@ async function runTest(name: string, fn: () => void | Promise<void>): Promise<vo
   }
 }
 
-function testSetRollingStockAxisQueuesClampedCommand(): void {
+function testSetRollingStockAxisQueuesNumberCommandWhenAxisNamesAreUnknown(): void {
   const { commands, handlers } = setupCommandHandlers();
 
   handlers.get(CommandEvent.SetRollingStockAxis)?.({
@@ -22,6 +22,20 @@ function testSetRollingStockAxisQueuesClampedCommand(): void {
   });
 
   assert.deepEqual(commands, ['EEPRollingstockSetAxisByNumber|RS-1|2|100']);
+}
+
+function testSetRollingStockAxisQueuesNameCommandWhenAxisNamesAreKnown(): void {
+  const { commands, handlers } = setupCommandHandlers();
+
+  handlers.get(CommandEvent.SetRollingStockAxis)?.({
+    rollingStockName: 'RS-1',
+    axisNumber: 8,
+    axisName: 'Heckfluegel',
+    axisNamesKnown: true,
+    value: 55.4,
+  });
+
+  assert.deepEqual(commands, ['EEPRollingstockSetAxis|RS-1|Heckfluegel|55']);
 }
 
 function testSetTrainSpeedQueuesClampedTargetSpeedCommand(): void {
@@ -90,7 +104,14 @@ function setupCommandHandlers() {
 }
 
 export async function run(): Promise<void> {
-  await runTest('set rolling stock axis queues clamped command', testSetRollingStockAxisQueuesClampedCommand);
+  await runTest(
+    'set rolling stock axis queues number command when axis names are unknown',
+    testSetRollingStockAxisQueuesNumberCommandWhenAxisNamesAreUnknown,
+  );
+  await runTest(
+    'set rolling stock axis queues name command when axis names are known',
+    testSetRollingStockAxisQueuesNameCommandWhenAxisNamesAreKnown,
+  );
   await runTest(
     'set train speed queues clamped target-speed command',
     testSetTrainSpeedQueuesClampedTargetSpeedCommand,

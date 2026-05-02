@@ -34,6 +34,8 @@ function RollingStockRow(props: { rollingStock: RollingStockAppDto }) {
     socket.emit(CommandEvent.SetRollingStockAxis, {
       rollingStockName: rollingStock.name,
       axisNumber,
+      axisName: rollingStock.axisNames?.[String(axisNumber)],
+      axisNamesKnown: rollingStock.axisNamesKnown,
       value,
     });
   };
