@@ -1,6 +1,6 @@
 import * as os from 'node:os';
 
-const DEFAULT_DEV_SERVER_PORTS = ['3001', '4200', '4173', '5173'];
+const DEFAULT_DEV_SERVER_PORTS = ['3000', '3001', '4200', '4173', '5173'];
 const LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '::1'];
 const LOOPBACK_REQUEST_ADDRESSES = ['127.0.0.1', '::1'];
 
@@ -126,7 +126,11 @@ export default class TrustedServerAddressPolicy {
     try {
       const parsedOrigin = new URL(origin);
       const effectivePort = parsedOrigin.port || defaultPortForProtocol(parsedOrigin.protocol);
-      return this.isTrustedServerHost(parsedOrigin.hostname) && this.allowedCorsPorts.has(effectivePort);
+      if (!this.allowedCorsPorts.has(effectivePort)) {
+        return false;
+      }
+
+      return this.isTrustedServerHost(parsedOrigin.hostname) || this.isAllowedRemoteDevOrigin(effectivePort);
     } catch (_error) {
       return false;
     }
@@ -188,6 +192,10 @@ export default class TrustedServerAddressPolicy {
 
   private choosePreferredServerHost(localIpv4Addresses: string[], hostname?: string): string {
     return localIpv4Addresses[0] ?? hostname ?? 'localhost';
+  }
+
+  private isAllowedRemoteDevOrigin(effectivePort: string): boolean {
+    return Boolean(this.options.allowDevServerOrigins) && effectivePort !== this.options.serverPort.toString();
   }
 
   private addTrustedServerHost(host: string): void {
