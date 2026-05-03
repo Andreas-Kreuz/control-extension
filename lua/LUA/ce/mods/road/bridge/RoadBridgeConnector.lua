@@ -7,6 +7,12 @@ local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 ---@class RoadBridgeConnector
 local RoadBridgeConnector = {}
 
+local function toBooleanSetting(param)
+    if param == true or param == "true" then return true end
+    if param == false or param == "false" then return false end
+    error("Expected boolean setting value")
+end
+
 function RoadBridgeConnector.registerStatePublishers()
     local trafficLightModelStatePublisher = require("ce.mods.road.data.TrafficLightModelStatePublisher")
     local roadStatePublisher = require("ce.mods.road.data.RoadStatePublisher")
@@ -15,23 +21,23 @@ end
 
 function RoadBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand("IntersectionSettings.setShowRequestsOnSignal", function (param)
-        IntersectionSettings.setShowRequestsOnSignal(param == "true")
+        IntersectionSettings.setShowRequestsOnSignal(toBooleanSetting(param))
     end)
     ServerExchangeCoordinator.registerAllowedCommand("IntersectionSettings.setShowSequenceOnSignal", function (param)
-        IntersectionSettings.setShowSequenceOnSignal(param == "true")
+        IntersectionSettings.setShowSequenceOnSignal(toBooleanSetting(param))
     end)
     ServerExchangeCoordinator.registerAllowedCommand("IntersectionSettings.setShowModelInfoOnSignal", function (param)
-        IntersectionSettings.setShowModelInfoOnSignal(param == "true")
+        IntersectionSettings.setShowModelInfoOnSignal(toBooleanSetting(param))
     end)
     local showNameAndSequenceFunction = "IntersectionSettings.setShowNameAndSequenceOnSignal"
     ServerExchangeCoordinator.registerAllowedCommand(showNameAndSequenceFunction, function (param)
-        IntersectionSettings.setShowNameAndSequenceOnSignal(param == "true")
+        IntersectionSettings.setShowNameAndSequenceOnSignal(toBooleanSetting(param))
     end)
     ServerExchangeCoordinator.registerAllowedCommand("IntersectionSettings.setShowSignalIdOnSignal", function (param)
-        IntersectionSettings.setShowSignalIdOnSignal(param == "true")
+        IntersectionSettings.setShowSignalIdOnSignal(toBooleanSetting(param))
     end)
     ServerExchangeCoordinator.registerAllowedCommand("IntersectionSettings.setShowLanesOnStructure", function (param)
-        IntersectionSettings.setShowLanesOnStructure(param == "true")
+        IntersectionSettings.setShowLanesOnStructure(toBooleanSetting(param))
     end)
     ServerExchangeCoordinator.registerAllowedCommand("AkKreuzungSchalteAutomatisch", Intersection.switchAutomatically)
     ServerExchangeCoordinator.registerAllowedCommand("AkKreuzungSchalteManuell", Intersection.switchManuallyTo)

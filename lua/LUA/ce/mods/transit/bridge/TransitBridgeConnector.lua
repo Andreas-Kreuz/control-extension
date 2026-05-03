@@ -6,6 +6,12 @@ local TransitSettings = require("ce.mods.transit.TransitSettings")
 ---@class TransitBridgeConnector
 local TransitBridgeConnector = {}
 
+local function toBooleanSetting(param)
+    if param == true or param == "true" then return true end
+    if param == false or param == "false" then return false end
+    error("Expected boolean setting value")
+end
+
 function TransitBridgeConnector.registerStatePublishers()
     local publicTransportStatePublisher = require("ce.mods.transit.data.TransitStatePublisher")
     StatePublisherRegistry.registerStatePublishers(publicTransportStatePublisher)
@@ -14,7 +20,7 @@ end
 function TransitBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand(
         "TransitSettings.setShowDepartureTippText",
-        function (param) TransitSettings.setShowDepartureTippText(param == "true") end
+        function (param) TransitSettings.setShowDepartureTippText(toBooleanSetting(param)) end
     )
 end
 
