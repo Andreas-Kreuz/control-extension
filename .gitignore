@@ -20,6 +20,7 @@ __pycache__
 /apps/*/node_modules
 /apps/*/*.tsbuildinfo
 /apps/web-server/settings.json
+/apps/web-server/update-status-cache.json
 
 /packages/*/build
 /packages/*/dist
