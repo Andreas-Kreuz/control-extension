@@ -1,17 +1,19 @@
-import { TransitLineLuaDto } from '../../ce/dto/transit/TransitLineLuaDto';
+﻿import { TransitLineLuaDto } from '../../ce/dto/transit/TransitLineLuaDto';
 import { TransitStationLuaDto } from '../../ce/dto/transit/TransitStationLuaDto';
 import { TransitTrainLuaDto } from '../../ce/dto/transit/TransitTrainLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, TransitLineDto, TransitStationDto } from '@ce/web-shared';
+import { CeTypes, TransitLineAppDto, TransitStationAppDto, TransitTrainAppDto } from '@ce/web-shared';
 
+// Maps Lua transit DTOs into transit AppDtos.
+// Lua inputs: ce.mods.transit.Line, LineName, Station, TransitTrain.
 export default class TransitSelector {
   private lastState?: fromEepData.State;
-  private transitLines: Record<string, TransitLineDto> = {};
-  private transitLineNames: Record<string, TransitLineDto> = {};
-  private transitStations: Record<string, TransitStationDto> = {};
-  private transitTrains: Record<string, TransitTrainLuaDto> = {};
+  private transitLines: Record<string, TransitLineAppDto> = {};
+  private transitLineNames: Record<string, TransitLineAppDto> = {};
+  private transitStations: Record<string, TransitStationAppDto> = {};
+  private transitTrains: Record<string, TransitTrainAppDto> = {};
 
-  private mapLineDto(line: TransitLineLuaDto): TransitLineDto {
+  private mapLineDto(line: TransitLineLuaDto): TransitLineAppDto {
     return {
       id: line.id,
       nr: line.nr,
@@ -26,6 +28,27 @@ export default class TransitSelector {
           timeToStation: st.timeToStation,
         })),
       })),
+    };
+  }
+
+  private mapTrainDto(train: TransitTrainLuaDto): TransitTrainAppDto {
+    return {
+      id: train.id,
+      ...(train.line !== undefined ? { line: train.line } : {}),
+      ...(train.destination !== undefined ? { destination: train.destination } : {}),
+      ...(train.origin !== undefined ? { origin: train.origin } : {}),
+      ...(train.direction !== undefined ? { direction: train.direction } : {}),
+      ...(train.nextStations !== undefined
+        ? {
+            nextStations: train.nextStations.map((entry) => ({
+              station: {
+                name: entry.station.name,
+                platform: entry.station.platform,
+              },
+              departureInMinutes: entry.departureInMinutes,
+            })),
+          }
+        : {}),
     };
   }
 
@@ -85,33 +108,17 @@ export default class TransitSelector {
       const dict = state.ceTypes[CeTypes.TransitTrain] as unknown as Record<string, TransitTrainLuaDto>;
       this.transitTrains = {};
       Object.values(dict).forEach((dto: TransitTrainLuaDto) => {
-        this.transitTrains[dto.id] = {
-          id: dto.id,
-          ...(dto.line !== undefined ? { line: dto.line } : {}),
-          ...(dto.destination !== undefined ? { destination: dto.destination } : {}),
-          ...(dto.direction !== undefined ? { direction: dto.direction } : {}),
-          ...(dto.nextStations !== undefined
-            ? {
-                nextStations: dto.nextStations.map((entry) => ({
-                  station: {
-                    name: entry.station.name,
-                    platform: entry.station.platform,
-                  },
-                  departureInMinutes: entry.departureInMinutes,
-                })),
-              }
-            : {}),
-        };
+        this.transitTrains[dto.id] = this.mapTrainDto(dto);
       });
     }
   }
 
-  getTransitLines = (): Record<string, TransitLineDto> => this.transitLines;
-  getTransitLine = (id: string): TransitLineDto | undefined => this.transitLines[id];
-  getTransitLineNames = (): Record<string, TransitLineDto> => this.transitLineNames;
-  getTransitLineName = (id: string): TransitLineDto | undefined => this.transitLineNames[id];
-  getTransitStations = (): Record<string, TransitStationDto> => this.transitStations;
-  getTransitStation = (id: string): TransitStationDto | undefined => this.transitStations[id];
-  getTransitTrains = (): Record<string, TransitTrainLuaDto> => this.transitTrains;
-  getTransitTrain = (id: string): TransitTrainLuaDto | undefined => this.transitTrains[id];
+  getTransitLines = (): Record<string, TransitLineAppDto> => this.transitLines;
+  getTransitLine = (id: string): TransitLineAppDto | undefined => this.transitLines[id];
+  getTransitLineNames = (): Record<string, TransitLineAppDto> => this.transitLineNames;
+  getTransitLineName = (id: string): TransitLineAppDto | undefined => this.transitLineNames[id];
+  getTransitStations = (): Record<string, TransitStationAppDto> => this.transitStations;
+  getTransitStation = (id: string): TransitStationAppDto | undefined => this.transitStations[id];
+  getTransitTrains = (): Record<string, TransitTrainAppDto> => this.transitTrains;
+  getTransitTrain = (id: string): TransitTrainAppDto | undefined => this.transitTrains[id];
 }

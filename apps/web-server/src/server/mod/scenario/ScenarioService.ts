@@ -13,7 +13,6 @@ export default class ScenarioService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: ScenarioRoom,
       id: 'ScenarioRoom',
-      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(this.scenarioSelector.getScenarios());
       },

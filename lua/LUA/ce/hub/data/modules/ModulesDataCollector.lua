@@ -1,5 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModulesDataCollector ...") end
 
+---@class ModulesDataCollector
+---@field setRegisteredCeModules fun(modules: table<string, CeModule>):nil
+---@field collectModules fun():table<string, CeModule>
 local ModulesDataCollector = {}
 
 ---@type table<string, CeModule>|nil

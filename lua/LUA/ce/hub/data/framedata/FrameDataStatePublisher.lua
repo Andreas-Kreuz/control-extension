@@ -16,7 +16,7 @@ end
 function FrameDataStatePublisher.syncState()
     if not FrameDataStatePublisher.enabled then return end
     if not initialized then FrameDataStatePublisher.initialize() end
-    return FrameDataPublisher.syncState()
+    FrameDataPublisher.syncState()
 end
 
 return FrameDataStatePublisher

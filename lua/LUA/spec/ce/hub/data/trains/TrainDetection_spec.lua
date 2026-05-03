@@ -1,3 +1,4 @@
+---@diagnostic disable: redundant-parameter
 describe("TrainDiscovery", function ()
     local function runCycle(selectedTrackCeTypes)
         local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
@@ -73,13 +74,13 @@ describe("TrainDiscovery", function ()
             assert.equals(1, rollingStock:getHookStatus())
             assert.equals(1, rollingStock:getHookGlueMode())
 
-            _G.EEPGetTrainCouplingFront = nil
-            _G.EEPGetTrainCouplingRear = nil
-            _G.EEPIsTrainInTrainyard = nil
-            _G.EEPRollingstockGetOrientation = nil
-            _G.EEPRollingstockGetSmoke = nil
-            _G.EEPRollingstockGetHook = nil
-            _G.EEPRollingstockGetHookGlue = nil
+            rawset(_G, "EEPGetTrainCouplingFront", nil)
+            rawset(_G, "EEPGetTrainCouplingRear", nil)
+            rawset(_G, "EEPIsTrainInTrainyard", nil)
+            rawset(_G, "EEPRollingstockGetOrientation", nil)
+            rawset(_G, "EEPRollingstockGetSmoke", nil)
+            rawset(_G, "EEPRollingstockGetHook", nil)
+            rawset(_G, "EEPRollingstockGetHookGlue", nil)
 
             assert.has_no.errors(function () runCycle() end)
             assert.equals(1, train:getCouplingFront())
@@ -116,7 +117,6 @@ describe("TrainDiscovery", function ()
                 control = 5
             }
             local rollingStockByTrainName = {}
-            local originalGetRollingstockTrack = _G.EEPRollingstockGetTrack
 
             for trackType, trackId in pairs(occupiedTracksByType) do
                 local trainName = "#Train-" .. trackType
@@ -137,13 +137,15 @@ describe("TrainDiscovery", function ()
                 Store.state.tracks[trackType][trackId].occupiedTrainName = trainName
             end
 
-            _G.EEPRollingstockGetTrack = function (rollingStockName)
+            local originalGetRollingstockTrack = _G.EEPRollingstockGetTrack
+            local getRollingstockTrackStub = stub(_G, "EEPRollingstockGetTrack", function (rollingStockName)
                 local info = rollingStockByTrainName[rollingStockName]
                 if info then
                     return true, info.trackId, 5, 1, info.systemId
                 end
                 return originalGetRollingstockTrack(rollingStockName)
-            end
+            end)
+            finally(function () getRollingstockTrackStub:revert() end)
 
             runCycle()
 
@@ -153,9 +155,11 @@ describe("TrainDiscovery", function ()
                 local track = TrackRegistry.get(trackType, trackId)
 
                 assert.is_not_nil(train)
+                ---@cast train Train
                 assert.equals(trackType, train:getTrackType())
                 assert.same({ [tostring(trackId)] = trackId }, train:getOnTrack())
                 assert.is_not_nil(track)
+                ---@cast track Track
                 assert.is_true(track.reserved)
                 assert.equals(trainName, track.reservedByTrainName)
             end

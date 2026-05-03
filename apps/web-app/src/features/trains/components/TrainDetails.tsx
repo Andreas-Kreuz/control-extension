@@ -1,26 +1,28 @@
-import { useState } from 'react';
-import { TrainListDto } from '@ce/web-shared';
+﻿import { useState } from 'react';
+import { TrainListAppDto } from '@ce/web-shared';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TrainCamerasView from './TrainCamerasView';
 import TrainInformationView from './TrainInformationView';
-import TrainLineInformationView from './TrainLineInformationView';
-import TrainRollingStockView from './TrainRollingStockView';
+import TrainLineView from './TrainLineView';
+import RollingStockView from './RollingStockView';
+import useTransitTrain from '../hooks/useTransitTrain';
 import useTrainDynamic from '../hooks/useTrainDynamic';
 import useTrainRollingStock from '../hooks/useTrainRollingStock';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
 
-const TrainDetails = (props: { train: TrainListDto }) => {
+const TrainDetails = (props: { train: TrainListAppDto }) => {
   const [activeTab, setActiveTab] = useState(0);
   const train = props.train;
   const trainDynamic = useTrainDynamic(train.id);
+  const transitTrain = useTransitTrain(train.id);
   const rollingStock = useTrainRollingStock(train.id);
   const transitSettings = useTransitSettings();
   const showTransitTab = Boolean(transitSettings);
-  const currentLine = trainDynamic?.line ?? train.line ?? '-';
-  const currentDestination = trainDynamic?.destination ?? train.destination ?? '-';
+  const currentLine = transitTrain?.line ?? train.line ?? '-';
+  const currentDestination = transitTrain?.destination ?? train.destination ?? '-';
   const tabs = [
     { key: 'information', label: 'Information' },
     { key: 'rolling-stock', label: 'RollingStock' },
@@ -50,15 +52,15 @@ const TrainDetails = (props: { train: TrainListDto }) => {
           {...(trainDynamic?.targetSpeed !== undefined ? { targetSpeed: trainDynamic.targetSpeed } : {})}
         />
       )}
-      {tabs[safeTabIndex]?.key === 'rolling-stock' && <TrainRollingStockView rollingStock={rollingStock} />}
+      {tabs[safeTabIndex]?.key === 'rolling-stock' && <RollingStockView rollingStock={rollingStock} />}
       {tabs[safeTabIndex]?.key === 'kameras' && (
         <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />
       )}
       {tabs[safeTabIndex]?.key === 'linieninformationen' && (
-        <TrainLineInformationView
+        <TrainLineView
           line={currentLine}
           destination={currentDestination}
-          nextStations={trainDynamic?.nextStations ?? []}
+          nextStations={transitTrain?.nextStations ?? []}
         />
       )}
     </Stack>

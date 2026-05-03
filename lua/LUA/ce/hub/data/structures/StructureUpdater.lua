@@ -3,6 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureUpda
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
+---@class StructureUpdater
+---@field runInitialUpdate fun(options: table|nil):nil
+---@field runUpdate fun(options: table|nil):nil
 local StructureUpdater = {}
 
 local EEPStructureGetLight = _G.EEPStructureGetLight or function () end
@@ -28,7 +31,7 @@ function StructureUpdater.runUpdate()
     local fields = HubOptionsRegistry.getFieldUpdatePolicies("structures")
     for _, structure in pairs(StructureRegistry.getAll()) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure,
-                                                            tostring(structure.id or structure.name))
+                                                           tostring(structure.id or structure.name))
         if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
             local _, tag = EEPStructureGetTagText(structure.name)
             structure:setTag(tag or "")

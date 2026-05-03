@@ -34,8 +34,8 @@ Jeder Baustein ist eigenständig nutzbar. Höhere Bausteine sind optional.
 
 ### Lua Hub (Baustein 1)
 
-- Unabhängig von Data Bridge, Server und Web App.
-- Wer nur Anlagenlogik in Lua schreiben möchte, braucht ausschließlich den Lua Hub.
+- Laufzeit- und Orchestrierungsanker der Lua-Seite, einschließlich Data-Bridge-Anbindung.
+- Wer nur Anlagenlogik in Lua schreiben möchte, braucht keinen laufenden Server und keine Web App.
 
 ### Data Bridge (Baustein 2)
 
@@ -79,9 +79,9 @@ Data Bridge                   --> transparente Übertragung, kein Datenwissen
     |
     v
 Server (LuaDto-Empfang)
-    |  Selectors: LuaDto  -->  *Dto (web-shared)
+    |  Selectors: *LuaDto  -->  *AppDto (web-shared)
     v
-web-shared *Dto               --> stabiler Vertrag zwischen Server und Web App
+web-shared *AppDto            --> stabiler Vertrag zwischen Server und Web App
     |
     v
 Web App                       --> ggf. view-spezifische Reduktion (View Models)
@@ -106,15 +106,17 @@ in dem alle aktuellen Zustände gehalten werden.
 **3. Data Bridge — Transparente Übertragung**
 
 Die Data Bridge überträgt Daten, kennt aber deren Struktur nicht und verändert sie nicht.
-Sie ist ein reiner Transportkanal.
+Sie ist ein reiner Transportkanal, auch wenn sie vom Lua Hub orchestriert wird.
 
 **4. Server — Tailoring für Konsumenten**
 
-Der Server empfängt Lua DTOs und transformiert sie über Selectors in `*Dto`-Objekte
-(definiert in `apps/web-shared`). Dabei gilt:
+Der Server empfängt Lua DTOs (`*LuaDto`) und transformiert sie über Selectors in
+`*AppDto`-Objekte (definiert in `apps/web-shared/src/dtos/app`). Dabei gilt:
 
 - Tailoring (Reduktion, Filterung für Clients) findet ausschließlich auf Serverseite statt.
-- Die reine Lua-API (`LuaDto`) wird dadurch nicht verändert.
+- Die reine Lua-API (`ceType` und `*LuaDto`) wird dadurch nicht verändert.
+- Server/Web-App-Socket-Rooms für Features sind stabile App-`DomainRoom`s, nicht Lua-`ceType`-Strings.
+- Rohe `ceType`-Strings werden nur dynamisch im generischen Daten-Explorer über `CeTypeRoom` verwendet.
 - Ziel des Tailoring: Datenverkehr zwischen Server und Clients minimieren,
   Update-Ereignisse für die Web App reduzieren.
 
@@ -122,12 +124,12 @@ Der Server empfängt Lua DTOs und transformiert sie über Selectors in `*Dto`-Ob
 
 `apps/web-shared` enthält die gemeinsamen TypeScript-Typen und Events, die Server und Web App
 teilen. Dadurch muss dasselbe Datenmodell nicht doppelt implementiert werden.
-Die `*Dto`-Typen in `web-shared` sind der stabile Client-Vertrag — Lua-interne Änderungen
+Die `*AppDto`-Typen in `web-shared` sind der stabile Client-Vertrag — Lua-interne Änderungen
 werden durch die Selectors abgefangen, sodass der Client-Vertrag stabil bleibt.
 
 **6. Web App — View-spezifische Datenhaltung**
 
-Die Web App empfängt `*Dto`-Objekte und kann diese für Views lokal halten (View Models).
+Die Web App empfängt `*AppDto`-Objekte und kann diese für Views lokal halten (View Models).
 Ziel: minimale Re-Renders und minimaler Speicherbedarf.
 
 ---

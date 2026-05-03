@@ -1,20 +1,20 @@
-﻿import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
-import { useApiDataRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { TransitSettingsRoom, SettingAppDto, SettingsAppDto } from '@ce/web-shared';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 
 import { useState } from 'react';
 import useDebug from '../../../shared/socket/useDebug';
 
-function useIntersectionSettings(): SettingsDto | undefined {
-  const [settings, setSettings] = useState<SettingsDto | undefined>(undefined);
+function useIntersectionSettings(): SettingsAppDto | undefined {
+  const [settings, setSettings] = useState<SettingsAppDto | undefined>(undefined);
   const debug = useDebug();
 
-  useApiDataRoomHandler(CeTypes.TransitModuleSetting, (payload: string) => {
-    const data: SettingDto<any>[] = Object.values(JSON.parse(payload));
+  useDomainRoomHandler(TransitSettingsRoom, 'All', (payload: string) => {
+    const data: SettingAppDto<any>[] = Object.values(JSON.parse(payload));
     const mySettings = {
       moduleName: 'Einstellungen für ÖPNV',
       settings: data,
     };
-    if (debug) console.log('                 |⚠️ FIRED ---', 'API: ' + CeTypes.TransitModuleSetting, mySettings);
+    if (debug) console.log('                 |⚠️ FIRED ---', 'TransitSettingsRoom', mySettings);
     setSettings(mySettings);
   });
 

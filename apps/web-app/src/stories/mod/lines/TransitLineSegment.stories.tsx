@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react';
+﻿import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from 'storybook/test';
-import { TransitLineSegment as AkTransitLineSegment } from './TransitLineSegment.component';
+import { TransitLineSegment as TransitLineSegmentStory } from './TransitLineSegment.component';
 import Line from '../../../features/lines/model/Line';
 import StationInfo from '../../../features/lines/model/StationInfo';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
-  title: 'Module Elements/Transit/AkTransitLineSegment',
+  title: 'Module Elements/Transit/TransitLineSegment',
   tags: ['autodocs'],
-  component: AkTransitLineSegment,
-} satisfies Meta<typeof AkTransitLineSegment>;
+  component: TransitLineSegmentStory,
+} satisfies Meta<typeof TransitLineSegmentStory>;
 
 const line10HbfStations: StationInfo[] = [
   { station: { name: 'Alte Messe' }, timeToStation: 0 },

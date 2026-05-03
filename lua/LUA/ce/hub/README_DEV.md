@@ -117,12 +117,10 @@ Nicht jeder CeType scannt die Welt unabhängig. Der wichtigste gekoppelte Pfad i
 
 Dadurch bleibt die Discovery zentral, während Registry, Updater und Publisher weiter je CeType getrennt bleiben.
 
-## Rückgabewerte und Events
+## Events
 
 Die aktiven Hub-Publisher transportieren ihre Nutzdaten primär über `DataChangeBus.fire*()`.
-Die Rückgabewerte von `syncState()` sind meist nur `{}` oder eine Kompatibilitätsschicht für bestehende Aufrufer.
-
-Wenn ein Publisher Daten direkt zurückgibt, müssen diese nur serialisierbare Werte enthalten. Funktionen oder nicht-string-/nicht-number-Schlüssel sind unzulässig.
+`syncState()` ist side-effect-only und liefert keine Nutzdaten zurück.
 
 ## Weiterführende Dokumentation
 

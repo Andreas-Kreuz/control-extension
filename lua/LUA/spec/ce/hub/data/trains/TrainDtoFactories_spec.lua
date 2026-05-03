@@ -21,6 +21,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getTargetSpeed = function () return 4 end,
             getCouplingFront = function () return 1 end,
             getCouplingRear = function () return 2 end,
+            getLights = function () return { ["0"] = true, ["1"] = false, ["2"] = true, ["3"] = false } end,
             getActive = function () return true end,
             getTrainyardId = function () return 9 end,
             getInTrainyard = function () return false end,
@@ -42,6 +43,9 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getHookGlueMode = function () return 3 end,
             getActive = function () return false end,
             getTextureTexts = function () return { ["1"] = "Line", ["2"] = "" } end,
+            getAxisNames = function () return { ["2"] = "Fahrer" } end,
+            getAxisValues = function () return { ["2"] = 75 } end,
+            getTextureNames = function () return { ["1"] = "Fahrziel" } end,
             getRotX = function () return 1.23 end,
             getRotY = function () return 2.35 end,
             getRotZ = function () return 3.46 end,
@@ -55,6 +59,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getY = function () return 2 end,
             getZ = function () return 3 end,
             getMileage = function () return 4 end,
+            getXmlModel = function () return "SCHIENE\\STRASSENBAHN\\GT4_WG_A_01_MA1.3dm" end,
         }
 
         local trainCeType, trainKeyId, trainKey, trainDto =
@@ -76,6 +81,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
                         targetSpeed = 4,
                         couplingFront = 1,
                         couplingRear = 2,
+                        lights = { ["0"] = true, ["1"] = false, ["2"] = true, ["3"] = false },
                         active = true,
                         trainyardId = 9,
                         inTrainyard = false,
@@ -101,6 +107,9 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
         assert.equals(2, rsDto.hookStatus)
         assert.equals(3, rsDto.hookGlueMode)
         assert.same({ ["1"] = "Line", ["2"] = "" }, rsDto.surfaceTexts)
+        assert.same({ ["2"] = "Fahrer" }, rsDto.axisNames)
+        assert.same({ ["2"] = 75 }, rsDto.axisValues)
+        assert.same({ ["1"] = "Fahrziel" }, rsDto.textureNames)
         assert.equals(99, rsDto.trackId)
         assert.equals(10.5, rsDto.trackDistance)
         assert.equals(1, rsDto.trackDirection)
@@ -115,6 +124,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
         assert.equals(1.23, rsDto.rotX)
         assert.equals(2.35, rsDto.rotY)
         assert.equals(3.46, rsDto.rotZ)
+        assert.equals("SCHIENE\\STRASSENBAHN\\GT4_WG_A_01_MA1.3dm", rsDto.xmlModel)
     end)
 
     it("uses placeholder values for ondemand fields when not subscribed", function ()
@@ -131,6 +141,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
             getTargetSpeed = function () return 88 end,
             getCouplingFront = function () return 5 end,
             getCouplingRear = function () return 6 end,
+            getLights = function () return { ["0"] = true, ["1"] = true, ["2"] = true, ["3"] = true } end,
             getActive = function () return true end,
             getTrainyardId = function () return 7 end,
             getInTrainyard = function () return true end,
@@ -143,6 +154,7 @@ insulate("ce.hub.data.trains.TrainDtoFactory and RollingStockDtoFactory", functi
         assert.equals(0, dto.targetSpeed)
         assert.equals(0, dto.couplingFront)
         assert.equals(0, dto.couplingRear)
+        assert.same({ ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false }, dto.lights)
         assert.equals(false, dto.active)
         assert.equals(false, dto.inTrainyard)
         assert.equals("", dto.trainyardId)

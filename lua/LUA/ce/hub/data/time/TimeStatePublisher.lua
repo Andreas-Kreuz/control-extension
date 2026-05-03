@@ -1,6 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.time.TimeStatePublisher ...") end
 local TimePublisher = require("ce.hub.data.time.TimePublisher")
 
+---@class TimeStatePublisher
+---@field name string
+---@field initialize fun():nil
+---@field syncState fun():nil
 TimeStatePublisher = {}
 TimeStatePublisher.enabled = true
 local initialized = false
@@ -17,7 +21,7 @@ function TimeStatePublisher.syncState()
     if not TimeStatePublisher.enabled then return end
 
     if not initialized then TimeStatePublisher.initialize() end
-    return TimePublisher.syncState()
+    TimePublisher.syncState()
 end
 
 return TimeStatePublisher

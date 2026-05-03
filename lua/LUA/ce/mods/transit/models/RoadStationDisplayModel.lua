@@ -31,7 +31,7 @@ function DisplayModel:new(name, initStation, displayEntries)
     return x
 end
 
-function DisplayModel:printName() print("[#DisplayModel] name: " .. self.name) end
+function DisplayModel:printName() print(string.format("[#DisplayModel] name: %s", self.name)) end
 
 function DisplayModel:print(displayStructure, stationQueueEntries)
     self.displayEntries(displayStructure, stationQueueEntries)

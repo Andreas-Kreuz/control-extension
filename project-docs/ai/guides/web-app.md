@@ -14,7 +14,7 @@
 
 - Install dependencies: `yarn`
 - Available root scripts: `yarn ce-help`
-- Dev storybook: `yarn dev:storybook`
+- Dev storybook: `cmd /c yarn dev:storybook` on Windows/PowerShell, otherwise `yarn dev:storybook`
 - Format (non-Lua): `yarn format:apps`
 - Format (all): `yarn format` — may fail on existing Liquid/HTML in `pages/docs/`; evaluate separately from your changes
 - Developer workflows: `pages/docs/_anleitungen-entwickler/Aufbau_des_Projektes.md`

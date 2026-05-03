@@ -6,10 +6,43 @@ local DataSlotsRegistry = require("ce.hub.data.slots.DataSlotsRegistry")
 
 local DataSlotsPublisher = {}
 
+local function hasPayloadFields(dto)
+    for key in pairs(dto or {}) do
+        if key ~= "ceType" and key ~= "id" then return true end
+    end
+    return false
+end
+
+local function publishRemovedSlots(ceType, removedIds)
+    for slotId in pairs(removedIds) do
+        DataChangeBus.fireDataRemoved(DataSlotDtoFactory.createRemovalDto(ceType, slotId))
+    end
+end
+
+local function publishSlots(ceType, slots)
+    for _, slot in pairs(slots) do
+        if slot.needsFullSend then
+            DataChangeBus.fireDataChanged(DataSlotDtoFactory.createFullDto(ceType, slot))
+            slot.needsFullSend = false
+            slot:resetDirty()
+        elseif slot:hasDirtyFields() then
+            local dtoCeType, keyId, key, dto = DataSlotDtoFactory.createPatchDto(ceType, slot, slot.dirtyFields)
+            if hasPayloadFields(dto) then DataChangeBus.fireDataChanged(dtoCeType, keyId, key, dto) end
+            slot:resetDirty()
+        end
+    end
+end
+
 function DataSlotsPublisher.syncState()
-    DataChangeBus.fireListChange(DataSlotDtoFactory.createFilledDataSlotDtoList(DataSlotsRegistry.getFilled()))
-    DataChangeBus.fireListChange(DataSlotDtoFactory.createEmptyDataSlotDtoList(DataSlotsRegistry.getEmpty()))
-    return {}
+    local filledCeType = DataSlotDtoFactory.filledCeType()
+    local emptyCeType = DataSlotDtoFactory.emptyCeType()
+
+    publishRemovedSlots(filledCeType, DataSlotsRegistry.getRemovedFilledIds())
+    publishRemovedSlots(emptyCeType, DataSlotsRegistry.getRemovedEmptyIds())
+    DataSlotsRegistry.clearRemoved()
+
+    publishSlots(filledCeType, DataSlotsRegistry.getFilled())
+    publishSlots(emptyCeType, DataSlotsRegistry.getEmpty())
 end
 
 return DataSlotsPublisher

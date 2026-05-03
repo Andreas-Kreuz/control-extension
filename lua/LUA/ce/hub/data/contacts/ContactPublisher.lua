@@ -12,7 +12,7 @@ function ContactPublisher.syncState()
 
     if not HubOptionsRegistry.isPublishEnabled("contacts") then
         ContactRegistry.clearPendingChanges()
-        return {}
+        return
     end
 
     local addedIds = ContactRegistry.getAddedIds()
@@ -37,7 +37,6 @@ function ContactPublisher.syncState()
     end
 
     ContactRegistry.clearPendingChanges()
-    return {}
 end
 
 return ContactPublisher

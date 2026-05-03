@@ -3,6 +3,7 @@
 -- Field policies: all fields always
 
 ---@class ScenarioDto
+---@field ceType string                   -- Policy: always
 ---@field id string                       -- Policy: always
 ---@field name string                     -- Policy: always
 ---@field scenarioName string|nil         -- Policy: always
@@ -13,7 +14,3 @@
 ---@field activeTrain string|nil          -- Policy: always
 ---@field activeRollingStock string|nil   -- Policy: always
 ---@field timeLapse number|nil            -- Policy: always
-
----@class ScenarioDtoFactory
----@field createScenarioDto fun(scenario: table):string,string,string|number,ScenarioDto
----@field createScenarioDtoList fun(scenario: table):string,string,table

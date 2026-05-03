@@ -15,7 +15,7 @@ Top Down Flow:
 
 4. Web Server (apps/web-server/)
    - stores data in server store to be independent from Lua
-   - sends and receices data to 5. via (Socket.IO / REST-API)
+   - translates `*LuaDto`/`ceType` data into stable `*AppDto` contracts and app `DomainRoom`s
 
 5. Web App (apps/web-app/)
-   - connects to server only to send commands and receive data - contract: DTOs in `apps/web-shared/src/dtos/server`
+   - connects to server only to send commands and receive data - contract: `*AppDto` in `apps/web-shared/src/dtos/app`

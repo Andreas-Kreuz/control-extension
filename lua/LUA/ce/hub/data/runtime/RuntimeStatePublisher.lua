@@ -1,6 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeStatePublisher ...") end
 local RuntimePublisher = require("ce.hub.data.runtime.RuntimePublisher")
 
+---@class RuntimeStatePublisher
+---@field name string
+---@field initialize fun():nil
+---@field syncState fun():nil
 RuntimeStatePublisher = {}
 RuntimeStatePublisher.enabled = true
 local initialized = false
@@ -16,7 +20,7 @@ end
 function RuntimeStatePublisher.syncState()
     if not RuntimeStatePublisher.enabled then return end
     if not initialized then RuntimeStatePublisher.initialize() end
-    return RuntimePublisher.syncState()
+    RuntimePublisher.syncState()
 end
 
 return RuntimeStatePublisher

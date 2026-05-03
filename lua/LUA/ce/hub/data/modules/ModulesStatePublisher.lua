@@ -2,8 +2,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModulesStatePubl
 local ModulesPublisher = require("ce.hub.data.modules.ModulesPublisher")
 
 ---@class ModulesStatePublisher
+---@field name string
 ---@field initialize fun():nil
----@field syncState fun():table
+---@field syncState fun():nil
 ModulesStatePublisher = {}
 ModulesStatePublisher.enabled = true
 local initialized = false
@@ -18,7 +19,7 @@ end
 function ModulesStatePublisher.syncState()
     if not ModulesStatePublisher.enabled then return end
     if not initialized then ModulesStatePublisher.initialize() end
-    return ModulesPublisher.syncState()
+    ModulesPublisher.syncState()
 end
 
 return ModulesStatePublisher

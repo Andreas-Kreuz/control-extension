@@ -2,8 +2,10 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
 import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import WeatherSelector from './WeatherSelector';
-import { WeatherRoom } from '@ce/web-shared';
+import { DomainRoom } from '@ce/web-shared';
 import { Server } from 'socket.io';
+
+const WeatherRoom = new DomainRoom('App.Weather');
 
 export default class WeatherService implements DomainRoomService {
   private roomDataProviders: DomainDataProvider[] = [];
@@ -13,7 +15,6 @@ export default class WeatherService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: WeatherRoom,
       id: 'WeatherRoom',
-      onInterest: [],
       jsonCreator: (_room: string): string => JSON.stringify(this.weatherSelector.getWeather()),
     });
   }

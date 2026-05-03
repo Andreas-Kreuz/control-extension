@@ -55,6 +55,7 @@
 ---@field id string
 ---@field line string|nil
 ---@field destination string|nil
+---@field origin string|nil
 ---@field direction string|nil
 ---@field nextStations TransitTrainNextStationDto[]
 

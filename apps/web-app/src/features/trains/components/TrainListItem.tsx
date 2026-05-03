@@ -1,23 +1,35 @@
-import { TrainListDto } from '@ce/web-shared';
+﻿import { TrainListAppDto } from '@ce/web-shared';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import { trainIconFor } from '../lib/trainIconFor';
 import { ListItemIcon } from '@mui/material';
+import { ListIconSources } from '../lib/trainListIconSources';
 
 interface TrainListItemProps {
-  train: TrainListDto;
+  train: TrainListAppDto;
   selected: boolean;
   onSelect: () => void;
 }
 
 const TrainListItem = ({ train, selected, onSelect }: TrainListItemProps) => {
-  const iconSrc = '/assets/' + trainIconFor(train.trainType) + '.svg';
+  const iconSrc = ListIconSources[train.trainType];
   return (
     <ListItem disablePadding>
       <ListItemButton selected={selected} onClick={onSelect}>
-        <ListItemIcon sx={{ pr: 1 }}>
-          <img src={iconSrc} height="32" />
+        <ListItemIcon
+          sx={{
+            width: 48,
+            height: 32,
+            minWidth: 48,
+            mr: 1,
+            p: '2px',
+            border: 1,
+            borderColor: 'grey.700',
+            borderRadius: '4px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <img src={iconSrc} width="100%" height="100%" alt="" style={{ objectFit: 'contain' }} />
         </ListItemIcon>
         <ListItemText primary={train.id} />
       </ListItemButton>

@@ -1,3 +1,4 @@
+---@diagnostic disable: redundant-parameter
 insulate("ce.hub.data.trains.TrainRegistry", function ()
     local function clearModule(name) package.loaded[name] = nil end
 

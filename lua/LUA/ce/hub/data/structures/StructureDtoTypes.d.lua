@@ -17,9 +17,3 @@
 ---@field smoke boolean
 ---@field fire boolean
 ---@field gsbname string|nil -- oninterest
-
----@class StructureDtoFactory
----@field createFullDto fun(structure: Structure, isSelected: boolean|nil):string,string,string|number,StructureDto
----@field createPatchDto fun(structure: Structure, dirtyFields: table<string,boolean>, isSelected: boolean|nil):string,
----string,string|number,StructureDto
----@field createRefDto fun(structureId: string):string,string,string|number,table

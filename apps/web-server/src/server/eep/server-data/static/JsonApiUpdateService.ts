@@ -1,13 +1,14 @@
 import { CacheService } from '../CacheService';
 import EepDataStore, { State } from '../EepDataStore';
 import JsonApiReducer, { ServerData } from './ServerData';
-import { ApiDataRoom, CeTypes, ServerStatusEvent } from '@ce/web-shared';
+import { ApiDataRoom, ServerStatsAppDto, ServerStatsRoom, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
 export default class JsonApiUpdateService {
   private debug = false;
   private reducer = new JsonApiReducer();
+  private serverStats: ServerStatsAppDto = { eepDataUpToDate: false, luaDataReceived: false, apiEntryCount: 0 };
 
   constructor(
     private router: express.Router,
@@ -56,6 +57,10 @@ export default class JsonApiUpdateService {
       if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + ServerStatusEvent.UrlsChanged);
       socket.emit(ServerStatusEvent.UrlsChanged, this.reducer.getUrlJson());
     }
+
+    if (room === ServerStatsRoom.roomId('ServerStats')) {
+      socket.emit(ServerStatsRoom.eventId('ServerStats'), JSON.stringify(this.serverStats));
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -76,6 +81,10 @@ export default class JsonApiUpdateService {
       this.cacheService.writeCache(currentState);
     }
     this.reducer.setLastAnnouncedData(data);
+    this.serverStats = this.createServerStats(currentState, data);
+    this.io
+      .to(ServerStatsRoom.roomId('ServerStats'))
+      .emit(ServerStatsRoom.eventId('ServerStats'), JSON.stringify(this.serverStats));
     this.registerStatsTimeout(data);
 
     this.announceEepData(oldData, data, currentState.eventCounter);
@@ -130,21 +139,25 @@ export default class JsonApiUpdateService {
 
   private lastTimeOut?: NodeJS.Timeout;
 
-  private registerStatsTimeout(data: ServerData) {
+  private createServerStats(currentState: State, data: ServerData): ServerStatsAppDto {
+    const luaDataReceived = Object.keys(currentState.ceTypes).length > 0;
+    return {
+      eepDataUpToDate: luaDataReceived,
+      luaDataReceived,
+      apiEntryCount: data.urls.length,
+    };
+  }
+
+  private registerStatsTimeout(_data: ServerData) {
     if (this.lastTimeOut) {
       clearTimeout(this.lastTimeOut);
     }
     this.lastTimeOut = setTimeout(() => {
-      const roomName = CeTypes.ServerStats;
-      const currentStatsJson = data.roomToJson[roomName];
-      if (!currentStatsJson) {
-        return;
-      }
-      const currentStats = JSON.parse(currentStatsJson);
-      const newStats = { ...currentStats, eepDataUpToDate: false };
-      const newStatsJsonString = JSON.stringify(newStats);
-      data.roomToJson[roomName] = newStatsJsonString;
-      this.io.to(ApiDataRoom.roomId(roomName)).emit(ApiDataRoom.eventId(roomName), newStatsJsonString);
+      this.serverStats = { ...this.serverStats, eepDataUpToDate: false };
+      const newStatsJsonString = JSON.stringify(this.serverStats);
+      this.io
+        .to(ServerStatsRoom.roomId('ServerStats'))
+        .emit(ServerStatsRoom.eventId('ServerStats'), newStatsJsonString);
     }, 1000);
   }
 }

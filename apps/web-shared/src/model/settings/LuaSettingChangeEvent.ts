@@ -1,8 +1,8 @@
-import { SettingDto } from '../../dtos/server/settings/SettingDto';
+﻿import { SettingAppDto } from '../../dtos/app/settings/SettingAppDto';
 
 export class SettingDtoChangeEvent {
   constructor(
-    public setting: SettingDto<any>,
+    public setting: SettingAppDto<any>,
     public newValue: any,
   ) {}
 }

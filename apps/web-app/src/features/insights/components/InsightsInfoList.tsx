@@ -1,4 +1,3 @@
-import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,17 +8,19 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import OutlinedCard from '../../../shared/components/cards/OutlinedCard';
 
 interface InsightsInfoListItem {
   icon: ReactNode;
   label: string;
   value: string;
   href?: string;
+  valuePrefix?: ReactNode;
   valueIcon?: ReactNode;
   tooltip?: string;
 }
 
-function InsightsInfoListRow(props: InsightsInfoListItem) {
+function InsightsInfoRow(props: InsightsInfoListItem) {
   const row = (
     <ListItem
       aria-label={props.tooltip}
@@ -37,24 +38,25 @@ function InsightsInfoListRow(props: InsightsInfoListItem) {
         primary={props.label}
         slotProps={{
           primary: {
-            variant: 'caption',
-            sx: { fontWeight: 600, lineHeight: 1.2 },
+            variant: 'body2',
+            sx: { fontWeight: 500, lineHeight: 1.2 },
           },
         }}
         sx={{ minWidth: 0, mr: 1, my: 0 }}
       />
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flex: '0 0 auto', minWidth: 0 }}>
+        {props.valuePrefix}
         {props.href ? (
           <Link
             component={RouterLink}
             to={props.href}
-            variant="caption"
+            variant="body2"
             sx={{ lineHeight: 1.2, overflowWrap: 'anywhere', textAlign: 'right' }}
           >
             {props.value}
           </Link>
         ) : (
-          <Typography variant="caption" sx={{ lineHeight: 1.2, overflowWrap: 'anywhere', textAlign: 'right' }}>
+          <Typography variant="body2" sx={{ lineHeight: 1.2, overflowWrap: 'anywhere', textAlign: 'right' }}>
             {props.value}
           </Typography>
         )}
@@ -72,19 +74,7 @@ function InsightsInfoListRow(props: InsightsInfoListItem) {
 
 function InsightsInfoList(props: { title: string; description: string; items: InsightsInfoListItem[] }) {
   return (
-    <Box
-      sx={{
-        alignItems: 'flex-start',
-        border: 1,
-        borderColor: 'divider',
-        borderRadius: 1,
-        display: 'flex',
-        height: 1,
-        minWidth: 0,
-        p: 2,
-        width: 1,
-      }}
-    >
+    <OutlinedCard title={props.title} description={props.description}>
       <List
         disablePadding
         sx={{
@@ -95,19 +85,11 @@ function InsightsInfoList(props: { title: string; description: string; items: In
           width: 1,
         }}
       >
-        <Stack spacing={0.5} sx={{ mb: 0.5 }}>
-          <Typography variant="h6" sx={{ lineHeight: 1 }}>
-            {props.title}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1 }}>
-            {props.description}
-          </Typography>
-        </Stack>
         {props.items.map((item) => (
-          <InsightsInfoListRow key={item.label} {...item} />
+          <InsightsInfoRow key={item.label} {...item} />
         ))}
       </List>
-    </Box>
+    </OutlinedCard>
   );
 }
 

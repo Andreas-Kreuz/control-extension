@@ -28,6 +28,7 @@ end
 local fieldGetters = {
     line = function (t) return t:getLine() end,
     destination = function (t) return t:getDestination() end,
+    origin = function (t) return t:getOrigin() end,
     direction = function (t) return t:getDirection() end,
     nextStations = buildNextStationsDto,
 }
@@ -35,12 +36,14 @@ local fieldGetters = {
 local fieldPlaceholders = {
     line = "",
     destination = "",
+    origin = "",
     direction = "",
     nextStations = {},
 }
 
 function TransitTrainDtoFactory.createFullDto(transitTrain, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
+    ---@type table<string, any>
     local dto = {
         ceType = CE_TYPE,
         id = transitTrain.id,
@@ -57,6 +60,7 @@ end
 
 function TransitTrainDtoFactory.createPatchDto(transitTrain, dirtyFields, isSelected)
     local fieldPolicies = TransitOptionsRegistry.getFieldPublishPolicies("transitTrains")
+    ---@type table<string, any>
     local dto = {
         ceType = CE_TYPE,
         id = transitTrain.id,

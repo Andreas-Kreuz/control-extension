@@ -16,7 +16,7 @@ function TrainStatePublisher.syncState()
     if not TrainStatePublisher.enabled then return end
     if not initialized then TrainStatePublisher.initialize() end
 
-    return TrainPublisher.syncState()
+    TrainPublisher.syncState()
 end
 
 return TrainStatePublisher

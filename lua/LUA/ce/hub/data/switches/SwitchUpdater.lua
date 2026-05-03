@@ -3,6 +3,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchUpdater .
 local SwitchRegistry = require("ce.hub.data.switches.SwitchRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
+---@class SwitchUpdater
+---@field runUpdate fun():nil
 local SwitchUpdater = {}
 
 local EEPGetSwitch = _G.EEPGetSwitch or function () return 0 end

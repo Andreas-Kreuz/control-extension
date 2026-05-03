@@ -1,23 +1,9 @@
 import * as assert from 'node:assert/strict';
-import EepDataService from './eepdata/EepDataService';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import RoadDataService from './road/RoadDataService';
 import TransitService from './transit/TransitService';
-import {
-  AuxiliaryTrackRoom,
-  CeTypes,
-  ContactRoom,
-  IntersectionRoom,
-  IntersectionLaneRoom,
-  IntersectionTrafficLightRoom,
-  RoadModuleSettingRoom,
-  SignalRoom,
-  TransitLineDetailsRoom,
-  TransitLineNameRoom,
-  TransitModuleSettingRoom,
-  TransitStationDetailsRoom,
-  TransitTrainRoom,
-  detailRoomForCeType,
-} from '@ce/web-shared';
+import { CeTypes, CeTypeRoom, IntersectionListRoom, TransitLineListRoom } from '@ce/web-shared';
 
 async function runTest(name: string, fn: () => void | Promise<void>): Promise<void> {
   try {
@@ -38,56 +24,105 @@ function providerById(
   return provider;
 }
 
-function testDetailRoomMappings(): void {
-  assert.equal(detailRoomForCeType(CeTypes.HubSignal), SignalRoom);
-  assert.equal(detailRoomForCeType(CeTypes.HubContact), ContactRoom);
-  assert.equal(detailRoomForCeType(CeTypes.HubAuxiliaryTrack), AuxiliaryTrackRoom);
-  assert.equal(detailRoomForCeType(CeTypes.RoadIntersection), IntersectionRoom);
-  assert.equal(detailRoomForCeType(CeTypes.RoadModuleSetting), RoadModuleSettingRoom);
-  assert.equal(detailRoomForCeType(CeTypes.TransitLine), TransitLineDetailsRoom);
-  assert.equal(detailRoomForCeType(CeTypes.TransitLineName), TransitLineNameRoom);
-  assert.equal(detailRoomForCeType(CeTypes.TransitStation), TransitStationDetailsRoom);
-  assert.equal(detailRoomForCeType(CeTypes.TransitTrain), TransitTrainRoom);
-  assert.equal(detailRoomForCeType(CeTypes.TransitModuleSetting), TransitModuleSettingRoom);
+function getFilesRecursive(dir: string): string[] {
+  const files: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...getFilesRecursive(fullPath));
+    } else if (/\.(ts|tsx)$/.test(entry.name)) {
+      files.push(fullPath);
+    }
+  }
+  return files;
 }
 
-function testEepDataServiceDetailProvidersReturnSingleEntries(): void {
-  const service = new EepDataService({} as never);
-  service.getUpdaters()[0]?.updateFromState({
-    ceTypes: {
-      [CeTypes.HubSignal]: {
-        S1: { id: 'S1', position: 'P1', tag: 'Tag 1', waitingVehiclesCount: 0 },
-      },
-      [CeTypes.HubContact]: {
-        C1: { id: 'C1', luaFn: 'fn' },
-      },
-      [CeTypes.HubAuxiliaryTrack]: {
-        T1: { id: 'T1', reserved: true },
-      },
-    },
-  } as never);
+function testCeTypeRoomIsDynamic(): void {
+  const room = new CeTypeRoom(CeTypes.TransitStation);
+  const roomId = room.roomId('StationA');
 
-  const signalProvider = providerById(service, 'SignalRoom');
-  const contactProvider = providerById(service, 'ContactRoom');
-  const auxiliaryTrackProvider = providerById(service, 'AuxiliaryTrackRoom');
-
-  assert.deepEqual(JSON.parse(signalProvider.jsonCreator(SignalRoom.roomId('S1'))), {
-    id: 'S1',
-    position: 'P1',
-    tag: 'Tag 1',
-    waitingVehiclesCount: 0,
+  assert.deepEqual(CeTypeRoom.parseRoomId(roomId), {
+    ceType: CeTypes.TransitStation,
+    entryId: 'StationA',
   });
-  assert.deepEqual(JSON.parse(contactProvider.jsonCreator(ContactRoom.roomId('C1'))), {
-    id: 'C1',
-    luaFn: 'fn',
-  });
-  assert.deepEqual(JSON.parse(auxiliaryTrackProvider.jsonCreator(AuxiliaryTrackRoom.roomId('T1'))), {
-    id: 'T1',
-    reserved: true,
-  });
+  assert.equal(room.eventId('StationA'), "[DataChange - ce.mods.transit.Station: 'StationA']");
 }
 
-function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
+function testDomainRoomRegistryIsMinimal(): void {
+  const registryPath = path.resolve(process.cwd(), 'apps/web-shared/src/rooms/DomainRoomRegistry.ts');
+  const source = fs.readFileSync(registryPath, 'utf8');
+
+  assert.equal(source.includes('CeTypes'), false, 'DomainRoomRegistry must not statically map CeTypes');
+  assert.equal(source.includes('ApiNames'), false, 'DomainRoomRegistry must not wrap CeTypes via API name aliases');
+  assert.equal(
+    source.includes('detailRoomForCeType'),
+    false,
+    'DomainRoomRegistry must not expose static ceType mapping',
+  );
+}
+
+function testApiNameAliasesRemoved(): void {
+  const removedFileName = 'App' + 'ApiNames.ts';
+  assert.equal(fs.existsSync(path.resolve(process.cwd(), 'apps/web-shared/src', removedFileName)), false);
+}
+
+function testCeTypeRoomIsDataFeatureOnlyInWebApp(): void {
+  const appSrc = path.resolve(process.cwd(), 'apps/web-app/src');
+  const allowedRoot = path.resolve(appSrc, 'features/data') + path.sep;
+  const offenders = getFilesRecursive(appSrc).filter((file) => {
+    const source = fs.readFileSync(file, 'utf8');
+    return source.includes('CeTypeRoom') && !file.startsWith(allowedRoot);
+  });
+
+  assert.deepEqual(
+    offenders.map((file) => path.relative(process.cwd(), file)),
+    [],
+    'CeTypeRoom may only be used by apps/web-app/src/features/data/**',
+  );
+}
+
+function testAppDtoProvenanceIsServerSelectorOnly(): void {
+  const appDtoRoot = path.resolve(process.cwd(), 'apps/web-shared/src/dtos/app');
+  const forbiddenTerms = ['lua/LUA/', 'DtoFactory.lua', 'Produced by: lua'];
+  const maxProvenanceLineLength = 120;
+  const offenders: string[] = [];
+
+  getFilesRecursive(appDtoRoot)
+    .filter((file) => file.endsWith('AppDto.ts'))
+    .forEach((file) => {
+      const relativePath = path.relative(process.cwd(), file);
+      const source = fs.readFileSync(file, 'utf8');
+      const lines = source.split(/\r?\n/);
+
+      forbiddenTerms.forEach((term) => {
+        if (source.includes(term)) {
+          offenders.push(`${relativePath} contains ${term}`);
+        }
+      });
+
+      if (lines[0] !== '// App contract populated by:') {
+        offenders.push(`${relativePath} is missing the App contract provenance header`);
+      }
+
+      if (!lines[1]?.startsWith('// apps/web-server/')) {
+        offenders.push(`${relativePath} must point AppDto provenance to server code`);
+      }
+
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i];
+        if (!line?.startsWith('//')) {
+          break;
+        }
+        if (line.length > maxProvenanceLineLength) {
+          offenders.push(`${relativePath}:${i + 1} provenance line is too long`);
+        }
+      }
+    });
+
+  assert.deepEqual(offenders, []);
+}
+
+function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
   const roadService = new RoadDataService({} as never);
   roadService.getUpdaters()[0]?.updateFromState({
     ceTypes: {
@@ -100,75 +135,8 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
           nextSwitching: 'S2',
           ready: true,
           timeForGreen: 15,
-          staticCams: ['Cam 1'],
-          phases: [
-            {
-              id: 'Crossing 1-S1',
-              name: 'S1',
-              order: 1,
-              prio: 2,
-              greenPhaseSeconds: 15,
-              trafficLights: [{ signalId: 2, type: 'CAR', trafficSignalName: 'K1', use: 'TRAFFIC_ONLY' }],
-            },
-          ],
-        },
-      },
-      [CeTypes.RoadIntersectionLane]: {
-        L1: {
-          id: '1-L1',
-          intersectionId: 1,
-          name: 'Lane 1',
-          phase: 'GREEN',
-          vehicleMultiplier: 2,
-          eepSaveId: 5,
-          type: 'NORMAL',
-          countType: 'TRACKS',
-          waitingTrains: ['Train 1'],
-          waitingForGreenCyclesCount: 4,
-          directions: ['LEFT'],
-          switchings: ['S1'],
-          tracks: [10],
-        },
-      },
-      [CeTypes.RoadIntersectionTrafficLight]: {
-        TL1: {
-          id: 2,
-          signalId: 2,
-          trafficSignalName: 'K1',
-          use: 'TRAFFIC_ONLY',
-          modelId: 'road',
-          currentPhase: 'GREEN',
-          intersectionId: 1,
-          lightStructures: {
-            '0': {
-              structureRed: 'Red',
-              structureGreen: 'Green',
-              structureYellow: 'Yellow',
-              structureRequest: 'Request',
-            },
-          },
-          axisStructures: [
-            {
-              structureName: 'Axis',
-              axisName: 'Signal',
-              positionDefault: 0,
-              positionRed: 1,
-              positionGreen: 2,
-              positionYellow: 3,
-              positionPedestrian: 4,
-              positionRedYellow: 5,
-            },
-          ],
-        },
-      },
-      [CeTypes.RoadModuleSetting]: {
-        Show: {
-          name: 'Show',
-          category: 'Display',
-          description: 'Show',
-          eepFunction: 'fn',
-          type: 'boolean',
-          value: true,
+          staticCams: [],
+          phases: [],
         },
       },
     },
@@ -180,160 +148,39 @@ function testRoadAndTransitDetailProvidersReturnSingleEntries(): void {
       [CeTypes.TransitLine]: {
         L1: { id: 'L1', nr: '1', trafficType: 'BUS', lineSegments: [] },
       },
-      [CeTypes.TransitLineName]: {
-        L1: { id: 'L1', nr: '1', trafficType: 'BUS', lineSegments: [] },
-      },
-      [CeTypes.TransitStation]: {
-        StationA: {
-          id: 'StationA',
-          name: 'Station A',
-          platforms: [{ nr: 1, routes: ['10'] }],
-          queue: [{ trainName: 'Bus 1', line: '10', destination: 'Central', timeInMinutes: 3, platform: 1 }],
-        },
-      },
-      [CeTypes.TransitTrain]: {
-        TT1: {
-          id: 'TT1',
-          line: '1',
-          destination: 'Central',
-          nextStations: [{ station: { name: 'Station A', platform: '2' }, departureInMinutes: 3 }],
-        },
-      },
-      [CeTypes.TransitModuleSetting]: {
-        Next: {
-          name: 'Next',
-          category: 'Display',
-          description: 'Next departures',
-          eepFunction: 'fn',
-          type: 'boolean',
-          value: true,
-        },
-      },
     },
   } as never);
 
-  const intersectionProvider = providerById(roadService, 'IntersectionRoom');
-  const laneProvider = providerById(roadService, 'IntersectionLaneRoom');
-  const trafficLightProvider = providerById(roadService, 'IntersectionTrafficLightRoom');
-  const roadModuleSettingProvider = providerById(roadService, 'RoadModuleSettingRoom');
-  const lineProvider = providerById(transitService, 'TransitLineDetailsRoom');
-  const lineNameProvider = providerById(transitService, 'TransitLineNameRoom');
-  const stationProvider = providerById(transitService, 'TransitStationDetailsRoom');
-  const trainProvider = providerById(transitService, 'TransitTrainRoom');
-  const transitModuleSettingProvider = providerById(transitService, 'TransitModuleSettingRoom');
+  const intersectionListProvider = providerById(roadService, 'IntersectionListRoom');
+  const transitLineListProvider = providerById(transitService, 'TransitLineListRoom');
 
-  assert.deepEqual(JSON.parse(intersectionProvider.jsonCreator(IntersectionRoom.roomId('1'))), {
-    id: 1,
-    name: 'Crossing 1',
-    currentSwitching: 'S1',
-    manualSwitching: '',
-    nextSwitching: 'S2',
-    ready: true,
-    timeForGreen: 15,
-    staticCams: ['Cam 1'],
-    phases: [
-      {
-        id: 'Crossing 1-S1',
-        name: 'S1',
-        order: 1,
-        prio: 2,
-        greenPhaseSeconds: 15,
-        trafficLights: [{ signalId: 2, type: 'CAR', trafficSignalName: 'K1', use: 'TRAFFIC_ONLY' }],
-      },
-    ],
-  });
-  assert.deepEqual(JSON.parse(laneProvider.jsonCreator(IntersectionLaneRoom.roomId('1-L1'))), {
-    id: '1-L1',
-    intersectionId: 1,
-    name: 'Lane 1',
-    phase: 'GREEN',
-    vehicleMultiplier: 2,
-    eepSaveId: 5,
-    type: 'NORMAL',
-    countType: 'TRACKS',
-    waitingTrains: ['Train 1'],
-    waitingForGreenCyclesCount: 4,
-    directions: ['LEFT'],
-    switchings: ['S1'],
-    tracks: [10],
-  });
-  assert.deepEqual(JSON.parse(trafficLightProvider.jsonCreator(IntersectionTrafficLightRoom.roomId('2'))), {
-    id: 2,
-    signalId: 2,
-    trafficSignalName: 'K1',
-    use: 'TRAFFIC_ONLY',
-    modelId: 'road',
-    currentPhase: 'GREEN',
-    intersectionId: 1,
-    lightStructures: {
-      '0': {
-        structureRed: 'Red',
-        structureGreen: 'Green',
-        structureYellow: 'Yellow',
-        structureRequest: 'Request',
-      },
+  assert.deepEqual(JSON.parse(intersectionListProvider.jsonCreator(IntersectionListRoom.roomId('All'))), {
+    '1': {
+      id: 1,
+      name: 'Crossing 1',
+      currentSwitching: 'S1',
+      manualSwitching: '',
+      nextSwitching: 'S2',
+      ready: true,
+      timeForGreen: 15,
+      staticCams: [],
+      phases: [],
     },
-    axisStructures: [
-      {
-        structureName: 'Axis',
-        axisName: 'Signal',
-        positionDefault: 0,
-        positionRed: 1,
-        positionGreen: 2,
-        positionYellow: 3,
-        positionPedestrian: 4,
-        positionRedYellow: 5,
-      },
-    ],
   });
-  assert.deepEqual(JSON.parse(roadModuleSettingProvider.jsonCreator(RoadModuleSettingRoom.roomId('Show'))), {
-    name: 'Show',
-    category: 'Display',
-    description: 'Show',
-    eepFunction: 'fn',
-    type: 'boolean',
-    value: true,
-  });
-  assert.deepEqual(JSON.parse(lineProvider.jsonCreator(TransitLineDetailsRoom.roomId('L1'))), {
-    id: 'L1',
-    nr: '1',
-    trafficType: 'BUS',
-    lineSegments: [],
-  });
-  assert.deepEqual(JSON.parse(lineNameProvider.jsonCreator(TransitLineNameRoom.roomId('L1'))), {
-    id: 'L1',
-    nr: '1',
-    trafficType: 'BUS',
-    lineSegments: [],
-  });
-  assert.deepEqual(JSON.parse(stationProvider.jsonCreator(TransitStationDetailsRoom.roomId('StationA'))), {
-    id: 'StationA',
-    name: 'Station A',
-    platforms: [{ nr: 1, routes: ['10'] }],
-    queue: [{ trainName: 'Bus 1', line: '10', destination: 'Central', timeInMinutes: 3, platform: 1 }],
-  });
-  assert.deepEqual(JSON.parse(trainProvider.jsonCreator(TransitTrainRoom.roomId('TT1'))), {
-    id: 'TT1',
-    line: '1',
-    destination: 'Central',
-    nextStations: [{ station: { name: 'Station A', platform: '2' }, departureInMinutes: 3 }],
-  });
-  assert.deepEqual(JSON.parse(transitModuleSettingProvider.jsonCreator(TransitModuleSettingRoom.roomId('Next'))), {
-    name: 'Next',
-    category: 'Display',
-    description: 'Next departures',
-    eepFunction: 'fn',
-    type: 'boolean',
-    value: true,
-  });
+  assert.deepEqual(JSON.parse(transitLineListProvider.jsonCreator(TransitLineListRoom.roomId('All'))), [
+    { id: 'L1', nr: '1', trafficType: 'BUS', lineSegments: [] },
+  ]);
 }
 
 export async function run(): Promise<void> {
-  await runTest('detail room mapping covers all supported ceTypes', testDetailRoomMappings);
-  await runTest('eep data detail rooms return single entries', testEepDataServiceDetailProvidersReturnSingleEntries);
+  await runTest('ceType rooms are created dynamically', testCeTypeRoomIsDynamic);
+  await runTest('domain room registry is minimal', testDomainRoomRegistryIsMinimal);
+  await runTest('API name aliases are removed', testApiNameAliasesRemoved);
+  await runTest('CeTypeRoom is only used by the Web App data feature', testCeTypeRoomIsDataFeatureOnlyInWebApp);
+  await runTest('AppDto provenance points to server selectors only', testAppDtoProvenanceIsServerSelectorOnly);
   await runTest(
-    'road and transit detail rooms return single entries',
-    testRoadAndTransitDetailProvidersReturnSingleEntries,
+    'road and transit feature rooms return AppDto collections',
+    testRoadAndTransitFeatureRoomsReturnAppDtoCollections,
   );
 }
 

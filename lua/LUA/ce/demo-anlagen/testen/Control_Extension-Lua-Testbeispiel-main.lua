@@ -9,21 +9,21 @@ zaehler = 0
 geladen, loadedZaehler = EEPLoadData(1)
 if geladen then
     zaehler = loadedZaehler
-    print(zaehler .. " (geladen)")
+    print(string.format("%s (geladen)", zaehler))
 end
 
 -- Ein Fahrzeug verlässt den Bereich vor dem Signal
 function zaehleHoch()
     zaehler = zaehler + 1
     EEPSaveData(1, zaehler)
-    print(zaehler .. " erwarte: " .. ((zaehler < 2) and "rot" or "gruen"))
+    print(string.format("%s erwarte: %s", zaehler, ((zaehler < 2) and "rot" or "gruen")))
 end
 
 -- Ein Fahrzeug verlässt den Bereich vor dem Signal
 function zaehleRunter()
     zaehler = zaehler - 1
     EEPSaveData(1, zaehler)
-    print(zaehler .. " erwarte: " .. ((zaehler < 2) and "rot" or "gruen"))
+    print(string.format("%s erwarte: %s", zaehler, ((zaehler < 2) and "rot" or "gruen")))
 end
 
 -- Bei weniger als zwei Fahrzeigen im Bereich setzen wir die Ampel auf rot

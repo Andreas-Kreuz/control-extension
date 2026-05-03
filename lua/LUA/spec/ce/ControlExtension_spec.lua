@@ -2,8 +2,10 @@ insulate("ControlExtension", function ()
     local function clearModule(name)
         package.loaded[name] = nil
     end
+    local printStub
 
     before_each(function ()
+        printStub = stub(_G, "print")
         clearModule("ce.ControlExtension")
         clearModule("ce.hub.ControlExtensionHub")
         clearModule("ce.hub.ModuleRegistry")
@@ -14,52 +16,58 @@ insulate("ControlExtension", function ()
         require("ce.hub.eep.EepSimulator")
     end)
 
+    after_each(function ()
+        printStub:revert()
+        printStub = nil
+    end)
+
     it("delegates registration to ModuleRegistry and runtime control to ControlExtensionHub", function ()
         local ControlExtensionHub = require("ce.hub.ControlExtensionHub")
         local ModuleRegistry = require("ce.hub.ModuleRegistry")
         local ControlExtension = require("ce.ControlExtension")
         local calls = {}
-        local oldRegisterModules = ModuleRegistry.registerModules
-        local oldInitTasks = ControlExtensionHub.initTasks
-        local oldRunTasks = ControlExtensionHub.runTasks
-        local oldSetDebug = ControlExtensionHub.setDebug
-        local oldSetPause = ControlExtensionHub.setPauseEepDuringInitialization
-        local oldActivateServer = ControlExtensionHub.activateServer
-        local oldDeactivateServer = ControlExtensionHub.deactivateServer
-        local oldSetOptions = ControlExtensionHub.setOptions
 
-        ModuleRegistry.registerModules = function (...)
+        local registerModulesStub = stub(ModuleRegistry, "registerModules", function (...)
             calls.registerModules = { ... }
             return "registered"
-        end
-        ControlExtensionHub.initTasks = function ()
+        end)
+        local initTasksStub = stub(ControlExtensionHub, "initTasks", function ()
             calls.initTasks = true
             return "initialized"
-        end
-        ControlExtensionHub.runTasks = function (cycleCount)
+        end)
+        local runTasksStub = stub(ControlExtensionHub, "runTasks", function (cycleCount)
             calls.runTasks = cycleCount
             return "ran"
-        end
-        ControlExtensionHub.setDebug = function (debug)
+        end)
+        local setDebugStub = stub(ControlExtensionHub, "setDebug", function (debug)
             calls.setDebug = debug
             return debug
-        end
-        ControlExtensionHub.setPauseEepDuringInitialization = function (pauseEepDuringInitialization)
-            calls.setPause = pauseEepDuringInitialization
-            return pauseEepDuringInitialization
-        end
-        ControlExtensionHub.activateServer = function ()
+        end)
+        local setPauseStub = stub(ControlExtensionHub,
+                                  "setPauseEepDuringInitialization", function (pauseEepDuringInitialization)
+                                      calls.setPause = pauseEepDuringInitialization
+                                      return pauseEepDuringInitialization
+                                  end)
+        local activateServerStub = stub(ControlExtensionHub, "activateServer", function ()
             calls.activateServer = true
             return "activated"
-        end
-        ControlExtensionHub.deactivateServer = function ()
+        end)
+        local deactivateServerStub = stub(ControlExtensionHub, "deactivateServer", function ()
             calls.deactivateServer = true
             return "deactivated"
-        end
-        ControlExtensionHub.setOptions = function (options)
+        end)
+        local setOptionsStub = stub(ControlExtensionHub, "setOptions", function (options)
             calls.setOptions = options
             return options
-        end
+        end)
+        finally(function () registerModulesStub:revert() end)
+        finally(function () initTasksStub:revert() end)
+        finally(function () runTasksStub:revert() end)
+        finally(function () setDebugStub:revert() end)
+        finally(function () setPauseStub:revert() end)
+        finally(function () activateServerStub:revert() end)
+        finally(function () deactivateServerStub:revert() end)
+        finally(function () setOptionsStub:revert() end)
 
         local firstModule = { name = "spec.FirstModule" }
         local secondModule = { name = "spec.SecondModule" }
@@ -92,15 +100,6 @@ insulate("ControlExtension", function ()
         assert.is_nil(ControlExtension.unregisterModules)
         assert.is_nil(ControlExtension.getModuleNames)
         assert.is_nil(ControlExtension.init)
-
-        ModuleRegistry.registerModules = oldRegisterModules
-        ControlExtensionHub.initTasks = oldInitTasks
-        ControlExtensionHub.runTasks = oldRunTasks
-        ControlExtensionHub.setDebug = oldSetDebug
-        ControlExtensionHub.setPauseEepDuringInitialization = oldSetPause
-        ControlExtensionHub.activateServer = oldActivateServer
-        ControlExtensionHub.deactivateServer = oldDeactivateServer
-        ControlExtensionHub.setOptions = oldSetOptions
     end)
 
     it("keeps the minimal startup path optional", function ()

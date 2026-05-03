@@ -3,6 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructurePubl
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+
+---@class StructurePublisher
+---@field syncState fun(options: table|nil):nil
 local StructurePublisher = {}
 
 local function hasPayloadFields(dto)
@@ -18,7 +21,7 @@ function StructurePublisher.syncState()
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
     if not HubOptionsRegistry.isPublishEnabled("structures") then
         StructureRegistry.clearPendingChanges()
-        return {}
+        return
     end
 
     local addedIds = StructureRegistry.getAddedIds()
@@ -35,7 +38,7 @@ function StructurePublisher.syncState()
     end
 
     for structureId in pairs(removedIds) do
-        DataChangeBus.fireDataRemoved(StructureDtoFactory.createRefDto(structureId))
+        DataChangeBus.fireDataRemoved(StructureDtoFactory.createRemovalDto(structureId))
     end
 
     for structureId, structure in pairs(StructureRegistry.getAll()) do
@@ -59,7 +62,6 @@ function StructurePublisher.syncState()
     end
 
     StructureRegistry.clearPendingChanges()
-    return {}
 end
 
 return StructurePublisher

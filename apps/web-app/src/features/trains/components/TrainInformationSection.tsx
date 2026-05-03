@@ -1,8 +1,8 @@
-import { TrainListDto } from '@ce/web-shared';
+﻿import { TrainListAppDto } from '@ce/web-shared';
 import TrainInformationView from './TrainInformationView';
 import useTrainDynamic from '../hooks/useTrainDynamic';
 
-function TrainInformationSection({ train }: { train: TrainListDto }) {
+function TrainInformationSection({ train }: { train: TrainListAppDto }) {
   const trainDynamic = useTrainDynamic(train.id);
   return (
     <TrainInformationView

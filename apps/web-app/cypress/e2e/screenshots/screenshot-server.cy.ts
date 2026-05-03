@@ -1,4 +1,4 @@
-import EepSimulator from '../../test-helpers/eep-simulator';
+﻿import EepSimulator from '../../test-helpers/eep-simulator';
 import { createScreenshots, prepareForScreenshot } from './createScreenshots';
 import { generatedScreenshotPath } from './generatedScreenshotPath';
 
@@ -86,7 +86,7 @@ function tests(size: string, _closestSelector: string, simulator: EepSimulator) 
       simulator.eepEvent('eep-version-complete.json');
       cy.reload();
       cy.contains('Bereitgestellte Daten');
-      cy.contains('ce.server.ApiEntries');
+      cy.contains('server.api-entries');
       cy.contains('ce.hub.EepVersion');
       cy.contains('aus 2 Events');
       cy.get('#choose-dir-current-dir').invoke('text', 'C:\\Trend\\EEP18');

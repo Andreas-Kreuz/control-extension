@@ -1,10 +1,12 @@
-import { SettingLuaDto } from '../../ce/dto/settings/SettingLuaDto';
+﻿import { SettingLuaDto } from '../../ce/dto/settings/SettingLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
-import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
+import { CeTypes, SettingAppDto, SettingsAppDto } from '@ce/web-shared';
 
+// Maps Lua transit setting DTOs into SettingsAppDto.
+// Lua input: ce.mods.transit.ModuleSetting.
 export default class TransitSettingsSelector {
   private lastState?: fromEepData.State;
-  private settings: SettingsDto = { moduleName: 'Public Transport', settings: [] };
+  private settings: SettingsAppDto = { moduleName: 'Public Transport', settings: [] };
 
   updateFromState(state: fromEepData.State): void {
     this.settings = { moduleName: 'Public Transport', settings: [] };
@@ -19,7 +21,7 @@ export default class TransitSettingsSelector {
       SettingLuaDto<unknown>
     >;
     Object.values(settingsDict).forEach((settingDto: SettingLuaDto<unknown>) => {
-      const setting: SettingDto<unknown> = {
+      const setting: SettingAppDto<unknown> = {
         name: settingDto.name,
         category: settingDto.category,
         description: settingDto.description,
@@ -32,6 +34,6 @@ export default class TransitSettingsSelector {
   }
 
   getSettings = () => this.settings;
-  getSetting = (name: string): SettingDto<unknown> | undefined =>
+  getSetting = (name: string): SettingAppDto<unknown> | undefined =>
     this.settings.settings.find((setting) => setting.name === name);
 }

@@ -1,5 +1,16 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockModel ...") end
 
+-- Model metadata extraction: project-docs/ai/guides/lua-rollingstock-models.md
+---@class RollingStockModel
+---@field new fun(self: RollingStockModel, o?: table):RollingStockModel
+---@field setLine fun(self: RollingStockModel, rollingStockName: string, line: string):nil
+---@field setDestination fun(self: RollingStockModel, rollingStockName: string, destination: string):nil
+---@field setOrigin fun(self: RollingStockModel, rollingStockName: string, origin: string):nil
+---@field setNextStop fun(self: RollingStockModel, rollingStockName: string, nextStop: string):nil
+---@field setStations fun(self: RollingStockModel, rollingStockName: string, stations: string):nil
+---@field setWagonNr fun(self: RollingStockModel, rollingStockName: string, wagonNumber: string):nil
+---@field openDoors fun(self: RollingStockModel, rollingStockName: string):nil
+---@field closeDoors fun(self: RollingStockModel, rollingStockName: string):nil
 local RollingStockModel = {}
 
 function RollingStockModel:new(o)
@@ -20,6 +31,20 @@ function RollingStockModel:setDestination(rollingStockName, destination)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
     assert(type(destination) == "string", "Need 'destination' as string")
+    -- Overwrite me
+end
+
+function RollingStockModel:setOrigin(rollingStockName, origin)
+    assert(type(self) == "table", "Call this method with ':'")
+    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+    assert(type(origin) == "string", "Need 'origin' as string")
+    -- Overwrite me
+end
+
+function RollingStockModel:setNextStop(rollingStockName, nextStop)
+    assert(type(self) == "table", "Call this method with ':'")
+    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+    assert(type(nextStop) == "string", "Need 'nextStop' as string")
     -- Overwrite me
 end
 

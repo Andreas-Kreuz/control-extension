@@ -37,7 +37,7 @@ function AkModellInstaller:generatePackage(outputDirectory)
         for path, fileName in pairs(modelPackage.modelPaths) do
             if not os.execute([[copy "]] .. path .. [[" "]] .. modelPackageDirectory .. "\\" .. fileName ..
                     [[" >nul]]) then
-                print([[copy "]] .. path .. [[" "]] .. modelPackageDirectory .. "\\" .. fileName .. [["]])
+                print(string.format("copy \"%s\" \"%s\\%s\"", path, modelPackageDirectory, fileName))
                 os.execute([[copy "]] .. path .. [[" "]] .. modelPackageDirectory .. "\\" .. fileName .. [[" ]])
                 os.exit(1)
             end

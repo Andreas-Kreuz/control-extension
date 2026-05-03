@@ -1,9 +1,9 @@
-import Box from '@mui/material/Box';
+﻿import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
-import AppCaption from '../../../shared/components/AppCaption';
+import TypeCaption from '../../../shared/components/TypeCaption';
 import type Intersection from '../model/Intersection';
 import type { IntersectionPhase, IntersectionPhaseTrafficLight } from '../model/Intersection';
 
@@ -78,7 +78,7 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
   if (phases.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="textSecondary">
           Keine Phasen vorhanden.
         </Typography>
       </Box>
@@ -87,7 +87,7 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
 
   return (
     <Stack sx={{ px: 2, pt: 1, pb: 2, minWidth: 0 }}>
-      <AppCaption>Signalzeitenplan</AppCaption>
+      <TypeCaption>Signalzeitenplan</TypeCaption>
       <Box sx={{ mt: 1, overflowX: 'auto' }}>
         <Box sx={{ minWidth: rowLabelWidth + phases.reduce((sum, phase) => sum + phaseWidth(phase), 0) }}>
           <Box sx={{ display: 'flex', ml: `${rowLabelWidth}px` }}>
@@ -107,7 +107,7 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
                   <Typography variant="caption" sx={{ display: 'block', fontWeight: 700 }} noWrap>
                     {phase.name}
                   </Typography>
-                  <Typography variant="caption" color={stateLabel ? 'primary' : 'text.secondary'} noWrap>
+                  <Typography variant="caption" color={stateLabel ? 'primary' : 'textSecondary'} noWrap>
                     {stateLabel ?? `${phase.greenPhaseSeconds}s`}
                   </Typography>
                 </Box>

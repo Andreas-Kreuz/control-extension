@@ -193,6 +193,7 @@ function HubOptionDefaults.create()
                     targetSpeed = "always",
                     couplingFront = "always",
                     couplingRear = "always",
+                    lights = "always",
                     active = "always",
                     inTrainyard = "always",
                     trainyardId = "always"
@@ -207,6 +208,7 @@ function HubOptionDefaults.create()
                     targetSpeed = "oninterest",
                     couplingFront = "oninterest",
                     couplingRear = "oninterest",
+                    lights = "oninterest",
                     active = "oninterest",
                     inTrainyard = "oninterest",
                     trainyardId = "oninterest"
@@ -230,6 +232,7 @@ function HubOptionDefaults.create()
                     trackType = "always",
                     hookStatus = "always",
                     hookGlueMode = "always",
+                    axisValues = "always",
                     surfaceTexts = "oninterest",
                     trackId = "oninterest",
                     trackDistance = "oninterest",
@@ -242,6 +245,7 @@ function HubOptionDefaults.create()
                     orientationForward = "always",
                     smoke = "always",
                     active = "always",
+                    axisNamesKnown = "always",
                     rotX = "oninterest",
                     rotY = "oninterest",
                     rotZ = "oninterest"
@@ -260,7 +264,10 @@ function HubOptionDefaults.create()
                     trackType = "always",
                     hookStatus = "always",
                     hookGlueMode = "always",
+                    axisNames = "always",
+                    axisValues = "always",
                     surfaceTexts = "always",
+                    textureNames = "always",
                     trackId = "oninterest",
                     trackDistance = "oninterest",
                     trackDirection = "oninterest",
@@ -272,10 +279,11 @@ function HubOptionDefaults.create()
                     orientationForward = "oninterest",
                     smoke = "oninterest",
                     active = "oninterest",
+                    axisNamesKnown = "always",
                     rotX = "oninterest",
                     rotY = "oninterest",
                     rotZ = "oninterest",
-                    xmlModel = "oninterest"
+                    xmlModel = "always"
                 }
             }
         }

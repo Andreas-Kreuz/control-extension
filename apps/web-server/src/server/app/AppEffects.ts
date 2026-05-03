@@ -11,15 +11,15 @@ import { registerLogMod } from '../mod/log/registerLogMod';
 import TransitService from '../mod/transit/TransitService';
 import TrainUpdateService from '../mod/train/TrainUpdateService';
 import VersionService from '../mod/version/VersionService';
-import ScenarioService from '../mod/scenario/ScenarioService';
-import TimeService from '../mod/time/TimeService';
-import WeatherService from '../mod/weather/WeatherService';
 import EepDataService from '../mod/eepdata/EepDataService';
 import RoadDataService from '../mod/road/RoadDataService';
+import ScenarioService from '../mod/scenario/ScenarioService';
 import AppConfig from './config/AppConfig';
 import AppReducer from './config/AppData';
 import CommandLineParser from './config/CommandLineParser';
-import { RoomEvent, ServerInfoEvent, SettingsEvent } from '@ce/web-shared';
+import UpdateCheckService, { UpdateStatusRoomElement } from './update/UpdateCheckService';
+import { RoomEvent, ServerInfoEvent, SettingsEvent, UpdateStatusRoom } from '@ce/web-shared';
+import type { UpdateStatusAppDto } from '@ce/web-shared';
 import * as express from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -34,6 +34,8 @@ export default class AppEffects {
   private interestSyncService: InterestSyncService | null = null;
   private store = new AppReducer();
   private TESTMODE = false;
+  private updateCheckService: UpdateCheckService;
+  private updateSearchStarted = false;
 
   // Statistic data
   private statistics: ServerStatisticsService;
@@ -47,6 +49,8 @@ export default class AppEffects {
     private serverConfigPath: string,
   ) {
     this.serverConfigFile = path.resolve(this.serverConfigPath, 'settings.json');
+    this.updateCheckService = new UpdateCheckService({ cacheDirectory: this.serverConfigPath });
+    this.updateCheckService.onStatusChanged((status) => this.emitUpdateStatus(status));
 
     // Start collecting statistic data
     this.statistics = new ServerStatisticsService();
@@ -70,6 +74,9 @@ export default class AppEffects {
         if (this.debug)
           console.log('🟨 EMIT to ' + socket.id + ': ' + SettingsEvent.PairingRequired, this.getPairingRequired());
         socket.emit(SettingsEvent.PairingRequired, JSON.stringify(this.getPairingRequired()));
+        if (this.debug)
+          console.log('🟨 EMIT to ' + socket.id + ': ' + SettingsEvent.SearchForUpdates, this.getSearchForUpdates());
+        socket.emit(SettingsEvent.SearchForUpdates, JSON.stringify(this.getSearchForUpdates()));
       }
 
       if (rooms.room === ServerInfoEvent.Room) {
@@ -78,6 +85,16 @@ export default class AppEffects {
         }
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + ServerInfoEvent.Room, this.getHostname());
         socket.emit(ServerInfoEvent.StatisticsUpdate, this.statistics);
+      }
+
+      if (rooms.room === UpdateStatusRoom.roomId(UpdateStatusRoomElement)) {
+        if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {
+          return;
+        }
+        socket.emit(UpdateStatusRoom.eventId(UpdateStatusRoomElement), JSON.stringify(this.getUpdateStatus()));
+        if (this.getSearchForUpdates()) {
+          void this.updateCheckService.refresh();
+        }
       }
     });
 
@@ -96,6 +113,31 @@ export default class AppEffects {
       if (this.debug) console.log(SettingsEvent.ChangePairingRequired + '"' + pairingRequired + '"');
       this.changePairingRequired(Boolean(pairingRequired));
     });
+
+    socket.on(SettingsEvent.ChangeSearchForUpdates, (searchForUpdates: boolean) => {
+      if (!this.socketService.ensureAdminSocket(socket, SettingsEvent.ChangeSearchForUpdates)) {
+        return;
+      }
+      if (this.debug) console.log(SettingsEvent.ChangeSearchForUpdates + '"' + searchForUpdates + '"');
+      this.changeSearchForUpdates(Boolean(searchForUpdates));
+    });
+  }
+
+  private emitUpdateStatus(status: UpdateStatusAppDto): void {
+    if (!this.getSearchForUpdates()) {
+      return;
+    }
+    this.io
+      .to(UpdateStatusRoom.roomId(UpdateStatusRoomElement))
+      .emit(UpdateStatusRoom.eventId(UpdateStatusRoomElement), JSON.stringify(status));
+  }
+
+  private getUpdateStatus(): UpdateStatusAppDto {
+    if (!this.getSearchForUpdates()) {
+      return { state: 'current', currentVersion: this.updateCheckService.getStatus().currentVersion };
+    }
+
+    return this.updateCheckService.getStatus();
   }
 
   private loadConfig(): void {
@@ -113,8 +155,12 @@ export default class AppEffects {
       console.log(error);
     }
     appConfig.pairingRequired = appConfig.pairingRequired !== false;
+    appConfig.searchForUpdates = appConfig.searchForUpdates === true;
     this.store.setAppConfig(appConfig);
     this.socketService.setPairingRequired(this.store.getPairingRequired());
+    if (this.store.getSearchForUpdates()) {
+      this.startUpdateSearch();
+    }
   }
 
   private saveConfig(config: AppConfig): void {
@@ -149,11 +195,42 @@ export default class AppEffects {
     return this.store.getPairingRequired();
   }
 
+  public getSearchForUpdates(): boolean {
+    return this.store.getSearchForUpdates();
+  }
+
   public changePairingRequired(pairingRequired: boolean): void {
     this.store.setPairingRequired(pairingRequired);
     this.socketService.setPairingRequired(pairingRequired);
     this.saveConfig(this.store.getAppConfig());
     this.io.to(SettingsEvent.Room).emit(SettingsEvent.PairingRequired, JSON.stringify(pairingRequired));
+  }
+
+  public changeSearchForUpdates(searchForUpdates: boolean): void {
+    this.store.setSearchForUpdates(searchForUpdates);
+    this.saveConfig(this.store.getAppConfig());
+    this.io.to(SettingsEvent.Room).emit(SettingsEvent.SearchForUpdates, JSON.stringify(searchForUpdates));
+
+    if (searchForUpdates) {
+      this.startUpdateSearch();
+      void this.updateCheckService.refresh();
+      return;
+    }
+
+    this.updateCheckService.stop();
+    this.updateSearchStarted = false;
+    this.io
+      .to(UpdateStatusRoom.roomId(UpdateStatusRoomElement))
+      .emit(UpdateStatusRoom.eventId(UpdateStatusRoomElement), JSON.stringify(this.getUpdateStatus()));
+  }
+
+  private startUpdateSearch(): void {
+    if (this.updateSearchStarted) {
+      return;
+    }
+
+    this.updateSearchStarted = true;
+    this.updateCheckService.start();
   }
 
   public changeEepDirectory(eepDir: string) {
@@ -227,8 +304,6 @@ export default class AppEffects {
     eepDataEffects.registerDomainRoom(new TransitService(this.io));
     eepDataEffects.registerDomainRoom(new VersionService(this.io));
     eepDataEffects.registerDomainRoom(new ScenarioService(this.io));
-    eepDataEffects.registerDomainRoom(new TimeService(this.io));
-    eepDataEffects.registerDomainRoom(new WeatherService(this.io));
     eepDataEffects.registerDomainRoom(new EepDataService(this.io));
     eepDataEffects.registerDomainRoom(new RoadDataService(this.io));
 

@@ -76,8 +76,6 @@ function pointsToString(points: AreaPoint[], height: number) {
 }
 
 function StatisticsDiagram(props: {
-  title: string;
-  description: string;
   samples: TimeDesc[][];
   initializationSamples: TimeDesc[][];
   maxValue?: number;
@@ -116,25 +114,14 @@ function StatisticsDiagram(props: {
   return (
     <Box
       sx={{
-        border: 1,
-        borderColor: 'divider',
-        borderRadius: 1,
         minWidth: 0,
+        mt: 2,
         overflow: 'hidden',
-        p: 2,
         width: 1,
         height: 1,
       }}
     >
       <Stack spacing={1.25} sx={{ height: 1, minWidth: 0, width: 1 }}>
-        <Stack spacing={0.5} sx={{ mb: 1 }}>
-          <Typography variant="h6" sx={{ lineHeight: 1 }}>
-            {props.title}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1 }}>
-            {props.description}
-          </Typography>
-        </Stack>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'stretch', width: 1 }}>
           <Box sx={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden' }}>
             <svg width="100%" height="180" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">

@@ -55,12 +55,14 @@ function TransitOptionDefaults.create()
                 fieldUpdates = {
                     line = "always",
                     destination = "always",
+                    origin = "always",
                     direction = "always",
                     nextStations = "always"
                 },
                 fieldPublish = {
                     line = "always",
                     destination = "always",
+                    origin = "always",
                     direction = "always",
                     nextStations = "oninterest"
                 }

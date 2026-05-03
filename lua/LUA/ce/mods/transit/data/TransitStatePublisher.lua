@@ -14,6 +14,10 @@ local enabled = true
 local initialized = false
 TransitStatePublisher.name = "ce.mods.transit.data.TransitStatePublisher"
 
+local function isSelectedModuleSetting(setting)
+    return InterestSyncRegistry.isSelected(TransitCeTypes.ModuleSetting, tostring(setting.name))
+end
+
 function TransitStatePublisher.initialize()
     if not enabled or initialized then return end
     initialized = true
@@ -40,13 +44,9 @@ function TransitStatePublisher.syncState()
     end
     if TransitOptionsRegistry.isPublishEnabled("moduleSettings") then
         DataChangeBus.fireListChange(TransitDtoFactory.createModuleSettingDtoList(data.publicTransportSettings,
-                                                                                  function (setting)
-            return InterestSyncRegistry.isSelected(TransitCeTypes.ModuleSetting, tostring(setting.name))
-        end))
+                                                                                  isSelectedModuleSetting))
     end
     LineRegistry.fireChangeLinesEvent()
-
-    return {}
 end
 
 return TransitStatePublisher

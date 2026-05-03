@@ -5,7 +5,7 @@ Für die übergreifende Architektur aller Bausteine siehe [ARCHITECTURE.md](../.
 
 ## Übersicht
 
-Der Lua-Teil besteht aus zwei unabhängig nutzbaren Schichten:
+Der Lua-Teil besteht aus zwei Schichten:
 
 ```text
 EEP-Programm (Lua 5.3)
@@ -22,7 +22,7 @@ EEP-Programm (Lua 5.3)
 ## Lua Hub (`ce/hub/`)
 
 Der Lua Hub ist der Laufzeitkern. Er registriert CeModule, ruft diese in jedem EEP-Zyklus auf
-und erfasst dabei reine EEP-Daten.
+und erfasst dabei reine EEP-Daten. Außerdem orchestriert er die Data Bridge.
 
 ### Verantwortung
 

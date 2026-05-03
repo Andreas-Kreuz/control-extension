@@ -16,7 +16,7 @@ und ist der einzige Baustein ohne eigene Unabhängigkeit — sie ist reiner Kons
 Control Extension Server
     | Socket.IO-Events / REST-API
     v
-*Dto (aus apps/web-shared)         stabiler Eingangsvertrag
+*AppDto (aus apps/web-shared)      stabiler Eingangsvertrag
     |
     | ggf. lokale Transformation
     v
@@ -30,9 +30,10 @@ React-Komponenten                  Anzeige und Bedienung
 
 ## Eingangsvertrag
 
-Die Web App empfängt ausschließlich `*Dto`-Objekte, die in `apps/web-shared` definiert sind.
-Dieser Vertrag ist stabil: Lua-interne Änderungen werden durch Server-Selectors abgefangen
-und erreichen die Web App nicht direkt.
+Die Web App empfängt ausschließlich `*AppDto`-Objekte, die in `apps/web-shared/src/dtos/app`
+definiert sind. Dieser Vertrag ist stabil: Lua-interne Änderungen werden durch Server-Selectors
+abgefangen und erreichen die Web App nicht direkt. Nicht-generischer Web-App-Code abonniert
+stabile App-Room/API-Namen, keine Lua-`ceType`-Strings.
 
 Für das gemeinsame Datenmodell siehe
 [apps/web-shared/ARCHITECTURE_SHARED.md](../web-shared/ARCHITECTURE_SHARED.md).
@@ -53,7 +54,7 @@ oder Umstrukturierung für die Darstellung sinnvoll ist.
 ## Datenhaltungsregel
 
 Die Web App hält Daten lokal nur dann vor, wenn eine view-spezifische Transformation
-gegenüber dem empfangenen `*Dto` notwendig ist. Andernfalls werden `*Dto`-Objekte
+gegenüber dem empfangenen `*AppDto` notwendig ist. Andernfalls werden `*AppDto`-Objekte
 direkt in den Komponenten verwendet.
 
 ---

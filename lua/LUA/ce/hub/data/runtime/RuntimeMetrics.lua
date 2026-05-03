@@ -1,9 +1,21 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeMetrics ...") end
 
+---@class RuntimeMetricEntry
+---@field id string
+---@field count number
+---@field time number
+---@field lastTime number
+
 ---@class RuntimeMetrics
+---@field storeRunTime fun(group: string, time: number):nil
+---@field keepGroup fun(group: string):nil
+---@field get fun(group: string):RuntimeMetricEntry
+---@field getAll fun():table<string, RuntimeMetricEntry>
+---@field reset fun(group: string):nil
+---@field resetAll fun():nil
 local RuntimeMetrics = {}
 
----@type table<string, RuntimeEntry>
+---@type table<string, RuntimeMetricEntry>
 local runtimeData = {}
 local groupsToKeep = {}
 
@@ -13,7 +25,7 @@ function RuntimeMetrics.storeRunTime(group, time)
     -- collect and sum runtime data, needs rework
     if not runtimeData then runtimeData = {} end
     if not runtimeData[group] then
-        ---@class RuntimeEntry
+        ---@type RuntimeMetricEntry
         local runTimeEntry = { id = group, count = 0, time = 0, lastTime = 0 }
         runtimeData[group] = runTimeEntry
     end

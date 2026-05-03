@@ -4,6 +4,7 @@
 
 - Keep changes local and minimal — many modules are stateful; small targeted patches beat broad refactorings
 - No unnecessary renames or formatting sweeps
+- Prefer human-readable code over clever abstractions: use descriptive names, straightforward control flow, and small domain-focused helpers. Avoid generic helpers, deep indirection, and premature abstraction unless they clearly reduce real complexity.
 - Do not reset existing local user changes
 - Markdown files must use correct German umlauts — ASCII substitutions (`ae`, `oe`, `ue`) only for Lua identifiers
 - Generated build artifacts (`*.tsbuildinfo`) must not be committed; check `.gitignore` for new cache files

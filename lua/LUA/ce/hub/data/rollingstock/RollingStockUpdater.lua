@@ -39,11 +39,17 @@ function RollingStockUpdater.runUpdate()
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) then
                     local ok, couplingFront = EEPRollingstockGetCouplingFront(rs.rollingStockName)
-                    if ok then rs:setCouplingFront(couplingFront) end
+                    if ok then
+                        ---@cast couplingFront number
+                        rs:setCouplingFront(couplingFront)
+                    end
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) then
                     local ok, couplingRear = EEPRollingstockGetCouplingRear(rs.rollingStockName)
-                    if ok then rs:setCouplingRear(couplingRear) end
+                    if ok then
+                        ---@cast couplingRear number
+                        rs:setCouplingRear(couplingRear)
+                    end
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "length", isSelected) then
                     local _, length = EEPRollingstockGetLength(rs.rollingStockName)
@@ -71,7 +77,10 @@ function RollingStockUpdater.runUpdate()
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "hookGlueMode", isSelected)
                     and EEPRollingstockGetHookGlue then
                     local ok, hookGlueMode = EEPRollingstockGetHookGlue(rs.rollingStockName)
-                    if ok then rs:setHookGlueMode(hookGlueMode) end
+                    if ok then
+                        ---@cast hookGlueMode number
+                        rs:setHookGlueMode(hookGlueMode)
+                    end
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "orientationForward", isSelected)
                     and EEPRollingstockGetOrientation then
@@ -88,6 +97,9 @@ function RollingStockUpdater.runUpdate()
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "surfaceTexts", isSelected) then
                     rs:updateTextureTexts()
                 end
+                if isSelected or SyncPolicy.shouldUpdateField(fieldPolicies, "axisValues", isSelected) then
+                    rs:updateAxisValues()
+                end
                 if (SyncPolicy.shouldUpdateField(fieldPolicies, "rotX", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotY", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotZ", isSelected))
@@ -100,9 +112,15 @@ function RollingStockUpdater.runUpdate()
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "trackDistance", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "trackDirection", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "trackSystem", isSelected) then
-                        local _, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(
+                        local ok, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(
                             rs.rollingStockName)
-                        rs:setTrack(trackId, trackDistance, trackDirection, trackSystem)
+                        if ok then
+                            ---@cast trackId number
+                            ---@cast trackDistance number
+                            ---@cast trackDirection number
+                            ---@cast trackSystem number
+                            rs:setTrack(trackId, trackDistance, trackDirection, trackSystem)
+                        end
                     end
                     if SyncPolicy.shouldUpdateField(fieldPolicies, "posX", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "posY", isSelected)

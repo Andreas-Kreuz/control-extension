@@ -19,11 +19,11 @@ function RollingStockPublisher.syncState()
 
     if not HubOptionsRegistry.isPublishEnabled("rollingStocks") then
         RollingStockRegistry.clearPendingChanges()
-        return {}
+        return
     end
 
     for stockId in pairs(RollingStockRegistry.getRemovedIds()) do
-        DataChangeBus.fireDataRemoved(RollingStockDtoFactory.createRefDto(stockId))
+        DataChangeBus.fireDataRemoved(RollingStockDtoFactory.createRemovalDto(stockId))
     end
 
     for _, rs in pairs(RollingStockRegistry.getAll()) do
@@ -45,7 +45,6 @@ function RollingStockPublisher.syncState()
     end
 
     RollingStockRegistry.clearPendingChanges()
-    return {}
 end
 
 return RollingStockPublisher

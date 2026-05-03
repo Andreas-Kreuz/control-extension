@@ -1,7 +1,7 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import Versions from '../lib/Versions';
-import { VersionRoom, VersionDto } from '@ce/web-shared';
+import { VersionRoom, VersionAppDto } from '@ce/web-shared';
 
 function cutOutLua(versionString: string) {
   if (versionString && versionString.startsWith('Lua ')) {
@@ -18,7 +18,7 @@ export default function useVersionInfo(): Versions {
   });
 
   useDomainRoomHandler(VersionRoom, 'VersionRoom', (payload: string) => {
-    const data: Record<string, VersionDto> = JSON.parse(payload);
+    const data: Record<string, VersionAppDto> = JSON.parse(payload);
     if (data.versionInfo) {
       setVersions({
         appVersion: data.versionInfo.singleVersion,

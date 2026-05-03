@@ -1,6 +1,6 @@
 {
   "name": "@ce/web-server",
-  "version": "0.0.5",
+  "version": "v0.0.6-alpha",
   "description": "Control Extension Server für EEP",
   "type": "commonjs",
   "private": true,
@@ -29,6 +29,10 @@
   "main": "./build/main/index.js",
   "build": {
     "electronVersion": "35.1.2",
+    "electronLanguages": [
+      "de",
+      "en-US"
+    ],
     "appId": "io.github.andreas-kreuz.control-extention-for-eep",
     "files": [
       "build/**/*",

@@ -1,45 +1,90 @@
-import BarChartIcon from '@mui/icons-material/BarChart';
+﻿import BarChartIcon from '@mui/icons-material/BarChart';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import TrainIcon from '@mui/icons-material/Train';
+import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Link as RouterLink } from 'react-router-dom';
-import AppCardImg from '../../../shared/components/AppCardImg';
-import AppCardGrid from '../../../shared/layouts/AppCardGrid';
-import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
-import AppPage from '../../../shared/layouts/AppPage';
+import ImageCard from '../../../shared/components/cards/ImageCard';
+import CardGridItem from '../../../shared/layouts/CardGridItem';
+import CardGridContainer from '../../../shared/layouts/CardGridContainer';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import useUpdateStatus from '../../update/hooks/useUpdateStatus';
 import getNavSections from '../lib/NavElements';
 
 function MainMenu() {
   const navigation = getNavSections();
+  const updateStatus = useUpdateStatus();
+  const updateAvailable = updateStatus.state === 'stable-available' || updateStatus.state === 'prerelease-available';
 
   const trafficNav = navigation.filter((nav) => nav.name === 'Verkehr').flatMap((nav) => nav.values);
 
   return (
-    <AppPage>
-      <AppCardGridContainer>
+    <PageContainer>
+      <CardGridContainer>
         {trafficNav.map(
           (card) =>
             card.image && (
-              <AppCardGrid key={card.title}>
-                <AppCardImg
+              <CardGridItem key={card.title}>
+                <ImageCard
                   title={card.title}
                   image={'/assets/' + card.image}
                   to={card.link}
                   {...(card.subtitle !== undefined ? { subtitle: card.subtitle } : {})}
                 />
-              </AppCardGrid>
+              </CardGridItem>
             ),
         )}
-      </AppCardGridContainer>
-      <Grid container spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'flex-start', mt: 2 }}>
+      </CardGridContainer>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'flex-start',
+          mt: 2,
+        }}
+      >
         <Button variant="text" startIcon={<BarChartIcon />} component={RouterLink} to="/insights">
           Einblicke
         </Button>
         <Button variant="text" startIcon={<Inventory2Icon />} component={RouterLink} to="/data">
           Daten
         </Button>
+        <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
+          Aktiver Zug
+        </Button>
+        <Button
+          variant="text"
+          startIcon={
+            updateAvailable ? (
+              <Badge
+                badgeContent={' '}
+                color="success"
+                overlap="circular"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    height: 14,
+                    minWidth: 14,
+                    p: 0,
+                  },
+                }}
+              >
+                <InfoOutlinedIcon />
+              </Badge>
+            ) : (
+              <InfoOutlinedIcon />
+            )
+          }
+          component={RouterLink}
+          to="/about"
+        >
+          Über diese Version
+        </Button>
       </Grid>
-    </AppPage>
+    </PageContainer>
   );
 }
 

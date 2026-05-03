@@ -1,5 +1,9 @@
 insulate("ce.hub.data.signals.SignalStatePublisher", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local eepGetSignalStub
+    local eepSignalGetTagTextStub
+    local eepGetSignalTrainsCountStub
+    local eepGetSignalTrainNameStub
 
     before_each(function ()
         clearModule("ce.hub.data.signals.SignalStatePublisher")
@@ -20,22 +24,22 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
             }
         }
 
-        stub(_G, "EEPGetSignal", function (id)
+        eepGetSignalStub = stub(_G, "EEPGetSignal", function (id)
             local entry = states[id]
             if not entry then return 0 end
             return entry.position
         end)
-        stub(_G, "EEPSignalGetTagText", function (id)
+        eepSignalGetTagTextStub = stub(_G, "EEPSignalGetTagText", function (id)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.tag
         end)
-        stub(_G, "EEPGetSignalTrainsCount", function (id)
+        eepGetSignalTrainsCountStub = stub(_G, "EEPGetSignalTrainsCount", function (id)
             local entry = states[id]
             if not entry then return nil end
             return entry.waitingCount
         end)
-        stub(_G, "EEPGetSignalTrainName", function (id, position)
+        eepGetSignalTrainNameStub = stub(_G, "EEPGetSignalTrainName", function (id, position)
             local entry = states[id]
             if not entry then return nil end
             return entry.vehicles[position]
@@ -43,10 +47,10 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
     end)
 
     after_each(function ()
-        _G.EEPGetSignal:revert()
-        _G.EEPSignalGetTagText:revert()
-        _G.EEPGetSignalTrainsCount:revert()
-        _G.EEPGetSignalTrainName:revert()
+        eepGetSignalStub:revert()
+        eepSignalGetTagTextStub:revert()
+        eepGetSignalTrainsCountStub:revert()
+        eepGetSignalTrainNameStub:revert()
     end)
 
     it("fires both ceTypes with the existing wire format", function ()

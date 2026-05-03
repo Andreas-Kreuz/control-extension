@@ -1,8 +1,11 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureDataCollector ...") end
 
+---@class StructureDataCollector
+---@field collectInitialStructures fun():table
+---@field refreshDirtyStructures fun(existingStructures: table):table
 local StructureDataCollector = {}
 
-local MAX_STRUCTURES = 50000
+local MAX_STRUCTURES = 5000
 
 local EEPStructureGetLight = _G.EEPStructureGetLight or function () end         -- EEP 11.1 Plug-In 1
 local EEPStructureGetSmoke = _G.EEPStructureGetSmoke or function () end         -- EEP 11.1 Plug-In 1

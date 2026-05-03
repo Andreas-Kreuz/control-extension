@@ -20,6 +20,7 @@ __pycache__
 /apps/*/node_modules
 /apps/*/*.tsbuildinfo
 /apps/web-server/settings.json
+/apps/web-server/update-status-cache.json
 
 /packages/*/build
 /packages/*/dist
@@ -71,7 +72,7 @@ __pycache__
 /lua/LUA/ce/databridge/exchange/ce-version.txt
 /lua/LUA/ce/databridge/exchange/server-is-running
 /lua/LUA/ce/databridge/exchange/server-state.*
-/lua/LUA/ce/databridge/exchange-test/
+/lua/LUA/ce/databridge/exchange-test/*
 !/lua/LUA/ce/databridge/exchange-test/.gitkeep
 /lua/LUA/comm_*
 /lua/modell-pakete
@@ -164,3 +165,4 @@ web-app/src/app/client/modules/intersection/intersection-lane-display/example-sv
 Lua_manual.pdf
 EEP18_Manual_GER.pdf
 package-lock.json
+scripts/internal*

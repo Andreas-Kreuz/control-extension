@@ -1,12 +1,12 @@
-﻿import { CeTypes } from '@ce/web-shared';
+import { IntersectionSwitchingListRoom } from '@ce/web-shared';
 import { useState } from 'react';
-import { useApiDataRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import IntersectionSwitching from '../model/IntersectionSwitching';
 
 function useIntersectionSwitchings(): IntersectionSwitching[] {
   const [intersectionSwitchings, setIntersectionSwitchings] = useState<IntersectionSwitching[]>([]);
 
-  useApiDataRoomHandler(CeTypes.RoadIntersectionSwitching, (payload: string) => {
+  useDomainRoomHandler(IntersectionSwitchingListRoom, 'All', (payload: string) => {
     const data: Record<string, IntersectionSwitching> = JSON.parse(payload);
     setIntersectionSwitchings(Object.values(data));
   });

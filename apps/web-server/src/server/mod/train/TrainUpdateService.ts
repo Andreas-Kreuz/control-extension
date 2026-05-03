@@ -4,14 +4,7 @@ import InterestSyncService from '../../eep/server-data/dynamic/InterestSyncServi
 import { RollingStockSelector } from './RollingStockSelector';
 import { TrainSelector } from './TrainSelector';
 import { State } from '../../eep/server-data/EepDataStore';
-import {
-  CeTypes,
-  RollingStockRoom,
-  RollingStockTexturesRoom,
-  RollingStockRotationRoom,
-  TrainListRoom,
-  TrainRoom,
-} from '@ce/web-shared';
+import { CeTypes, RollingStockRoom, TrainListRoom, TrainRoom } from '@ce/web-shared';
 import express from 'express';
 import { Server } from 'socket.io';
 
@@ -32,7 +25,6 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TrainListRoom,
       id: 'TrainListRoom',
-      onInterest: [],
       jsonCreator: (room: string): string => {
         const trackType = TrainListRoom.idOfRoom(room);
         return JSON.stringify(this.trainSelector.getTrainList(trackType));
@@ -41,16 +33,6 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TrainRoom,
       id: 'TrainRoom',
-      onInterest: [
-        {
-          ceType: CeTypes.HubTrain,
-          idOfRoom: (roomName: string) => TrainRoom.idOfRoom(roomName),
-        },
-        {
-          ceType: CeTypes.TransitTrain,
-          idOfRoom: (roomName: string) => TrainRoom.idOfRoom(roomName),
-        },
-      ],
       jsonCreator: (room: string): string => {
         const trainId = TrainRoom.idOfRoom(room);
         return JSON.stringify(this.trainSelector.getTrain(trainId) ?? null);
@@ -59,36 +41,11 @@ export default class TrainUpdateService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: RollingStockRoom,
       id: 'RollingStockRoom',
-      onInterest: [
-        {
-          ceType: CeTypes.HubRollingStock,
-          idOfRoom: (roomName: string) => RollingStockRoom.idOfRoom(roomName),
-        },
-      ],
       jsonCreator: (room: string): string => {
         const rollingStockId = RollingStockRoom.idOfRoom(room);
         return JSON.stringify(this.rollingStockSelector.getRollingStock(rollingStockId) ?? null);
       },
     });
-    this.roomDataProviders.push({
-      roomType: RollingStockTexturesRoom,
-      id: 'RollingStockTexturesRoom',
-      onInterest: [],
-      jsonCreator: (room: string): string => {
-        const rollingStockId = RollingStockTexturesRoom.idOfRoom(room);
-        return JSON.stringify(this.rollingStockSelector.getRollingStockTextures(rollingStockId) ?? null);
-      },
-    });
-    this.roomDataProviders.push({
-      roomType: RollingStockRotationRoom,
-      id: 'RollingStockRotationRoom',
-      onInterest: [],
-      jsonCreator: (room: string): string => {
-        const rollingStockId = RollingStockRotationRoom.idOfRoom(room);
-        return JSON.stringify(this.rollingStockSelector.getRollingStockRotation(rollingStockId) ?? null);
-      },
-    });
-
     this.registerRoutes();
   }
 

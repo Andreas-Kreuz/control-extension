@@ -1,3 +1,4 @@
+---@diagnostic disable: redundant-parameter
 describe("EepSimulator track state", function ()
     local function trackCases(EepSimulator)
         return {

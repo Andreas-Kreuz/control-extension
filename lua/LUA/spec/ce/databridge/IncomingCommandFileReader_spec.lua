@@ -9,16 +9,13 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.IncomingCommandExecutor")
         clearModule("ce.databridge.IncomingCommandFileReader")
-        io.open = originalIoOpen
     end)
-
-    after_each(function () io.open = originalIoOpen end)
 
     it("prepares the command file in the exchange directory and executes commands from it", function ()
         local openCalls = {}
         local commands = {}
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/commands-to-ce" then
@@ -30,14 +27,17 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
                 return { read = function () return "print|" end, close = function () end }
             end
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
         local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
-        IncomingCommandExecutor.executeIncomingCommands = function (commandText)
-            table.insert(commands, commandText)
-        end
+        local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
+                                                 function (commandText)
+                                                     table.insert(commands, commandText)
+                                                 end)
+        finally(function () executeIncomingCommandsStub:revert() end)
 
         openCalls = {}
         ExchangeDirRegistry.setExchangeDirectory("custom-dir")
@@ -56,7 +56,7 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         local openCalls = {}
         local commands = {}
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/commands-to-ce" and
@@ -71,14 +71,17 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
                 return { read = function () return content end, close = function () end }
             end
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
         local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
-        IncomingCommandExecutor.executeIncomingCommands = function (commandText)
-            table.insert(commands, commandText)
-        end
+        local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
+                                                 function (commandText)
+                                                     table.insert(commands, commandText)
+                                                 end)
+        finally(function () executeIncomingCommandsStub:revert() end)
 
         ExchangeDirRegistry.setExchangeDirectory("custom-dir")
         IncomingCommandFileReader.readAndExecuteIncomingCommands()

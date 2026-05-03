@@ -3,7 +3,7 @@ import { TrainType } from '@ce/web-shared';
 export const trainIconFor = (trainType: TrainType) => {
   switch (trainType) {
     case TrainType.Plane:
-      return 'Flugzeug';
+      return 'sign-airplane';
     case TrainType.CarWithTrailer:
       return 'sign-passenger-car-with-trailer';
     case TrainType.Bike:

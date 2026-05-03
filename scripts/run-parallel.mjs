@@ -11,10 +11,12 @@ if (commands.length === 0) {
 const isWindows = process.platform === 'win32';
 const shellCommand = isWindows ? process.env.ComSpec || 'cmd.exe' : '/bin/sh';
 const shellArgs = (command) => (isWindows ? ['/d', '/s', '/c', command] : ['-lc', command]);
+const shutdownGraceMs = 5000;
 
 const children = new Set();
 let completedChildren = 0;
 let shutdownState = null;
+let forcedExitTimer = null;
 
 const killChild = (child) => {
   if (isWindows && child.pid) {
@@ -34,6 +36,10 @@ const killOthers = (currentChild) => {
 
 const maybeExit = () => {
   if (completedChildren === commands.length) {
+    if (forcedExitTimer) {
+      clearTimeout(forcedExitTimer);
+      forcedExitTimer = null;
+    }
     process.exit(shutdownState?.code ?? 0);
   }
 };
@@ -42,6 +48,16 @@ const startShutdown = (currentChild, code) => {
   if (!shutdownState) {
     shutdownState = { code };
     killOthers(currentChild);
+
+    forcedExitTimer = setTimeout(() => {
+      const stillRunning = [...children].map((child) => child.commandLabel).filter(Boolean);
+      if (stillRunning.length > 0) {
+        console.error(`Timed out waiting for parallel command shutdown: ${stillRunning.join(', ')}`);
+      }
+      process.exit(shutdownState.code);
+    }, shutdownGraceMs);
+
+    forcedExitTimer.unref?.();
   }
 };
 
@@ -53,6 +69,7 @@ for (const command of commands) {
   });
 
   children.add(child);
+  child.commandLabel = command;
 
   child.on('error', (error) => {
     console.error(`Failed to start command: ${command}`);

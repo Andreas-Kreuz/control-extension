@@ -1,11 +1,25 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioRegistry ...") end
 
+local Scenario = require("ce.hub.data.scenario.Scenario")
+
 local ScenarioRegistry = {}
 
 local scenario = nil
 
 function ScenarioRegistry.set(entry)
-    scenario = entry
+    if not entry then
+        scenario = nil
+        return
+    end
+
+    entry.id = entry.id or "scenario"
+    entry.name = entry.name or "scenario"
+
+    if scenario then
+        scenario:update(entry)
+    else
+        scenario = Scenario:new(entry)
+    end
 end
 
 function ScenarioRegistry.get()

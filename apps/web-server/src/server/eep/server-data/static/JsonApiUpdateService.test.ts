@@ -105,6 +105,7 @@ function makeRouter() {
 
 const fakeIo: TestServer = { to: () => ({ emit: () => {} }) };
 const fakeCacheService: CacheService = { writeCache: () => {}, readCache: () => null };
+const serverApiEntriesName = 'server.api-entries';
 
 function makeStore(ceTypes: State['ceTypes'], eventCounter = 1): TestStore {
   return {
@@ -153,8 +154,8 @@ function testIndexListsRoomsAfterStateChange(): void {
   const { body } = callIndex();
   const html = body as string;
   assert.ok(html.includes(`href="/api/v1/${CeTypes.HubSignal}"`));
-  assert.ok(html.includes(`href="/api/v1/${CeTypes.ServerApiEntries}"`));
-  assert.ok(html.includes(`href="/api/v1/${CeTypes.ServerStats}"`));
+  assert.ok(html.includes(`href="/api/v1/${serverApiEntriesName}"`));
+  assert.equal(html.includes('server.stats'), false);
 }
 
 function testRoomReturns404WhenUnknown(): void {

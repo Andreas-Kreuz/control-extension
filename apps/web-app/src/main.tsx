@@ -1,7 +1,7 @@
-import './index.css';
+﻿import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import WebAppRoot from './app/components/WebAppRoot';
+import WebRoot from './app/components/WebRoot';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -13,7 +13,7 @@ if (serverRenderPaths.some((path) => window.location.pathname.startsWith(path)))
 } else {
   root.render(
     <React.StrictMode>
-      <WebAppRoot />
+      <WebRoot />
     </React.StrictMode>,
   );
 }

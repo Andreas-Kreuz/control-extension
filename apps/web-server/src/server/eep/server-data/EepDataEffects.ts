@@ -16,6 +16,7 @@ export default class EepDataEffects {
   private stateController: DomainRoomManager;
   private jsonApiController: JsonApiRoomObserver;
   private refreshSettings = { pending: true, inProgress: false };
+  private refreshTimer: NodeJS.Timeout;
 
   constructor(
     router: express.Router,
@@ -31,7 +32,8 @@ export default class EepDataEffects {
     this.stateController = new DomainRoomManager(io, interestSyncService);
     this.jsonApiController = new JsonApiRoomObserver(router, io, cacheService);
 
-    setInterval(() => this.refreshStateIfRequired(), 50);
+    this.refreshTimer = setInterval(() => this.refreshStateIfRequired(), 50);
+    this.refreshTimer.unref?.();
   }
 
   registerDomainRoom(domainRoomService: DomainRoomService) {
@@ -85,7 +87,7 @@ export default class EepDataEffects {
       const receivedEventNr = event.eventCounter;
 
       // Fire this event only if it is expected or a complete reset
-      if (receivedEventNr == 1 || expectedEventNr == receivedEventNr || event.type === 'CompleteReset') {
+      if (expectedEventNr === receivedEventNr || event.type === 'CompleteReset') {
         this.store.onNewEvent(event);
         this.refreshSettings.pending = true;
       } else if (receivedEventNr > expectedEventNr) {

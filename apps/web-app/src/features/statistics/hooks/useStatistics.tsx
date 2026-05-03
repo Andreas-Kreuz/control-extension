@@ -1,13 +1,13 @@
 ﻿import { useState } from 'react';
 import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import TimeDesc from '../model/TimeDesc';
-import { RuntimeStatisticsDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeDto } from '@ce/web-shared';
+import { RuntimeStatisticsAppDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeAppDto } from '@ce/web-shared';
 
-function toTimeDescList(entries: RuntimeStatisticsTimeDto[] = []): TimeDesc[] {
+function toTimeDescList(entries: RuntimeStatisticsTimeAppDto[] = []): TimeDesc[] {
   return entries.map((entry) => new TimeDesc(entry.id, entry.ms));
 }
 
-function toTimeDescHistory(entries: RuntimeStatisticsTimeDto[][] = []): TimeDesc[][] {
+function toTimeDescHistory(entries: RuntimeStatisticsTimeAppDto[][] = []): TimeDesc[][] {
   return entries.map((sample) => toTimeDescList(sample));
 }
 
@@ -62,7 +62,7 @@ function useStatistics() {
     RuntimeStatisticsRoom,
     'RuntimeStatisticsRoom',
     (payload: string) => {
-      const statistics: RuntimeStatisticsDto = JSON.parse(payload);
+      const statistics: RuntimeStatisticsAppDto = JSON.parse(payload);
 
       setPublisherSyncTimes(toTimeDescHistory(statistics.history?.publisherSyncTimes));
       setPublisherInitTimes(toTimeDescList(statistics.initialization?.publisherInitTimes));

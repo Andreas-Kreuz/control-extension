@@ -1,4 +1,7 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.CeHubModule ...") end
+if CeDebugLoad then
+    print("[#Start] Loading ce.hub.CeHubModule ...")
+end
+require("ce.hub.eep.EepCompatibilityApi")
 
 ---@class CeHubModule: CeModule
 CeHubModule = {}
@@ -90,10 +93,12 @@ function CeHubModule.setAnl3Path(path)
 end
 
 local function runAnl3Discovery()
-    if not anl3Path then return end
+    if not anl3Path then
+        return
+    end
     local tableOfAnl3, err = Anl3ToTable.loadAnlage(anl3Path)
     if not tableOfAnl3 then
-        print("[CeHubModule] Anl3 load failed: " .. tostring(err))
+        print(string.format("[CeHubModule] Anl3 load failed: %s", tostring(err)))
         return
     end
     local scenarioName = EEPGetAnlName and EEPGetAnlName() or nil
@@ -101,9 +106,13 @@ local function runAnl3Discovery()
         local rawLuaPath = Anl3DiscoveryHelper.getLuaPath(tableOfAnl3) or ""
         local luaPathName = rawLuaPath:match("\\([^\\]+)%.lua$")
         if luaPathName ~= scenarioName then
-            print(string.format(
-                "[CeHubModule] Anl3 mismatch: EEPGetAnlName=%s but LUAPath=%s -- skipping anl3 discoveries",
-                tostring(scenarioName), tostring(rawLuaPath)))
+            print(
+                string.format(
+                    "[CeHubModule] Anl3 mismatch: EEPGetAnlName=%s but LUAPath=%s -- skipping anl3 discoveries",
+                    tostring(scenarioName),
+                    tostring(rawLuaPath)
+                )
+            )
             return
         end
     end
@@ -111,7 +120,9 @@ local function runAnl3Discovery()
 end
 
 function CeHubModule.init()
-    if not CeHubModule.enabled or initialized then return end
+    if not CeHubModule.enabled or initialized then
+        return
+    end
     HubBridgeConnector.registerStatePublishers()
     HubBridgeConnector.registerFunctions()
     runAnl3Discovery()
@@ -120,7 +131,9 @@ function CeHubModule.init()
 end
 
 function CeHubModule.run()
-    if not CeHubModule.enabled then return end
+    if not CeHubModule.enabled then
+        return
+    end
     runDataUpdates()
     Scheduler:runTasks()
 end

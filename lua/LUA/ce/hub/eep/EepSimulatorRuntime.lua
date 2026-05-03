@@ -1,3 +1,4 @@
+---@diagnostic disable: unused-local
 if CeDebugLoad then print("[#Start] Loading ce.hub.eep.EepSimulatorRuntime ...") end
 
 local Store = require("ce.hub.eep.EepSimulatorStore")
@@ -94,6 +95,13 @@ local function create(simulator, globals)
             if rollingStock.smokeEnabled == nil then rollingStock.smokeEnabled = false end
             if rollingStock.rotation == nil then rollingStock.rotation = { rotX = 0, rotY = 0, rotZ = 0 } end
             if rollingStock.userCamera == nil then rollingStock.userCamera = nil end
+            local axisValuesByNumber = rollingStock.axisValuesByNumber or rollingStock.axisValues or {}
+            rollingStock.axisValuesByNumber = {}
+            for axisNumber, axisValue in pairs(axisValuesByNumber) do
+                local numericAxisNumber = tonumber(axisNumber)
+                if numericAxisNumber then rollingStock.axisValuesByNumber[numericAxisNumber] = axisValue end
+            end
+            rollingStock.axisValues = nil
             return rollingStock
         end
 
@@ -106,6 +114,7 @@ local function create(simulator, globals)
             textureTextBySurfaceNumber = {},
             hookEnabled = false,
             fixedLoad = false,
+            axisValuesByNumber = {},
             userCamera = nil
         }
     end
@@ -655,10 +664,10 @@ local function create(simulator, globals)
         local secondsSinceMidnight = math.floor(totalSeconds % 86400)
         if secondsSinceMidnight < 0 then secondsSinceMidnight = secondsSinceMidnight + 86400 end
 
-        EEPTime = secondsSinceMidnight
-        EEPTimeH = math.floor(secondsSinceMidnight / 3600)
-        EEPTimeM = math.floor((secondsSinceMidnight % 3600) / 60)
-        EEPTimeS = secondsSinceMidnight % 60
+        rawset(_G, "EEPTime", secondsSinceMidnight)
+        rawset(_G, "EEPTimeH", math.floor(secondsSinceMidnight / 3600))
+        rawset(_G, "EEPTimeM", math.floor((secondsSinceMidnight % 3600) / 60))
+        rawset(_G, "EEPTimeS", secondsSinceMidnight % 60)
     end
 
     function Runtime.callEEPSetTime(stunde, minute, seconds)
@@ -754,9 +763,39 @@ local function create(simulator, globals)
 
     function Runtime.callEEPRollingstockSetSlot(rsName, slot) end
 
-    function Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter) end
+    function Runtime.callEEPRollingstockSetAxis(rollingstockName, axisName, axisPosition, useNameFilter)
+        local rollingStock = getOrCreateRollingStockEntry(rollingstockName)
+        rollingStock.axisValuesByName = rollingStock.axisValuesByName or {}
+        rollingStock.axisValuesByName[axisName] = tonumber(axisPosition)
+        return true
+    end
 
-    function Runtime.callEEPRollingstockGetAxis(rollingstockName, axisName) end
+    function Runtime.callEEPRollingstockGetAxis(rollingstockName, axisName)
+        local rollingStock = select(1, getRollingStockTrainContext(rollingstockName))
+        if not rollingStock or not rollingStock.axisValuesByName then return false, nil end
+
+        local value = rollingStock.axisValuesByName[axisName]
+        if value == nil then return false, nil end
+
+        return true, value
+    end
+
+    function Runtime.callEEPRollingstockSetAxisByNumber(rollingstockName, axisNumber, axisPosition)
+        local rollingStock = getOrCreateRollingStockEntry(rollingstockName)
+        rollingStock.axisValuesByNumber = rollingStock.axisValuesByNumber or {}
+        rollingStock.axisValuesByNumber[tonumber(axisNumber)] = tonumber(axisPosition)
+        return true
+    end
+
+    function Runtime.callEEPRollingstockGetAxisByNumber(rollingstockName, axisNumber)
+        local rollingStock = select(1, getRollingStockTrainContext(rollingstockName))
+        if not rollingStock or not rollingStock.axisValuesByNumber then return false, nil end
+
+        local value = rollingStock.axisValuesByNumber[tonumber(axisNumber)]
+        if value == nil then return false, nil end
+
+        return true, value
+    end
 
     function Runtime.callEEPLoadData(slot)
         return
@@ -1352,8 +1391,6 @@ local function create(simulator, globals)
         state.camera.rotZ = rotZ
         return true
     end
-
-    function Runtime.callEEPRollingstockGetSmoke(rollingstockName) return true, 0 end
 
     function Runtime.callEEPRollingstockSetSmoke(rollingstockName, status)
         getOrCreateRollingStockEntry(rollingstockName).smokeEnabled = status == true or status == 1

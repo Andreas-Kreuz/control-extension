@@ -1,3 +1,4 @@
+---@diagnostic disable: redundant-parameter
 insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
@@ -86,11 +87,10 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 
         local removed = {}
-        local originalFireDataRemoved = DataChangeBus.fireDataRemoved
-        DataChangeBus.fireDataRemoved = function (ceType, keyId, key, dto)
+        local fireDataRemovedStub = stub(DataChangeBus, "fireDataRemoved", function (ceType, keyId, key, dto)
             table.insert(removed, { ceType = ceType, keyId = keyId, key = key, dto = dto })
-            return originalFireDataRemoved(ceType, keyId, key, dto)
-        end
+        end)
+        finally(function () fireDataRemovedStub:revert() end)
 
         EepSimulator.simulateAddTrain("T1", "RS1")
         RollingStockRegistry.forName("RS1")

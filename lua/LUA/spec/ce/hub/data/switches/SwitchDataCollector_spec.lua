@@ -1,5 +1,7 @@
 insulate("ce.hub.data.switches.SwitchDataCollector", function ()
     local function clearModule(name) package.loaded[name] = nil end
+    local eepGetSwitchStub
+    local eepSwitchGetTagTextStub
 
     before_each(function ()
         clearModule("ce.hub.data.switches.SwitchDataCollector")
@@ -11,12 +13,12 @@ insulate("ce.hub.data.switches.SwitchDataCollector", function ()
             }
         }
 
-        stub(_G, "EEPGetSwitch", function (id)
+        eepGetSwitchStub = stub(_G, "EEPGetSwitch", function (id)
             local entry = states[id]
             if not entry then return 0 end
             return entry.position
         end)
-        stub(_G, "EEPSwitchGetTagText", function (id)
+        eepSwitchGetTagTextStub = stub(_G, "EEPSwitchGetTagText", function (id)
             local entry = states[id]
             if not entry then return false, nil end
             return true, entry.tag
@@ -24,8 +26,8 @@ insulate("ce.hub.data.switches.SwitchDataCollector", function ()
     end)
 
     after_each(function ()
-        _G.EEPGetSwitch:revert()
-        _G.EEPSwitchGetTagText:revert()
+        eepGetSwitchStub:revert()
+        eepSwitchGetTagTextStub:revert()
     end)
 
     it("collects initial switches by id and refreshes their fields", function ()

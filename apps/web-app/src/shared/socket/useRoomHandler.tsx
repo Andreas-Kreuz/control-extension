@@ -1,13 +1,17 @@
 import { ApiDataRoom, PairingStatus, RoomEvent } from '@ce/web-shared';
-import { DomainRoom } from '@ce/web-shared';
 import { useEffect, useRef, useState } from 'react';
 import { useSocket } from '../../app/hooks/useSocket';
 import { useSocketIsConnected } from '../../app/hooks/useSocketConnection';
 import { useSocketPairingStatus } from '../../app/hooks/useSocketPairing';
 import useDebug from './useDebug';
 
+interface RoomHandlerRoom {
+  roomId(entryId: string): string;
+  eventId(eventId: string): string;
+}
+
 export function useDomainRoomHandler(
-  domainRoom: DomainRoom,
+  domainRoom: RoomHandlerRoom,
   element: string,
   handler: (data: any) => any,
   cleanUpHandler?: () => void,

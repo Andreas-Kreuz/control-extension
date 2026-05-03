@@ -3,31 +3,39 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModulesPublisher
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local ModuleDtoFactory = require("ce.hub.data.modules.ModuleDtoFactory")
 local ModulesRegistry = require("ce.hub.data.modules.ModulesRegistry")
-local TableUtils = require("ce.hub.util.TableUtils")
 
 local ModulesPublisher = {}
 
-local knownModInfos = {}
-
-local function checkModule(moduleName, module)
-    local _, _, _, newModInfo = ModuleDtoFactory.createModuleDto(moduleName, module)
-    local oldModInfo = knownModInfos[moduleName]
-    if not oldModInfo then
-        DataChangeBus.fireDataAdded(ModuleDtoFactory.createModuleDto(moduleName, module))
-    elseif not TableUtils.sameDictEntries(oldModInfo, newModInfo) then
-        DataChangeBus.fireDataChanged(ModuleDtoFactory.createModuleDto(moduleName, module))
+local function hasPayloadFields(dto)
+    for key in pairs(dto or {}) do
+        if key ~= "ceType" and key ~= "id" then return true end
     end
-    knownModInfos[moduleName] = newModInfo
+    return false
+end
+
+local function publishRemovedModules()
+    for moduleId in pairs(ModulesRegistry.getRemovedIds()) do
+        DataChangeBus.fireDataRemoved(ModuleDtoFactory.createRemovalDto(moduleId))
+    end
+    ModulesRegistry.clearRemoved()
+end
+
+local function publishModule(module)
+    if module.needsFullSend then
+        DataChangeBus.fireDataAdded(ModuleDtoFactory.createModuleDto(module))
+        module.needsFullSend = false
+        module:resetDirty()
+    elseif module:hasDirtyFields() then
+        local ceType, keyId, key, dto = ModuleDtoFactory.createModulePatchDto(module, module.dirtyFields)
+        if hasPayloadFields(dto) then DataChangeBus.fireDataChanged(ceType, keyId, key, dto) end
+        module:resetDirty()
+    end
 end
 
 function ModulesPublisher.syncState()
     local registeredCeModules = ModulesRegistry.get()
-    for moduleName, module in pairs(registeredCeModules) do checkModule(moduleName, module) end
-
-    local modInfos = { modules = {} }
-    local _, _, modInfosById = ModuleDtoFactory.createModuleDtoList(registeredCeModules)
-    for key, value in pairs(modInfosById) do modInfos[key] = value end
-    return modInfos
+    publishRemovedModules()
+    for _, module in pairs(registeredCeModules) do publishModule(module) end
 end
 
 return ModulesPublisher

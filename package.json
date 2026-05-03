@@ -1,7 +1,7 @@
 {
   "name": "@ce/root",
   "private": true,
-  "version": "0.0.5",
+  "version": "v0.0.6-alpha",
   "workspaces": [
     "apps/*",
     "packages/*",
@@ -12,8 +12,10 @@
     "build:docs:assets": "node ./scripts/run-update-doc-assets.mjs",
     "build:docs:assets:force": "node ./scripts/run-update-doc-assets.mjs --force",
     "build:release": "yarn run check && node ./scripts/build-release.mjs",
+    "build:release:skiptests": "node ./scripts/build-release.mjs",
     "build:exe": "node ./scripts/assert-build-win-supported.mjs && yarn run build && yarn workspace @ce/web-server run build:exe",
     "ce-help": "node ./scripts/ce-help.mjs",
+    "ce:help": "yarn ce-help",
     "check": "yarn run tools:check && yarn run lint && yarn run test",
     "check:lua": "yarn run lint:lua && yarn run test:lua",
     "check:web": "yarn run lint:web && yarn run test:web",

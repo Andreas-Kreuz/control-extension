@@ -1,6 +1,6 @@
 import StatisticsDiagram from './StatisticsDiagram';
 import TimeDesc from '../../statistics/model/TimeDesc';
-import InsightsDashboardPanel from './InsightsDashboardPanel';
+import OutlinedCard from '../../../shared/components/cards/OutlinedCard';
 
 function InsightsStatisticsPanel(props: {
   title: string;
@@ -12,17 +12,15 @@ function InsightsStatisticsPanel(props: {
   onLegendToggle: () => void;
 }) {
   return (
-    <InsightsDashboardPanel>
+    <OutlinedCard title={props.title} description={props.description}>
       <StatisticsDiagram
-        title={props.title}
-        description={props.description}
         samples={props.samples}
         initializationSamples={props.initializationSamples ?? []}
         {...(props.maxValue !== undefined ? { maxValue: props.maxValue } : {})}
         legendExpanded={props.legendExpanded}
         onLegendToggle={props.onLegendToggle}
       />
-    </InsightsDashboardPanel>
+    </OutlinedCard>
   );
 }
 

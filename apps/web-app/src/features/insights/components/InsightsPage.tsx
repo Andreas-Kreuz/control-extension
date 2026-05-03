@@ -1,12 +1,11 @@
-import Grid from '@mui/material/Grid';
-import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+﻿import Grid from '@mui/material/Grid';
+import CardGridContainer from '../../../shared/layouts/CardGridContainer';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import useStatistics from '../../statistics/hooks/useStatistics';
 import TimeDesc from '../../statistics/model/TimeDesc';
 import { useState } from 'react';
-import InsightsDashboardPanel from './InsightsDashboardPanel';
-import InsightsInformationInfo from './InsightsInformationInfo';
+import InsightsRuntimeInfo from './InsightsRuntimeInfo';
 import InsightsStatisticsPanel from './InsightsStatisticsPanel';
 import InsightsStatusInfo from './InsightsStatusInfo';
 import InsightsVersionInfo from './InsightsVersionInfo';
@@ -39,26 +38,20 @@ function InsightsPage() {
   );
 
   return (
-    <AppPage>
-      <AppPageHeadline>Einblicke</AppPageHeadline>
-      <AppCardGridContainer>
+    <PageContainer>
+      <PageHeadline>Einblicke</PageHeadline>
+      <CardGridContainer>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsDashboardPanel>
-            <InsightsStatusInfo />
-          </InsightsDashboardPanel>
+          <InsightsStatusInfo />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsDashboardPanel>
-            <InsightsVersionInfo />
-          </InsightsDashboardPanel>
+          <InsightsRuntimeInfo updateTimes={updateTimes} />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsDashboardPanel>
-            <InsightsInformationInfo updateTimes={updateTimes} />
-          </InsightsDashboardPanel>
+          <InsightsVersionInfo />
         </Grid>
-      </AppCardGridContainer>
-      <AppCardGridContainer sx={{ mt: 3 }}>
+      </CardGridContainer>
+      <CardGridContainer sx={{ mt: 3 }}>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <InsightsStatisticsPanel
             title="Erkennung"
@@ -92,8 +85,8 @@ function InsightsPage() {
             onLegendToggle={() => setLegendsExpanded((current) => !current)}
           />
         </Grid>
-      </AppCardGridContainer>
-    </AppPage>
+      </CardGridContainer>
+    </PageContainer>
   );
 }
 

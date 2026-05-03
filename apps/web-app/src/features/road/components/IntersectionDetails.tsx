@@ -1,8 +1,8 @@
-import { useSocket } from '../../../app/hooks/useSocket';
-import AppCaption from '../../../shared/components/AppCaption';
-import AppHeadline from '../../../shared/components/AppHeadline';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPaper from '../../../shared/layouts/AppPaper';
+﻿import { useSocket } from '../../../app/hooks/useSocket';
+import TypeCaption from '../../../shared/components/TypeCaption';
+import SectionHeadline from '../../../shared/components/SectionHeadline';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import BackgroundPaper from '../../../shared/layouts/BackgroundPaper';
 import useIntersection from '../hooks/useIntersection';
 import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
 import { CommandEvent, RoadEvent } from '@ce/web-shared';
@@ -47,19 +47,19 @@ function IntersectionDetails() {
   }
 
   return (
-    <AppPage>
+    <PageContainer>
       {i && (
         <>
-          <AppPaper
+          <BackgroundPaper
           // image="/assets/card-img-intersection.jpg"
           >
-            <AppHeadline gutterBottom>Kreuzung {i.id}</AppHeadline>
+            <SectionHeadline gutterBottom>Kreuzung {i.id}</SectionHeadline>
             <Chip label={i.name} />
             <Stack
               direction="row"
               sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}
             ></Stack>
-            <AppCaption gutterTop>Modus</AppCaption>
+            <TypeCaption gutterTop>Modus</TypeCaption>
             <Stack direction="row" spacing={1}>
               <Chip
                 label="Auto"
@@ -80,7 +80,7 @@ function IntersectionDetails() {
             </Stack>
 
             <Divider sx={{ py: 1 }} />
-            <AppCaption gutterTop>Schaltung</AppCaption>
+            <TypeCaption gutterTop>Schaltung</TypeCaption>
             <Stack
               direction="row"
               flexWrap="wrap"
@@ -117,7 +117,7 @@ function IntersectionDetails() {
             {i.staticCams && i.staticCams.length > 0 && (
               <>
                 <Divider sx={{ py: 1 }} />
-                <AppCaption gutterTop>Kameras</AppCaption>
+                <TypeCaption gutterTop>Kameras</TypeCaption>
                 <Stack direction="row" sx={{ pt: 1, pb: 0 }}>
                   {i.staticCams.map((c, j) => {
                     return (
@@ -144,7 +144,7 @@ function IntersectionDetails() {
                 </Stack>
               </>
             )}
-          </AppPaper>
+          </BackgroundPaper>
 
           {i.staticCams && i.staticCams.length === 0 && (
             <Alert
@@ -170,7 +170,7 @@ function IntersectionDetails() {
           )}
         </>
       )}
-    </AppPage>
+    </PageContainer>
   );
 }
 

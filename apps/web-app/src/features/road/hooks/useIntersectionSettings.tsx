@@ -1,20 +1,19 @@
-﻿import { CeTypes, SettingDto, SettingsDto } from '@ce/web-shared';
+import { RoadSettingsRoom, SettingAppDto, SettingsAppDto } from '@ce/web-shared';
 import useDebug from '../../../shared/socket/useDebug';
-import { useApiDataRoomHandler } from '../../../shared/socket/useRoomHandler';
-import Intersection from '../model/Intersection';
+import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import { useState } from 'react';
 
-function useIntersectionSettings(): SettingsDto | undefined {
-  const [settings, setSettings] = useState<SettingsDto | undefined>(undefined);
+function useIntersectionSettings(): SettingsAppDto | undefined {
+  const [settings, setSettings] = useState<SettingsAppDto | undefined>(undefined);
   const debug = useDebug();
 
-  useApiDataRoomHandler(CeTypes.RoadModuleSetting, (payload: string) => {
-    const data: SettingDto<any>[] = Object.values(JSON.parse(payload));
+  useDomainRoomHandler(RoadSettingsRoom, 'All', (payload: string) => {
+    const data: SettingAppDto<any>[] = Object.values(JSON.parse(payload));
     const mySettings = {
       moduleName: 'Einstellungen für Kreuzungen',
       settings: data,
     };
-    if (debug) console.log('                 |⚠️ FIRED ---', 'API: ' + CeTypes.RoadModuleSetting, mySettings);
+    if (debug) console.log('                 |⚠️ FIRED ---', 'RoadSettingsRoom', mySettings);
     setSettings(mySettings);
   });
 

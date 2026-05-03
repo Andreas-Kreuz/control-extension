@@ -1,4 +1,4 @@
-﻿import { CommandEvent, RollingStockDto } from '@ce/web-shared';
+﻿import { CommandEvent, RollingStockAppDto } from '@ce/web-shared';
 import { useSocket } from '../../../app/hooks/useSocket';
 import useDebug from '../../../shared/socket/useDebug';
 
@@ -6,7 +6,7 @@ const useSetRollingStockCam = () => {
   const socket = useSocket();
   const debug = useDebug();
 
-  return (rollingStock: RollingStockDto | undefined, key: number) => {
+  return (rollingStock: RollingStockAppDto | undefined, key: number) => {
     if (debug) console.log('                 |📹 CAM SET --', 'for ROLLING STOCK', rollingStock, key);
     if (!rollingStock) {
       return;

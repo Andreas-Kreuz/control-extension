@@ -9,5 +9,5 @@ export interface DomainDataProvider {
   roomType: DomainRoom;
   id: string;
   jsonCreator: (roomName: string) => string;
-  onInterest: OnInterestBinding[];
+  onInterest?: OnInterestBinding[];
 }

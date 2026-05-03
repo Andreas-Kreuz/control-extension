@@ -1,5 +1,14 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureRegistry ...") end
 
+---@class StructureRegistry
+---@field has fun(structureId: string):boolean
+---@field add fun(structure: Structure):nil
+---@field remove fun(structureId: string):nil
+---@field forId fun(structureId: string):Structure|nil
+---@field getAll fun():table<string, Structure>
+---@field getAddedIds fun():table<string, boolean>
+---@field getRemovedIds fun():table<string, boolean>
+---@field clearPendingChanges fun():nil
 local StructureRegistry = {}
 
 ---@type table<string, Structure>

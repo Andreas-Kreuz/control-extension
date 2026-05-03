@@ -8,26 +8,25 @@ insulate("ce.databridge.ExchangeDirRegistry", function ()
 
     before_each(function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
-        io.open = originalIoOpen
         CeTestingMode = originalCeTestingMode
     end)
 
     after_each(function ()
-        io.open = originalIoOpen
         CeTestingMode = originalCeTestingMode
     end)
 
     it("stores the resolved default exchange directory during module load", function ()
         local openCalls = {}
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" then
                 return originalIoOpen(name, mode)
             end
 
             table.insert(openCalls, { name = name, mode = mode })
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 
@@ -44,7 +43,7 @@ insulate("ce.databridge.ExchangeDirRegistry", function ()
         rawset(_G, "CeTestingMode", false)
         clearModule("ce.databridge.ExchangeDirRegistry")
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "../LUA/ce/databridge/exchange/ce-version.txt" and
                 name ~= "./LUA/ce/databridge/exchange/ce-version.txt" then
                 return originalIoOpen(name, mode)
@@ -53,7 +52,8 @@ insulate("ce.databridge.ExchangeDirRegistry", function ()
             table.insert(openCalls, { name = name, mode = mode })
             if name == "../LUA/ce/databridge/exchange/ce-version.txt" then return nil end
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 
@@ -71,7 +71,7 @@ insulate("ce.databridge.ExchangeDirRegistry", function ()
     it("stores a validated exchange directory", function ()
         local openCalls = {}
 
-        io.open = function (name, mode)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "exchange-dir/ce-version.txt" then
                 return originalIoOpen(name, mode)
@@ -79,7 +79,8 @@ insulate("ce.databridge.ExchangeDirRegistry", function ()
 
             table.insert(openCalls, { name = name, mode = mode })
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 

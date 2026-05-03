@@ -34,8 +34,6 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
         }
 
         local signalRoom, signalKeyId, signalKey, signalDto = SignalDtoFactory.createSignalDto(signal)
-        local waitingRoom, waitingKeyId, waitingKey, waitingDto = SignalDtoFactory.createWaitingOnSignalDto(waiting)
-        local signalListRoom, signalListKeyId, signalDtos = SignalDtoFactory.createSignalDtoList({ signal })
         local waitingListRoom, waitingListKeyId, waitingDtos =
             SignalDtoFactory.createWaitingOnSignalDtoList({ waiting })
 
@@ -57,33 +55,6 @@ insulate("ce.hub.data.signals.SignalDtoFactory", function ()
                         signalFunctions = { "1", "2" },
                         activeFunction = "1"
                     }, signalDto)
-        assert.equals("ce.hub.WaitingOnSignal", waitingRoom)
-        assert.equals("id", waitingKeyId)
-        assert.equals("7-1", waitingKey)
-        assert.same({
-                        ceType = "ce.hub.WaitingOnSignal",
-                        id = "7-1",
-                        signalId = 7,
-                        waitingPosition = 1,
-                        vehicleName = "Bus 1",
-                        waitingCount = 3
-                    }, waitingDto)
-        assert.equals("ce.hub.Signal", signalListRoom)
-        assert.equals("id", signalListKeyId)
-        assert.same({
-                        {
-                            ceType = "ce.hub.Signal",
-                            id = 7,
-                            position = 1,
-                            tag = "Stop",
-                            waitingVehiclesCount = 3,
-                            stopDistance = 15,
-                            itemName = "Signal 7",
-                            itemNameWithModelPath = "Signals/Signal 7",
-                            signalFunctions = { "1", "2" },
-                            activeFunction = "1"
-                        }
-                    }, signalDtos)
         assert.equals("ce.hub.WaitingOnSignal", waitingListRoom)
         assert.equals("id", waitingListKeyId)
         assert.same({

@@ -1,16 +1,16 @@
-import { RouteObject, useParams } from 'react-router-dom';
+﻿import { RouteObject, useParams } from 'react-router-dom';
 import DataPage from './components/DataPage';
-import DataTypeEntriesPage from './components/DataTypeEntriesPage';
+import DataEntriesPage from './components/DataEntriesPage';
 
-function DataTypeEntriesRoute() {
+function DataEntriesRoute() {
   const { selectedElement } = useParams<{ selectedElement: string }>();
 
-  return <DataTypeEntriesPage selectedElement={selectedElement} />;
+  return <DataEntriesPage selectedElement={selectedElement} />;
 }
 
 const routes: RouteObject[] = [
   { index: true, element: <DataPage /> },
-  { path: ':ceType/:selectedElement?', element: <DataTypeEntriesRoute /> },
+  { path: ':ceType/:selectedElement?', element: <DataEntriesRoute /> },
 ];
 
 export default routes;

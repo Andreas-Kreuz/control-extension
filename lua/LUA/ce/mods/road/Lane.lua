@@ -37,8 +37,13 @@ local function updateLaneSignal(lane, reason)
         local greenTrafficLights = {}
         for trafficLight in pairs(lane.trafficLightsToDriveOn) do
             if Lane.debug then
-                print(string.format("[#Lane] %s can drive on: %s (%s): %s", lane.name, trafficLight:signalNamesText(),
-                                    trafficLight.phase, tostring(TrafficLightState.canDrive(trafficLight.phase))))
+                print(string.format(
+                    "[#Lane] %s can drive on: %s (%s): %s",
+                    lane.name,
+                    trafficLight:signalNamesText(),
+                    trafficLight.phase,
+                    tostring(TrafficLightState.canDrive(trafficLight.phase))
+                ))
             end
             if TrafficLightState.canDrive(trafficLight.phase) then
                 haveGreen = true
@@ -78,8 +83,12 @@ local function addTrainToQueue(lane, trainName)
 
         -- Fix queue length
         if lane.vehicleCount ~= lane.queue:size() then
-            print(string.format("[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d",
-                                lane.name, lane.queue:size(), lane.vehicleCount))
+            print(string.format(
+                "[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d",
+                lane.name,
+                lane.queue:size(),
+                lane.vehicleCount
+            ))
             lane.vehicleCount = lane.queue:size()
         end
     end
@@ -111,8 +120,12 @@ local function popTrainFromQueue(lane, trainName)
 
         -- Remove train and fix queue
         if numberOfPops > 1 and Lane.debug then
-            print(string.format("[#Lane] AUTOCORRECT %s: Have to remove %d trains to get to %s", lane.name,
-                                numberOfPops, trainName))
+            print(string.format(
+                "[#Lane] AUTOCORRECT %s: Have to remove %d trains to get to %s",
+                lane.name,
+                numberOfPops,
+                trainName
+            ))
         end
         for _ = 1, numberOfPops, 1 do
             local trainFromQueue = lane.queue:pop()
@@ -125,8 +138,11 @@ local function popTrainFromQueue(lane, trainName)
         if lane.vehicleCount ~= lane.queue:size() then
             if Lane.debug and numberOfPops == 1 then
                 print(string.format(
-                    "[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d", lane.name,
-                    lane.queue:size(), lane.vehicleCount))
+                    "[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d",
+                    lane.name,
+                    lane.queue:size(),
+                    lane.vehicleCount
+                ))
             end
             lane.vehicleCount = lane.queue:size()
         end
@@ -342,7 +358,7 @@ function Lane:resetQueueFromRoadTracks()
         assert(ok)
 
         if waiting then
-            if not trainName then print("[#Lane] Kein Zug auf Strasse: " .. strassenId) end
+            if not trainName then print(string.format("[#Lane] Kein Zug auf Strasse: %s", strassenId)) end
             assert(trainName)
             self.queue:push(trainName)
         end
@@ -447,7 +463,7 @@ end
 
 function Lane:setDirections(...)
     for _, direction in pairs(...) do
-        if not Lane.Directions[direction] then print("[#Lane] No such direction: " .. direction) end
+        if not Lane.Directions[direction] then print(string.format("[#Lane] No such direction: %s", direction)) end
     end
 
     self.directions = ... or { "LEFT", "STRAIGHT", "RIGHT" }
@@ -455,7 +471,7 @@ end
 
 function Lane:setTrafficType(trafficType)
     if not Lane.Type[trafficType] then
-        print("[#Lane] No such traffic type: " .. trafficType)
+        print(string.format("[#Lane] No such traffic type: %s", trafficType))
     else
         self.trafficType = trafficType
     end

@@ -5,6 +5,18 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDtoFactory ...
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
+
+---@class RoadDtoFactory
+---@field createIntersectionDto fun(intersection: table, isSelected?: boolean):string,string,string|number,IntersectionDto
+---@field createIntersectionDtoList fun(intersections: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
+---@field createIntersectionLaneDto fun(lane: table, isSelected?: boolean):string,string,string|number,IntersectionLaneDto
+---@field createIntersectionLaneDtoList fun(lanes: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
+---@field createIntersectionSwitchingDto fun(switching: table, isSelected?: boolean):string,string,string|number,IntersectionSwitchingDto
+---@field createIntersectionSwitchingDtoList fun(switchings: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
+---@field createIntersectionTrafficLightDto fun(trafficLight: table, isSelected?: boolean):string,string,string|number,IntersectionTrafficLightDto
+---@field createIntersectionTrafficLightDtoList fun(trafficLights: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
+---@field createIntersectionModuleSettingDto fun(setting: table, isSelected?: boolean):string,string,string|number,IntersectionModuleSettingDto
+---@field createIntersectionModuleSettingDtoList fun(settings: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
 local RoadDtoFactory = {}
 
 local function copyTable(values)

@@ -1,23 +1,23 @@
-import AppCardGridContainer from '../../../shared/layouts/AppCardGridContainer';
-import AppPage from '../../../shared/layouts/AppPage';
-import StatisticsCard from './StatisticsCard';
+﻿import CardGridContainer from '../../../shared/layouts/CardGridContainer';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import StatisticsTimingCard from './StatisticsTimingCard';
 import useStatistics from '../hooks/useStatistics';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import VersionInfoWrapper from './VersionInfoWrapper';
 
 function StatisticsOverview() {
   const { overallTimes, initializationTimes, controllerUpdateTimes } = useStatistics();
 
   return (
-    <AppPage>
-      <AppPageHeadline>Statistik</AppPageHeadline>
-      <AppCardGridContainer>
+    <PageContainer>
+      <PageHeadline>Statistik</PageHeadline>
+      <CardGridContainer>
         <VersionInfoWrapper />
-        <StatisticsCard title="Initialisierungszeit" samples={initializationTimes} maxEntries={1} hidelegend />
-        <StatisticsCard title="Gesamtzeit" samples={overallTimes} />
-        <StatisticsCard title="Server-Kommunikation" samples={controllerUpdateTimes} />
-      </AppCardGridContainer>
-    </AppPage>
+        <StatisticsTimingCard title="Initialisierungszeit" samples={initializationTimes} maxEntries={1} hidelegend />
+        <StatisticsTimingCard title="Gesamtzeit" samples={overallTimes} />
+        <StatisticsTimingCard title="Server-Kommunikation" samples={controllerUpdateTimes} />
+      </CardGridContainer>
+    </PageContainer>
   );
 }
 

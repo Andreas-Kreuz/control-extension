@@ -11,6 +11,10 @@ import { Tail } from 'tail';
  * This service is responsible for the communication with EEP.
  */
 export default class EepService implements CacheService {
+  private static filesToDeleteOnExit = new Set<string>();
+  private static processCleanupRegistered = false;
+  private static signalCleanupInProgress = false;
+
   private dir: string | null = null;
   private jsonFileWatcher?: fs.FSWatcher;
   private readonly logFileMonitor: LogFileMonitor;
@@ -64,7 +68,7 @@ export default class EepService implements CacheService {
 
   private disconnectFromFiles(): void {
     if (this.dir) {
-      this.deleteFileIfExists(path.resolve(this.dir, FileNames.serverIsRunning));
+      EepService.deleteFileIfExists(path.resolve(this.dir, FileNames.serverIsRunning));
     }
 
     this.logFileMonitor.detach();
@@ -124,7 +128,7 @@ export default class EepService implements CacheService {
     );
   }
 
-  private deleteFileIfExists(file: string): void {
+  private static deleteFileIfExists(file: string): void {
     try {
       fs.unlinkSync(file);
     } catch (_err) {
@@ -137,18 +141,17 @@ export default class EepService implements CacheService {
     const jsonFile = path.resolve(dir, FileNames.eventsFromCe);
     const jsonReadyFile = path.resolve(dir, FileNames.eventsFromCePending);
 
-    // First start: Read the JSON file - ignore if EEP is ready
+    // First start: only read a payload that EEP explicitly marked as pending.
     if (!this.jsonFileWatcher) {
       performance.mark('eep:start-wait-for-json');
-      this.readJsonFile(jsonFile, jsonReadyFile);
+      if (fs.existsSync(jsonReadyFile)) {
+        this.readJsonFile(jsonFile, jsonReadyFile);
+      }
     }
-
-    // First start: Delete the EEP FINISHED file, so EEP will know we are ready
-    this.deleteFileIfExists(jsonReadyFile);
 
     // Watch in the directory, if the file is recreated
     this.jsonFileWatcher = fs.watch(dir, (_eventType: string, filename: string | null) => {
-      // If the jsonReadyFile exists: Read the data and remove the file
+      // If events-from-ce.pending exists: read the payload and remove the marker.
       if (filename === FileNames.eventsFromCePending && fs.existsSync(jsonReadyFile)) {
         // console.log('Reading: ', jsonFile);
         this.readJsonFile(jsonFile, jsonReadyFile);
@@ -174,8 +177,8 @@ export default class EepService implements CacheService {
         'eep:stop-wait-for-json',
       );
 
-      // Delete the EEP FINISHED file, so EEP will know we are ready
-      this.deleteFileIfExists(jsonReadyFile);
+      // Delete events-from-ce.pending, so EEP knows the payload was consumed.
+      EepService.deleteFileIfExists(jsonReadyFile);
       performance.mark('eep:start-wait-for-json');
     } catch (err) {
       console.log(err);
@@ -198,16 +201,36 @@ export default class EepService implements CacheService {
   }
 
   private deleteFileOnExit(fileName: string) {
-    // Delete the event counter file on exit
     const file = path.resolve(this.requireDir(), fileName);
-    process.on('exit', () => {
-      fs.unlink(file, (err) => {
-        if (err) {
-          console.error(err);
-        }
-        if (this.debug) console.log('on(exit): ' + file + ' successfully deleted');
-      });
-    });
+    EepService.filesToDeleteOnExit.add(file);
+    EepService.registerProcessCleanup();
+  }
+
+  private static registerProcessCleanup(): void {
+    if (EepService.processCleanupRegistered) {
+      return;
+    }
+
+    EepService.processCleanupRegistered = true;
+    process.on('exit', () => EepService.deleteRegisteredFiles());
+    process.once('SIGINT', () => EepService.exitAfterSignal('SIGINT'));
+    process.once('SIGTERM', () => EepService.exitAfterSignal('SIGTERM'));
+  }
+
+  private static exitAfterSignal(signal: NodeJS.Signals): void {
+    if (EepService.signalCleanupInProgress) {
+      return;
+    }
+
+    EepService.signalCleanupInProgress = true;
+    EepService.deleteRegisteredFiles();
+    process.kill(process.pid, signal);
+  }
+
+  private static deleteRegisteredFiles(): void {
+    for (const file of EepService.filesToDeleteOnExit) {
+      EepService.deleteFileIfExists(file);
+    }
   }
 
   public setOnJsonContentChanged(updateFunction: (jsonText: string, lastUpdate: number) => void) {

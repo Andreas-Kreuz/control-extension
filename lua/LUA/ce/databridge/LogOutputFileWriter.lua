@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch, cast-local-type, need-check-nil
 if CeDebugLoad then print("[#Start] Loading ce.databridge.LogOutputFileWriter ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
@@ -7,10 +8,15 @@ local LogOutputFileWriter = {}
 local initialized = false
 local resetMarker = "@@CE_LOG_RESET@@"
 
+---@type fun(v: any, message?: any): any
 local originalAssert
+---@type fun(message?: any, level?: integer):nil
 local originalError
+---@type fun(...: any):nil
 local originalPrint
+---@type fun(message: any, ...: any):nil|nil
 local originalWarn
+---@type fun():nil
 local originalClearlog
 
 local function logFromCeFileName() return ExchangeDirRegistry.getExchangeDirectory() .. "/log-from-ce" end
@@ -39,7 +45,6 @@ local function deleteLogFile()
 end
 
 function LogOutputFileWriter.initialize()
-    _G.print = function () end -- suppress print output for this test
     if initialized then return end
 
     originalAssert = assert

@@ -94,7 +94,7 @@ Elementtyp: Modulstatus
 
 Hinweis:
 
-- `syncState()` liefert aktuell kein Listenobjekt, sondern ein Root-Objekt mit leeren `ceTypes = {}` plus Einträgen unter `root[module.id]`.
+- `syncState()` liefert keine Nutzdaten zurück; Moduländerungen werden über `DataChangeBus` veröffentlicht.
 
 ### `ce.hub.EepVersion`
 
@@ -607,30 +607,11 @@ Schema:
 - identisch zu `ce.mods.transit.Line`
 - wird von `LineRegistry.fireChangeLinesEvent()` gesendet
 
-## Rückgabewerte der `syncState()`-Funktionen
+## `syncState()`-Transport
 
-Die heutigen Hub-Publisher senden ihre Nutzdaten primär über `DataChangeBus.fire*()` und geben in der Regel `{}` zurück.
-Die `*StatePublisher.lua`-Dateien sind dabei nur noch dünne Adapter auf die eigentlichen Publisher.
-
-| Publisher-Adapter                             | Rückgabe heute             | Bemerkung                               |
-| --------------------------------------------- | -------------------------- | --------------------------------------- |
-| `ModulesStatePublisher.syncState()`           | Objekt mit Modulen nach ID | einzig relevanter direkter Rückgabewert |
-| `RuntimeStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
-| `FrameDataStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
-| `VersionStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
-| `ScenarioStatePublisher.syncState()`          | `{}`                       | Nutzdaten nur im Event                  |
-| `SignalStatePublisher.syncState()`            | `{}`                       | Nutzdaten nur im Event                  |
-| `SwitchStatePublisher.syncState()`            | `{}`                       | Nutzdaten nur im Event                  |
-| `TimeStatePublisher.syncState()`              | `{}`                       | Nutzdaten nur im Event                  |
-| `WeatherStatePublisher.syncState()`           | `{}`                       | Nutzdaten nur im Event                  |
-| `DataSlotsStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
-| `StructureStatePublisher.syncState()`         | `{}`                       | Nutzdaten nur im Event                  |
-| `TracksStatePublisher.syncState()`            | `{}`                       | Nutzdaten nur im Event                  |
-| `TrainStatePublisher.syncState()`             | `{}`                       | Nutzdaten nur im Event                  |
-| `RollingStockStatePublisher.syncState()`      | `{}`                       | Nutzdaten nur im Event                  |
-| `TrafficLightModelStatePublisher.syncState()` | `{}`                       | Nutzdaten nur im Event                  |
-| `RoadStatePublisher.syncState()`              | `{}`                       | internes Datenobjekt wird verworfen     |
-| `TransitStatePublisher.syncState()`           | `{}`                       | internes Datenobjekt wird verworfen     |
+Die heutigen Hub-Publisher senden ihre Nutzdaten über `DataChangeBus.fire*()`.
+Die `*StatePublisher.lua`-Dateien sind dünne Adapter auf die eigentlichen Publisher.
+`syncState()` liefert keine Nutzdaten zurück.
 
 ## Verwendete EEP-Funktionen und Handbuchbezug
 

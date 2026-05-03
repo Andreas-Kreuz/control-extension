@@ -34,6 +34,7 @@ const groups = [
       { name: 'build:docs:assets:force', description: 'Generierte Doku-Assets vollständig neu erzeugen' },
       { name: 'build:exe', description: 'Windows-EXE der App und des Servers bauen' },
       { name: 'build:release', description: 'App und Server sowie Lua als Release für EEP bauen' },
+      { name: 'build:release:skiptests', description: 'Release für EEP ohne vorherige Checks bauen' },
       { name: 'clean', description: 'Temporäre Artefakte von Web, Doku und Lua gemeinsam entfernen' },
       { name: 'clean:docs', description: 'Jekyll-Build- und Cache-Artefakte der Doku entfernen' },
       { name: 'clean:lua', description: 'Temporäre Lua-Coverage- und Testartefakte entfernen' },

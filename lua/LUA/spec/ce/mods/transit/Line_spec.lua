@@ -35,6 +35,8 @@ insulate("Line Management Ring Line", function ()
 
         Line.scheduleDeparture("train1", RoadStation.forName("C"), 4)
         local scheduledNextStations = transitTrain1:getNextStations()
+        local scheduledOrigin = transitTrain1:getOrigin()
+        it("train1 gets origin from detected line segment", function () assert.are.equal("A", scheduledOrigin) end)
         it("train1 stores scheduled next stations", function ()
             assert.are.equal(3, #scheduledNextStations)
             assert.are.equal("C", scheduledNextStations[1].station.name)
@@ -59,6 +61,7 @@ insulate("Line Management Ring Line", function ()
     end)
 
     insulate("LineSegments", function ()
+        ---@type { segment: LineSegment, timeInMinutes: number }[]
         local segments = ringLineSegment:getAllSegments()
         it("Got 1 line segments", function () assert.are.equal(1, #segments) end)
         it("1st line ok", function () assert.are.equal(ringLineSegment, segments[1].segment) end)
@@ -181,10 +184,12 @@ insulate("Line Management 4 Line segments", function ()
 
             Line.trainDeparted("train4", RoadStation.forName("Hauptbahnhof"))
             local route2 = train4:getRoute()
+            local origin2 = transitTrain4:getOrigin()
             local queue = RoadStation.forName("Hauptbahnhof").queue
             local queueLength = #queue.entriesByArrival
             local queueText = RoadStation.queueToText(queue)
             it("", function () assert.are.equal("Linie 10: Tram in Richtung Striesen", route2) end)
+            it("sets origin after changing to next section", function () assert.are.equal("Messe Dresden", origin2) end)
             it("", function () assert.are.equal(4, queueLength) end)
             it("", function ()
                 assert.are.equal(
@@ -201,6 +206,7 @@ insulate("Line Management 4 Line segments", function ()
     end)
 
     insulate("LineSegments", function ()
+        ---@type { segment: LineSegment, timeInMinutes: number }[]
         local segments = linie10Messe:getAllSegments()
 
         it("Got 4 line segments", function () assert.are.equal(4, #segments) end)
@@ -212,6 +218,242 @@ insulate("Line Management 4 Line segments", function ()
         it("2nd time ok", function () assert.are.equal(6, segments[2].timeInMinutes) end)
         it("3rd time ok", function () assert.are.equal(7, segments[3].timeInMinutes) end)
         it("4th time ok", function () assert.are.equal(8, segments[4].timeInMinutes) end)
+    end)
+end)
+
+insulate("Line route reconciliation", function ()
+    local EepSimulator = require("ce.hub.eep.EepSimulator")
+    local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+    local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+    local Line = require("ce.mods.transit.Line")
+    local RoadStation = require("ce.mods.transit.RoadStation")
+
+    EepSimulator.simulateAddTrain("#RouteTrain1", "RouteTrain1 RS")
+    EepSimulator.simulateAddTrain("#RouteTrain2", "RouteTrain2 RS")
+    EepSimulator.simulateAddTrain("#RouteTrain3", "RouteTrain3 RS")
+    EepSimulator.simulateAddTrain("#RouteTrain4", "RouteTrain4 RS")
+
+    local sStriesen = RoadStation:new("Route Test Striesen", -1)
+    local sMesse = RoadStation:new("Route Test Messe", -1)
+    local sRadebeul = RoadStation:new("Route Test Radebeul", -1)
+
+    local line10 = Line.forName("10")
+    local l10Striesen = line10:addSection("Route Test Tram 10 Striesen", "Striesen")
+    l10Striesen:addStop(sMesse:platform(1), 0)
+    l10Striesen:addStop(sStriesen:platform(1), 2)
+
+    local l10Messe = line10:addSection("Route Test Tram 10 Messe Dresden", "Messe Dresden")
+    l10Messe:addStop(sStriesen:platform(2), 0)
+    l10Messe:addStop(sMesse:platform(2), 2)
+
+    local line4 = Line.forName("4")
+    local l04Striesen = line4:addSection("Route Test Tram 04 Striesen", "Striesen")
+    l04Striesen:addStop(sRadebeul:platform(1), 0)
+    l04Striesen:addStop(sStriesen:platform(3), 2)
+
+    insulate("raw EEP route change before trainDeparted", function ()
+        local train = TrainRegistry.forName("#RouteTrain1")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(l10Messe.routeName)
+        transitTrain:changeDestination(l10Messe.destination, l10Messe.line.nr)
+
+        EEPSetTrainRoute("#RouteTrain1", l04Striesen.routeName)
+        Line.trainDeparted("#RouteTrain1", sRadebeul)
+
+        it("updates cached train route from EEP", function ()
+            assert.equals(l04Striesen.routeName, train:getRoute())
+        end)
+        it("updates internal line from route mapping", function () assert.equals("4", transitTrain:getLine()) end)
+        it("updates destination from route mapping", function ()
+            assert.equals("Striesen", transitTrain:getDestination())
+        end)
+        it("updates origin from route mapping", function ()
+            assert.equals("Route Test Radebeul", transitTrain:getOrigin())
+        end)
+    end)
+
+    insulate("raw EEP route change before scheduleDeparture", function ()
+        local train = TrainRegistry.forName("#RouteTrain2")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(l10Messe.routeName)
+        transitTrain:changeDestination(l10Messe.destination, l10Messe.line.nr)
+
+        EEPSetTrainRoute("#RouteTrain2", l04Striesen.routeName)
+        Line.scheduleDeparture("#RouteTrain2", sStriesen, 5)
+
+        it("updates cached train route from EEP", function ()
+            assert.equals(l04Striesen.routeName, train:getRoute())
+        end)
+        it("updates internal line from route mapping", function () assert.equals("4", transitTrain:getLine()) end)
+        it("updates destination from route mapping", function ()
+            assert.equals("Striesen", transitTrain:getDestination())
+        end)
+    end)
+
+    insulate("same line route change updates destination", function ()
+        local train = TrainRegistry.forName("#RouteTrain3")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(l10Striesen.routeName)
+        transitTrain:changeDestination(l10Striesen.destination, l10Striesen.line.nr)
+
+        EEPSetTrainRoute("#RouteTrain3", l10Messe.routeName)
+        Line.scheduleDeparture("#RouteTrain3", sMesse, 3)
+
+        it("keeps the line", function () assert.equals("10", transitTrain:getLine()) end)
+        it("updates the destination", function () assert.equals("Messe Dresden", transitTrain:getDestination()) end)
+    end)
+
+    insulate("unknown EEP route removes transit state", function ()
+        local train = TrainRegistry.forName("#RouteTrain4")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(l10Striesen.routeName)
+        transitTrain:changeDestination(l10Striesen.destination, l10Striesen.line.nr)
+
+        EEPSetTrainRoute("#RouteTrain4", "Route Test Unknown Route")
+        local ok = pcall(function () Line.scheduleDeparture("#RouteTrain4", sStriesen, 1) end)
+
+        it("does not fail", function () assert.is_true(ok) end)
+        it("clears the previous line", function () assert.equals("", transitTrain:getLine()) end)
+        it("clears the previous destination", function ()
+            assert.equals("", transitTrain:getDestination())
+        end)
+        it("removes the train from transit trains", function ()
+            assert.is_nil(TransitTrainRegistry.find("#RouteTrain4"))
+        end)
+    end)
+
+    insulate("duplicate EEP routes keep the first mapping", function ()
+        local duplicateLine = Line.forName("Duplicate Route Test")
+        local duplicateSegment = duplicateLine:addSection(l10Striesen.routeName, "Duplicate")
+
+        it("returns the existing route mapping", function () assert.equals(l10Striesen, duplicateSegment) end)
+    end)
+end)
+
+insulate("Line contact guards", function ()
+    local EepSimulator = require("ce.hub.eep.EepSimulator")
+    local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+    local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+    local Line = require("ce.mods.transit.Line")
+    local RoadStation = require("ce.mods.transit.RoadStation")
+
+    EepSimulator.simulateAddTrain("#GuardTrain1", "GuardTrain1 RS")
+    EepSimulator.simulateAddTrain("#GuardTrain2", "GuardTrain2 RS")
+    EepSimulator.simulateAddTrain("#GuardTrain3", "GuardTrain3 RS")
+    EepSimulator.simulateAddTrain("#GuardTrain4", "GuardTrain4 RS")
+    EepSimulator.simulateAddTrain("#GuardTrain5", "GuardTrain5 RS")
+
+    local sGuardStart = RoadStation:new("Guard Test Start", -1)
+    local sGuardEnd = RoadStation:new("Guard Test End", -1)
+    local sGuardOther = RoadStation:new("Guard Test Other", -1)
+
+    local guardLine10 = Line.forName("Guard10")
+    local guardOutbound = guardLine10:addSection("Guard Route 10 Outbound", "Guard End")
+    guardOutbound:addStop(sGuardStart:platform(1), 0)
+    guardOutbound:addStop(sGuardEnd:platform(1), 2)
+
+    local guardInbound = guardLine10:addSection("Guard Route 10 Inbound", "Guard Start")
+    guardInbound:addStop(sGuardEnd:platform(2), 0)
+    guardInbound:addStop(sGuardStart:platform(2), 2)
+    guardOutbound:setNextSection(guardInbound, 2)
+
+    local guardLine20 = Line.forName("Guard20")
+    local guardOther = guardLine20:addSection("Guard Route 20 Other", "Guard Other")
+    guardOther:addStop(sGuardOther:platform(1), 0)
+
+    local function stationHasTrain(station, trainName)
+        for _, entry in pairs(station.queue.entries) do
+            if entry.trainName == trainName then return true end
+        end
+        return false
+    end
+
+    local function transitStationsHaveTrain(trainName)
+        return stationHasTrain(sGuardStart, trainName)
+            or stationHasTrain(sGuardEnd, trainName)
+            or stationHasTrain(sGuardOther, trainName)
+    end
+
+    insulate("unknown route clears stale departures", function ()
+        local train = TrainRegistry.forName("#GuardTrain1")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(guardOutbound.routeName)
+        transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
+        Line.scheduleDeparture("#GuardTrain1", sGuardEnd, 4)
+
+        EEPSetTrainRoute("#GuardTrain1", "Guard Route Unknown")
+        Line.scheduleDeparture("#GuardTrain1", sGuardEnd, 1)
+
+        it("removes stale station departures", function ()
+            assert.is_false(transitStationsHaveTrain("#GuardTrain1"))
+        end)
+        it("clears next stations", function () assert.are.equal(0, #transitTrain:getNextStations()) end)
+        it("clears line information", function () assert.equals("", transitTrain:getLine()) end)
+        it("removes transit train state", function ()
+            assert.is_nil(TransitTrainRegistry.find("#GuardTrain1"))
+        end)
+    end)
+
+    insulate("unknown route does not create transit train state", function ()
+        local train = TrainRegistry.forName("#GuardTrain5")
+        train:setRoute("Guard Route Unknown Without Transit Train")
+
+        Line.scheduleDeparture("#GuardTrain5", sGuardEnd, 1)
+
+        it("does not add station departures", function ()
+            assert.is_false(transitStationsHaveTrain("#GuardTrain5"))
+        end)
+        it("does not create a transit train", function ()
+            assert.is_nil(TransitTrainRegistry.find("#GuardTrain5"))
+        end)
+    end)
+
+    insulate("known route on wrong station clears stale departures", function ()
+        local train = TrainRegistry.forName("#GuardTrain2")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(guardOutbound.routeName)
+        transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
+        Line.scheduleDeparture("#GuardTrain2", sGuardEnd, 4)
+
+        EEPSetTrainRoute("#GuardTrain2", guardOther.routeName)
+        Line.scheduleDeparture("#GuardTrain2", sGuardStart, 1)
+
+        it("updates the train line from the EEP route", function ()
+            assert.equals("Guard20", transitTrain:getLine())
+        end)
+        it("removes stale station departures", function ()
+            assert.is_false(transitStationsHaveTrain("#GuardTrain2"))
+        end)
+        it("clears next stations", function () assert.are.equal(0, #transitTrain:getNextStations()) end)
+    end)
+
+    insulate("known route on matching station updates normally", function ()
+        local train = TrainRegistry.forName("#GuardTrain3")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(guardOutbound.routeName)
+        transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
+
+        EEPSetTrainRoute("#GuardTrain3", guardOther.routeName)
+        Line.scheduleDeparture("#GuardTrain3", sGuardOther, 3)
+
+        it("updates the train line from the EEP route", function ()
+            assert.equals("Guard20", transitTrain:getLine())
+        end)
+        it("adds station departures", function () assert.is_true(stationHasTrain(sGuardOther, "#GuardTrain3")) end)
+        it("stores next stations", function () assert.are.equal(1, #transitTrain:getNextStations()) end)
+    end)
+
+    insulate("setNextSection at the last station is not cleared", function ()
+        local train = TrainRegistry.forName("#GuardTrain4")
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(guardOutbound.routeName)
+        transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
+
+        Line.trainDeparted("#GuardTrain4", sGuardEnd)
+
+        it("changes to the next section route", function () assert.equals(guardInbound.routeName, train:getRoute()) end)
+        it("keeps transit line state", function () assert.equals("Guard10", transitTrain:getLine()) end)
+        it("stores next stations", function () assert.is_true(#transitTrain:getNextStations() > 0) end)
     end)
 end)
 

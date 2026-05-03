@@ -56,6 +56,7 @@ function LineSegment:setNextSection(newLineSegment, timeInMinutes)
     self.nextLineSegmentInfo = { followingSegment = newLineSegment, timeInMinutes = timeInMinutes }
 end
 
+---@return { segment: LineSegment, timeInMinutes: number }[]
 function LineSegment:getAllSegments()
     assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
     local viewed = {}
@@ -76,6 +77,18 @@ function LineSegment:getAllSegments()
 
     segments[1].timeInMinutes = timeInMinutes
     return segments
+end
+
+function LineSegment:hasStation(station)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(station) == "table" and station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
+
+    for _, segmentInfo in ipairs(self:getAllSegments()) do
+        for _, stationInfo in ipairs(segmentInfo.segment.stationInfos) do
+            if stationInfo.station == station then return true end
+        end
+    end
+    return false
 end
 
 ---comment
@@ -128,8 +141,14 @@ function LineSegment:nextStationList(routeName, nextStation, currentStation)
         if currentStation or index > 1 then total = total + info.timeToStation end
         info.totalTime = total
         if LineSegment.debug then
-            print("[#LineSegment] " .. info.lineNr .. "->" .. info.destination .. " " .. info.station.name .. " (" ..
-                info.totalTime .. ") " .. info.timeToStation)
+            print(string.format(
+                "[#LineSegment] %s->%s %s (%s) %s",
+                info.lineNr,
+                info.destination,
+                info.station.name,
+                info.totalTime,
+                info.timeToStation
+            ))
         end
     end
 
@@ -200,6 +219,8 @@ function LineSegment:trainDeparted(train, currentStation)
     local transitTrain = TransitTrainRegistry.forTrain(train)
     local oldDestination = transitTrain:getDestination()
     local oldLine = transitTrain:getLine()
+    ---@cast oldDestination string
+    ---@cast oldLine string
     local infoList = self:nextStationList(train:getRoute(), nil, currentStation)
     updateTransitTrainNextStations(train, infoList, 0)
 
@@ -207,6 +228,8 @@ function LineSegment:trainDeparted(train, currentStation)
         local nextSegment = self.nextLineSegmentInfo.followingSegment
         train:setRoute(nextSegment.routeName)
         transitTrain:changeDestination(nextSegment.destination, nextSegment.line.nr)
+        local origin = nextSegment:getFirstStation()
+        if origin then transitTrain:setOrigin(origin.name) end
     end
 
     for _, info in ipairs(infoList) do

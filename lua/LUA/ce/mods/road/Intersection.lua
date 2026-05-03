@@ -19,14 +19,16 @@ Intersection.debug = CeStartWithDebug or false
 Intersection.allIntersections = {}
 
 function Intersection.switchManuallyTo(crossingName, sequenceName)
-    if Intersection.debug then print("[#Intersection] switchManuallyTo:" .. crossingName .. "/" .. sequenceName) end
+    if Intersection.debug then
+        print(string.format("[#Intersection] switchManuallyTo: %s/%s", crossingName, sequenceName))
+    end
     ---@type Intersection
     local k = Intersection.allIntersections[crossingName]
     if k then k:setManualSequence(sequenceName) end
 end
 
 function Intersection.switchAutomatically(crossingName)
-    if Intersection.debug then print("[#Intersection] switchAutomatically:" .. crossingName) end
+    if Intersection.debug then print(string.format("[#Intersection] switchAutomatically: %s", crossingName)) end
     ---@type Intersection
     local k = Intersection.allIntersections[crossingName]
     if k then k:setAutomaticSequence() end
@@ -79,7 +81,7 @@ function Intersection:setManualSequence(sequenceName)
     for _, sequence in ipairs(self.sequences) do
         if sequence.name == sequenceName then
             self.manualSequence = sequence
-            print("[#Intersection] Manuell geschaltet auf: " .. sequence.name .. " (" .. self.name .. "')")
+            print(string.format("[#Intersection] Manuell geschaltet auf: %s (%s')", sequence.name, self.name))
             self:setGreenPhaseFinished(true)
         end
     end
@@ -88,7 +90,7 @@ end
 function Intersection:setAutomaticSequence()
     self.manualSequence = nil
     self:setGreenPhaseFinished(true)
-    print("[#Intersection] Automatikmodus aktiviert. (" .. self.name .. "')")
+    print(string.format("[#Intersection] Automatikmodus aktiviert. (%s')", self.name))
 end
 
 function Intersection:setSwitchInStrictOrder(value)
@@ -114,7 +116,7 @@ function Intersection:addStaticCam(kameraName) table.insert(self.staticCams, kam
 
 function Intersection.resetVehicles()
     for _, crossing in pairs(allIntersections) do
-        print("[#Intersection] SETZE ZURUECK: " .. crossing.name)
+        print(string.format("[#Intersection] SETZE ZURUECK: %s", crossing.name))
         if crossing.lanes then for _, lane in pairs(crossing.lanes) do lane:resetVehicles() end end
     end
 end
@@ -362,7 +364,7 @@ function Intersection.initSequences()
                 laneFound = true
             end
             if not laneFound then
-                print("[#Intersection] No LANE found in sequence " .. sequence.name .. " (" .. crossing.name .. ")")
+                print(string.format("[#Intersection] No LANE found in sequence %s (%s)", sequence.name, crossing.name))
             end
             assert(laneFound)
             for v in pairs(sequence.trafficLights) do crossing.trafficLights[v.signalId] = v end

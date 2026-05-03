@@ -52,11 +52,11 @@ function StorageUtility.loadTable(eepSaveId, name)
     local hResult, data = EEPLoadData(eepSaveId)
     if hResult then
         if StorageUtility.debug then
-            print("[#StorageUtility] Laden: [OK] - " .. eepSaveId .. " - " .. name .. " gefunden: " .. data)
+            print(string.format("[#StorageUtility] Laden: [OK] - %s - %s gefunden: %s", eepSaveId, name, data))
         end
     else
         if StorageUtility.debug then
-            print("[#StorageUtility] Laden: [!!] - " .. eepSaveId .. " (DataSlot) - " .. name .. " nicht gefunden!")
+            print(string.format("[#StorageUtility] Laden: [!!] - %s (DataSlot) - %s nicht gefunden!", eepSaveId, name))
         end
     end
 
@@ -68,7 +68,7 @@ function StorageUtility.parseTableFromString(data)
     if data then
         for k, v in string.gmatch(data, "(%w+)=(.-[,])") do
             v = v:sub(1, -2)
-            if StorageUtility.debug then print("[#StorageUtility] " .. k .. "=" .. v) end
+            if StorageUtility.debug then print(string.format("[#StorageUtility] %s=%s", k, v)) end
             t[k] = v
         end
     end
@@ -88,10 +88,10 @@ function StorageUtility.loadTableRollingStock(rollingStockName)
     local hResult, data = EEPRollingstockGetTagText(rollingStockName)
     if hResult then
         if StorageUtility.debug then
-            print("[#StorageUtility] Load: [OK] - " .. rollingStockName .. " (RollingStock) found: " .. data)
+            print(string.format("[#StorageUtility] Load: [OK] - %s (RollingStock) found: %s", rollingStockName, data))
         end
     else
-        print("[#StorageUtility] Load: [!!] - " .. rollingStockName .. " (RollingStock) not found!")
+        print(string.format("[#StorageUtility] Load: [!!] - %s (RollingStock) not found!", rollingStockName))
     end
 
     return StorageUtility.parseTableFromString(data)
@@ -137,14 +137,23 @@ function StorageUtility.saveTable(eepSaveId, table, name)
     local maxLength = StorageUtility.maxSaveDataStringLength
     local text = StorageUtility.encodeTable(table, maxLength)
     if text:len() > maxLength then
-        print("[#StorageUtility] Cannot store more than " ..
-            maxLength .. " characters in slot " .. eepSaveId .. " - " .. name)
+        print(string.format(
+            "[#StorageUtility] Cannot store more than %s characters in slot %s - %s",
+            maxLength,
+            eepSaveId,
+            name
+        ))
     end
     assert(text:len() <= maxLength)
     local hresult = EEPSaveData(eepSaveId, text)
     if StorageUtility.debug then
-        print("[#StorageUtility] Speichern [" .. (hresult and "OK" or "!!") .. "] - " .. eepSaveId .. " - " .. name ..
-            " gespeichert: " .. text)
+        print(string.format(
+            "[#StorageUtility] Speichern [%s] - %s - %s gespeichert: %s",
+            (hresult and "OK" or "!!"),
+            eepSaveId,
+            name,
+            text
+        ))
     end
     savedValues[eepSaveId] = text
     if StorageUtility.debug then StorageUtility.updateDebugFile() end
@@ -166,7 +175,12 @@ function StorageUtility.encodeTable(table, maxLength)
         assert(not string.find(v, ","))
         text = text .. k .. "=" .. v .. ","
     end
-    if text:len() > maxLength then print("[#StorageUtility] Cannot store more than " .. maxLength .. " characters") end
+    if text:len() > maxLength then
+        print(string.format(
+            "[#StorageUtility] Cannot store more than %s characters",
+            maxLength
+        ))
+    end
     assert(text:len() <= maxLength)
     return text
 end

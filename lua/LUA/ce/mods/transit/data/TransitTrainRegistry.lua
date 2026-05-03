@@ -29,6 +29,11 @@ function TransitTrainRegistry.forName(trainId)
     return TransitTrainRegistry.forTrain(TrainRegistry.forName(trainId))
 end
 
+function TransitTrainRegistry.find(trainId)
+    assert(type(trainId) == "string", "Need 'trainId' as string")
+    return allTransitTrains[trainId]
+end
+
 function TransitTrainRegistry.remove(trainId)
     if allTransitTrains[trainId] == nil then return end
 

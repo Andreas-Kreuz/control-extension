@@ -4,25 +4,16 @@ insulate("ce.databridge.ServerExchangeFileIo", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     local originalIoOpen = io.open
-    local originalIoClose = io.close
-
     before_each(function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.ServerExchangeFileIo")
-        io.open = originalIoOpen
-        io.close = originalIoClose
-    end)
-
-    after_each(function ()
-        io.open = originalIoOpen
-        io.close = originalIoClose
     end)
 
     it("detects a ready server from the exchange directory", function ()
         local openCalls = {}
 
-        io.close = function () end
-        io.open = function (name, mode)
+        local ioCloseStub = stub(io, "close", function () end)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/server-is-running" and
@@ -36,7 +27,9 @@ insulate("ce.databridge.ServerExchangeFileIo", function ()
                 return nil
             end
             return { write = function () end, flush = function () end, close = function () end }
-        end
+        end)
+        finally(function () ioCloseStub:revert() end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local ServerExchangeFileIo = require("ce.databridge.ServerExchangeFileIo")
@@ -56,8 +49,8 @@ insulate("ce.databridge.ServerExchangeFileIo", function ()
         local openCalls = {}
         local writtenFiles = {}
 
-        io.close = function () end
-        io.open = function (name, mode)
+        local ioCloseStub = stub(io, "close", function () end)
+        local ioOpenStub = stub(io, "open", function (name, mode)
             if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
                 name ~= "custom-dir/ce-version.txt" and
                 name ~= "custom-dir/events-from-ce" and
@@ -76,7 +69,9 @@ insulate("ce.databridge.ServerExchangeFileIo", function ()
                 flush = function () end,
                 close = function () end
             }
-        end
+        end)
+        finally(function () ioCloseStub:revert() end)
+        finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
         local ServerExchangeFileIo = require("ce.databridge.ServerExchangeFileIo")

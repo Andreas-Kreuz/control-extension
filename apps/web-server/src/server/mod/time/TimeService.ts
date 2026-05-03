@@ -2,8 +2,10 @@ import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { DomainDataProvider } from '../../eep/server-data/dynamic/DomainDataProvider';
 import DomainRoomService from '../../eep/server-data/dynamic/DomainRoomService';
 import TimeSelector from './TimeSelector';
-import { TimeRoom } from '@ce/web-shared';
+import { DomainRoom } from '@ce/web-shared';
 import { Server } from 'socket.io';
+
+const TimeRoom = new DomainRoom('App.Time');
 
 export default class TimeService implements DomainRoomService {
   private roomDataProviders: DomainDataProvider[] = [];
@@ -13,7 +15,6 @@ export default class TimeService implements DomainRoomService {
     this.roomDataProviders.push({
       roomType: TimeRoom,
       id: 'TimeRoom',
-      onInterest: [],
       jsonCreator: (_room: string): string => {
         return JSON.stringify(this.timeSelector.getTimes());
       },

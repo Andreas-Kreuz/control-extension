@@ -300,7 +300,7 @@ Exportierte CeTypes:
 - `ce.mods.road.IntersectionTrafficLight`
 - `ce.mods.road.ModuleSetting`
 
-Wichtig: `syncState()` baut die Nutzdaten zwar intern auf, liefert derzeit aber bewusst ein leeres Tabellenobjekt zurück. Der eigentliche Datentransport erfolgt über `DataChangeBus`.
+Wichtig: `syncState()` baut die Nutzdaten intern auf und veröffentlicht sie über `DataChangeBus`, liefert aber keine Nutzdaten zurück.
 
 ### [TrafficLightModelStatePublisher.lua](./TrafficLightModelStatePublisher.lua)
 
@@ -311,7 +311,7 @@ Verantwortlichkeiten:
 - Export aller registrierten `TrafficLightModel`-Definitionen
 - Emission des CeTypes `ce.mods.road.SignalTypeDefinition` über `DataChangeBus`
 
-Wie bei `RoadStatePublisher` erfolgt der eigentliche Transport aktuell über Events, nicht über den Rückgabewert von `syncState()`.
+Wie bei `RoadStatePublisher` erfolgt der eigentliche Transport aktuell über Events; `syncState()` liefert keine Nutzdaten zurück.
 
 ### [AxisStructureTrafficLight.lua](./AxisStructureTrafficLight.lua)
 

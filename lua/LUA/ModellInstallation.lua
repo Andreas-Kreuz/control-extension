@@ -6,7 +6,7 @@ local AkModellPaket = require("ce.modellpacker.AkModellPaket")
 
 local currentDirectory = ".."
 if arg and arg[1] then currentDirectory = arg[1] end
-print("[#ModellInstallation] Suche Installationsdateien in Verzeichnis \"" .. currentDirectory .. "\"")
+print(string.format("[#ModellInstallation] Suche Installationsdateien in Verzeichnis \"%s\"", currentDirectory))
 
 -----------------------------------------
 -- Paket: Control Extension
@@ -61,10 +61,10 @@ paket3:addFiles(currentDirectory, "", "LUA\\ce\\demo-anlagen\\tutorial-ampel", {
 paket3:addFiles(currentDirectory, "", "Resourcen\\Anlagen\\ce\\Control_Extension-Tutorial-Ampelkreuzung",
                 { ".dds", "README.md", "desktop.ini" })
 
-print("[#ModellInstallation] " .. paket0.germanName)
-print("[#ModellInstallation] " .. paket1.germanName)
-print("[#ModellInstallation] " .. paket2.germanName)
-print("[#ModellInstallation] " .. paket3.germanName)
+print(string.format("[#ModellInstallation] %s", paket0.germanName))
+print(string.format("[#ModellInstallation] %s", paket1.germanName))
+print(string.format("[#ModellInstallation] %s", paket2.germanName))
+print(string.format("[#ModellInstallation] %s", paket3.germanName))
 
 local installer = AkModellInstaller:new("Installer-Control-Extension-fuer-EEP")
 installer:addModelPackage(paket0)

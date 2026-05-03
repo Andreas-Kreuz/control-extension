@@ -17,7 +17,11 @@
 ---@field trackType string|nil
 ---@field hookStatus number
 ---@field hookGlueMode number
+---@field axisNamesKnown boolean
+---@field axisNames table<string,string>
+---@field axisValues table<string,number>
 ---@field surfaceTexts table<string,string>
+---@field textureNames table<string,string>
 ---@field trackId number -- ondemand: placeholder 0 when not subscribed
 ---@field trackDistance number -- ondemand: placeholder 0 when not subscribed
 ---@field trackDirection number -- ondemand: placeholder 0 when not subscribed
@@ -32,11 +36,4 @@
 ---@field rotX number -- ondemand: placeholder 0 when not subscribed
 ---@field rotY number -- ondemand: placeholder 0 when not subscribed
 ---@field rotZ number -- ondemand: placeholder 0 when not subscribed
----@field xmlModel string|nil -- oninterest
-
----@class RollingStockDtoFactory
----@field createFullDto fun(stock: RollingStock, isSubscribed: boolean|nil):string,string,string,RollingStockDto
----@field createPatchDto fun(stock: RollingStock, dirtyFields: table<string,boolean>, isSubscribed: boolean|nil):
----string,string,string,RollingStockDto
----@field createOndemandPlaceholderPatch fun(stock: RollingStock):string,string,string,RollingStockDto
----@field createRefDto fun(stockId: string):string,string,string,table
+---@field xmlModel string|nil

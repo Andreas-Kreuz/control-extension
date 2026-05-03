@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -6,11 +6,11 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
-import AppPage from '../../../shared/layouts/AppPage';
-import AppPageHeadline from '../../../shared/layouts/AppPageHeadline';
+import PageContainer from '../../../shared/layouts/PageContainer';
+import PageHeadline from '../../../shared/layouts/PageHeadline';
 import useApiEntries from '../hooks/useApiEntries';
 
-function DataMod() {
+function DataPage() {
   const entries = useApiEntries();
   const [filter, setFilter] = useState('');
 
@@ -22,8 +22,8 @@ function DataMod() {
   }, [entries, filter]);
 
   return (
-    <AppPage>
-      <AppPageHeadline>CE-Typen</AppPageHeadline>
+    <PageContainer>
+      <PageHeadline>CE-Typen</PageHeadline>
       <TextField
         size="small"
         label="Typ filtern"
@@ -49,8 +49,8 @@ function DataMod() {
           ))}
         </TableBody>
       </Table>
-    </AppPage>
+    </PageContainer>
   );
 }
 
-export default DataMod;
+export default DataPage;

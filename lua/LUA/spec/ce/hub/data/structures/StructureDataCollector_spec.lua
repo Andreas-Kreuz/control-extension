@@ -2,6 +2,13 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     local states
+    local structureGetLightStub
+    local structureGetSmokeStub
+    local structureGetFireStub
+    local structureGetPositionStub
+    local structureGetRotationStub
+    local structureGetModelTypeStub
+    local structureGetTagTextStub
 
     before_each(function ()
         clearModule("ce.hub.data.structures.StructureDataCollector")
@@ -30,37 +37,37 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
             }
         }
 
-        stub(_G, "EEPStructureGetLight", function (name)
+        structureGetLightStub = stub(_G, "EEPStructureGetLight", function (name)
             local entry = states[name]
             if not entry or entry.hasLight ~= true then return false, false end
             return true, entry.light
         end)
-        stub(_G, "EEPStructureGetSmoke", function (name)
+        structureGetSmokeStub = stub(_G, "EEPStructureGetSmoke", function (name)
             local entry = states[name]
             if not entry or entry.hasSmoke ~= true then return false, false end
             return true, entry.smoke
         end)
-        stub(_G, "EEPStructureGetFire", function (name)
+        structureGetFireStub = stub(_G, "EEPStructureGetFire", function (name)
             local entry = states[name]
             if not entry or entry.hasFire ~= true then return false, false end
             return true, entry.fire
         end)
-        stub(_G, "EEPStructureGetPosition", function (name)
+        structureGetPositionStub = stub(_G, "EEPStructureGetPosition", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.pos[1], entry.pos[2], entry.pos[3]
         end)
-        stub(_G, "EEPStructureGetRotation", function (name)
+        structureGetRotationStub = stub(_G, "EEPStructureGetRotation", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.rot[1], entry.rot[2], entry.rot[3]
         end)
-        stub(_G, "EEPStructureGetModelType", function (name)
+        structureGetModelTypeStub = stub(_G, "EEPStructureGetModelType", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.modelType
         end)
-        stub(_G, "EEPStructureGetTagText", function (name)
+        structureGetTagTextStub = stub(_G, "EEPStructureGetTagText", function (name)
             local entry = states[name]
             if not entry then return false end
             return true, entry.tag
@@ -68,13 +75,13 @@ insulate("ce.hub.data.structures.StructureDataCollector", function ()
     end)
 
     after_each(function ()
-        _G.EEPStructureGetLight:revert()
-        _G.EEPStructureGetSmoke:revert()
-        _G.EEPStructureGetFire:revert()
-        _G.EEPStructureGetPosition:revert()
-        _G.EEPStructureGetRotation:revert()
-        _G.EEPStructureGetModelType:revert()
-        _G.EEPStructureGetTagText:revert()
+        structureGetLightStub:revert()
+        structureGetSmokeStub:revert()
+        structureGetFireStub:revert()
+        structureGetPositionStub:revert()
+        structureGetRotationStub:revert()
+        structureGetModelTypeStub:revert()
+        structureGetTagTextStub:revert()
     end)
 
     it("collects initial structures with static and dynamic fields", function ()

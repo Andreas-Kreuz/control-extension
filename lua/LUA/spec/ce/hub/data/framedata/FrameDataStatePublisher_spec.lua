@@ -27,24 +27,24 @@ insulate("FrameDataStatePublisher", function ()
         local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
         local published = {}
 
-        DataChangeBus.fireListChange = function (ceType, keyId, list)
-            table.insert(published, { ceType = ceType, keyId = keyId, list = list })
-        end
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
+            table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        finally(function () fireDataChangedStub:revert() end)
 
         FrameDataUpdater.runUpdate()
         FrameDataStatePublisher.syncState()
         assert.equals(1, #published)
         assert.equals("ce.hub.FrameData", published[1].ceType)
         assert.equals("id", published[1].keyId)
+        assert.equals("frameData", published[1].key)
         assert.same({
-                        {
-                            ceType = "ce.hub.FrameData",
-                            id = "frameData",
-                            framesPerSecond = 60,
-                            currentFrame = 15,
-                            currentRenderFrame = 15948
-                        }
-                    }, published[1].list)
+                        ceType = "ce.hub.FrameData",
+                        id = "frameData",
+                        framesPerSecond = 60,
+                        currentFrame = 15,
+                        currentRenderFrame = 15948
+                    }, published[1].dto)
     end)
 
     it("publishes nil values when EEP functions are not available", function ()
@@ -58,9 +58,10 @@ insulate("FrameDataStatePublisher", function ()
         local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")
         local published = {}
 
-        DataChangeBus.fireListChange = function (ceType, keyId, list)
-            table.insert(published, { ceType = ceType, keyId = keyId, list = list })
-        end
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
+            table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        finally(function () fireDataChangedStub:revert() end)
 
         FrameDataRegistry.set({
             {
@@ -70,10 +71,8 @@ insulate("FrameDataStatePublisher", function ()
         FrameDataStatePublisher.syncState()
         assert.equals(1, #published)
         assert.same({
-                        {
-                            ceType = "ce.hub.FrameData",
-                            id = "frameData"
-                        }
-                    }, published[1].list)
+                        ceType = "ce.hub.FrameData",
+                        id = "frameData"
+                    }, published[1].dto)
     end)
 end)

@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStock ...") end
 
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
+local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local TableUtils = require("ce.hub.util.TableUtils")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
@@ -41,8 +42,203 @@ local function collectTextureTexts(rollingStockName)
     return surfaceTexts
 end
 
+local function copyTableWithStringKeys(values)
+    local copy = {}
+    for key, value in pairs(values or {}) do copy[tostring(key)] = value end
+    return copy
+end
+
+local function sortedNumberKeys(values)
+    local keys = {}
+    for key in pairs(values or {}) do
+        local numberKey = tonumber(key)
+        if numberKey then keys[#keys + 1] = numberKey end
+    end
+    table.sort(keys)
+    return keys
+end
+
+local function currentEepLanguage()
+    local language = type(EEPLng) == "string" and string.upper(EEPLng) or ""
+    if language == "ENG" or language == "GER" or language == "POL" or language == "FRA" then return language end
+    return "GER"
+end
+
+local function axisNameForNumber(modelInfo, axisNumber)
+    if not modelInfo then return nil end
+
+    if type(modelInfo.getAxisName) == "function" then
+        return modelInfo:getAxisName(axisNumber, currentEepLanguage())
+    end
+
+    local axisNames = modelInfo.axisNames or {}
+    return axisNames[tonumber(axisNumber)]
+end
+
+local function axisNamesKnownForModelInfo(modelInfo)
+    if not modelInfo then return false end
+    if type(modelInfo.getAxisNamesKnown) == "function" then return modelInfo:getAxisNamesKnown() end
+    return modelInfo.axisNamesKnown == true
+end
+
+local function sortedAxisNumbers(modelInfo)
+    local numbers = {}
+    local byNumber = {}
+
+    local function addKeys(values)
+        for _, numberKey in ipairs(sortedNumberKeys(values)) do
+            if not byNumber[numberKey] then
+                byNumber[numberKey] = true
+                numbers[#numbers + 1] = numberKey
+            end
+        end
+    end
+
+    addKeys(modelInfo and modelInfo.axisNames or {})
+    for _, languageAxisNames in pairs(modelInfo and modelInfo.axisNamesByLanguage or {}) do
+        addKeys(languageAxisNames)
+    end
+
+    table.sort(numbers)
+    return numbers
+end
+
+local function collectAxisValues(rollingStockName, modelInfo)
+    local axisValues = {}
+    local axisNumbers = sortedAxisNumbers(modelInfo)
+    local hasAxisMetadata = #axisNumbers > 0
+    if not hasAxisMetadata and axisNamesKnownForModelInfo(modelInfo) then return axisValues end
+    if not hasAxisMetadata then
+        for axisNumber = 1, 10 do axisNumbers[#axisNumbers + 1] = axisNumber end
+    end
+
+    for _, axisNumber in ipairs(axisNumbers) do
+        local ok, axisValue = false, nil
+        if hasAxisMetadata and type(EEPRollingstockGetAxis) == "function" then
+            local axisName = axisNameForNumber(modelInfo, axisNumber)
+            if axisName then ok, axisValue = EEPRollingstockGetAxis(rollingStockName, axisName) end
+        end
+        if not ok and type(EEPRollingstockGetAxisByNumber) == "function" then
+            ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
+        end
+        if ok then axisValues[tostring(axisNumber)] = tonumber(axisValue) or 0 end
+    end
+
+    return axisValues
+end
+
 ---@class RollingStock
+---@field values table<string, string>
+---@field id string
+---@field rollingStockName string
+---@field type string
+---@field trainName string
+---@field positionInTrain integer
+---@field couplingFront integer
+---@field couplingRear integer
+---@field modelType integer
+---@field modelTypeText string
+---@field propelled boolean
+---@field length number
+---@field mileage number
+---@field trackId integer
+---@field trackDistance number
+---@field trackDirection integer
+---@field trackSystem integer
+---@field x number
+---@field y number
+---@field z number
+---@field model RollingStockModel
+---@field modelInfo table|nil
+---@field axisNamesKnown boolean
+---@field axisValues table<string, number>
+---@field tag string
+---@field orientationForward boolean
+---@field smoke number|boolean
+---@field hookStatus number
+---@field hookGlueMode number
+---@field active boolean
+---@field textureTexts table<string, string>
+---@field rotX number
+---@field rotY number
+---@field rotZ number
+---@field trackType string|nil
 ---@field xmlModel string|nil
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
+---@field new fun(self: RollingStock, o: table):RollingStock
+---@field setValue fun(self: RollingStock, key: string, value: string):nil
+---@field getValue fun(self: RollingStock, key: string):string
+---@field save fun(self: RollingStock, clearCurrentInfo?: boolean):nil
+---@field setLine fun(self: RollingStock, line: string):nil
+---@field setDestination fun(self: RollingStock, destination: string):nil
+---@field setStations fun(self: RollingStock, stations: string):nil
+---@field setWagonNr fun(self: RollingStock, nr: string):nil
+---@field getWagonNr fun(self: RollingStock):string
+---@field setTrainName fun(self: RollingStock, trainName: string):nil
+---@field getTrainName fun(self: RollingStock):string
+---@field setPositionInTrain fun(self: RollingStock, positionInTrain: number):nil
+---@field getPositionInTrain fun(self: RollingStock):number
+---@field getLength fun(self: RollingStock):number
+---@field setLength fun(self: RollingStock, length: number):nil
+---@field getModelType fun(self: RollingStock):number
+---@field setModelType fun(self: RollingStock, modelType: number):nil
+---@field getModelTypeText fun(self: RollingStock):string
+---@field getTag fun(self: RollingStock):string
+---@field setTag fun(self: RollingStock, tag: string):nil
+---@field getPropelled fun(self: RollingStock):boolean
+---@field setPropelled fun(self: RollingStock, propelled: boolean):nil
+---@field setOrientationForward fun(self: RollingStock, orientationForward: boolean):nil
+---@field getOrientationForward fun(self: RollingStock):boolean
+---@field setSmoke fun(self: RollingStock, smoke: number|boolean):nil
+---@field getSmoke fun(self: RollingStock):number|boolean
+---@field setHookStatus fun(self: RollingStock, hookStatus: number):nil
+---@field getHookStatus fun(self: RollingStock):number
+---@field setHookGlueMode fun(self: RollingStock, hookGlueMode: number):nil
+---@field getHookGlueMode fun(self: RollingStock):number
+---@field setActive fun(self: RollingStock, active: boolean):nil
+---@field getActive fun(self: RollingStock):boolean
+---@field setTextureTexts fun(self: RollingStock, textureTexts: table<string, string>):nil
+---@field getTextureTexts fun(self: RollingStock):table<string, string>
+---@field updateTextureTexts fun(self: RollingStock):nil
+---@field setAxisValues fun(self: RollingStock, axisValues: table<string, number>):nil
+---@field getAxisValues fun(self: RollingStock):table<string, number>
+---@field updateAxisValues fun(self: RollingStock):nil
+---@field setAxisByNumber fun(self: RollingStock, axisNumber: number|string, axisValue: number|string):boolean
+---@field setAxisByNameFallback fun(self: RollingStock, axisNumber: number|string, axisValue: number|string):boolean
+---@field getAxisNames fun(self: RollingStock):table<string, string>
+---@field getAxisNamesKnown fun(self: RollingStock):boolean
+---@field getTextureNames fun(self: RollingStock):table<string, string>
+---@field setRotation fun(self: RollingStock, rotX: number, rotY: number, rotZ: number):nil
+---@field getRotX fun(self: RollingStock):number
+---@field getRotY fun(self: RollingStock):number
+---@field getRotZ fun(self: RollingStock):number
+---@field setCouplingFront fun(self: RollingStock, couplingFront: number):nil
+---@field getCouplingFront fun(self: RollingStock):number
+---@field setCouplingRear fun(self: RollingStock, couplingRear: number):nil
+---@field getCouplingRear fun(self: RollingStock):number
+---@field getTrackId fun(self: RollingStock):number
+---@field setTrack fun(self: RollingStock, trackId: number, trackDistance: number,
+---trackDirection: number, trackSystem: number):nil
+---@field getTrackDistance fun(self: RollingStock):number
+---@field getTrackDirection fun(self: RollingStock):number
+---@field getTrackSystem fun(self: RollingStock):number
+---@field setTrackType fun(self: RollingStock, trackType: string):nil
+---@field getTrackType fun(self: RollingStock):string|nil
+---@field setPosition fun(self: RollingStock, x: number, y: number, z: number):nil
+---@field getX fun(self: RollingStock):number
+---@field getY fun(self: RollingStock):number
+---@field getZ fun(self: RollingStock):number
+---@field setMileage fun(self: RollingStock, mileage: number):nil
+---@field getMileage fun(self: RollingStock):number
+---@field getXmlModel fun(self: RollingStock):string|nil
+---@field setXmlModel fun(self: RollingStock, model: string|nil):nil
+---@field resetDirty fun(self: RollingStock):nil
+---@field hasDirtyFields fun(self: RollingStock):boolean
+---@field openDoors fun(self: RollingStock):nil
+---@field closeDoors fun(self: RollingStock):nil
+---@field toJsonStatic fun(self: RollingStock):table
+---@field toJsonDynamic fun(self: RollingStock):table
 local RollingStock = {}
 
 -- Field update policies (see RollingStockStaticDtoTypes.d.lua / RollingStockDynamicDtoTypes.d.lua):
@@ -54,14 +250,14 @@ local function markDirty(rollingStock, fieldName)
     rollingStock.dirtyFields[fieldName] = true
 end
 
-
 ---Create a new RollingStock and init it
----@param o RollingStock
+---@param o table
 ---@return RollingStock
 function RollingStock:new(o)
     assert(o.rollingStockName, "Provide a rollingStockName")
     assert(type(o.rollingStockName) == "string", "Need 'o.id' as string")
     o.id = o.rollingStockName
+    local xmlModel = o.xmlModel
 
     self.__index = self
     setmetatable(o, self)
@@ -92,7 +288,6 @@ function RollingStock:new(o)
     end
 
     o.type = "RollingStock"
-    o.model = RollingStockModels.modelFor(o.id)
     o.trainName = ""
     o.positionInTrain = -1
     o.couplingFront = couplingFront or 1
@@ -109,6 +304,9 @@ function RollingStock:new(o)
     o.hookGlueMode = hookGlueOk and hookGlueMode or 0
     o.active = activeRollingStock == o.id
     o.textureTexts = collectTextureTexts(o.id)
+    o.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    o.axisNamesKnown = axisNamesKnownForModelInfo(o.modelInfo)
+    o.axisValues = collectAxisValues(o.id, o.modelInfo)
     o.trackId = trackId or -1
     o.trackDistance = tonumber(string.format("%.2f", trackDistance or -1)) or -1
     o.trackDirection = trackDirection or -1
@@ -120,7 +318,8 @@ function RollingStock:new(o)
     o.rotX = rotationOk and round2(rotX) or 0
     o.rotY = rotationOk and round2(rotY) or 0
     o.rotZ = rotationOk and round2(rotZ) or 0
-    o.xmlModel = nil
+    o.xmlModel = xmlModel
+    o.model = RollingStockModels.modelFor(o.id, o.xmlModel)
     o.dirtyFields = {}
     o.needsFullSend = true
     return o
@@ -310,7 +509,7 @@ end
 
 function RollingStock:setSmoke(smoke)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    assert(type(smoke) == "number", "Need 'smoke' as number")
+    assert(type(smoke) == "number" or type(smoke) == "boolean", "Need 'smoke' as number|boolean")
     local oldSmoke = self.smoke
     self.smoke = smoke
     if oldSmoke ~= smoke then markDirty(self, "smoke") end
@@ -376,6 +575,75 @@ end
 function RollingStock:updateTextureTexts()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     self:setTextureTexts(collectTextureTexts(self.rollingStockName))
+end
+
+function RollingStock:setAxisValues(axisValues)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(axisValues) == "table", "Need 'axisValues' as table")
+    local nextAxisValues = copyTableWithStringKeys(axisValues)
+    local oldAxisValues = self.axisValues or {}
+    self.axisValues = nextAxisValues
+    if not TableUtils.sameDictEntries(oldAxisValues, nextAxisValues) then markDirty(self, "axisValues") end
+end
+
+function RollingStock:getAxisValues()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return copyTableWithStringKeys(self.axisValues or {})
+end
+
+function RollingStock:updateAxisValues()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+end
+
+function RollingStock:setAxisByNumber(axisNumber, axisValue)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    axisNumber = tonumber(axisNumber)
+    axisValue = tonumber(axisValue)
+    if not axisNumber or not axisValue then return false end
+
+    if axisNameForNumber(self.modelInfo, axisNumber)
+        and self:setAxisByNameFallback(axisNumber, axisValue) then
+        return true
+    end
+
+    if type(EEPRollingstockSetAxisByNumber) == "function" then
+        local ok = EEPRollingstockSetAxisByNumber(self.rollingStockName, axisNumber, axisValue)
+        if ok then return true end
+    end
+
+    return self:setAxisByNameFallback(axisNumber, axisValue)
+end
+
+function RollingStock:setAxisByNameFallback(axisNumber, axisValue)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    axisNumber = tonumber(axisNumber)
+    axisValue = tonumber(axisValue)
+    if not axisNumber or not axisValue then return false end
+    if type(EEPRollingstockSetAxis) ~= "function" then return false end
+
+    local axisName = axisNameForNumber(self.modelInfo, axisNumber)
+    if not axisName then
+        print(string.format("[#RollingStock] No axis name for %s axis %s", self.rollingStockName, tostring(axisNumber)))
+        return false
+    end
+
+    return EEPRollingstockSetAxis(self.rollingStockName, axisName, axisValue) == true
+end
+
+function RollingStock:getAxisNames()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.axisNames or {})
+end
+
+function RollingStock:getAxisNamesKnown()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return self.axisNamesKnown == true
+end
+
+function RollingStock:getTextureNames()
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.textureNames or {})
 end
 
 function RollingStock:setRotation(rotX, rotY, rotZ)
@@ -584,7 +852,19 @@ end
 
 function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local oldXmlModel = self.xmlModel
+    local oldAxisNames = self:getAxisNames()
+    local oldAxisNamesKnown = self:getAxisNamesKnown()
+    local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
+    self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
+    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
+    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
+    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+    if oldXmlModel ~= model then markDirty(self, "xmlModel") end
+    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
+    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
+    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
 function RollingStock:resetDirty()
@@ -617,6 +897,10 @@ function RollingStock:toJsonStatic()
         hookStatus = self:getHookStatus(),
         hookGlueMode = self:getHookGlueMode(),
         active = self:getActive(),
+        axisNamesKnown = self:getAxisNamesKnown(),
+        axisNames = self:getAxisNames(),
+        axisValues = self:getAxisValues(),
+        textureNames = self:getTextureNames(),
         nr = self:getWagonNr(),
         trackId = self:getTrackId(),
         trackDistance = self:getTrackDistance(),

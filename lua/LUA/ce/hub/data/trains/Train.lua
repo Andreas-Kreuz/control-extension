@@ -3,12 +3,75 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
 local TableUtils = require("ce.hub.util.TableUtils")
 
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local StorageUtility = require("ce.hub.util.StorageUtility")
-local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
-local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
+local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
+local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 
+---@class Train
+---@field id string
+---@field name string
+---@field type string
+---@field values table<string, string>
+---@field route string
+---@field rollingStockCount number
+---@field speed number
+---@field targetSpeed number
+---@field length number
+---@field couplingFront number
+---@field couplingRear number
+---@field lights table<string, boolean>
+---@field active boolean
+---@field trainyardId number|nil
+---@field inTrainyard boolean
+---@field movesForward boolean
+---@field trackType string|nil
+---@field onTracks table<string, number>
+---@field occupiedTracks table<string, number>
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
+---@field new fun(self: Train, o: table):Train
+---@field load fun(self: Train):table<string, string>
+---@field save fun(self: Train, clearCurrentInfo?: boolean):nil
+---@field getName fun(self: Train):string
+---@field getLength fun(self: Train):number
+---@field setLength fun(self: Train, length: number):nil
+---@field setValue fun(self: Train, key: string, value: string):nil
+---@field getValue fun(self: Train, key: string):string
+---@field setRoute fun(self: Train, routeName: string):nil
+---@field updateRoute fun(self: Train, routeName: string):nil
+---@field getRoute fun(self: Train):string
+---@field setRollingStockCount fun(self: Train, count: integer):nil
+---@field getRollingStockCount fun(self: Train):number
+---@field setSpeed fun(self: Train, speed: number):nil
+---@field getSpeed fun(self: Train):number
+---@field setTargetSpeed fun(self: Train, targetSpeed: number):nil
+---@field getTargetSpeed fun(self: Train):number
+---@field setCouplingFront fun(self: Train, couplingFront: number):nil
+---@field getCouplingFront fun(self: Train):number
+---@field setCouplingRear fun(self: Train, couplingRear: number):nil
+---@field getCouplingRear fun(self: Train):number
+---@field setLights fun(self: Train, lights: table<string, boolean>):nil
+---@field updateLights fun(self: Train):nil
+---@field getLights fun(self: Train):table<string, boolean>
+---@field setActive fun(self: Train, active: boolean):nil
+---@field getActive fun(self: Train):boolean
+---@field setTrainyard fun(self: Train, inTrainyard: boolean, trainyardId: number|nil):nil
+---@field getTrainyardId fun(self: Train):number|nil
+---@field getInTrainyard fun(self: Train):boolean
+---@field setMovesForward fun(self: Train, movesForward: boolean):nil
+---@field getMovesForward fun(self: Train):boolean
+---@field setOnTrack fun(self: Train, onTracks: table<string, number>):nil
+---@field getOnTrack fun(self: Train):table<string, number>
+---@field setTrackType fun(self: Train, trackType: string):nil
+---@field getTrackType fun(self: Train):string|nil
+---@field openDoors fun(self: Train):nil
+---@field closeDoors fun(self: Train):nil
+---@field resetDirty fun(self: Train):nil
+---@field hasDirtyFields fun(self: Train):boolean
+---@field toJsonStatic fun(self: Train):table
+---@field toJsonDynamic fun(self: Train):table
 local Train = {}
+local TRAIN_LIGHT_SOURCES = { 0, 1, 2, 3 }
 
 -- Field update policies (see TrainStaticDtoTypes.d.lua / TrainDynamicDtoTypes.d.lua):
 --   always   => real value always included in DTO
@@ -19,9 +82,19 @@ local function markDirty(train, fieldName)
     train.dirtyFields[fieldName] = true
 end
 
+local function getTrainLights(trainName)
+    local lights = {}
+    for _, source in ipairs(TRAIN_LIGHT_SOURCES) do
+        local ok, enabled = false, false
+        if EEPGetTrainLight then ok, enabled = EEPGetTrainLight(trainName, source) end
+        lights[tostring(source)] = ok and enabled == true or false
+    end
+    return lights
+end
+
 
 ---Create a new train with the given object
----@param o Train must contain a string o.name
+---@param o table must contain a string o.name
 function Train:new(o)
     assert(type(self) == "table", "Call this method with ':'")
     assert(o, "Provide a train object")
@@ -38,6 +111,7 @@ function Train:new(o)
     local _, couplingRear = false, nil
     if EEPGetTrainCouplingRear then _, couplingRear = EEPGetTrainCouplingRear(o.name) end
     local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
+    local lights = getTrainLights(o.name)
     local inTrainyard, trainyardId = false, nil
     if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(o.name) end
     assert(haveTrain, o.name)
@@ -53,6 +127,7 @@ function Train:new(o)
     o.targetSpeed = targetSpeed or speed
     o.couplingFront = couplingFront or 0
     o.couplingRear = couplingRear or 0
+    o.lights = lights
     o.active = activeTrain == o.name
     o.inTrainyard = inTrainyard == true
     o.trainyardId = inTrainyard and trainyardId or nil
@@ -239,6 +314,30 @@ function Train:getCouplingRear()
     return self.couplingRear
 end
 
+function Train:setLights(lights)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(lights) == "table", "Need 'lights' as table")
+    local changed = false
+    for _, source in ipairs(TRAIN_LIGHT_SOURCES) do
+        local key = tostring(source)
+        local value = lights[key] == true
+        if self.lights[key] ~= value then
+            self.lights[key] = value
+            changed = true
+        end
+    end
+    if changed then markDirty(self, "lights") end
+end
+
+function Train:updateLights()
+    self:setLights(getTrainLights(self.name))
+end
+
+function Train:getLights()
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    return self.lights
+end
+
 function Train:setActive(active)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(active) == "boolean", "Need 'active' as boolean")
@@ -329,8 +428,7 @@ function Train:openDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        local model = RollingStockModels.modelFor(rollingStockName)
-        model:openDoors(rollingStockName)
+        RollingStockRegistry.forName(rollingStockName):openDoors()
     end
 end
 
@@ -338,8 +436,7 @@ function Train:closeDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        local model = RollingStockModels.modelFor(rollingStockName)
-        model:closeDoors(rollingStockName)
+        RollingStockRegistry.forName(rollingStockName):closeDoors()
     end
 end
 
@@ -363,6 +460,7 @@ function Train:toJsonStatic()
         targetSpeed = self:getTargetSpeed(),
         couplingFront = self:getCouplingFront(),
         couplingRear = self:getCouplingRear(),
+        lights = self:getLights(),
         active = self:getActive(),
         inTrainyard = self:getInTrainyard(),
         trainyardId = self:getTrainyardId(),

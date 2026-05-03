@@ -101,7 +101,11 @@ function testCorsOriginsAllowConfiguredDevPortsOnlyWhenEnabled(): void {
 
   assert.equal(devPolicy.isTrustedOrigin('http://server-box:5173'), true);
   assert.equal(devPolicy.isTrustedOrigin('http://192.168.10.25:4173'), true);
+  assert.equal(devPolicy.isTrustedOrigin('http://192.168.10.99:5173'), true);
+  assert.equal(devPolicy.isTrustedOrigin('http://dev-box:5173'), true);
   assert.equal(prodPolicy.isTrustedOrigin('http://server-box:5173'), false);
+  assert.equal(prodPolicy.isTrustedOrigin('http://192.168.10.99:5173'), false);
+  assert.equal(devPolicy.isTrustedOrigin('http://192.168.10.99:3000'), false);
 }
 
 export async function run(): Promise<void> {

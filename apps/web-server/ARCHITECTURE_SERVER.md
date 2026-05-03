@@ -27,7 +27,7 @@ LuaDto-Empfang
     |
     | Selector.ts (Transformation / Stabilitätsschicht)
     v
-*Dto      [apps/web-shared/src/dtos/]   stabiler Client-Vertrag
+*AppDto   [apps/web-shared/src/dtos/app/] stabiler Client-Vertrag
     |
     | Socket.IO-Events / REST-API
     v
@@ -55,7 +55,8 @@ siehe [`src/server/ce/dto/README.md`](src/server/ce/dto/README.md).
 
 ## Selectors — Stabilitätsschicht
 
-Selectors sind die **einzige Brücke** zwischen LuaDto und dem Client-Vertrag (`*Dto` in `web-shared`).
+Selectors sind die **einzige Brücke** zwischen `*LuaDto`/`ceType` und dem Client-Vertrag
+(`*AppDto` und stabile App-Room/API-Namen in `web-shared`).
 
 Ändert sich das Lua-Ausgabeformat, wird nur der Selector angepasst — der Client-Vertrag
 in `apps/web-shared` bleibt stabil. Die Web App muss nicht bei jeder Lua-Änderung

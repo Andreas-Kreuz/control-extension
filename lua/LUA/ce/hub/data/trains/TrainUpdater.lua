@@ -2,9 +2,9 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainUpdater ..."
 
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-local EepFunctionWrapper = require("ce.hub.eep.EepFunctionWrapper")
+local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
 
-local EEPGetTrainLength = EepFunctionWrapper.EEPGetTrainLength
+local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 local TrainUpdater = {}
 TrainUpdater.debug = CeStartWithDebug or false
 
@@ -48,6 +48,9 @@ function TrainUpdater.runUpdate()
         if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) and EEPGetTrainCouplingRear then
             local ok, trainCouplingRear = EEPGetTrainCouplingRear(train.name)
             if ok then train:setCouplingRear(trainCouplingRear) end
+        end
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "lights", isSelected) and EEPGetTrainLight then
+            train:updateLights()
         end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
             train:setActive(activeTrain == train.name)

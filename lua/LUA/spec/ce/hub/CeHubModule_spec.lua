@@ -1,10 +1,12 @@
-﻿insulate("CeHubModule", function ()
+insulate("CeHubModule", function ()
     local function clearModule(name)
         package.loaded[name] = nil
     end
+    local printStub
+    local ioInitInitializeStub
 
     before_each(function ()
-        stub(_G, "print")
+        printStub = stub(_G, "print")
         clearModule("ce.ControlExtension")
         clearModule("ce.hub.ControlExtensionHub")
         clearModule("ce.hub.ModuleRegistry")
@@ -23,11 +25,12 @@
         clearModule("ce.databridge.ServerExchangeCoordinator")
         clearModule("ce.databridge.IncomingCommandExecutor")
         require("ce.hub.eep.EepSimulator")
-        require("ce.databridge.IoInit").initialize = function () end
+        ioInitInitializeStub = stub(require("ce.databridge.IoInit"), "initialize", function () end)
     end)
 
     after_each(function ()
-        _G.print:revert()
+        printStub:revert()
+        ioInitInitializeStub:revert()
     end)
 
     it("returns CeHubModule from setOptions and applies hub options", function ()

@@ -16,7 +16,7 @@ end
 function WeatherStatePublisher.syncState()
     if not WeatherStatePublisher.enabled then return end
     if not initialized then WeatherStatePublisher.initialize() end
-    return WeatherPublisher.syncState()
+    WeatherPublisher.syncState()
 end
 
 return WeatherStatePublisher

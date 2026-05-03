@@ -11,8 +11,8 @@ insulate("TimedExecution", function ()
         local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
         local first, second = TimedExecution.runTimed("spec.runTimed", function (prefix, value)
-                                                           return prefix .. value, value * 2
-                                                       end, "v", 3)
+                                                          return prefix .. value, value * 2
+                                                      end, "v", 3)
 
         local runtime = RuntimeMetrics.get("spec.runTimed")
         assert.equals("v3", first)
@@ -39,8 +39,8 @@ insulate("TimedExecution", function ()
         local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
         local result = TimedExecution.executeAndStoreRunTime(function (value)
-                                                                  return value + 1
-                                                              end, "spec.compat", 4)
+                                                                 return value + 1
+                                                             end, "spec.compat", 4)
 
         local runtime = RuntimeMetrics.get("spec.compat")
         assert.equals(5, result)

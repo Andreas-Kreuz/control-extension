@@ -10,15 +10,11 @@ insulate("ce.hub.data.switches.SwitchDtoFactory", function ()
         local switch = { id = 11, position = 1, tag = "Main" }
 
         local ceType, keyId, key, switchDto = SwitchDtoFactory.createSwitchDto(switch)
-        local listRoom, listKeyId, switchDtos = SwitchDtoFactory.createSwitchDtoList({ switch })
         switch.tag = "Changed"
 
         assert.equals("ce.hub.Switch", ceType)
         assert.equals("id", keyId)
         assert.equals(11, key)
         assert.same({ ceType = "ce.hub.Switch", id = 11, position = 1, tag = "Main" }, switchDto)
-        assert.equals("ce.hub.Switch", listRoom)
-        assert.equals("id", listKeyId)
-        assert.same({ { ceType = "ce.hub.Switch", id = 11, position = 1, tag = "Main" } }, switchDtos)
     end)
 end)

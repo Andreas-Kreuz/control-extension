@@ -40,8 +40,12 @@ local function scheduleAfter(scheduledTasks, newTask, offsetInSeconds, previousT
             scheduledTask:addSubsequentTask(newTask, offsetInSeconds)
             previousTaskFound = true
             if Scheduler.debug then
-                print("[#Scheduler] Task scheduled: '" .. newTask.name .. "' (" .. offsetInSeconds ..
-                    " seconds after '" .. previousTask.name .. "')")
+                print(string.format(
+                    "[#Scheduler] Task scheduled: '%s' (%s seconds after '%s')",
+                    newTask.name,
+                    offsetInSeconds,
+                    previousTask.name
+                ))
             end
         else
             -- schedule the subsequentTask of the newTask
@@ -71,8 +75,11 @@ function Scheduler:runTasks()
             end
             if secondsSinceMidnight >= plannedAtSeconds then
                 if Scheduler.debug then
-                    print("[#Scheduler " .. secondsSinceMidnight .. "] Running Task: '" .. currentTask.name ..
-                        "' (NOW)")
+                    print(string.format(
+                        "[#Scheduler %s] Running Task: '%s' (NOW)",
+                        secondsSinceMidnight,
+                        currentTask.name
+                    ))
                 end
                 currentTask:starteAktion()
                 scheduledTasks[currentTask] = true
@@ -83,9 +90,13 @@ function Scheduler:runTasks()
             self.scheduledTasks[currentTask] = nil
             for successorAction, offsetSeconds in pairs(currentTask.subsequentTask) do
                 if Scheduler.debug then
-                    print("[#Scheduler " .. secondsSinceMidnight .. "] Scheduling Task: '" .. successorAction.name ..
-                        "' in " .. offsetSeconds .. " seconds " .. "(at " .. currentSecondsSinceMidnight() +
-                        offsetSeconds .. ")")
+                    print(string.format(
+                        "[#Scheduler %s] Scheduling Task: '%s' in %s seconds (at %s)",
+                        secondsSinceMidnight,
+                        successorAction.name,
+                        offsetSeconds,
+                        currentSecondsSinceMidnight() + offsetSeconds
+                    ))
                 end
                 self.scheduledTasks[successorAction] = currentSecondsSinceMidnight() + offsetSeconds
             end
@@ -113,16 +124,23 @@ function Scheduler:scheduleTask(offsetInSeconds, newTask, precedingTask)
         previousTaskFound = scheduleAfter(self.scheduledTasks, newTask, offsetInSeconds, precedingTask) or
             scheduleAfter(self.futureTasks, newTask, offsetInSeconds, precedingTask)
         if not previousTaskFound then
-            print("[#Scheduler] DID NOT FIND PREDECESSOR TASK FOR! : " .. precedingTask.name .. " --> " ..
-                newTask.name)
+            print(string.format(
+                "[#Scheduler] DID NOT FIND PREDECESSOR TASK FOR! : %s --> %s",
+                precedingTask.name,
+                newTask.name
+            ))
         end
     end
 
     if not previousTaskFound and not self.scheduledTasks[newTask] then
         self.futureTasks[newTask] = currentSecondsSinceMidnight() + offsetInSeconds
         if Scheduler.debug then
-            print("[#Scheduler] Task scheduled: '" .. newTask.name .. "' in " .. offsetInSeconds .. " seconds (at " ..
-                currentSecondsSinceMidnight() + offsetInSeconds .. ")")
+            print(string.format(
+                "[#Scheduler] Task scheduled: '%s' in %s seconds (at %s)",
+                newTask.name,
+                offsetInSeconds,
+                currentSecondsSinceMidnight() + offsetInSeconds
+            ))
         end
     end
 end

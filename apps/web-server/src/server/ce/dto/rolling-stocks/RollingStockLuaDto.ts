@@ -28,8 +28,13 @@ export interface RollingStockLuaDto {
   orientationForward?: boolean;
   smoke?: number;
   active?: boolean;
+  // axes
+  axisNamesKnown?: boolean;
+  axisNames?: Record<string, string> | string[];
+  axisValues?: Record<string, number> | number[];
   // textures
-  surfaceTexts?: Record<string, string>;
+  surfaceTexts?: Record<string, string> | string[];
+  textureNames?: Record<string, string> | string[];
   // rotation
   rotX?: number;
   rotY?: number;

@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { TrackType, TrainListDto, TrainType } from '@ce/web-shared';
+﻿import type { Meta, StoryObj } from '@storybook/react';
+import { TrackType, TrainListAppDto, TrainType } from '@ce/web-shared';
 import { PropsWithChildren, useReducer } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import TrainsPage from '../../features/trains/components/TrainsPage';
 import { Action, TrainContext, TrainDispatchContext } from '../../features/trains/providers/TrainProvider';
 
-const trains: TrainListDto[] = [
+const trains: TrainListAppDto[] = [
   {
     id: 'IC 2049',
     name: 'Intercity 2049',
@@ -64,7 +64,7 @@ const trains: TrainListDto[] = [
   },
 ];
 
-const reducer = (state: { trackType: TrackType; trainList: TrainListDto[] }, action: Action) => {
+const reducer = (state: { trackType: TrackType; trainList: TrainListAppDto[] }, action: Action) => {
   switch (action.type) {
     case 'set track type':
       return { ...state, trackType: action.trackType };

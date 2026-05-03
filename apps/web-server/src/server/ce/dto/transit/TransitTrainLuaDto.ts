@@ -11,6 +11,7 @@ export interface TransitTrainLuaDto {
   id: string;
   line?: string;
   destination?: string;
+  origin?: string;
   direction?: string;
   nextStations?: TransitTrainNextStationLuaDto[];
 }

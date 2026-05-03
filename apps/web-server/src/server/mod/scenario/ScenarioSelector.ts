@@ -1,11 +1,13 @@
-import { ScenarioLuaDto } from '../../ce/dto/scenario/ScenarioLuaDto';
+﻿import { ScenarioLuaDto } from '../../ce/dto/scenario/ScenarioLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
-import { CeTypes, ScenarioDto } from '@ce/web-shared';
+import { CeTypes, ScenarioAppDto } from '@ce/web-shared';
 
+// Maps Lua scenario DTOs into ScenarioAppDto.
+// Lua input: ce.hub.Scenario.
 export default class ScenarioSelector {
   private lastState?: fromEepData.State;
-  private scenarios: Record<string, ScenarioDto> = {};
+  private scenarios: Record<string, ScenarioAppDto> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState || !state.ceTypes[CeTypes.HubScenario]) {
@@ -30,5 +32,5 @@ export default class ScenarioSelector {
     });
   }
 
-  getScenarios = (): Record<string, ScenarioDto> => this.scenarios;
+  getScenarios = (): Record<string, ScenarioAppDto> => this.scenarios;
 }

@@ -30,12 +30,12 @@ DataChangeBus.printListener = {
         else
             t = t .. ": " .. tostring(payload)
         end
-        print("[#EventCounter] " .. event.eventCounter .. ": " .. event.type .. " .. " .. t)
+        print(string.format("[#EventCounter] %s: %s .. %s", event.eventCounter, event.type, t))
     end
 }
 
 function DataChangeBus.printEventCounter()
-    if DataChangeBus.debug then print("[#EventCounter] value " .. eventCounter) end
+    if DataChangeBus.debug then print(string.format("[#EventCounter] value %s", eventCounter)) end
 end
 
 local function registerDefaultListeners()

@@ -20,8 +20,6 @@ function TrafficLightModelStatePublisher.syncState()
 
     local trafficLightModels = TrafficLightModelsDataCollector.collectTrafficLightModels()
     DataChangeBus.fireListChange(TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList(trafficLightModels))
-
-    return {}
 end
 
 return TrafficLightModelStatePublisher

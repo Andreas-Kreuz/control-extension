@@ -1,11 +1,13 @@
-import { WeatherLuaDto } from '../../ce/dto/weather/WeatherLuaDto';
+﻿import { WeatherLuaDto } from '../../ce/dto/weather/WeatherLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
-import { CeTypes, WeatherDto } from '@ce/web-shared';
+import { CeTypes, WeatherAppDto } from '@ce/web-shared';
 
+// Maps Lua weather DTOs into WeatherAppDto.
+// Lua input: ce.hub.Weather.
 export default class WeatherSelector {
   private lastState?: fromEepData.State;
-  private weather: Record<string, WeatherDto> = {};
+  private weather: Record<string, WeatherAppDto> = {};
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState || !state.ceTypes[CeTypes.HubWeather]) {
@@ -30,5 +32,5 @@ export default class WeatherSelector {
     });
   }
 
-  getWeather = (): Record<string, WeatherDto> => this.weather;
+  getWeather = (): Record<string, WeatherAppDto> => this.weather;
 }
