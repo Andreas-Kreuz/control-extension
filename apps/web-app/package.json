@@ -1,7 +1,7 @@
 {
   "name": "@ce/web-app",
   "private": true,
-  "version": "0.0.6",
+  "version": "v0.0.6-alpha",
   "type": "module",
   "homepage": ".",
   "scripts": {
