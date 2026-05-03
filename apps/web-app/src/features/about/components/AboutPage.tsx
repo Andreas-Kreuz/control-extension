@@ -259,8 +259,12 @@ export function AboutPageContent(props: { installedAppVersion?: string; updateSt
               </ListItem>
               <ListItem sx={{ display: 'list-item', py: 0.5 }}>
                 <Typography variant="body1">
-                  Lösche zur Sicherheit die vorhandenen Verzeichnisse <code>LUA\ce</code> und{' '}
-                  <code>Resourcen\Anlagen\ce</code> aus Deiner EEP-Installation.
+                  Lösche zur Sicherheit die vorhandenen <code>ce</code>-Verzeichnisse - WICHTIG:{' '}
+                  <strong>
+                    nur die <code>ce</code>
+                    -Verzeichnisse!
+                  </strong>{' '}
+                  - <code>LUA\ce</code> und <code>Resourcen\Anlagen\ce</code> aus Deiner EEP-Installation.
                 </Typography>
               </ListItem>
               <ListItem sx={{ display: 'list-item', py: 0.5 }}>
@@ -271,7 +275,7 @@ export function AboutPageContent(props: { installedAppVersion?: string; updateSt
                     target="_blank"
                     rel="noreferrer"
                   >
-                    GitHub Release
+                    neueste GitHub Release
                   </Link>{' '}
                   die Datei <code>control-extension-*.zip</code> herunter.
                 </Typography>
