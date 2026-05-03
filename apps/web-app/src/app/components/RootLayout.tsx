@@ -16,8 +16,6 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import UpdateAvailable from '../../shared/components/update/UpdateAvailable';
-import useUpdateStatus from '../../features/update/hooks/useUpdateStatus';
 import { SideSheetContext, defaultSideSheetState } from '../contexts/SideSheetContext';
 import type { SideSheetState } from '../contexts/SideSheetContext';
 import BackButton from './BackButton';
@@ -42,9 +40,6 @@ function RootLayout({ navItems }: RootLayoutProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
-  const updateStatus = useUpdateStatus();
-  const updateAvailable =
-    updateStatus.state === 'stable-available' || updateStatus.state === 'prerelease-available';
 
   const [sideSheetState, setSideSheetState] = useState<SideSheetState>(defaultSideSheetState);
 
@@ -131,13 +126,6 @@ function RootLayout({ navItems }: RootLayoutProps) {
                 </ListItemButton>
               ))}
               <Box sx={{ flex: '1 1 auto' }} />
-              {updateAvailable && (
-                <Box sx={{ flex: '0 0 auto', p: 2 }}>
-                  <RouterLink to="/about" style={{ textDecoration: 'none' }}>
-                    <UpdateAvailable />
-                  </RouterLink>
-                </Box>
-              )}
             </List>
           </Drawer>
         )}
@@ -174,15 +162,6 @@ function RootLayout({ navItems }: RootLayoutProps) {
                 </Tooltip>
               ))}
               <Box sx={{ flex: '1 1 auto' }} />
-              {updateAvailable && (
-                <Box sx={{ display: 'flex', flex: '0 0 auto', justifyContent: 'center', py: 1 }}>
-                  <Tooltip title="Update available" placement="right">
-                    <RouterLink to="/about" style={{ textDecoration: 'none' }}>
-                      <UpdateAvailable iconOnly />
-                    </RouterLink>
-                  </Tooltip>
-                </Box>
-              )}
             </List>
           </Drawer>
         )}

@@ -143,9 +143,11 @@ export function AboutPageContent(props: { installedAppVersion?: string; updateSt
     knownVersion(props.installedAppVersion) ??
     '?';
   const currentVersionName =
-    updateStatus.currentRelease?.name ?? (currentVersion !== '?' ? 'Installierte Control Extension Version' : undefined);
+    updateStatus.currentRelease?.name ??
+    (currentVersion !== '?' ? 'Installierte Control Extension Version' : undefined);
   const serverSentCurrentVersionInfo =
-    knownVersion(updateStatus.currentRelease?.version) !== undefined || knownVersion(updateStatus.currentVersion) !== undefined;
+    knownVersion(updateStatus.currentRelease?.version) !== undefined ||
+    knownVersion(updateStatus.currentVersion) !== undefined;
   const currentVersionIsConfirmed = updateStatus.state === 'current' && serverSentCurrentVersionInfo;
   const currentVersionIsPrerelease =
     updateStatus.currentRelease?.prerelease === true ||
@@ -208,12 +210,12 @@ export function AboutPageContent(props: { installedAppVersion?: string; updateSt
             <OutlinedCard sx={{ bgcolor: 'background.paper' }}>
               <Stack spacing={0.5} sx={{ minWidth: 0 }}>
                 <Typography variant="overline" color="text.secondary">
-                  Control Extension
+                  Neue Version
                 </Typography>
                 <Typography variant="h4">Hier ist noch alles in Bewegung</Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Die App ist gerade noch im Aufbau. Rechne bitte damit, dass sich Funktionen, Ansichten und Abläufe
-                  ändern, während wir die Control Extension weiterentwickeln.
+                  Die App ist gerade noch im Aufbau. Rechne bitte damit, dass sich Funktionen, Ansichten und Abläufe bei
+                  jedem Update ändern. Das betrifft Server und Lua-API.
                 </Typography>
               </Stack>
               <Divider sx={{ mt: 2, mx: -2 }} />

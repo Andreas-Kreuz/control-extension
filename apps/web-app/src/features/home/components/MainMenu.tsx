@@ -2,6 +2,7 @@
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import TrainIcon from '@mui/icons-material/Train';
+import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { Link as RouterLink } from 'react-router-dom';
@@ -9,10 +10,13 @@ import ImageCard from '../../../shared/components/cards/ImageCard';
 import CardGridItem from '../../../shared/layouts/CardGridItem';
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
+import useUpdateStatus from '../../update/hooks/useUpdateStatus';
 import getNavSections from '../lib/NavElements';
 
 function MainMenu() {
   const navigation = getNavSections();
+  const updateStatus = useUpdateStatus();
+  const updateAvailable = updateStatus.state === 'stable-available' || updateStatus.state === 'prerelease-available';
 
   const trafficNav = navigation.filter((nav) => nav.name === 'Verkehr').flatMap((nav) => nav.values);
 
@@ -33,7 +37,16 @@ function MainMenu() {
             ),
         )}
       </CardGridContainer>
-      <Grid container spacing={2} sx={{ alignItems: 'flex-start', justifyContent: 'flex-start', mt: 2 }}>
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          alignItems: 'flex-start',
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'flex-start',
+          mt: 2,
+        }}
+      >
         <Button variant="text" startIcon={<BarChartIcon />} component={RouterLink} to="/insights">
           Einblicke
         </Button>
@@ -43,7 +56,31 @@ function MainMenu() {
         <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
           Aktiver Zug
         </Button>
-        <Button variant="text" startIcon={<InfoOutlinedIcon />} component={RouterLink} to="/about">
+        <Button
+          variant="text"
+          startIcon={
+            updateAvailable ? (
+              <Badge
+                badgeContent={' '}
+                color="success"
+                overlap="circular"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    height: 14,
+                    minWidth: 14,
+                    p: 0,
+                  },
+                }}
+              >
+                <InfoOutlinedIcon />
+              </Badge>
+            ) : (
+              <InfoOutlinedIcon />
+            )
+          }
+          component={RouterLink}
+          to="/about"
+        >
           Über diese Version
         </Button>
       </Grid>
