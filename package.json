@@ -14,6 +14,7 @@
     "build:release": "yarn run check && node ./scripts/build-release.mjs",
     "build:exe": "node ./scripts/assert-build-win-supported.mjs && yarn run build && yarn workspace @ce/web-server run build:exe",
     "ce-help": "node ./scripts/ce-help.mjs",
+    "ce:help": "yarn ce-help",
     "check": "yarn run tools:check && yarn run lint && yarn run test",
     "check:lua": "yarn run lint:lua && yarn run test:lua",
     "check:web": "yarn run lint:web && yarn run test:web",
