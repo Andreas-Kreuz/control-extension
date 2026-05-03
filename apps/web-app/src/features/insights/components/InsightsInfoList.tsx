@@ -15,6 +15,7 @@ interface InsightsInfoListItem {
   label: string;
   value: string;
   href?: string;
+  valuePrefix?: ReactNode;
   valueIcon?: ReactNode;
   tooltip?: string;
 }
@@ -44,6 +45,7 @@ function InsightsInfoRow(props: InsightsInfoListItem) {
         sx={{ minWidth: 0, mr: 1, my: 0 }}
       />
       <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', flex: '0 0 auto', minWidth: 0 }}>
+        {props.valuePrefix}
         {props.href ? (
           <Link
             component={RouterLink}
