@@ -97,8 +97,7 @@ export function compareVersions(leftVersion: string, rightVersion: string): numb
     return undefined;
   }
 
-  const numericCompare =
-    left.major - right.major || left.minor - right.minor || left.patch - right.patch;
+  const numericCompare = left.major - right.major || left.minor - right.minor || left.patch - right.patch;
   if (numericCompare !== 0) {
     return numericCompare;
   }
@@ -122,7 +121,9 @@ function mainDownloadUrl(release: GitHubRelease, version: string): string | unde
 
   const normalizedVersion = normalizeVersion(version);
   const mainAssetName = 'control-extension-' + normalizedVersion + '.zip';
-  const assets = release.assets.filter((asset): asset is GitHubReleaseAsset => typeof asset === 'object' && asset !== null);
+  const assets = release.assets.filter(
+    (asset): asset is GitHubReleaseAsset => typeof asset === 'object' && asset !== null,
+  );
   const mainAsset = assets.find((asset) => asset.name === mainAssetName);
   const fallbackAsset = assets.find(
     (asset) =>
@@ -155,15 +156,13 @@ function toAppRelease(release: GitHubRelease): UpdateReleaseAppDto | undefined {
 }
 
 function latestRelease(releases: UpdateReleaseAppDto[]): UpdateReleaseAppDto | undefined {
-  return releases
-    .slice()
-    .sort((left, right) => {
-      const compared = compareVersions(right.version, left.version);
-      if (compared !== undefined && compared !== 0) {
-        return compared;
-      }
-      return (right.publishedAt ?? '').localeCompare(left.publishedAt ?? '');
-    })[0];
+  return releases.slice().sort((left, right) => {
+    const compared = compareVersions(right.version, left.version);
+    if (compared !== undefined && compared !== 0) {
+      return compared;
+    }
+    return (right.publishedAt ?? '').localeCompare(left.publishedAt ?? '');
+  })[0];
 }
 
 function readCurrentVersion(): string {
@@ -205,12 +204,14 @@ export function createUpdateStatus(
     prereleaseComparison !== undefined && prereleaseComparison > 0 ? latestPrereleaseRelease : undefined;
 
   const availableRelease =
-    stableComparison !== undefined && stableComparison > 0
-      ? latestStableRelease
-      : availablePrereleaseRelease;
+    stableComparison !== undefined && stableComparison > 0 ? latestStableRelease : availablePrereleaseRelease;
 
   const state =
-    availableRelease === undefined ? 'current' : availableRelease.prerelease ? 'prerelease-available' : 'stable-available';
+    availableRelease === undefined
+      ? 'current'
+      : availableRelease.prerelease
+        ? 'prerelease-available'
+        : 'stable-available';
 
   return {
     state,
@@ -297,7 +298,11 @@ export default class UpdateCheckService {
       }
 
       if (!response.ok) {
-        this.setStatus({ ...this.status, state: this.status.state === 'unknown' ? 'unavailable' : this.status.state, checkedAt });
+        this.setStatus({
+          ...this.status,
+          state: this.status.state === 'unknown' ? 'unavailable' : this.status.state,
+          checkedAt,
+        });
         return;
       }
 

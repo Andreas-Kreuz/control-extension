@@ -20,7 +20,11 @@ async function testCompareVersions(): Promise<void> {
 }
 
 async function testStableUpdateWinsOverPrerelease(): Promise<void> {
-  const status = createUpdateStatus('0.0.6', [release('0.0.7'), release('0.0.8-beta.1', true)], '2026-05-03T00:00:00.000Z');
+  const status = createUpdateStatus(
+    '0.0.6',
+    [release('0.0.7'), release('0.0.8-beta.1', true)],
+    '2026-05-03T00:00:00.000Z',
+  );
 
   assert.equal(status.state, 'stable-available');
   assert.equal(status.availableRelease?.version, '0.0.7');
@@ -29,7 +33,11 @@ async function testStableUpdateWinsOverPrerelease(): Promise<void> {
 }
 
 async function testPrereleaseUpdateWhenNoStableUpdateExists(): Promise<void> {
-  const status = createUpdateStatus('0.0.6', [release('0.0.6'), release('0.0.7-beta.1', true)], '2026-05-03T00:00:00.000Z');
+  const status = createUpdateStatus(
+    '0.0.6',
+    [release('0.0.6'), release('0.0.7-beta.1', true)],
+    '2026-05-03T00:00:00.000Z',
+  );
 
   assert.equal(status.state, 'prerelease-available');
   assert.equal(status.availableRelease?.version, '0.0.7-beta.1');
@@ -37,7 +45,11 @@ async function testPrereleaseUpdateWhenNoStableUpdateExists(): Promise<void> {
 }
 
 async function testCurrentWhenNothingNewerExists(): Promise<void> {
-  const status = createUpdateStatus('0.0.7', [release('0.0.7'), release('0.0.7-beta.1', true)], '2026-05-03T00:00:00.000Z');
+  const status = createUpdateStatus(
+    '0.0.7',
+    [release('0.0.7'), release('0.0.7-beta.1', true)],
+    '2026-05-03T00:00:00.000Z',
+  );
 
   assert.equal(status.state, 'current');
   assert.equal(status.availableRelease, undefined);

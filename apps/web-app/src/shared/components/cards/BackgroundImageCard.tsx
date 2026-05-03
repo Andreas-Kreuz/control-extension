@@ -1,5 +1,6 @@
 ﻿import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
+import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -14,6 +15,7 @@ export interface BackgroundImageCardProps {
   additionalChips?: ReactNode[];
   to?: string;
   icon?: string;
+  framedIcon?: boolean;
   image?: string;
   small?: boolean;
   expanded?: boolean;
@@ -66,7 +68,29 @@ function BackgroundImageCard(props: BackgroundImageCardProps) {
           </Typography>
         )}
         <Stack direction="row" spacing={1} sx={{ '& .MuiChip-outlined': { backgroundColor: 'rgba(255,255,255,0.8)' } }}>
-          {props.icon && <img src={props.icon} height="32" />}
+          {props.icon &&
+            (props.framedIcon ? (
+              <Box
+                component="span"
+                sx={{
+                  width: 48,
+                  height: 32,
+                  p: '2px',
+                  border: 1,
+                  borderColor: 'grey.700',
+                  borderRadius: '4px',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Box component="img" src={props.icon} alt="" sx={{ width: 1, height: 1, objectFit: 'contain' }} />
+              </Box>
+            ) : (
+              <img src={props.icon} height="32" alt="" />
+            ))}
           {props.id && <Chip label={props.id} />}
           {props.additionalChips && props.additionalChips.map((e) => e)}
         </Stack>

@@ -66,9 +66,7 @@ export function InsightsVersionInfoContent(props: {
           icon: <Box component="img" alt="" src="/favicon.svg" sx={{ height: 20, width: 20 }} />,
           label: 'Control Extension',
           value: props.versions.appVersion,
-          valuePrefix: showUpdateChip ? (
-            <UpdateVersionChip version={props.availableUpdateVersion} />
-          ) : undefined,
+          valuePrefix: showUpdateChip ? <UpdateVersionChip version={props.availableUpdateVersion} /> : undefined,
         },
       ]}
     />
@@ -78,8 +76,7 @@ export function InsightsVersionInfoContent(props: {
 function InsightsVersionInfo() {
   const versions = useVersionStatus();
   const updateStatus = useUpdateStatus();
-  const updateAvailable =
-    updateStatus.state === 'stable-available' || updateStatus.state === 'prerelease-available';
+  const updateAvailable = updateStatus.state === 'stable-available' || updateStatus.state === 'prerelease-available';
   const availableUpdateVersion =
     updateStatus.availableRelease?.version ?? updateStatus.availablePrereleaseRelease?.version;
 

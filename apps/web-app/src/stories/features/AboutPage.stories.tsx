@@ -61,7 +61,8 @@ export const Version005GitHubUpdate: Story = {
         version: '0.0.5',
         name: 'v0.0.5-alpha',
         url: 'https://github.com/Andreas-Kreuz/control-extension/releases/tag/v0.0.5',
-        downloadUrl: 'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
+        downloadUrl:
+          'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
         prerelease: true,
         publishedAt: '2026-04-21T14:54:46Z',
         changelog: changelog005,
@@ -70,7 +71,8 @@ export const Version005GitHubUpdate: Story = {
         version: '0.0.5',
         name: 'v0.0.5-alpha',
         url: 'https://github.com/Andreas-Kreuz/control-extension/releases/tag/v0.0.5',
-        downloadUrl: 'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
+        downloadUrl:
+          'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
         prerelease: true,
         publishedAt: '2026-04-21T14:54:46Z',
         changelog: changelog005,
@@ -79,7 +81,8 @@ export const Version005GitHubUpdate: Story = {
         version: '0.0.5',
         name: 'v0.0.5-alpha',
         url: 'https://github.com/Andreas-Kreuz/control-extension/releases/tag/v0.0.5',
-        downloadUrl: 'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
+        downloadUrl:
+          'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
         prerelease: true,
         publishedAt: '2026-04-21T14:54:46Z',
         changelog: changelog005,
@@ -98,7 +101,8 @@ export const NoUpdateAvailable: Story = {
         version: '0.0.5',
         name: 'v0.0.5-alpha',
         url: 'https://github.com/Andreas-Kreuz/control-extension/releases/tag/v0.0.5',
-        downloadUrl: 'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
+        downloadUrl:
+          'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
         prerelease: true,
         publishedAt: '2026-04-21T14:54:46Z',
         changelog: changelog005,
@@ -107,7 +111,8 @@ export const NoUpdateAvailable: Story = {
         version: '0.0.5',
         name: 'v0.0.5-alpha',
         url: 'https://github.com/Andreas-Kreuz/control-extension/releases/tag/v0.0.5',
-        downloadUrl: 'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
+        downloadUrl:
+          'https://github.com/Andreas-Kreuz/control-extension/releases/download/v0.0.5/control-extension-0.0.5.zip',
         prerelease: true,
         publishedAt: '2026-04-21T14:54:46Z',
         changelog: changelog005,

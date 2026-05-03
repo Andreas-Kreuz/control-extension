@@ -1,11 +1,6 @@
 // App contract populated by:
 // apps/web-server/src/server/app/update/UpdateCheckService.ts
-export type UpdateStatusState =
-  | 'unknown'
-  | 'current'
-  | 'stable-available'
-  | 'prerelease-available'
-  | 'unavailable';
+export type UpdateStatusState = 'unknown' | 'current' | 'stable-available' | 'prerelease-available' | 'unavailable';
 
 export interface UpdateReleaseAppDto {
   version: string;
