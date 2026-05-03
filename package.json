@@ -12,6 +12,7 @@
     "build:docs:assets": "node ./scripts/run-update-doc-assets.mjs",
     "build:docs:assets:force": "node ./scripts/run-update-doc-assets.mjs --force",
     "build:release": "yarn run check && node ./scripts/build-release.mjs",
+    "build:release:skiptests": "node ./scripts/build-release.mjs",
     "build:exe": "node ./scripts/assert-build-win-supported.mjs && yarn run build && yarn workspace @ce/web-server run build:exe",
     "ce-help": "node ./scripts/ce-help.mjs",
     "ce:help": "yarn ce-help",
