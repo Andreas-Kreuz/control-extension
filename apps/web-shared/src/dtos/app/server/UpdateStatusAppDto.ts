@@ -1,3 +1,5 @@
+// App contract populated by:
+// apps/web-server/src/server/app/update/UpdateCheckService.ts
 export type UpdateStatusState =
   | 'unknown'
   | 'current'
