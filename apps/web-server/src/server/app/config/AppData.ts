@@ -29,6 +29,14 @@ export default class AppData {
     return this.appConfig.pairingRequired;
   }
 
+  public setSearchForUpdates(searchForUpdates: boolean): void {
+    this.appConfig.searchForUpdates = searchForUpdates;
+  }
+
+  public getSearchForUpdates(): boolean {
+    return this.appConfig.searchForUpdates;
+  }
+
   public setEepDirOk(ok: boolean): void {
     this.eepDirOk = ok;
   }

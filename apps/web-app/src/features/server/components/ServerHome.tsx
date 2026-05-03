@@ -20,6 +20,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileDownloadOffIcon from '@mui/icons-material/FileDownloadOff';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
 import List from '@mui/material/List';
@@ -46,6 +48,7 @@ function ServerHome() {
   const [open, setOpen] = useState(false);
   const [pendingClients, setPendingClients] = useState<PendingPairingClient[]>([]);
   const [pairingRequired, setPairingRequired] = useState(true);
+  const [searchForUpdates, setSearchForUpdates] = useState(false);
   const hasEepData = data.some((entry) => entry.startsWith('ce.hub.') || entry.startsWith('ce.mods.'));
 
   const webAppUrl =
@@ -114,6 +117,12 @@ end`;
         setPairingRequired(JSON.parse(payload));
       },
     },
+    {
+      eventName: SettingsEvent.SearchForUpdates,
+      handler: (payload: string) => {
+        setSearchForUpdates(JSON.parse(payload));
+      },
+    },
   ]);
 
   const handleClickOpen = () => {
@@ -133,6 +142,10 @@ end`;
   const handlePairingRequiredChange = (checked: boolean) => {
     setPairingRequired(checked);
     socket.emit(SettingsEvent.ChangePairingRequired, checked);
+  };
+  const handleSearchForUpdatesChange = (checked: boolean) => {
+    setSearchForUpdates(checked);
+    socket.emit(SettingsEvent.ChangeSearchForUpdates, checked);
   };
 
   const eepInstallations = ['C:\\Trend\\EEP18', 'C:\\Trend\\EEP17', 'C:\\Trend\\EEP16'];
@@ -205,6 +218,38 @@ end`;
             }}
           >
             <Stack spacing={1}>
+              <Stack
+                sx={{
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 2,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexGrow: 1 }}>
+                  {searchForUpdates ? <FileDownloadIcon sx={{ color: 'success.main' }} /> : <FileDownloadOffIcon />}
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body1">Automatisch nach Updates suchen</Typography>
+                    <Typography variant="body2">
+                      {searchForUpdates
+                        ? 'Zeigt neue Versionen in der App an, damit Du sie herunterladen kannst.'
+                        : 'Zeigt keine neuen Versionen von GitHub an.'}
+                    </Typography>
+                  </Box>
+                </Stack>
+                <FormControlLabel
+                  labelPlacement="start"
+                  sx={{ m: 0, ml: { md: 'auto' } }}
+                  control={
+                    <Switch
+                      checked={searchForUpdates}
+                      onChange={(_event, checked) => handleSearchForUpdatesChange(checked)}
+                      slotProps={{ input: { id: 'search-for-updates-switch' } }}
+                    />
+                  }
+                  label="Updates suchen"
+                />
+              </Stack>
               <Stack
                 sx={{
                   alignItems: { xs: 'flex-start', md: 'center' },
