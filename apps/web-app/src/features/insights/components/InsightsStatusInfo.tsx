@@ -101,7 +101,7 @@ function InsightsStatusInfo() {
           ? 'Stellt ' + apiEntryCount + ' verschiedene Informationen zur Verfügung'
           : 'Keine Daten empfangen'
         : 'Server nicht erreichbar',
-      statusText: isConnected ? (luaDataReceived ? 'OK' : 'Keine Daten') : 'Nicht verbunden',
+      statusText: isConnected ? (luaDataReceived ? 'OK' : 'Nicht gefunden') : 'Nicht verbunden',
       componentIcon: 'bridge',
       badgeIcon: isConnected ? (luaDataReceived ? 'ok' : 'paused') : 'disconnected',
     },
