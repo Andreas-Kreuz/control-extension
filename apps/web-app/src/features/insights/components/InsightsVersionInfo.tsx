@@ -13,11 +13,6 @@ function InsightsVersionInfo() {
       description="Installierte Komponenten"
       items={[
         {
-          icon: <Box component="img" alt="" src="/favicon.svg" sx={{ height: 20, width: 20 }} />,
-          label: 'Control Extension',
-          value: versions.appVersion,
-        },
-        {
           icon: <TerminalRoundedIcon sx={{ fontSize: 20 }} />,
           label: 'Lua',
           value: versions.luaVersion,
@@ -26,6 +21,11 @@ function InsightsVersionInfo() {
           icon: <TrainRoundedIcon sx={{ fontSize: 20 }} />,
           label: 'EEP',
           value: versions.eepVersion,
+        },
+        {
+          icon: <Box component="img" alt="" src="/favicon.svg" sx={{ height: 20, width: 20 }} />,
+          label: 'Control Extension',
+          value: versions.appVersion,
         },
       ]}
     />

@@ -45,10 +45,10 @@ function InsightsPage() {
           <InsightsStatusInfo />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsVersionInfo />
+          <InsightsRuntimeInfo updateTimes={updateTimes} />
         </Grid>
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <InsightsRuntimeInfo updateTimes={updateTimes} />
+          <InsightsVersionInfo />
         </Grid>
       </CardGridContainer>
       <CardGridContainer sx={{ mt: 3 }}>
