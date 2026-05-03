@@ -27,6 +27,7 @@ export type { TimeAppDto } from './dtos/app/time/TimeAppDto';
 export type { RuntimeAppDto } from './dtos/app/runtime/RuntimeAppDto';
 export type { FrameDataAppDto } from './dtos/app/framedata/FrameDataAppDto';
 export type { ServerStatsAppDto } from './dtos/app/server/ServerStatsAppDto';
+export type { UpdateReleaseAppDto, UpdateStatusAppDto, UpdateStatusState } from './dtos/app/server/UpdateStatusAppDto';
 export type {
   RuntimeStatisticsAppDto,
   RuntimeStatisticsHistoryAppDto,
@@ -66,6 +67,7 @@ export { ServerStatsRoom } from './rooms/DomainRoomRegistry';
 export { RuntimeStatisticsRoom } from './rooms/DomainRoomRegistry';
 export { ModuleRoom } from './rooms/DomainRoomRegistry';
 export { VersionRoom } from './rooms/DomainRoomRegistry';
+export { UpdateStatusRoom } from './rooms/DomainRoomRegistry';
 export { ScenarioRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionListRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionRoom } from './rooms/DomainRoomRegistry';

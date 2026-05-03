@@ -1,4 +1,5 @@
 ﻿import BarChartIcon from '@mui/icons-material/BarChart';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import TrainIcon from '@mui/icons-material/Train';
 import Button from '@mui/material/Button';
@@ -41,6 +42,9 @@ function MainMenu() {
         </Button>
         <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
           Aktiver Zug
+        </Button>
+        <Button variant="text" startIcon={<InfoOutlinedIcon />} component={RouterLink} to="/about">
+          Über diese Version
         </Button>
       </Grid>
     </PageContainer>

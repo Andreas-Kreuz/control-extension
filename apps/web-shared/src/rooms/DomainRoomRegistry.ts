@@ -5,6 +5,7 @@ const ServerStatsRoom = new DomainRoom('App.ServerStats');
 const RuntimeStatisticsRoom = new DomainRoom('App.RuntimeStatistics');
 const ModuleRoom = new DomainRoom('App.Modules');
 const VersionRoom = new DomainRoom('App.Version');
+const UpdateStatusRoom = new DomainRoom('App.UpdateStatus');
 const ScenarioRoom = new DomainRoom('App.Scenario');
 
 const TrainListRoom = new DomainRoom('App.TrainList');
@@ -27,6 +28,7 @@ export { ServerStatsRoom };
 export { RuntimeStatisticsRoom };
 export { ModuleRoom };
 export { VersionRoom };
+export { UpdateStatusRoom };
 export { ScenarioRoom };
 export { TrainListRoom };
 export { TrainRoom };

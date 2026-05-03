@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import type { Meta, StoryObj } from '@storybook/react';
 import PlainCard from '../../shared/components/cards/PlainCard';
 import BackgroundImageCard from '../../shared/components/cards/BackgroundImageCard';
+import BorderedSimpleCard from '../../shared/components/cards/BorderedSimpleCard';
 import IconHeaderCard from '../../shared/components/cards/IconHeaderCard';
 import ImageCard from '../../shared/components/cards/ImageCard';
 import OutlinedCard from '../../shared/components/cards/OutlinedCard';
@@ -42,6 +43,14 @@ function CardStyles() {
           Content inside an outlined card
         </Typography>
       </OutlinedCard>
+      <BorderedSimpleCard>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
+            Bordered simple card
+          </Typography>
+          <Typography variant="h6">Compact content</Typography>
+        </Box>
+      </BorderedSimpleCard>
       <StatusCard
         title="Status strip card"
         statusText="OK"

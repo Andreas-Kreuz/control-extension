@@ -17,7 +17,9 @@ import ScenarioService from '../mod/scenario/ScenarioService';
 import AppConfig from './config/AppConfig';
 import AppReducer from './config/AppData';
 import CommandLineParser from './config/CommandLineParser';
-import { RoomEvent, ServerInfoEvent, SettingsEvent } from '@ce/web-shared';
+import UpdateCheckService, { UpdateStatusRoomElement } from './update/UpdateCheckService';
+import { RoomEvent, ServerInfoEvent, SettingsEvent, UpdateStatusRoom } from '@ce/web-shared';
+import type { UpdateStatusAppDto } from '@ce/web-shared';
 import * as express from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -32,6 +34,7 @@ export default class AppEffects {
   private interestSyncService: InterestSyncService | null = null;
   private store = new AppReducer();
   private TESTMODE = false;
+  private updateCheckService: UpdateCheckService;
 
   // Statistic data
   private statistics: ServerStatisticsService;
@@ -45,6 +48,9 @@ export default class AppEffects {
     private serverConfigPath: string,
   ) {
     this.serverConfigFile = path.resolve(this.serverConfigPath, 'settings.json');
+    this.updateCheckService = new UpdateCheckService({ cacheDirectory: this.serverConfigPath });
+    this.updateCheckService.onStatusChanged((status) => this.emitUpdateStatus(status));
+    this.updateCheckService.start();
 
     // Start collecting statistic data
     this.statistics = new ServerStatisticsService();
@@ -77,6 +83,17 @@ export default class AppEffects {
         if (this.debug) console.log('🟨 EMIT to ' + socket.id + ': ' + ServerInfoEvent.Room, this.getHostname());
         socket.emit(ServerInfoEvent.StatisticsUpdate, this.statistics);
       }
+
+      if (rooms.room === UpdateStatusRoom.roomId(UpdateStatusRoomElement)) {
+        if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {
+          return;
+        }
+        socket.emit(
+          UpdateStatusRoom.eventId(UpdateStatusRoomElement),
+          JSON.stringify(this.updateCheckService.getStatus()),
+        );
+        void this.updateCheckService.refresh();
+      }
     });
 
     socket.on(SettingsEvent.ChangeDir, (dir: string) => {
@@ -94,6 +111,12 @@ export default class AppEffects {
       if (this.debug) console.log(SettingsEvent.ChangePairingRequired + '"' + pairingRequired + '"');
       this.changePairingRequired(Boolean(pairingRequired));
     });
+  }
+
+  private emitUpdateStatus(status: UpdateStatusAppDto): void {
+    this.io
+      .to(UpdateStatusRoom.roomId(UpdateStatusRoomElement))
+      .emit(UpdateStatusRoom.eventId(UpdateStatusRoomElement), JSON.stringify(status));
   }
 
   private loadConfig(): void {

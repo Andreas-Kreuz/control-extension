@@ -14,6 +14,7 @@ const StatisticsRoute = lazy(() => import('../features/statistics/StatisticsRout
 const StatusRoute = lazy(() => import('../features/status/StatusRoute'));
 const TrainDashboardRoute = lazy(() => import('../features/trainDashboard/TrainDashboardRoute'));
 const TrainsRoute = lazy(() => import('../features/trains/TrainsRoute'));
+const AboutRoute = lazy(() => import('../features/about/AboutRoute'));
 
 const homeRoutes = [
   { path: '/', element: <HomeRoute /> },
@@ -22,6 +23,7 @@ const homeRoutes = [
   { path: '/statistics', element: <StatisticsRoute /> },
   { path: '/insights', element: <InsightsRoute /> },
   { path: '/selectedTrain', element: <TrainDashboardRoute /> },
+  { path: '/about', element: <AboutRoute /> },
   { path: '/trains/*', element: <TrainsRoute /> },
   { path: '/data/*', element: <DataRoute /> },
 ];
