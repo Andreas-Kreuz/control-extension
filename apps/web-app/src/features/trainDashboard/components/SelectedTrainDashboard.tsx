@@ -1,5 +1,7 @@
 ﻿import { CommandEvent, RollingStockAppDto, TrainAppDto } from '@ce/web-shared';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import CarRentalIcon from '@mui/icons-material/CarRental';
+import CarRepairIcon from '@mui/icons-material/CarRepair';
 import CommitIcon from '@mui/icons-material/Commit';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -16,7 +18,7 @@ import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
-import LabelIcon from '@mui/icons-material/LabelOutlined';
+import BadgeIcon from '@mui/icons-material/Badge';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -363,7 +365,7 @@ function InfoCard(props: { train: TrainAppDto; transit?: TransitInfo; onSpeedCom
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
-        <OverviewMetric icon={<LabelIcon />} label="Name des Zugs" value={train.name || '-'} />
+        <OverviewMetric icon={<BadgeIcon />} label="Name des Zugs" value={train.name || '-'} />
         <OverviewMetric icon={<RouteIcon />} label="EEP-Route" value={train.route || '-'} />
         <OverviewMetric icon={<SpeedIcon />} label="Geschwindigkeit" value={`${train.speed} km/h`} />
         <ListItem sx={{ alignItems: 'flex-start', m: 0, p: 0 }}>
@@ -394,7 +396,7 @@ function TrainAssociationCard(props: {
   onLightChange: (source: number, checked: boolean) => void;
 }) {
   return (
-    <IconHeaderCard title="Zug steuern" icon={<TuneIcon color="primary" />}>
+    <IconHeaderCard title="Zug steuern" icon={<CarRentalIcon color="primary" />}>
       <Stack spacing={3}>
         <ControlGrid>
           <CouplingSegmentedControl
@@ -779,7 +781,7 @@ function RollingStockHeadline(props: {
 
 function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
   return (
-    <IconHeaderCard title="Fahrzeug Info" icon={<DirectionsRailwayIcon color="primary" />}>
+    <IconHeaderCard title="Fahrzeug Info" icon={<CarRepairIcon color="primary" />}>
       <List
         dense
         sx={{
@@ -787,7 +789,7 @@ function RollingStockInfoCard(props: { rollingStock: RollingStockAppDto }) {
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
-        <OverviewMetric icon={<LabelIcon />} label="Name des Fahrzeugs" value={props.rollingStock.name || '-'} />
+        <OverviewMetric icon={<BadgeIcon />} label="Name des Fahrzeugs" value={props.rollingStock.name || '-'} />
         <OverviewMetric icon={<AssignmentIcon />} label="Tag-Text" value={props.rollingStock.tag || '-'} />
         <OverviewMetric
           icon={<FileUploadIcon />}

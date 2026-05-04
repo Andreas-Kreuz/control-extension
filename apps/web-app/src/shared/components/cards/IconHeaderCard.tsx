@@ -24,7 +24,7 @@ function IconHeaderCard(props: IconHeaderCardProps) {
           content: { sx: { display: 'flex', flexDirection: 'column', gap: 0.25, minWidth: 0 } },
           title: {
             variant: 'h5',
-            sx: { lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+            sx: { lineHeight: 1, textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
           },
           subheader: { variant: 'subtitle1', sx: { display: 'block', lineHeight: 1, mt: 0 } },
         }}
