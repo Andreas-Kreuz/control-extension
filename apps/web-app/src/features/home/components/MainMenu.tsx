@@ -12,7 +12,7 @@ import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import useModuleAvailability from '../../../app/hooks/useModuleAvailability';
 import useUpdateStatus from '../../update/hooks/useUpdateStatus';
-import getNavSections from '../lib/NavElements';
+import getNavSections, { hubCeModuleId } from '../lib/NavElements';
 import ControlExtensionSetupCard from './ControlExtensionSetupCard';
 
 function MainMenu() {
@@ -23,6 +23,7 @@ function MainMenu() {
 
   const trafficNav = navigation.filter((nav) => nav.name === 'Verkehr').flatMap((nav) => nav.values);
   const availableTrafficCards = trafficNav.filter((card) => card.available && card.image);
+  const hubModuleAvailable = isModuleAvailable(hubCeModuleId);
 
   return (
     <PageContainer>
@@ -58,9 +59,11 @@ function MainMenu() {
         <Button variant="text" startIcon={<Inventory2Icon />} component={RouterLink} to="/data">
           Daten
         </Button>
-        <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
-          Aktiver Zug
-        </Button>
+        {hubModuleAvailable && (
+          <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
+            Aktiver Zug
+          </Button>
+        )}
         <Button
           variant="text"
           startIcon={

@@ -10,11 +10,12 @@ describe('App Home', () => {
   it('hides module-gated home modules after reset', () => {
     cy.visit('/simple');
     cy.contains('Control Extension App');
-    cy.contains('Ampeln').should('not.exist');
-    cy.contains('ÖPNV').should('not.exist');
-    cy.contains('Fuhrpark').should('not.exist');
+    cy.get('a[href="/road"]').should('not.exist');
+    cy.get('a[href="/transit"]').should('not.exist');
+    cy.get('a[href="/trains"]').should('not.exist');
     cy.contains('Control Extension einbinden');
     cy.contains('ControlExtension.addModules');
+    cy.get('a[href="/selectedTrain"]').should('not.exist');
     cy.contains('Einblicke');
   });
 
@@ -26,6 +27,7 @@ describe('App Home', () => {
     cy.contains('Ampeln');
     cy.contains('ÖPNV').should('not.exist');
     cy.contains('Fuhrpark').should('not.exist');
+    cy.contains('Aktiver Zug').should('not.exist');
     cy.contains('Einblicke');
   });
 
@@ -37,6 +39,7 @@ describe('App Home', () => {
     cy.contains('ÖPNV');
     cy.contains('Ampeln').should('not.exist');
     cy.contains('Fuhrpark').should('not.exist');
+    cy.contains('Aktiver Zug').should('not.exist');
     cy.contains('Einblicke');
   });
 
@@ -46,6 +49,7 @@ describe('App Home', () => {
     cy.visit('/simple');
     cy.contains('Control Extension App');
     cy.contains('Fuhrpark');
+    cy.contains('Aktiver Zug');
     cy.contains('Ampeln').should('not.exist');
     cy.contains('ÖPNV').should('not.exist');
     cy.contains('Einblicke');
