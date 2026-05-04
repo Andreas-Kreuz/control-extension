@@ -10,6 +10,7 @@
 - Generated build artifacts (`*.tsbuildinfo`) must not be committed; check `.gitignore` for new cache files
 - On Windows/PowerShell, always use `yarn.cmd` instead of `yarn`; PowerShell may route `yarn` through `yarn.ps1`, which can be blocked by execution policy
 - Lua tool config locations: `luacheck` uses `lua/.luacheckrc`; `busted` uses `lua/.busted`
+- For refactors of shared execution paths, do an impact search before finishing: find all usages of the changed API/behavior, inspect sibling modules using the same pattern, and update tests for every affected integration point. Avoid validating only the first visible failure.
 
 ## Review Focus
 
