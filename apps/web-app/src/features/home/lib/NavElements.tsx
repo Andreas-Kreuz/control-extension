@@ -1,28 +1,29 @@
-const hubCeModuleId = 'b9f34a2e-1c5d-4f8a-9e7b-3d0a6c8f2e41'; // "ce.hub.CeHubModule"
-const roadCeModuleId = 'c5a3e6d3-0f9b-4c89-a908-ed8cf8809362'; // "ce.mods.road.CeRoadModule"
-const transitCeModuleId = '83ce6b42-1bda-45e0-8b4a-e8daeed047ab'; // "ce.mods.transit.CeTransitModule"
+export const hubCeModuleId = 'b9f34a2e-1c5d-4f8a-9e7b-3d0a6c8f2e41'; // "ce.hub.CeHubModule"
+export const roadCeModuleId = 'c5a3e6d3-0f9b-4c89-a908-ed8cf8809362'; // "ce.mods.road.CeRoadModule"
+export const transitCeModuleId = '83ce6b42-1bda-45e0-8b4a-e8daeed047ab'; // "ce.mods.transit.CeTransitModule"
 
-function getNavSections(): {
+export interface NavElement {
+  available: boolean;
+  icon: string;
+  image?: string;
+  title: string;
+  subtitle?: string;
+  link: string;
+  description?: string;
+  linkDescription?: string;
+  requiredModuleId?: string;
+}
+
+export interface NavSection {
   name: string;
   available: boolean;
-  values: {
-    available: boolean;
-    icon: string;
-    image?: string;
-    title: string;
-    subtitle?: string;
-    link: string;
-    description?: string;
-    linkDescription?: string;
-    requiredModuleId?: string;
-  }[];
-}[] {
-  const availLuaData = false;
-  const availIntersection = false;
-  const availTransit = false;
+  values: NavElement[];
+}
+
+function getNavSections(isModuleAvailable: (moduleId: string) => boolean): NavSection[] {
   const availModules = false;
 
-  const navigation = [
+  const navigation: NavSection[] = [
     {
       name: 'Home',
       available: true,
@@ -37,10 +38,10 @@ function getNavSections(): {
     },
     {
       name: 'Verkehr',
-      available: availLuaData && (availIntersection || availTransit),
+      available: true,
       values: [
         {
-          available: availLuaData,
+          available: true,
           icon: 'directions_car',
           title: 'Fuhrpark',
           subtitle: 'Fahrzeugverbände und Fahrzeuge',
@@ -51,7 +52,7 @@ function getNavSections(): {
           requiredModuleId: hubCeModuleId,
         },
         {
-          available: availIntersection,
+          available: true,
           icon: 'gamepad',
           title: 'Ampeln',
           subtitle: 'Kreuzungen automatisch steuern',
@@ -62,7 +63,7 @@ function getNavSections(): {
           requiredModuleId: roadCeModuleId,
         },
         {
-          available: availTransit,
+          available: true,
           icon: 'route',
           title: 'ÖPNV',
           subtitle: 'Nahverkehrslinien verwalten',
@@ -73,7 +74,7 @@ function getNavSections(): {
           requiredModuleId: transitCeModuleId,
         },
         // {
-        //   available: availLuaData,
+        //   available: true,
         //   icon: 'directions_car',
         //   title: 'Autos',
         //   subtitle: 'Straßen',
@@ -84,7 +85,7 @@ function getNavSections(): {
         //   requiredModuleId: hubCeModuleId,
         // },
         // {
-        //   available: availLuaData,
+        //   available: true,
         //   icon: 'tram',
         //   title: 'Trams',
         //   subtitle: 'Straßenbahngleise',
@@ -95,7 +96,7 @@ function getNavSections(): {
         //   requiredModuleId: hubCeModuleId,
         // },
         // {
-        //   available: availLuaData,
+        //   available: true,
         //   icon: 'train',
         //   title: 'Züge',
         //   subtitle: 'Bahngleise',
@@ -120,7 +121,7 @@ function getNavSections(): {
           linkDescription: 'Log-Datei ansehen',
         },
         {
-          available: availLuaData,
+          available: true,
           icon: 'memory',
           title: 'Speicher',
           link: '/data',
@@ -129,7 +130,7 @@ function getNavSections(): {
           requiredModuleId: hubCeModuleId,
         },
         {
-          available: availLuaData,
+          available: true,
           icon: 'traffic',
           title: 'Signale',
           link: '/signals',
@@ -149,7 +150,18 @@ function getNavSections(): {
     },
   ];
 
-  return navigation;
+  return navigation.map((section) => {
+    const values = section.values.map((value) => ({
+      ...value,
+      available: value.available && (value.requiredModuleId === undefined || isModuleAvailable(value.requiredModuleId)),
+    }));
+
+    return {
+      ...section,
+      available: section.available && values.some((value) => value.available),
+      values,
+    };
+  });
 }
 
 export default getNavSections;

@@ -18,6 +18,7 @@ import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-rout
 import type { ReactNode } from 'react';
 import { SideSheetContext, defaultSideSheetState } from '../contexts/SideSheetContext';
 import type { SideSheetState } from '../contexts/SideSheetContext';
+import useModuleAvailability from '../hooks/useModuleAvailability';
 import BackButton from './BackButton';
 
 const DRAWER_WIDTH = 240;
@@ -29,6 +30,7 @@ export interface NavItem {
   icon: ReactElement;
   label: string;
   path: string;
+  requiredModuleId?: string;
 }
 
 interface RootLayoutProps {
@@ -37,9 +39,13 @@ interface RootLayoutProps {
 
 function RootLayout({ navItems }: RootLayoutProps) {
   const theme = useTheme();
+  const { isModuleAvailable } = useModuleAvailability();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
+  const visibleNavItems = navItems.filter(
+    (item) => item.requiredModuleId === undefined || isModuleAvailable(item.requiredModuleId),
+  );
 
   const [sideSheetState, setSideSheetState] = useState<SideSheetState>(defaultSideSheetState);
 
@@ -60,7 +66,7 @@ function RootLayout({ navItems }: RootLayoutProps) {
   }, []);
 
   const activeIndex = (() => {
-    const idx = navItems.findIndex(
+    const idx = visibleNavItems.findIndex(
       (item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/'),
     );
     return idx >= 0 ? idx : 0;
@@ -114,7 +120,7 @@ function RootLayout({ navItems }: RootLayoutProps) {
             }}
           >
             <List sx={{ display: 'flex', flexDirection: 'column', height: 1 }}>
-              {navItems.map((item, index) => (
+              {visibleNavItems.map((item, index) => (
                 <ListItemButton
                   key={item.path}
                   selected={activeIndex === index}
@@ -147,7 +153,7 @@ function RootLayout({ navItems }: RootLayoutProps) {
             }}
           >
             <List disablePadding sx={{ display: 'flex', flexDirection: 'column', height: 1 }}>
-              {navItems.map((item, index) => (
+              {visibleNavItems.map((item, index) => (
                 <Tooltip key={item.path} title={item.label} placement="right">
                   <ListItemButton
                     selected={activeIndex === index}
@@ -228,14 +234,14 @@ function RootLayout({ navItems }: RootLayoutProps) {
           >
             <BottomNavigation
               value={activeIndex}
-              onChange={(_, newValue: number) => handleNavigation(navItems[newValue]?.path ?? '/')}
+              onChange={(_, newValue: number) => handleNavigation(visibleNavItems[newValue]?.path ?? '/')}
               sx={{
                 bgcolor: 'primary.main',
                 '& .MuiBottomNavigationAction-root': { color: 'primary.contrastText', opacity: 0.7 },
                 '& .MuiBottomNavigationAction-root.Mui-selected': { color: 'primary.contrastText', opacity: 1 },
               }}
             >
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <BottomNavigationAction key={item.path} label={item.label} icon={item.icon} />
               ))}
             </BottomNavigation>
