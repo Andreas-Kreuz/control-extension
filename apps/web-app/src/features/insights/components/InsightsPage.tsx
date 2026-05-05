@@ -2,8 +2,8 @@
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
-import useStatistics from '../../statistics/hooks/useStatistics';
-import TimeDesc from '../../statistics/model/TimeDesc';
+import useStatistics from '../hooks/useStatistics';
+import TimeDesc from '../model/TimeDesc';
 import { useState } from 'react';
 import InsightsRuntimeInfo from './InsightsRuntimeInfo';
 import InsightsStatisticsPanel from './InsightsStatisticsPanel';

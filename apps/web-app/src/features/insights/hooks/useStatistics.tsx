@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import TimeDesc from '../model/TimeDesc';
 import { RuntimeStatisticsAppDto, RuntimeStatisticsRoom, RuntimeStatisticsTimeAppDto } from '@ce/web-shared';

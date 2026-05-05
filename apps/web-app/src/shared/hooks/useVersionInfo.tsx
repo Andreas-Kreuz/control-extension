@@ -1,7 +1,7 @@
-﻿import { useState } from 'react';
-import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useState } from 'react';
+import { VersionAppDto, VersionRoom } from '@ce/web-shared';
+import { useDomainRoomHandler } from '../socket/useRoomHandler';
 import Versions from '../lib/Versions';
-import { VersionRoom, VersionAppDto } from '@ce/web-shared';
 
 function cutOutLua(versionString: string) {
   if (versionString && versionString.startsWith('Lua ')) {

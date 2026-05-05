@@ -10,7 +10,6 @@ const HomeRoute = lazy(() => import('../features/home/HomeRoute'));
 const InsightsRoute = lazy(() => import('../features/insights/InsightsRoute'));
 const LinesRoute = lazy(() => import('../features/lines/LinesRoute'));
 const ServerRoute = lazy(() => import('../features/server/ServerRoute'));
-const StatisticsRoute = lazy(() => import('../features/statistics/StatisticsRoute'));
 const StatusRoute = lazy(() => import('../features/status/StatusRoute'));
 const TrainsRoute = lazy(() => import('../features/trains/TrainsRoute'));
 const AboutRoute = lazy(() => import('../features/about/AboutRoute'));
@@ -19,7 +18,6 @@ const homeRoutes = [
   { path: '/', element: <HomeRoute /> },
   { path: '/transit/*', element: <LinesRoute /> },
   { path: '/road/*', element: <RoadRoute /> },
-  { path: '/statistics', element: <StatisticsRoute /> },
   { path: '/insights', element: <InsightsRoute /> },
   { path: '/about', element: <AboutRoute /> },
   { path: '/train/*', element: <TrainsRoute /> },

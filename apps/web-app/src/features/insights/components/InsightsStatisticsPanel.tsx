@@ -1,5 +1,5 @@
 import StatisticsDiagram from './StatisticsDiagram';
-import TimeDesc from '../../statistics/model/TimeDesc';
+import TimeDesc from '../model/TimeDesc';
 import OutlinedCard from '../../../shared/components/cards/OutlinedCard';
 
 function InsightsStatisticsPanel(props: {
