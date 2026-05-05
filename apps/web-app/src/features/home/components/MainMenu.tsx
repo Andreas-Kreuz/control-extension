@@ -60,7 +60,7 @@ function MainMenu() {
           Daten
         </Button>
         {hubModuleAvailable && (
-          <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
+          <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/train/selected">
             Aktiver Zug
           </Button>
         )}

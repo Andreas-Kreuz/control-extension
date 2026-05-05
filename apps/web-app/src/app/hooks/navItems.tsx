@@ -7,7 +7,7 @@ import { hubCeModuleId, roadCeModuleId, transitCeModuleId } from '../../features
 
 const navItems: NavItem[] = [
   { icon: <HomeIcon />, label: 'Start', path: '/' },
-  { icon: <CommuteIcon />, label: 'Fuhrpark', path: '/trains', requiredModuleId: hubCeModuleId },
+  { icon: <CommuteIcon />, label: 'Fuhrpark', path: '/train/list', requiredModuleId: hubCeModuleId },
   { icon: <TrafficIcon />, label: 'Ampeln', path: '/road', requiredModuleId: roadCeModuleId },
   { icon: <TramIcon />, label: 'ÖPNV', path: '/transit', requiredModuleId: transitCeModuleId },
 ];

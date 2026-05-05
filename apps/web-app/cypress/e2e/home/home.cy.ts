@@ -12,10 +12,10 @@ describe('App Home', () => {
     cy.contains('Control Extension App');
     cy.get('a[href="/road"]').should('not.exist');
     cy.get('a[href="/transit"]').should('not.exist');
-    cy.get('a[href="/trains"]').should('not.exist');
+    cy.get('a[href="/train/list"]').should('not.exist');
     cy.contains('Control Extension einbinden');
     cy.contains('ControlExtension.addModules');
-    cy.get('a[href="/selectedTrain"]').should('not.exist');
+    cy.get('a[href="/train/selected"]').should('not.exist');
     cy.contains('Einblicke');
   });
 
