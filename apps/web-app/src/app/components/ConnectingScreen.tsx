@@ -1,4 +1,4 @@
-import { Divider as MuiDivider } from '@mui/material';
+import { Box, Divider as MuiDivider } from '@mui/material';
 import MuiBackdrop from '@mui/material/Backdrop';
 import MuiCircularProgress from '@mui/material/CircularProgress';
 import MuiPaper from '@mui/material/Paper';
@@ -16,13 +16,15 @@ const ConnectingScreen = (props: ConnectingScreenProps) => {
         <MuiStack sx={{ alignItems: 'center' }} spacing={1}>
           <MuiTypography gutterBottom>
             Verbindung wird wiederhergestellt{' '}
-            <strong style={{ fontWeight: 500, wordBreak: 'break-word' }}>{props.url}</strong>
+            <MuiTypography component="strong" sx={{ fontWeight: 500, wordBreak: 'break-word' }}>
+              {props.url}
+            </MuiTypography>
           </MuiTypography>
           <MuiCircularProgress />
         </MuiStack>
         <MuiDivider sx={{ my: 2 }} />
         <MuiStack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-          <img src={'/icon-192.png'} style={{ height: 48 }} />
+          <Box component="img" src="/icon-192.png" sx={{ height: 48 }} />
           <MuiTypography gutterBottom>
             <strong>Server versehentlich beendet?</strong>
             <br />

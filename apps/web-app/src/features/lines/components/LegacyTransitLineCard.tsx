@@ -5,7 +5,6 @@ import BusIcon from '@mui/icons-material/DirectionsBus';
 import TramIcon from '@mui/icons-material/Tram';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
 import { useState } from 'react';
 
 export interface LegacyTransitLineCardProps {
@@ -16,11 +15,6 @@ export interface LegacyTransitLineCardProps {
 const LegacyTransitLineCard = (props: LegacyTransitLineCardProps) => {
   const line = props.line;
   const [expanded, setExpanded] = useState(props.expanded ?? false);
-
-  const Pre = styled('pre')({
-    fontSize: 14,
-    whiteSpace: 'normal',
-  });
 
   return (
     <BackgroundImageCard

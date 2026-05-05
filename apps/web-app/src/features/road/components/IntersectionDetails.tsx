@@ -8,11 +8,12 @@ import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
 import { CommandEvent, RoadEvent } from '@ce/web-shared';
 import CamIcon from '@mui/icons-material/Videocam';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { styled, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import { useParams } from 'react-router-dom';
 import { Tooltip } from '@mui/material';
 
@@ -23,11 +24,6 @@ function IntersectionDetails() {
   const id = parseInt(intersectionId || '555');
   const i = useIntersection(id);
   const switchings = useIntersectionSwitching(i?.name);
-
-  const Pre = styled('pre')({
-    fontSize: 14,
-    whiteSpace: 'normal',
-  });
 
   function sendSwitchManually(intersectionName: string, switchingName: string) {
     socket.emit(RoadEvent.SwitchManually, {
@@ -162,9 +158,13 @@ function IntersectionDetails() {
               </Typography>
               <Typography variant="body2">
                 So hast Du Deine Kreuzung angelegt:
-                <Pre>c1 = Crossing:new(...)</Pre>
+                <Box component="pre" sx={{ fontSize: 14, whiteSpace: 'normal' }}>
+                  c1 = Crossing:new(...)
+                </Box>
                 Suche Dir nun eine statische Kamera aus und füge ihren Namen wie folgt hinzu:
-                <Pre>c1:addStaticCam('Kameraname')</Pre>
+                <Box component="pre" sx={{ fontSize: 14, whiteSpace: 'normal' }}>
+                  c1:addStaticCam('Kameraname')
+                </Box>
               </Typography>
             </Alert>
           )}

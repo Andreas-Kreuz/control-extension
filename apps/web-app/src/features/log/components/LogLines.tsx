@@ -1,21 +1,7 @@
 ﻿import { useLog } from '../providers/LogProvider';
 import Box from '@mui/material/Box';
-import { styled, type SxProps, type Theme } from '@mui/material/styles';
+import type { SxProps, Theme } from '@mui/material/styles';
 import { useEffect, useRef } from 'react';
-
-const LogLineList = styled('ul')({
-  m: 0,
-  p: 0,
-  marginBlock: 0,
-  paddingInlineStart: 0,
-});
-
-const LogLineEntry = styled('li')({
-  fontSize: 14,
-  fontFamily: 'monospace',
-  listStyleType: 'none',
-  whiteSpace: 'pre',
-});
 
 interface LogLinesProps {
   height?: string;
@@ -52,11 +38,17 @@ function LogLines({ height = '14.2em', width = 'calc(100vw)', sx }: LogLinesProp
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
     >
-      <LogLineList>
+      <Box component="ul" sx={{ m: 0, p: 0, marginBlock: 0, paddingInlineStart: 0 }}>
         {lines?.map((l) => (
-          <LogLineEntry key={l.key}>{l.line}</LogLineEntry>
+          <Box
+            component="li"
+            key={l.key}
+            sx={{ fontFamily: 'monospace', fontSize: 14, listStyleType: 'none', whiteSpace: 'pre' }}
+          >
+            {l.line}
+          </Box>
         ))}
-      </LogLineList>
+      </Box>
       <div ref={messagesEndRef} />
     </Box>
   );

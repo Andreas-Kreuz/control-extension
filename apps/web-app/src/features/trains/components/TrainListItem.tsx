@@ -1,4 +1,5 @@
 ﻿import { TrainListAppDto } from '@ce/web-shared';
+import Box from '@mui/material/Box';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
@@ -29,7 +30,7 @@ const TrainListItem = ({ train, selected, onSelect }: TrainListItemProps) => {
             boxSizing: 'border-box',
           }}
         >
-          <img src={iconSrc} width="100%" height="100%" alt="" style={{ objectFit: 'contain' }} />
+          <Box component="img" src={iconSrc} width="100%" height="100%" alt="" sx={{ objectFit: 'contain' }} />
         </ListItemIcon>
         <ListItemText primary={train.id} />
       </ListItemButton>

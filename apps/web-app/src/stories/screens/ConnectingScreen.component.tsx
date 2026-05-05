@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import MyConnectingScreen, {
   ConnectingScreenProps as MyConnectingScreenProps,
 } from '../../app/components/ConnectingScreen';
@@ -5,9 +6,9 @@ import MyConnectingScreen, {
 export type ConnectingScreenProps = Omit<MyConnectingScreenProps, 'children'>;
 
 export const ConnectingScreen = ({ ...args }: ConnectingScreenProps) => (
-  <div style={{ minHeight: '20rem' }}>
+  <Box sx={{ minHeight: '20rem' }}>
     <MyConnectingScreen {...args} />
-  </div>
+  </Box>
 );
 
 export default ConnectingScreen;

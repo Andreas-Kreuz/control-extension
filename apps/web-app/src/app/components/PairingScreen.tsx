@@ -1,4 +1,4 @@
-import { Divider as MuiDivider } from '@mui/material';
+import { Box, Divider as MuiDivider } from '@mui/material';
 import MuiBackdrop from '@mui/material/Backdrop';
 import MuiPaper from '@mui/material/Paper';
 import MuiStack from '@mui/material/Stack';
@@ -24,7 +24,7 @@ const PairingScreen = (props: PairingScreenProps) => {
         </MuiStack>
         <MuiDivider sx={{ my: 2 }} />
         <MuiTypography gutterBottom>
-          <img src={'/icon-192.png'} style={{ height: 48, float: 'left', marginRight: '1rem' }} />
+          <Box component="img" src="/icon-192.png" sx={{ height: 48, float: 'left', mr: 2 }} />
           <strong>Dein Zugriff wird gerade freigegeben.</strong>
           <br />
           Sobald der Server die Anfrage bestaetigt, wird die App automatisch geoeffnet.
