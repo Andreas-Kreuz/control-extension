@@ -32,7 +32,9 @@ function IconHeaderCard(props: IconHeaderCardProps) {
       {!props.headerOnly && props.children !== undefined && (
         <>
           <Divider />
-          <CardContent>{props.children}</CardContent>
+          <CardContent sx={{ '--section-content-px': '16px', p: 2, '&:last-child': { pb: 2 } }}>
+            {props.children}
+          </CardContent>
         </>
       )}
     </Card>

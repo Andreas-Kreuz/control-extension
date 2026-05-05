@@ -12,7 +12,7 @@ const LinesRoute = lazy(() => import('../features/lines/LinesRoute'));
 const ServerRoute = lazy(() => import('../features/server/ServerRoute'));
 const StatisticsRoute = lazy(() => import('../features/statistics/StatisticsRoute'));
 const StatusRoute = lazy(() => import('../features/status/StatusRoute'));
-const TrainDashboardRoute = lazy(() => import('../features/trainDashboard/TrainDashboardRoute'));
+const TrainDashboardRoute = lazy(() => import('../features/trains/TrainDashboardRoute'));
 const TrainsRoute = lazy(() => import('../features/trains/TrainsRoute'));
 const AboutRoute = lazy(() => import('../features/about/AboutRoute'));
 

@@ -1,25 +1,8 @@
-﻿import type { ReactNode } from 'react';
-import { TrainListAppDto, TrainType } from '@ce/web-shared';
+import type { ReactNode } from 'react';
+import { TrainListAppDto } from '@ce/web-shared';
 import BackgroundImageCard from '../../../shared/components/cards/BackgroundImageCard';
-import { trainIconFor } from '../lib/trainIconFor';
 import { getTrainChips } from '../lib/trainDetails';
-
-const getIconName = (trainType: TrainType): string => {
-  const imgName = trainIconFor(trainType);
-  return '/assets/' + imgName + '.svg';
-};
-
-const getImageName = (trackType: string): string => {
-  switch (trackType) {
-    case 'road':
-      return '/assets/card-img-trains-road.jpg';
-    case 'tram':
-      return '/assets/card-img-trains-tram.jpg';
-    case 'train':
-    default:
-      return '/assets/card-img-trains-rail.jpg';
-  }
-};
+import { ListIconSources } from '../lib/trainListIconSources';
 
 interface TrainListCardProps {
   train: TrainListAppDto;
@@ -35,7 +18,8 @@ const TrainListCard = ({ train, selected, onSelect, children }: TrainListCardPro
     <BackgroundImageCard
       title={train.id}
       additionalChips={additionalChips}
-      icon={getIconName(train.trainType)}
+      icon={ListIconSources[train.trainType]}
+      framedIcon
       selected={selected}
       expanded={selected}
       setExpanded={() => onSelect()}

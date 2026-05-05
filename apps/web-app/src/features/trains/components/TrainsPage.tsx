@@ -5,12 +5,12 @@ import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
-import Chip from '@mui/material/Chip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
@@ -19,21 +19,18 @@ import useSelectedElementNavigation from '../../../shared/layouts/useSelectedEle
 import setTrackType from '../hooks/useSetTrackType';
 import useTrackType from '../hooks/useTrackType';
 import useTrains from '../hooks/useTrains';
-import TrainCamerasView from './TrainCamerasView';
+import TrainCamerasSection from './TrainCamerasSection';
 import TrainInformationSection from './TrainInformationSection';
 import RollingStockSection from './RollingStockSection';
 import TrainLineSection from './TrainLineSection';
 import TrainListCard from './TrainListCard';
 import TrainListItem from './TrainListItem';
+import { trainSections } from './trainSectionPresentation';
 
 interface ChipData {
   key: TrackType;
   label: string;
 }
-
-const TrackTypeChipItem = styled('li')(({ theme }) => ({
-  margin: theme.spacing(0.5),
-}));
 
 function hasTransitLineInfo(train: { line?: string }) {
   const line = (train.line ?? '').trim();
@@ -52,39 +49,40 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
   const [lineInfoOnly, setLineInfoOnly] = useState(false);
 
   const [chipData] = useState<readonly ChipData[]>([
-    { key: TrackType.Rail, label: 'Gleise' },
-    { key: TrackType.Tram, label: 'Straßenbahn' },
+    { key: TrackType.Rail, label: 'Gleis' },
+    { key: TrackType.Tram, label: 'Tram' },
     { key: TrackType.Road, label: 'Straße' },
-    { key: TrackType.Auxiliary, label: 'Sonstige Splines' },
-    { key: TrackType.Control, label: 'Steuerstrecken' },
+    { key: TrackType.Auxiliary, label: 'Sonstige' },
+    { key: TrackType.Control, label: 'Steuern' },
   ]);
   const selectedTrackLabel = chipData.find((entry) => entry.key === trackType)?.label;
   const filteredTrains = lineInfoOnly ? trains.filter(hasTransitLineInfo) : trains;
 
   const filterSlot = (
     <>
-      <Box
-        component="ul"
+      <ToggleButtonGroup
+        exclusive
+        size="small"
+        value={trackType}
+        onChange={(_event, value: TrackType | null) => {
+          if (value !== null) {
+            setType(value);
+          }
+        }}
         sx={{
-          display: 'flex',
-          justifyContent: { xs: 'center', md: 'flex-start' },
+          bgcolor: 'background.paper',
+          display: 'inline-flex',
           flexWrap: 'wrap',
-          listStyle: 'none',
-          p: 0,
-          m: 0,
+          maxWidth: '100%',
+          width: 'fit-content',
         }}
       >
         {chipData.map((data) => (
-          <TrackTypeChipItem key={data.key}>
-            <Chip
-              label={data.label}
-              variant="filled"
-              color={trackType === data.key ? 'primary' : 'default'}
-              onClick={() => setType(data.key)}
-            />
-          </TrackTypeChipItem>
+          <ToggleButton key={data.key} value={data.key}>
+            {data.label}
+          </ToggleButton>
         ))}
-      </Box>
+      </ToggleButtonGroup>
       <FormControlLabel
         control={
           <Switch
@@ -124,12 +122,29 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
         )}
         getDetails={(train) => [
           {
-            title: 'Kameras',
-            component: <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />,
+            title: trainSections.trainControls.sideSheetTitle,
+            icon: trainSections.trainControls.icon,
+            component: <TrainCamerasSection trainName={train.id} rollingStockName={train.firstRollingStockName} />,
           },
-          ...(hasTransitLineInfo(train) ? [{ title: 'Linien', component: <TrainLineSection train={train} /> }] : []),
-          { title: 'Information', component: <TrainInformationSection train={train} /> },
-          { title: 'RollingStock', component: <RollingStockSection trainId={train.id} /> },
+          ...(hasTransitLineInfo(train)
+            ? [
+                {
+                  title: trainSections.trainLine.sideSheetTitle,
+                  icon: trainSections.trainLine.icon,
+                  component: <TrainLineSection train={train} />,
+                },
+              ]
+            : []),
+          {
+            title: trainSections.trainInfo.sideSheetTitle,
+            icon: trainSections.trainInfo.icon,
+            component: <TrainInformationSection train={train} />,
+          },
+          {
+            title: trainSections.rollingStockInfo.sideSheetTitle,
+            icon: trainSections.rollingStockInfo.icon,
+            component: <RollingStockSection trainId={train.id} />,
+          },
         ]}
         filterSlot={filterSlot}
         selectedElement={selectedElement}

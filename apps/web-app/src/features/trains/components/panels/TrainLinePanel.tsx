@@ -1,17 +1,15 @@
-﻿import type { TrainNextStationAppDto } from '@ce/web-shared';
-import { Fragment } from 'react';
+import type { TrainNextStationAppDto } from '@ce/web-shared';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RouteIcon from '@mui/icons-material/Route';
+import { Fragment } from 'react';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { IconListEntry } from '../../../../shared/components/iconlist';
+import { FullBleedDivider } from '../../../../shared/components/sections';
 
 function formatDeparture(entry: TrainNextStationAppDto) {
   if (entry.departureInMinutes <= 0) return '0 min';
@@ -21,7 +19,7 @@ function formatDeparture(entry: TrainNextStationAppDto) {
 function TrainNextStationList({ nextStations }: { nextStations: TrainNextStationAppDto[] }) {
   if (nextStations.length === 0) {
     return (
-      <Typography variant="body2" color="textSecondary" sx={{ p: 2 }}>
+      <Typography variant="body2" color="textSecondary" sx={{ py: 2 }}>
         Keine nächsten Stationen vorhanden.
       </Typography>
     );
@@ -52,7 +50,6 @@ function TrainNextStationList({ nextStations }: { nextStations: TrainNextStation
               minWidth: 0,
               wordBreak: 'break-word',
               lineHeight: 'inherit',
-              pl: 2,
             }}
           >
             {entry.station.name}
@@ -72,7 +69,7 @@ function TrainNextStationList({ nextStations }: { nextStations: TrainNextStation
           >
             {formatDeparture(entry)}
           </Typography>
-          <Box sx={{ ...cellSx(index), pr: 2, minWidth: 0, justifyContent: 'flex-start' }}>
+          <Box sx={{ ...cellSx(index), minWidth: 0, justifyContent: 'flex-start' }}>
             <Chip
               size="small"
               label={`Steig ${entry.station.platform}`}
@@ -92,37 +89,27 @@ function TrainNextStationList({ nextStations }: { nextStations: TrainNextStation
   );
 }
 
-function TrainLineView(props: { line?: string; destination?: string; nextStations?: TrainNextStationAppDto[] }) {
-  const rows = [
-    { label: 'Linie', value: props.line ?? '-', icon: RouteIcon },
-    { label: 'Ziel', value: props.destination ?? '-', icon: LocationOnIcon },
-  ];
-
+function TrainLinePanel(props: { line?: string; destination?: string; nextStations?: TrainNextStationAppDto[] }) {
   return (
     <Stack spacing={0}>
       <List
         dense
+        disablePadding
         sx={{
           '& .MuiListItemText-root': { display: 'flex', flexDirection: 'column-reverse' },
         }}
       >
-        {rows.map((row) => (
-          <ListItem key={row.label} sx={{ alignItems: 'flex-start' }}>
-            <ListItemIcon sx={{ mt: 0.5 }}>
-              <row.icon />
-            </ListItemIcon>
-            <ListItemText primary={row.value} secondary={row.label} />
-          </ListItem>
-        ))}
+        <IconListEntry icon={<RouteIcon />} title="Linie" value={props.line ?? '-'} />
+        <IconListEntry icon={<LocationOnIcon />} title="Ziel" value={props.destination ?? '-'} />
       </List>
-      <Divider />
-      <Typography variant="subtitle2" sx={{ px: 2, pt: 2, pb: 1 }}>
+      <FullBleedDivider />
+      <Typography variant="subtitle2" sx={{ pt: 2, pb: 1 }}>
         Nächste Stationen
       </Typography>
-      <Divider />
+      <FullBleedDivider />
       <TrainNextStationList nextStations={props.nextStations ?? []} />
     </Stack>
   );
 }
 
-export default TrainLineView;
+export default TrainLinePanel;

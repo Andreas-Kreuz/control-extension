@@ -1,7 +1,7 @@
-﻿import { TrainListAppDto } from '@ce/web-shared';
-import TrainLineView from './TrainLineView';
-import useTransitTrain from '../hooks/useTransitTrain';
+import { TrainListAppDto } from '@ce/web-shared';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
+import useTransitTrain from '../hooks/useTransitTrain';
+import TrainLinePanel from './panels/TrainLinePanel';
 
 function TrainLineSection({ train }: { train: TrainListAppDto }) {
   const transitTrain = useTransitTrain(train.id);
@@ -11,7 +11,7 @@ function TrainLineSection({ train }: { train: TrainListAppDto }) {
 
   const line = transitTrain?.line ?? train.line ?? '-';
   const destination = transitTrain?.destination ?? train.destination ?? '-';
-  return <TrainLineView line={line} destination={destination} nextStations={transitTrain?.nextStations ?? []} />;
+  return <TrainLinePanel line={line} destination={destination} nextStations={transitTrain?.nextStations ?? []} />;
 }
 
 export default TrainLineSection;

@@ -67,7 +67,11 @@ function BackgroundImageCard(props: BackgroundImageCardProps) {
             {props.subtitle}
           </Typography>
         )}
-        <Stack direction="row" spacing={1} sx={{ '& .MuiChip-outlined': { backgroundColor: 'rgba(255,255,255,0.8)' } }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ pt: 0.5, '& .MuiChip-outlined': { backgroundColor: 'rgba(255,255,255,0.8)' } }}
+        >
           {props.icon &&
             (props.framedIcon ? (
               <Box

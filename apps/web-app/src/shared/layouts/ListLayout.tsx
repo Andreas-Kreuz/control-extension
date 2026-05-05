@@ -1,5 +1,5 @@
 ﻿import { Fragment, useCallback, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
@@ -15,10 +15,12 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSideSheet } from '../../app/contexts/SideSheetContext';
 import { Paper } from '@mui/material';
+import { DetailTabPanelBody, IconHeaderSection } from '../components/sections';
 
 export interface DetailSection {
   title: string;
   component: ReactNode;
+  icon?: ReactElement;
 }
 
 export interface ListLayoutProps<T> {
@@ -41,7 +43,7 @@ function MobileTabs({ sections }: { sections: DetailSection[] }) {
   const safeTab = Math.min(activeTab, sections.length - 1);
 
   if (sections.length === 1) {
-    return <Stack>{sections[0]?.component}</Stack>;
+    return <DetailTabPanelBody>{sections[0]?.component}</DetailTabPanelBody>;
   }
 
   return (
@@ -58,7 +60,7 @@ function MobileTabs({ sections }: { sections: DetailSection[] }) {
         ))}
       </Tabs>
       <Divider />
-      {sections[safeTab]?.component}
+      <DetailTabPanelBody>{sections[safeTab]?.component}</DetailTabPanelBody>
     </Stack>
   );
 }
@@ -74,13 +76,9 @@ function SideSheetDetail({ sections, onClose }: { sections: DetailSection[]; onC
       <Divider />
       <Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
         {sections.map((section) => (
-          <Box key={section.title}>
-            <Typography variant="h6" sx={{ px: 2, pt: 2, pb: 1 }}>
-              {section.title}
-            </Typography>
-            <Divider />
+          <IconHeaderSection key={section.title} title={section.title} icon={section.icon}>
             {section.component}
-          </Box>
+          </IconHeaderSection>
         ))}
       </Box>
     </Box>
