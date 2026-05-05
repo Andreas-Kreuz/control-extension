@@ -2,7 +2,7 @@
 import HomeIcon from '@mui/icons-material/Home';
 import TrafficIcon from '@mui/icons-material/Traffic';
 import TramIcon from '@mui/icons-material/Tram';
-import type { NavItem } from '../components/RootLayout';
+import type { NavItem } from '../../shared/components/nav';
 import { hubCeModuleId, roadCeModuleId, transitCeModuleId } from '../../features/home/lib/NavElements';
 
 const navItems: NavItem[] = [
