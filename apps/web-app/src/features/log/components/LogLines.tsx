@@ -1,6 +1,6 @@
 ﻿import { useLog } from '../providers/LogProvider';
 import Box from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
+import { styled, type SxProps, type Theme } from '@mui/material/styles';
 import { useEffect, useRef } from 'react';
 
 const LogLineList = styled('ul')({
@@ -17,7 +17,13 @@ const LogLineEntry = styled('li')({
   whiteSpace: 'pre',
 });
 
-function LogLines() {
+interface LogLinesProps {
+  height?: string;
+  width?: string;
+  sx?: SxProps<Theme>;
+}
+
+function LogLines({ height = '14.2em', width = 'calc(100vw)', sx }: LogLinesProps) {
   const logState = useLog();
   const lines = logState?.lines;
   const autoScroll = logState?.autoScroll;
@@ -35,13 +41,16 @@ function LogLines() {
 
   return (
     <Box
-      height="14.2em"
-      width="calc(100vw)"
-      sx={{
-        overflow: 'auto',
-        pt: 1,
-        px: 1,
-      }}
+      height={height}
+      width={width}
+      sx={[
+        {
+          overflow: 'auto',
+          pt: 1,
+          px: 1,
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     >
       <LogLineList>
         {lines?.map((l) => (

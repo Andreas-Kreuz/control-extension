@@ -9,6 +9,7 @@ const RoadRoute = lazy(() => import('../features/road/RoadRoute'));
 const HomeRoute = lazy(() => import('../features/home/HomeRoute'));
 const InsightsRoute = lazy(() => import('../features/insights/InsightsRoute'));
 const LinesRoute = lazy(() => import('../features/lines/LinesRoute'));
+const LogRoute = lazy(() => import('../features/log/LogRoute'));
 const ServerRoute = lazy(() => import('../features/server/ServerRoute'));
 const StatusRoute = lazy(() => import('../features/status/StatusRoute'));
 const TrainsRoute = lazy(() => import('../features/trains/TrainsRoute'));
@@ -22,6 +23,7 @@ const homeRoutes = [
   { path: '/about', element: <AboutRoute /> },
   { path: '/train/*', element: <TrainsRoute /> },
   { path: '/data/*', element: <DataRoute /> },
+  { path: '/log/*', element: <LogRoute /> },
 ];
 
 export const appRouter = createBrowserRouter([
