@@ -39,10 +39,9 @@ export function groupAxisByName(rollingStock: RollingStockAppDto[]): MergedAxisG
 
   return Array.from(groups.values())
     .map((group) => {
-      const values = new Set(group.targets.map((target) => target.value));
       return {
         ...group,
-        value: values.size === 1 ? (group.targets[0]?.value ?? 0) : 0,
+        value: group.targets[0]?.value ?? 0,
       };
     })
     .sort((left, right) => left.name.localeCompare(right.name, 'de'));

@@ -1,10 +1,24 @@
-import { CommandEvent, RollingStockAppDto, TrainAppDto } from '@ce/web-shared';
+import {
+  CommandEvent,
+  PairingStatus,
+  RollingStockAppDto,
+  RollingStockRoom,
+  RoomEvent,
+  TrainAppDto,
+} from '@ce/web-shared';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useSocket } from '../../../app/hooks/useSocket';
+import { useSocketIsConnected } from '../../../app/hooks/useSocketConnection';
+import { useSocketPairingStatus } from '../../../app/hooks/useSocketPairing';
 import { CameraControlSource } from '../../../shared/components/controls';
 import useDebug from '../../../shared/socket/useDebug';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
-import { groupAxisByName, isSelectedRollingStock, MergedAxisGroup } from '../lib/trainDashboard';
+import {
+  groupAxisByName,
+  isSelectedRollingStock,
+  mergeRollingStockModelInfo,
+  MergedAxisGroup,
+} from '../lib/trainDashboard';
 import useOptimisticTrainControls from './useOptimisticTrainControls';
 import useRollingStock from './useRollingStock';
 import useSelectedScenario from './useSelectedScenario';
@@ -54,11 +68,16 @@ function useTrainDashboard(): TrainDashboardPanelModel {
       : selectedTrainName;
   const train = useTrainDynamic(trainId);
   const rollingStock = useTrainRollingStock(trainId);
+  const dynamicRollingStock = useTrainRollingStockDynamic(rollingStock ?? []);
   const transitTrain = useTransitTrain(trainId);
   const transitSettings = useTransitSettings();
   const cameraRollingStockName = rollingStock?.[0]?.name ?? activeRollingStock?.name ?? train?.name ?? trainId;
   const cameraRollingStock = useRollingStock(cameraRollingStockName);
-  const trainRollingStock = rollingStock ?? [];
+  const trainRollingStock = useMemo(
+    () =>
+      rollingStock?.map((item) => mergeRollingStockModelInfo(item, dynamicRollingStock[item.id])) ?? [],
+    [dynamicRollingStock, rollingStock],
+  );
   const controls = useOptimisticTrainControls({
     train,
     onCouplingCommit: setCoupling,
@@ -170,6 +189,56 @@ function useTrainDashboard(): TrainDashboardPanelModel {
     trainSelected: train.active || selectedTrainName === train.id || selectedTrainName === train.name,
     ...(transit !== undefined ? { transit } : {}),
   };
+}
+
+function useTrainRollingStockDynamic(rollingStock: RollingStockAppDto[]): Record<string, RollingStockAppDto> {
+  const socket = useSocket();
+  const isConnected = useSocketIsConnected();
+  const pairingStatus = useSocketPairingStatus();
+  const [dynamicRollingStock, setDynamicRollingStock] = useState<Record<string, RollingStockAppDto>>({});
+  const rollingStockIds = useMemo(() => rollingStock.map((item) => item.id).filter(Boolean), [rollingStock]);
+  const rollingStockIdsKey = rollingStockIds.join('\n');
+  const canJoinRoom =
+    isConnected && (pairingStatus === PairingStatus.Approved || pairingStatus === PairingStatus.Admin);
+
+  useEffect(() => {
+    const currentIds = new Set(rollingStockIds);
+    setDynamicRollingStock((current) =>
+      Object.fromEntries(Object.entries(current).filter(([id]) => currentIds.has(id))),
+    );
+
+    const handlers = rollingStockIds.map((id) => {
+      const eventName = RollingStockRoom.eventId(id);
+      const handler = (payload: string) => {
+        const data = JSON.parse(payload) as RollingStockAppDto | null;
+        setDynamicRollingStock((current) => {
+          if (data) {
+            return { ...current, [id]: data };
+          }
+
+          const next = { ...current };
+          delete next[id];
+          return next;
+        });
+      };
+
+      socket.on(eventName, handler);
+      return { eventName, handler, roomName: RollingStockRoom.roomId(id) };
+    });
+
+    if (canJoinRoom) {
+      handlers.forEach((handler) => socket.emit(RoomEvent.JoinRoom, { room: handler.roomName }));
+    }
+
+    return () => {
+      handlers.forEach((handler) => {
+        socket.emit(RoomEvent.LeaveRoom, { room: handler.roomName });
+        socket.off(handler.eventName, handler.handler);
+      });
+    };
+  }, [canJoinRoom, rollingStockIdsKey, socket]);
+
+  return dynamicRollingStock;
 }
 
 export default useTrainDashboard;
