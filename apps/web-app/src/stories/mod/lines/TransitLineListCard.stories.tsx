@@ -1,7 +1,8 @@
-﻿import type { Meta, StoryObj } from '@storybook/react';
-import { TransitLineListCard as TransitLineListCardStory } from './TransitLineListCard.component';
+import Stack from '@mui/material/Stack';
+import type { Meta, StoryObj } from '@storybook/react';
 import Line from '../../../features/lines/model/Line';
 import StationInfo from '../../../features/lines/model/StationInfo';
+import { TransitLineListCard as TransitLineListCardStory } from './TransitLineListCard.component';
 
 const meta = {
   title: 'Module Elements/Transit/TransitLineListCard',
@@ -37,6 +38,9 @@ const line1: Line = {
 const line2Bus: Line = { ...line1, id: 65, nr: '65', trafficType: 'BUS' };
 const line3Train: Line = { ...line1, id: 43, nr: 'S43', trafficType: 'TRAIN' };
 const line4Subway: Line = { ...line1, id: 405, nr: 'U5', trafficType: 'SUBWAY' };
+const line5Ferry: Line = { ...line1, id: 120, nr: 'F12', trafficType: 'FERRY' };
+const line6Sbahn: Line = { ...line1, id: 3, nr: 'S3', trafficType: 'SBAHN' };
+const iconLines = [line2Bus, line1, line4Subway, line5Ferry, line6Sbahn];
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -55,6 +59,16 @@ export const Rail: Story = {
 
 export const Subway: Story = {
   args: { line: line4Subway, selected: false, onSelect: () => {} },
+};
+
+export const AllIcons: Story = {
+  render: () => (
+    <Stack spacing={2} sx={{ p: 2 }}>
+      {iconLines.map((line) => (
+        <TransitLineListCardStory key={line.id} line={line} selected={false} onSelect={() => {}} />
+      ))}
+    </Stack>
+  ),
 };
 
 export const SubwayOnMobile: Story = {

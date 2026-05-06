@@ -1,8 +1,8 @@
 ﻿import type { ReactNode } from 'react';
 import Line from '../model/Line';
 import Card from '@mui/material/Card';
-import { CardActionArea, Stack, Avatar, Typography } from '@mui/material';
-import { getColor, getIcon } from '../lib/Transit';
+import { CardActionArea, Stack, Typography } from '@mui/material';
+import LineAvatar from '../../../shared/components/lines/LineAvatar';
 
 export interface TransitLineListCardProps {
   line: Line;
@@ -16,7 +16,7 @@ const TransitLineListCard = ({ line, selected, onSelect, children }: TransitLine
     <Card sx={{ ...(selected && { outline: '2px solid', outlineColor: 'primary.main' }) }}>
       <CardActionArea onClick={onSelect}>
         <Stack direction={'row'} spacing={1} sx={{ pt: 2, px: 2, pb: 2 }}>
-          <Avatar sx={{ bgcolor: getColor(line.trafficType) }}>{getIcon(line.trafficType)}</Avatar>
+          <LineAvatar trafficType={line.trafficType} />
           <Typography variant="h5" align="center" sx={{ fontWeight: 500, px: 2, minWidth: '4rem' }}>
             {line.nr}
           </Typography>
