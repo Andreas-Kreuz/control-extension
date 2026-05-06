@@ -106,3 +106,28 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 - 🐞 Das Beenden des Servers räumt Austauschdateien zuverlässiger auf
 - 🐞 Linieninformationen werden nach EEP-Routenwechseln zuverlässiger aktualisiert; Fahrzeuge ohne passende Linienroute verschwinden aus Haltestellenanzeigen
 - 🐞 Mehrere UI-Korrekturen für Achsensteuerung, Textfarben, Abstände und Zugauswahl
+
+## **Control Extension v0.0.7-alpha** Vorschauversion
+
+### Neu in v0.0.7-alpha
+
+- ⭐ Neue Navigation mit angepasster Darstellung für Desktop, Tablet und Mobilgeräte
+- ⭐ App-Bereiche werden nur noch angezeigt, wenn das passende Control-Extension-Modul in EEP aktiv ist
+- ⭐ Neue Start-Hilfe zum Einbinden der Control Extension, wenn noch keine Module aktiv sind
+- ⭐ Überarbeitetes Zug-Dashboard mit Panels für Steuerung, Kameras, Achsen, Linieninformationen, Rollmaterial und Texturen
+- ⭐ Gemeinsame Zugachsen können zusammen gesteuert werden, wenn die Achsnamen bekannt sind
+- ⭐ Überarbeitete Symbole und kompaktere Darstellungen für Zug- und Rollmaterialinformationen
+
+### Lua Änderungen in v0.0.7-alpha
+
+- ⭐ Einstellungen für Ampeln und ÖPNV verwenden nun lesbare deutsche Namen mit Umlauten
+- ⭐ Demo-Anlagen für Ampeln und Linien wurden aktualisiert
+
+### Behobene Fehler in v0.0.7-alpha
+
+- 🐞 Einstellungen für Ampeln und ÖPNV werden wieder im erwarteten Format an die App geliefert
+- 🐞 Boolean-Einstellungen aus der App werden in Lua zuverlässiger verarbeitet
+- 🐞 Nicht verfügbare Module blenden ihre Karten und Navigationseinträge aus
+- 🐞 Der aktive Zug wird nicht mehr angezeigt, wenn das Hub-Modul nicht geladen ist
+- 🐞 Alte Statistik-Route wurde entfernt; Statistik- und Versionsinfos liegen nun in der Einblicke-Seite
+- 🐞 Mehrere UI-Korrekturen an Navigation, Textdarstellung, Abständen, Karten und Zugauswahl
