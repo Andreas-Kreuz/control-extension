@@ -4,6 +4,10 @@ require("ce.demo-anlagen.demo-linien.demo-linien-main")
 -- Diese Zeile lädt den Einstiegspunkt der Lua-Bibliothek
 local ControlExtension = require("ce.ControlExtension")
 
+ControlExtension.setOptions({
+    anl3path = "Resourcen/Anlagen/ce/Control_Extension-Demo-Linien/Control_Extension-Demo-Linien.anl3",
+})
+
 -- Diese Zeilen registrieren die folgenden Module
 -- * Hub (immer benötigt)
 -- * Intersection (für die Ampelsteuerung notwendig)
