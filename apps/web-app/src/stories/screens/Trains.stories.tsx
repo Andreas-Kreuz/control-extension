@@ -82,7 +82,7 @@ const TrainsStoryShell = ({ children }: PropsWithChildren) => {
   });
 
   return (
-    <MemoryRouter initialEntries={['/trains']}>
+    <MemoryRouter initialEntries={['/train/list']}>
       <TrainContext.Provider value={state}>
         <TrainDispatchContext.Provider value={dispatch}>{children}</TrainDispatchContext.Provider>
       </TrainContext.Provider>

@@ -48,22 +48,22 @@ function tests(size: string, closestSelector: string, simulator: EepSimulator) {
       cy.screenshot(generatedScreenshotPath('/road/1', 'detail', size));
     });
 
-    it('/ trains ' + size, () => {
-      cy.visit('/trains');
+    it('/ train/list ' + size, () => {
+      cy.visit('/train/list');
       waitForHome();
       cy.contains('#Acros_Schweiger_HB3').closest(closestSelector);
       prepareForScreenshot();
-      cy.screenshot(generatedScreenshotPath('/trains', 'overview', size), { capture: 'viewport' });
+      cy.screenshot(generatedScreenshotPath('/train/list', 'overview', size), { capture: 'viewport' });
     });
 
-    it('/ trains details' + size, () => {
-      cy.visit('/trains/%23Acros_Schweiger_HB3');
+    it('/ train/list details' + size, () => {
+      cy.visit('/train/list/%23Acros_Schweiger_HB3');
       waitForHome();
       cy.contains('#Acros_Schweiger_HB3')
         .closest(closestSelector)
         .scrollIntoView({ offset: { top: -90, left: 0 } });
       prepareForScreenshot();
-      cy.screenshot(generatedScreenshotPath('/trains/%23Acros_Schweiger_HB3', 'detail', size), {
+      cy.screenshot(generatedScreenshotPath('/train/list/%23Acros_Schweiger_HB3', 'detail', size), {
         capture: 'viewport',
       });
     });

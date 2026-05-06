@@ -4,7 +4,7 @@ import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 import { ModuleAppDto, ModuleRoom } from '@ce/web-shared';
 import { useState } from 'react';
 import { useServerStatus } from '../../status/hooks/useServerInfo';
-import TimeDesc from '../../statistics/model/TimeDesc';
+import TimeDesc from '../model/TimeDesc';
 import { useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import InsightsInfoList from './InsightsInfoList';
 

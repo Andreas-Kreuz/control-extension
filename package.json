@@ -1,7 +1,7 @@
 {
   "name": "@ce/root",
   "private": true,
-  "version": "v0.0.6-alpha",
+  "version": "v0.0.7-alpha",
   "workspaces": [
     "apps/*",
     "packages/*",

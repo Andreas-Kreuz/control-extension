@@ -4,21 +4,19 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import TrainCamerasView from './TrainCamerasView';
-import TrainInformationView from './TrainInformationView';
-import TrainLineView from './TrainLineView';
-import RollingStockView from './RollingStockView';
 import useTransitTrain from '../hooks/useTransitTrain';
 import useTrainDynamic from '../hooks/useTrainDynamic';
-import useTrainRollingStock from '../hooks/useTrainRollingStock';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
+import TrainInformationPanel from './panels/TrainInformationPanel';
+import TrainLinePanel from './panels/TrainLinePanel';
+import RollingStockSection from './RollingStockSection';
+import TrainCamerasSection from './TrainCamerasSection';
 
 const TrainDetails = (props: { train: TrainListAppDto }) => {
   const [activeTab, setActiveTab] = useState(0);
   const train = props.train;
   const trainDynamic = useTrainDynamic(train.id);
   const transitTrain = useTransitTrain(train.id);
-  const rollingStock = useTrainRollingStock(train.id);
   const transitSettings = useTransitSettings();
   const showTransitTab = Boolean(transitSettings);
   const currentLine = transitTrain?.line ?? train.line ?? '-';
@@ -47,17 +45,17 @@ const TrainDetails = (props: { train: TrainListAppDto }) => {
       </Tabs>
       <Divider />
       {tabs[safeTabIndex]?.key === 'information' && (
-        <TrainInformationView
+        <TrainInformationPanel
           train={train}
           {...(trainDynamic?.targetSpeed !== undefined ? { targetSpeed: trainDynamic.targetSpeed } : {})}
         />
       )}
-      {tabs[safeTabIndex]?.key === 'rolling-stock' && <RollingStockView rollingStock={rollingStock} />}
+      {tabs[safeTabIndex]?.key === 'rolling-stock' && <RollingStockSection trainId={train.id} />}
       {tabs[safeTabIndex]?.key === 'kameras' && (
-        <TrainCamerasView trainName={train.id} rollingStockName={train.firstRollingStockName} />
+        <TrainCamerasSection trainName={train.id} rollingStockName={train.firstRollingStockName} />
       )}
       {tabs[safeTabIndex]?.key === 'linieninformationen' && (
-        <TrainLineView
+        <TrainLinePanel
           line={currentLine}
           destination={currentDestination}
           nextStations={transitTrain?.nextStations ?? []}

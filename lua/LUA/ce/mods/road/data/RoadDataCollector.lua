@@ -198,7 +198,7 @@ end
 function RoadDataCollector.collectModuleSettings()
     return {
         {
-            category = "Tipp-Texte fuer Ampeln",
+            category = "Tipp-Texte für Ampeln",
             name = "Wartende Fahrzeuge",
             description = "Jede Ampel zeigt die wartenden Fahrzeuge",
             type = "boolean",
@@ -206,7 +206,7 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Ampeln",
+            category = "Tipp-Texte für Ampeln",
             name = "Modellinformation",
             description = "Zeigt das Ampelmodell und seine Schaltungen",
             type = "boolean",
@@ -214,7 +214,7 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowModelInfoOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Ampeln",
+            category = "Tipp-Texte für Ampeln",
             name = "Kurzname und Farbe",
             description = "Zeigt den farbigen Ampelnamen und die aktuelle Farbe",
             type = "boolean",
@@ -222,7 +222,7 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowNameAndSequenceOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Ampeln",
+            category = "Tipp-Texte für Ampeln",
             name = "Phasen",
             description = "Zeige die aktuelle Schaltung dieser Ampel in den Ampelphasen",
             type = "boolean",
@@ -230,7 +230,7 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowSequenceOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Kreuzungen",
+            category = "Tipp-Texte für Kreuzungen",
             name = "Kreuzungsübersicht einblenden",
             description = "Zeigt Fahrspuren und deren Schaltung",
             type = "boolean",
@@ -238,7 +238,7 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowLanesOnStructure"
         },
         {
-            category = "Tipp-Texte fuer Signale (allgemein)",
+            category = "Tipp-Texte für Signale (allgemein)",
             name = "Signal-ID einblenden",
             description = "Zeigt an jedem Signal dessen Nummer als TippText",
             type = "boolean",

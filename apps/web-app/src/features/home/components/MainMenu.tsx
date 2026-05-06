@@ -10,33 +10,39 @@ import ImageCard from '../../../shared/components/cards/ImageCard';
 import CardGridItem from '../../../shared/layouts/CardGridItem';
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
+import useModuleAvailability from '../../../app/hooks/useModuleAvailability';
 import useUpdateStatus from '../../update/hooks/useUpdateStatus';
-import getNavSections from '../lib/NavElements';
+import getNavSections, { hubCeModuleId } from '../lib/NavElements';
+import ControlExtensionSetupCard from './ControlExtensionSetupCard';
 
 function MainMenu() {
-  const navigation = getNavSections();
+  const { isModuleAvailable } = useModuleAvailability();
+  const navigation = getNavSections(isModuleAvailable);
   const updateStatus = useUpdateStatus();
   const updateAvailable = updateStatus.state === 'stable-available' || updateStatus.state === 'prerelease-available';
 
   const trafficNav = navigation.filter((nav) => nav.name === 'Verkehr').flatMap((nav) => nav.values);
+  const availableTrafficCards = trafficNav.filter((card) => card.available && card.image);
+  const hubModuleAvailable = isModuleAvailable(hubCeModuleId);
 
   return (
     <PageContainer>
-      <CardGridContainer>
-        {trafficNav.map(
-          (card) =>
-            card.image && (
-              <CardGridItem key={card.title}>
-                <ImageCard
-                  title={card.title}
-                  image={'/assets/' + card.image}
-                  to={card.link}
-                  {...(card.subtitle !== undefined ? { subtitle: card.subtitle } : {})}
-                />
-              </CardGridItem>
-            ),
-        )}
-      </CardGridContainer>
+      {availableTrafficCards.length > 0 ? (
+        <CardGridContainer>
+          {availableTrafficCards.map((card) => (
+            <CardGridItem key={card.title}>
+              <ImageCard
+                title={card.title}
+                image={'/assets/' + card.image}
+                to={card.link}
+                {...(card.subtitle !== undefined ? { subtitle: card.subtitle } : {})}
+              />
+            </CardGridItem>
+          ))}
+        </CardGridContainer>
+      ) : (
+        <ControlExtensionSetupCard />
+      )}
       <Grid
         container
         spacing={2}
@@ -53,9 +59,11 @@ function MainMenu() {
         <Button variant="text" startIcon={<Inventory2Icon />} component={RouterLink} to="/data">
           Daten
         </Button>
-        <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/selectedTrain">
-          Aktiver Zug
-        </Button>
+        {hubModuleAvailable && (
+          <Button variant="text" startIcon={<TrainIcon />} component={RouterLink} to="/train/selected">
+            Aktiver Zug
+          </Button>
+        )}
         <Button
           variant="text"
           startIcon={

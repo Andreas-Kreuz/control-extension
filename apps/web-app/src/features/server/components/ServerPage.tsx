@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import './ServerPage.css';
 import ServerHome from './ServerHome';
 import ConnectingScreenHost from '../../../app/components/ConnectingScreenHost';
 import { useSocketIsConnected } from '../../../app/hooks/useSocketConnection';
@@ -24,19 +23,17 @@ function ServerPage() {
   }
 
   return (
-    <div className="Server">
-      <Box sx={{ minHeight: '100vh' }}>
-        <AppBar>
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: 'block' }}>
-              CE Server
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        <Toolbar />
-        <ServerHome />
-      </Box>
-    </div>
+    <Box sx={{ minHeight: '100vh' }}>
+      <AppBar>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, display: 'block' }}>
+            CE Server
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Toolbar />
+      <ServerHome />
+    </Box>
   );
 }
 

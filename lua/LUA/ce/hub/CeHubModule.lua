@@ -97,7 +97,9 @@ local function runAnl3Discovery()
         return
     end
     local tableOfAnl3, err = Anl3ToTable.loadAnlage(anl3Path)
-    if not tableOfAnl3 then
+    if tableOfAnl3 then
+        print(string.format("[CeHubModule] Successfully loaded Anl3 from %s", anl3Path))
+    else
         print(string.format("[CeHubModule] Anl3 load failed: %s", tostring(err)))
         return
     end

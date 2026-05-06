@@ -1,6 +1,5 @@
 ﻿import { useSocket } from '../../../app/hooks/useSocket';
 import { useRoomHandler } from '../../../shared/socket/useRoomHandler';
-import './ServerHome.css';
 import {
   ApprovePairingClientPayload,
   PairingEvent,
@@ -417,7 +416,9 @@ end`;
                     <br />
                     Stelle sicher, dass Du den folgenden Lua-Code in EEP eingetragen hast.
                   </Alert>
-                  <pre>{code}</pre>
+                  <Box component="pre" sx={{ fontSize: '90%' }}>
+                    {code}
+                  </Box>
                 </div>
               </Stack>
             </ListItem>

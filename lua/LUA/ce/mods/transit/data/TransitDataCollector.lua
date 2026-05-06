@@ -8,9 +8,9 @@ local TransitDataCollector = {}
 function TransitDataCollector.collectModuleSettings()
     return {
         {
-            category = "Tipp-Texte fuer Anzeigetafeln",
-            name = "Naechste Abfahrten",
-            description = "Zeige Abfahrten fuer Bus und Tram-Linien als TippText an",
+            category = "Tipp-Texte für Anzeigetafeln",
+            name = "Nächste Abfahrten",
+            description = "Zeige Abfahrten für Bus und Tram-Linien als TippText an",
             type = "boolean",
             value = TransitSettings.showDepartureTippText,
             eepFunction = "TransitSettings.setShowDepartureTippText"

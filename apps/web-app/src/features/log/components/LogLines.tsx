@@ -1,23 +1,15 @@
 ﻿import { useLog } from '../providers/LogProvider';
 import Box from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
+import type { SxProps, Theme } from '@mui/material/styles';
 import { useEffect, useRef } from 'react';
 
-const LogLineList = styled('ul')({
-  m: 0,
-  p: 0,
-  marginBlock: 0,
-  paddingInlineStart: 0,
-});
+interface LogLinesProps {
+  height?: string;
+  width?: string;
+  sx?: SxProps<Theme>;
+}
 
-const LogLineEntry = styled('li')({
-  fontSize: 14,
-  fontFamily: 'monospace',
-  listStyleType: 'none',
-  whiteSpace: 'pre',
-});
-
-function LogLines() {
+function LogLines({ height = '14.2em', width = 'calc(100vw)', sx }: LogLinesProps) {
   const logState = useLog();
   const lines = logState?.lines;
   const autoScroll = logState?.autoScroll;
@@ -35,19 +27,28 @@ function LogLines() {
 
   return (
     <Box
-      height="14.2em"
-      width="calc(100vw)"
-      sx={{
-        overflow: 'auto',
-        pt: 1,
-        px: 1,
-      }}
+      height={height}
+      width={width}
+      sx={[
+        {
+          overflow: 'auto',
+          pt: 1,
+          px: 1,
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     >
-      <LogLineList>
+      <Box component="ul" sx={{ m: 0, p: 0, marginBlock: 0, paddingInlineStart: 0 }}>
         {lines?.map((l) => (
-          <LogLineEntry key={l.key}>{l.line}</LogLineEntry>
+          <Box
+            component="li"
+            key={l.key}
+            sx={{ fontFamily: 'monospace', fontSize: 14, listStyleType: 'none', whiteSpace: 'pre' }}
+          >
+            {l.line}
+          </Box>
         ))}
-      </LogLineList>
+      </Box>
       <div ref={messagesEndRef} />
     </Box>
   );

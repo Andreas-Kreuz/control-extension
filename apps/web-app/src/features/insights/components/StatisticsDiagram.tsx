@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import TimeDesc from '../../statistics/model/TimeDesc';
+import TimeDesc from '../model/TimeDesc';
 import StatisticsDiagramLegend from './StatisticsDiagramLegend';
 
 const AREA_COLORS = [

@@ -12,6 +12,7 @@ import {
   IntersectionSwitchingAppDto,
   IntersectionTrafficLightAppDto,
   SettingAppDto,
+  SettingsAppDto,
   TrafficLightModelAppDto,
 } from '@ce/web-shared';
 
@@ -24,7 +25,7 @@ export default class RoadSelector {
   private intersectionSwitchings: Record<string, IntersectionSwitchingAppDto> = {};
   private intersectionTrafficLights: Record<string, IntersectionTrafficLightAppDto> = {};
   private trafficLightModels: Record<string, TrafficLightModelAppDto> = {};
-  private moduleSettings: Record<string, SettingAppDto<unknown>> = {};
+  private moduleSettings: SettingsAppDto = { moduleName: 'Einstellungen für Kreuzungen', settings: [] };
 
   updateFromState(state: fromEepData.State): void {
     if (state === this.lastState) {
@@ -113,18 +114,18 @@ export default class RoadSelector {
       }),
     );
 
-    this.moduleSettings = {};
+    this.moduleSettings = { moduleName: 'Einstellungen für Kreuzungen', settings: [] };
     if (state.ceTypes[CeTypes.RoadModuleSetting]) {
       const dict = state.ceTypes[CeTypes.RoadModuleSetting] as unknown as Record<string, SettingLuaDto<unknown>>;
       Object.values(dict).forEach((dto) => {
-        this.moduleSettings[dto.name] = {
+        this.moduleSettings.settings.push({
           name: dto.name,
           category: dto.category,
           description: dto.description,
           eepFunction: dto.eepFunction,
           type: dto.type,
           value: dto.value,
-        };
+        });
       });
     }
   }
@@ -155,6 +156,7 @@ export default class RoadSelector {
   getIntersectionLane = (id: string): IntersectionLaneAppDto | undefined => this.intersectionLanes[id];
   getTrafficLightModels = (): Record<string, TrafficLightModelAppDto> => this.trafficLightModels;
   getTrafficLightModel = (id: string): TrafficLightModelAppDto | undefined => this.trafficLightModels[id];
-  getModuleSettings = (): Record<string, SettingAppDto<unknown>> => this.moduleSettings;
-  getModuleSetting = (id: string): SettingAppDto<unknown> | undefined => this.moduleSettings[id];
+  getModuleSettings = (): SettingsAppDto => this.moduleSettings;
+  getModuleSetting = (id: string): SettingAppDto<unknown> | undefined =>
+    this.moduleSettings.settings.find((setting) => setting.name === id);
 }

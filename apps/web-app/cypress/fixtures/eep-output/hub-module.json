@@ -1,0 +1,14 @@
+{
+  "payload": {
+    "keyId": "id",
+    "element": {
+      "id": "b9f34a2e-1c5d-4f8a-9e7b-3d0a6c8f2e41",
+      "enabled": true,
+      "name": "ce.hub.CeHubModule",
+      "ceType": "ce.hub.Module"
+    },
+    "ceType": "ce.hub.Module"
+  },
+  "type": "DataAdded",
+  "eventCounter": 1
+}

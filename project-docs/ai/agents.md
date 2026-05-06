@@ -7,7 +7,7 @@ Start here. Follow links downward only for the domain you need.
 Project:
 
 - [overview.md](overview.md): what this project is — stack, layers, monorepo structure
-- [guides/commands.md](guides/commands.md): yarn commands — build, test, lint, format, dev
+- [guides/commands.md](guides/commands.md): yarn and other commands — build, test, lint, format, dev - read before running commands
 
 Lua guides:
 
@@ -36,4 +36,4 @@ Architecture:
 Cross-cutting:
 
 - [encoding/rules.md](encoding/rules.md): file encoding (Latin1 vs UTF-8)
-- [guides/work-rules.md](guides/work-rules.md): change style, review focus, general rules
+- [guides/work-rules.md](guides/work-rules.md): change style, review focus, general rules - always read before code changes

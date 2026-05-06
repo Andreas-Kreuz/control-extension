@@ -5,9 +5,9 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
 import { Link as RouterLink } from 'react-router-dom';
-import useVersionStatus from '../../statistics/hooks/useVersionInfo';
+import useVersionStatus from '../../../shared/hooks/useVersionInfo';
 import useUpdateStatus from '../../update/hooks/useUpdateStatus';
-import type Versions from '../../statistics/lib/Versions';
+import type Versions from '../../../shared/lib/Versions';
 import InsightsInfoList from './InsightsInfoList';
 
 function displayVersion(version: string) {

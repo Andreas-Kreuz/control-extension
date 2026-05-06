@@ -1,3 +1,4 @@
+import Box from '@mui/material/Box';
 import React from 'react';
 
 class ErrorBoundary extends React.Component<{ children?: any }, { hasError: boolean; error: any }> {
@@ -17,10 +18,10 @@ class ErrorBoundary extends React.Component<{ children?: any }, { hasError: bool
   override render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem' }}>
+        <Box sx={{ p: '2rem' }}>
           <h1>Something went wrong.</h1>
           {this.state.error}
-        </div>
+        </Box>
       );
     }
 

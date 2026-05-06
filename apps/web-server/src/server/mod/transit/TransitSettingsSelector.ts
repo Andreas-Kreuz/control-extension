@@ -6,15 +6,18 @@ import { CeTypes, SettingAppDto, SettingsAppDto } from '@ce/web-shared';
 // Lua input: ce.mods.transit.ModuleSetting.
 export default class TransitSettingsSelector {
   private lastState?: fromEepData.State;
-  private settings: SettingsAppDto = { moduleName: 'Public Transport', settings: [] };
+  private settings: SettingsAppDto = { moduleName: 'Einstellungen für ÖPNV', settings: [] };
 
   updateFromState(state: fromEepData.State): void {
-    this.settings = { moduleName: 'Public Transport', settings: [] };
-
-    if (state === this.lastState || !state.ceTypes[CeTypes.TransitModuleSetting]) {
+    if (state === this.lastState) {
       return;
     }
     this.lastState = state;
+    this.settings = { moduleName: 'Einstellungen für ÖPNV', settings: [] };
+
+    if (!state.ceTypes[CeTypes.TransitModuleSetting]) {
+      return;
+    }
 
     const settingsDict = state.ceTypes[CeTypes.TransitModuleSetting] as unknown as Record<
       string,

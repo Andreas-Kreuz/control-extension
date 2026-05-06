@@ -6,9 +6,8 @@ local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 local Lane = require("ce.mods.road.Lane")
 local Intersection = require("ce.mods.road.Intersection")
-local CeRoadModule = require("ce.mods.road.CeRoadModule")
-CeRoadModule.loadSettingsFromSlot(100)
-TrafficLight.zeigeAnforderungen = true
+local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+IntersectionSettings.loadSettingsFromSlot(100)
 
 ------------------------------------------------
 -- Damit kommt wird die Variable "Zugname" automatisch durch EEP belegt
@@ -125,6 +124,7 @@ do
     c2Sequence4:addCarLights(K5)
 
     c2:addStaticCam("Kreuzung 2")
+    c2:setTippStructure("#18")
 end
 -- endregion
 
@@ -160,14 +160,14 @@ do
     c1Lane7 = Lane:new("Fahrspur 7 - K1", 107, K7, { "STRAIGHT", "RIGHT" })
     c1Lane8 = Lane:new("Fahrspur 8 - K1", 108, K8, { "LEFT" })
 
-    local F1 = TrafficLight:new("F1", 40, Grundmodell_Ampel_3_FG)
-    local F2 = TrafficLight:new("F2", 41, Grundmodell_Ampel_3_FG)
-    local F3 = TrafficLight:new("F3", 36, Grundmodell_Ampel_3_FG)
-    local F4 = TrafficLight:new("F4", 37, Grundmodell_Ampel_3_FG)
-    local F5 = TrafficLight:new("F5", 38, Grundmodell_Ampel_3_FG)
-    local F6 = TrafficLight:new("F6", 39, Grundmodell_Ampel_3_FG)
-    local F7 = TrafficLight:new("F7", 42, Grundmodell_Ampel_3_FG)
-    local F8 = TrafficLight:new("F8", 43, Grundmodell_Ampel_3_FG)
+    local F1 = TrafficLight:newPedestrianOnly("F1", 40, Grundmodell_Ampel_3_FG)
+    local F2 = TrafficLight:newPedestrianOnly("F2", 41, Grundmodell_Ampel_3_FG)
+    local F3 = TrafficLight:newPedestrianOnly("F3", 36, Grundmodell_Ampel_3_FG)
+    local F4 = TrafficLight:newPedestrianOnly("F4", 37, Grundmodell_Ampel_3_FG)
+    local F5 = TrafficLight:newPedestrianOnly("F5", 38, Grundmodell_Ampel_3_FG)
+    local F6 = TrafficLight:newPedestrianOnly("F6", 39, Grundmodell_Ampel_3_FG)
+    local F7 = TrafficLight:newPedestrianOnly("F7", 42, Grundmodell_Ampel_3_FG)
+    local F8 = TrafficLight:newPedestrianOnly("F8", 43, Grundmodell_Ampel_3_FG)
 
     -- endregion
     -- region K1-Schaltungen
@@ -203,12 +203,15 @@ do
     c1Sequence4:addCarLights(K8)
 
     c1:addStaticCam("Kreuzung 1")
+    c1:setTippStructure("#17")
 end
 -- endregion
 
 local ControlExtension = require("ce.ControlExtension")
 local crossingCeModule = require("ce.mods.road.CeRoadModule")
-ControlExtension.addModules(crossingCeModule)
+ControlExtension.addModules(crossingCeModule).setOptions({
+    anl3path = "Resourcen/Anlagen/ce/Control_Extension-Demo-Ampel/Control_Extension-Demoanlage-Ampel-Grundmodelle.anl3",
+})
 
 function EEPMain()
     -- print("[#Anlage] Speicher: " .. collectgarbage("count"))
