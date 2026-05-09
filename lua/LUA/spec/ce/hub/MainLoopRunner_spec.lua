@@ -27,6 +27,7 @@ insulate("MainLoopRunner", function ()
         clearModule("ce.databridge.ServerExchangeCoordinator")
         clearModule("ce.databridge.ServerExchangeFileIo")
         clearModule("ce.databridge.IncomingCommandFileReader")
+        clearModule("ce.databridge.SafeFileIo")
         clearModule("ce.databridge.LogOutputFileWriter")
         clearModule("ce.databridge.IoInit")
         clearModule("ce.databridge.ExchangeDirRegistry")
@@ -34,6 +35,7 @@ insulate("MainLoopRunner", function ()
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.databridge.DataStoreFileWriter")
         clearModule("ce.hub.publish.DataChangeBus")
+        clearModule("ce.hub.util.ProtectedExecution")
         clearModule("ce.hub.util.TimedExecution")
     end
 
@@ -307,6 +309,121 @@ insulate("MainLoopRunner", function ()
 
         ControlExtension.runTasks(5)
 
+        assert.same({ 1, 0 }, pauseCalls)
+    end)
+
+    it("continues later runtime phases after one module run fails", function ()
+        local MainLoopRunner = require("ce.hub.MainLoopRunner")
+        local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
+        local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
+        local DataStoreFileWriter = require("ce.databridge.DataStoreFileWriter")
+        local goodModuleRunCalls = 0
+        local publisherSyncCalls = 0
+        local commandReadCalls = 0
+        local dataStoreWriteCalls = 0
+
+        local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
+                                                        function ()
+                                                            commandReadCalls = commandReadCalls + 1
+                                                        end)
+        local writeStub = stub(DataStoreFileWriter, "write", function ()
+            dataStoreWriteCalls = dataStoreWriteCalls + 1
+        end)
+        finally(function () readAndExecuteIncomingCommandsStub:revert() end)
+        finally(function () writeStub:revert() end)
+
+        StatePublisherRegistry.registerStatePublishers({
+            name = "spec.IndependentPublisher",
+            initialize = function () end,
+            syncState = function () publisherSyncCalls = publisherSyncCalls + 1 end
+        })
+
+        MainLoopRunner.runCycle(0, { "bad", "good" }, {
+            bad = {
+                name = "spec.BadModule",
+                init = function () end,
+                run = function () error("module failed") end
+            },
+            good = {
+                name = "spec.GoodModule",
+                init = function () end,
+                run = function () goodModuleRunCalls = goodModuleRunCalls + 1 end
+            }
+        }, { enableServer = false, enableDataStoreJson = true })
+
+        assert.equals(1, goodModuleRunCalls)
+        assert.equals(1, publisherSyncCalls)
+        assert.equals(1, commandReadCalls)
+        assert.equals(1, dataStoreWriteCalls)
+    end)
+
+    it("retries failed module and publisher initialization", function ()
+        local MainLoopRunner = require("ce.hub.MainLoopRunner")
+        local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
+        local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
+        local moduleInitCalls = 0
+        local moduleRunCalls = 0
+        local publisherInitCalls = 0
+        local publisherSyncCalls = 0
+
+        local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
+                                                        function () end)
+        finally(function () readAndExecuteIncomingCommandsStub:revert() end)
+
+        StatePublisherRegistry.registerStatePublishers({
+            name = "spec.RetryPublisher",
+            initialize = function ()
+                publisherInitCalls = publisherInitCalls + 1
+                if publisherInitCalls == 1 then error("publisher init failed") end
+            end,
+            syncState = function () publisherSyncCalls = publisherSyncCalls + 1 end
+        })
+
+        local modules = {
+            retry = {
+                name = "spec.RetryModule",
+                init = function ()
+                    moduleInitCalls = moduleInitCalls + 1
+                    if moduleInitCalls == 1 then error("module init failed") end
+                end,
+                run = function () moduleRunCalls = moduleRunCalls + 1 end
+            }
+        }
+
+        MainLoopRunner.runCycle(5, { "retry" }, modules, { enableServer = false })
+        assert.is_false(MainLoopRunner.areModulesInitialized())
+        assert.equals(1, moduleInitCalls)
+        assert.equals(0, moduleRunCalls)
+        assert.equals(1, publisherInitCalls)
+        assert.equals(0, publisherSyncCalls)
+
+        MainLoopRunner.runCycle(5, { "retry" }, modules, { enableServer = false })
+        assert.is_true(MainLoopRunner.areModulesInitialized())
+        assert.equals(2, moduleInitCalls)
+        assert.equals(1, moduleRunCalls)
+        assert.equals(2, publisherInitCalls)
+        assert.equals(1, publisherSyncCalls)
+    end)
+
+    it("runTasks catches remaining runCycle errors and resumes EEP", function ()
+        local ControlExtension = require("ce.ControlExtension")
+        local MainLoopRunner = require("ce.hub.MainLoopRunner")
+        local pauseCalls = {}
+
+        ControlExtension.setPauseEepDuringInitialization(true)
+        local runCycleStub = stub(MainLoopRunner, "runCycle", function ()
+            error("cycle failed")
+        end)
+        local eepPauseStub = stub(_G, "EEPPause", function (value)
+            table.insert(pauseCalls, value)
+        end)
+        finally(function () runCycleStub:revert() end)
+        finally(function () eepPauseStub:revert() end)
+
+        local ok, result = pcall(function () return ControlExtension.runTasks(5) end)
+
+        assert.is_true(ok)
+        assert.is_nil(result)
         assert.same({ 1, 0 }, pauseCalls)
     end)
 end)

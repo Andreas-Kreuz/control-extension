@@ -8,6 +8,8 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
     before_each(function ()
         clearModule("ce.databridge.ExchangeDirRegistry")
         clearModule("ce.databridge.IncomingCommandExecutor")
+        clearModule("ce.databridge.SafeFileIo")
+        clearModule("ce.hub.util.ProtectedExecution")
         clearModule("ce.databridge.IncomingCommandFileReader")
     end)
 
@@ -24,11 +26,15 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
             table.insert(openCalls, { name = name, mode = mode })
             if mode == "r" then
                 return {
-                    read = function () return files[name] or "" end,
+                    read = function ()
+                        if files[name] == "__READ_ERROR__" then error("read failed") end
+                        return files[name] or ""
+                    end,
                     close = function () closeCalls[name] = (closeCalls[name] or 0) + 1 end
                 }
             end
 
+            if files[name] == "__WRITE_ERROR__" then error("write failed") end
             files[name] = ""
             return {
                 write = function (_, content) files[name] = files[name] .. content end,
@@ -173,5 +179,66 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
             }, openCalls)
         assert.same({ "clearlog\n" }, commands)
         assert.equals("", files["custom-dir/commands-to-ce"])
+    end)
+
+    it("does not mark the command file as prepared when startup truncation fails", function ()
+        local openCalls = {}
+        local closeCalls = {}
+        local commands = {}
+        local files = { ["custom-dir/commands-to-ce"] = "__WRITE_ERROR__" }
+
+        local ioOpenStub = stubFileIo(files, openCalls, closeCalls)
+        local printStub = stub(_G, "print", function () end)
+        finally(function () ioOpenStub:revert() end)
+        finally(function () printStub:revert() end)
+
+        local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
+        local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
+                                                 function (commandText)
+                                                     table.insert(commands, commandText)
+                                                 end)
+        finally(function () executeIncomingCommandsStub:revert() end)
+
+        ExchangeDirRegistry.setExchangeDirectory("custom-dir")
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "stale|"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+
+        assert.same({}, commands)
+        assert.equals("", files["custom-dir/commands-to-ce"])
+    end)
+
+    it("does not advance the consumed offset when reading fails", function ()
+        local openCalls = {}
+        local closeCalls = {}
+        local commands = {}
+        local files = {}
+
+        local ioOpenStub = stubFileIo(files, openCalls, closeCalls)
+        local printStub = stub(_G, "print", function () end)
+        finally(function () ioOpenStub:revert() end)
+        finally(function () printStub:revert() end)
+
+        local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
+        local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
+                                                 function (commandText)
+                                                     table.insert(commands, commandText)
+                                                 end)
+        finally(function () executeIncomingCommandsStub:revert() end)
+
+        ExchangeDirRegistry.setExchangeDirectory("custom-dir")
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "print|one\n"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "__READ_ERROR__"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "print|one\nprint|two\n"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+
+        assert.same({ "print|one\n", "print|two\n" }, commands)
     end)
 end)

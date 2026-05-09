@@ -86,7 +86,12 @@ function ServerExchangeFileIo.writeOutgoingEvents(jsonData)
     end
 
     if fileExists(serverIsRunningFileName) then
-        writeFile(eventsFromCePendingFileName, "")
+        if not pcall(writeFile, eventsFromCePendingFileName, "") then
+            print(string.format(
+                "[#ServerExchangeFileIo] CANNOT WRITE TO %s",
+                eventsFromCePendingFileName
+            ))
+        end
     end
 end
 

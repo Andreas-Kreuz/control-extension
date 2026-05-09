@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.databridge.IncomingCommandFileReader ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
 local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+local SafeFileIo = require("ce.databridge.SafeFileIo")
 
 local IncomingCommandFileReader = {}
 
@@ -39,8 +40,14 @@ local function prepareCommandFile()
 end
 
 function IncomingCommandFileReader.readAndExecuteIncomingCommands()
-    local commandFileName = prepareCommandFile()
-    local commands = readFile(commandFileName) -- file: commands-to-ce
+    local okPrepare, commandFileName = SafeFileIo.run("IncomingCommandFileReader.prepareCommandFile",
+                                                      commandsToCeFileName or "commands-to-ce", prepareCommandFile)
+    if not okPrepare then return end
+
+    local okRead, commands = SafeFileIo.run("IncomingCommandFileReader.readFile", commandFileName, readFile,
+                                            commandFileName)
+    if not okRead then return end
+
     if commands:len() < lastConsumedByteOffset then lastConsumedByteOffset = 0 end
 
     local newCommands = commands:sub(lastConsumedByteOffset + 1)

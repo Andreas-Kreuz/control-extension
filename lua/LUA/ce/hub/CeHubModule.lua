@@ -39,11 +39,11 @@ local TimedExecution = require("ce.hub.util.TimedExecution")
 local anl3Path = nil
 
 local function tk(group, func)
-    TimedExecution.runTimedAndKeep(group, func)
+    TimedExecution.runProtectedTimedAndKeep(group, func)
 end
 
 local function tu(group, func)
-    TimedExecution.runTimed(group, func)
+    TimedExecution.runProtectedTimed(group, func)
 end
 
 local function runInitialDataDiscovery()

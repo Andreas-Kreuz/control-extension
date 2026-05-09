@@ -2,6 +2,7 @@ insulate("TimedExecution", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     before_each(function ()
+        clearModule("ce.hub.util.ProtectedExecution")
         clearModule("ce.hub.util.TimedExecution")
         clearModule("ce.hub.data.runtime.RuntimeMetrics")
     end)
@@ -44,6 +45,39 @@ insulate("TimedExecution", function ()
 
         local runtime = RuntimeMetrics.get("spec.compat")
         assert.equals(5, result)
+        assert.equals(1, runtime.count)
+        assert.is_true(runtime.lastTime >= 0)
+    end)
+
+    it("runProtectedTimed stores runtime and returns original results", function ()
+        local TimedExecution = require("ce.hub.util.TimedExecution")
+        local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
+
+        local ok, first, second = TimedExecution.runProtectedTimed("spec.protectedTimed", function (prefix, value)
+            return prefix .. value, value * 2
+        end, "v", 4)
+
+        local runtime = RuntimeMetrics.get("spec.protectedTimed")
+        assert.is_true(ok)
+        assert.equals("v4", first)
+        assert.equals(8, second)
+        assert.equals(1, runtime.count)
+        assert.is_true(runtime.lastTime >= 0)
+    end)
+
+    it("runProtectedTimed stores runtime when the function fails", function ()
+        local TimedExecution = require("ce.hub.util.TimedExecution")
+        local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
+        local printStub = stub(_G, "print", function () end)
+        finally(function () printStub:revert() end)
+
+        local ok, err = TimedExecution.runProtectedTimed("spec.protectedTimedFailure", function ()
+            error("boom")
+        end)
+
+        local runtime = RuntimeMetrics.get("spec.protectedTimedFailure")
+        assert.is_false(ok)
+        assert.is_truthy(string.find(err, "boom", 1, true))
         assert.equals(1, runtime.count)
         assert.is_true(runtime.lastTime >= 0)
     end)

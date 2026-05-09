@@ -4,6 +4,7 @@ require("ce.databridge.IoInit").initialize()
 
 local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
 local ControlExtensionHub = {}
 ControlExtensionHub.debug = CeStartWithDebug or false
@@ -54,23 +55,29 @@ end
 
 function ControlExtensionHub.runTasks(cycleCount)
     local effectiveCycleCount = type(cycleCount) == "number" and cycleCount or 5
-    local resumeEEP
-    if not MainLoopRunner.areModulesInitialized() and ControlExtensionHub.pauseEepDuringInitialization then
-        if ControlExtensionHub.debug then print("[ControlExtensionHub] Pause EEP during initialization") end
-        EEPPause(1)
-        resumeEEP = true
-    end
+    local resumeEEP = false
 
-    local totalTime = MainLoopRunner.runCycle(effectiveCycleCount, ModuleRegistry.getModuleNames(),
-                                              ModuleRegistry.getRegisteredCeModules(),
-                                              { debug = ControlExtensionHub.debug, enableServer = serverEnabled })
+    local ok, totalTime = ProtectedExecution.run("ControlExtensionHub.runTasks", function ()
+        if not MainLoopRunner.areModulesInitialized() and ControlExtensionHub.pauseEepDuringInitialization then
+            if ControlExtensionHub.debug then print("[ControlExtensionHub] Pause EEP during initialization") end
+            local pauseOk = ProtectedExecution.run("ControlExtensionHub.pauseEEP", EEPPause, 1)
+            resumeEEP = pauseOk
+        end
+
+        return MainLoopRunner.runCycle(effectiveCycleCount, ModuleRegistry.getModuleNames(),
+                                       ModuleRegistry.getRegisteredCeModules(),
+                                       { debug = ControlExtensionHub.debug, enableServer = serverEnabled })
+    end)
 
     if resumeEEP then
         if ControlExtensionHub.debug then
-            print(string.format("[ControlExtensionHub] Resume EEP after initialization %3.0f ms", totalTime * 1000))
+            print(string.format("[ControlExtensionHub] Resume EEP after initialization %3.0f ms",
+                                (totalTime or 0) * 1000))
         end
-        EEPPause(0)
+        ProtectedExecution.run("ControlExtensionHub.resumeEEP", EEPPause, 0)
     end
+
+    if not ok then return nil end
 
     return totalTime
 end

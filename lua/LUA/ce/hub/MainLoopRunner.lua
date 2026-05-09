@@ -14,9 +14,11 @@ MainLoopRunner.debug = CeStartWithDebug or false
 
 local modulesInitialized = false
 local initializedStatePublisherNames = {}
+local initializedModuleNames = {}
 local ioCycleIndex = -1
 local runTimed = TimedExecution.runTimed
-local runTimedAndKeep = TimedExecution.runTimedAndKeep
+local runProtectedTimed = TimedExecution.runProtectedTimed
+local runProtectedTimedAndKeep = TimedExecution.runProtectedTimedAndKeep
 
 local function copyRuntimeEntries(runtimeEntries)
     local copy = {}
@@ -33,31 +35,45 @@ local function runInitModulesPhase(executionOrderModuleNames, registeredCeModule
 
     ServerExchangeCoordinator.initialize(serverEnabled)
 
+    local allModulesInitialized = true
     for _, moduleName in ipairs(executionOrderModuleNames) do
-        if MainLoopRunner.debug then
-            print(string.format("[#MainLoopRunner] Begin initTask() for \"%s\"", moduleName))
-        end
-        local module = registeredCeModules[moduleName]
-        runTimedAndKeep("CeModule." .. module.name .. ".init", function () module.init() end)
-        if MainLoopRunner.debug then
-            print(string.format("[#MainLoopRunner] End initTask() for \"%s\" after %.3f seconds", module.name,
-                                RuntimeMetrics.get("CeModule." .. module.name .. ".init").lastTime / 1000))
+        if not initializedModuleNames[moduleName] then
+            allModulesInitialized = false
+            local module = registeredCeModules[moduleName]
+            if MainLoopRunner.debug then
+                print(string.format("[#MainLoopRunner] Begin initTask() for \"%s\"", moduleName))
+            end
+            local ok = runProtectedTimedAndKeep("CeModule." .. module.name .. ".init", function () module.init() end)
+            if ok then
+                initializedModuleNames[moduleName] = true
+                allModulesInitialized = true
+            end
+            if MainLoopRunner.debug then
+                print(string.format("[#MainLoopRunner] End initTask() for \"%s\" after %.3f seconds", module.name,
+                                    RuntimeMetrics.get("CeModule." .. module.name .. ".init").lastTime / 1000))
+            end
         end
     end
 
-    modulesInitialized = true
+    for _, moduleName in ipairs(executionOrderModuleNames) do
+        if not initializedModuleNames[moduleName] then allModulesInitialized = false end
+    end
+
+    modulesInitialized = allModulesInitialized
 end
 
 local function runModulesPhase(executionOrderModuleNames, registeredCeModules)
     for _, moduleName in ipairs(executionOrderModuleNames) do
-        if MainLoopRunner.debug then
-            print(string.format("[#MainLoopRunner] Begin run() for \"%s\"", moduleName))
-        end
-        local module = registeredCeModules[moduleName]
-        runTimed("CeModule." .. module.name .. ".run", function () module.run() end)
-        local moduleTime = RuntimeMetrics.get("CeModule." .. module.name .. ".run").lastTime / 1000
-        if MainLoopRunner.debug and moduleTime > 0.01 then
-            print(string.format("[#MainLoopRunner] WARNING: run() %.3f seconds for \"%s\"", moduleTime, moduleName))
+        if initializedModuleNames[moduleName] then
+            if MainLoopRunner.debug then
+                print(string.format("[#MainLoopRunner] Begin run() for \"%s\"", moduleName))
+            end
+            local module = registeredCeModules[moduleName]
+            runProtectedTimed("CeModule." .. module.name .. ".run", function () module.run() end)
+            local moduleTime = RuntimeMetrics.get("CeModule." .. module.name .. ".run").lastTime / 1000
+            if MainLoopRunner.debug and moduleTime > 0.01 then
+                print(string.format("[#MainLoopRunner] WARNING: run() %.3f seconds for \"%s\"", moduleTime, moduleName))
+            end
         end
     end
 end
@@ -67,10 +83,10 @@ local function runInitStatePublishersPhase(statePublishers)
 
     for _, statePublisher in ipairs(statePublishers) do
         if not initializedStatePublisherNames[statePublisher.name] then
-            runTimedAndKeep("StatePublisher." .. statePublisher.name .. ".initialize", function ()
+            local ok = runProtectedTimedAndKeep("StatePublisher." .. statePublisher.name .. ".initialize", function ()
                 statePublisher.initialize()
             end)
-            initializedStatePublisherNames[statePublisher.name] = true
+            if ok then initializedStatePublisherNames[statePublisher.name] = true end
             if MainLoopRunner.debug then
                 print(string.format("[#MainLoopRunner] initialize() %4.0f ms for \"%s\"",
                                     RuntimeMetrics.get("StatePublisher." .. statePublisher.name .. ".initialize")
@@ -86,12 +102,16 @@ end
 
 local function runSyncStatePhase(statePublishers, printFirstTime)
     for _, statePublisher in ipairs(statePublishers) do
-        runTimed("StatePublisher." .. statePublisher.name .. ".syncState", function () statePublisher.syncState() end)
-        local statePublisherTime = RuntimeMetrics.get("StatePublisher." .. statePublisher.name .. ".syncState")
-            .lastTime
-        if MainLoopRunner.debug and (statePublisherTime > 10 or printFirstTime) then
-            print(string.format("[#MainLoopRunner] syncState() %4.0f ms for \"%s\"", statePublisherTime,
-                                statePublisher.name))
+        if initializedStatePublisherNames[statePublisher.name] then
+            runProtectedTimed("StatePublisher." .. statePublisher.name .. ".syncState", function ()
+                statePublisher.syncState()
+            end)
+            local statePublisherTime = RuntimeMetrics.get("StatePublisher." .. statePublisher.name .. ".syncState")
+                .lastTime
+            if MainLoopRunner.debug and (statePublisherTime > 10 or printFirstTime) then
+                print(string.format("[#MainLoopRunner] syncState() %4.0f ms for \"%s\"", statePublisherTime,
+                                    statePublisher.name))
+            end
         end
     end
 end
@@ -99,7 +119,7 @@ end
 function MainLoopRunner.areModulesInitialized() return modulesInitialized end
 
 function MainLoopRunner.initModules(executionOrderModuleNames, registeredCeModules, serverEnabled)
-    runTimed("MainLoopRunner.runCycle-1-initModules", function ()
+    runProtectedTimed("MainLoopRunner.runCycle-1-initModules", function ()
         runInitModulesPhase(executionOrderModuleNames, registeredCeModules, serverEnabled)
     end)
 end
@@ -120,40 +140,44 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
     local totalTime
 
     runTimed("MainLoopRunner.runCycle-OVERALL", function ()
-        runTimed("MainLoopRunner.runCycle-1-initModules", function ()
+        runProtectedTimed("MainLoopRunner.runCycle-1-initModules", function ()
             runInitModulesPhase(executionOrderModuleNames, registeredCeModules, enableServer)
         end)
-        runTimed("MainLoopRunner.runCycle-2-runModules", function ()
+        runProtectedTimed("MainLoopRunner.runCycle-2-runModules", function ()
             runModulesPhase(executionOrderModuleNames, registeredCeModules)
         end)
         ---@diagnostic disable-next-line: cast-local-type
-        printFirstTime = runTimed("MainLoopRunner.runCycle-3-initStatePublishers", function ()
-            return runInitStatePublishersPhase(statePublishers)
-        end)
-        runTimed("MainLoopRunner.runCycle-4-syncState", function ()
+        local initStatePublishersOk, nextPrintFirstTime =
+            runProtectedTimed("MainLoopRunner.runCycle-3-initStatePublishers", function ()
+                return runInitStatePublishersPhase(statePublishers)
+            end)
+        printFirstTime = initStatePublishersOk and nextPrintFirstTime == true
+        runProtectedTimed("MainLoopRunner.runCycle-4-syncState", function ()
             runSyncStatePhase(statePublishers, printFirstTime)
         end)
 
 
-        runTimed("MainLoopRunner.runCycle-5-commands", function ()
+        runProtectedTimed("MainLoopRunner.runCycle-5-commands", function ()
             IncomingCommandFileReader.readAndExecuteIncomingCommands()
         end)
 
         if publishIo and enableServer then
             ---@diagnostic disable-next-line: cast-local-type
-            serverIsReady = runTimed("MainLoopRunner.runCycle-6-waitForServer", function ()
+            local serverIsReadyOk, nextServerIsReady = runProtectedTimed("MainLoopRunner.runCycle-6-waitForServer",
+                                                                         function ()
                 return ServerExchangeCoordinator.isServerReady()
             end)
+            serverIsReady = serverIsReadyOk and nextServerIsReady == true
         end
 
         if publishIo and enableServer and serverIsReady then
-            runTimed("MainLoopRunner.runCycle-7-serverOutput", function ()
+            runProtectedTimed("MainLoopRunner.runCycle-7-serverOutput", function ()
                 return ServerExchangeCoordinator.runServerOutputCycle()
             end)
         end
 
         if publishIo and enableDataStoreJson then
-            runTimed("MainLoopRunner.runCycle-8-dataStoreWrite", function ()
+            runProtectedTimed("MainLoopRunner.runCycle-8-dataStoreWrite", function ()
                 DataStoreFileWriter.write()
             end)
         end
