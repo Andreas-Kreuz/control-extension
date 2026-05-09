@@ -11,23 +11,40 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         clearModule("ce.databridge.IncomingCommandFileReader")
     end)
 
-    it("prepares the command file in the exchange directory and executes commands from it", function ()
-        local openCalls = {}
-        local commands = {}
+    local function clearTable(t)
+        for key in pairs(t) do t[key] = nil end
+    end
 
-        local ioOpenStub = stub(io, "open", function (name, mode)
-            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
-                name ~= "custom-dir/ce-version.txt" and
-                name ~= "custom-dir/commands-to-ce" then
+    local function stubFileIo(files, openCalls, closeCalls)
+        return stub(io, "open", function (name, mode)
+            if not string.find(name, "ce%-version%.txt") and not string.find(name, "commands%-to%-ce") then
                 return originalIoOpen(name, mode)
             end
 
             table.insert(openCalls, { name = name, mode = mode })
             if mode == "r" then
-                return { read = function () return "print|" end, close = function () end }
+                return {
+                    read = function () return files[name] or "" end,
+                    close = function () closeCalls[name] = (closeCalls[name] or 0) + 1 end
+                }
             end
-            return { write = function () end, flush = function () end, close = function () end }
+
+            files[name] = ""
+            return {
+                write = function (_, content) files[name] = files[name] .. content end,
+                flush = function () end,
+                close = function () closeCalls[name] = (closeCalls[name] or 0) + 1 end
+            }
         end)
+    end
+
+    it("truncates the command file once on startup and closes files within the cycle", function ()
+        local openCalls = {}
+        local closeCalls = {}
+        local commands = {}
+        local files = { ["custom-dir/commands-to-ce"] = "stale|" }
+
+        local ioOpenStub = stubFileIo(files, openCalls, closeCalls)
         finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
@@ -36,10 +53,10 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
                                                  function (commandText)
                                                      table.insert(commands, commandText)
-                                                 end)
+        end)
         finally(function () executeIncomingCommandsStub:revert() end)
 
-        openCalls = {}
+        clearTable(openCalls)
         ExchangeDirRegistry.setExchangeDirectory("custom-dir")
         IncomingCommandFileReader.readAndExecuteIncomingCommands()
 
@@ -49,29 +66,84 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
                 { name = "custom-dir/commands-to-ce", mode = "w" },
                 { name = "custom-dir/commands-to-ce", mode = "r" }
             }, openCalls)
-        assert.same({ "print|" }, commands)
+        assert.same({}, commands)
+        assert.equals("", files["custom-dir/commands-to-ce"])
+        assert.equals(2, closeCalls["custom-dir/commands-to-ce"])
     end)
 
-    it("prepares the command file again when the exchange directory changes", function ()
+    it("opens and closes the command file each cycle and executes only appended commands", function ()
         local openCalls = {}
+        local closeCalls = {}
         local commands = {}
+        local files = {}
 
-        local ioOpenStub = stub(io, "open", function (name, mode)
-            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
-                name ~= "custom-dir/ce-version.txt" and
-                name ~= "custom-dir/commands-to-ce" and
-                name ~= "other-dir/ce-version.txt" and
-                name ~= "other-dir/commands-to-ce" then
-                return originalIoOpen(name, mode)
-            end
+        local ioOpenStub = stubFileIo(files, openCalls, closeCalls)
+        finally(function () ioOpenStub:revert() end)
 
-            table.insert(openCalls, { name = name, mode = mode })
-            if mode == "r" then
-                local content = name == "other-dir/commands-to-ce" and "clearlog" or ""
-                return { read = function () return content end, close = function () end }
-            end
-            return { write = function () end, flush = function () end, close = function () end }
+        local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
+        local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
+                                                 function (commandText)
+                                                     table.insert(commands, commandText)
         end)
+        finally(function () executeIncomingCommandsStub:revert() end)
+
+        clearTable(openCalls)
+        ExchangeDirRegistry.setExchangeDirectory("custom-dir")
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "print|one\n"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "print|one\nprint|two\n"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+
+        assert.same({ "print|one\n", "print|two\n" }, commands)
+        assert.equals(4, closeCalls["custom-dir/commands-to-ce"])
+        assert.same(
+            {
+                { name = "custom-dir/ce-version.txt", mode = "w" },
+                { name = "custom-dir/commands-to-ce", mode = "w" },
+                { name = "custom-dir/commands-to-ce", mode = "r" },
+                { name = "custom-dir/commands-to-ce", mode = "r" },
+                { name = "custom-dir/commands-to-ce", mode = "r" }
+            }, openCalls)
+    end)
+
+    it("executes from the beginning when the command file was externally truncated", function ()
+        local openCalls = {}
+        local closeCalls = {}
+        local commands = {}
+        local files = {}
+
+        local ioOpenStub = stubFileIo(files, openCalls, closeCalls)
+        finally(function () ioOpenStub:revert() end)
+
+        local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
+        local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
+                                                 function (commandText)
+                                                     table.insert(commands, commandText)
+                                                 end)
+        finally(function () executeIncomingCommandsStub:revert() end)
+
+        ExchangeDirRegistry.setExchangeDirectory("custom-dir")
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "print|one\nprint|two\n"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["custom-dir/commands-to-ce"] = "clearlog\n"
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+
+        assert.same({ "print|one\nprint|two\n", "clearlog\n" }, commands)
+    end)
+
+    it("truncates the command file again when the exchange directory changes", function ()
+        local openCalls = {}
+        local closeCalls = {}
+        local commands = {}
+        local files = { ["other-dir/commands-to-ce"] = "stale|" }
+
+        local ioOpenStub = stubFileIo(files, openCalls, closeCalls)
         finally(function () ioOpenStub:revert() end)
 
         local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
@@ -86,16 +158,20 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         ExchangeDirRegistry.setExchangeDirectory("custom-dir")
         IncomingCommandFileReader.readAndExecuteIncomingCommands()
 
-        openCalls = {}
+        clearTable(openCalls)
         ExchangeDirRegistry.setExchangeDirectory("other-dir")
+        IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        files["other-dir/commands-to-ce"] = "clearlog\n"
         IncomingCommandFileReader.readAndExecuteIncomingCommands()
 
         assert.same(
             {
                 { name = "other-dir/ce-version.txt", mode = "w" },
                 { name = "other-dir/commands-to-ce", mode = "w" },
+                { name = "other-dir/commands-to-ce", mode = "r" },
                 { name = "other-dir/commands-to-ce", mode = "r" }
             }, openCalls)
-        assert.same({ "clearlog" }, commands)
+        assert.same({ "clearlog\n" }, commands)
+        assert.equals("", files["custom-dir/commands-to-ce"])
     end)
 end)
