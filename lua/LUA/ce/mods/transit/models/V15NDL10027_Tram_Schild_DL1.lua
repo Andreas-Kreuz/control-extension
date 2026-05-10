@@ -40,6 +40,7 @@ Tram_Schild_DL1.displayEntries = function (displayStructure, stationQueueEntries
 
     local t = table.concat(text, "")
     EEPChangeInfoStructure(displayStructure, t)
+    EEPStructureSetLight(displayStructure, true)
     EEPShowInfoStructure(displayStructure, TransitSettings.showDepartureTippText)
 end
 
