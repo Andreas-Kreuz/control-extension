@@ -17,6 +17,7 @@ export const CeTypes = {
   HubStructure: 'ce.hub.Structure',
   HubScenario: 'ce.hub.Scenario',
   HubTime: 'ce.hub.Time',
+  HubRoute: 'ce.hub.Route',
   HubTrain: 'ce.hub.Train',
   HubRollingStock: 'ce.hub.RollingStock',
   HubAuxiliaryTrack: 'ce.hub.AuxiliaryTrack',

@@ -24,6 +24,7 @@ export type { VersionAppDto } from './dtos/app/version/VersionAppDto';
 export type { ScenarioAppDto } from './dtos/app/scenario/ScenarioAppDto';
 export type { WeatherAppDto } from './dtos/app/weather/WeatherAppDto';
 export type { TimeAppDto } from './dtos/app/time/TimeAppDto';
+export type { RouteAppDto } from './dtos/app/routes/RouteAppDto';
 export type { RuntimeAppDto } from './dtos/app/runtime/RuntimeAppDto';
 export type { FrameDataAppDto } from './dtos/app/framedata/FrameDataAppDto';
 export type { ServerStatsAppDto } from './dtos/app/server/ServerStatsAppDto';

@@ -14,6 +14,7 @@ local HubCeTypes = {
     Structure = "ce.hub.Structure",
     Scenario = "ce.hub.Scenario",
     Time = "ce.hub.Time",
+    Route = "ce.hub.Route",
     Train = "ce.hub.Train",
     RollingStock = "ce.hub.RollingStock",
     AuxiliaryTrack = "ce.hub.AuxiliaryTrack",

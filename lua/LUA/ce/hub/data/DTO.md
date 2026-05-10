@@ -33,6 +33,7 @@ Wichtig:
 | `framedata`       | `FrameDataUpdater`, `FrameDataPublisher`, `FrameDataDtoFactory`                            | `ListChanged` für `ce.hub.FrameData`                           |
 | `version`         | `VersionUpdater`, `VersionPublisher`, `VersionDtoFactory`                                  | `ListChanged` für `ce.hub.EepVersion`                          |
 | `scenario`        | `ScenarioUpdater`, `ScenarioPublisher`, `ScenarioDtoFactory`                               | `ListChanged` für `ce.hub.Scenario`                            |
+| `routes`          | `RouteDiscovery`, `RoutePublisher`, `RouteDtoFactory`                                      | `ListChanged` für `ce.hub.Route`                               |
 | `signals`         | `SignalDiscovery`, `SignalUpdater`, `SignalPublisher`, `SignalDtoFactory`                  | `ListChanged` für `ce.hub.Signal` und `ce.hub.WaitingOnSignal` |
 | `switches`        | `SwitchDiscovery`, `SwitchUpdater`, `SwitchPublisher`, `SwitchDtoFactory`                  | `ListChanged` für `ce.hub.Switch`                              |
 | `time`            | `TimeUpdater`, `TimePublisher`, `TimeDtoFactory`                                           | `ListChanged` für `ce.hub.Time`                                |
@@ -57,6 +58,7 @@ Wichtig:
 | Wartende Fahrzeuge an Signalen      | `ce.hub.WaitingOnSignal`                | `id`      |
 | Weichen                             | `ce.hub.Switch`                         | `id`      |
 | Szenario                            | `ce.hub.Scenario`                       | `id`      |
+| Routen                              | `ce.hub.Route`                          | `id`      |
 | Zeit                                | `ce.hub.Time`                           | `id`      |
 | Wetter                              | `ce.hub.Weather`                        | `id`      |
 | Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
@@ -124,6 +126,19 @@ Elementtyp: Szenarioinfo
 | `activeTrain`        | `string` \| `nil` | Zugname         | aktiver Zug aus `EEPGetTrainActive()`                    |
 | `activeRollingStock` | `string` \| `nil` | Fahrzeugname    | aktives Rollmaterial aus `EEPRollingstockGetActive()`    |
 | `timeLapse`          | `number` \| `nil` | Zeitraffer      | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()`       |
+
+### `ce.hub.Route`
+
+Elementtyp: EEP-Route
+
+| Name   | Typ       | Wertebereich              | Beschreibung                                    |
+| ------ | --------- | ------------------------- | ----------------------------------------------- |
+| `id`   | `integer` | Routen-ID aus der Anlage  | technischer Schlüssel der gespeicherten Route   |
+| `name` | `string`  | Routenname aus der Anlage | Anzeigename aus den `.anl3`-Options-Attributen |
+
+Abgeleitet aus:
+
+- `.anl3` `<Options RouteItems="..." RouteId_n="..." RouteName_n="...">`
 
 ### `ce.hub.Runtime`
 

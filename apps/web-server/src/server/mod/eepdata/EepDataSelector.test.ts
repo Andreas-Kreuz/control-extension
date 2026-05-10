@@ -214,6 +214,37 @@ function testStructureDtosWithPartialFields(): void {
   });
 }
 
+function testRouteDtosFromCeType(): void {
+  const selector = new EepDataSelector();
+
+  selector.updateFromState({
+    eventCounter: 1,
+    ceTypes: {
+      [CeTypes.HubRoute]: {
+        '1': {
+          id: 1,
+          name: 'Linie 285 Hochbaum',
+        },
+        '2': {
+          id: 2,
+          name: 'Linie 285 Schnalzlaut',
+        },
+      },
+    },
+  });
+
+  assert.deepEqual(selector.getRoutes(), {
+    '1': {
+      id: 1,
+      name: 'Linie 285 Hochbaum',
+    },
+    '2': {
+      id: 2,
+      name: 'Linie 285 Schnalzlaut',
+    },
+  });
+}
+
 export async function run(): Promise<void> {
   await runTest(
     'EepDataSelector caches only changed runtime statistics samples and keeps the last ten',
@@ -225,6 +256,7 @@ export async function run(): Promise<void> {
   );
   await runTest('EepDataSelector maps unified structure ceType', testStructureDtosFromUnifiedCeType);
   await runTest('EepDataSelector handles structures with partial fields', testStructureDtosWithPartialFields);
+  await runTest('EepDataSelector maps route ceType', testRouteDtosFromCeType);
 }
 
 if (require.main === module) {

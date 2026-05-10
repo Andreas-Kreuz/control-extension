@@ -112,6 +112,13 @@ function HubOptionDefaults.create()
                 fieldUpdates = {},
                 fieldPublish = {}
             },
+            routes = {
+                ceType = HubCeTypes.Route,
+                discoveryAndUpdate = true,
+                publish = true,
+                fieldUpdates = {},
+                fieldPublish = {}
+            },
             weather = {
                 ceType = HubCeTypes.Weather,
                 discoveryAndUpdate = true,

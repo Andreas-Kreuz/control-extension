@@ -5,6 +5,7 @@ local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
 local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
 local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
 local ContactDiscovery = require("ce.hub.data.contacts.ContactDiscovery")
+local RouteDiscovery = require("ce.hub.data.routes.RouteDiscovery")
 
 local Anl3DiscoveryHelper = {}
 
@@ -38,11 +39,27 @@ local function buildDiscoveryTable(root)
         rollingStocks = {},
         structures = {},
         signals = {},
+        routes = {},
         contacts = {}
     }
 
     local eepLua = findChild(root, "EEPLua")
     if eepLua then dt.luaPath = eepLua.attrs.LUAPath end
+
+    local options = findChild(root, "Options")
+    if options then
+        local routeItems = tonumber(options.attrs.RouteItems) or 0
+        for index = 0, routeItems - 1 do
+            local routeId = tonumber(options.attrs["RouteId_" .. index])
+            local routeName = options.attrs["RouteName_" .. index]
+            if routeId and routeName then
+                dt.routes[#dt.routes + 1] = {
+                    id = routeId,
+                    name = routeName
+                }
+            end
+        end
+    end
 
     local kammerasammlung = findChild(root, "Kammerasammlung")
     if kammerasammlung then
@@ -118,6 +135,7 @@ end
 function Anl3DiscoveryHelper.fillDiscoveries(root)
     local dt = buildDiscoveryTable(root)
     ScenarioDiscovery.initFromAnl3(dt)
+    RouteDiscovery.initFromAnl3(dt)
     TrainDiscovery.initFromAnl3(dt)
     StructureDiscovery.initFromAnl3(dt)
     SignalDiscovery.initFromAnl3(dt)
