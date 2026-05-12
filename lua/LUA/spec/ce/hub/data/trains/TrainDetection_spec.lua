@@ -22,7 +22,7 @@ describe("TrainDiscovery", function ()
             assert.is_falsy(TrainRegistry.getAllTrainNames()["#EepTrain1"])
 
             EepSimulator.simulatePlaceTrainOnRailTrack(1, "#EepTrain1")
-            runCycle()
+            for _ = 1, 50 do runCycle() end
 
             assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1"])
             assert.is_falsy(TrainRegistry.getAllTrainNames()["#EepTrain1;001"])
@@ -36,11 +36,38 @@ describe("TrainDiscovery", function ()
             assert.equals(1, TrainRegistry.forName("#EepTrain1"):getRollingStockCount())
             assert.equals(1, TrainRegistry.forName("#EepTrain1;001"):getRollingStockCount())
         end)
+
+        it("refreshes track occupancy on the first runtime pass and then every 50 discovery calls", function ()
+            local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+            EepSimulator.simulateAddTrain("#TrackRefreshTrain1", "TrackRefreshStock1")
+            EepSimulator.simulateAddTrain("#TrackRefreshTrain2", "TrackRefreshStock2")
+            TrainDiscovery.runInitialDiscovery()
+
+            EepSimulator.simulatePlaceTrainOnRailTrack(1, "#TrackRefreshTrain1")
+            runCycle()
+
+            assert.is_true(TrainRegistry.getAllTrainNames()["#TrackRefreshTrain1"])
+            assert.is_falsy(TrainRegistry.getAllTrainNames()["#TrackRefreshTrain2"])
+
+            EepSimulator.simulatePlaceTrainOnRailTrack(2, "#TrackRefreshTrain2")
+            for _ = 1, 49 do runCycle() end
+
+            assert.is_falsy(TrainRegistry.getAllTrainNames()["#TrackRefreshTrain2"])
+
+            runCycle()
+
+            assert.is_true(TrainRegistry.getAllTrainNames()["#TrackRefreshTrain2"])
+        end)
     end)
 
     insulate("keeps optional multi-return getters robust during updates", function ()
         it("handles missing optional globals without leaking them", function ()
             local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local HubCeTypes = require("ce.hub.data.HubCeTypes")
+            local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
             local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
             local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
             local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
@@ -51,6 +78,7 @@ describe("TrainDiscovery", function ()
             runCycle()
 
             local rollingStockName = TrainRegistry.rollingStockNameInTrain("#EepTrainMultiReturn", 0)
+            InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, rollingStockName)
 
             EEPSetTrainCouplingFront("#EepTrainMultiReturn", true)
             EEPSetTrainCouplingRear("#EepTrainMultiReturn", false)
@@ -91,6 +119,50 @@ describe("TrainDiscovery", function ()
             assert.equals(1, rollingStock:getSmoke())
             assert.equals(1, rollingStock:getHookStatus())
             assert.equals(1, rollingStock:getHookGlueMode())
+
+            InterestSyncRegistry.clearAll()
+        end)
+    end)
+
+    insulate("updates target speed on interest", function ()
+        it("does not poll target speed for unselected trains by default", function ()
+            local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local HubCeTypes = require("ce.hub.data.HubCeTypes")
+            local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+            local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+            local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
+
+            HubOptionsRegistry.reset()
+            EepSimulator.simulateAddTrain("#TargetSpeedTrain", "TargetSpeedStock")
+            local train = TrainRegistry.forName("#TargetSpeedTrain")
+            train:resetDirty()
+
+            local targetSpeedCalls = 0
+            local originalGetTrainSpeed = _G.EEPGetTrainSpeed
+            local getTrainSpeedStub = stub(_G, "EEPGetTrainSpeed", function (trainName, readTargetSpeed)
+                if readTargetSpeed then
+                    targetSpeedCalls = targetSpeedCalls + 1
+                    return true, 44
+                end
+                return originalGetTrainSpeed(trainName, readTargetSpeed)
+            end)
+            finally(function () getTrainSpeedStub:revert() end)
+
+            TrainUpdater.runUpdate()
+
+            assert.equals(0, targetSpeedCalls)
+            assert.is_nil(train.dirtyFields.targetSpeed)
+
+            InterestSyncRegistry.startSyncFor(HubCeTypes.Train, "#TargetSpeedTrain")
+            TrainUpdater.runUpdate()
+
+            assert.equals(1, targetSpeedCalls)
+            assert.equals(44, train:getTargetSpeed())
+            assert.is_true(train.dirtyFields.targetSpeed)
+
+            InterestSyncRegistry.clearAll()
+            HubOptionsRegistry.reset()
         end)
     end)
 

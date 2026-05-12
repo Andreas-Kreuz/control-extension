@@ -31,6 +31,8 @@ local movedTrainNames = {}
 local dirtyTrainNames = {}
 local hooksRegistered = false
 local tracksInitialized = false
+local trackRefreshRunIndex = 0
+local TRACK_REFRESH_INTERVAL = 50
 
 local function trackTypeFromSystemId(trackTypeId)
     if trackTypeId == 1 then return "rail" end
@@ -140,21 +142,23 @@ local function removeTrain(trainName)
     end
 end
 
-local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks)
+local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks, tracksRefreshed)
     local allKnownTrains = {}
 
     for trainName in pairs(detected) do
         local trainOnMap, speed = EEPGetTrainSpeed(trainName)
         if trainOnMap then
             local train, created = TrainRegistry.forName(trainName)
+            local previousInfo = TrainDiscoveryCache.get(trainName) or {}
             local dirty = created or (dirtyTrains[trainName] and true or false)
             local moved = created or dirty or train:getSpeed() ~= 0 or speed ~= 0 or
                 (movedTrains[trainName] and true or false)
 
             if created or dirty then syncRollingStockComposition(train) end
 
-            local trackType = nil
-            if trainTracks[trainName] and next(trainTracks[trainName]) ~= nil then
+            local tracks = tracksRefreshed and trainTracks[trainName] or previousInfo.tracks
+            local trackType = tracksRefreshed and nil or previousInfo.trackType
+            if tracksRefreshed and tracks and next(tracks) ~= nil then
                 local firstRollingStock = TrainRegistry.rollingStockNameInTrain(train.name, 0)
                 if firstRollingStock then
                     local ok, _, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
@@ -168,7 +172,7 @@ local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks)
                 created = created,
                 dirty = dirty,
                 moved = moved,
-                tracks = trainTracks[trainName],
+                tracks = tracks,
                 trackType = trackType
             }
         else
@@ -222,6 +226,7 @@ function TrainDiscovery.runInitialDiscovery()
 
     registerHooks()
     initializeTracks()
+    trackRefreshRunIndex = 0
     TrainDiscoveryCache.clear()
 end
 
@@ -242,19 +247,24 @@ function TrainDiscovery.runDiscovery()
     local dirty = dirtyTrainNames
     local moved = movedTrainNames
     local detected = {}
+    local tracksRefreshed = trackRefreshRunIndex % TRACK_REFRESH_INTERVAL == 0
     for trainName in pairs(TrainRegistry.getAllTrainNames()) do detected[trainName] = true end
     for trainName in pairs(dirty) do detected[trainName] = true end
     for trainName in pairs(moved) do detected[trainName] = true end
 
-    local trainTracks = updateTracks()
-    for trainName in pairs(trainTracks) do detected[trainName] = true end
+    local trainTracks = {}
+    if tracksRefreshed then
+        trainTracks = updateTracks()
+        for trainName in pairs(trainTracks) do detected[trainName] = true end
+    end
     RuntimeMetrics.storeRunTime("TrainDiscovery.findTrainsOnTrack", os.clock() - time)
 
     time = os.clock()
-    local allKnownTrains = buildSnapshot(detected, dirty, moved, trainTracks)
+    local allKnownTrains = buildSnapshot(detected, dirty, moved, trainTracks, tracksRefreshed)
     RuntimeMetrics.storeRunTime("TrainDiscovery.buildSnapshot", os.clock() - time)
     TrainDiscoveryCache.replaceAll(allKnownTrains)
 
+    trackRefreshRunIndex = trackRefreshRunIndex + 1
     dirtyTrainNames = {}
     movedTrainNames = {}
 end

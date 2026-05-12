@@ -159,7 +159,7 @@ insulate("axis and texture metadata", function ()
                 rollingStocks = {
                     ceType = HubCeTypes.RollingStock,
                     discoveryAndUpdate = true,
-                    fieldUpdates = { axisValues = "never" }
+                    fieldUpdates = { axisValues = "oninterest" }
                 }
             }
         })
@@ -182,6 +182,201 @@ insulate("axis and texture metadata", function ()
 
         InterestSyncRegistry.clearAll()
         HubOptionsRegistry.reset()
+    end)
+
+    it("does not refresh axis values in the updater for unselected rolling stock", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        HubOptionsRegistry.setOptions({
+            ceTypes = {
+                rollingStocks = {
+                    ceType = HubCeTypes.RollingStock,
+                    discoveryAndUpdate = true,
+                    fieldUpdates = { axisValues = "oninterest" }
+                }
+            }
+        })
+
+        EepSimulator.simulateAddTrain("AxisNoUpdateTrain", "AxisNoUpdateStock")
+        local train = TrainRegistry.forName("AxisNoUpdateTrain")
+        train:setRollingStockCount(1)
+        TrainRegistry.setRollingStockNames("AxisNoUpdateTrain", { ["0"] = "AxisNoUpdateStock" })
+        EEPRollingstockSetAxisByNumber("AxisNoUpdateStock", 2, 10)
+
+        local stock = RollingStockRegistry.forName("AxisNoUpdateStock")
+        stock:resetDirty()
+
+        EEPRollingstockSetAxisByNumber("AxisNoUpdateStock", 2, 80)
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(10, stock:getAxisValues()["2"])
+        assert.is_nil(stock.dirtyFields.axisValues)
+
+        HubOptionsRegistry.reset()
+    end)
+
+    it("refreshes rare rolling stock fields only on interest", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        HubOptionsRegistry.reset()
+        EepSimulator.simulateAddTrain("RareFieldTrain", "RareFieldStock")
+        local train = TrainRegistry.forName("RareFieldTrain")
+        train:setRollingStockCount(1)
+        TrainRegistry.setRollingStockNames("RareFieldTrain", { ["0"] = "RareFieldStock" })
+
+        local stock = RollingStockRegistry.forName("RareFieldStock")
+        local initialOrientationForward = stock:getOrientationForward()
+        stock:resetDirty()
+
+        local lengthCalls = 0
+        local motorCalls = 0
+        local modelTypeCalls = 0
+        local orientationCalls = 0
+        local smokeCalls = 0
+        local lengthStub = stub(_G, "EEPRollingstockGetLength", function ()
+            lengthCalls = lengthCalls + 1
+            return true, 12
+        end)
+        local motorStub = stub(_G, "EEPRollingstockGetMotor", function ()
+            motorCalls = motorCalls + 1
+            return true, true
+        end)
+        local modelTypeStub = stub(_G, "EEPRollingstockGetModelType", function ()
+            modelTypeCalls = modelTypeCalls + 1
+            return true, 8
+        end)
+        local orientationStub = stub(_G, "EEPRollingstockGetOrientation", function ()
+            orientationCalls = orientationCalls + 1
+            return true, not initialOrientationForward
+        end)
+        local smokeStub = stub(_G, "EEPRollingstockGetSmoke", function ()
+            smokeCalls = smokeCalls + 1
+            return true, 1
+        end)
+        finally(function ()
+            lengthStub:revert()
+            motorStub:revert()
+            modelTypeStub:revert()
+            orientationStub:revert()
+            smokeStub:revert()
+        end)
+
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(0, lengthCalls)
+        assert.equals(0, motorCalls)
+        assert.equals(0, modelTypeCalls)
+        assert.equals(0, orientationCalls)
+        assert.equals(0, smokeCalls)
+        assert.equals(5, stock:getLength())
+        assert.is_false(stock:getPropelled())
+        assert.equals(1, stock:getModelType())
+        assert.equals(initialOrientationForward, stock:getOrientationForward())
+        assert.equals(0, stock:getSmoke())
+
+        InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "RareFieldStock")
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(1, lengthCalls)
+        assert.equals(1, motorCalls)
+        assert.equals(1, modelTypeCalls)
+        assert.equals(1, orientationCalls)
+        assert.equals(1, smokeCalls)
+        assert.equals(12, stock:getLength())
+        assert.is_true(stock:getPropelled())
+        assert.equals(8, stock:getModelType())
+        assert.equals(not initialOrientationForward, stock:getOrientationForward())
+        assert.equals(1, stock:getSmoke())
+
+        InterestSyncRegistry.clearAll()
+        HubOptionsRegistry.reset()
+    end)
+
+    it("updates only exposed rolling stock couplings in multi-stock trains", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        EepSimulator.simulateAddTrain("CouplingTrain", "CouplingFront", "CouplingMiddle", "CouplingRear")
+        local train = TrainRegistry.forName("CouplingTrain")
+        train:setRollingStockCount(3)
+        TrainRegistry.setRollingStockNames("CouplingTrain", {
+            ["0"] = "CouplingFront",
+            ["1"] = "CouplingMiddle",
+            ["2"] = "CouplingRear"
+        })
+        RollingStockRegistry.forName("CouplingFront")
+        RollingStockRegistry.forName("CouplingMiddle")
+        RollingStockRegistry.forName("CouplingRear")
+
+        local frontCalls = {}
+        local rearCalls = {}
+        local frontStub = stub(_G, "EEPRollingstockGetCouplingFront", function (name)
+            frontCalls[name] = (frontCalls[name] or 0) + 1
+            return true, 1
+        end)
+        local rearStub = stub(_G, "EEPRollingstockGetCouplingRear", function (name)
+            rearCalls[name] = (rearCalls[name] or 0) + 1
+            return true, 2
+        end)
+        finally(function ()
+            frontStub:revert()
+            rearStub:revert()
+        end)
+
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(1, frontCalls.CouplingFront)
+        assert.is_nil(frontCalls.CouplingMiddle)
+        assert.is_nil(frontCalls.CouplingRear)
+        assert.is_nil(rearCalls.CouplingFront)
+        assert.is_nil(rearCalls.CouplingMiddle)
+        assert.equals(1, rearCalls.CouplingRear)
+    end)
+
+    it("updates both couplings for single-stock trains", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        EepSimulator.simulateAddTrain("SingleCouplingTrain", "SingleCouplingStock")
+        local train = TrainRegistry.forName("SingleCouplingTrain")
+        train:setRollingStockCount(1)
+        TrainRegistry.setRollingStockNames("SingleCouplingTrain", { ["0"] = "SingleCouplingStock" })
+        RollingStockRegistry.forName("SingleCouplingStock")
+
+        local frontCalls = {}
+        local rearCalls = {}
+        local frontStub = stub(_G, "EEPRollingstockGetCouplingFront", function (name)
+            frontCalls[name] = (frontCalls[name] or 0) + 1
+            return true, 1
+        end)
+        local rearStub = stub(_G, "EEPRollingstockGetCouplingRear", function (name)
+            rearCalls[name] = (rearCalls[name] or 0) + 1
+            return true, 2
+        end)
+        finally(function ()
+            frontStub:revert()
+            rearStub:revert()
+        end)
+
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(1, frontCalls.SingleCouplingStock)
+        assert.equals(1, rearCalls.SingleCouplingStock)
     end)
 end)
 
