@@ -39,6 +39,11 @@ function ControlExtension.setPauseEepDuringInitialization(pauseEepDuringInitiali
     return ControlExtension
 end
 
+function ControlExtension.setTransport(transport)
+    ControlExtensionHub.setTransport(transport)
+    return ControlExtension
+end
+
 function ControlExtension.setOptions(options)
     ControlExtensionHub.setOptions(options)
     return ControlExtension

@@ -81,6 +81,8 @@ function ServerExchangeFileIo.writeOutgoingEvents(jsonData)
                 "[#ServerExchangeFileIo] CANNOT WRITE TO %s",
                 eventsFromCeFileName
             ))
+            writing = false
+            return false
         end
         writing = false
     end
@@ -91,8 +93,11 @@ function ServerExchangeFileIo.writeOutgoingEvents(jsonData)
                 "[#ServerExchangeFileIo] CANNOT WRITE TO %s",
                 eventsFromCePendingFileName
             ))
+            return false
         end
     end
+
+    return true
 end
 
 return ServerExchangeFileIo

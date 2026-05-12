@@ -1,8 +1,10 @@
 -- Use this class in XxxBridgeConnector to register commands
 if CeDebugLoad then print("[#Start] Loading ce.databridge.ServerExchangeCoordinator ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+local ServerResyncCoordinator = require("ce.databridge.ServerResyncCoordinator")
 local ServerEventBuffer = require("ce.databridge.ServerEventBuffer")
 local ServerExchangeFileIo = require("ce.databridge.ServerExchangeFileIo")
+local ServerTransportSelector = require("ce.databridge.ServerTransportSelector")
 local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
 local os = require("os")
 
@@ -35,15 +37,19 @@ function ServerExchangeCoordinator.initialize(serverShallBeUsed)
 end
 
 function ServerExchangeCoordinator.isServerReady()
-    return not ServerExchangeCoordinator.checkServerStatus or ServerExchangeFileIo.isServerReady()
+    local transport = ServerTransportSelector.getSelectedTransport()
+    local ready = not ServerExchangeCoordinator.checkServerStatus or transport.isReady()
+    ServerResyncCoordinator.observe(ready, transport)
+    return ready
 end
 
 --- Main function of this module. Is called by MainLoopRunner.
 function ServerExchangeCoordinator.runServerOutputCycle()
     local overallTime0 = os.clock()
-    local encodedEvents = ServerEventBuffer.drainBufferedEvents()
+    local encodedEvents = ServerEventBuffer.peekBufferedEvents()
     local overallTime1 = os.clock()
-    ServerExchangeFileIo.writeOutgoingEvents(encodedEvents)
+    local writeOk = ServerTransportSelector.getSelectedTransport().writeOutgoingEvents(encodedEvents)
+    if writeOk then ServerEventBuffer.commitBufferedEvents() end
     local overallTime2 = os.clock()
 
     local encodeTime = overallTime1 - overallTime0

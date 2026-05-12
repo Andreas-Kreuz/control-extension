@@ -35,6 +35,7 @@ __pycache__
 /apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/commands-to-ce
 /apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-is-running
 /apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-state.*
+/apps/web-app/cypress/io-empty/LUA/ce/databridge/exchange/server-transport.json
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/ak*
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/ce-*
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/events-from-ce
@@ -43,6 +44,7 @@ __pycache__
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/commands-to-ce
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-is-running
 /apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-state.*
+/apps/web-app/cypress/io/LUA/ce/databridge/exchange/server-transport.json
 /apps/web-app/cypress/io/ce*
 /apps/web-app/cypress/server-config/settings.json
 /apps/web-app/cypress/screenshots
@@ -72,6 +74,7 @@ __pycache__
 /lua/LUA/ce/databridge/exchange/ce-version.txt
 /lua/LUA/ce/databridge/exchange/server-is-running
 /lua/LUA/ce/databridge/exchange/server-state.*
+/lua/LUA/ce/databridge/exchange/server-transport.json
 /lua/LUA/ce/databridge/exchange-test/*
 !/lua/LUA/ce/databridge/exchange-test/.gitkeep
 /lua/LUA/comm_*

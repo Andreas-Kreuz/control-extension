@@ -5,6 +5,7 @@ require("ce.databridge.IoInit").initialize()
 local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
 local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
+local ServerTransportRegistry = require("ce.databridge.ServerTransportRegistry")
 
 local ControlExtensionHub = {}
 ControlExtensionHub.debug = CeStartWithDebug or false
@@ -25,6 +26,10 @@ function ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringIniti
     assert(pauseEepDuringInitialization == true or pauseEepDuringInitialization == false)
     ControlExtensionHub.pauseEepDuringInitialization = pauseEepDuringInitialization
     return pauseEepDuringInitialization
+end
+
+function ControlExtensionHub.setTransport(transport)
+    return ServerTransportRegistry.setTransport(transport)
 end
 
 function ControlExtensionHub.setOptions(options)

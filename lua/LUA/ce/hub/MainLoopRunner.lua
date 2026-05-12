@@ -152,15 +152,6 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
                 return runInitStatePublishersPhase(statePublishers)
             end)
         printFirstTime = initStatePublishersOk and nextPrintFirstTime == true
-        runProtectedTimed("MainLoopRunner.runCycle-4-syncState", function ()
-            runSyncStatePhase(statePublishers, printFirstTime)
-        end)
-
-
-        runProtectedTimed("MainLoopRunner.runCycle-5-commands", function ()
-            IncomingCommandFileReader.readAndExecuteIncomingCommands()
-        end)
-
         if publishIo and enableServer then
             ---@diagnostic disable-next-line: cast-local-type
             local serverIsReadyOk, nextServerIsReady = runProtectedTimed("MainLoopRunner.runCycle-6-waitForServer",
@@ -169,6 +160,15 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
             end)
             serverIsReady = serverIsReadyOk and nextServerIsReady == true
         end
+
+        runProtectedTimed("MainLoopRunner.runCycle-4-syncState", function ()
+            runSyncStatePhase(statePublishers, printFirstTime)
+        end)
+
+
+        runProtectedTimed("MainLoopRunner.runCycle-5-commands", function ()
+            IncomingCommandFileReader.readAndExecuteIncomingCommands()
+        end)
 
         if publishIo and enableServer and serverIsReady then
             runProtectedTimed("MainLoopRunner.runCycle-7-serverOutput", function ()

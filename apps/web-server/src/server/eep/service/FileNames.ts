@@ -4,6 +4,7 @@ export enum FileNames {
   logFromCe = 'log-from-ce',
   commandsToCe = 'commands-to-ce',
   serverIsRunning = 'server-is-running',
+  serverTransport = 'server-transport.json',
   serverCache = 'server-state.json',
   serverEventCounter = 'server-state.counter',
 }

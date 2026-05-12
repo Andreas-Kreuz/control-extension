@@ -44,4 +44,8 @@ function RouteRegistry.markClean()
     dirty = false
 end
 
+function RouteRegistry.markDirty()
+    dirty = true
+end
+
 return RouteRegistry

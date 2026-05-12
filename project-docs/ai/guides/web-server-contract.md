@@ -35,6 +35,8 @@
 ## Commands
 
 - Headless server: `yarn workspace @ce/web-server run run:headless`
+- Server event input starts both receivers: named pipe for default Lua event transport and file watcher for legacy/fallback file transport
+- The server writes runtime-only `server-transport.json` next to the exchange files with the current pipe name and `sessionId`; remove it on disconnect/reinit
 
 ## Testing
 
