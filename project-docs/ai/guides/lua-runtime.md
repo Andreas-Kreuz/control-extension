@@ -7,6 +7,13 @@
 - Installed path: `C:\Trend\EEP18\LUA` (version-dependent)
 - Keep existing German identifiers, comments, and log messages when modifying Lua code
 
+## EEP Call Budget
+
+- Treat EEP calls as expensive, especially calls in update methods, loops, and rolling stock texture/tag writes.
+- Prefer cached hub state, watched registries, throttled updates, or event/contact-point driven reconciliation.
+- Make EEP-facing setters idempotent: compare cached state first and return early when values are unchanged.
+- If a feature needs fresh EEP data, scope the calls to the smallest registered/watch list possible.
+
 ## EepOriginalApi
 
 - `lua/LUA/ce/hub/eep/EepOriginalApi.d.lua` is the type-safe reference of the original EEP API

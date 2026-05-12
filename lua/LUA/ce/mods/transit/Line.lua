@@ -53,19 +53,19 @@ function Line:addSection(routeName, destination)
     return lineSegment
 end
 
-local function lineSegmentForTrainRoute(train)
-    -- A raw EEPSetTrainRoute() changes only EEP state. Contact points pull that route back into transit state.
-    local routeName = train:getRoute()
-    local routeOk, eepRouteName = EEPGetTrainRoute(train.name)
-    if routeOk and type(eepRouteName) == "string" then
-        routeName = eepRouteName
-        if routeName ~= train:getRoute() then train:updateRoute(routeName) end
-    end
+local function lineSegmentForRouteName(train, routeName, options)
     assert(type(routeName) == "string", "Need 'routeName' as string")
+    options = options or {}
 
     local lineSegment = lineSegmentsByRouteName[routeName]
     if not lineSegment then
-        print(string.format("[#Line] Could not find lineSegment for route: '%s' for train: %s", routeName, train.name))
+        if not options.suppressUnknownRouteLog then
+            print(string.format(
+                "[#Line] Could not find lineSegment for route: '%s' for train: %s",
+                routeName,
+                train.name
+            ))
+        end
         return nil
     end
 
@@ -78,9 +78,26 @@ local function lineSegmentForTrainRoute(train)
     end
 
     local origin = lineSegment:getFirstStation()
-    if origin then transitTrain:setOrigin(origin.name) end
+    if origin and transitTrain:getOrigin() ~= origin.name then transitTrain:setOrigin(origin.name) end
 
     return lineSegment, transitTrain
+end
+
+function Line.applyCachedRouteForTrain(train, options)
+    assert(type(train) == "table" and train.type == "Train", "Need 'train' as Train")
+    return lineSegmentForRouteName(train, train:getRoute(), options)
+end
+
+local function lineSegmentForTrainRoute(train)
+    -- A raw EEPSetTrainRoute() changes only EEP state. Contact points pull that route back into transit state.
+    local routeName = train:getRoute()
+    local routeOk, eepRouteName = EEPGetTrainRoute(train.name)
+    if routeOk and type(eepRouteName) == "string" then
+        routeName = eepRouteName
+        if routeName ~= train:getRoute() then train:updateRoute(routeName) end
+    end
+
+    return lineSegmentForRouteName(train, routeName)
 end
 
 local function clearTransitDeparturesForTrain(train)

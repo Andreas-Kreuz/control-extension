@@ -4,8 +4,22 @@ insulate("ce.mods.transit.CeTransitModule", function ()
     before_each(function ()
         require("ce.hub.eep.EepSimulator")
         clearModule("ce.mods.transit.CeTransitModule")
+        clearModule("ce.mods.transit.DepotSignalRegistry")
+        clearModule("ce.mods.transit.DepotSignalReleaseUpdater")
+        clearModule("ce.mods.transit.Line")
+        clearModule("ce.mods.transit.LineRegistry")
+        clearModule("ce.mods.transit.RoadStation")
+        clearModule("ce.mods.transit.data.TransitTrainRegistry")
+        clearModule("ce.mods.transit.data.TransitTrainUpdater")
         clearModule("ce.mods.transit.options.TransitOptionsRegistry")
         clearModule("ce.mods.transit.data.TransitDtoFactory")
+        clearModule("ce.hub.data.signals.Signal")
+        clearModule("ce.hub.data.signals.SignalRegistry")
+        clearModule("ce.hub.data.signals.WaitingOnSignal")
+        clearModule("ce.hub.data.signals.WaitingOnSignalRegistry")
+        clearModule("ce.hub.data.signals.SignalUpdater")
+        clearModule("ce.hub.data.trains.TrainRegistry")
+        clearModule("ce.hub.options.HubOptionsRegistry")
     end)
 
     local function makeStation(name, queueEntries, routePlatforms)
@@ -18,9 +32,91 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         }
     end
 
+    local function withSignalFunctions(functionsBySignalId, fn)
+        local originalGetSignalFunctions = _G.EEPGetSignalFunctions
+        local originalGetSignalFunction = _G.EEPGetSignalFunction
+        _G.EEPGetSignalFunctions = function (signalId)
+            local functions = functionsBySignalId[signalId]
+            return functions ~= nil, functions and #functions or 0
+        end
+        _G.EEPGetSignalFunction = function (signalId, selectionIndex)
+            local functions = functionsBySignalId[signalId]
+            local signalFunction = functions and functions[selectionIndex] or nil
+            return signalFunction ~= nil, signalFunction
+        end
+
+        local ok, err = pcall(fn)
+        _G.EEPGetSignalFunctions = originalGetSignalFunctions
+        _G.EEPGetSignalFunction = originalGetSignalFunction
+        if not ok then error(err) end
+    end
+
     it("returns the module from setOptions for chaining", function ()
         local CeTransitModule = require("ce.mods.transit.CeTransitModule")
         assert.equals(CeTransitModule, CeTransitModule.setOptions({}))
+    end)
+
+    it("returns the module from loadSettingsFromSlot for chaining", function ()
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        assert.equals(CeTransitModule, CeTransitModule:loadSettingsFromSlot(25))
+    end)
+
+    it("registers depot signals and forces required hub update policies", function ()
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+        local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+        local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")
+
+        assert.equals(CeTransitModule, CeTransitModule:registerDepotSignals(701, 702))
+
+        assert.is_true(SignalRegistry.has(701))
+        assert.is_true(WaitingOnSignalRegistry.getWatchedSignalIds()[701])
+        assert.equals("always", HubOptionsRegistry.getFieldUpdatePolicies("trains").route)
+        assert.equals("always", HubOptionsRegistry.getFieldUpdatePolicies("waitingOnSignals").vehicleName)
+    end)
+
+    it("wraps transit constructors and display model access", function ()
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local displayModel = require("ce.mods.transit.models.RoadStationDisplayModel")
+
+        local station = CeTransitModule:newRoadStation("Sugar Station", -1)
+        local stationWithoutSaveSlot = CeTransitModule:newRoadStation("Sugar Station without Save Slot")
+        local line = CeTransitModule:newLine({ nr = "Sugar" })
+
+        assert.equals("RoadStation", station.type)
+        assert.equals("RoadStation", stationWithoutSaveSlot.type)
+        assert.equals(-1, stationWithoutSaveSlot.eepSaveId)
+        assert.equals("Line", line.type)
+        assert.equals(displayModel, CeTransitModule:getDisplayModel())
+    end)
+
+    it("reconciles train line and destination from a known cached hub route", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local Line = require("ce.mods.transit.Line")
+        local RoadStation = require("ce.mods.transit.RoadStation")
+        local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+
+        EepSimulator.simulateAddTrain("#RouteUpdateTrain", "RouteUpdateTrain RS")
+        local startStation = RoadStation:new("Route Update Start", -1)
+        local segment = Line.forName("RU"):addSection("Route Update Known", "Route Update Destination")
+        segment:addStop(startStation:platform(1), 0)
+
+        local train = TrainRegistry.forName("#RouteUpdateTrain")
+        train:setRoute(segment.routeName)
+        train:setValue(TagKeys.Train.line, "Old")
+        train:setValue(TagKeys.Train.destination, "Old Destination")
+
+        CeTransitModule.run()
+
+        local transitTrain = TransitTrainRegistry.find("#RouteUpdateTrain")
+        local storedValues = train:load()
+        assert.equals("RU", transitTrain:getLine())
+        assert.equals("Route Update Destination", transitTrain:getDestination())
+        assert.equals("RU", storedValues[TagKeys.Train.line])
+        assert.equals("Route Update Destination", storedValues[TagKeys.Train.destination])
     end)
 
     it("station DTO: platforms always present, queue absent when not selected (default options)", function ()
@@ -110,5 +206,84 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         assert.equals("10", dto.nr)
         assert.equals("BUS", dto.trafficType)
         assert.same({}, dto.lineSegments)
+    end)
+
+    it("releases a depot signal when the first waiting train uses a known transit route", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local Line = require("ce.mods.transit.Line")
+        local RoadStation = require("ce.mods.transit.RoadStation")
+        local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+
+        EepSimulator.simulateAddTrain("#DepotKnownTrain", "Depot Known RS")
+        local startStation = RoadStation:new("Depot Start", -1)
+        local segment = Line.forName("D"):addSection("Depot Route Known", "Depot Destination")
+        segment:addStop(startStation:platform(1), 0)
+        local train = TrainRegistry.forName("#DepotKnownTrain")
+        train:setRoute(segment.routeName)
+        EEPSetSignal(801, 1)
+        EepSimulator.simulateQueueTrainOnSignal(801, "#DepotKnownTrain")
+        CeTransitModule:registerDepotSignals(801)
+
+        SignalUpdater.runUpdate()
+        CeTransitModule.run()
+
+        local transitTrain = TransitTrainRegistry.find("#DepotKnownTrain")
+        assert.equals(2, EEPGetSignal(801))
+        assert.equals("D", transitTrain:getLine())
+        assert.equals("Depot Destination", transitTrain:getDestination())
+        assert.equals("Depot Start", transitTrain:getOrigin())
+    end)
+
+    it("uses the detected signal function index to release a depot signal", function ()
+        withSignalFunctions({ [803] = { 1, 2 } }, function ()
+            local EepSimulator = require("ce.hub.eep.EepSimulator")
+            local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+            local Line = require("ce.mods.transit.Line")
+            local RoadStation = require("ce.mods.transit.RoadStation")
+            local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+            EepSimulator.simulateAddTrain("#DepotGreenIndexTrain", "Depot Green Index RS")
+            local startStation = RoadStation:new("Depot Green Index Start", -1)
+            local segment = Line.forName("G"):addSection("Depot Green Index Route", "Depot Green Index Destination")
+            segment:addStop(startStation:platform(1), 0)
+            TrainRegistry.forName("#DepotGreenIndexTrain"):setRoute(segment.routeName)
+            EEPSetSignal(803, 2)
+            EepSimulator.simulateQueueTrainOnSignal(803, "#DepotGreenIndexTrain")
+            CeTransitModule:registerDepotSignals(803)
+
+            SignalUpdater.runUpdate()
+            CeTransitModule.run()
+
+            assert.equals(1, EEPGetSignal(803))
+        end)
+    end)
+
+    it("does not release a depot signal for an unknown route", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        EepSimulator.simulateAddTrain("#DepotUnknownTrain", "Depot Unknown RS")
+        TrainRegistry.forName("#DepotUnknownTrain"):setRoute("Depot Route Unknown")
+        EEPSetSignal(802, 1)
+        EepSimulator.simulateQueueTrainOnSignal(802, "#DepotUnknownTrain")
+        CeTransitModule:registerDepotSignals(802)
+
+        local originalPrint = _G.print
+        local printedLines = {}
+        _G.print = function (message) table.insert(printedLines, message) end
+        SignalUpdater.runUpdate()
+        CeTransitModule.run()
+        _G.print = originalPrint
+
+        assert.equals(1, EEPGetSignal(802))
+        for _, message in ipairs(printedLines) do
+            assert.not_match("Could not find lineSegment", message)
+        end
     end)
 end)

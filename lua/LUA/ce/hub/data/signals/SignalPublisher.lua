@@ -9,28 +9,6 @@ local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegi
 ---@field syncState fun(options: table|nil):nil
 local SignalPublisher = {}
 
-local EEPGetSignalTrainName = _G.EEPGetSignalTrainName or function () return nil end
-
-local function collectWaitingOnSignals()
-    local waitingOnSignals = {}
-    for _, signal in pairs(SignalRegistry.getAll()) do
-        local count = signal:getWaitingVehiclesCount()
-        if count and count > 0 then
-            for pos = 1, count do
-                local vehicleName = EEPGetSignalTrainName(signal.id, pos)
-                waitingOnSignals[#waitingOnSignals + 1] = {
-                    id = signal.id .. "-" .. pos,
-                    signalId = signal.id,
-                    waitingPosition = pos,
-                    vehicleName = vehicleName or "",
-                    waitingCount = count
-                }
-            end
-        end
-    end
-    return waitingOnSignals
-end
-
 local function hasPayloadFields(dto)
     for key in pairs(dto or {}) do
         if key ~= "ceType" and key ~= "id" then return true end
@@ -85,7 +63,6 @@ function SignalPublisher.syncState()
     end
 
     if HubOptionsRegistry.isPublishEnabled("waitingOnSignals") then
-        WaitingOnSignalRegistry.set(collectWaitingOnSignals())
         publishWaitingOnSignalRemovals()
         publishWaitingOnSignals()
     end

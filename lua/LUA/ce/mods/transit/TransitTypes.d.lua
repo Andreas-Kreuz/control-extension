@@ -55,6 +55,7 @@
 ---@field addSection fun(self: Line, routeName: string, destination: string):LineSegment
 ---@field scheduleDeparture fun(trainName: string, station: RoadStation, timeInMinutes: number):nil
 ---@field trainDeparted fun(trainName: string, station: RoadStation):nil
+---@field applyCachedRouteForTrain fun(train: Train):LineSegment|nil,TransitTrain|nil
 ---@field toJsonStatic fun(self: Line):table
 ---@field getLines fun():table<string, Line>
 

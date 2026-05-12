@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitTrainUpdater ...") end
 
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+local Line = require("ce.mods.transit.Line")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
 
@@ -17,6 +18,7 @@ function TransitTrainUpdater.runUpdate()
         transitTrain:updateLine(values[TagKeys.Train.line])
         transitTrain:updateDestination(values[TagKeys.Train.destination])
         transitTrain:updateDirection(values[TagKeys.Train.direction])
+        Line.applyCachedRouteForTrain(hubTrain, { suppressUnknownRouteLog = true })
     end
 
     for trainId in pairs(TransitTrainRegistry.getAll()) do

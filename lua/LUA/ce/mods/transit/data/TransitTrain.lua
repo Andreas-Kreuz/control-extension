@@ -85,12 +85,13 @@ function TransitTrain:setLine(line)
     assert("string" == type(line) or "number" == type(line), "Provide 'line' as 'string' or 'number'")
     line = tostring(line)
     local oldLine = self.line
+    if oldLine == line then return end
     self.line = line
     writeValueToRollingStock(self.id, TagKeys.Train.line, line)
     updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setLine(rollingStockName, line)
     end)
-    if oldLine ~= line then markDirty(self, "line") end
+    markDirty(self, "line")
 end
 
 function TransitTrain:getLine()
@@ -111,12 +112,13 @@ function TransitTrain:setDestination(destination)
     assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
     assert(type(destination) == "string", "Need 'destination' as string")
     local oldDestination = self.destination
+    if oldDestination == destination then return end
     self.destination = destination
     writeValueToRollingStock(self.id, TagKeys.Train.destination, destination)
     updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setDestination(rollingStockName, destination)
     end)
-    if oldDestination ~= destination then markDirty(self, "destination") end
+    markDirty(self, "destination")
 end
 
 function TransitTrain:getDestination()
@@ -136,11 +138,12 @@ function TransitTrain:setOrigin(origin)
     assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
     assert(type(origin) == "string", "Need 'origin' as string")
     local oldOrigin = self.origin
+    if oldOrigin == origin then return end
     self.origin = origin
     updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setOrigin(rollingStockName, origin)
     end)
-    if oldOrigin ~= origin then markDirty(self, "origin") end
+    markDirty(self, "origin")
 end
 
 function TransitTrain:getOrigin()
@@ -160,9 +163,10 @@ function TransitTrain:setDirection(direction)
     assert(type(self) == "table" and self.type == "TransitTrain", "Call this method with ':'")
     assert(type(direction) == "string", "Need 'direction' as string")
     local oldDirection = self.direction
+    if oldDirection == direction then return end
     self.direction = direction
     writeValueToRollingStock(self.id, TagKeys.Train.direction, direction)
-    if oldDirection ~= direction then markDirty(self, "direction") end
+    markDirty(self, "direction")
 end
 
 function TransitTrain:getDirection()
