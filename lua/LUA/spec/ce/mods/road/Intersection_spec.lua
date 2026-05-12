@@ -234,7 +234,7 @@ insulate("Crossing", function ()
 
             it("TrafficLights are there", function ()
                 assert.equals(1.5, sequenceA:calculatePriority())
-                assert.equals(2.0, sequenceB:calculatePriority())
+                assert.equals(1.0, sequenceB:calculatePriority())
                 assert.equals(3.0, sequenceC:calculatePriority())
             end)
         end)

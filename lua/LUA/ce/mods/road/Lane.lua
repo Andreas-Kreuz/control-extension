@@ -8,6 +8,8 @@ local fmt = require("ce.hub.eep.TippTextFormatter")
 -- Lane starts here
 local Lane = {}
 Lane.debug = CeStartWithDebug or false
+local RouteDriveMode = { ONLY = "ONLY", ALSO = "ALSO" }
+local ROUTE_WILDCARD = "!ALL!"
 
 ---@type table<string, LaneRequestType>
 Lane.RequestType = {
@@ -57,7 +59,7 @@ local function updateLaneSignal(lane, reason)
         else
             canDrive = false
         end
-        lane.trafficLight:switchTo(canDrive and TrafficLightState.GREEN or TrafficLightState.RED, reason)
+        lane.laneTrafficLight:switchTo(canDrive and TrafficLightState.GREEN or TrafficLightState.RED, reason)
     end
 end
 
@@ -210,16 +212,19 @@ local function refreshRequests(lane)
         ---@type Queue
         local queue = lane.queue
         local queuedRoutes = {}
+        local hasDefaultRouteRequest = false
         local carsInQueue = not queue:isEmpty()
         for _, car in ipairs(queue:elements()) do
             local _, route = EEPGetTrainRoute(car)
             queuedRoutes[route] = true
+            local routeRules = Lane.effectiveRouteDriveRules(lane, route)
+            if not (routeRules and routeRules[RouteDriveMode.ONLY]) then hasDefaultRouteRequest = true end
         end
 
         local requests = {}
         for route, trafficLights in pairs(lane.requestTrafficLights) do
-            local wildCardRoute = route == "!ALL!"
-            local haveRequest = queuedRoutes[route] or (wildCardRoute and carsInQueue)
+            local wildCardRoute = route == ROUTE_WILDCARD
+            local haveRequest = queuedRoutes[route] or (wildCardRoute and carsInQueue and hasDefaultRouteRequest)
             for _, trafficLight in ipairs(trafficLights) do
                 if not requests[trafficLight] then requests[trafficLight] = haveRequest end
             end
@@ -228,34 +233,37 @@ local function refreshRequests(lane)
     end
 end
 
+function Lane.effectiveRouteDriveRules(lane, route)
+    return lane.routeDriveRules and lane.routeDriveRules[route]
+end
+
 function Lane.laneCanDrive(lane, trafficLights)
     if lane.trafficLightsToDriveOn then
-        -- In case, we have routes, we need to see if the first vehicle is allowed to drive
-        local driveOnAnyRoute = false
-        local matchesFirstVehicle = false
-        for _, trafficLight in ipairs(trafficLights) do
-            local allowedRoutes = lane.trafficLightsToDriveOn[trafficLight]
-            driveOnAnyRoute = true
-            matchesFirstVehicle = false
-            if allowedRoutes then
-                for _, route in ipairs(allowedRoutes) do
-                    driveOnAnyRoute = false
-                    if route == lane.firstVehiclesRoute then
-                        matchesFirstVehicle = true
-                        break
-                    end
-                end
+        local trafficLightsSet = {}
+        for _, trafficLight in ipairs(trafficLights) do trafficLightsSet[trafficLight] = true end
+        local routeRules = Lane.effectiveRouteDriveRules(lane, lane.firstVehiclesRoute)
+        if routeRules and routeRules[RouteDriveMode.ONLY] then
+            for trafficLight in pairs(routeRules[RouteDriveMode.ONLY]) do
+                if trafficLightsSet[trafficLight] then return true end
             end
-            if driveOnAnyRoute or matchesFirstVehicle then break end
+            return false
         end
-
-        return driveOnAnyRoute or matchesFirstVehicle
+        if lane.defaultDriveTrafficLights then
+            for trafficLight in pairs(lane.defaultDriveTrafficLights) do
+                if trafficLightsSet[trafficLight] then return true end
+            end
+        end
+        if routeRules and routeRules[RouteDriveMode.ALSO] then
+            for trafficLight in pairs(routeRules[RouteDriveMode.ALSO]) do
+                if trafficLightsSet[trafficLight] then return true end
+            end
+        end
+        return false
     else
         -- In case, there is no couting, we need to return true
         return true
     end
 end
-
 --------------------
 -- Klasse Fahrspur
 --------------------
@@ -369,15 +377,71 @@ end
 function Lane:showRequestsOn(trafficLight, ...)
     assert(self and self.getType and "function" == type(self.getType) and self.getType() == "Lane",
            "Did you use colons instead of a dot myLane:showRequestsOn(...)")
-
-    local routes = ... and { ... } or { "!ALL!" }
+    local routes = ... and { ... } or { ROUTE_WILDCARD }
     self.requestTrafficLights = self.requestTrafficLights or {}
     for _, route in ipairs(routes) do
         self.requestTrafficLights[route] = self.requestTrafficLights[route] or {}
         table.insert(self.requestTrafficLights[route], trafficLight)
     end
 end
-
+local RouteDriveBuilder = {}
+local function ensureTrafficLightCanDrive(lane, trafficLight)
+    assert(trafficLight.type == "TrafficLight")
+    lane.trafficLightsToDriveOn = lane.trafficLightsToDriveOn or {}
+    lane.trafficLightsToDriveOn[trafficLight] = lane.trafficLightsToDriveOn[trafficLight] or {}
+    trafficLight.lanes[lane] = true
+    if trafficLight ~= lane.laneTrafficLight then lane.laneTrafficLight.lanes[lane] = nil end
+end
+local function routeList(...)
+    local routes = { ... }
+    assert(#routes > 0, "Specify at least one route")
+    for _, route in ipairs(routes) do assert(type(route) == "string", "Need 'route' as string") end
+    return routes
+end
+local function ensureRouteRule(lane, route, mode)
+    lane.routeDriveRules = lane.routeDriveRules or {}
+    lane.routeDriveRules[route] = lane.routeDriveRules[route] or {}
+    lane.routeDriveRules[route][mode] = lane.routeDriveRules[route][mode] or {}
+    return lane.routeDriveRules[route][mode]
+end
+local function appendRoutesForTrafficLight(lane, trafficLight, routes)
+    local configuredRoutes = lane.trafficLightsToDriveOn[trafficLight]
+    for _, route in ipairs(routes) do
+        local known = false
+        for _, configuredRoute in ipairs(configuredRoutes) do
+            if route == configuredRoute then
+                known = true
+                break
+            end
+        end
+        if not known then table.insert(configuredRoutes, route) end
+    end
+end
+local function routeBuilderDriveOn(builder, trafficLight, mode)
+    local lane = builder.lane
+    ensureTrafficLightCanDrive(lane, trafficLight)
+    appendRoutesForTrafficLight(lane, trafficLight, builder.selectedRoutes)
+    for _, route in ipairs(builder.selectedRoutes) do ensureRouteRule(lane, route, mode)[trafficLight] = true end
+    return builder
+end
+local function routeBuilderDriveOnAll(builder, mode, ...)
+    local trafficLights = { ... }
+    assert(#trafficLights > 0, "Specify at least one traffic light")
+    for _, trafficLight in ipairs(trafficLights) do routeBuilderDriveOn(builder, trafficLight, mode) end
+    return builder
+end
+function RouteDriveBuilder:driveOnlyOn(...)
+    return routeBuilderDriveOnAll(self, RouteDriveMode.ONLY, ...)
+end
+function RouteDriveBuilder:driveAlsoOn(...)
+    return routeBuilderDriveOnAll(self, RouteDriveMode.ALSO, ...)
+end
+function RouteDriveBuilder:showRequestsOn(...)
+    for _, trafficLight in ipairs({ ... }) do
+        self.lane:showRequestsOn(trafficLight, table.unpack(self.selectedRoutes))
+    end
+    return self.lane
+end
 ---Z?hle alle Fahrzeuge am Signal
 ---Count on the lane's traffic signal
 function Lane:useSignalForQueue()
@@ -389,9 +453,9 @@ end
 function Lane:resetQueueFromSignal()
     for _ = 1, self.queue:size(), 1 do self.queue:pop() end
 
-    local wartend = EEPGetSignalTrainsCount(self.trafficLight.signalId)
+    local wartend = EEPGetSignalTrainsCount(self.laneTrafficLight.signalId)
     for i = 1, wartend, 1 do
-        local trainName = EEPGetSignalTrainName(self.trafficLight.signalId, i)
+        local trainName = EEPGetSignalTrainName(self.laneTrafficLight.signalId, i)
         self.queue:push(trainName)
     end
     save(self)
@@ -450,7 +514,7 @@ function Lane:setFahrzeugMultiplikator(fahrzeugMultiplikator)
 end
 
 function Lane:switchTrafficLightTo(phase, grund)
-    self.trafficLight:switchTo(phase, grund)
+    self.laneTrafficLight:switchTo(phase, grund)
     self.phase = phase
 end
 
@@ -477,28 +541,30 @@ function Lane:setTrafficType(trafficType)
     end
 end
 
---- Erzeugt eine Fahrspur, welche durch eine Ampel gesteuert wird.
+--- Erzeugt eine Fahrspur, welche durch genau ein EEP-Fahrspur-Signal gesteuert wird.
 ---@param name string @Name der Fahrspur einer Kreuzung
 ---@param eepSaveId number, @EEPSaveSlot-Id fuer das Speichern der Fahrspur
----@param trafficLight TrafficLight @genau eine Ampeln
+---@param laneTrafficLight TrafficLight @das einzelne EEP-Fahrspur-Signal, das Fahrzeuge anhaelt oder freigibt
 ---@param directions? string[] eine oder mehrere Ampeln
 ---@param trafficType? string (default: "NORMAL")
 ---@return Lane
-function Lane:new(name, eepSaveId, trafficLight, directions, trafficType)
+function Lane:new(name, eepSaveId, laneTrafficLight, directions, trafficType)
     assert(name, "Bitte geben Sie den Namen \"name\" fuer diese Fahrspur an.")
     assert(type(name) == "string", "Need 'name' as string")
     assert(eepSaveId, "Bitte geben Sie den Wert \"eepSaveId\" fuer diese Fahrspur an.")
     assert(type(eepSaveId) == "number")
-    assert(trafficLight, "Specify a single \"trafficLight\" for this lane (the one, where the traffic is queued).")
-    assert(trafficLight.type == "TrafficLight",
-           "Specify a single \"trafficLight\" for this lane (the one, where the traffic is queued).")
+    assert(laneTrafficLight,
+           "Specify a single \"laneTrafficLight\" for this lane (the EEP signal controlling the lane traffic).")
+    assert(laneTrafficLight.type == "TrafficLight",
+           "Specify a single \"laneTrafficLight\" for this lane (the EEP signal controlling the lane traffic).")
     -- assert(signalId, "Bitte geben Sie den Wert \"signalId\" fuer diese Fahrspur an.")
     if eepSaveId ~= -1 then StorageUtility.registerId(eepSaveId, "Lane " .. name) end
     local o = {
         name = name,
         type = "Lane",
         eepSaveId = eepSaveId,
-        trafficLight = trafficLight,
+        laneTrafficLight = laneTrafficLight,
+        trafficLight = laneTrafficLight,
         requestType = Lane.RequestType.NORMAL,
         routesToCount = {},
         signalUsedForRequest = false,
@@ -513,26 +579,56 @@ function Lane:new(name, eepSaveId, trafficLight, directions, trafficType)
 
     self.__index = self
     setmetatable(o, self)
-    trafficLight:applyToLane(o)
+    laneTrafficLight:applyToLane(o)
     load(o)
     return o
 end
 
----Fügt eine Ampel hinzu nach deren Grün (oder Aus!) gefahren werden darf. Diese Ampel darf nicht die Ampel der
----Fahrspur sein.
----Optional können die Routen mitgegeben werden, für die das Losfahren erlaubt ist.
+---Sets the default traffic lights which allow this lane to drive.
+---@param ... TrafficLight
+function Lane:driveOnDefaultSignals(...)
+    local trafficLights = { ... }
+    assert(#trafficLights > 0, "Specify at least one traffic light")
+
+    local newDefaultDriveTrafficLights = {}
+    for _, trafficLight in ipairs(trafficLights) do
+        ensureTrafficLightCanDrive(self, trafficLight)
+        newDefaultDriveTrafficLights[trafficLight] = true
+    end
+
+    if self.defaultDriveTrafficLights then
+        for trafficLight in pairs(self.defaultDriveTrafficLights) do
+            if not newDefaultDriveTrafficLights[trafficLight] then
+                self.trafficLightsToDriveOn[trafficLight] = nil
+                if trafficLight ~= self.laneTrafficLight then trafficLight.lanes[self] = nil end
+            end
+        end
+    end
+
+    self.defaultDriveTrafficLights = newDefaultDriveTrafficLights
+    for trafficLight in pairs(newDefaultDriveTrafficLights) do self.trafficLightsToDriveOn[trafficLight] = {} end
+    return self
+end
+
+---Starts a route-bound drive signal registration.
+---@param ... string Route names
+function Lane:routes(...)
+    return setmetatable({ lane = self, selectedRoutes = routeList(...) }, { __index = RouteDriveBuilder })
+end
+
+---Fuegt eine Ampel hinzu nach deren Gruen (oder Aus!) gefahren werden darf.
+---Ohne Routen wird sie als Standardsignal registriert, mit Routen als zusaetzliches Routensignal.
 ---
----Sets the traffic light which is used to drive. This traffic light must not be the lanes signal!
----Optionally some Route names can be added, which are allowed to drive on this traffic light
+---Sets the traffic light which is used to drive.
+---Without routes it is registered as default signal, with routes as additional route signal.
 ---@param trafficLight TrafficLight
 function Lane:driveOn(trafficLight, ...)
     assert(trafficLight.type == "TrafficLight")
-    if trafficLight.signalId ~= self.trafficLight.signalId then
-        if ... then
-            for _, route in ipairs(...) do assert(type(route) == "string", "Need 'route' as string") end
-        end
-        self.trafficLightsToDriveOn = self.trafficLightsToDriveOn or {}
-        self.trafficLightsToDriveOn[trafficLight] = { ... }
+    if trafficLight == self.laneTrafficLight then return self end
+    if ... then
+        self:routes(...):driveAlsoOn(trafficLight)
+    else
+        self:driveOnDefaultSignals(trafficLight)
     end
     return self
 end
@@ -542,9 +638,9 @@ end
 ---Wird von einer Ampel aufgerufen, dass über die driveOn() Methode für diese Fahrspur angemeldet wurde
 ---@param trafficLight TrafficLight
 function Lane:trafficLightChanged(trafficLight)
-    if trafficLight ~= self.trafficLight then
+    if trafficLight ~= self.laneTrafficLight then
         assert(self.trafficLightsToDriveOn, "There is no traffic light registered on this lane: " ..
-            trafficLight.signalId .. " / " .. self.trafficLight.signalId)
+            trafficLight.signalId .. " / " .. self.laneTrafficLight.signalId)
         assert(self.trafficLightsToDriveOn[trafficLight],
                "This lane does not drive on the given traffic light: " .. trafficLight.signalId)
     end

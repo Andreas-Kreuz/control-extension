@@ -13,9 +13,9 @@ describe("Lane ...", function ()
         -- Traffic Light which is visible to tell the lanes traffic to drive
         local driveTrafficLight = TrafficLight:new("driveTrafficLight", signalId, TrafficLightModel.Unsichtbar_2er)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
-        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
+        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
 
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", 34, laneTrafficLight)
         local tlsBeforeDriveOn = lane.trafficLightsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
@@ -29,7 +29,7 @@ describe("Lane ...", function ()
         it("Lane has signal", function () assert.are.same({}, lane.trafficLightsToDriveOn[driveTrafficLight]) end)
         describe("Can drive at red", function ()
             driveTrafficLight:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = laneSignal.phase
+            local canDriveAtRed = laneTrafficLight.phase
             it("SignalId is correct", function ()
                 assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexRed,
                               EEPGetSignal(driveTrafficLight.signalId))
@@ -38,13 +38,14 @@ describe("Lane ...", function ()
         end)
         describe("Can drive at green", function ()
             driveTrafficLight:switchTo(TrafficLightState.GREEN)
-            local canDriveAtGreen = laneSignal.phase
+            local canDriveAtGreen = laneTrafficLight.phase
             it("SignalId is correct", function ()
                 assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexGreen,
                               EEPGetSignal(driveTrafficLight.signalId))
             end)
             it("SignalId is correct", function ()
-                assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexGreen, EEPGetSignal(laneSignal.signalId))
+                assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexGreen,
+                              EEPGetSignal(laneTrafficLight.signalId))
             end)
             it("canDrive()", function () assert.equals(TrafficLightState.GREEN, canDriveAtGreen) end)
         end)
@@ -64,10 +65,10 @@ describe("Lane ...", function ()
         K1:switchTo(TrafficLightState.RED)
         K2:switchTo(TrafficLightState.RED)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
-        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
+        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
 
         ---@type Lane
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", 34, laneTrafficLight)
         local tlsBeforeDriveOn = lane.trafficLightsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
@@ -81,7 +82,7 @@ describe("Lane ...", function ()
         end)
         describe("K1 can drive at red", function ()
             K1:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = laneSignal.phase
+            local canDriveAtRed = laneTrafficLight.phase
             local signalIndexK1 = EEPGetSignal(K1.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexRed, signalIndexK1) end)
@@ -90,7 +91,7 @@ describe("Lane ...", function ()
         end)
         describe("K1 can drive at green", function ()
             K1:switchTo(TrafficLightState.GREEN)
-            local canDriveAtGreen = laneSignal.phase
+            local canDriveAtGreen = laneTrafficLight.phase
             local signalIndexK1 = EEPGetSignal(K1.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexGreen, signalIndexK1) end)
@@ -99,7 +100,7 @@ describe("Lane ...", function ()
         end)
         describe("K2 can drive at green", function ()
             K2:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = laneSignal.phase
+            local canDriveAtRed = laneTrafficLight.phase
             local signalIndexK2 = EEPGetSignal(K2.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexRed, signalIndexK2) end)
@@ -112,12 +113,12 @@ describe("Lane ...", function ()
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexGreen, signalIndexK2) end)
 
-            local canDriveNoVehicle = laneSignal.phase
+            local canDriveNoVehicle = laneTrafficLight.phase
             it("canDrive() noVehicle", function () assert.equals(TrafficLightState.RED, canDriveNoVehicle) end)
 
             lane:vehicleEntered("#Car1")
             local firstVehiclesRoute1 = lane.firstVehiclesRoute
-            local canDriveAtGreen2 = laneSignal.phase
+            local canDriveAtGreen2 = laneTrafficLight.phase
             it("canDrive() vehicleWithRoute", function ()
                 assert.equals("Matching Route", firstVehiclesRoute1)
             end)
@@ -128,7 +129,7 @@ describe("Lane ...", function ()
 
             lane:vehicleEntered("#Car2")
             local firstVehiclesRoute2 = lane.firstVehiclesRoute
-            local canDriveAtGreen3 = laneSignal.phase
+            local canDriveAtGreen3 = laneTrafficLight.phase
             it("canDrive() vehicleWithRoute", function () assert.equals("Alle", firstVehiclesRoute2) end)
             it("canDrive() vehicleWithRoute", function ()
                 assert.equals(TrafficLightState.RED, canDriveAtGreen3)
@@ -136,6 +137,134 @@ describe("Lane ...", function ()
             lane:vehicleLeft("#Car2")
 
             K2:switchTo(TrafficLightState.RED)
+        end)
+    end)
+
+    insulate("Lane based route drive signals", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
+        local secondDefaultSignal = TrafficLight:new("Second Default", 58, TrafficLightModel.JS2_3er_mit_FG)
+        local exclusiveSignal = TrafficLight:new("Exclusive", 56, TrafficLightModel.JS2_3er_mit_FG)
+        local additionalSignal = TrafficLight:new("Additional", 57, TrafficLightModel.JS2_3er_mit_FG)
+        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+
+        lane:driveOnDefaultSignals(defaultSignal, secondDefaultSignal)
+        lane:routes("Exclusive Route"):driveOnlyOn(exclusiveSignal)
+        lane:routes("Additional Route"):driveAlsoOn(additionalSignal)
+
+        it("registers the default signal as fallback", function ()
+            assert.is_true(lane.defaultDriveTrafficLights[defaultSignal])
+            assert.is_true(lane.defaultDriveTrafficLights[secondDefaultSignal])
+            assert.are.same({}, lane.trafficLightsToDriveOn[defaultSignal])
+            assert.are.same({}, lane.trafficLightsToDriveOn[secondDefaultSignal])
+            assert.is_true(defaultSignal.lanes[lane])
+            assert.is_true(secondDefaultSignal.lanes[lane])
+        end)
+
+        it("allows non-matching routes on the default signal only", function ()
+            lane.firstVehiclesRoute = "Other Route"
+
+            assert.is_true(Lane.laneCanDrive(lane, { defaultSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { secondDefaultSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, { exclusiveSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, { additionalSignal }))
+        end)
+
+        it("uses exclusive route signals instead of the default signal", function ()
+            lane.firstVehiclesRoute = "Exclusive Route"
+
+            assert.is_false(Lane.laneCanDrive(lane, { defaultSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, { secondDefaultSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { exclusiveSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, { additionalSignal }))
+        end)
+
+        it("allows additional route signals together with the default signal", function ()
+            lane.firstVehiclesRoute = "Additional Route"
+
+            assert.is_true(Lane.laneCanDrive(lane, { defaultSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { secondDefaultSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { additionalSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, {}))
+        end)
+    end)
+
+    insulate("Multi-signal route drive signals", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
+        local secondDefaultSignal = TrafficLight:new("Second Default", 56, TrafficLightModel.JS2_3er_mit_FG)
+        local exclusiveSignal = TrafficLight:new("Exclusive", 57, TrafficLightModel.JS2_3er_mit_FG)
+        local secondExclusiveSignal = TrafficLight:new("Second Exclusive", 58, TrafficLightModel.JS2_3er_mit_FG)
+        local additionalSignal = TrafficLight:new("Additional", 59, TrafficLightModel.JS2_3er_mit_FG)
+        local secondAdditionalSignal = TrafficLight:new("Second Additional", 60, TrafficLightModel.JS2_3er_mit_FG)
+        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+
+        lane:driveOnDefaultSignals(defaultSignal, secondDefaultSignal)
+        lane:routes("Exclusive Route"):driveOnlyOn(exclusiveSignal, secondExclusiveSignal)
+        lane:routes("Additional Route"):driveAlsoOn(additionalSignal, secondAdditionalSignal)
+
+        it("stores the lane traffic light and keeps the compatibility alias", function ()
+            assert.equals(laneTrafficLight, lane.laneTrafficLight)
+            assert.equals(laneTrafficLight, lane.trafficLight)
+        end)
+
+        it("allows route-specific additional signals from one call", function ()
+            lane.firstVehiclesRoute = "Additional Route"
+
+            assert.is_true(Lane.laneCanDrive(lane, { additionalSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { secondAdditionalSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { defaultSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, { exclusiveSignal }))
+        end)
+
+        it("uses route-specific exclusive signals from one call", function ()
+            lane.firstVehiclesRoute = "Exclusive Route"
+
+            assert.is_false(Lane.laneCanDrive(lane, { defaultSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { exclusiveSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { secondExclusiveSignal }))
+            assert.is_false(Lane.laneCanDrive(lane, { additionalSignal }))
+        end)
+
+        it("requires at least one route for route-bound drive signals", function ()
+            assert.has_error(function () lane:routes():driveAlsoOn(additionalSignal) end, "Specify at least one route")
+        end)
+    end)
+    insulate("Legacy applyToLane maps to lane based route drive signals", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
+        local routeSignal = TrafficLight:new("Route", 56, TrafficLightModel.JS2_3er_mit_FG)
+        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+
+        defaultSignal:applyToLane(lane)
+        routeSignal:applyToLane(lane, "Route A")
+
+        it("maps applyToLane without routes to the default signal", function ()
+            assert.is_true(lane.defaultDriveTrafficLights[defaultSignal])
+            assert.are.same({}, lane.trafficLightsToDriveOn[defaultSignal])
+        end)
+
+        it("maps applyToLane with routes to an additional route signal", function ()
+            lane.firstVehiclesRoute = "Route A"
+
+            assert.are.same({ "Route A" }, lane.trafficLightsToDriveOn[routeSignal])
+            assert.is_true(Lane.laneCanDrive(lane, { defaultSignal }))
+            assert.is_true(Lane.laneCanDrive(lane, { routeSignal }))
         end)
     end)
 
@@ -261,6 +390,55 @@ describe("Lane ...", function ()
         it("  Light on K1 NoCar", function () assert.is_false(lightOnK1NoCar2) end)
         it("  Light on K2 NoCar", function () assert.is_false(lightOnK2NoCar2) end)
         it("  Light on K3 NoCar", function () assert.is_false(lightOnK3NoCar2) end)
+    end)
+
+    insulate("Route builder shows exclusive route requests only on the selected traffic light", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        EEPSetTrainRoute("#Car1", "Route A")
+        EEPSetTrainRoute("#Car2", "Route B")
+        EEPSetTrainRoute("#Car3", "Route C")
+
+        EEPStructureSetLight("#11_RED", false)
+        EEPStructureSetLight("#21_RED", false)
+        EEPStructureSetLight("#12_GREEN", false)
+        EEPStructureSetLight("#22_GREEN", false)
+        EEPStructureSetLight("#13_YELLOW", false)
+        EEPStructureSetLight("#23_YELLOW", false)
+        EEPStructureSetLight("#14_REQUEST", false)
+        EEPStructureSetLight("#24_REQUEST", false)
+
+        local S2 = TrafficLight:new("S2", 55, TrafficLightModel.JS2_3er_ohne_FG, "#11_RED", "#12_GREEN",
+                                    "#13_YELLOW", "#14_REQUEST")
+        local S3 = TrafficLight:new("S3", 56, TrafficLightModel.JS2_3er_ohne_FG, "#21_RED", "#22_GREEN",
+                                    "#23_YELLOW", "#24_REQUEST")
+        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+
+        lane:driveOnDefaultSignals(S2):showRequestsOn(S2)
+        lane:routes("Route A", "Route B"):driveOnlyOn(S3):showRequestsOn(S3)
+
+        it("registers selected route requests only on S3 and default requests on S2", function ()
+            assert.same({ S2 }, lane.requestTrafficLights["!ALL!"])
+            assert.same({ S3 }, lane.requestTrafficLights["Route A"])
+            assert.same({ S3 }, lane.requestTrafficLights["Route B"])
+        end)
+
+        lane:vehicleEntered("#Car1")
+        local _, lightOnS2RouteA = EEPStructureGetLight("#14")
+        local _, lightOnS3RouteA = EEPStructureGetLight("#24")
+        it("turns on S3 request light for an exclusive route", function () assert.is_true(lightOnS3RouteA) end)
+        it("does not turn on S2 request light for an exclusive route", function () assert.is_false(lightOnS2RouteA) end)
+        lane:vehicleLeft("#Car1")
+
+        lane:vehicleEntered("#Car3")
+        local _, lightOnS2RouteC = EEPStructureGetLight("#14")
+        local _, lightOnS3RouteC = EEPStructureGetLight("#24")
+        it("turns on S2 request light for another route", function () assert.is_true(lightOnS2RouteC) end)
+        it("does not turn on S3 request light for another route", function () assert.is_false(lightOnS3RouteC) end)
     end)
 
     describe("Legacy loading", function ()

@@ -90,11 +90,11 @@ lane3 = Lane:new("Lane 3 S", 3, L3, { Lane.Directions.LEFT })
 lane4 = Lane:new("Lane 4 S", 4, L4, { Lane.Directions.STRAIGHT })
 
 -- Lege fest, welche Ampeln für eine Kreuzung gelten
-K1:applyToLane(lane1)
-K6:applyToLane(lane2)
-K7:applyToLane(lane2, "Rechtsabbieger")
-K8:applyToLane(lane3)
-K9:applyToLane(lane4)
+lane1:driveOnDefaultSignals(K1)
+lane2:driveOnDefaultSignals(K6)
+lane2:routes("Rechtsabbieger"):driveAlsoOn(K7)
+lane3:driveOnDefaultSignals(K8)
+lane4:driveOnDefaultSignals(K9)
 
 -- Lege die Schaltungen an und füge Ampeln für Fahrzeuge, Tram und Fußgänger hinzu
 sequenceA = crossing:newSequence("Sequence A - North South")

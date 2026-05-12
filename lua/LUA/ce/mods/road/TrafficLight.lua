@@ -394,7 +394,8 @@ function TrafficLight:changed() for lane in pairs(self.lanes) do lane:trafficLig
 ---@param lane Lane The lane apply this traffic light for
 function TrafficLight:applyToLane(lane, ...)
     lane:driveOn(self, ...)
-    if self ~= lane.trafficLight then lane.trafficLight.lanes[lane] = nil end
+    local laneTrafficLight = lane.laneTrafficLight or lane.trafficLight
+    if self ~= laneTrafficLight then laneTrafficLight.lanes[lane] = nil end
     self.lanes[lane] = true
 end
 

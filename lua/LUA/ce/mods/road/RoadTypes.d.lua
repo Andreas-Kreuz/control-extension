@@ -84,7 +84,7 @@
 ---@field showRequestOnSignal fun(self: TrafficLight, hasRequest: boolean):nil
 ---@field print fun(self: TrafficLight):nil
 ---@field changed fun(self: TrafficLight):nil
----@field applyToLane fun(self: TrafficLight, lane: Lane, ...: TrafficLightType):Lane
+---@field applyToLane fun(self: TrafficLight, lane: Lane, ...: string):Lane
 
 ---@class Lane
 ---@field Directions table<string, LaneDirection>
@@ -93,7 +93,8 @@
 ---@field calculatePriority fun(self: Lane, trafficLights: table):number
 ---@field checkRequests fun(self: Lane):nil
 ---@field debug boolean
----@field driveOn fun(self: Lane, trafficLight: TrafficLight, ...: TrafficLightType):nil
+---@field driveOnDefaultSignals fun(self: Lane, ...: TrafficLight):Lane
+---@field driveOn fun(self: Lane, trafficLight: TrafficLight, ...: string):Lane
 ---@field firstGoodTrain string|nil
 ---@field firstVehiclesRoute string|nil
 ---@field getLaneType fun(self: Lane):LaneRequestType
@@ -106,8 +107,9 @@
 ---@field hasRequest fun(self: Lane):boolean
 ---@field incrementWaitCount fun(self: Lane):nil
 ---@field laneCanDrive fun(lane: Lane, trafficLights: table):boolean
+---@field laneTrafficLight TrafficLight
 ---@field name string
----@field new fun(self: Lane, name: string, eepSaveId: number, trafficLight: TrafficLight,
+---@field new fun(self: Lane, name: string, eepSaveId: number, laneTrafficLight: TrafficLight,
 --- directions?: string[], trafficType?: string):Lane
 ---@field queue Queue
 ---@field requestInfoText string|nil
@@ -120,6 +122,8 @@
 ---@field resetQueueFromSignal fun(self: Lane):nil
 ---@field resetVehicles fun(self: Lane):nil
 ---@field resetWaitCount fun(self: Lane):nil
+--- Starts route-bound drive signal registration. At least one route is required.
+---@field routes fun(self: Lane, ...: string):LaneRouteDriveBuilder
 ---@field routesToCount table
 ---@field setDirections fun(self: Lane, ...: LaneDirection):nil
 ---@field setFahrzeugMultiplikator fun(self: Lane, fahrzeugMultiplikator: number):nil
@@ -144,6 +148,11 @@
 ---@field vehicleEntered fun(self: Lane, trainName: string):nil
 ---@field vehicleLeft fun(self: Lane, trainName: string):nil
 ---@field waitCount number
+
+---@class LaneRouteDriveBuilder
+---@field driveOnlyOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):LaneRouteDriveBuilder
+---@field driveAlsoOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):LaneRouteDriveBuilder
+---@field showRequestsOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):Lane
 
 ---@class IntersectionSequence
 ---@field type string

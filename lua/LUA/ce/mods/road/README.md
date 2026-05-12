@@ -128,25 +128,56 @@ _Vorschlag für den selbst vergebenen Namen:_
 Eine `TrafficLight` kann ein Verkehrssignal, ein Fußgängersignal oder beides zugleich darstellen.
 Intern werden die Namen als `trafficSignalName` und `pedestrianSignalName` getrennt gespeichert.
 
-### `TrafficLight:applyToLane()` - Ampel für Fahrspur nutzen
+### Fahrspur-Ampeln und zusätzliche Routensignale
 
-| Aufruf                                       |
-| -------------------------------------------- |
-| `TrafficLight:applyToLane(lane, [route...])` |
+| Aufruf                                                                               |
+| ------------------------------------------------------------------------------------ |
+| `lane:driveOnDefaultSignals(trafficLight...)`                                        |
+| `lane:routes(route...):driveOnlyOn(trafficLight...)`                                 |
+| `lane:routes(route...):driveAlsoOn(trafficLight...)`                                 |
+| `lane:routes(route...):driveOnlyOn(trafficLight...):showRequestsOn(trafficLight...)` |
 
-Fahrspuren werden standardmäßig nur durch ihre Fahrspur-Ampel geschaltet. Mit `TrafficLight:applyToLane(lane, [route...])`` kannst Du der Fahrspur eine andere Ampel als die Fahrspur-Ampel zuweisen. In diesem Fall sollte die Fahrspur-Ampel immer unsichtbar sein.
+Der Verkehr einer Fahrspur wird in EEP immer von genau einem Fahrspur-Signal gesteuert: dem `laneTrafficLight` aus `Lane:new(...)`. Wenn mehrere sichtbare Ampeln entscheiden sollen, ob ein Fahrzeug fahren darf, nimm für `laneTrafficLight` ein unsichtbares Signal. Dieses unsichtbare Signal hält die Fahrzeuge in EEP an oder gibt sie frei.
 
-| Parameter | Typ      | Bedeutung                                                             |
-| --------- | -------- | --------------------------------------------------------------------- |
-| `name`    | `string` | Fahrspur, die durch diese Ampel geschaltet werden soll.               |
-| `route`   | `string` | Optional: Diese Ampel soll nur für die angegebene(n) Route(n) gelten. |
+Die anderen Ampeln sagen dem eigentlichen Signal der Fahrspur nur, ob es grün sein könnte. Dazu ist die Route des aktuell an der ersten Stelle stehenden Fahrzeugs ausschlaggebend:
 
-| Rückgabewert                                       |
-| -------------------------------------------------- |
-| `TrafficLight` (neu erstellte Tabelle bzw. Objekt) |
+- `lane:driveOnDefaultSignals(...)`: Standard-Ampeln. Der Fahrspurverkehr fährt, wenn eines dieser Ampeln grün ist, außer für die erste Fahrzeugroute gilt gerade eine passende exklusive Regel.
+- `lane:routes(...):driveAlsoOn(...)`: zusätzliche Ampeln. Der Fahrspurverkehr fährt für diese Routen auch dann, wenn eines dieser Ampeln grün ist.
+- `lane:routes(...):driveOnlyOn(...)`: exklusive Ampeln. Der Fahrspurverkehr fährt für diese Routen nur dann, wenn eines dieser Ampeln grün ist; Standard-Ampeln zählen dann nicht.
 
-**Beachte**: Die Funktion musst mit `:new()` statt `.new()` aufgerufen werden -
-also mit einem Doppelpunkt und nicht mit einem Punkt.
+`routes(...)` ist vor `driveAlsoOn(...)` und `driveOnlyOn(...)` Pflicht und muss mindestens eine Route enthalten. Alle drei Methoden können mehrere Ampeln in einem Aufruf bekommen.
+
+`TrafficLight:applyToLane(lane, [route...])` bleibt als ältere Schreibweise erhalten. Ohne Routen entspricht es `lane:driveOnDefaultSignals(trafficLight)`, mit Routen entspricht es `lane:routes(route...):driveAlsoOn(trafficLight)`.
+
+| Parameter      | Typ                 | Bedeutung                                                       |
+| -------------- | ------------------- | --------------------------------------------------------------- |
+| `trafficLight` | `TrafficLight`, ... | Eine oder mehrere Ampeln, deren Grün die Fahrspur freigibt.     |
+| `route`        | `string`, ...       | Eine oder mehrere Routen, für die eine Routensignal-Regel gilt. |
+
+Beispiele:
+
+```lua
+-- Eine einfache Fahrspur: K1 ist das sichtbare Signal (eine Ampel) und steuert direkt EEP.
+local lane = Lane:new("K1L1", 101, K1)
+
+-- Andere sichtbare Ampeln entscheiden, ein unsichtbares Signal steuert die Fahrspur EEP.
+local lane = Lane:new("L1", 102, L1_unsichtbar)
+lane:driveOnDefaultSignals(K1, K2):showRequestsOn(K1, K2)
+
+lane:routes("Tram 11 Heiderand", "Tram 11 Rehfeld")
+    :driveOnlyOn(S3, S4)
+    :showRequestsOn(S3, S4)
+
+lane:routes("Rechtsabbieger")
+    :driveAlsoOn(K5, K6)
+    :showRequestsOn(K5, K6)
+```
+
+| Rückgabewert                                                           |
+| ---------------------------------------------------------------------- |
+| `Lane` bzw. bei `routes(...)` bis zum Abschluss der Kette ein Builder. |
+
+**Beachte**: Die Methoden werden mit Doppelpunkt aufgerufen, also z. B. `lane:driveOnDefaultSignals(S2)`.
 
 ### `TrafficLight:addLightStructure()` - Lichtsteuerung von Immobilien
 
@@ -220,20 +251,19 @@ Um die Fahrtrichtungen einer Fahrspur festzulegen, nutze einen der folgenden Wer
 
 ### `Lane:new()` - Neue Fahrspur anlegen
 
-| Aufruf                                                             |
-| ------------------------------------------------------------------ |
-| `Lane:new(name, eepSaveId, trafficLight, directions, trafficType)` |
+| Aufruf                                                                 |
+| ---------------------------------------------------------------------- |
+| `Lane:new(name, eepSaveId, laneTrafficLight, directions, trafficType)` |
 
-Jede Fahrspur `Lane` bekommt genau eine Ampel `TrafficLight` als Fahrspursignal. Diese Ampel bestimmt, ob das erste
-Fahrzeug in der Fahrspur fahren darf
+Jede Fahrspur `Lane` bekommt genau ein `laneTrafficLight`. Diese Ampel ist das EEP-Fahrspur-Signal, das Fahrzeuge wirklich anhält oder freigibt. Bei einfachen Fahrspuren kann das die sichtbare Ampel sein. Wenn mehrere Ampeln über dieselbe Fahrspur entscheiden sollen, ist `laneTrafficLight` ein unsichtbares Signal.
 
-| Parameter      | Typ                        | Bedeutung                                                          |
-| -------------- | -------------------------- | ------------------------------------------------------------------ |
-| `name`         | `string`                   | Name der Fahrspur, z.B. "L1", "L2", ... oder "K1L1", "K1L2", ...   |
-| `eepSaveId`    | `number`                   | Freie EEP-Speicher-ID (1 - 1000), für die Datenablage der Fahrspur |
-| `trafficLight` | `TrafficLight`             | Die Fahrspur-Ampel muss angegeben werden.                          |
-| `directions`   | `{ Lane.Directions, ... }` | Tabelle mit einer oder mehreren Richtungen (optional)              |
-| `trafficType`  | `string`                   | Verkehrstyp (OBSOLET, MUSS IN `TrafficLight` übertragen werden)    |
+| Parameter          | Typ                        | Bedeutung                                                          |
+| ------------------ | -------------------------- | ------------------------------------------------------------------ |
+| `name`             | `string`                   | Name der Fahrspur, z.B. "L1", "L2", ... oder "K1L1", "K1L2", ...   |
+| `eepSaveId`        | `number`                   | Freie EEP-Speicher-ID (1 - 1000), für die Datenablage der Fahrspur |
+| `laneTrafficLight` | `TrafficLight`             | Das eine EEP-Signal, das den Verkehr auf dieser Fahrspur steuert.  |
+| `directions`       | `{ Lane.Directions, ... }` | Tabelle mit einer oder mehreren Richtungen (optional)              |
+| `trafficType`      | `string`                   | Verkehrstyp (OBSOLET, MUSS IN `TrafficLight` übertragen werden)    |
 
 | Rückgabewert                               |
 | ------------------------------------------ |

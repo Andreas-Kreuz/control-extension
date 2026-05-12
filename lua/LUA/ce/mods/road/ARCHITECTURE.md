@@ -155,7 +155,7 @@ Verantwortlichkeiten:
 - Ermittlung von Anforderungen über Kontaktpunkte, Signale oder reservierte Straßentracks
 - Berechnung von Fahrspurprioritäten für die Schaltungswahl
 - Zuordnung zusätzlicher Anforderungsampeln abhängig von Routen
-- Spiegelung des Fahrzustands auf das sichtbare Fahrspursignal
+- Spiegelung des Fahrzustands auf das eine EEP-Fahrspur-Signal `laneTrafficLight`
 
 Wichtige Betriebsarten für Anforderungen:
 
@@ -171,7 +171,11 @@ Wichtige Zustandsfelder:
 - `queue`
 - `firstVehiclesRoute`
 - `requestType`
+- `laneTrafficLight`: das einzelne EEP-Signal, das Fahrzeuge auf der Fahrspur anhält oder freigibt
+- `trafficLight`: Kompatibilitätsalias auf `laneTrafficLight`
 - `trafficLightsToDriveOn`
+- `defaultDriveTrafficLights`
+- `routeDriveRules`
 - `requestTrafficLights`
 - `signalUsedForRequest`
 - `tracksUsedForRequest`
@@ -203,7 +207,10 @@ Besonderheiten:
 
 - negative oder nicht nutzbare Signal-IDs werden intern auf eigene negative IDs abgebildet; diese Ampeln sind logisch verwaltet und schalten kein EEP-Signal
 - `lightStructures` und `axisStructures` ergänzen die eigentliche Signalsteuerung
-- `applyToLane(...)` koppelt eine Ampel an Fahrspuren und nutzt intern `lane:driveOn(...)`
+- `Lane:driveOnDefaultSignals(...)`, `Lane:routes(...):driveOnlyOn(...)` und `Lane:routes(...):driveAlsoOn(...)` koppeln Fahrspuren an Freigabe-Signale
+- `driveOnDefaultSignals(...)` setzt Standard-Freigaben; `driveAlsoOn(...)` ergänzt sie für benannte Routen; `driveOnlyOn(...)` ersetzt sie für benannte Routen
+- `routes(...)` muss mindestens eine Route enthalten
+- `TrafficLight:applyToLane(...)` bleibt als ältere Schreibweise erhalten und delegiert auf die Lane-API
 - `showRequestOnSignal(...)` steuert optionale Anforderungslichter an Zusatz-Immobilien
 - das Feld `reason` ist zwar als Teil des Objekts vorgesehen und wird in `refreshInfo()` abgefragt, wird im aktuellen Codepfad aber nicht aktiv gesetzt
 
@@ -366,8 +373,8 @@ Aktuelle Rolle:
 Der reguläre Ablauf für eine automatisch geschaltete Kreuzung ist aktuell:
 
 1. Anwendercode erzeugt `TrafficLightModel`, `TrafficLight`, `Lane`, `IntersectionSequence` und `Intersection`.
-2. `Lane:new(...)` registriert den Save-Slot, koppelt die sichtbare Fahrspurampel an die Fahrspur und lädt gespeicherten Zustand.
-3. Zusätzliche Freigabeampeln werden optional über `Lane:driveOn(...)` oder `TrafficLight:applyToLane(...)` verdrahtet.
+2. `Lane:new(..., laneTrafficLight, ...)` registriert den Save-Slot, setzt das eine EEP-kontrollierende Fahrspur-Signal und lädt gespeicherten Zustand.
+3. Zusätzliche Freigabe-Signale werden optional über `driveOnDefaultSignals(...)`, `routes(...):driveAlsoOn(...)`, `routes(...):driveOnlyOn(...)` oder die ältere Schreibweise `TrafficLight:applyToLane(...)` verdrahtet.
 4. Sequenzen registrieren ihre Ampeln über `addCarLights(...)`, `addTramLights(...)` und `addPedestrianLights(...)`.
 5. `CeRoadModule.init()` registriert Web-Anbindung und ruft `Intersection.initSequences()` auf.
 6. `Intersection.initSequences()` leitet aus allen Sequenzen die effektiven Fahrspuren und Ampeln je Kreuzung ab.

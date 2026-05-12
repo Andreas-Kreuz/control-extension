@@ -266,7 +266,7 @@ local function recalculateSignalInfo(crossing)
 
     local trafficLightsToRefresh = {}
     for _, lane in pairs(crossing.lanes) do
-        local trafficLight = lane.trafficLight
+        local trafficLight = lane.laneTrafficLight or lane.trafficLight
         trafficLightsToRefresh[trafficLight.signalId] = trafficLight
         local text = "<br></j>" .. lane:getRequestInfo() .. " / " .. lane.waitCount
         trafficLight:setLaneInfo(text)
