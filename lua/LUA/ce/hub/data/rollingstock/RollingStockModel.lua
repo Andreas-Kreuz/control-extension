@@ -1,6 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockModel ...") end
 
 -- Model metadata extraction: project-docs/ai/guides/lua-rollingstock-models.md
+-- Register model names without EEP instance suffixes like ";001".
+-- Wagon numbers are vehicle numbers and must not overwrite licence plates.
 ---@class RollingStockModel
 ---@field new fun(self: RollingStockModel, o?: table):RollingStockModel
 ---@field setLine fun(self: RollingStockModel, rollingStockName: string, line: string):nil

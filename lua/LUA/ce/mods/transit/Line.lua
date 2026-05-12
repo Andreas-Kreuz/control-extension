@@ -32,8 +32,8 @@ function Line:new(o)
     return o
 end
 
-function Line:addSection(routeName, destination)
-    assert(type(self) == "table" and self.type == "Line", "Call this method with ':'")
+local function createSection(line, routeName, destination)
+    assert(type(line) == "table" and line.type == "Line", "Call this method with ':'")
     assert(type(routeName) == "string", "Need 'routeName' as string")
     assert(type(destination) == "string", "Need 'destination' as string")
     local existingSegment = lineSegmentsByRouteName[routeName]
@@ -47,10 +47,20 @@ function Line:addSection(routeName, destination)
         return existingSegment
     end
 
-    local lineSegment = LineSegment:new(routeName, self, destination)
-    self.lineSegments[routeName] = lineSegment
+    local lineSegment = LineSegment:new(routeName, line, destination)
+    line.lineSegments[routeName] = lineSegment
     lineSegmentsByRouteName[routeName] = lineSegment
     return lineSegment
+end
+
+function Line:addSection(routeName, destination)
+    return createSection(self, routeName, destination)
+end
+
+function Line:createDepotSection(routeName)
+    local depotSection = createSection(self, routeName, "")
+    depotSection.autoReleaseDepotSignal = false
+    return depotSection
 end
 
 local function lineSegmentForRouteName(train, routeName, options)
@@ -69,9 +79,16 @@ local function lineSegmentForRouteName(train, routeName, options)
         return nil
     end
 
+    if options.requireDepotSignalAutoRelease and not lineSegment.autoReleaseDepotSignal then return nil end
+
     local transitTrain = TransitTrainRegistry.forTrain(train)
-    local lineName = lineSegment.line.nr
-    local destination = lineSegment.destination
+    local display = lineSegment:displayMatches(transitTrain:getLine(), transitTrain:getDestination())
+        and {
+            line = transitTrain:getLine(),
+            destination = transitTrain:getDestination()
+        } or lineSegment:chooseDisplay()
+    local lineName = display.line
+    local destination = display.destination
 
     if transitTrain:getLine() ~= lineName or transitTrain:getDestination() ~= destination then
         transitTrain:changeDestination(destination, lineName)
@@ -86,6 +103,21 @@ end
 function Line.applyCachedRouteForTrain(train, options)
     assert(type(train) == "table" and train.type == "Train", "Need 'train' as Train")
     return lineSegmentForRouteName(train, train:getRoute(), options)
+end
+
+function Line.setTrainSection(trainName, section)
+    assert(type(trainName) == "string", "Need 'trainName' as string")
+    assert(type(section) == "table" and section.type == "LineSegment", "Need 'section' as LineSegment")
+
+    local train = TrainRegistry.forName(trainName)
+    local transitTrain = TransitTrainRegistry.forTrain(train)
+    local display = section:chooseDisplay()
+
+    train:setRoute(section.routeName)
+    transitTrain:changeDestination(display.destination, display.line)
+    local origin = section:getFirstStation()
+    if origin then transitTrain:setOrigin(origin.name) end
+    transitTrain:setNextStations({})
 end
 
 local function lineSegmentForTrainRoute(train)
