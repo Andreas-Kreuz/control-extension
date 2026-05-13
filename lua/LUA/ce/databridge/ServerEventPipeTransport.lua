@@ -10,6 +10,11 @@ ServerEventPipeTransport.debug = CeStartWithDebug or false
 local descriptor
 local lastErrorMessage
 
+local function serverStartHint()
+    return "HINWEIS: Starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis, " ..
+        "wenn du den Web Server der Control Extension fuer EEP verwenden willst."
+end
+
 local function logFailure(message)
     if lastErrorMessage == message then return end
     lastErrorMessage = message
@@ -25,13 +30,26 @@ local function refreshDescriptor()
     return descriptor
 end
 
+local function pipeIsAvailable(nextDescriptor)
+    local opened, fileOrError = pcall(io.open, nextDescriptor.pipeName, "w")
+    if not opened or not fileOrError then
+        descriptor = nil
+        logFailure(serverStartHint())
+        return false
+    end
+
+    safeClose(fileOrError)
+    return true
+end
+
 function ServerEventPipeTransport.isReady()
     if not ServerExchangeFileIo.isServerRunning() then
         descriptor = nil
         return false
     end
 
-    return refreshDescriptor() ~= nil
+    local nextDescriptor = refreshDescriptor()
+    return nextDescriptor ~= nil and pipeIsAvailable(nextDescriptor)
 end
 
 function ServerEventPipeTransport.getSessionId()
@@ -45,7 +63,8 @@ function ServerEventPipeTransport.writeOutgoingEvents(jsonData)
 
     local opened, fileOrError = pcall(io.open, descriptor.pipeName, "w")
     if not opened or not fileOrError then
-        logFailure("Cannot open pipe: " .. tostring(fileOrError))
+        descriptor = nil
+        logFailure(serverStartHint())
         return false
     end
 
@@ -57,13 +76,15 @@ function ServerEventPipeTransport.writeOutgoingEvents(jsonData)
 
     if not okWrite then
         safeClose(file)
-        logFailure("Cannot write pipe: " .. tostring(writeError))
+        descriptor = nil
+        logFailure("Die Verbindung zum Web Server wurde unterbrochen: " .. tostring(writeError))
         return false
     end
 
     local okClose, closeError = pcall(function () file:close() end)
     if not okClose then
-        logFailure("Cannot close pipe: " .. tostring(closeError))
+        descriptor = nil
+        logFailure("Die Verbindung zum Web Server wurde unterbrochen: " .. tostring(closeError))
         return false
     end
 

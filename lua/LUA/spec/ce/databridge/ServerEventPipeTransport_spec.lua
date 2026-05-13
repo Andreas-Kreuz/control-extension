@@ -54,15 +54,58 @@ insulate("ce.databridge.ServerEventPipeTransport", function ()
         assert.is_true(closed)
     end)
 
-    it("returns false without throwing when pipe open or write fails", function ()
+    it("is not ready when the descriptor pipe cannot be opened", function ()
+        local printedMessages = {}
         local ServerExchangeFileIo = require("ce.databridge.ServerExchangeFileIo")
         local ServerTransportDescriptorReader = require("ce.databridge.ServerTransportDescriptorReader")
         local serverRunningStub = stub(ServerExchangeFileIo, "isServerRunning", function () return true end)
         local descriptorStub = stub(ServerTransportDescriptorReader, "read", function ()
             return { eventTransport = "pipe", pipeName = "\\\\.\\pipe\\spec", sessionId = "session" }
         end)
-        local printStub = stub(_G, "print", function () end)
+        local printStub = stub(_G, "print", function (message) table.insert(printedMessages, message) end)
         local ioOpenStub = stub(io, "open", function () return nil, "missing pipe" end)
+        finally(function () serverRunningStub:revert() end)
+        finally(function () descriptorStub:revert() end)
+        finally(function () printStub:revert() end)
+        finally(function () ioOpenStub:revert() end)
+
+        local ServerEventPipeTransport = require("ce.databridge.ServerEventPipeTransport")
+
+        assert.is_false(ServerEventPipeTransport.isReady())
+        assert.has_no.errors(function ()
+            assert.is_false(ServerEventPipeTransport.writeOutgoingEvents("{\"kind\":\"event\"}"))
+        end)
+        assert.equals(
+            "[#ServerEventPipeTransport] HINWEIS: Starte LUA/ce/control-extension-server.exe im " ..
+            "EEP-Verzeichnis, wenn du den Web Server der Control Extension fuer EEP verwenden willst.",
+            printedMessages[1]
+        )
+    end)
+
+    it("returns false without throwing when pipe write fails", function ()
+        local printedMessages = {}
+        local openCalls = 0
+        local ServerExchangeFileIo = require("ce.databridge.ServerExchangeFileIo")
+        local ServerTransportDescriptorReader = require("ce.databridge.ServerTransportDescriptorReader")
+        local serverRunningStub = stub(ServerExchangeFileIo, "isServerRunning", function () return true end)
+        local descriptorStub = stub(ServerTransportDescriptorReader, "read", function ()
+            return { eventTransport = "pipe", pipeName = "\\\\.\\pipe\\spec", sessionId = "session" }
+        end)
+        local printStub = stub(_G, "print", function (message) table.insert(printedMessages, message) end)
+        local ioOpenStub = stub(io, "open", function ()
+            openCalls = openCalls + 1
+            if openCalls == 1 then
+                return {
+                    close = function () end
+                }
+            end
+
+            return {
+                write = function () error("broken pipe") end,
+                flush = function () end,
+                close = function () end
+            }
+        end)
         finally(function () serverRunningStub:revert() end)
         finally(function () descriptorStub:revert() end)
         finally(function () printStub:revert() end)
@@ -74,18 +117,6 @@ insulate("ce.databridge.ServerEventPipeTransport", function ()
         assert.has_no.errors(function ()
             assert.is_false(ServerEventPipeTransport.writeOutgoingEvents("{\"kind\":\"event\"}"))
         end)
-
-        ioOpenStub:revert()
-        ioOpenStub = stub(io, "open", function ()
-            return {
-                write = function () error("broken pipe") end,
-                flush = function () end,
-                close = function () end
-            }
-        end)
-
-        assert.has_no.errors(function ()
-            assert.is_false(ServerEventPipeTransport.writeOutgoingEvents("{\"kind\":\"event\"}"))
-        end)
+        assert.matches("Die Verbindung zum Web Server wurde unterbrochen", printedMessages[1], 1, true)
     end)
 end)
