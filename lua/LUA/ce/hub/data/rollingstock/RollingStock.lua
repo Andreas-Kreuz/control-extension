@@ -173,6 +173,10 @@ end
 ---@field setLine fun(self: RollingStock, line: string):nil
 ---@field setDestination fun(self: RollingStock, destination: string):nil
 ---@field setStations fun(self: RollingStock, stations: string):nil
+---@field setLicencePlate fun(self: RollingStock, licencePlate: string):nil
+---@field getLicencePlate fun(self: RollingStock):string
+---@field setWagonNumber fun(self: RollingStock, wagonNumber: string):nil
+---@field getWagonNumber fun(self: RollingStock):string
 ---@field setWagonNr fun(self: RollingStock, nr: string):nil
 ---@field getWagonNr fun(self: RollingStock):string
 ---@field setTrainName fun(self: RollingStock, trainName: string):nil
@@ -371,16 +375,42 @@ end
 
 function RollingStock:setStations(stations) self.model:setStations(self.rollingStockName, stations) end
 
-function RollingStock:setWagonNr(nr)
-    local oldNr = self:getValue(TagKeys.RollingStock.wagonNumber)
-    self:setValue(TagKeys.RollingStock.wagonNumber, nr)
-    self.model:setWagonNr(self.rollingStockName, nr)
-    if oldNr ~= nr then
+function RollingStock:setLicencePlate(licencePlate)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
+    local oldLicencePlate = self:getLicencePlate()
+    self:setValue(TagKeys.RollingStock.licencePlate, licencePlate)
+    self.model:setLicencePlate(self.rollingStockName, licencePlate)
+    if oldLicencePlate ~= licencePlate then
+        markDirty(self, "licencePlate")
+    end
+end
+
+function RollingStock:getLicencePlate() return self:getValue(TagKeys.RollingStock.licencePlate) end
+
+function RollingStock:setWagonNumber(wagonNumber)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
+    local oldWagonNumber = self:getWagonNumber()
+    self:setValue(TagKeys.RollingStock.wagonNumber, wagonNumber)
+    if rawget(self.model, "setWagonNumber") then
+        self.model:setWagonNumber(self.rollingStockName, wagonNumber)
+    elseif rawget(self.model, "setWagonNr") then
+        self.model:setWagonNr(self.rollingStockName, wagonNumber)
+    else
+        self.model:setWagonNumber(self.rollingStockName, wagonNumber)
+    end
+    if oldWagonNumber ~= wagonNumber then
+        markDirty(self, "vehicleNumber")
         markDirty(self, "nr")
     end
 end
 
-function RollingStock:getWagonNr() return self:getValue(TagKeys.RollingStock.wagonNumber) end
+function RollingStock:getWagonNumber() return self:getValue(TagKeys.RollingStock.wagonNumber) end
+
+function RollingStock:setWagonNr(nr) self:setWagonNumber(nr) end
+
+function RollingStock:getWagonNr() return self:getWagonNumber() end
 
 --- Updates the trains trainName
 ---@param trainName string train trainName
@@ -472,11 +502,16 @@ function RollingStock:setTag(tag)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(tag) == "string", "Need 'tag' as string")
     local oldTag = self.tag
-    local oldNr = self:getWagonNr()
+    local oldLicencePlate = self:getLicencePlate()
+    local oldWagonNumber = self:getWagonNumber()
     self.tag = tag
     self.values = StorageUtility.parseTableFromString(tag)
     if oldTag ~= tag then markDirty(self, "tag") end
-    if oldNr ~= self:getWagonNr() then markDirty(self, "nr") end
+    if oldLicencePlate ~= self:getLicencePlate() then markDirty(self, "licencePlate") end
+    if oldWagonNumber ~= self:getWagonNumber() then
+        markDirty(self, "vehicleNumber")
+        markDirty(self, "nr")
+    end
 end
 
 --- Get the propelled value of this rolling stock
@@ -901,6 +936,8 @@ function RollingStock:toJsonStatic()
         axisNames = self:getAxisNames(),
         axisValues = self:getAxisValues(),
         textureNames = self:getTextureNames(),
+        licencePlate = self:getLicencePlate(),
+        vehicleNumber = self:getWagonNumber(),
         nr = self:getWagonNr(),
         trackId = self:getTrackId(),
         trackDistance = self:getTrackDistance(),

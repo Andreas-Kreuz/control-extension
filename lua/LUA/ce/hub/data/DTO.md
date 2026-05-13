@@ -131,9 +131,9 @@ Elementtyp: Szenarioinfo
 
 Elementtyp: EEP-Route
 
-| Name   | Typ       | Wertebereich              | Beschreibung                                    |
-| ------ | --------- | ------------------------- | ----------------------------------------------- |
-| `id`   | `integer` | Routen-ID aus der Anlage  | technischer Schlüssel der gespeicherten Route   |
+| Name   | Typ       | Wertebereich              | Beschreibung                                   |
+| ------ | --------- | ------------------------- | ---------------------------------------------- |
+| `id`   | `integer` | Routen-ID aus der Anlage  | technischer Schlüssel der gespeicherten Route  |
 | `name` | `string`  | Routenname aus der Anlage | Anzeigename aus den `.anl3`-Options-Attributen |
 
 Abgeleitet aus:
@@ -377,7 +377,9 @@ Elementtyp: RollingStock-Daten
 | `modelType`          | `integer`              | `1` bis `15`                              | Modelltyp aus `EEPRollingstockGetModelType`                                                           |
 | `modelTypeText`      | `string`               | feste Textmenge                           | lesbarer Modelltyptext aus lokalem Mapping                                                            |
 | `tag`                | `string`               | freier Text bis 1024 Zeichen              | Tag-Text aus `EEPRollingstockGetTagText`                                                              |
-| `nr`                 | `string` \| `nil`      | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
+| `licencePlate`       | `string` \| `nil`      | freier Text                               | Kennzeichen aus dem bibliotheksinternen Tag-Modell; Tag-Schlüssel `p`                                 |
+| `vehicleNumber`      | `string` \| `nil`      | freier Text                               | Fahrzeugnummer aus dem bibliotheksinternen Tag-Modell; Tag-Schlüssel `w`                              |
+| `nr`                 | `string` \| `nil`      | freier Text                               | Kompatibilitätsalias für `vehicleNumber`                                                              |
 | `trackType`          | `string` \| `nil`      | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
 | `hookStatus`         | `number`               | Statuscode                                | Hakenzustand aus `EEPRollingstockGetHook()`                                                           |
 | `hookGlueMode`       | `number`               | Statuscode                                | Haken-/Ladezustand aus `EEPRollingstockGetHookGlue()`                                                 |
@@ -409,6 +411,9 @@ Abgeleitet aus:
 Hinweis:
 
 - Das aktive DTO bündelt heute statische, dynamische, Text- und Rotationsfelder in `ce.hub.RollingStock`.
+- Kennzeichen und Fahrzeugnummern bleiben RollingStock-Felder. Zugweite Anzeigen im Web werden daraus als
+  eindeutige Wertelisten abgeleitet, damit Busse, Anhänger und gekuppelte Straßenbahnen unterschiedliche
+  Nummerierungslogiken nutzen können.
 - Die Werte werden vor Vergleich und Export an mehreren Stellen gerundet, um Event-Rauschen zu reduzieren.
 
 ### `ce.hub.*Track`

@@ -23,6 +23,9 @@ function testRollingStockSelectorPreservesXmlModel(): void {
           id: 'RS1',
           name: 'Wagon 1',
           xmlModel: 'rollingstock/model.xml',
+          licencePlate: 'DD CE 42',
+          vehicleNumber: '1001',
+          nr: '1001',
           axisNamesKnown: true,
           axisNames: { '2': 'Fahrer' },
           axisValues: { '2': 75 },
@@ -65,6 +68,9 @@ function testRollingStockSelectorPreservesXmlModel(): void {
     rotX: 0,
     rotY: 0,
     rotZ: 0,
+    licencePlate: 'DD CE 42',
+    vehicleNumber: '1001',
+    nr: '1001',
     xmlModel: 'rollingstock/model.xml',
   });
 }
@@ -185,6 +191,27 @@ function testRollingStockSelectorMapsMergedLuaPatchAxisValues(): void {
   assert.deepEqual(rollingStock?.axisValues, { '2': 80 });
 }
 
+function testRollingStockSelectorMapsIdentifierFields(): void {
+  const selector = new RollingStockSelector();
+  selector.updateFromState({
+    ceTypes: {
+      [CeTypes.HubRollingStock]: {
+        RS1: {
+          id: 'RS1',
+          licencePlate: 'DD CE 42',
+          vehicleNumber: '1001',
+          nr: '1001',
+        },
+      },
+    },
+  } as never);
+
+  const rollingStock = selector.getRollingStock('RS1');
+  assert.equal(rollingStock?.licencePlate, 'DD CE 42');
+  assert.equal(rollingStock?.vehicleNumber, '1001');
+  assert.equal(rollingStock?.nr, '1001');
+}
+
 function testTrainSelectorMapsTransitNextStations(): void {
   const selector = new TrainSelector(new RollingStockSelector());
   selector.updateFromState({
@@ -221,6 +248,7 @@ export async function run(): Promise<void> {
     'rolling stock selector maps merged Lua patch axis values',
     testRollingStockSelectorMapsMergedLuaPatchAxisValues,
   );
+  await runTest('rolling stock selector maps identifier fields', testRollingStockSelectorMapsIdentifierFields);
   await runTest('train selector preserves string trainyardId', testTrainSelectorPreservesStringTrainyardId);
   await runTest('train selector maps lights', testTrainSelectorMapsLights);
   await runTest('train selector maps transit next stations', testTrainSelectorMapsTransitNextStations);

@@ -79,14 +79,18 @@ insulate("MAN Citybus CR1 display updates", function ()
 
         citybus:setLine("Bus1", "12")
         citybus:setDestination("Bus1", "Bahnhof")
-        citybus:setWagonNr("Bus1", "MA-CR 1")
+        citybus:setLicencePlate("Bus1", "DD CE 42")
+        citybus:setWagonNumber("Bus1", "1001")
+        citybus:setWagonNr("Bus1", "1002")
         citybus:openDoors("Bus1")
         citybus:closeDoors("Bus1")
 
         assert.same({
                         { rollingStockName = "Bus1", surfaceNumber = 4, text = "12" },
                         { rollingStockName = "Bus1", surfaceNumber = 5, text = "Bahnhof" },
-                        { rollingStockName = "Bus1", surfaceNumber = 2, text = "MA-CR 1" },
+                        { rollingStockName = "Bus1", surfaceNumber = 1, text = "DD CE 42" },
+                        { rollingStockName = "Bus1", surfaceNumber = 2, text = "1001" },
+                        { rollingStockName = "Bus1", surfaceNumber = 2, text = "1002" },
                     }, textureCalls)
         assert.same({
                         { rollingStockName = "Bus1", axisName = "Tuer1", axisPosition = 100 },
@@ -164,7 +168,8 @@ insulate("GT6 8 7ND display updates", function ()
         wagon:setDestination("Wagen1", "Central")
         wagon:setOrigin("Wagen1", "Depot")
         wagon:setNextStop("Wagen1", "Market")
-        wagon:setWagonNr("Wagen1", "201")
+        wagon:setWagonNumber("Wagen1", "201")
+        wagon:setWagonNr("Wagen1", "202")
 
         assert.same({
                         { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  7  " },
@@ -177,6 +182,8 @@ insulate("GT6 8 7ND display updates", function ()
                         { rollingStockName = "Wagen1", surfaceNumber = 17, text = "Market" },
                         { rollingStockName = "Wagen1", surfaceNumber = 23, text = "201" },
                         { rollingStockName = "Wagen1", surfaceNumber = 24, text = "201" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 23, text = "202" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 24, text = "202" },
                     }, textureCalls)
         assert.same({
                         { rollingStockName = "Wagen1", axisName = "Linie Fahrziel", axisPosition = 100 },

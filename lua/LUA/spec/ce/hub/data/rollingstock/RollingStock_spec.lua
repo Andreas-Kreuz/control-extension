@@ -408,3 +408,105 @@ insulate("refresh model by XML model", function ()
         assert.equals("MODEL XML", stock.model["myMarker"])
     end)
 end)
+
+insulate("licence plate and vehicle number tags", function ()
+    local EepSimulator = require("ce.hub.eep.EepSimulator")
+
+    before_each(function ()
+        EepSimulator.simulateAddTrain("#TagTrain", "TagStock")
+    end)
+
+    it("persists values, updates model hooks, and exposes DTO fields", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        local calls = {}
+        local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        stock.model = {
+            setLicencePlate = function (_, rollingStockName, licencePlate)
+                table.insert(calls, {
+                    type = "licencePlate",
+                    rollingStockName = rollingStockName,
+                    value = licencePlate
+                })
+            end,
+            setWagonNumber = function (_, rollingStockName, wagonNumber)
+                table.insert(calls, {
+                    type = "vehicleNumber",
+                    rollingStockName = rollingStockName,
+                    value = wagonNumber
+                })
+            end
+        }
+
+        stock:setLicencePlate("DD CE 42")
+        stock:setWagonNumber("1001")
+
+        assert.equals("DD CE 42", stock:getLicencePlate())
+        assert.equals("1001", stock:getWagonNumber())
+        assert.equals("1001", stock:getWagonNr())
+        assert.is_true(stock.dirtyFields.licencePlate)
+        assert.is_true(stock.dirtyFields.vehicleNumber)
+        assert.is_true(stock.dirtyFields.nr)
+        assert.same({
+                        { type = "licencePlate", rollingStockName = "TagStock", value = "DD CE 42" },
+                        { type = "vehicleNumber", rollingStockName = "TagStock", value = "1001" },
+                    }, calls)
+
+        local _, _, _, dto = RollingStockDtoFactory.createFullDto(stock, true)
+        assert.equals("DD CE 42", dto.licencePlate)
+        assert.equals("1001", dto.vehicleNumber)
+        assert.equals("1001", dto.nr)
+    end)
+
+    it("marks semantic fields when tag text changes externally", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        stock:setLicencePlate("DD CE 42")
+        stock:setWagonNumber("1001")
+        stock:resetDirty()
+
+        stock:setTag("p=DD CE 43,w=1002,")
+
+        assert.equals("DD CE 43", stock:getLicencePlate())
+        assert.equals("1002", stock:getWagonNumber())
+        assert.is_true(stock.dirtyFields.licencePlate)
+        assert.is_true(stock.dirtyFields.vehicleNumber)
+        assert.is_true(stock.dirtyFields.nr)
+    end)
+
+    it("uses legacy model wagon number hooks when needed", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local calls = {}
+        local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        stock.model = {
+            setWagonNr = function (_, rollingStockName, wagonNumber)
+                table.insert(calls, { rollingStockName = rollingStockName, value = wagonNumber })
+            end
+        }
+
+        stock:setWagonNumber("1001")
+
+        assert.same({ { rollingStockName = "TagStock", value = "1001" } }, calls)
+    end)
+    it("creates semantic patch DTOs and the legacy nr alias", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        stock.model = {
+            setLicencePlate = function () end,
+            setWagonNumber = function () end
+        }
+        stock:setLicencePlate("DD CE 42")
+        stock:setWagonNumber("1001")
+
+        local _, _, _, dto = RollingStockDtoFactory.createPatchDto(stock, {
+            licencePlate = true,
+            vehicleNumber = true,
+            nr = true
+        }, true)
+
+        assert.equals("DD CE 42", dto.licencePlate)
+        assert.equals("1001", dto.vehicleNumber)
+        assert.equals("1001", dto.nr)
+    end)
+end)

@@ -43,6 +43,8 @@ export class RollingStockSelector {
         tag: rsDto.tag ?? '',
         hookStatus: rsDto.hookStatus ?? 0,
         hookGlueMode: rsDto.hookGlueMode ?? 0,
+        ...(rsDto.licencePlate !== undefined ? { licencePlate: rsDto.licencePlate } : {}),
+        ...(rsDto.vehicleNumber !== undefined ? { vehicleNumber: rsDto.vehicleNumber } : {}),
         ...(rsDto.nr !== undefined ? { nr: rsDto.nr } : {}),
         ...(rsDto.trackType !== undefined ? { trackType: rsDto.trackType } : {}),
         trackSystem: rsDto.trackSystem ?? 0,

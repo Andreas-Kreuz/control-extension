@@ -12,6 +12,8 @@ export interface RollingStockLuaDto {
   modelType?: number;
   modelTypeText?: string;
   tag?: string;
+  licencePlate?: string;
+  vehicleNumber?: string;
   nr?: string;
   trackType?: string;
   hookStatus?: number;

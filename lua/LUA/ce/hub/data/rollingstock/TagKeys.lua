@@ -5,6 +5,6 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.TagKeys ...
 local TagKeys = {}
 
 TagKeys.Train = { destination = "d", direction = "a", line = "l", route = "r", trainNumber = "n" }
-TagKeys.RollingStock = { wagonNumber = "w", tag = "t", model = "m", to = "o", from = "f" }
+TagKeys.RollingStock = { wagonNumber = "w", licencePlate = "p", tag = "t", model = "m", to = "o", from = "f" }
 
 return TagKeys

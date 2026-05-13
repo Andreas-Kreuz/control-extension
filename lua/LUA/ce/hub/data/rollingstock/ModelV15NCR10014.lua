@@ -57,7 +57,14 @@ local function createCitybus(axisNames, textureTexts, doorAxisNames)
         assert(type(stations) == "string", "Need 'stations' as string")
     end
 
-    function citybus:setWagonNr(rollingStockName, wagonNumber)
+    function citybus:setLicencePlate(rollingStockName, licencePlate)
+        assert(type(self) == "table", "Call this method with ':'")
+        assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+        assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
+        EEPRollingstockSetTextureText(rollingStockName, 1, licencePlate)
+    end
+
+    function citybus:setWagonNumber(rollingStockName, wagonNumber)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")

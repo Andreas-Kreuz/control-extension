@@ -39,6 +39,8 @@ local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 ---@field getValue fun(self: Train, key: string):string
 ---@field setRoute fun(self: Train, routeName: string):nil
 ---@field updateRoute fun(self: Train, routeName: string):nil
+---@field setLicencePlate fun(self: Train, licencePlate: string):nil
+---@field setWagonNumber fun(self: Train, wagonNumber: string):nil
 ---@field getRoute fun(self: Train):string
 ---@field setRollingStockCount fun(self: Train, count: integer):nil
 ---@field getRollingStockCount fun(self: Train):number
@@ -231,6 +233,26 @@ end
 function Train:getRoute()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     return self.route
+end
+
+function Train:setLicencePlate(licencePlate)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
+    local carCount = EEPGetRollingstockItemsCount(self.name)
+    for i = 0, carCount - 1 do
+        local rollingStockName = EEPGetRollingstockItemName(self.name, i)
+        RollingStockRegistry.forName(rollingStockName):setLicencePlate(licencePlate)
+    end
+end
+
+function Train:setWagonNumber(wagonNumber)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
+    local carCount = EEPGetRollingstockItemsCount(self.name)
+    for i = 0, carCount - 1 do
+        local rollingStockName = EEPGetRollingstockItemName(self.name, i)
+        RollingStockRegistry.forName(rollingStockName):setWagonNumber(wagonNumber)
+    end
 end
 
 --- Updates the trains rolling stock count

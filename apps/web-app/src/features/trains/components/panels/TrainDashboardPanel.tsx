@@ -56,8 +56,10 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
           <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
             <IconHeaderCard title={trainSections.trainInfo.title} icon={trainSections.trainInfo.icon}>
               <TrainInfoPanel
+                licencePlates={dashboard.licencePlates}
                 train={dashboard.train}
                 {...(dashboard.transit !== undefined ? { transit: dashboard.transit } : {})}
+                vehicleNumbers={dashboard.vehicleNumbers}
                 onSpeedCommit={dashboard.onSpeedCommit}
               />
             </IconHeaderCard>

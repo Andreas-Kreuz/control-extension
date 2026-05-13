@@ -42,3 +42,19 @@ Dazu gehören auch Felder, die früher separat transportiert wurden, zum Beispie
 Die vollständige Feldliste ist in [../DTO.md](../DTO.md) beschrieben.
 
 Hinweis: Offene Fachthemen rund um Tags und Schlüssel-Ownership bleiben in [TODO.md](TODO.md) dokumentiert.
+
+## Fahrzeugnummer und Kennzeichen
+
+Fahrzeugnummern und Kennzeichen werden am einzelnen `RollingStock` gespeichert und über `ce.hub.RollingStock`
+veröffentlicht:
+
+- `vehicleNumber` nutzt weiterhin den kompakten Tag-Schlüssel `w`. Dieser Schlüssel war bereits als
+  `wagonNumber` im Bestand vorhanden; ein Wechsel würde gespeicherte Anlagenwerte unnötig entwerten.
+- `licencePlate` nutzt den neuen Tag-Schlüssel `p`. Der Schlüssel ist noch frei, kurz genug für den
+  begrenzten EEP-Tag-Text und fachlich als "plate" gut lesbar.
+- `nr`, `setWagonNr()` und `getWagonNr()` bleiben als Kompatibilitätsalias für `vehicleNumber` erhalten,
+  damit vorhandene Skripte und ältere Web-Daten weiter funktionieren.
+
+Zugweite Anzeigen im Web sind abgeleitete Zusammenfassungen aus den RollingStock-Werten. Sie werden nicht als
+eigene Felder am Zug persistiert, weil Kennzeichen und Fahrzeugnummer je nach Bus, Anhänger oder gekuppelter Tram
+pro RollingStock oder pro Fahrzeuggruppe vergeben werden können.

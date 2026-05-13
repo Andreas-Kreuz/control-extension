@@ -33,6 +33,8 @@ export interface RollingStockAppDto {
   rotX: number;
   rotY: number;
   rotZ: number;
+  licencePlate?: string;
+  vehicleNumber?: string;
   nr?: string;
   trackType?: string;
   xmlModel?: string;
