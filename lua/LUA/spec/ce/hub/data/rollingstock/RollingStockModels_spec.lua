@@ -79,7 +79,7 @@ insulate("MAN Citybus CR1 display updates", function ()
 
         citybus:setLine("Bus1", "12")
         citybus:setDestination("Bus1", "Bahnhof")
-        citybus:setLicencePlate("Bus1", "DD CE 42")
+        citybus:setLicencePlate("Bus1", "DD-VB 2500")
         citybus:setWagonNumber("Bus1", "1001")
         citybus:setWagonNr("Bus1", "1002")
         citybus:openDoors("Bus1")
@@ -88,7 +88,7 @@ insulate("MAN Citybus CR1 display updates", function ()
         assert.same({
                         { rollingStockName = "Bus1", surfaceNumber = 4, text = "12" },
                         { rollingStockName = "Bus1", surfaceNumber = 5, text = "Bahnhof" },
-                        { rollingStockName = "Bus1", surfaceNumber = 1, text = "DD CE 42" },
+                        { rollingStockName = "Bus1", surfaceNumber = 1, text = "  DD       VB 2500" },
                         { rollingStockName = "Bus1", surfaceNumber = 2, text = "1001" },
                         { rollingStockName = "Bus1", surfaceNumber = 2, text = "1002" },
                     }, textureCalls)
@@ -98,6 +98,35 @@ insulate("MAN Citybus CR1 display updates", function ()
                         { rollingStockName = "Bus1", axisName = "Tuer1", axisPosition = 0 },
                         { rollingStockName = "Bus1", axisName = "Tuer2", axisPosition = 0 },
                     }, axisCalls)
+    end)
+
+    it("formats supported licence plate inputs for the texture", function ()
+        local citybus = model["MAN Citybus 1 GL FL gelb CR1"]
+        local examples = {
+            { input = "DD-VB2500", expected = "  DD       VB 2500" },
+            { input = "DD-VB 2500", expected = "  DD       VB 2500" },
+            { input = "DD VB2500", expected = "  DD       VB 2500" },
+            { input = "DD VB 2500", expected = "  DD       VB 2500" },
+            { input = "DD 20000", expected = "  DD       20000" },
+            { input = "DD Q 1", expected = "  DD       Q 1" },
+            { input = "DD Q 12", expected = "  DD       Q 12" },
+            { input = "DD Q 123", expected = "  DD       Q 123" },
+            { input = "DD Q 1234", expected = "  DD       Q 1234" },
+        }
+
+        for _, example in ipairs(examples) do
+            citybus:setLicencePlate("Bus1", example.input)
+        end
+
+        local expectedCalls = {}
+        for _, example in ipairs(examples) do
+            table.insert(expectedCalls, {
+                rollingStockName = "Bus1",
+                surfaceNumber = 1,
+                text = example.expected
+            })
+        end
+        assert.same(expectedCalls, textureCalls)
     end)
 
     it("sets all listed doors on the FL bus", function ()

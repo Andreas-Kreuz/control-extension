@@ -19,6 +19,17 @@ local citybusTexturesRot = {
     [5] = "Fahrziel"
 }
 
+local function formatLicencePlateTextureText(licencePlate)
+    local cityCode, registration = licencePlate:gsub("%-", " "):match("^%s*(%S+)%s+(.+)%s*$")
+    if cityCode then
+        registration = registration:gsub("%s+", " ")
+        local letters, digits = registration:match("^([A-Z]+)%s*(%d+)$")
+        if letters then registration = letters .. " " .. digits end
+        return "  " .. cityCode .. "       " .. registration
+    end
+    return licencePlate
+end
+
 local function createCitybus(axisNames, textureTexts, doorAxisNames)
     local citybus = RollingStockModel:new({
         axisNames = axisNames,
@@ -61,7 +72,7 @@ local function createCitybus(axisNames, textureTexts, doorAxisNames)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
-        EEPRollingstockSetTextureText(rollingStockName, 1, licencePlate)
+        EEPRollingstockSetTextureText(rollingStockName, 1, formatLicencePlateTextureText(licencePlate))
     end
 
     function citybus:setWagonNumber(rollingStockName, wagonNumber)
