@@ -17,6 +17,9 @@
 | `signalFunctions`       | `string[]` |
 | `activeFunction`        | `string`   |
 
+Hinweis: `waitingVehiclesCount` wird standardmäßig nur bei Interesse mit echtem Wert veröffentlicht.
+Nicht ausgewählte Einträge enthalten den Platzhalter `0`.
+
 ## CeType `ce.hub.WaitingOnSignal`
 
 - Key-ID: `id`
@@ -29,3 +32,7 @@
 | `waitingPosition` | `number` |
 | `vehicleName`     | `string` |
 | `waitingCount`    | `number` |
+
+Hinweis: `waitingPosition`, `vehicleName` und `waitingCount` werden standardmäßig nur bei Interesse
+mit echten Werten veröffentlicht. Nicht ausgewählte vollständige DTOs enthalten Platzhalterwerte
+(`0` beziehungsweise `""`); Patch-DTOs lassen diese Felder ohne Interesse weg.

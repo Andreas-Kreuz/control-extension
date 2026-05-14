@@ -156,8 +156,9 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
             ---@diagnostic disable-next-line: cast-local-type
             local serverIsReadyOk, nextServerIsReady = runProtectedTimed("MainLoopRunner.runCycle-6-waitForServer",
                                                                          function ()
-                return ServerExchangeCoordinator.isServerReady()
-            end)
+                                                                             return ServerExchangeCoordinator
+                                                                             .isServerReady()
+                                                                         end)
             serverIsReady = serverIsReadyOk and nextServerIsReady == true
         end
 

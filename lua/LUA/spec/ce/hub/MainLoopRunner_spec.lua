@@ -339,17 +339,17 @@ insulate("MainLoopRunner", function ()
         })
 
         MainLoopRunner.runCycle(0, { "bad", "good" }, {
-            bad = {
-                name = "spec.BadModule",
-                init = function () end,
-                run = function () error("module failed") end
-            },
-            good = {
-                name = "spec.GoodModule",
-                init = function () end,
-                run = function () goodModuleRunCalls = goodModuleRunCalls + 1 end
-            }
-        }, { enableServer = false, enableDataStoreJson = true })
+                                    bad = {
+                                        name = "spec.BadModule",
+                                        init = function () end,
+                                        run = function () error("module failed") end
+                                    },
+                                    good = {
+                                        name = "spec.GoodModule",
+                                        init = function () end,
+                                        run = function () goodModuleRunCalls = goodModuleRunCalls + 1 end
+                                    }
+                                }, { enableServer = false, enableDataStoreJson = true })
 
         assert.equals(1, goodModuleRunCalls)
         assert.equals(1, publisherSyncCalls)

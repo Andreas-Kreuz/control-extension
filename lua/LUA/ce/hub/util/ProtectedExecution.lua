@@ -10,8 +10,8 @@ function ProtectedExecution.run(label, fn, ...)
     local args = { ... }
     local result = {
         xpcall(function ()
-            return fn(table.unpack(args))
-        end, traceback)
+                   return fn(table.unpack(args))
+               end, traceback)
     }
 
     local ok = table.remove(result, 1)

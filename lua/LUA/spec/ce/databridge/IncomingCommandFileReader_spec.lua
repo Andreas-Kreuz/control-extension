@@ -59,7 +59,7 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
                                                  function (commandText)
                                                      table.insert(commands, commandText)
-        end)
+                                                 end)
         finally(function () executeIncomingCommandsStub:revert() end)
 
         clearTable(openCalls)
@@ -92,7 +92,7 @@ insulate("ce.databridge.IncomingCommandFileReader", function ()
         local executeIncomingCommandsStub = stub(IncomingCommandExecutor, "executeIncomingCommands",
                                                  function (commandText)
                                                      table.insert(commands, commandText)
-        end)
+                                                 end)
         finally(function () executeIncomingCommandsStub:revert() end)
 
         clearTable(openCalls)

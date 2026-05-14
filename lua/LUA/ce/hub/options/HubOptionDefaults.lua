@@ -60,6 +60,7 @@ function HubOptionDefaults.create()
                     functions = "always"
                 },
                 fieldPublish = {
+                    waitingVehiclesCount = "oninterest",
                     tag = "always",
                     stopDistance = "always",
                     itemName = "always",
@@ -71,7 +72,11 @@ function HubOptionDefaults.create()
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {},
-                fieldPublish = {}
+                fieldPublish = {
+                    waitingPosition = "oninterest",
+                    vehicleName = "oninterest",
+                    waitingCount = "oninterest"
+                }
             },
             switches = {
                 ceType = HubCeTypes.Switch,

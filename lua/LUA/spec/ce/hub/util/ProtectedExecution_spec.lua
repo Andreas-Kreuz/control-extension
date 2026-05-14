@@ -9,8 +9,8 @@ insulate("ce.hub.util.ProtectedExecution", function ()
         local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
         local ok, first, second = ProtectedExecution.run("spec.success", function (value)
-            return "v" .. value, value * 2
-        end, 3)
+                                                             return "v" .. value, value * 2
+                                                         end, 3)
 
         assert.is_true(ok)
         assert.equals("v3", first)

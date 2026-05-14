@@ -28,9 +28,9 @@ function DepotSignalReleaseUpdater.runUpdate()
         elseif releasedFirstVehicleBySignal[signalId] ~= trainName then
             local train = getKnownTrain(trainName)
             if train and Line.applyCachedRouteForTrain(train, {
-                suppressUnknownRouteLog = true,
-                requireDepotSignalAutoRelease = true
-            }) then
+                    suppressUnknownRouteLog = true,
+                    requireDepotSignalAutoRelease = true
+                }) then
                 EEPSetSignal(signalId, DepotSignalRegistry.getReleasePosition(signalId))
                 releasedFirstVehicleBySignal[signalId] = trainName
             end

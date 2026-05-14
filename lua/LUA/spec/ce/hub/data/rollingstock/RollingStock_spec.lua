@@ -448,7 +448,7 @@ insulate("licence plate and vehicle number tags", function ()
         assert.is_true(stock.dirtyFields.vehicleNumber)
         assert.is_true(stock.dirtyFields.nr)
         assert.same({
-                        { type = "licencePlate", rollingStockName = "TagStock", value = "DD CE 42" },
+                        { type = "licencePlate",  rollingStockName = "TagStock", value = "DD CE 42" },
                         { type = "vehicleNumber", rollingStockName = "TagStock", value = "1001" },
                     }, calls)
 
@@ -500,10 +500,10 @@ insulate("licence plate and vehicle number tags", function ()
         stock:setWagonNumber("1001")
 
         local _, _, _, dto = RollingStockDtoFactory.createPatchDto(stock, {
-            licencePlate = true,
-            vehicleNumber = true,
-            nr = true
-        }, true)
+                                                                       licencePlate = true,
+                                                                       vehicleNumber = true,
+                                                                       nr = true
+                                                                   }, true)
 
         assert.equals("DD CE 42", dto.licencePlate)
         assert.equals("1001", dto.vehicleNumber)

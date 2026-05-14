@@ -45,6 +45,18 @@ Die Default-Optionen liegen zentral in `HubOptionDefaults.lua`.
 - `oninterest` - Das Feld wird nur aktualisiert / veröffentlicht, wenn der Dateneintrag ausgewählt ist.
 - `never` - Das Feld wird nie aktualisiert / veröffentlicht.
 
+## Relevante Defaults
+
+Signalbezogene Wartedaten werden standardmäßig nur bei Interesse mit echten Werten veröffentlicht:
+
+- `ceTypes.signals.fieldPublish.waitingVehiclesCount = "oninterest"`
+- `ceTypes.waitingOnSignals.fieldPublish.waitingPosition = "oninterest"`
+- `ceTypes.waitingOnSignals.fieldPublish.vehicleName = "oninterest"`
+- `ceTypes.waitingOnSignals.fieldPublish.waitingCount = "oninterest"`
+
+Nicht ausgewählte vollständige DTOs enthalten dafür Platzhalterwerte. Patch-DTOs für nicht ausgewählte
+`ce.hub.WaitingOnSignal`-Einträge lassen diese Felder weg, wenn nur On-Interest-Felder geändert wurden.
+
 ## Legacy
 
 Nicht mehr unterstuetzt:

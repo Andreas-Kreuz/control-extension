@@ -103,15 +103,15 @@ insulate("MAN Citybus CR1 display updates", function ()
     it("formats supported licence plate inputs for the texture", function ()
         local citybus = model["MAN Citybus 1 GL FL gelb CR1"]
         local examples = {
-            { input = "DD-VB2500", expected = "  DD       VB 2500" },
+            { input = "DD-VB2500",  expected = "  DD       VB 2500" },
             { input = "DD-VB 2500", expected = "  DD       VB 2500" },
-            { input = "DD VB2500", expected = "  DD       VB 2500" },
+            { input = "DD VB2500",  expected = "  DD       VB 2500" },
             { input = "DD VB 2500", expected = "  DD       VB 2500" },
-            { input = "DD 20000", expected = "  DD       20000" },
-            { input = "DD Q 1", expected = "  DD       Q 1" },
-            { input = "DD Q 12", expected = "  DD       Q 12" },
-            { input = "DD Q 123", expected = "  DD       Q 123" },
-            { input = "DD Q 1234", expected = "  DD       Q 1234" },
+            { input = "DD 20000",   expected = "  DD       20000" },
+            { input = "DD Q 1",     expected = "  DD       Q 1" },
+            { input = "DD Q 12",    expected = "  DD       Q 12" },
+            { input = "DD Q 123",   expected = "  DD       Q 123" },
+            { input = "DD Q 1234",  expected = "  DD       Q 1234" },
         }
 
         for _, example in ipairs(examples) do

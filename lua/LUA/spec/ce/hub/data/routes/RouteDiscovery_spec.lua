@@ -24,11 +24,11 @@ insulate("ce.hub.data.routes.RouteDiscovery", function ()
         local RouteRegistry = require("ce.hub.data.routes.RouteRegistry")
 
         local routeXml = table.concat({
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            "<sutrackp>",
-            optionsXml or "",
-            "</sutrackp>"
-        }, "")
+                                          '<?xml version="1.0" encoding="UTF-8"?>',
+                                          "<sutrackp>",
+                                          optionsXml or "",
+                                          "</sutrackp>"
+                                      }, "")
         local root = assert(Anl3ToTable.loadAnlage(writeTempXml(routeXml)))
         Anl3DiscoveryHelper.fillDiscoveries(root)
         return RouteRegistry.getAll()

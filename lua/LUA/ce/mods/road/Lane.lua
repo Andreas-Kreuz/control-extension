@@ -264,6 +264,7 @@ function Lane.laneCanDrive(lane, trafficLights)
         return true
     end
 end
+
 --------------------
 -- Klasse Fahrspur
 --------------------
@@ -384,6 +385,7 @@ function Lane:showRequestsOn(trafficLight, ...)
         table.insert(self.requestTrafficLights[route], trafficLight)
     end
 end
+
 local RouteDriveBuilder = {}
 local function ensureTrafficLightCanDrive(lane, trafficLight)
     assert(trafficLight.type == "TrafficLight")
@@ -433,15 +435,18 @@ end
 function RouteDriveBuilder:driveOnlyOn(...)
     return routeBuilderDriveOnAll(self, RouteDriveMode.ONLY, ...)
 end
+
 function RouteDriveBuilder:driveAlsoOn(...)
     return routeBuilderDriveOnAll(self, RouteDriveMode.ALSO, ...)
 end
+
 function RouteDriveBuilder:showRequestsOn(...)
     for _, trafficLight in ipairs({ ... }) do
         self.lane:showRequestsOn(trafficLight, table.unpack(self.selectedRoutes))
     end
     return self.lane
 end
+
 ---Z?hle alle Fahrzeuge am Signal
 ---Count on the lane's traffic signal
 function Lane:useSignalForQueue()

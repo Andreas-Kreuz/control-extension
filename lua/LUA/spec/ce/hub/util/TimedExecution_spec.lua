@@ -54,8 +54,8 @@ insulate("TimedExecution", function ()
         local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 
         local ok, first, second = TimedExecution.runProtectedTimed("spec.protectedTimed", function (prefix, value)
-            return prefix .. value, value * 2
-        end, "v", 4)
+                                                                       return prefix .. value, value * 2
+                                                                   end, "v", 4)
 
         local runtime = RuntimeMetrics.get("spec.protectedTimed")
         assert.is_true(ok)
