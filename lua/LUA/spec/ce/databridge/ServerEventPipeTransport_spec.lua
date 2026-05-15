@@ -92,7 +92,9 @@ insulate("ce.databridge.ServerEventPipeTransport", function ()
             return { eventTransport = "pipe", pipeName = "\\\\.\\pipe\\spec", sessionId = "session" }
         end)
         local printStub = stub(_G, "print", function (message) table.insert(printedMessages, message) end)
-        local ioOpenStub = stub(io, "open", function ()
+        local ioOpenStub = stub(io, "open", function (name, mode)
+            if name ~= "\\\\.\\pipe\\spec" then return originalIoOpen(name, mode) end
+
             openCalls = openCalls + 1
             if openCalls == 1 then
                 return {
@@ -117,6 +119,7 @@ insulate("ce.databridge.ServerEventPipeTransport", function ()
         assert.has_no.errors(function ()
             assert.is_false(ServerEventPipeTransport.writeOutgoingEvents("{\"kind\":\"event\"}"))
         end)
+        assert.equals(2, openCalls)
         assert.matches("Die Verbindung zum Web Server wurde unterbrochen", printedMessages[1], 1, true)
     end)
 end)
