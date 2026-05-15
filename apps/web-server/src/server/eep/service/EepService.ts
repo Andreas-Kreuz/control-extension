@@ -150,7 +150,11 @@ export default class EepService implements CacheService {
 
   private attachEventsFromCePipe(): void {
     const pipeIdentity = ServerPipeNameFactory.create();
-    this.pipeEventReceiver = new PipeEventReceiver(pipeIdentity.pipeName, (line) => this.eventLineAppeared(line), this.debug);
+    this.pipeEventReceiver = new PipeEventReceiver(
+      pipeIdentity.pipeName,
+      (line) => this.eventLineAppeared(line),
+      this.debug,
+    );
     this.pipeEventReceiver.start();
     this.descriptorWriter = new ServerTransportDescriptorWriter(this.requireDir());
     this.descriptorWriter.write({
