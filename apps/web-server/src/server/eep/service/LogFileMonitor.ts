@@ -17,6 +17,7 @@ export class LogFileMonitor {
   private currentLogLines = '';
   private initialScanCompleted = false;
   private logFileMissing = false;
+  private clearOnNextReappear = false;
   private suppressResetCallbackOnce = false;
 
   constructor(
@@ -62,6 +63,7 @@ export class LogFileMonitor {
     this.currentLogLines = '';
     this.initialScanCompleted = false;
     this.logFileMissing = false;
+    this.clearOnNextReappear = false;
     this.suppressResetCallbackOnce = false;
   }
 
@@ -77,6 +79,7 @@ export class LogFileMonitor {
     const logFileSize = this.readLogFileSize();
     if (logFileSize === null) {
       if (!this.logFileMissing) {
+        this.clearOnNextReappear = this.initialScanCompleted;
         this.readOffset = 0;
         this.pendingFragment = '';
         this.currentLogLines = '';
@@ -86,7 +89,14 @@ export class LogFileMonitor {
       }
       return;
     }
+    const fileReappeared = this.logFileMissing;
     this.logFileMissing = false;
+
+    if (fileReappeared && this.clearOnNextReappear) {
+      if (this.debug) console.log('[FILE] Reset log stream after reappear:', this.logFilePath);
+      this.callbacks.onCleared();
+      this.clearOnNextReappear = false;
+    }
 
     const fileShrank = logFileSize < this.readOffset;
     if (fileShrank) {

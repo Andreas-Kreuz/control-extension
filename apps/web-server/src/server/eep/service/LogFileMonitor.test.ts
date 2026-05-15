@@ -207,13 +207,42 @@ async function testShrinkRereadsFromStartAndUsesLastResetMarker(): Promise<void>
   );
 }
 
+async function testRuntimeTruncateClearsVisibleLog(): Promise<void> {
+  await withMonitor(
+    async ({ logFilePath, seenBatches, getSeenClears, monitor }) => {
+      await luaPrint(logFilePath, 'Before reload');
+      await waitFor(() => {
+        assert.equal(seenBatches.length, 1);
+        assert.equal(monitor.readCurrentLogLines(), '12:34:56 Before reload');
+      });
+
+      await luaRestart(logFilePath);
+      await waitFor(() => {
+        assert.equal(getSeenClears(), 1);
+        assert.equal(monitor.readCurrentLogLines(), '');
+      });
+
+      await luaPrint(logFilePath, 'After reload');
+      await waitFor(() => {
+        assert.equal(seenBatches.length, 2);
+        assert.equal(seenBatches[1], '12:34:56 After reload');
+        assert.equal(monitor.readCurrentLogLines(), '12:34:56 After reload');
+      });
+    },
+    async ({ logFilePath }) => {
+      await luaRestart(logFilePath);
+    },
+  );
+}
+
 async function testRecreatedFileRebuildsVisibleState(): Promise<void> {
   await withMonitor(
-    async ({ logFilePath, seenBatches, monitor }) => {
+    async ({ logFilePath, seenBatches, getSeenClears, monitor }) => {
       await luaPrint(logFilePath, 'First');
       await waitFor(() => {
         assert.equal(seenBatches.length, 1);
         assert.equal(seenBatches[0], '12:34:56 First');
+        assert.equal(monitor.readCurrentLogLines(), '12:34:56 First');
       });
 
       const missingLogPath = logFilePath + '.missing';
@@ -222,12 +251,13 @@ async function testRecreatedFileRebuildsVisibleState(): Promise<void> {
 
       assert.equal(seenBatches.length, 1);
 
-      await luaRestart(logFilePath, '12:34:56 First\n12:34:56 Second\n');
+      await luaRestart(logFilePath, '12:34:56 Second\n');
       await unlink(missingLogPath);
       await waitFor(() => {
+        assert.equal(getSeenClears(), 1);
         assert.equal(seenBatches.length, 2);
-        assert.equal(seenBatches[1], '12:34:56 First\n12:34:56 Second');
-        assert.equal(monitor.readCurrentLogLines(), '12:34:56 First\n12:34:56 Second');
+        assert.equal(seenBatches[1], '12:34:56 Second');
+        assert.equal(monitor.readCurrentLogLines(), '12:34:56 Second');
       });
     },
     async ({ logFilePath }) => {
@@ -251,7 +281,11 @@ export async function run(): Promise<void> {
     testShrinkRereadsFromStartAndUsesLastResetMarker,
   );
   await runTest(
-    'LogFileMonitor rebuilds the visible state when the log file disappears and later reappears',
+    'LogFileMonitor clears the visible log when the log file is truncated',
+    testRuntimeTruncateClearsVisibleLog,
+  );
+  await runTest(
+    'LogFileMonitor clears and rebuilds visible state when the log file disappears and later reappears',
     testRecreatedFileRebuildsVisibleState,
   );
 }

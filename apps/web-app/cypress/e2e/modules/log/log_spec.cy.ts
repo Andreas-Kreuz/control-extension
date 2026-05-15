@@ -16,6 +16,8 @@ const getLogList = () => {
   return cy.get('ul');
 };
 
+const getCompanionLogList = () => cy.contains('section', 'EEP Log').find('ul');
+
 before(() => {
   simulator.reset();
 });
@@ -99,6 +101,20 @@ describe('Logger', () => {
 
       simulator.writeLogLine('After reset');
       getLogList().children().should('have.length', 1).first().contains('After reset');
+    });
+  });
+
+  describe('companion', () => {
+    it('clears the visible log when Lua reload truncates the log file', () => {
+      simulator.writeLogLine('Before reload');
+      cy.visit('/companion');
+      getCompanionLogList().children().should('have.length', 1).first().contains('Before reload');
+
+      simulator.restartLogFile();
+      getCompanionLogList().children().should('have.length', 0);
+
+      simulator.writeLogLine('After reload');
+      getCompanionLogList().children().should('have.length', 1).first().contains('After reload');
     });
   });
 });
