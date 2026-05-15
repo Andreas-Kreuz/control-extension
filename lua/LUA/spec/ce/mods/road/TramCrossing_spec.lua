@@ -146,4 +146,52 @@ insulate("ce.mods.road.TramCrossing", function ()
 
         assert.equals(2, EEPGetSignal(111))
     end)
+
+    it("sets secured indicator only when signals switched to occupied", function ()
+        local crossing = TramCrossing:new("Crossing K", 112, 1, 2, 3)
+        local returned = crossing:addSecuredIndicator("#SecuredIndicatorK", 2, 10, 20)
+
+        assert.equals(crossing, returned)
+        assert.equals(10, select(2, EEPStructureGetAxisByNumber("#SecuredIndicatorK", 2)))
+
+        crossing:trainEntered("#Tram1")
+
+        assert.equals(3, EEPGetSignal(112))
+        assert.equals(10, select(2, EEPStructureGetAxisByNumber("#SecuredIndicatorK", 2)))
+
+        _G.EEPTime = _G.EEPTime + 2
+        Scheduler:runTasks()
+
+        assert.equals(1, EEPGetSignal(112))
+        assert.equals(20, select(2, EEPStructureGetAxisByNumber("#SecuredIndicatorK", 2)))
+
+        crossing:trainExited("#Tram1")
+
+        assert.equals(2, EEPGetSignal(112))
+        assert.equals(10, select(2, EEPStructureGetAxisByNumber("#SecuredIndicatorK", 2)))
+    end)
+
+    it("sets added secured indicator to secured for an occupied crossing", function ()
+        EEPSignalSetTagText(113, "c=1,")
+        local crossing = TramCrossing:new("Crossing L", 113, 1, 2, 3)
+
+        crossing:addSecuredIndicator("#SecuredIndicatorL", 1, 30, 40)
+
+        assert.equals(1, EEPGetSignal(113))
+        assert.equals(40, select(2, EEPStructureGetAxisByNumber("#SecuredIndicatorL", 1)))
+    end)
+
+    it("supports secured indicators with named structure axes", function ()
+        local crossing = TramCrossing:new("Crossing M", 114, 1, 2, 3)
+
+        crossing:addSecuredIndicator("#SecuredIndicatorM", "Blinklicht", 0, 100)
+        crossing:trainEntered("#Tram1")
+
+        assert.equals(0, select(2, EEPStructureGetAxis("#SecuredIndicatorM", "Blinklicht")))
+
+        _G.EEPTime = _G.EEPTime + 2
+        Scheduler:runTasks()
+
+        assert.equals(100, select(2, EEPStructureGetAxis("#SecuredIndicatorM", "Blinklicht")))
+    end)
 end)

@@ -849,6 +849,18 @@ local function create(simulator, globals)
         return true, structure and structure.axisPositions and structure.axisPositions[achse] or 0
     end
 
+    function Runtime.callEEPStructureSetAxisByNumber(luaName, axisNumber, axisPosition)
+        local structure = getOrCreateStructureState(luaName)
+        structure.axisPositionsByNumber = structure.axisPositionsByNumber or {}
+        structure.axisPositionsByNumber[axisNumber] = axisPosition
+        return true
+    end
+
+    function Runtime.callEEPStructureGetAxisByNumber(luaName, axisNumber)
+        local structure = state.structures[stripImmoName(luaName)]
+        return true, structure and structure.axisPositionsByNumber and structure.axisPositionsByNumber[axisNumber] or 0
+    end
+
     function Runtime.callEEPStructureSetPosition(luaName, posX, posY, posZ) end
 
     function Runtime.callEEPStructureSetRotation(luaName, rotX, rotY, rotZ) end

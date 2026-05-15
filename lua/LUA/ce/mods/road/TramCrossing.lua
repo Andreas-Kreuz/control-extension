@@ -17,7 +17,9 @@ local Task = require("ce.hub.scheduler.Task")
 ---@field name string Crossing name for diagnostics and scheduled task names
 ---@field primarySignal number EEP signal ID whose tag stores the train count
 ---@field signals TramCrossingSignal[] Signals switched by this crossing
+---@field securedIndicators TramCrossingSecuredIndicator[] Structure axes showing secured crossing state
 ---@field count number Number of trams currently counted inside the crossing
+---@field secured boolean Whether the crossing signals currently secure the crossing with red
 ---@field yellowPhaseSeconds number Duration of the yellow phase before switching to occupied
 local TramCrossing = {}
 TramCrossing.__index = TramCrossing
@@ -64,6 +66,41 @@ local function createSignal(signal, signalPositionIfOccupied, signalPositionIfCl
     }
 end
 
+---@class TramCrossingSecuredIndicator
+---@field structureId string EEP structure ID or Lua name
+---@field axis number|string EEP structure axis number or name
+---@field axisValueUnsecured number Axis value when the crossing is not secured by red signals
+---@field axisValueSecured number Axis value when the crossing is secured by red signals
+
+---@param structureId string EEP structure ID or Lua name
+---@param axis number|string EEP structure axis number or name
+---@param axisValueUnsecured number Axis value when the crossing is not secured
+---@param axisValueSecured number Axis value when the crossing is secured
+---@return TramCrossingSecuredIndicator
+local function createSecuredIndicator(structureId, axis, axisValueUnsecured, axisValueSecured)
+    assert(type(structureId) == "string", "Need 'structureId' as string")
+    assert(type(axis) == "number" or type(axis) == "string", "Need 'axis' as number or string")
+    assert(type(axisValueUnsecured) == "number", "Need 'axisValueUnsecured' as number")
+    assert(type(axisValueSecured) == "number", "Need 'axisValueSecured' as number")
+
+    local ok
+    if type(axis) == "number" then
+        assert(type(EEPStructureGetAxisByNumber) == "function", "EEPStructureGetAxisByNumber is not available")
+        ok = EEPStructureGetAxisByNumber(structureId, axis)
+    else
+        assert(type(EEPStructureGetAxis) == "function", "EEPStructureGetAxis is not available")
+        ok = EEPStructureGetAxis(structureId, axis)
+    end
+    assert(ok, "Secured indicator structure axis not found: " .. structureId .. " axis " .. axis)
+
+    return {
+        structureId = structureId,
+        axis = axis,
+        axisValueUnsecured = axisValueUnsecured,
+        axisValueSecured = axisValueSecured
+    }
+end
+
 ---Creates a tram crossing and loads the current train count from the primary signal tag.
 ---The constructor signal stores the count; additional signals only follow switching.
 ---Use this once per physical tram crossing so each instance has independent state and signal control.
@@ -81,7 +118,9 @@ function TramCrossing:new(crossingName, signal, signalPositionIfOccupied, signal
         name = crossingName,
         primarySignal = signal,
         signals = {},
+        securedIndicators = {},
         count = parseCount(signal),
+        secured = false,
         yellowPhaseSeconds = TramCrossing.defaultYellowPhaseSeconds
     }
     self.__index = self
@@ -104,6 +143,20 @@ function TramCrossing:addSignal(signal, signalPositionIfOccupied, signalPosition
     table.insert(self.signals, createSignal(signal, signalPositionIfOccupied, signalPositionIfClear,
                                             signalPositionYellow))
     self:switchByCount()
+    return self
+end
+
+---Adds a structure axis that indicates when the crossing is secured by red signals.
+---The secured value is set only after the crossing has switched to occupied/red.
+---@param structureId string EEP structure ID or Lua name
+---@param axis number|string EEP structure axis number or name
+---@param axisValueUnsecured number Axis value when the crossing is clear or yellow
+---@param axisValueSecured number Axis value when the crossing is occupied/red
+---@return TramCrossing self for chained calls
+function TramCrossing:addSecuredIndicator(structureId, axis, axisValueUnsecured, axisValueSecured)
+    table.insert(self.securedIndicators,
+                 createSecuredIndicator(structureId, axis, axisValueUnsecured, axisValueSecured))
+    self:switchSecuredIndicators(self.secured)
     return self
 end
 
@@ -165,19 +218,36 @@ end
 ---Switches all signals to their configured clear/green position.
 ---This is used when no tram is inside the crossing so road traffic may proceed again.
 function TramCrossing:switchToClear()
+    self:switchSecuredIndicators(false)
     for _, signal in ipairs(self.signals) do EEPSetSignal(signal.signal, signal.signalPositionIfClear, 1) end
 end
 
 ---Switches all signals to their configured yellow position.
 ---This is used as the warning phase before road traffic is stopped for an entering tram.
 function TramCrossing:switchToYellow()
+    self:switchSecuredIndicators(false)
     for _, signal in ipairs(self.signals) do EEPSetSignal(signal.signal, signal.signalPositionYellow, 1) end
 end
 
 ---Switches all signals to their configured occupied/red position.
 ---This is used while at least one tram is inside the crossing so conflicting traffic stays stopped.
 function TramCrossing:switchToOccupied()
+    self:switchSecuredIndicators(true)
     for _, signal in ipairs(self.signals) do EEPSetSignal(signal.signal, signal.signalPositionIfOccupied, 1) end
+end
+
+---Switches all configured secured indicators to the requested secured state.
+---@param isSecured boolean Whether the crossing is secured by red signals
+function TramCrossing:switchSecuredIndicators(isSecured)
+    self.secured = isSecured
+    for _, indicator in ipairs(self.securedIndicators) do
+        local axisValue = isSecured and indicator.axisValueSecured or indicator.axisValueUnsecured
+        if type(indicator.axis) == "number" then
+            EEPStructureSetAxisByNumber(indicator.structureId, indicator.axis, axisValue)
+        else
+            EEPStructureSetAxis(indicator.structureId, indicator.axis, axisValue)
+        end
+    end
 end
 
 ---Starts the yellow phase and schedules the final occupied/red switch.
