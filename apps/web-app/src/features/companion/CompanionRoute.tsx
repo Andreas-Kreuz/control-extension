@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import useLines from '../lines/hooks/useLines';
 import useTrainDashboard from '../trains/hooks/useTrainDashboard';
 import useSetRollingStockAxis from '../trains/hooks/useSetRollingStockAxis';
+import { LogProvider } from '../log/providers/LogProvider';
 import CompanionPage from './components/CompanionPage';
 
 function CompanionRoute() {
@@ -23,11 +24,13 @@ function CompanionRoute() {
   }, [dashboard, lines]);
 
   return (
-    <CompanionPage
-      dashboard={dashboard}
-      onRollingStockAxisCommit={setRollingStockAxis}
-      transitTrafficType={transitTrafficType}
-    />
+    <LogProvider>
+      <CompanionPage
+        dashboard={dashboard}
+        onRollingStockAxisCommit={setRollingStockAxis}
+        transitTrafficType={transitTrafficType}
+      />
+    </LogProvider>
   );
 }
 

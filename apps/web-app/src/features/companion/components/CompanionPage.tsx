@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import LineAvatar from '../../../shared/components/lines/LineAvatar';
 import type { LineTrafficType } from '../../../shared/components/lines/LineAvatar';
+import LogLines from '../../log/components/LogLines';
 import PreservedLineBreaks from '../../trains/components/panels/PreservedLineBreaks';
 import { sortedAxisKeysByName, sortedNumberKeys } from '../../trains/lib/trainDashboard';
 import type { MergedAxisGroup } from '../../trains/lib/trainDashboard';
@@ -551,21 +552,46 @@ function CompanionBottomPanel() {
     <Box
       component="section"
       sx={{
-        alignItems: 'center',
-        bgcolor: 'grey.200',
+        bgcolor: 'background.paper',
         borderTop: '1px solid',
         borderColor: 'divider',
         color: 'text.secondary',
         display: 'flex',
+        flexDirection: 'column',
         gridColumn: '1',
         gridRow: '2',
-        justifyContent: 'center',
         minHeight: 0,
         minWidth: 0,
-        p: 2,
+        overflow: 'hidden',
       }}
     >
-      <Typography variant="body2">Platzhalter</Typography>
+      <Box
+        sx={{
+          alignItems: 'center',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          flexShrink: 0,
+          minHeight: 36,
+          px: 1.5,
+        }}
+      >
+        <Typography variant="subtitle2" color="text.primary">
+          EEP Log
+        </Typography>
+      </Box>
+      <LogLines
+        height="100%"
+        width="100%"
+        sx={{
+          bgcolor: 'grey.50',
+          flex: 1,
+          minHeight: 0,
+          '& li': {
+            fontSize: 13,
+          },
+        }}
+      />
     </Box>
   );
 }
