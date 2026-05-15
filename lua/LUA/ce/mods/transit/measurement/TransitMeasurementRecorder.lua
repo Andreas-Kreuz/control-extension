@@ -42,14 +42,15 @@ end
 
 local function stationLabel(station, previousStation)
     if not previousStation then return station.name end
-    return string.format("%s (%s)", station.name, previousStation.name)
+    return string.format("%s (von %s)", station.name, previousStation.name)
 end
 
 local function rowToText(row)
     return string.format(
-        "| %s, %s | %s | %s |",
+        "| %s, %s | %s | %s | %s |",
         formatDuration(row.plannedSeconds),
-        formatDuration(row.actualSeconds),
+        formatDuration(row.departureActualSeconds),
+        formatDuration(row.travelSeconds),
         formatDuration(row.standSeconds),
         stationLabel(row.station, row.previousStation)
     )
@@ -59,7 +60,7 @@ local function printMeasurement(measurement)
     local lines = { string.format("Messfahrt Linie %s nach %s", measurement.line, measurement.destination) }
     table.insert(lines, string.format("Gesamtfahrzeit: %s", formatDuration(measurement.totalTravelSeconds)))
     for _, warning in ipairs(measurement.warnings) do table.insert(lines, warning) end
-    table.insert(lines, "| Fahrzeit Soll/Ist | Standzeit | Haltestelle |")
+    table.insert(lines, "| Abfahrten Soll / Ist | Fahrzeit | Standzeit | Haltestelle |")
     for _, row in ipairs(measurement.rows) do table.insert(lines, rowToText(row)) end
     print(table.concat(lines, "\n"))
 end
@@ -111,8 +112,10 @@ local function addStartRow(measurement, station)
         station = station,
         previousStation = nil,
         plannedSeconds = 0,
-        actualSeconds = 0,
-        standSeconds = nil
+        departureActualSeconds = 0,
+        travelSeconds = nil,
+        standSeconds = nil,
+        segmentStartDepartedSeconds = nil
     }
     table.insert(measurement.rows, row)
     measurement.currentRow = row
@@ -166,18 +169,31 @@ local function newMeasurementAfterEndStation(train, lineSegment, station)
     return measurement
 end
 
-local function addStationRow(measurement, lineSegment, station, eventSeconds)
+local function addStationRow(measurement, lineSegment, station, eventSeconds, eventName)
     local plannedMinutes = lineSegment:plannedMinutesBetween(measurement.routeName, measurement.currentStation, station)
     if not plannedMinutes then return false end
 
     local previousStation = measurement.currentStation
-    local startSeconds = measurement.currentDepartedSeconds or measurement.currentArrivedSeconds
+    local segmentStartDepartedSeconds = measurement.currentDepartedSeconds
+    local isEndStation = station == lineSegment:getLastStation()
+    local travelSeconds = nil
+    local departureActualSeconds = nil
+
+    if eventName == "trainArrived" and segmentStartDepartedSeconds then
+        travelSeconds = elapsedSeconds(segmentStartDepartedSeconds, eventSeconds)
+        if isEndStation then departureActualSeconds = travelSeconds end
+    elseif eventName == "trainDeparted" and segmentStartDepartedSeconds then
+        departureActualSeconds = elapsedSeconds(segmentStartDepartedSeconds, eventSeconds)
+    end
+
     local row = {
         station = station,
         previousStation = previousStation,
         plannedSeconds = plannedMinutes * 60,
-        actualSeconds = elapsedSeconds(startSeconds or eventSeconds, eventSeconds),
-        standSeconds = nil
+        departureActualSeconds = departureActualSeconds,
+        travelSeconds = travelSeconds,
+        standSeconds = nil,
+        segmentStartDepartedSeconds = segmentStartDepartedSeconds
     }
     table.insert(measurement.rows, row)
     measurement.currentStation = station
@@ -203,7 +219,7 @@ local function recordArrival(measurement, lineSegment, station)
             addWarning(measurement, warningArrivedWithoutPreviousDeparture(station, measurement.currentStation))
         end
         addSkippedStationWarning(measurement, lineSegment, station)
-        if not addStationRow(measurement, lineSegment, station, now) then return end
+        if not addStationRow(measurement, lineSegment, station, now, "trainArrived") then return end
     end
 
     measurement.currentArrivedSeconds = now
@@ -215,7 +231,7 @@ local function recordDeparture(measurement, lineSegment, station)
 
     if measurement.currentStation ~= station then
         addSkippedStationWarning(measurement, lineSegment, station)
-        if not addStationRow(measurement, lineSegment, station, now) then return end
+        if not addStationRow(measurement, lineSegment, station, now, "trainDeparted") then return end
     end
 
     if not measurement.currentArrivedSeconds and not measurement.currentDepartedSeconds then
@@ -224,6 +240,12 @@ local function recordDeparture(measurement, lineSegment, station)
 
     if measurement.currentArrivedSeconds then
         measurement.currentRow.standSeconds = elapsedSeconds(measurement.currentArrivedSeconds, now)
+    end
+    if measurement.currentRow.previousStation and measurement.currentRow.segmentStartDepartedSeconds then
+        measurement.currentRow.departureActualSeconds = elapsedSeconds(
+            measurement.currentRow.segmentStartDepartedSeconds,
+            now
+        )
     end
     if not measurement.firstDepartedSeconds then measurement.firstDepartedSeconds = now end
     measurement.currentDepartedSeconds = now

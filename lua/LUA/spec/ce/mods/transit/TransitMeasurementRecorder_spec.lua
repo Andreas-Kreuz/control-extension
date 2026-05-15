@@ -93,10 +93,10 @@ insulate("TransitMeasurementRecorder", function ()
         assert.are.equal(
             "Messfahrt Linie MeasurementNormal nach C\n" ..
             "Gesamtfahrzeit: 06:45 min\n" ..
-            "| Fahrzeit Soll/Ist | Standzeit | Haltestelle |\n" ..
-            "| 00:00 min, 00:00 min | --:-- min | MeasurementNormal A |\n" ..
-            "| 01:00 min, 03:20 min | 00:50 min | MeasurementNormal B (MeasurementNormal A) |\n" ..
-            "| 02:00 min, 02:35 min | --:-- min | MeasurementNormal C (MeasurementNormal B) |",
+            "| Abfahrten Soll / Ist | Fahrzeit | Standzeit | Haltestelle |\n" ..
+            "| 00:00 min, 00:00 min | --:-- min | --:-- min | MeasurementNormal A |\n" ..
+            "| 01:00 min, 04:10 min | 03:20 min | 00:50 min | MeasurementNormal B (von MeasurementNormal A) |\n" ..
+            "| 02:00 min, 02:35 min | 02:35 min | --:-- min | MeasurementNormal C (von MeasurementNormal B) |",
             printedLines[1]
         )
     end)
@@ -117,10 +117,12 @@ insulate("TransitMeasurementRecorder", function ()
             "Gesamtfahrzeit: 06:45 min\n" ..
             "ACHTUNG: Aufruf von trainDeparted an MeasurementMissingArrival B, ohne dass vorher " ..
             "trainArrived an MeasurementMissingArrival B aufgerufen wurde.\n" ..
-            "| Fahrzeit Soll/Ist | Standzeit | Haltestelle |\n" ..
-            "| 00:00 min, 00:00 min | --:-- min | MeasurementMissingArrival A |\n" ..
-            "| 01:00 min, 04:10 min | --:-- min | MeasurementMissingArrival B (MeasurementMissingArrival A) |\n" ..
-            "| 02:00 min, 02:35 min | --:-- min | MeasurementMissingArrival C (MeasurementMissingArrival B) |",
+            "| Abfahrten Soll / Ist | Fahrzeit | Standzeit | Haltestelle |\n" ..
+            "| 00:00 min, 00:00 min | --:-- min | --:-- min | MeasurementMissingArrival A |\n" ..
+            "| 01:00 min, 04:10 min | --:-- min | --:-- min | " ..
+            "MeasurementMissingArrival B (von MeasurementMissingArrival A) |\n" ..
+            "| 02:00 min, 02:35 min | 02:35 min | --:-- min | " ..
+            "MeasurementMissingArrival C (von MeasurementMissingArrival B) |",
             printedLines[1]
         )
     end)
@@ -141,10 +143,12 @@ insulate("TransitMeasurementRecorder", function ()
             "Gesamtfahrzeit: 06:00 min\n" ..
             "ACHTUNG: Aufruf von trainArrived an MeasurementMissingDeparture C, ohne dass die vorherige Station " ..
             "MeasurementMissingDeparture B mit trainDeparted verlassen wurde.\n" ..
-            "| Fahrzeit Soll/Ist | Standzeit | Haltestelle |\n" ..
-            "| 00:00 min, 00:00 min | --:-- min | MeasurementMissingDeparture A |\n" ..
-            "| 01:00 min, 03:00 min | --:-- min | MeasurementMissingDeparture B (MeasurementMissingDeparture A) |\n" ..
-            "| 02:00 min, 03:00 min | --:-- min | MeasurementMissingDeparture C (MeasurementMissingDeparture B) |",
+            "| Abfahrten Soll / Ist | Fahrzeit | Standzeit | Haltestelle |\n" ..
+            "| 00:00 min, 00:00 min | --:-- min | --:-- min | MeasurementMissingDeparture A |\n" ..
+            "| 01:00 min, --:-- min | 03:00 min | --:-- min | " ..
+            "MeasurementMissingDeparture B (von MeasurementMissingDeparture A) |\n" ..
+            "| 02:00 min, --:-- min | --:-- min | --:-- min | " ..
+            "MeasurementMissingDeparture C (von MeasurementMissingDeparture B) |",
             printedLines[1]
         )
     end)
@@ -164,9 +168,9 @@ insulate("TransitMeasurementRecorder", function ()
             "ACHTUNG: Zwischen MeasurementSkipped A und MeasurementSkipped C wurden Stationen " ..
             string.char(252) .. "bersprungen: " ..
             "MeasurementSkipped B.\n" ..
-            "| Fahrzeit Soll/Ist | Standzeit | Haltestelle |\n" ..
-            "| 00:00 min, 00:00 min | --:-- min | MeasurementSkipped A |\n" ..
-            "| 03:00 min, 05:40 min | --:-- min | MeasurementSkipped C (MeasurementSkipped A) |",
+            "| Abfahrten Soll / Ist | Fahrzeit | Standzeit | Haltestelle |\n" ..
+            "| 00:00 min, 00:00 min | --:-- min | --:-- min | MeasurementSkipped A |\n" ..
+            "| 03:00 min, 05:40 min | 05:40 min | --:-- min | MeasurementSkipped C (von MeasurementSkipped A) |",
             printedLines[1]
         )
     end)
@@ -187,7 +191,7 @@ insulate("TransitMeasurementRecorder", function ()
             true
         ))
         assert.is_truthy(string.find(printedLines[1], "Gesamtfahrzeit: 07:00 min", 1, true))
-        assert.is_truthy(string.find(printedLines[1], "| 06:00 min, 07:00 min |", 1, true))
+        assert.is_truthy(string.find(printedLines[1], "| 06:00 min, 07:00 min | 07:00 min |", 1, true))
     end)
 
     it("does not report the previous station itself as skipped when it appears again in the route", function ()
