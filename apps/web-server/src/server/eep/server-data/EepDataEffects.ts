@@ -23,7 +23,7 @@ export default class EepDataEffects {
     io: Server,
     private socketService: SocketService,
     private cacheService: CacheService,
-    interestSyncService?: InterestSyncService,
+    private interestSyncService?: InterestSyncService,
   ) {
     this.store.init(this.cacheService.readCache());
     console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
@@ -89,6 +89,9 @@ export default class EepDataEffects {
       // Fire this event only if it is expected or a complete reset
       if (expectedEventNr === receivedEventNr || event.type === 'CompleteReset') {
         this.store.onNewEvent(event);
+        if (event.type === 'CompleteReset') {
+          this.interestSyncService?.replayRetainedInterests();
+        }
         this.refreshSettings.pending = true;
       } else if (receivedEventNr > expectedEventNr) {
         console.error(
