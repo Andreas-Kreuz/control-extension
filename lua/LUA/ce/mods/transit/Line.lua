@@ -2,6 +2,7 @@ local LineSegment = require("ce.mods.transit.LineSegment")
 local RoadStation = require("ce.mods.transit.RoadStation")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+local TransitMeasurementRecorder = require("ce.mods.transit.measurement.TransitMeasurementRecorder")
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.Line ...") end
 
 local Line = {}
@@ -180,7 +181,23 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
 
     local train = TrainRegistry.forName(trainName)
     local lineSegment = lineSegmentForTrainAtStation(train, station)
-    if lineSegment then lineSegment:prepareDepartureAt(train, station, timeInMinutes) end
+    if lineSegment then
+        lineSegment:prepareDepartureAt(train, station, timeInMinutes)
+        TransitMeasurementRecorder.recordScheduledDeparture(train, lineSegment, station, timeInMinutes)
+    end
+end
+
+function Line.trainArrived(trainName, station)
+    assert(type(trainName) == "string", "Need 'trainName' as string")
+    assert(type(station) == "table", "Need 'station' as table")
+    assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
+
+    local train = TrainRegistry.forName(trainName)
+    local lineSegment, transitTrain = lineSegmentForTrainAtStation(train, station)
+    if lineSegment then
+        lineSegment:prepareDepartureAt(train, station, 0)
+        TransitMeasurementRecorder.recordTrainArrived(train, lineSegment, station, transitTrain)
+    end
 end
 
 function Line.trainDeparted(trainName, station)
@@ -194,6 +211,7 @@ function Line.trainDeparted(trainName, station)
     ---@cast transitTrain TransitTrain
 
     station:trainLeft(trainName, transitTrain:getDestination(), transitTrain:getLine())
+    TransitMeasurementRecorder.recordTrainDeparted(train, lineSegment, station, transitTrain)
     lineSegment:trainDeparted(train, station)
 end
 

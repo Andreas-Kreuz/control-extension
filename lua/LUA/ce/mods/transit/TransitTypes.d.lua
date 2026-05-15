@@ -55,6 +55,7 @@
 ---@field addSection fun(self: Line, routeName: string, destination: string):LineSegment
 ---@field createDepotSection fun(self: Line, routeName: string):LineSegment
 ---@field scheduleDeparture fun(trainName: string, station: RoadStation, timeInMinutes: number):nil
+---@field trainArrived fun(trainName: string, station: RoadStation):nil
 ---@field trainDeparted fun(trainName: string, station: RoadStation):nil
 ---@field setTrainSection fun(trainName: string, section: LineSegment):nil
 ---@field applyCachedRouteForTrain fun(train: Train):LineSegment|nil,TransitTrain|nil
@@ -83,6 +84,8 @@
 ---@field getAllSegments fun(self: LineSegment):LineSegment[]
 ---@field hasStation fun(self: LineSegment, station: RoadStation):boolean
 ---@field nextStationList fun(self: LineSegment, routeName: string, nextStation?: RoadStation, currentStation?: RoadStation):table[]
+---@field plannedMinutesBetween function
+---@field skippedStationsBetween function
 ---@field getLastStation fun(self: LineSegment):RoadStation|nil
 ---@field getFirstStation fun(self: LineSegment):RoadStation|nil
 ---@field prepareDepartureAt fun(self: LineSegment, train: Train, nextStation: RoadStation, timeInMinutes: number):nil

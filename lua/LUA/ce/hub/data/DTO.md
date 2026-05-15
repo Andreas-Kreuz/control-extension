@@ -158,17 +158,17 @@ Elementtyp: Laufzeitmetrik
 
 Elementtyp: Signal
 
-| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                          |
-| ----------------------- | ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                     |
-| `position`              | `integer`           | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal       |
-| `tag`                   | `string`            | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist |
+| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                                                                                         |
+| ----------------------- | ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                                                                                    |
+| `position`              | `integer`           | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal                                                                      |
+| `tag`                   | `string`            | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist                                                                |
 | `waitingVehiclesCount`  | `integer`           | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0` |
-| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                             |
-| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                   |
-| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                  |
-| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                               |
-| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                      |
+| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                                                                                            |
+| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                                                                                  |
+| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                                                                                 |
+| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                                                                                              |
+| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                                                                                     |
 
 Abgeleitet aus:
 
@@ -183,13 +183,13 @@ Abgeleitet aus:
 
 Elementtyp: Wartender Fahrzeugverband an einem Signal
 
-| Name              | Typ       | Wertebereich                   | Beschreibung                                                        |
-| ----------------- | --------- | ------------------------------ | ------------------------------------------------------------------- |
-| `id`              | `string`  | `<signalId>-<position>`        | zusammengesetzter technischer Schlüssel                             |
-| `signalId`        | `integer` | `> 0`                          | referenziertes Signal                                               |
-| `waitingPosition` | `integer` | `>= 1`                         | Position innerhalb der Warteschlange am Signal; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0` |
+| Name              | Typ       | Wertebereich                   | Beschreibung                                                                                                                                                |
+| ----------------- | --------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | `string`  | `<signalId>-<position>`        | zusammengesetzter technischer Schlüssel                                                                                                                     |
+| `signalId`        | `integer` | `> 0`                          | referenziertes Signal                                                                                                                                       |
+| `waitingPosition` | `integer` | `>= 1`                         | Position innerhalb der Warteschlange am Signal; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0`                       |
 | `vehicleName`     | `string`  | Fahrzeugverbandsname oder `""` | Name aus `EEPGetSignalTrainName`; bei fehlendem Namen leerer String; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `""` |
-| `waitingCount`    | `integer` | `>= 0`                         | Gesamtanzahl wartender Fahrzeugverbände an diesem Signal; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0` |
+| `waitingCount`    | `integer` | `>= 0`                         | Gesamtanzahl wartender Fahrzeugverbände an diesem Signal; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0`             |
 
 Abgeleitet aus:
 

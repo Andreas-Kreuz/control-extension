@@ -214,6 +214,72 @@ end
 ---@return RoadStation|nil
 function LineSegment:getFirstStation() if #self.stationInfos > 0 then return self.stationInfos[1].station end end
 
+local function orderedStationInfos(lineSegment, routeName)
+    local allSegments = lineSegment:getAllSegments()
+    local startIndex = 1
+    for index, segmentInfo in ipairs(allSegments) do
+        if segmentInfo.segment.routeName == routeName then
+            startIndex = index
+            break
+        end
+    end
+
+    local stationInfos = {}
+    for offset = 0, #allSegments - 1 do
+        local segmentInfo = allSegments[((startIndex + offset - 1) % #allSegments) + 1]
+        for _, stationInfo in ipairs(segmentInfo.segment.stationInfos) do
+            table.insert(stationInfos, stationInfo)
+        end
+    end
+    return stationInfos
+end
+
+local function stationMatches(left, right)
+    return left == right or left.name == right.name
+end
+
+function LineSegment:plannedMinutesBetween(routeName, fromStation, toStation)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(routeName) == "string", "Provide 'routeName' as 'string'")
+    assert(type(fromStation) == "table" and fromStation.type == "RoadStation", "Provide 'fromStation' as 'RoadStation'")
+    assert(type(toStation) == "table" and toStation.type == "RoadStation", "Provide 'toStation' as 'RoadStation'")
+
+    if fromStation == toStation then return 0 end
+
+    local stationInfos = orderedStationInfos(self, routeName)
+    for fromIndex, stationInfo in ipairs(stationInfos) do
+        if stationMatches(stationInfo.station, fromStation) then
+            local totalTime = 0
+            for offset = 1, #stationInfos - 1 do
+                local info = stationInfos[((fromIndex + offset - 1) % #stationInfos) + 1]
+                totalTime = totalTime + (info.timeToStation or 2)
+                if stationMatches(info.station, toStation) then return totalTime end
+            end
+        end
+    end
+    return nil
+end
+
+function LineSegment:skippedStationsBetween(routeName, fromStation, toStation)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(routeName) == "string", "Provide 'routeName' as 'string'")
+    assert(type(fromStation) == "table" and fromStation.type == "RoadStation", "Provide 'fromStation' as 'RoadStation'")
+    assert(type(toStation) == "table" and toStation.type == "RoadStation", "Provide 'toStation' as 'RoadStation'")
+
+    local stationInfos = orderedStationInfos(self, routeName)
+    local skippedStations = {}
+    for fromIndex, stationInfo in ipairs(stationInfos) do
+        if stationMatches(stationInfo.station, fromStation) then
+            for offset = 1, #stationInfos - 1 do
+                local info = stationInfos[((fromIndex + offset - 1) % #stationInfos) + 1]
+                if stationMatches(info.station, toStation) then return skippedStations end
+                if not stationMatches(info.station, fromStation) then table.insert(skippedStations, info.station) end
+            end
+        end
+    end
+    return {}
+end
+
 local function platformFor(info)
     local station = info.station
     local destKey = info.lineNr .. "->" .. info.destination
