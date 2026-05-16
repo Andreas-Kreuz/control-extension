@@ -7,11 +7,11 @@ function normalizeIntersection(intersection: Partial<Intersection>): Intersectio
   return {
     id: intersection.id ?? 0,
     name: intersection.name ?? '',
-    timeForGreen: intersection.timeForGreen ?? 0,
+    greenTimeSeconds: intersection.greenTimeSeconds ?? 0,
     ready: intersection.ready ?? false,
-    currentSwitching: intersection.currentSwitching ?? '',
-    manualSwitching: intersection.manualSwitching ?? '',
-    nextSwitching: intersection.nextSwitching ?? '',
+    currentPhase: intersection.currentPhase ?? '',
+    manualPhase: intersection.manualPhase ?? '',
+    nextPhase: intersection.nextPhase ?? '',
     staticCams: intersection.staticCams ?? [],
     phases: intersection.phases ?? [],
   };

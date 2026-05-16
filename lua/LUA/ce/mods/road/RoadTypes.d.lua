@@ -1,6 +1,6 @@
 ---@meta
 
----@alias TrafficLightType
+---@alias SignalType
 ---| "BUS"
 ---| "CAR"
 ---| "TRAM"
@@ -40,12 +40,12 @@
 ---@field allModels table<string, TrafficLightModel>
 ---@field new fun(self: TrafficLightModel, name: string, signalIndexRed: number, signalIndexGreen: number, signalIndexYellow?: number, signalIndexRedYellow?: number, signalIndexPedestrian?: number, signalIndexSwitchOff?: number, signalIndexBlinkYellow?: number, signalIndexGreenYellow?: number):TrafficLightModel
 ---@field print fun(self: TrafficLightModel):nil
----@field signalIndexOf fun(self: TrafficLightModel, phase: string):number
----@field phaseOf fun(self: TrafficLightModel, signalIndex: number):string
+---@field signalIndexOf fun(self: TrafficLightModel, indication: string):number
+---@field indicationOf fun(self: TrafficLightModel, signalIndex: number):string
 
----@class TrafficLight
+---@class Signal
 ---@field type string
----@field trafficSignalName string|nil
+---@field vehicleSignalName string|nil
 ---@field pedestrianSignalName string|nil
 ---@field use string
 ---@field signalId number
@@ -56,45 +56,45 @@
 ---@field lanes table
 ---@field phase string
 ---@field debug boolean
----@field sequenceInfo any
+---@field phaseInfo any
 ---@field laneInfo any
----@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field newPedestrianOnly fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field withPedestrian fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
----@field asPedestrianOnly fun(self: TrafficLight):TrafficLight
----@field trafficSignalNameTippText fun(self: TrafficLight):string
----@field pedestrianSignalNameTippText fun(self: TrafficLight):string
----@field signalNamesTippText fun(self: TrafficLight):string
----@field signalNamesText fun(self: TrafficLight):string
----@field addLightStructure fun(self: TrafficLight, redStructure?: string, greenStructure?: string,
+---@field new fun(self: Signal, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):Signal
+---@field newPedestrianOnly fun(self: Signal, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):Signal
+---@field withPedestrian fun(self: Signal, pedestrianSignalName: string):Signal
+---@field asPedestrianOnly fun(self: Signal):Signal
+---@field vehicleSignalNameTippText fun(self: Signal):string
+---@field pedestrianSignalNameTippText fun(self: Signal):string
+---@field signalNamesTippText fun(self: Signal):string
+---@field signalNamesText fun(self: Signal):string
+---@field addLightStructure fun(self: Signal, redStructure?: string, greenStructure?: string,
 --- yellowStructure?: string, requestStructure?: string):nil
----@field addAxisStructure fun(self: TrafficLight, structureName: string, axisName: string, positionDefault: number,
+---@field addAxisStructure fun(self: Signal, structureName: string, axisName: string, positionDefault: number,
 --- positionRed?: number, positionGreen?: number, positionYellow?: number,
 --- positionRedYellow?: number, positionPedestrian?: number):nil
----@field setSequenceInfo fun(self: TrafficLight, sequenceInfo: any):nil
----@field setLaneInfo fun(self: TrafficLight, laneInfo: any):nil
----@field showInfoText fun(self: TrafficLight, showInfo: boolean):nil
----@field changeInfoText fun(self: TrafficLight, infoText: string):nil
----@field refreshInfo fun(self: TrafficLight):nil
----@field switchAll fun(trafficLights: table, phase: string, reason?: string):nil
----@field switchTo fun(self: TrafficLight, phase: string, reason?: string):nil
----@field switchStructureLight fun(self: TrafficLight):nil
----@field switchStructureAxis fun(self: TrafficLight):nil
----@field switchSignal fun(self: TrafficLight, sigIndex: number):nil
----@field showRequestOnSignal fun(self: TrafficLight, hasRequest: boolean):nil
----@field print fun(self: TrafficLight):nil
----@field changed fun(self: TrafficLight):nil
----@field applyToLane fun(self: TrafficLight, lane: Lane, ...: string):Lane
+---@field setPhaseInfo fun(self: Signal, phaseInfo: any):nil
+---@field setLaneInfo fun(self: Signal, laneInfo: any):nil
+---@field showInfoText fun(self: Signal, showInfo: boolean):nil
+---@field changeInfoText fun(self: Signal, infoText: string):nil
+---@field refreshInfo fun(self: Signal):nil
+---@field switchAll fun(signals: table, indication: string, reason?: string):nil
+---@field switchTo fun(self: Signal, indication: string, reason?: string):nil
+---@field switchStructureLight fun(self: Signal):nil
+---@field switchStructureAxis fun(self: Signal):nil
+---@field switchSignal fun(self: Signal, sigIndex: number):nil
+---@field showRequestOnSignal fun(self: Signal, hasRequest: boolean):nil
+---@field print fun(self: Signal):nil
+---@field changed fun(self: Signal):nil
+---@field applyToLane fun(self: Signal, lane: Lane, ...: string):Lane
 
 ---@class Lane
 ---@field Directions table<string, LaneDirection>
 ---@field RequestType table<string, LaneRequestType>
 ---@field Type table<string, LaneType>
----@field calculatePriority fun(self: Lane, trafficLights: table):number
+---@field calculatePriority fun(self: Lane, signals: table):number
 ---@field checkRequests fun(self: Lane):nil
 ---@field debug boolean
 ---@field driveOnDefaultSignals fun(self: Lane, ...: TrafficLight):Lane
----@field driveOn fun(self: Lane, trafficLight: TrafficLight, ...: string):Lane
+---@field driveOn fun(self: Lane, signal: Signal, ...: string):Lane
 ---@field firstGoodTrain string|nil
 ---@field firstVehiclesRoute string|nil
 ---@field getLaneType fun(self: Lane):LaneRequestType
@@ -106,18 +106,18 @@
 ---@field getWaitCount fun(self: Lane):number
 ---@field hasRequest fun(self: Lane):boolean
 ---@field incrementWaitCount fun(self: Lane):nil
----@field laneCanDrive fun(lane: Lane, trafficLights: table):boolean
----@field laneTrafficLight TrafficLight
+---@field laneCanDrive fun(lane: Lane, signals: table):boolean
+---@field laneSignal TrafficLight
 ---@field name string
----@field new fun(self: Lane, name: string, eepSaveId: number, laneTrafficLight: TrafficLight,
+---@field new fun(self: Lane, name: string, eepSaveId: number, laneSignal: TrafficLight,
 --- directions?: string[], trafficType?: string):Lane
 ---@field queue Queue
 ---@field requestInfoText string|nil
 ---@field requestType LaneRequestType
----@field phase TrafficLightState
+---@field phase SignalIndication
 ---@field tracksUsedForRequest boolean
 ---@field fahrzeugMultiplikator number
----@field requestTrafficLights table<string, TrafficLight[]>
+---@field requestSignals table<string, TrafficLight[]>
 ---@field resetQueueFromRoadTracks fun(self: Lane):nil
 ---@field resetQueueFromSignal fun(self: Lane):nil
 ---@field resetVehicles fun(self: Lane):nil
@@ -130,17 +130,16 @@
 ---@field setHighLightingTracks fun(self: Lane, ...: any):nil
 ---@field setLaneType fun(self: Lane, requestType: LaneRequestType):nil
 ---@field setTrafficType fun(self: Lane, trafficType: LaneType):nil
----@field showRequestsOn fun(self: Lane, trafficLight: TrafficLight, ...: string):nil
---- Indicates lane requests on the given traffic light, if the traffic light has
+---@field showRequestsOnSignalGroups fun(self: Lane, ...: SignalGroup):Lane
+--- Indicates lane requests on the given signal, if the signal has
 --- a request structure defined. The additional ... parameter contains route
 --- names that can be given to indicate requests on these specific routes only.
 ---@field signalUsedForRequest boolean
----@field switchTrafficLightTo fun(self: Lane, phase: string, grund: string):nil
+---@field switchSignalTo fun(self: Lane, indication: string, grund: string):nil
 ---@field tracksForHighlighting table
 ---@field tracksForRequests table
----@field trafficLight TrafficLight
----@field trafficLightChanged fun(self: Lane, trafficLight: TrafficLight):nil
----@field trafficLightsToDriveOn table|nil
+---@field signalChanged fun(self: Lane, signal: Signal):nil
+---@field signalsToDriveOn table|nil
 ---@field type string
 ---@field useSignalForQueue fun(self: Lane):nil
 ---@field useTrackForQueue fun(self: Lane, roadId: number):nil
@@ -150,79 +149,77 @@
 ---@field waitCount number
 
 ---@class LaneRouteDriveBuilder
----@field driveOnlyOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):LaneRouteDriveBuilder
----@field driveAlsoOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):LaneRouteDriveBuilder
----@field showRequestsOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):Lane
+---@field driveOnlyOnSignalGroups fun(self: LaneRouteDriveBuilder, ...: SignalGroup):LaneRouteDriveBuilder
+---@field driveAlsoOnSignalGroups fun(self: LaneRouteDriveBuilder, ...: SignalGroup):LaneRouteDriveBuilder
+---@field showRequestsOnSignalGroups fun(self: LaneRouteDriveBuilder, ...: SignalGroup):Lane
 
----@class IntersectionSequence
+---@class TrafficPhase
 ---@field type string
 ---@field name string
----@field trafficLights table<TrafficLight, TrafficLightType>
----@field greenPhaseSeconds number
+---@field signalHeads table<Signal, SignalType>
+---@field greenTimeSeconds number
 ---@field crossing Intersection|nil
 ---@field prio number
 ---@field lanes table<Lane, boolean>
 ---@field debug boolean
----@field Type table<string, TrafficLightType>
+---@field Type table<string, SignalType>
 ---@field getType fun():string
----@field getName fun(self: IntersectionSequence):string
----@field new fun(self: IntersectionSequence, name: string, greenPhaseSeconds?: number):IntersectionSequence
----@field initSequence fun(self: IntersectionSequence):nil
----@field trafficLightsToTurnRedAndGreen fun(self: IntersectionSequence, oldSequence?: IntersectionSequence):
----(table<TrafficLight, TrafficLightType>, table<TrafficLight, TrafficLightType>)
----@field tasksForSwitchingFrom fun(self: IntersectionSequence, oldSequence?: IntersectionSequence, afterRedTask?: any):table
----@field getLanes fun(self: IntersectionSequence):table<Lane, boolean>
----@field lanesNamesText fun(self: IntersectionSequence):string
----@field addCarLights fun(self: IntersectionSequence, ...: TrafficLight):nil
----@field addPedestrianLights fun(self: IntersectionSequence, ...: TrafficLight):nil
----@field addTramLights fun(self: IntersectionSequence, ...: TrafficLight):nil
----@field lanesSortedByPriority fun(self: IntersectionSequence):Lane[]
----@field lanesSortedByName fun(self: IntersectionSequence):Lane[]
----@field sequencePriorityComparator fun(schaltung1: IntersectionSequence, schaltung2: IntersectionSequence):boolean
----@field calculatePriority fun(self: IntersectionSequence):number
----@field resetWaitCount fun(self: IntersectionSequence):nil
+---@field getName fun(self: TrafficPhase):string
+---@field new fun(self: TrafficPhase, name: string, greenTimeSeconds?: number):TrafficPhase
+---@field initPhase fun(self: TrafficPhase):nil
+---@field signalHeadsToTurnRedAndGreen fun(self: TrafficPhase, oldPhase?: TrafficPhase):
+---(table<Signal, SignalType>, table<Signal, SignalType>)
+---@field tasksForPhaseChangeFrom fun(self: TrafficPhase, oldPhase?: TrafficPhase, afterRedTask?: any):table
+---@field getLanes fun(self: TrafficPhase):table<Lane, boolean>
+---@field lanesNamesText fun(self: TrafficPhase):string
+---@field addSignalGroup fun(self: TrafficPhase, ...: SignalGroup):nil
+---@field lanesSortedByPriority fun(self: TrafficPhase):Lane[]
+---@field lanesSortedByName fun(self: TrafficPhase):Lane[]
+---@field phasePriorityComparator fun(phase1: TrafficPhase, phase2: TrafficPhase):boolean
+---@field calculatePriority fun(self: TrafficPhase):number
+---@field resetWaitCount fun(self: TrafficPhase):nil
 
 ---@class Intersection
 ---@field name string
 ---@field lanes table<string, Lane>
----@field trafficLights table<string, TrafficLight>
----@field currentSequence IntersectionSequence
----@field sequences IntersectionSequence[]
+---@field signals table<string, Signal>
+---@field currentPhase TrafficPhase
+---@field phases TrafficPhase[]
 ---@field greenPhaseFinished boolean
 ---@field greenPhaseReached boolean
----@field greenPhaseSeconds number
+---@field greenTimeSeconds number
 ---@field staticCams string[]
----@field nextSequence IntersectionSequence|nil
----@field manualSequence string|nil
+---@field nextPhase TrafficPhase|nil
+---@field manualPhase string|nil
 ---@field tippStructure string|nil
 ---@field switchInStrictOrder boolean
 ---@field debug boolean
 ---@field allIntersections table<string, Intersection>
----@field switchManuallyTo fun(crossingName: string, sequenceName: string):nil
+---@field switchManuallyTo fun(crossingName: string, phaseName: string):nil
 ---@field switchAutomatically fun(crossingName: string):nil
 ---@field getType fun():string
 ---@field getName fun(self: Intersection):string
----@field getSequences fun(self: Intersection):IntersectionSequence[]
----@field getCurrentSequence fun(self: Intersection):IntersectionSequence
----@field getNextSequence fun(self: Intersection):IntersectionSequence|nil
----@field getManualSequence fun(self: Intersection):string|nil
----@field onSwitchedToSequence fun(self: Intersection, currentSequence: IntersectionSequence):nil
----@field calculateNextSequence fun(self: Intersection):IntersectionSequence|nil
----@field setManualSequence fun(self: Intersection, sequenceName: string):nil
----@field setAutomaticSequence fun(self: Intersection):nil
+---@field getPhases fun(self: Intersection):TrafficPhase[]
+---@field getCurrentPhase fun(self: Intersection):TrafficPhase
+---@field getNextPhase fun(self: Intersection):TrafficPhase|nil
+---@field getManualPhase fun(self: Intersection):string|nil
+---@field onSwitchedToPhase fun(self: Intersection, currentPhase: TrafficPhase):nil
+---@field calculateNextPhase fun(self: Intersection):TrafficPhase|nil
+---@field setManualPhase fun(self: Intersection, phaseName: string):nil
+---@field setAutomaticPhase fun(self: Intersection):nil
 ---@field setSwitchInStrictOrder fun(self: Intersection, value: boolean):nil
----@field getGreenPhaseSeconds fun(self: Intersection):number
----@field setGreenPhaseFinished fun(self: Intersection, greenPhaseFinished: boolean):nil
----@field isGreenPhaseFinished fun(self: Intersection):boolean
----@field setGreenPhaseReached fun(self: Intersection, greenPhaseReached: boolean):nil
----@field isGreenPhaseReached fun(self: Intersection):boolean
+---@field getGreenTimeSeconds fun(self: Intersection):number
+---@field setGreenTimeFinished fun(self: Intersection, greenPhaseFinished: boolean):nil
+---@field isGreenTimeFinished fun(self: Intersection):boolean
+---@field setGreenReached fun(self: Intersection, greenPhaseReached: boolean):nil
+---@field isGreenReached fun(self: Intersection):boolean
 ---@field setTippStructure fun(self: Intersection, tippStructure: string):nil
 ---@field getStaticCams fun(self: Intersection):string[]
 ---@field addStaticCam fun(self: Intersection, kameraName: string):nil
 ---@field resetVehicles fun():nil
----@field new fun(self: Intersection, name: string, greenPhaseSeconds?: number):Intersection
----@field newSequence fun(self: Intersection, name: string, greenPhaseSeconds?: number):IntersectionSequence
----@field addSequence fun(self: Intersection, sequence: IntersectionSequence):IntersectionSequence
+---@field new fun(self: Intersection, name: string, greenTimeSeconds?: number):Intersection
+---@field newPhase fun(self: Intersection, name: string, greenTimeSeconds?: number):TrafficPhase
+---@field addPhase fun(self: Intersection, phase: TrafficPhase):TrafficPhase
 ---@field updateLaneTipText fun(self: Intersection):nil
----@field initSequences fun():nil
----@field switchSequences fun():nil
+---@field initPhases fun():nil
+---@field switchPhases fun():nil

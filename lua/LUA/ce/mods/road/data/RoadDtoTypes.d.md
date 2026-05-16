@@ -3,17 +3,17 @@
 ## CeType `ce.mods.road.Intersection`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionDto`
+- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionDto`
 
 | Name               | Typ                      |
 | ------------------ | ------------------------ |
 | `id`               | `number`                 |
 | `name`             | `string`                 |
-| `currentSwitching` | `string\|nil`            |
-| `manualSwitching`  | `string\|nil`            |
-| `nextSwitching`    | `string\|nil`            |
+| `currentPhase` | `string\|nil`            |
+| `manualPhase`  | `string\|nil`            |
+| `nextPhase`    | `string\|nil`            |
 | `ready`            | `boolean`                |
-| `timeForGreen`     | `number`                 |
+| `greenTimeSeconds`     | `number`                 |
 | `staticCams`       | `table`                  |
 | `phases`           | `IntersectionPhaseDto[]` |
 
@@ -25,33 +25,33 @@
 | `name`              | `string`                             |
 | `order`             | `number`                             |
 | `prio`              | `number`                             |
-| `greenPhaseSeconds` | `number`                             |
-| `trafficLights`     | `IntersectionPhaseTrafficLightDto[]` |
+| `greenTimeSeconds` | `number`                             |
+| `signalHeads`     | `IntersectionPhaseSignalHeadDto[]` |
 
-### `IntersectionPhaseTrafficLightDto`
+### `IntersectionPhaseSignalHeadDto`
 
 | Name                   | Typ           |
 | ---------------------- | ------------- |
 | `signalId`             | `number`      |
-| `signalKind`           | `string`      |
-| `signalKey`            | `string`      |
-| `signalName`           | `string\|nil` |
+| `signalHeadKind`           | `string`      |
+| `signalHeadKey`            | `string`      |
+| `signalHeadName`           | `string\|nil` |
 | `type`                 | `string`      |
-| `trafficSignalName`    | `string\|nil` |
-| `pedestrianSignalName` | `string\|nil` |
+| `vehicleSignalHeadName`    | `string\|nil` |
+| `pedestrianSignalHeadName` | `string\|nil` |
 | `use`                  | `string`      |
 
 ## CeType `ce.mods.road.IntersectionLane`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionLaneDto`
+- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionLaneDto`
 
 | Name                         | Typ      |
 | ---------------------------- | -------- |
 | `id`                         | `string` |
 | `intersectionId`             | `number` |
 | `name`                       | `string` |
-| `phase`                      | `string` |
+| `currentIndication`                      | `string` |
 | `vehicleMultiplier`          | `number` |
 | `eepSaveId`                  | `number` |
 | `type`                       | `string` |
@@ -59,13 +59,13 @@
 | `waitingTrains`              | `table`  |
 | `waitingForGreenCyclesCount` | `number` |
 | `directions`                 | `table`  |
-| `switchings`                 | `table`  |
+| `phases`                 | `table`  |
 | `tracks`                     | `table`  |
 
-## CeType `ce.mods.road.IntersectionSwitching`
+## CeType `ce.mods.road.IntersectionPhase`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionSwitchingDto`
+- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionPhaseDto`
 
 | Name             | Typ              |
 | ---------------- | ---------------- |
@@ -77,17 +77,17 @@
 ## CeType `ce.mods.road.IntersectionTrafficLight`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionTrafficLightDto`
+- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionTrafficLightDto`
 
 | Name                   | Typ                                                   |
 | ---------------------- | ----------------------------------------------------- |
 | `id`                   | `number`                                              |
 | `signalId`             | `number`                                              |
-| `trafficSignalName`    | `string\|nil`                                         |
-| `pedestrianSignalName` | `string\|nil`                                         |
+| `vehicleSignalName`        | `string\|nil`                                         |
+| `pedestrianSignalName`     | `string\|nil`                                         |
 | `use`                  | `string`                                              |
 | `modelId`              | `string`                                              |
-| `currentPhase`         | `string`                                              |
+| `currentIndication`    | `string`                                              |
 | `intersectionId`       | `number`                                              |
 | `lightStructures`      | `table<string, IntersectionTrafficLightStructureDto>` |
 | `axisStructures`       | `IntersectionTrafficLightAxisStructureDto[]`          |
@@ -95,7 +95,7 @@
 ## CeType `ce.mods.road.ModuleSetting`
 
 - Key-ID: `name`
-- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createRoadIntersectionModuleSettingDto`
+- DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionModuleSettingDto`
 
 | Name          | Typ       |
 | ------------- | --------- |
@@ -106,14 +106,14 @@
 | `value`       | `boolean` |
 | `eepFunction` | `string`  |
 
-## CeType `ce.mods.road.SignalTypeDefinition`
+## CeType `ce.mods.road.TrafficLightModel`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.road.data.TrafficLightModelDtoFactory.createSignalTypeDefinitionDto`
+- DtoFactory: `ce.mods.road.data.TrafficLightModelDtoFactory.createTrafficLightModelDto`
 
 | Name        | Typ                                |
 | ----------- | ---------------------------------- |
 | `id`        | `string`                           |
 | `name`      | `string`                           |
 | `type`      | `string`                           |
-| `positions` | `SignalTypeDefinitionPositionsDto` |
+| `positions` | `TrafficLightModelPositionsDto`          |

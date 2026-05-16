@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------------------------------------
 -- Diese Skript ist eine kleine Vorlage für das Testen von Kreuzungen, wenn Du bereits ein Lua-Skript mit Kreuzungen,
--- Schaltungen und Ampeln hast
+-- Phasen und Signalgeber hast
 --
 -- Voraussetzung: Du hast Lua auf der Kommandozeile installiert
 --
@@ -42,7 +42,7 @@ local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 Intersection.debug = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showRequestsOnSignal = false
-IntersectionSettings.showSequenceOnSignal = false
+IntersectionSettings.showPhaseOnSignal = false
 local StorageUtility = require("ce.hub.util.StorageUtility")
 StorageUtility.debug = false
 

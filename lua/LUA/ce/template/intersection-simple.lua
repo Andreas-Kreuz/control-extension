@@ -47,15 +47,15 @@ end
 
 local Lane = require("ce.mods.road.Lane")
 local Intersection = require("ce.mods.road.Intersection")
--- local IntersectionSequence = require("ce.mods.road.IntersectionSequence")
+-- local TrafficPhase = require("ce.mods.road.TrafficPhase")
 -- local LaneSettings = require("ce.mods.road.LaneSettings")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
 -- Ampeln für den Kraftfahrverkehr (K) und Strassenbahnen (S)
 local K1, K2
--- 3 Schaltungen
-local sequenceA, sequenceB
+-- Phasen
+local phase1, phase2
 -- die Kreuzung
 local crossing
 
@@ -71,11 +71,14 @@ crossing = Intersection:new("Dein Kreuzungsname")
 lane1 = Lane:new("Lane 1 N", 1, K1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
 lane2 = Lane:new("Lane 2 S", 2, K2, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
 
--- Lege die Schaltungen an und füge Ampeln für Fahrzeuge, Tram und Fußgänger hinzu
-sequenceA = crossing:newSequence("Schaltung Fahrzeuge")
-sequenceA:addCarLights(K1)
-sequenceA:addPedestrianLights(K2)
+-- Lege Signalgruppen und Phasen an
+local sgK1Vehicle = crossing:newSignalGroup("sgK1Vehicle"):addVehicleSignals(K1)
+local sgK2Vehicle = crossing:newSignalGroup("sgK2Vehicle"):addVehicleSignals(K2)
+local sgK1Pedestrian = crossing:newSignalGroup("sgK1Pedestrian"):addPedestrianSignals(K1)
+local sgK2Pedestrian = crossing:newSignalGroup("sgK2Pedestrian"):addPedestrianSignals(K2)
 
-sequenceB = crossing:newSequence("Schaltung Fussgaenger")
-sequenceB:addCarLights(K2)
-sequenceB:addPedestrianLights(K1)
+phase1 = crossing:newPhase("P1")
+phase1:addSignalGroup(sgK1Vehicle, sgK2Pedestrian)
+
+phase2 = crossing:newPhase("P2")
+phase2:addSignalGroup(sgK2Vehicle, sgK1Pedestrian)

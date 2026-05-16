@@ -1,6 +1,6 @@
-﻿import { IntersectionLuaDto } from '../../ce/dto/roads/IntersectionLuaDto';
+import { IntersectionLuaDto } from '../../ce/dto/roads/IntersectionLuaDto';
 import { IntersectionLaneLuaDto } from '../../ce/dto/roads/IntersectionLaneLuaDto';
-import { IntersectionSwitchingLuaDto } from '../../ce/dto/roads/IntersectionSwitchingLuaDto';
+import { IntersectionPhaseLuaDto } from '../../ce/dto/roads/IntersectionPhaseLuaDto';
 import { IntersectionTrafficLightLuaDto } from '../../ce/dto/roads/IntersectionTrafficLightLuaDto';
 import { SettingLuaDto } from '../../ce/dto/settings/SettingLuaDto';
 import { TrafficLightModelLuaDto } from '../../ce/dto/traffic-light-models/TrafficLightModelLuaDto';
@@ -9,7 +9,7 @@ import {
   CeTypes,
   IntersectionAppDto,
   IntersectionLaneAppDto,
-  IntersectionSwitchingAppDto,
+  IntersectionPhaseAppDto,
   IntersectionTrafficLightAppDto,
   SettingAppDto,
   SettingsAppDto,
@@ -17,12 +17,12 @@ import {
 } from '@ce/web-shared';
 
 // Maps Lua road DTOs into road AppDtos and road setting AppDtos.
-// Lua inputs: ce.mods.road.Intersection, lanes, switchings, lights, settings.
+// Lua inputs: ce.mods.road.Intersection, lanes, phases, signal heads, settings.
 export default class RoadSelector {
   private lastState?: fromEepData.State;
   private intersections: Record<string, IntersectionAppDto> = {};
   private intersectionLanes: Record<string, IntersectionLaneAppDto> = {};
-  private intersectionSwitchings: Record<string, IntersectionSwitchingAppDto> = {};
+  private intersectionPhases: Record<string, IntersectionPhaseAppDto> = {};
   private intersectionTrafficLights: Record<string, IntersectionTrafficLightAppDto> = {};
   private trafficLightModels: Record<string, TrafficLightModelAppDto> = {};
   private moduleSettings: SettingsAppDto = { moduleName: 'Einstellungen für Kreuzungen', settings: [] };
@@ -39,11 +39,11 @@ export default class RoadSelector {
       (dto) => ({
         id: dto.id,
         name: dto.name ?? '',
-        currentSwitching: dto.currentSwitching ?? '',
-        manualSwitching: dto.manualSwitching ?? '',
-        nextSwitching: dto.nextSwitching ?? '',
+        currentPhase: dto.currentPhase ?? '',
+        manualPhase: dto.manualPhase ?? '',
+        nextPhase: dto.nextPhase ?? '',
         ready: dto.ready ?? false,
-        timeForGreen: dto.timeForGreen ?? 0,
+        greenTimeSeconds: dto.greenTimeSeconds ?? 0,
         staticCams: dto.staticCams ?? [],
         phases: dto.phases ?? [],
       }),
@@ -56,7 +56,7 @@ export default class RoadSelector {
         id: dto.id,
         intersectionId: dto.intersectionId,
         name: dto.name,
-        phase: dto.phase,
+        currentIndication: dto.currentIndication,
         vehicleMultiplier: dto.vehicleMultiplier,
         eepSaveId: dto.eepSaveId,
         type: dto.type,
@@ -64,14 +64,14 @@ export default class RoadSelector {
         waitingTrains: dto.waitingTrains,
         waitingForGreenCyclesCount: dto.waitingForGreenCyclesCount,
         directions: dto.directions,
-        switchings: dto.switchings,
+        phases: dto.phases,
         tracks: dto.tracks,
       }),
     );
 
-    this.intersectionSwitchings = this.mapCeType<IntersectionSwitchingLuaDto, IntersectionSwitchingAppDto>(
+    this.intersectionPhases = this.mapCeType<IntersectionPhaseLuaDto, IntersectionPhaseAppDto>(
       state,
-      CeTypes.RoadIntersectionSwitching,
+      CeTypes.RoadIntersectionPhase,
       (dto) => ({
         id: dto.id,
         intersectionId: dto.intersectionId,
@@ -86,11 +86,11 @@ export default class RoadSelector {
       (dto) => ({
         id: dto.id,
         signalId: dto.signalId,
-        ...(dto.trafficSignalName !== undefined ? { trafficSignalName: dto.trafficSignalName } : {}),
+        ...(dto.vehicleSignalName !== undefined ? { vehicleSignalName: dto.vehicleSignalName } : {}),
         ...(dto.pedestrianSignalName !== undefined ? { pedestrianSignalName: dto.pedestrianSignalName } : {}),
         use: dto.use,
         modelId: dto.modelId,
-        currentPhase: dto.currentPhase,
+        currentIndication: dto.currentIndication,
         intersectionId: dto.intersectionId,
         lightStructures: dto.lightStructures,
         axisStructures: dto.axisStructures,
@@ -99,7 +99,7 @@ export default class RoadSelector {
 
     this.trafficLightModels = this.mapCeType<TrafficLightModelLuaDto, TrafficLightModelAppDto>(
       state,
-      CeTypes.RoadSignalTypeDefinition,
+      CeTypes.RoadTrafficLightModel,
       (dto) => ({
         id: dto.id,
         name: dto.name,
@@ -147,8 +147,8 @@ export default class RoadSelector {
 
   getIntersections = (): Record<string, IntersectionAppDto> => this.intersections;
   getIntersectionLanes = (): Record<string, IntersectionLaneAppDto> => this.intersectionLanes;
-  getIntersectionSwitchings = (): Record<string, IntersectionSwitchingAppDto> => this.intersectionSwitchings;
-  getIntersectionSwitching = (id: string): IntersectionSwitchingAppDto | undefined => this.intersectionSwitchings[id];
+  getIntersectionPhases = (): Record<string, IntersectionPhaseAppDto> => this.intersectionPhases;
+  getIntersectionPhase = (id: string): IntersectionPhaseAppDto | undefined => this.intersectionPhases[id];
   getIntersectionTrafficLights = (): Record<string, IntersectionTrafficLightAppDto> => this.intersectionTrafficLights;
   getIntersectionTrafficLight = (id: string): IntersectionTrafficLightAppDto | undefined =>
     this.intersectionTrafficLights[id];

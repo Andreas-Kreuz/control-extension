@@ -11,20 +11,20 @@ insulate("ce.mods.road.CeRoadModule", function ()
     local intersection = {
         id = 1,
         name = "A",
-        currentSwitching = "S1",
-        manualSwitching = "S2",
-        nextSwitching = "S3",
+        currentPhase = "P1",
+        manualPhase = "P2",
+        nextPhase = "P3",
         ready = true,
-        timeForGreen = 15,
+        greenTimeSeconds = 15,
         staticCams = { "Cam 1" },
         phases = {
             {
-                id = "A-S1",
-                name = "S1",
+                id = "A-P1",
+                name = "P1",
                 order = 1,
                 prio = 1,
-                greenPhaseSeconds = 15,
-                trafficLights = { { signalId = 1, type = "CAR" } }
+                greenTimeSeconds = 15,
+                signalHeads = { { signalId = 1, type = "CAR" } }
             }
         }
     }
@@ -42,11 +42,11 @@ insulate("ce.mods.road.CeRoadModule", function ()
         local _, _, _, dto = RoadDtoFactory.createIntersectionDto(intersection)
 
         assert.equals("A", dto.name)             -- "always" by default -> populated
-        assert.equals("", dto.manualSwitching)   -- "oninterest" by default, never selected -> empty
-        assert.equals("", dto.currentSwitching)  -- "oninterest" by default, never selected -> empty
-        assert.equals("", dto.nextSwitching)     -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.manualPhase)   -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.currentPhase)  -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.nextPhase)     -- "oninterest" by default, never selected -> empty
         assert.is_false(dto.ready)               -- "oninterest" by default, never selected -> false
-        assert.equals(15, dto.timeForGreen)      -- "always" by default -> populated
+        assert.equals(15, dto.greenTimeSeconds)      -- "always" by default -> populated
         assert.same({ "Cam 1" }, dto.staticCams) -- "always" by default -> populated
         assert.same(intersection.phases, dto.phases)
     end)
@@ -59,9 +59,9 @@ insulate("ce.mods.road.CeRoadModule", function ()
             ceTypes = {
                 intersections = {
                     fieldPublish = {
-                        currentSwitching = "always",
-                        manualSwitching = "always",
-                        nextSwitching = "always",
+                        currentPhase = "always",
+                        manualPhase = "always",
+                        nextPhase = "always",
                         ready = "always"
                     }
                 }
@@ -70,13 +70,13 @@ insulate("ce.mods.road.CeRoadModule", function ()
 
         local _, _, _, dto = RoadDtoFactory.createIntersectionDto(intersection)
 
-        assert.equals("S1", dto.currentSwitching)
-        assert.equals("S3", dto.nextSwitching)
+        assert.equals("P1", dto.currentPhase)
+        assert.equals("P3", dto.nextPhase)
         assert.is_true(dto.ready)
-        assert.equals(15, dto.timeForGreen)
+        assert.equals(15, dto.greenTimeSeconds)
         assert.same({ "Cam 1" }, dto.staticCams)
         assert.equals("A", dto.name) -- unspecified "always" field stays
-        assert.equals("S2", dto.manualSwitching)
+        assert.equals("P2", dto.manualPhase)
     end)
 
     it("intersection DTO: always fields become empty after setOptions with never", function ()
@@ -86,7 +86,7 @@ insulate("ce.mods.road.CeRoadModule", function ()
         CeRoadModule.setOptions({
             ceTypes = {
                 intersections = {
-                    fieldPublish = { name = "never", manualSwitching = "never" }
+                    fieldPublish = { name = "never", manualPhase = "never" }
                 }
             }
         })
@@ -94,7 +94,7 @@ insulate("ce.mods.road.CeRoadModule", function ()
         local _, _, _, dto = RoadDtoFactory.createIntersectionDto(intersection)
 
         assert.equals("", dto.name)
-        assert.equals("", dto.manualSwitching)
+        assert.equals("", dto.manualPhase)
     end)
 
     it("setOptions deep-merges: unspecified ceTypes retain their defaults", function ()
@@ -104,16 +104,16 @@ insulate("ce.mods.road.CeRoadModule", function ()
         CeRoadModule.setOptions({
             ceTypes = {
                 intersections = {
-                    fieldPublish = { currentSwitching = "always" }
+                    fieldPublish = { currentPhase = "always" }
                 }
             }
         })
 
-        local switching = { id = "A-S1", intersectionId = "A", name = "S1", prio = 1 }
-        local _, _, _, dto = RoadDtoFactory.createIntersectionSwitchingDto(switching)
+        local phase = { id = "A-P1", intersectionId = "A", name = "P1", prio = 1 }
+        local _, _, _, dto = RoadDtoFactory.createIntersectionPhaseDto(phase)
 
         assert.equals("A", dto.intersectionId)
-        assert.equals("S1", dto.name)
+        assert.equals("P1", dto.name)
         assert.equals(1, dto.prio)
     end)
 end)

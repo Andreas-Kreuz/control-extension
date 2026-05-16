@@ -3,93 +3,86 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.Intersection ...") end
 
 local Task = require("ce.hub.scheduler.Task")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
-local IntersectionSequence = require("ce.mods.road.IntersectionSequence")
+local TrafficPhase = require("ce.mods.road.TrafficPhase")
+local SignalGroup = require("ce.mods.road.SignalGroup")
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
-local TrafficLightState = require("ce.mods.road.TrafficLightState")
+local SignalIndication = require("ce.mods.road.SignalIndication")
 local fmt = require("ce.hub.eep.TippTextFormatter")
 
---------------------
--- Klasse Kreuzung
---------------------
----@type table<string,Intersection>
 local allIntersections = {}
 local Intersection = {}
 Intersection.debug = CeStartWithDebug or false
----@type table<string,Intersection>
 Intersection.allIntersections = {}
 
-function Intersection.switchManuallyTo(crossingName, sequenceName)
+function Intersection.switchManuallyTo(intersectionName, phaseName)
     if Intersection.debug then
-        print(string.format("[#Intersection] switchManuallyTo: %s/%s", crossingName, sequenceName))
+        print(string.format("[#Intersection] switchManuallyTo: %s/%s", intersectionName, phaseName))
     end
-    ---@type Intersection
-    local k = Intersection.allIntersections[crossingName]
-    if k then k:setManualSequence(sequenceName) end
+    local intersection = Intersection.allIntersections[intersectionName]
+    if intersection then intersection:setManualPhase(phaseName) end
 end
 
-function Intersection.switchAutomatically(crossingName)
-    if Intersection.debug then print(string.format("[#Intersection] switchAutomatically: %s", crossingName)) end
-    ---@type Intersection
-    local k = Intersection.allIntersections[crossingName]
-    if k then k:setAutomaticSequence() end
+function Intersection.switchAutomatically(intersectionName)
+    if Intersection.debug then print(string.format("[#Intersection] switchAutomatically: %s", intersectionName)) end
+    local intersection = Intersection.allIntersections[intersectionName]
+    if intersection then intersection:setAutomaticPhaseSelection() end
 end
 
 function Intersection.getType() return "Intersection" end
 
 function Intersection:getName() return self.name end
 
-function Intersection:getSequences() return self.sequences end
+function Intersection:getPhases() return self.phases end
 
-function Intersection:getCurrentSequence() return self.currentSequence end
+function Intersection:getCurrentPhase() return self.currentPhase end
 
-function Intersection:getNextSequence() return self.nextSequence end
+function Intersection:getNextPhase() return self.nextPhase end
 
-function Intersection:getManualSequence() return self.manualSequence end
+function Intersection:getManualPhase() return self.manualPhase end
 
-function Intersection:onSwitchedToSequence(currentSequence)
+function Intersection:onSwitchedToPhase(currentPhase)
     for _, lane in pairs(self.lanes) do
-        if currentSequence:getLanes()[lane] then
+        if currentPhase:getLanes()[lane] then
             lane:resetWaitCount()
         else
             lane:incrementWaitCount()
         end
     end
-    self.currentSequence = currentSequence
+    self.currentPhase = currentPhase
 end
 
----@return IntersectionSequence
-function Intersection:calculateNextSequence()
-    local nextSequence
-    if self.manualSequence then
-        nextSequence = self.manualSequence
+function Intersection:calculateNextPhase()
+    local nextPhase
+    if self.manualPhase then
+        nextPhase = self.manualPhase
     elseif self.switchInStrictOrder == true then
         local nextIndex = 1
-        for i, sequence in ipairs(self.sequences) do
-            if self.currentSequence == sequence then nextIndex = i == #self.sequences and 1 or i + 1 end
+        for i, phase in ipairs(self.phases) do
+            if self.currentPhase == phase then nextIndex = i == #self.phases and 1 or i + 1 end
         end
-        nextSequence = self.sequences[nextIndex]
+        nextPhase = self.phases[nextIndex]
     else
         local sortedTable = {}
-        for _, sequence in ipairs(self.sequences) do table.insert(sortedTable, sequence) end
-        table.sort(sortedTable, IntersectionSequence.sequencePriorityComparator)
-        nextSequence = sortedTable[1]
+        for _, phase in ipairs(self.phases) do table.insert(sortedTable, phase) end
+        table.sort(sortedTable, TrafficPhase.phasePriorityComparator)
+        nextPhase = sortedTable[1]
     end
-    return nextSequence
+    return nextPhase
 end
 
-function Intersection:setManualSequence(sequenceName)
-    for _, sequence in ipairs(self.sequences) do
-        if sequence.name == sequenceName then
-            self.manualSequence = sequence
-            print(string.format("[#Intersection] Manuell geschaltet auf: %s (%s')", sequence.name, self.name))
-            self:setGreenPhaseFinished(true)
+function Intersection:setManualPhase(phaseName)
+    for _, phase in ipairs(self.phases) do
+        if phase.name == phaseName then
+            self.manualPhase = phase
+            print(string.format("[#Intersection] Manuell geschaltet auf: %s (%s')", phase.name, self.name))
+            self:setGreenTimeFinished(true)
         end
     end
 end
 
-function Intersection:setAutomaticSequence()
-    self.manualSequence = nil
-    self:setGreenPhaseFinished(true)
+function Intersection:setAutomaticPhaseSelection()
+    self.manualPhase = nil
+    self:setGreenTimeFinished(true)
     print(string.format("[#Intersection] Automatikmodus aktiviert. (%s')", self.name))
 end
 
@@ -98,44 +91,41 @@ function Intersection:setSwitchInStrictOrder(value)
     self.switchInStrictOrder = value
 end
 
-function Intersection:getGreenPhaseSeconds() return self.greenPhaseSeconds end
+function Intersection:getGreenTimeSeconds() return self.greenTimeSeconds end
 
-function Intersection:setGreenPhaseFinished(greenPhaseFinished) self.greenPhaseFinished = greenPhaseFinished end
+function Intersection:setGreenTimeFinished(greenTimeFinished) self.greenTimeFinished = greenTimeFinished end
 
-function Intersection:isGreenPhaseFinished() return self.greenPhaseFinished end
+function Intersection:isGreenTimeFinished() return self.greenTimeFinished end
 
-function Intersection:setGreenPhaseReached(greenPhaseReached) self.greenPhaseReached = greenPhaseReached end
+function Intersection:setGreenReached(greenReached) self.greenReached = greenReached end
 
-function Intersection:isGreenPhaseReached() return self.greenPhaseReached end
+function Intersection:isGreenReached() return self.greenReached end
 
 function Intersection:setTippStructure(tippStructure) self.tippStructure = tippStructure end
 
 function Intersection:getStaticCams() return self.staticCams end
 
-function Intersection:addStaticCam(kameraName) table.insert(self.staticCams, kameraName) end
+function Intersection:addStaticCam(cameraName) table.insert(self.staticCams, cameraName) end
 
 function Intersection.resetVehicles()
-    for _, crossing in pairs(allIntersections) do
-        print(string.format("[#Intersection] SETZE ZURUECK: %s", crossing.name))
-        if crossing.lanes then for _, lane in pairs(crossing.lanes) do lane:resetVehicles() end end
+    for _, intersection in pairs(allIntersections) do
+        print(string.format("[#Intersection] SETZE ZURUECK: %s", intersection.name))
+        if intersection.lanes then for _, lane in pairs(intersection.lanes) do lane:resetVehicles() end end
     end
 end
 
---- Erzeugt eine neue Kreuzung und registriert diese automatisch fuer das automatische Schalten.
--- Fuegen sie Schaltungen zu dieser Kreuzung hinzu.
--- @param name string name of the crossing
--- @param greenPhaseSeconds nubmer number of seconds for a default green phase
----@return Intersection
-function Intersection:new(name, greenPhaseSeconds)
+function Intersection:new(name, greenTimeSeconds)
     local o = {
         name = name,
-        currentSequence = nil,
-        sequences = {},
+        currentPhase = nil,
+        phases = {},
+        signalGroups = {},
+        signalGroupsBySignalUse = {},
         lanes = {},
-        trafficLights = {},
-        greenPhaseReached = true,
-        greenPhaseFinished = true,
-        greenPhaseSeconds = greenPhaseSeconds or 15,
+        signals = {},
+        greenReached = true,
+        greenTimeFinished = true,
+        greenTimeSeconds = greenTimeSeconds or 15,
         switchInStrictOrder = false,
         tippStructure = nil,
         staticCams = {}
@@ -148,167 +138,159 @@ function Intersection:new(name, greenPhaseSeconds)
     return o
 end
 
---- Erzeugt eine Fahrspur, welche durch eine Ampel gesteuert wird.
----@param name string @Name of the Pedestrian Intersection einer Kreuzung
-function Intersection:newSequence(name, greenPhaseSeconds)
-    local sequence = IntersectionSequence:new(name, greenPhaseSeconds or self.greenPhaseSeconds)
-    self:addSequence(sequence)
-    return sequence
+function Intersection:newSignalGroup(name)
+    local signalGroup = SignalGroup:new(name)
+    table.insert(self.signalGroups, signalGroup)
+    return signalGroup
 end
 
-function Intersection:addSequence(sequence)
-    sequence.crossing = self
-    table.insert(self.sequences, sequence)
-    return sequence
-end
-
-local function allTrafficLights(sequences)
-    local list = {}
-
-    for _, sequence in ipairs(sequences) do
-        assert(sequence.getType() == "IntersectionSequence", type(sequence))
-        for trafficLight, type in pairs(sequence.trafficLights) do list[trafficLight] = type end
+function Intersection:signalGroupForSignalUse(signalHead, signalType)
+    local logicalUse = SignalGroup.logicalUseFor(signalType)
+    self.signalGroupsBySignalUse = self.signalGroupsBySignalUse or {}
+    self.signalGroupsBySignalUse[logicalUse] = self.signalGroupsBySignalUse[logicalUse] or {}
+    local signalGroup = self.signalGroupsBySignalUse[logicalUse][signalHead]
+    if not signalGroup then
+        signalGroup = self:newSignalGroup(signalHead:signalNamesText() .. " " .. logicalUse)
+        signalGroup:addSignals(signalType, signalHead)
+        self.signalGroupsBySignalUse[logicalUse][signalHead] = signalGroup
     end
+    return signalGroup
+end
 
+function Intersection:newPhase(name, greenTimeSeconds)
+    local phase = TrafficPhase:new(name, greenTimeSeconds or self.greenTimeSeconds)
+    self:addPhase(phase)
+    return phase
+end
+
+function Intersection:addPhase(phase)
+    phase.intersection = self
+    table.insert(self.phases, phase)
+    return phase
+end
+
+local function allSignalHeads(phases)
+    local list = {}
+    for _, phase in ipairs(phases) do
+        assert(phase.getType() == "TrafficPhase", type(phase))
+        for signalHead, signalType in pairs(phase.signalHeads) do list[signalHead] = signalType end
+    end
     return list
 end
 
----------------------------
--- Funktion switchTrafficLights
----------------------------
-local function switch(crossing)
+local function switch(intersection)
     local TrafficLight = require("ce.mods.road.TrafficLight")
 
     if Intersection.debug then
-        local msg = "[#Intersection] Schalte Kreuzung %s: %s"
-        print(string.format(msg, crossing:getName(), crossing:isGreenPhaseFinished() and "Ja" or "Nein"))
+        print(string.format("[#Intersection] Schalte Kreuzung %s: %s", intersection:getName(),
+                            intersection:isGreenTimeFinished() and "Ja" or "Nein"))
     end
 
-    if not crossing:isGreenPhaseFinished() or not crossing.greenPhaseReached then do return true end end
+    if not intersection:isGreenTimeFinished() or not intersection.greenReached then do return true end end
 
-    -- Start switching
-    crossing.greenPhaseReached = false
-    crossing:setGreenPhaseFinished(false)
+    intersection.greenReached = false
+    intersection:setGreenTimeFinished(false)
 
-    ---@type IntersectionSequence
-    local nextSequence = crossing:calculateNextSequence()
-    local currentSequence = crossing:getCurrentSequence()
-    crossing.nextSequence = nextSequence
-
-    local nextName = crossing.name .. " " .. nextSequence:getName()
+    local nextPhase = intersection:calculateNextPhase()
+    local currentPhase = intersection:getCurrentPhase()
+    intersection.nextPhase = nextPhase
 
     if Intersection.debug then
-        local msg = "[#Intersection] Schalte %s zu %s (%s)"
-        print(string.format(msg, crossing:getName(), nextName, nextSequence:lanesNamesText()))
+        print(string.format("[#Intersection] Schalte %s zu %s %s (%s)", intersection:getName(), intersection.name,
+                            nextPhase:getName(), nextPhase:lanesNamesText()))
     end
-    if not currentSequence then
-        local reason = "Schalte initial auf rot"
-        local turnRedTraffic = allTrafficLights(crossing.sequences)
-        TrafficLight.switchAll(turnRedTraffic, TrafficLightState.RED, reason)
+    if not currentPhase then
+        TrafficLight.switchAll(allSignalHeads(intersection.phases), SignalIndication.RED, "Schalte initial auf rot")
     end
 
-    -- After the sequence is ready, the current sequence is active
-    local switchedSequenceTask = Task:new(function () crossing:onSwitchedToSequence(nextSequence) end,
-                                          crossing.name .. " verwendet nun Schaltung " .. nextSequence.name)
+    local switchedPhaseTask = Task:new(function () intersection:onSwitchedToPhase(nextPhase) end,
+                                       intersection.name .. " verwendet nun Phase " .. nextPhase.name)
 
-    -- Calculate all tasks for switching in the sequence
     local lastTask
-    local tasks = nextSequence:tasksForSwitchingFrom(currentSequence, switchedSequenceTask)
-
+    local tasks = nextPhase:tasksForPhaseChangeFrom(currentPhase, switchedPhaseTask)
     for _, t in ipairs(tasks) do
         Scheduler:scheduleTask(t.offset, t.task, t.precedingTask)
         lastTask = t.task
     end
 
-    -- After the sequence is ready, the current sequence is active
-    local greenPhaseReachedTask = Task:new(function ()
-                                               if Intersection.debug then
-                                                   local msg = "[#Intersection] %s: Kreuzung ist auf grün geschaltet."
-                                                   print(string.format(msg, crossing.name))
-                                               end
-                                               crossing.greenPhaseReached = true
-                                           end, crossing.name .. " ist nun auf grün geschaltet)")
-    Scheduler:scheduleTask(0, greenPhaseReachedTask, lastTask)
+    local greenReachedTask = Task:new(
+        function ()
+            if Intersection.debug then
+                print(string.format(
+                    "[#Intersection] %s: Kreuzung ist auf gruen geschaltet.",
+                    intersection.name))
+            end
+            intersection.greenReached = true
+        end, intersection.name .. " ist nun auf gruen geschaltet)")
+    Scheduler:scheduleTask(0, greenReachedTask, lastTask)
 
-    -- Schedule the finishing task
-    local greenPhaseSeconds = nextSequence.greenPhaseSeconds
-    local crossingFinishedTask = Task:new(function ()
-                                              if Intersection.debug then
-                                                  local msg =
-                                                  "[#Intersection] %s: Fahrzeuge sind gefahren, kreuzung ist dann frei."
-                                                  print(string.format(msg, crossing.name))
-                                              end
-                                              crossing:setGreenPhaseFinished(true)
-                                          end,
-                                          crossing.name ..
-                                          " ist nun bereit zum Umschalten (war " ..
-                                          greenPhaseSeconds .. "s auf grün geschaltet)")
-    Scheduler:scheduleTask(greenPhaseSeconds, crossingFinishedTask, greenPhaseReachedTask)
+    local greenTimeSeconds = nextPhase.greenTimeSeconds
+    local intersectionFinishedTask = Task:new(
+        function ()
+            if Intersection.debug then
+                print(string.format(
+                    "[#Intersection] %s: Fahrzeuge sind gefahren, " ..
+                    "kreuzung ist dann frei.",
+                    intersection.name))
+            end
+            intersection:setGreenTimeFinished(true)
+        end,
+        intersection.name .. " ist nun bereit zum Umschalten (war " ..
+        greenTimeSeconds .. "s auf gruen geschaltet)")
+    Scheduler:scheduleTask(greenTimeSeconds, intersectionFinishedTask, greenReachedTask)
 end
 
---- Diese Funktion sucht sich aus den Ampeln die mit der passenden Fahrspur
--- raus und setzt deren Texte auf die aktuelle Schaltung
--- @param kreuzung
-local function recalculateSignalInfo(crossing)
-    for _, lane in pairs(crossing.lanes) do lane:checkRequests() end
+local function recalculateSignalInfo(intersection)
+    for _, lane in pairs(intersection.lanes) do lane:checkRequests() end
 
-    ---@type table<TrafficLight, TrafficLightModel>
-    local trafficLights = {}
+    local signalHeads = {}
+    local sortedPhases = {}
+    for _, phase in ipairs(intersection:getPhases()) do table.insert(sortedPhases, phase) end
+    table.sort(sortedPhases, function (s1, s2) return s1.name < s2.name end)
 
-    -- sort the circuits
-    local sortedSequences = {}
-    for _, v in ipairs(crossing:getSequences()) do table.insert(sortedSequences, v) end
-    table.sort(sortedSequences, function (s1, s2) return (s1.name < s2.name) end)
-
-    for _, sequence in ipairs(sortedSequences) do
-        for tl, type in pairs(sequence.trafficLights) do trafficLights[tl] = type end
+    for _, phase in ipairs(sortedPhases) do
+        for signalHead, signalType in pairs(phase.signalHeads) do signalHeads[signalHead] = signalType end
     end
 
-    local trafficLightsToRefresh = {}
-    for _, lane in pairs(crossing.lanes) do
-        local trafficLight = lane.laneTrafficLight or lane.trafficLight
-        trafficLightsToRefresh[trafficLight.signalId] = trafficLight
-        local text = "<br></j>" .. lane:getRequestInfo() .. " / " .. lane.waitCount
-        trafficLight:setLaneInfo(text)
+    local signalHeadsToRefresh = {}
+    for _, lane in pairs(intersection.lanes) do
+        local signalHead = lane.laneSignal
+        signalHeadsToRefresh[signalHead.signalId] = signalHead
+        signalHead:setLaneInfo("<br></j>" .. lane:getRequestInfo() .. " / " .. lane.waitCount)
     end
 
-    for trafficLight in pairs(trafficLights) do
-        trafficLightsToRefresh[trafficLight.signalId] = trafficLight
+    for signalHead in pairs(signalHeads) do
+        signalHeadsToRefresh[signalHead.signalId] = signalHead
         local text = {}
-        for _, sequence in ipairs(sortedSequences) do
-            local farbig = sequence == crossing:getCurrentSequence()
-            local type = sequence.trafficLights[trafficLight]
-            if not type then
+        for _, phase in ipairs(sortedPhases) do
+            local highlighted = phase == intersection:getCurrentPhase()
+            local signalType = phase.signalHeads[signalHead]
+            if not signalType then
                 table.insert(text, "<br><j>" ..
-                    (farbig and fmt.bgRed(sequence.name .. " (Rot)") or
-                        (sequence.name .. " " .. fmt.bgRed("(Rot)"))))
-            elseif type == IntersectionSequence.Type.CAR then
+                    (highlighted and fmt.bgRed(phase.name .. " (Rot)") or (phase.name .. " " .. fmt.bgRed("(Rot)"))))
+            elseif signalType == TrafficPhase.Type.CAR then
                 table.insert(text, "<br><j>" ..
-                    (farbig and fmt.bgGreen(sequence.name .. " (Gruen)") or
-                        (sequence.name .. " " .. fmt.bgGreen("(Gruen)"))))
-            elseif type == IntersectionSequence.Type.PEDESTRIAN then
+                    (highlighted and fmt.bgGreen(phase.name .. " (Gruen)") or
+                        (phase.name .. " " .. fmt.bgGreen("(Gruen)"))))
+            elseif signalType == TrafficPhase.Type.PEDESTRIAN then
                 table.insert(text, "<br><j>" ..
-                    (farbig and fmt.bgYellow(sequence.name .. " (FG)") or
-                        (sequence.name .. " " .. fmt.bgYellow("(FG)"))))
-            elseif type == IntersectionSequence.Type.TRAM then
+                    (highlighted and fmt.bgYellow(phase.name .. " (FG)") or
+                        (phase.name .. " " .. fmt.bgYellow("(FG)"))))
+            elseif signalType == TrafficPhase.Type.TRAM then
                 table.insert(text, "<br><j>" ..
-                    (farbig and fmt.bgBlue(sequence.name .. " (Tram)") or
-                        (sequence.name .. " " .. fmt.bgBlue("(Tram)"))))
+                    (highlighted and fmt.bgBlue(phase.name .. " (Tram)") or
+                        (phase.name .. " " .. fmt.bgBlue("(Tram)"))))
             else
-                -- No such type allowed here
-                assert(false, type)
+                assert(false, signalType)
             end
         end
         table.insert(text, "<br>")
-        trafficLight:setSequenceInfo(table.concat(text, ""))
+        signalHead:setPhaseInfo(table.concat(text, ""))
     end
 
-    for _, trafficLight in pairs(trafficLightsToRefresh) do trafficLight:refreshInfo() end
+    for _, signalHead in pairs(signalHeadsToRefresh) do signalHead:refreshInfo() end
 end
 
----comment
----@param lane Lane
----@return string
 local function getLaneRequestInfoBar(lane)
     local text = ""
     local max = 5
@@ -318,9 +300,9 @@ local function getLaneRequestInfoBar(lane)
         local requests = "X"
         local vehicles = math.min(lane.vehicleCount * lane.fahrzeugMultiplikator, max - 1)
         for _ = 1, vehicles do requests = requests .. "_" end
-        if lane.phase == TrafficLightState.RED then
+        if lane.currentIndication == SignalIndication.RED then
             text = text .. fmt.bgRed(requests)
-        elseif lane.phase == TrafficLightState.YELLOW then
+        elseif lane.currentIndication == SignalIndication.YELLOW then
             text = text .. fmt.bgYellow(requests)
         else
             text = text .. fmt.bgGreen(requests)
@@ -333,55 +315,52 @@ local function getLaneRequestInfoBar(lane)
     return text .. "  " .. lane.name
 end
 
----comment
----@param self Intersection
 function Intersection:updateLaneTipText()
-    local crossing = self
-    local text = fmt.bold(crossing.name) .. "<br>" .. "_____"
+    local text = fmt.bold(self.name) .. "<br>" .. "_____"
     for _, lane in pairs(self.lanes) do
         text = TippTextFormatter.appendUpTo1023(text, "<br></j>" .. getLaneRequestInfoBar(lane))
     end
 
-    if crossing.tippStructure then
-        EEPShowInfoStructure(crossing.tippStructure, IntersectionSettings.showLanesOnStructure)
-        EEPChangeInfoStructure(crossing.tippStructure, text)
+    if self.tippStructure then
+        EEPShowInfoStructure(self.tippStructure, IntersectionSettings.showLanesOnStructure)
+        EEPChangeInfoStructure(self.tippStructure, text)
     end
 end
 
 local setupHelpCreated = IntersectionSettings.showSignalIdOnSignal
 
---- Init all crossing lanes and traffic lights according to their sequences' traffic lights
---- ----
---- Speichert die Fahrspuren und Ampeln in den einzelnen Kreuzungen --> Weniger Suche danach
-function Intersection.initSequences()
-    for _, crossing in pairs(allIntersections) do
+function Intersection.initPhases()
+    for _, intersection in pairs(allIntersections) do
         local myLanes = {}
-        for _, sequence in ipairs(crossing.sequences) do
-            sequence:initSequence()
+        for _, phase in ipairs(intersection.phases) do
+            phase:initPhase()
             local laneFound = false
-            for v in pairs(sequence.lanes) do
-                myLanes[v.name] = v
+            for lane in pairs(phase.lanes) do
+                myLanes[lane.name] = lane
                 laneFound = true
             end
             if not laneFound then
-                print(string.format("[#Intersection] No LANE found in sequence %s (%s)", sequence.name, crossing.name))
+                print(string.format("[#Intersection] No LANE found in phase %s (%s)", phase.name, intersection.name))
             end
             assert(laneFound)
-            for v in pairs(sequence.trafficLights) do crossing.trafficLights[v.signalId] = v end
-
+            for signalHead in pairs(phase.signalHeads) do
+                intersection.signals[signalHead.signalId] = signalHead
+            end
             if Intersection.debug then
-                local text = "[#Intersection] %s - %s: %s"
-                print(string.format(text, crossing.name, sequence.name, sequence:lanesNamesText()))
+                print(string.format(
+                    "[#Intersection] %s - %s: %s",
+                    intersection.name,
+                    phase.name,
+                    phase:lanesNamesText()))
             end
         end
 
-        for _, v in pairs(myLanes) do table.insert(crossing.lanes, v) end
-        table.sort(crossing.lanes, function (a, b) return a.name < b.name end)
+        for _, lane in pairs(myLanes) do table.insert(intersection.lanes, lane) end
+        table.sort(intersection.lanes, function (a, b) return a.name < b.name end)
     end
 end
 
---- Switch all sequences according to the current crossing settings
-function Intersection.switchSequences()
+function Intersection.switchPhases()
     if setupHelpCreated ~= IntersectionSettings.showSignalIdOnSignal then
         setupHelpCreated = IntersectionSettings.showSignalIdOnSignal
         for signalId = 1, 1000 do
@@ -392,10 +371,10 @@ function Intersection.switchSequences()
         end
     end
 
-    for _, crossing in pairs(allIntersections) do
-        switch(crossing)
-        recalculateSignalInfo(crossing)
-        crossing:updateLaneTipText()
+    for _, intersection in pairs(allIntersections) do
+        switch(intersection)
+        recalculateSignalInfo(intersection)
+        intersection:updateLaneTipText()
     end
 end
 

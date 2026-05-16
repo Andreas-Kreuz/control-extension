@@ -40,7 +40,7 @@ TrafficLight.debug = false
 Intersection.debug = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showRequestsOnSignal = true
-IntersectionSettings.showSequenceOnSignal = true
+IntersectionSettings.showPhaseOnSignal = true
 
 --------------------------------------------------------------------
 -- Erste Hilfe - normalerweise nicht notwendig                    --

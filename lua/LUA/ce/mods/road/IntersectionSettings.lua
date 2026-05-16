@@ -3,9 +3,9 @@ local StorageUtility = require("ce.hub.util.StorageUtility")
 
 local IntersectionSettings = {}
 IntersectionSettings.showRequestsOnSignal = false
-IntersectionSettings.showSequenceOnSignal = false
+IntersectionSettings.showPhaseOnSignal = false
 IntersectionSettings.showModelInfoOnSignal = false
-IntersectionSettings.showNameAndSequenceOnSignal = false
+IntersectionSettings.showNameAndPhaseOnSignal = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showLanesOnStructure = false
 
@@ -15,12 +15,12 @@ function IntersectionSettings.loadSettingsFromSlot(eepSaveId)
     local data = StorageUtility.loadTable(IntersectionSettings.saveSlot, "Intersection settings")
     IntersectionSettings.showRequestsOnSignal = StorageUtility.toboolean(data["reqInfo"]) or
         IntersectionSettings.showRequestsOnSignal
-    IntersectionSettings.showSequenceOnSignal = StorageUtility.toboolean(data["seqInfo"]) or
-        IntersectionSettings.showSequenceOnSignal
+    IntersectionSettings.showPhaseOnSignal = StorageUtility.toboolean(data["seqInfo"]) or
+        IntersectionSettings.showPhaseOnSignal
     IntersectionSettings.showModelInfoOnSignal = StorageUtility.toboolean(data["modelInfo"]) or
         IntersectionSettings.showModelInfoOnSignal
-    IntersectionSettings.showNameAndSequenceOnSignal = StorageUtility.toboolean(data["nameSeqInfo"]) or
-        IntersectionSettings.showNameAndSequenceOnSignal
+    IntersectionSettings.showNameAndPhaseOnSignal = StorageUtility.toboolean(data["nameSeqInfo"]) or
+        IntersectionSettings.showNameAndPhaseOnSignal
     IntersectionSettings.showSignalIdOnSignal = StorageUtility.toboolean(data["sigInfo"]) or
         IntersectionSettings.showSignalIdOnSignal
     IntersectionSettings.showLanesOnStructure = StorageUtility.toboolean(data["laneInfo"]) or
@@ -31,9 +31,9 @@ function IntersectionSettings.saveSettings()
     if IntersectionSettings.saveSlot then
         local data = {
             reqInfo = tostring(IntersectionSettings.showRequestsOnSignal),
-            seqInfo = tostring(IntersectionSettings.showSequenceOnSignal),
+            seqInfo = tostring(IntersectionSettings.showPhaseOnSignal),
             modelInfo = tostring(IntersectionSettings.showModelInfoOnSignal),
-            nameSeqInfo = tostring(IntersectionSettings.showNameAndSequenceOnSignal),
+            nameSeqInfo = tostring(IntersectionSettings.showNameAndPhaseOnSignal),
             sigInfo = tostring(IntersectionSettings.showSignalIdOnSignal),
             laneInfo = tostring(IntersectionSettings.showLanesOnStructure)
         }
@@ -53,15 +53,15 @@ function IntersectionSettings.setShowModelInfoOnSignal(value)
     IntersectionSettings.saveSettings()
 end
 
-function IntersectionSettings.setShowSequenceOnSignal(value)
+function IntersectionSettings.setShowPhaseOnSignal(value)
     assert(value == true or value == false)
-    IntersectionSettings.showSequenceOnSignal = value
+    IntersectionSettings.showPhaseOnSignal = value
     IntersectionSettings.saveSettings()
 end
 
-function IntersectionSettings.setShowNameAndSequenceOnSignal(value)
+function IntersectionSettings.setShowNameAndPhaseOnSignal(value)
     assert(value == true or value == false)
-    IntersectionSettings.showNameAndSequenceOnSignal = value
+    IntersectionSettings.showNameAndPhaseOnSignal = value
     IntersectionSettings.saveSettings()
 end
 

@@ -2,7 +2,7 @@
 layout: page_with_toc
 title: Ampelsteuerung 3
 type: Tutorial mit Anlage
-subtitle: Erfahre wie Du anliegenden Verkehr erkennen kannst und wie dieser die Schaltungen beeinflusst.
+subtitle: Erfahre wie Du anliegenden Verkehr erkennen kannst und wie dieser die Phasen beeinflusst.
 img: '/assets/thumbnails/tutorial3-verkehr-erkennen.jpg'
 permalink: docs/anleitungen-ampelkreuzung/tutorial3-priorisierung
 hide: false
@@ -14,7 +14,7 @@ published: false
 
 **Voraussetzungen:**
 
-- [Anleitung "Ampelkreuzung automatisch steuern"](ampelkreuzung) - fange hier an, um zu erfahren, was Kreuzung, Schaltung und Fahrspur bedeuten.
+- [Anleitung "Ampelkreuzung automatisch steuern"](ampelkreuzung) - fange hier an, um zu erfahren, was Kreuzung, Phase, Signalgruppe und Fahrspur bedeuten.
 
 # Beispielanlage öffnen
 
@@ -74,7 +74,7 @@ Es gibt 4 Arten von Priorisierungen für Fahrspuren. Nur eine davon kann gleichz
 
 ## ... innerhalb einer Kreuzung
 
-Die nächste Schaltung wird immer durch die höchsten Durchschnittspriorität aller Fahrspuren bestimmt.
+Die nächste Phase wird immer durch die höchste Durchschnittspriorität aller Fahrspuren bestimmt.
 
 Durch das Einbeziehen der Wartezeit wird sichergestellt, dass jede Fahrspur berücksichtigt wird.
 

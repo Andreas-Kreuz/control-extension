@@ -13,36 +13,36 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local intersection = {
             id = 1,
             name = "A",
-            currentSwitching = "S1",
-            manualSwitching = "S2",
-            nextSwitching = "S3",
+            currentPhase = "P1",
+            manualPhase = "P2",
+            nextPhase = "P3",
             ready = true,
-            timeForGreen = 15,
+            greenTimeSeconds = 15,
             staticCams = { "Cam 1" },
             phases = {
                 {
-                    id = "A-S1",
-                    name = "S1",
+                    id = "A-P1",
+                    name = "P1",
                     order = 1,
                     prio = 2,
-                    greenPhaseSeconds = 15,
-                    trafficLights = {
+                    greenTimeSeconds = 15,
+                    signalHeads = {
                         {
                             signalId = 1,
-                            signalKind = "TRAFFIC",
-                            signalKey = "1:TRAFFIC",
-                            signalName = "K1",
+                            signalHeadKind = "VEHICLE",
+                            signalHeadKey = "1:VEHICLE",
+                            signalHeadName = "K1",
                             type = "CAR",
-                            trafficSignalName = "K1",
-                            use = "TRAFFIC_ONLY"
+                            vehicleSignalHeadName = "K1",
+                            use = "VEHICLE_ONLY"
                         },
                         {
                             signalId = 3,
-                            signalKind = "PEDESTRIAN",
-                            signalKey = "3:PEDESTRIAN",
-                            signalName = "F1",
+                            signalHeadKind = "PEDESTRIAN",
+                            signalHeadKey = "3:PEDESTRIAN",
+                            signalHeadName = "F1",
                             type = "PEDESTRIAN",
-                            pedestrianSignalName = "F1",
+                            pedestrianSignalHeadName = "F1",
                             use = "PEDESTRIAN_ONLY"
                         }
                     }
@@ -54,7 +54,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             id = "1-L1",
             intersectionId = 1,
             name = "L1",
-            phase = "GREEN",
+            currentIndication = "GREEN",
             vehicleMultiplier = 2,
             eepSaveId = 5,
             type = "NORMAL",
@@ -62,19 +62,19 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             waitingTrains = { "T1" },
             waitingForGreenCyclesCount = 4,
             directions = { "LEFT" },
-            switchings = { "S1" },
+            phases = { "P1" },
             tracks = { 10 },
             hidden = true
         }
-        local switching = { id = "A-S1", intersectionId = "A", name = "S1", prio = 1, hidden = true }
-        local trafficLight = {
+        local phase = { id = "A-P1", intersectionId = "A", name = "P1", prio = 1, hidden = true }
+        local signal = {
             id = 2,
             signalId = 2,
-            trafficSignalName = "K2",
+            vehicleSignalName = "K2",
             pedestrianSignalName = "F2",
-            use = "TRAFFIC_AND_PEDESTRIAN",
+            use = "VEHICLE_AND_PEDESTRIAN",
             modelId = "road",
-            currentPhase = "GREEN",
+            currentIndication = "GREEN",
             intersectionId = 1,
             lightStructures = {
                 ["0"] = {
@@ -113,16 +113,16 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local _, _, _, selectedIntersectionDto = RoadDtoFactory.createIntersectionDto(intersection, true)
         local laneCeType, laneKeyId, laneKey, laneDto = RoadDtoFactory.createIntersectionLaneDto(lane)
         local _, _, _, selectedLaneDto = RoadDtoFactory.createIntersectionLaneDto(lane, true)
-        local switchingCeType, switchingKeyId, switchingKey, switchingDto =
-            RoadDtoFactory.createIntersectionSwitchingDto(switching)
-        local tlCeType, tlKeyId, tlKey, trafficLightDto =
-            RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight)
-        local _, _, _, selectedTrafficLightDto =
-            RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight, true)
+        local phaseCeType, phaseKeyId, phaseKey, phaseDto =
+            RoadDtoFactory.createIntersectionPhaseDto(phase)
+        local tlCeType, tlKeyId, tlKey, signalDto =
+            RoadDtoFactory.createIntersectionTrafficLightDto(signal)
+        local _, _, _, selectedSignalDto =
+            RoadDtoFactory.createIntersectionTrafficLightDto(signal, true)
         local moduleCeType, moduleKeyId, moduleKey, moduleDto =
             RoadDtoFactory.createIntersectionModuleSettingDto(moduleSetting)
         local defsCeType, defsKeyId, defs =
-            TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList({
+            TrafficLightModelDtoFactory.createTrafficLightModelDtoList({
                 {
                     id = "road",
                     name = "road",
@@ -151,36 +151,36 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
-                        currentSwitching = "", -- oninterest, never selected
-                        manualSwitching = "",  -- oninterest, never selected
-                        nextSwitching = "",    -- oninterest, never selected
+                        currentPhase = "", -- oninterest, never selected
+                        manualPhase = "",  -- oninterest, never selected
+                        nextPhase = "",    -- oninterest, never selected
                         ready = false,         -- oninterest, never selected
-                        timeForGreen = 15,
+                        greenTimeSeconds = 15,
                         staticCams = { "Cam 1" },
                         phases = {
                             {
-                                id = "A-S1",
-                                name = "S1",
+                                id = "A-P1",
+                                name = "P1",
                                 order = 1,
                                 prio = 2,
-                                greenPhaseSeconds = 15,
-                                trafficLights = {
+                                greenTimeSeconds = 15,
+                                signalHeads = {
                                     {
                                         signalId = 1,
-                                        signalKind = "TRAFFIC",
-                                        signalKey = "1:TRAFFIC",
-                                        signalName = "K1",
+                                        signalHeadKind = "VEHICLE",
+                                        signalHeadKey = "1:VEHICLE",
+                                        signalHeadName = "K1",
                                         type = "CAR",
-                                        trafficSignalName = "K1",
-                                        use = "TRAFFIC_ONLY"
+                                        vehicleSignalHeadName = "K1",
+                                        use = "VEHICLE_ONLY"
                                     },
                                     {
                                         signalId = 3,
-                                        signalKind = "PEDESTRIAN",
-                                        signalKey = "3:PEDESTRIAN",
-                                        signalName = "F1",
+                                        signalHeadKind = "PEDESTRIAN",
+                                        signalHeadKey = "3:PEDESTRIAN",
+                                        signalHeadName = "F1",
                                         type = "PEDESTRIAN",
-                                        pedestrianSignalName = "F1",
+                                        pedestrianSignalHeadName = "F1",
                                         use = "PEDESTRIAN_ONLY"
                                     }
                                 }
@@ -191,36 +191,36 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
-                        currentSwitching = "S1",
-                        manualSwitching = "S2",
-                        nextSwitching = "S3",
+                        currentPhase = "P1",
+                        manualPhase = "P2",
+                        nextPhase = "P3",
                         ready = true,
-                        timeForGreen = 15,
+                        greenTimeSeconds = 15,
                         staticCams = { "Cam 1" },
                         phases = {
                             {
-                                id = "A-S1",
-                                name = "S1",
+                                id = "A-P1",
+                                name = "P1",
                                 order = 1,
                                 prio = 2,
-                                greenPhaseSeconds = 15,
-                                trafficLights = {
+                                greenTimeSeconds = 15,
+                                signalHeads = {
                                     {
                                         signalId = 1,
-                                        signalKind = "TRAFFIC",
-                                        signalKey = "1:TRAFFIC",
-                                        signalName = "K1",
+                                        signalHeadKind = "VEHICLE",
+                                        signalHeadKey = "1:VEHICLE",
+                                        signalHeadName = "K1",
                                         type = "CAR",
-                                        trafficSignalName = "K1",
-                                        use = "TRAFFIC_ONLY"
+                                        vehicleSignalHeadName = "K1",
+                                        use = "VEHICLE_ONLY"
                                     },
                                     {
                                         signalId = 3,
-                                        signalKind = "PEDESTRIAN",
-                                        signalKey = "3:PEDESTRIAN",
-                                        signalName = "F1",
+                                        signalHeadKind = "PEDESTRIAN",
+                                        signalHeadKey = "3:PEDESTRIAN",
+                                        signalHeadName = "F1",
                                         type = "PEDESTRIAN",
-                                        pedestrianSignalName = "F1",
+                                        pedestrianSignalHeadName = "F1",
                                         use = "PEDESTRIAN_ONLY"
                                     }
                                 }
@@ -235,7 +235,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
-                        phase = "", -- oninterest, never selected
+                        currentIndication = "", -- oninterest, never selected
                         vehicleMultiplier = 2,
                         eepSaveId = 5,
                         type = "NORMAL",
@@ -243,7 +243,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         waitingTrains = {},             -- oninterest, never selected
                         waitingForGreenCyclesCount = 0, -- oninterest, never selected
                         directions = { "LEFT" },
-                        switchings = { "S1" },
+                        phases = { "P1" },
                         tracks = { 10 }
                     }, laneDto)
         assert.same({
@@ -251,7 +251,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
-                        phase = "GREEN",
+                        currentIndication = "GREEN",
                         vehicleMultiplier = 2,
                         eepSaveId = 5,
                         type = "NORMAL",
@@ -259,19 +259,19 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         waitingTrains = { "T1" },
                         waitingForGreenCyclesCount = 4,
                         directions = { "LEFT" },
-                        switchings = { "S1" },
+                        phases = { "P1" },
                         tracks = { 10 }
                     }, selectedLaneDto)
-        assert.equals("ce.mods.road.IntersectionSwitching", switchingCeType)
-        assert.equals("id", switchingKeyId)
-        assert.equals("A-S1", switchingKey)
+        assert.equals("ce.mods.road.IntersectionPhase", phaseCeType)
+        assert.equals("id", phaseKeyId)
+        assert.equals("A-P1", phaseKey)
         assert.same({
-                        ceType = "ce.mods.road.IntersectionSwitching",
-                        id = "A-S1",
+                        ceType = "ce.mods.road.IntersectionPhase",
+                        id = "A-P1",
                         intersectionId = "A",
-                        name = "S1",
+                        name = "P1",
                         prio = 1
-                    }, switchingDto)
+                    }, phaseDto)
         assert.equals("ce.mods.road.IntersectionTrafficLight", tlCeType)
         assert.equals("id", tlKeyId)
         assert.equals(2, tlKey)
@@ -279,11 +279,11 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.IntersectionTrafficLight",
                         id = 2,
                         signalId = 2,
-                        trafficSignalName = "K2",
+                        vehicleSignalName = "K2",
                         pedestrianSignalName = "F2",
-                        use = "TRAFFIC_AND_PEDESTRIAN",
+                        use = "VEHICLE_AND_PEDESTRIAN",
                         modelId = "road",
-                        currentPhase = "", -- oninterest, never selected
+                        currentIndication = "", -- oninterest, never selected
                         intersectionId = 1,
                         lightStructures = {
                             ["0"] = {
@@ -305,16 +305,16 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                 positionRedYellow = 5
                             }
                         }
-                    }, trafficLightDto)
+                    }, signalDto)
         assert.same({
                         ceType = "ce.mods.road.IntersectionTrafficLight",
                         id = 2,
                         signalId = 2,
-                        trafficSignalName = "K2",
+                        vehicleSignalName = "K2",
                         pedestrianSignalName = "F2",
-                        use = "TRAFFIC_AND_PEDESTRIAN",
+                        use = "VEHICLE_AND_PEDESTRIAN",
                         modelId = "road",
-                        currentPhase = "GREEN",
+                        currentIndication = "GREEN",
                         intersectionId = 1,
                         lightStructures = {
                             ["0"] = {
@@ -336,7 +336,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                 positionRedYellow = 5
                             }
                         }
-                    }, selectedTrafficLightDto)
+                    }, selectedSignalDto)
         assert.equals("ce.mods.road.ModuleSetting", moduleCeType)
         assert.equals("name", moduleKeyId)
         assert.equals("Show", moduleKey)
@@ -349,11 +349,11 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         value = true,
                         eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
                     }, moduleDto)
-        assert.equals("ce.mods.road.SignalTypeDefinition", defsCeType)
+        assert.equals("ce.mods.road.TrafficLightModel", defsCeType)
         assert.equals("id", defsKeyId)
         assert.same({
                         {
-                            ceType = "ce.mods.road.SignalTypeDefinition",
+                            ceType = "ce.mods.road.TrafficLightModel",
                             id = "road",
                             name = "road",
                             type = "road",
@@ -384,11 +384,11 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                                                         [1] = {
                                                                             id = 1,
                                                                             name = "A",
-                                                                            currentSwitching = "S1",
-                                                                            manualSwitching = "S2",
-                                                                            nextSwitching = "S3",
+                                                                            currentPhase = "P1",
+                                                                            manualPhase = "P2",
+                                                                            nextPhase = "P3",
                                                                             ready = true,
-                                                                            timeForGreen = 15,
+                                                                            greenTimeSeconds = 15,
                                                                             staticCams = { "Cam 1" },
                                                                             phases = {}
                                                                         }
@@ -396,82 +396,83 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                                                         return intersection.id == 1
                                                                     end)
 
-        assert.same("S1", dtos[1].currentSwitching)
-        assert.same("S2", dtos[1].manualSwitching)
-        assert.same("S3", dtos[1].nextSwitching)
+        assert.same("P1", dtos[1].currentPhase)
+        assert.same("P2", dtos[1].manualPhase)
+        assert.same("P3", dtos[1].nextPhase)
         assert.is_true(dtos[1].ready)
     end)
 
-    it("collects ordered intersection phases with sorted traffic lights", function ()
+    it("collects ordered intersection phases with sorted signal heads", function ()
         require("ce.hub.eep.EepSimulator")
         local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
 
-        local trafficLight1 = {
+        local signalHead1 = {
             signalId = 1,
-            trafficSignalName = "K1",
-            use = "TRAFFIC_ONLY",
-            phase = "RED",
+            vehicleSignalName = "K1",
+            use = "VEHICLE_ONLY",
+            currentIndication = "RED",
             trafficLightModel = { name = "road" },
             axisStructures = {},
             lightStructures = {}
         }
-        local trafficLight3 = {
+        local signalHead3 = {
             signalId = 3,
             pedestrianSignalName = "F1",
             use = "PEDESTRIAN_ONLY",
-            phase = "GREEN",
+            currentIndication = "GREEN",
             trafficLightModel = { name = "road" },
             axisStructures = {},
             lightStructures = {}
         }
-        local sequence = {
-            name = "S1",
+        local phase = {
+            name = "P1",
             prio = 4,
-            greenPhaseSeconds = 12,
+            greenTimeSeconds = 12,
             lanes = {},
-            trafficLights = {
-                [trafficLight3] = "PEDESTRIAN",
-                [trafficLight1] = "CAR"
+            signalHeads = {
+                [signalHead3] = "PEDESTRIAN",
+                [signalHead1] = "CAR"
             }
         }
         local crossing = {
             name = "A",
             staticCams = { "Cam 1" },
-            getCurrentSequence = function () return nil end,
-            getManualSequence = function () return nil end,
-            getNextSequence = function () return nil end,
-            isGreenPhaseFinished = function () return true end,
-            getGreenPhaseSeconds = function () return 15 end,
+            getCurrentPhase = function () return nil end,
+            getManualPhase = function () return nil end,
+            getNextPhase = function () return nil end,
+            isGreenTimeFinished = function () return true end,
+            getGreenTimeSeconds = function () return 15 end,
             getStaticCams = function (self) return self.staticCams end,
-            getSequences = function () return { sequence } end
+            getPhases = function () return { phase } end
         }
 
         local data = RoadDataCollector.collectCrossings({ A = crossing })
 
         assert.same({
-                        id = "A-S1",
-                        name = "S1",
+                        id = "A-P1",
+                        name = "P1",
                         order = 1,
                         prio = 4,
-                        greenPhaseSeconds = 12,
-                        trafficLights = {
+                        greenTimeSeconds = 12,
+                        signalGroups = {},
+                        signalHeads = {
                             {
                                 signalId = 3,
-                                signalKind = "PEDESTRIAN",
-                                signalKey = "3:PEDESTRIAN",
-                                signalName = "F1",
+                                signalHeadKind = "PEDESTRIAN",
+                                signalHeadKey = "3:PEDESTRIAN",
+                                signalHeadName = "F1",
                                 type = "PEDESTRIAN",
-                                pedestrianSignalName = "F1",
+                                pedestrianSignalHeadName = "F1",
                                 use = "PEDESTRIAN_ONLY"
                             },
                             {
                                 signalId = 1,
-                                signalKind = "TRAFFIC",
-                                signalKey = "1:TRAFFIC",
-                                signalName = "K1",
+                                signalHeadKind = "VEHICLE",
+                                signalHeadKey = "1:VEHICLE",
+                                signalHeadName = "K1",
                                 type = "CAR",
-                                trafficSignalName = "K1",
-                                use = "TRAFFIC_ONLY"
+                                vehicleSignalHeadName = "K1",
+                                use = "VEHICLE_ONLY"
                             }
                         }
                     }, data.intersections[1].phases[1])

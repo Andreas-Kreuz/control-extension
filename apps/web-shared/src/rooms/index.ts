@@ -19,6 +19,6 @@ export {
   TransitTrainRoom,
   IntersectionListRoom,
   IntersectionRoom,
-  IntersectionSwitchingListRoom,
+  IntersectionPhaseListRoom,
   RoadSettingsRoom,
 } from './DomainRoomRegistry';

@@ -21,9 +21,9 @@ Wichtige Vorbemerkungen:
 
 | Collector                         | CeType                              |
 | --------------------------------- | ----------------------------------- |
-| `TrafficLightModelStatePublisher` | `ce.mods.road.SignalTypeDefinition` |
+| `TrafficLightModelStatePublisher` | `ce.mods.road.TrafficLightModel` |
 
-### CeType `ce.mods.road.SignalTypeDefinition`
+### CeType `ce.mods.road.TrafficLightModel`
 
 Jeder Eintrag beschreibt das Verhalten eines bestimmten Modells von Ampeln. Das Modell bestimmt, welche Signalstellung für die Ampelschaltung genutzt werden soll, also für rot, gelb, grün, Fußgängergrün usw.
 Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, signalIndex, 1)` verwendet werden und kommen bei `EEPGetSignal(signalId)` als zweiter Rückgabewert zurück.
@@ -47,7 +47,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | Collector            | CeType                                  |
 | -------------------- | --------------------------------------- |
 | `RoadStatePublisher` | `ce.mods.road.Intersection`             |
-| `RoadStatePublisher` | `ce.mods.road.IntersectionSwitching`    |
+| `RoadStatePublisher` | `ce.mods.road.IntersectionPhase`    |
 | `RoadStatePublisher` | `ce.mods.road.IntersectionTrafficLight` |
 | `RoadStatePublisher` | `ce.mods.road.IntersectionLane`         |
 | `RoadStatePublisher` | `ce.mods.road.ModuleSetting`            |
@@ -55,53 +55,53 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 ### CeType `ce.mods.road.Intersection`
 
 - Jeder Eintrag beschreibt eine Kreuzung mit eindeutiger `id` und einem `name`.
-- Wird eine Kreuzung manuell geschaltet, dann ist `manualSwitching` gesetzt. Dann steuert der Nutzer über die EEP-Web-App die Schaltung.
+- Wird eine Kreuzung manuell geschaltet, dann ist `manualPhase` gesetzt. Dann steuert der Nutzer über die EEP-Web-App die Phase.
 
 | Name               | Typ und Wertebereich / Beispiel                   | Beschreibung                                                                                                                                                       |
 | ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `id`               | `integer >= 1`; Beispiel: `1`                     | Laufende numerische ID je Kreuzung, erzeugt beim Collect in alphabetischer Reihenfolge der Kreuzungsnamen.                                                         |
 | `name`             | `string`; Beispiel: `Bahnhofstraße - Hauptstraße` | Kreuzungsname aus `Intersection:new(name, ...)`.                                                                                                                   |
-| `currentSwitching` | `string` oder nicht gesetzt; Beispiel: `S1a`      | Name der aktuell aktiven Schaltung aus `crossing:getCurrentSequence().name`. Wegen `nil` kann das Feld im JSON komplett fehlen.                                    |
-| `manualSwitching`  | `string` oder nicht gesetzt; Beispiel: `S3`       | Name der manuell genutzten Schaltung aus `crossing:getManualSequence().name`.                                                                                      |
-| `nextSwitching`    | `string` oder nicht gesetzt; Beispiel: `S1a`      | Name der als nächstes vorgesehenen Schaltung aus `crossing:getNextSequence().name`.                                                                                |
-| `ready`            | `boolean`; Beispiel: `false`                      | Status aus `crossing:isGreenPhaseFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                    |
-| `timeForGreen`     | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `IntersectionSequence:new(...)`.                                                                   |
+| `currentPhase` | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der aktuell aktiven Phase aus `crossing:getCurrentPhase().name`. Wegen `nil` kann das Feld im JSON komplett fehlen.                                    |
+| `manualPhase`  | `string` oder nicht gesetzt; Beispiel: `P3`       | Name der manuell genutzten Phase aus `crossing:getManualPhase().name`.                                                                                      |
+| `nextPhase`    | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der als nächstes vorgesehenen Phase aus `crossing:getNextPhase().name`.                                                                                |
+| `ready`            | `boolean`; Beispiel: `false`                      | Status aus `intersection:isGreenTimeFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                 |
+| `greenTimeSeconds`     | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `TrafficPhase:new(...)`.                                                                   |
 | `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `EEPSetCamera \| 0 \| <staticCam>` umgesetzt. |
-| `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `IntersectionSequence`-Einträgen der Kreuzung.                                                                                 |
+| `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `TrafficPhase`-Einträgen der Kreuzung.                                                                                 |
 
 #### `IntersectionPhaseDto`
 
 | Name                | Typ und Wertebereich / Beispiel      | Beschreibung                                                                                          |
 | ------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `id`                | `string`; Beispiel: `K1-S1`          | Zusammengesetzter Schlüssel aus Kreuzungsname und Schaltungsname.                                     |
-| `name`              | `string`; Beispiel: `S1`             | Schaltungsname aus `IntersectionSequence.name`.                                                       |
-| `order`             | `integer >= 1`; Beispiel: `1`        | Reihenfolge aus `crossing:getSequences()`.                                                            |
-| `prio`              | `number`; Beispiel: `4.5`            | Aktuelle Priorität der Schaltung.                                                                     |
-| `greenPhaseSeconds` | `number`; Beispiel: `15`             | Grünzeit dieser Schaltung.                                                                            |
-| `trafficLights`     | `IntersectionPhaseTrafficLightDto[]` | Sortierte Liste der Signale, die in dieser Schaltung grün bzw. fußgänger-/tram-spezifisch aktiv sind. |
+| `id`                | `string`; Beispiel: `K1-P1`          | Zusammengesetzter Schlüssel aus Kreuzungsname und Phasenname.                                      |
+| `name`              | `string`; Beispiel: `P1`             | Phasenname aus `TrafficPhase.name`.                                                              |
+| `order`             | `integer >= 1`; Beispiel: `1`        | Reihenfolge aus `crossing:getPhases()`.                                                            |
+| `prio`              | `number`; Beispiel: `4.5`            | Aktuelle Priorität der Phase.                                                                     |
+| `greenTimeSeconds` | `number`; Beispiel: `15`             | Grünzeit dieser Phase.                                                                            |
+| `signalHeads`     | `IntersectionPhaseSignalHeadDto[]` | Sortierte Liste der logischen Signal-Head-Verwendungen, die in dieser Phase grün bzw. fußgänger-/tram-spezifisch aktiv sind. |
 
-#### `IntersectionPhaseTrafficLightDto`
+#### `IntersectionPhaseSignalHeadDto`
 
 | Name                   | Typ und Wertebereich / Beispiel              | Beschreibung                                                               |
 | ---------------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
-| `signalId`             | `integer`; Beispiel: `23`                    | Signal-ID aus `TrafficLight.signalId`.                                     |
-| `type`                 | `string`; Beispiel: `CAR`                    | Rolle des Signals in der Schaltung, z. B. `CAR`, `TRAM` oder `PEDESTRIAN`. |
-| `trafficSignalName`    | `string` oder nicht gesetzt; Beispiel: `K1`  | Name des Verkehrssignals.                                                  |
-| `pedestrianSignalName` | `string` oder nicht gesetzt; Beispiel: `F1`  | Name des Fußgängersignals.                                                 |
+| `signalId`             | `integer`; Beispiel: `23`                    | Signal-ID aus `Signal.signalId`.                                     |
+| `type`                 | `string`; Beispiel: `CAR`                    | Rolle des Signals in der Phase, z. B. `CAR`, `TRAM` oder `PEDESTRIAN`. |
+| `vehicleSignalHeadName`    | `string` oder nicht gesetzt; Beispiel: `K1`  | Name des Verkehrssignals.                                                  |
+| `pedestrianSignalHeadName` | `string` oder nicht gesetzt; Beispiel: `F1`  | Name des Fußgängersignals.                                                 |
 | `use`                  | `string`; Beispiel: `TRAFFIC_AND_PEDESTRIAN` | Interne Nutzung des Signals: Verkehr, Fußgänger oder kombiniert.           |
 
-### CeType `ce.mods.road.IntersectionSwitching`
+### CeType `ce.mods.road.IntersectionPhase`
 
-- Jeder Eintrag beschreibt eine bestimmte Schaltung für eine Kreuzung.
-- Die Schaltung enthält eine `prio`, die sich aus der Wichtung der wartenden Fahrzeuge in den Fahrspuren, die für diese Schaltung grün bekommen, sowie der Zeit berechnet, in der diese Schaltung nicht grün war.
-- Es kann nur eine Schaltung pro Kreuzung aktiv sein (`currentSwitching` in der Kreuzung).
+- Jeder Eintrag beschreibt eine bestimmte Phase für eine Kreuzung.
+- Die Phase enthält eine `prio`, die sich aus der Wichtung der wartenden Fahrzeuge in den Fahrspuren, die für diese Phase grün bekommen, sowie der Zeit berechnet, in der diese Phase nicht grün war.
+- Es kann nur eine Phase pro Kreuzung aktiv sein (`currentPhase` in der Kreuzung).
 
 | Name             | Typ und Wertebereich / Beispiel                                               | Beschreibung                                                                                                                               |
 | ---------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`             | `string`, pro Schaltung eindeutig; Beispiel: `Bahnhofstraße - Hauptstraße-S1` | Zusammengesetzter Schlüssel aus Kreuzungsname und Schaltungsname.                                                                          |
+| `id`             | `string`, pro Phase eindeutig; Beispiel: `Bahnhofstraße - Hauptstraße-P1` | Zusammengesetzter Schlüssel aus Kreuzungsname und Phasenname.                                                                         |
 | `intersectionId` | `string`; Beispiel: `Bahnhofstraße - Hauptstraße`                             | Referenz auf die Kreuzung. Trotz Feldname ist hier nicht die numerische `intersections.id`, sondern `crossing.name` gespeichert.           |
-| `name`           | `string`; Beispiel: `S1`                                                      | Schaltungsname aus `IntersectionSequence.name`.                                                                                            |
-| `prio`           | `number`; Beispiel: `11.25`                                                   | Aktuelle Priorität der Schaltung aus `IntersectionSequence.prio`. Sie wird aus der Fahrspur-Logik berechnet, nicht direkt aus EEP gelesen. |
+| `name`           | `string`; Beispiel: `P1`                                                      | Phasenname aus `TrafficPhase.name`.                                                                                            |
+| `prio`           | `number`; Beispiel: `11.25`                                                   | Aktuelle Priorität der Phase aus `TrafficPhase.prio`. Sie wird aus der Fahrspur-Logik berechnet, nicht direkt aus EEP gelesen. |
 
 ### CeType `ce.mods.road.IntersectionTrafficLight`
 
@@ -114,17 +114,17 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`                                   | `integer`, meist Signal-ID; Beispiel: `95`                                                                                 | Primärschlüssel der Ampel. Bei negativ konfigurierten Signalen wird intern ein eigener negativer Schlüssel verwendet.                                                                                          |
 | `signalId`                             | `integer`; Beispiel: `95`                                                                                                  | Signal-ID aus `TrafficLight:new(name, signalId, ...)`. Positive Werte referenzieren ein EEP-Signal; negative Werte stehen für rein logisch verwaltete Signale.                                                 |
-| `trafficSignalName`                    | `string` oder nicht gesetzt; Beispiel: `K1`                                                                                | Name des Verkehrssignals.                                                                                                                                                                                      |
-| `pedestrianSignalName`                 | `string` oder nicht gesetzt; Beispiel: `F1`                                                                                | Name des Fußgängersignals, wenn die Ampel Fußgänger-Grün unterstützt oder Fußgänger-only ist.                                                                                                                  |
+| `vehicleSignalName`                        | `string` oder nicht gesetzt; Beispiel: `K1`                                                                                | Name des Verkehrssignals.                                                                                                                                                                                      |
+| `pedestrianSignalName`                     | `string` oder nicht gesetzt; Beispiel: `F1`                                                                                | Name des Fußgängersignals, wenn die Ampel Fußgänger-Grün unterstützt oder Fußgänger-only ist.                                                                                                                  |
 | `use`                                  | `string`; Beispiel: `TRAFFIC_AND_PEDESTRIAN`                                                                               | Interne Nutzung des Signals: `TRAFFIC_ONLY`, `PEDESTRIAN_ONLY` oder `TRAFFIC_AND_PEDESTRIAN`.                                                                                                                  |
 | `modelId`                              | `string`; Beispiel: `Unsichtbares Signal`                                                                                  | Name des zugeordneten `TrafficLightModel`.                                                                                                                                                                     |
-| `currentPhase`                         | `string`, Werte aus `TrafficLightState`; Beispiel: `Rot`                                                                   | Aktuelle Ampelphase. Bei positiven Signal-IDs initial aus `EEPGetSignal(signalId)` und `TrafficLightModel:phaseOf(...)`, danach aus der Lua-Logik gepflegt. Typische Werte im Snapshot: `Rot`, `Grün`, `Fußg`. |
+| `currentIndication`                    | `string`, Werte aus `SignalIndication`; Beispiel: `Rot`                                                                   | Aktuelle Signalindikation. Bei positiven Signal-IDs initial aus `EEPGetSignal(signalId)` und `TrafficLightModel:indicationOf(...)`, danach aus der Lua-Logik gepflegt. Typische Werte im Snapshot: `Rot`, `Grün`, `Fußg`. |
 | `intersectionId`                       | `integer >= 1`; Beispiel: `1`                                                                                              | Numerische Referenz auf `intersections.id`.                                                                                                                                                                    |
 | `lightStructures`                      | Objekt mit String-Schlüsseln oder leeres Array/Objekt; Beispiel: `{ "0": { "structureRed": "#5525_Straba Signal Halt" } }` | Zusatz-Immobilien mit Lichtsteuerung. Der Collector serialisiert hier bewusst kein Array, sondern ein Objekt mit Schlüsseln `"0"`, `"1"` usw.                                                                  |
 | `lightStructures.<n>.structureRed`     | `string` oder nicht gesetzt; Beispiel: `#5525_Straba Signal Halt`                                                          | Immobilie, deren Licht bei Rot oder Rot-Gelb geschaltet wird. Verwendet später `EEPStructureSetLight(...)`.                                                                                                    |
 | `lightStructures.<n>.structureGreen`   | `string` oder nicht gesetzt; Beispiel: `#5436_Straba Signal rechts`                                                        | Immobilie für Grün.                                                                                                                                                                                            |
 | `lightStructures.<n>.structureYellow`  | `string` oder nicht gesetzt; Beispiel: `#5526_Straba Signal anhalten`                                                      | Immobilie für Gelb; fällt beim Anlegen auf `structureRed` zurück.                                                                                                                                              |
-| `lightStructures.<n>.structureRequest` | `string` oder nicht gesetzt; Beispiel: `#5524_Straba Signal A`                                                             | Immobilie für Anforderung; wird über `TrafficLight:showRequestOnSignal(...)` mit `EEPStructureSetLight(...)` geschaltet.                                                                                       |
+| `lightStructures.<n>.structureRequest` | `string` oder nicht gesetzt; Beispiel: `#5524_Straba Signal A`                                                             | Immobilie für Anforderung; wird über `Signal:showRequestOnSignal(...)` mit `EEPStructureSetLight(...)` geschaltet.                                                                                       |
 | `axisStructures`                       | Objekt-Array; Beispiel: `[{"structureName":"#5816_Warnblink Fußgänger rechts"}]`                                           | Zusatz-Immobilien mit Achssteuerung.                                                                                                                                                                           |
 | `axisStructures[].structureName`       | `string`; Beispiel: `#5816_Warnblink Fußgänger rechts`                                                                     | Name der Immobilie, deren Achse verstellt wird. Nutzt später `EEPStructureSetAxis(...)`.                                                                                                                       |
 | `axisStructures[].axisName`            | `string`; Beispiel: `Blinklicht`                                                                                           | Name der Achse in der Immobilie.                                                                                                                                                                               |
@@ -142,7 +142,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `id`                         | `string`, pro Fahrspur eindeutig; Beispiel: `1-K1 - Fahrspur 01`         | Zusammengesetzter Schlüssel aus numerischer Kreuzungs-ID und Fahrspurname.                                                                                          |
 | `intersectionId`             | `integer >= 1`; Beispiel: `1`                                            | Referenz auf `intersections.id`.                                                                                                                                    |
 | `name`                       | `string`; Beispiel: `K1 - Fahrspur 01`                                   | Fahrspurname aus `Lane:new(...)`.                                                                                                                                   |
-| `phase`                      | `string`, festes Mapping; Beispiel: `GREEN`                              | Vom Collector normalisierte Phase. Werte: `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN`. Quelle ist `lane.phase`, also indirekt die Ampelsteuerung.  |
+| `currentIndication`                      | `string`, festes Mapping; Beispiel: `GREEN`                              | Vom Collector normalisierte Signalindikation. Werte: `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN`. Quelle ist `lane.currentIndication`, also indirekt die Ampelsteuerung.  |
 | `vehicleMultiplier`          | `number >= 0`; Beispiel: `15`                                            | Prioritätsfaktor aus `lane.fahrzeugMultiplikator`.                                                                                                                  |
 | `eepSaveId`                  | `integer`, typischerweise `1..1000` oder `-1`; Beispiel: `8`             | EEP-Datenslot der Fahrspur. Persistenz erfolgt über `StorageUtility.saveTable(...)` und `StorageUtility.loadTable(...)`.                                            |
 | `type`                       | `string`, `NORMAL`, `TRAM` oder `PEDESTRIAN`; Beispiel: `TRAM`           | Vom Collector abgeleiteter Fahrspurtyp: Fußgänger bei `Lane.RequestType.FUSSGAENGER`, Tram bei `lane.trafficType == "TRAM"`, sonst `NORMAL`.                        |
@@ -150,13 +150,13 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `waitingTrains`              | `string[]`; Beispiel: `["#Linie 10 - Zug 2"]`                            | Aktuelle Fahrspurwarteschlange aus `lane.queue`. Je nach Konfiguration stammen die Namen aus Kontaktpunkten, `EEPGetSignalTrainName(...)` oder Track-Registrierung. |
 | `waitingForGreenCyclesCount` | `integer >= 0`; Beispiel: `6`                                            | Anzahl verpasster Grünzyklen aus `lane.waitCount`.                                                                                                                  |
 | `directions`                 | `string[]`, Werte aus `Lane.Directions`; Beispiel: `["LEFT","STRAIGHT"]` | Konfigurierte Fahrtrichtungen. Mögliche Werte: `LEFT`, `HALF-LEFT`, `STRAIGHT`, `HALF-RIGHT`, `RIGHT`.                                                              |
-| `switchings`                 | `string[]`; Beispiel: `["S1","S1a"]`                                     | Alle Schaltungen, in denen diese Fahrspur vorkommt. Vom Collector aus den Sequenzen abgeleitet.                                                                     |
+| `phases`                 | `string[]`; Beispiel: `["P1","P1a"]`                                     | Alle Phasen, in denen diese Fahrspur vorkommt. Vom Collector aus den Phasen abgeleitet.                                                                     |
 | `tracks`                     | `string[]`; Beispiel: `[]`                                               | Optional konfigurierte Gleis-/Straßennamen für Hervorhebung. Keine direkte EEP-Abfrage im Collector.                                                                |
 
 ### CeType `ce.mods.road.ModuleSetting`
 
 - Generelle Einstellungen für das Ampelmodul.
-- Hier werden derzeit Anzeigeeinstellungen für Signale und Immobilien hinterlegt, damit man die Schaltungen und Fahrzeugwarteschlangen im Tooltip sehen kann. Diese werden in `IntersectionSettings.xxx` abgelegt.
+- Hier werden derzeit Anzeigeeinstellungen für Signale und Immobilien hinterlegt, damit man die Phasen und Fahrzeugwarteschlangen im Tooltip sehen kann. Diese werden in `IntersectionSettings.xxx` abgelegt.
 
 | Name          | Typ und Wertebereich / Beispiel                                                                             | Beschreibung                                                                                 |
 | ------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -173,8 +173,8 @@ Alle derzeit verfügbaren `IntersectionSettings` sind boolesche Anzeigeeinstellu
 
 | Setting                | Default / Persistenz / Setter                                                                                      | Beschreibung                                                                                                                                                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `showRequestsOnSignal` | Default: `false`; Persistenzschlüssel: `reqInfo`; Setter: `IntersectionSettings.setShowRequestsOnSignal(boolean)`  | Blendet an Ampeln die aktuellen Anforderungen bzw. Warteschlangeninformationen ein. Zusätzlich werden vorhandene `requestStructure`-Immobilien über `TrafficLight:showRequestOnSignal(...)` sichtbar geschaltet. |
-| `showSequenceOnSignal` | Default: `false`; Persistenzschlüssel: `seqInfo`; Setter: `IntersectionSettings.setShowSequenceOnSignal(boolean)`  | Zeigt an jeder Ampel die möglichen Schaltungen der Kreuzung und markiert dabei die gerade aktive Schaltung im Tooltip.                                                                                           |
+| `showRequestsOnSignal` | Default: `false`; Persistenzschlüssel: `reqInfo`; Setter: `IntersectionSettings.setShowRequestsOnSignal(boolean)`  | Blendet an Ampeln die aktuellen Anforderungen bzw. Warteschlangeninformationen ein. Zusätzlich werden vorhandene `requestStructure`-Immobilien über `Signal:showRequestOnSignal(...)` sichtbar geschaltet. |
+| `showPhaseOnSignal` | Default: `false`; Persistenzschlüssel: `seqInfo`; Setter: `IntersectionSettings.setShowPhaseOnSignal(boolean)`  | Zeigt an jeder Ampel die möglichen Phasen der Kreuzung und markiert dabei die gerade aktive Phase im Tooltip.                                                                                           |
 | `showSignalIdOnSignal` | Default: `false`; Persistenzschlüssel: `sigInfo`; Setter: `IntersectionSettings.setShowSignalIdOnSignal(boolean)`  | Blendet die Signal-ID bzw. bei virtuellen Signalen die zugeordnete Strukturinformation im Tooltip ein. Das ist vor allem für Aufbau, Diagnose und Mapping der Signale hilfreich.                                 |
 | `showLanesOnStructure` | Default: `false`; Persistenzschlüssel: `laneInfo`; Setter: `IntersectionSettings.setShowLanesOnStructure(boolean)` | Zeigt die Belegung der Fahrspuren gesammelt an der für die Kreuzung gesetzten Tipp-Struktur an. Wirksam nur, wenn für die Kreuzung eine `tippStructure` konfiguriert ist.                                        |
 
@@ -195,18 +195,18 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 
 | Raumname                            | Collector-Form in Lua      | Form im Web-Server-State / API | Web-App-Nutzung                                                                                      | Abgleich                                                                                                                                                                                              |
 | ----------------------------------- | -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ce.mods.road.SignalTypeDefinition` | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Inhalt des Snapshots passt zum Collector; die Web-App hat dafür derzeit keinen Consumer.                                                                                                              |
-| `ce.mods.road.Intersection`         | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersections.tsx`, `useIntersection.tsx`, `IntersectionOverview.tsx`, `IntersectionDetails.tsx` | Passt weitgehend. Achtung: `currentSwitching`, `manualSwitching` und `nextSwitching` können im JSON fehlen, sind im TS-Modell aber als Pflicht-`string` typisiert.                                    |
-| `road-intersection-switchings`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersectionSwitchings.tsx`, `useIntersectionSwitching.tsx`, `IntersectionDetails.tsx`           | Wird aktiv genutzt. Wichtig: `intersectionId` ist hier ein `string` mit dem Kreuzungsnamen, nicht die numerische ID. Die Web-App berücksichtigt das korrekt über `useIntersectionSwitching(i?.name)`. |
-| `road-intersection-traffic-lights`  | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Snapshot und Collector passen fachlich zusammen. `lightStructures` bleibt auch im Server-State ein Objekt mit String-Indizes.                                                                         |
+| `ce.mods.road.TrafficLightModel`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Inhalt des Snapshots passt zum Collector; die Web-App hat dafür derzeit keinen Consumer.                                                                                                              |
+| `ce.mods.road.Intersection`         | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersections.tsx`, `useIntersection.tsx`, `IntersectionOverview.tsx`, `IntersectionDetails.tsx` | Passt weitgehend. Achtung: `currentPhase`, `manualPhase` und `nextPhase` können im JSON fehlen, sind im TS-Modell aber als Pflicht-`string` typisiert.                                    |
+| `road-intersection-phases`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersectionPhases.tsx`, `useIntersectionPhase.tsx`, `IntersectionDetails.tsx`           | Wird aktiv genutzt. Wichtig: `intersectionId` ist hier ein `string` mit dem Kreuzungsnamen, nicht die numerische ID. Die Web-App berücksichtigt das korrekt über `useIntersectionPhase(i?.name)`. |
+| `road-intersection-signals`       | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Snapshot und Collector passen fachlich zusammen. `lightStructures` bleibt auch im Server-State ein Objekt mit String-Indizes.                                                                         |
 | `road-intersection-lanes`           | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Daten werden erzeugt und im State gehalten, aktuell aber nicht in `src/mod/intersections` dargestellt.                                                                                                |
 | `road-module-settings`              | Liste mit Schlüssel `name` | Objekt-Mapping nach `name`     | `useIntersectionSettings.tsx`, `ModuleSettingsButton`, `ModuleSetting.tsx`                           | Passt. Die Web-App behandelt die Daten generisch als `LuaSetting<boolean>`.                                                                                                                           |
 
 ### Auffällige Schema- und Integrationsbesonderheiten
 
 - Der Collector liefert Listen, der Web-Server-State speichert dieselben CeTypes aber als Objekte nach `keyId`. Das ist die Form, die auch die Web-App empfängt.
-- `road-intersection-switchings.intersectionId` ist ein Kreuzungsname (`string`), während `road-intersection-lanes.intersectionId` und `road-intersection-traffic-lights.intersectionId` numerische IDs sind.
-- `road-intersection-traffic-lights.lightStructures` wird als Objekt mit String-Indizes serialisiert, nicht als JSON-Array.
+- `road-intersection-phases.intersectionId` ist ein Kreuzungsname (`string`), während `road-intersection-lanes.intersectionId` und `road-intersection-signals.intersectionId` numerische IDs sind.
+- `road-intersection-signals.lightStructures` wird als Objekt mit String-Indizes serialisiert, nicht als JSON-Array.
 - Mehrere Felder in `ce.mods.road.Intersection` sind optional, weil Lua-`nil`-Felder beim JSON-Export nicht erscheinen.
 - Der aktuelle Snapshot in `server-state.json` enthält bereits alle sechs Road-CeTypes.
 - Der Web-Server-Reducer merged `ListChanged` aktuell in vorhandene CeType-Objekte hinein. Für die Road-CeTypes ist das nur dann exakt, wenn Schlüssel nicht verschwinden oder vorher ein `CompleteReset` erfolgt.
@@ -217,11 +217,11 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 
 | Ursprung in `ce/mods/road`                    | Eventtyp      | CeType / Schlüssel                         |
 | --------------------------------------------- | ------------- | ------------------------------------------ |
-| `TrafficLightModelStatePublisher.syncState()` | `ListChanged` | `ce.mods.road.SignalTypeDefinition` / `id` |
+| `TrafficLightModelStatePublisher.syncState()` | `ListChanged` | `ce.mods.road.TrafficLightModel` / `id` |
 | `RoadStatePublisher.syncState()`              | `ListChanged` | `ce.mods.road.Intersection` / `id`         |
 | `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-lanes` / `id`           |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-switchings` / `id`      |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-traffic-lights` / `id`  |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-phases` / `id`      |
+| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-signals` / `id`       |
 | `RoadStatePublisher.syncState()`              | `ListChanged` | `road-module-settings` / `name`            |
 
 ### In `ce/mods/road` ausgewertete Eingangs-Events und Callbacks
@@ -229,9 +229,9 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 | Ursprung                    | Event / Callback                                     | Weiterleitung / Aufruf                                                                                                   | Auswertung in `ce/mods/road`                                            | Wirkung                                                         |
 | --------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Web-App Kreuzungsdetail     | `[Road Event] Switch Automatically`                  | Web-Server erzeugt `AkKreuzungSchalteAutomatisch \| <intersectionName>`                                                  | `Intersection.switchAutomatically(crossingName)`                        | Setzt die Kreuzung in den Automatikmodus zurück.                |
-| Web-App Kreuzungsdetail     | `[Road Event] Switch Manually`                       | Web-Server erzeugt `AkKreuzungSchalteManuell \| <intersectionName> \| <switchingName>`                                   | `Intersection.switchManuallyTo(crossingName, sequenceName)`             | Erzwingt eine bestimmte Schaltung als manuelle Schaltung.       |
+| Web-App Kreuzungsdetail     | `[Road Event] Switch Manually`                       | Web-Server erzeugt `AkKreuzungSchalteManuell \| <intersectionName> \| <phaseName>`                                   | `Intersection.switchManuallyTo(crossingName, phaseName)`             | Erzwingt eine bestimmte Phase als manuelle Phase.       |
 | Web-App Einstellungsdialog  | `[Command Event] Change Setting`                     | Web-Server erzeugt `<eepFunction> \| <newValue>`; Aufruf `IntersectionSettings.setShowRequestsOnSignal(param == "true")` | Schaltet Tipptexte für Anforderungen und speichert den Wert.            |
-| Web-App Einstellungsdialog  | `[Command Event] Change Setting`                     | Web-Server erzeugt `<eepFunction> \| <newValue>`; Aufruf `IntersectionSettings.setShowSequenceOnSignal(param == "true")` | Schaltet Tipptexte für Schaltungen und speichert den Wert.              |
+| Web-App Einstellungsdialog  | `[Command Event] Change Setting`                     | Web-Server erzeugt `<eepFunction> \| <newValue>`; Aufruf `IntersectionSettings.setShowPhaseOnSignal(param == "true")` | Schaltet Tipptexte für Phasen und speichert den Wert.              |
 | Web-App Einstellungsdialog  | `[Command Event] Change Setting`                     | Web-Server erzeugt `<eepFunction> \| <newValue>`; Aufruf `IntersectionSettings.setShowSignalIdOnSignal(param == "true")` | Schaltet Signal-ID-Tipptexte und speichert den Wert.                    |
 | Web-App Einstellungsdialog  | `[Command Event] Change Setting`                     | Web-Server erzeugt `<eepFunction> \| <newValue>`; Aufruf `IntersectionSettings.setShowLanesOnStructure(param == "true")` | Schaltet Fahrspurzähler-Tipptexte und speichert den Wert.               |
 | EEP-Weichenereignis         | globaler Callback `EEPOnSwitch_<switchId>`           | Registrierung in `TramSwitch.new(...)` über `_G[...]`                                                                    | Liest `EEPGetSwitch(switchId)` und schaltet `EEPStructureSetLight(...)` | Spiegelt die Straßenbahnweichenstellung auf Licht-Immobilien.   |

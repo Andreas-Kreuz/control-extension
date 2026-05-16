@@ -1,4 +1,4 @@
-﻿import { RuntimeLuaDto } from '../../ce/dto/runtime/RuntimeLuaDto';
+import { RuntimeLuaDto } from '../../ce/dto/runtime/RuntimeLuaDto';
 import { ModuleLuaDto } from '../../ce/dto/modules/ModuleLuaDto';
 import { DataSlotLuaDto } from '../../ce/dto/data-slots/DataSlotLuaDto';
 import { SignalLuaDto } from '../../ce/dto/signals/SignalLuaDto';

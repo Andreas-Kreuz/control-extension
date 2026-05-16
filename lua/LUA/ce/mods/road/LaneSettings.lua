@@ -6,7 +6,7 @@ local Lane = require("ce.mods.road.Lane")
 -- local StorageUtility = require("ce.hub.util.StorageUtility")
 -- local TableUtils = require("ce.hub.util.TableUtils")
 -- local Task = require("ce.hub.scheduler.Task")
--- local TrafficLightState = require("ce.mods.road.TrafficLightState")
+-- local SignalIndication = require("ce.mods.road.SignalIndication")
 -- local fmt = require("ce.hub.eep.TippTextFormatter")
 
 ---This will remember the lane and its settings within this request. Each lane can have one settings only.

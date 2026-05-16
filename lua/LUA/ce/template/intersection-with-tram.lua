@@ -54,8 +54,8 @@ local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local L1, L2, L3, L4
 -- Ampeln für den Kraftfahrverkehr (K) und Strassenbahnen (S)
 local K1, K2, K3, K5, K6, K7, K8, K9, S1, S2
--- 3 Schaltungen
-local sequenceA, sequenceB, sequenceC
+-- Phasen
+local phase1, phase2, phase3
 -- die Kreuzung
 local crossing
 
@@ -89,33 +89,29 @@ lane2 = Lane:new("Lane 2 E", 2, L2, { Lane.Directions.LEFT, Lane.Directions.RIGH
 lane3 = Lane:new("Lane 3 S", 3, L3, { Lane.Directions.LEFT })
 lane4 = Lane:new("Lane 4 S", 4, L4, { Lane.Directions.STRAIGHT })
 
--- Lege fest, welche Ampeln für eine Kreuzung gelten
-lane1:driveOnDefaultSignals(K1)
-lane2:driveOnDefaultSignals(K6)
-lane2:routes("Rechtsabbieger"):driveAlsoOn(K7)
-lane3:driveOnDefaultSignals(K8)
-lane4:driveOnDefaultSignals(K9)
+local sgLane1StraightRight = crossing:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1, K2)
+local sgLane2Left = crossing:newSignalGroup("sgLane2Left"):addVehicleSignals(K6)
+local sgLane2Right = crossing:newSignalGroup("sgLane2Right"):addVehicleSignals(K7)
+local sgLane3Left = crossing:newSignalGroup("sgLane3Left"):addVehicleSignals(K8)
+local sgLane4Straight = crossing:newSignalGroup("sgLane4Straight"):addVehicleSignals(K9)
+local sgEastVehicle = crossing:newSignalGroup("sgEastVehicle"):addVehicleSignals(K3, K5)
+local sgTramNorthSouth = crossing:newSignalGroup("sgTramNorthSouth"):addTramSignals(S1, S2)
+local sgPedEast = crossing:newSignalGroup("sgPedEast"):addPedestrianSignals(K3, K6)
+local sgPedNorthSouth = crossing:newSignalGroup("sgPedNorthSouth"):addPedestrianSignals(K1, K2, K8, K9)
 
--- Lege die Schaltungen an und füge Ampeln für Fahrzeuge, Tram und Fußgänger hinzu
-sequenceA = crossing:newSequence("Sequence A - North South")
-sequenceA:addCarLights(K1)
-sequenceA:addCarLights(K2)
-sequenceA:addTramLights(S1)
-sequenceA:addCarLights(K9)
-sequenceA:addTramLights(S2)
-sequenceA:addPedestrianLights(K3)
-sequenceA:addPedestrianLights(K6)
+-- Lege fest, welche Signalgruppen für eine Kreuzung gelten
+lane1:driveOnDefaultSignalGroups(sgLane1StraightRight)
+lane2:driveOnDefaultSignalGroups(sgLane2Left)
+lane2:routes("Rechtsabbieger"):driveAlsoOnSignalGroups(sgLane2Right)
+lane3:driveOnDefaultSignalGroups(sgLane3Left)
+lane4:driveOnDefaultSignalGroups(sgLane4Straight)
 
-sequenceB = crossing:newSequence("Sequence B - South + East Right")
-sequenceB:addCarLights(K7)
-sequenceB:addCarLights(K8)
-sequenceB:addCarLights(K9)
+-- Lege die Phasen an
+phase1 = crossing:newPhase("P1")
+phase1:addSignalGroup(sgLane1StraightRight, sgLane4Straight, sgTramNorthSouth, sgPedEast)
 
-sequenceC = crossing:newSequence("Sequence C - East only")
-sequenceC:addCarLights(K3)
-sequenceC:addCarLights(K5)
-sequenceC:addCarLights(K6)
-sequenceC:addPedestrianLights(K1)
-sequenceC:addPedestrianLights(K2)
-sequenceC:addPedestrianLights(K8)
-sequenceC:addPedestrianLights(K9)
+phase2 = crossing:newPhase("P2")
+phase2:addSignalGroup(sgLane2Right, sgLane3Left, sgLane4Straight)
+
+phase3 = crossing:newPhase("P3")
+phase3:addSignalGroup(sgEastVehicle, sgLane2Left, sgPedNorthSouth)

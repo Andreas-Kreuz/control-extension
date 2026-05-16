@@ -1,10 +1,10 @@
-﻿import { useSocket } from '../../../app/hooks/useSocket';
+import { useSocket } from '../../../app/hooks/useSocket';
 import TypeCaption from '../../../shared/components/TypeCaption';
 import SectionHeadline from '../../../shared/components/SectionHeadline';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import BackgroundPaper from '../../../shared/layouts/BackgroundPaper';
 import useIntersection from '../hooks/useIntersection';
-import useIntersectionSwitching from '../hooks/useIntersectionSwitching';
+import useIntersectionPhase from '../hooks/useIntersectionPhase';
 import { CommandEvent, RoadEvent } from '@ce/web-shared';
 import CamIcon from '@mui/icons-material/Videocam';
 import Alert from '@mui/material/Alert';
@@ -23,12 +23,12 @@ function IntersectionDetails() {
   const { intersectionId } = useParams();
   const id = parseInt(intersectionId || '555');
   const i = useIntersection(id);
-  const switchings = useIntersectionSwitching(i?.name);
+  const phases = useIntersectionPhase(i?.name);
 
-  function sendSwitchManually(intersectionName: string, switchingName: string) {
+  function sendSwitchManually(intersectionName: string, phaseName: string) {
     socket.emit(RoadEvent.SwitchManually, {
       intersectionName,
-      switchingName,
+      phaseName,
     });
   }
 
@@ -60,7 +60,7 @@ function IntersectionDetails() {
               <Chip
                 label="Auto"
                 variant="filled"
-                color={i.manualSwitching ? 'default' : 'primary'}
+                color={i.manualPhase ? 'default' : 'primary'}
                 onClick={() => {
                   sendSwitchAutomatically(i.name);
                 }}
@@ -68,27 +68,26 @@ function IntersectionDetails() {
               <Chip
                 label="Manuell"
                 variant="filled"
-                color={i.manualSwitching ? 'primary' : 'default'}
+                color={i.manualPhase ? 'primary' : 'default'}
                 onClick={() => {
-                  sendSwitchManually(i.name, i.currentSwitching);
+                  sendSwitchManually(i.name, i.currentPhase);
                 }}
               />
             </Stack>
 
             <Divider sx={{ py: 1 }} />
-            <TypeCaption gutterTop>Schaltung</TypeCaption>
+            <TypeCaption gutterTop>Phase</TypeCaption>
             <Stack
               direction="row"
-              flexWrap="wrap"
-              sx={{ pt: 1, pb: 0 }}
+              sx={{ pt: 1, pb: 0, flexWrap: 'wrap' }}
               // sx={{ backgroundColor: theme.palette.background.default }}
             >
-              {switchings.map((s) => {
-                const active = i.currentSwitching === s.name;
+              {phases.map((s) => {
+                const active = i.currentPhase === s.name;
                 const next =
-                  (i.nextSwitching === s.name || i.manualSwitching === s.name) && i.currentSwitching !== s.name;
+                  (i.nextPhase === s.name || i.manualPhase === s.name) && i.currentPhase !== s.name;
                 const color = active ? 'primary' : next ? 'primary' : 'default';
-                const clickable = i.manualSwitching ? true : false;
+                const clickable = i.manualPhase ? true : false;
                 return (
                   <Chip
                     sx={{
@@ -98,7 +97,7 @@ function IntersectionDetails() {
                       backgroundColor: active || next ? theme.palette.primary.main : clickable ? undefined : 'white',
                     }}
                     label={s.name}
-                    variant={i.manualSwitching ? 'filled' : 'outlined'}
+                    variant={i.manualPhase ? 'filled' : 'outlined'}
                     key={s.name}
                     color={color}
                     clickable={clickable}

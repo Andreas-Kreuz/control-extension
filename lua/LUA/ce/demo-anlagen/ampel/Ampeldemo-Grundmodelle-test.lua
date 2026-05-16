@@ -29,7 +29,7 @@ require("ce.demo-anlagen.ampel.Ampeldemo-Grundmodelle-main")
 TrafficLight.debug = false
 Intersection.debug = false
 IntersectionSettings.showRequestsOnSignal = true
-IntersectionSettings.showSequenceOnSignal = true
+IntersectionSettings.showPhaseOnSignal = true
 IntersectionSettings.showSignalIdOnSignal = false
 Scheduler.debug = false
 StorageUtility.debug = false
@@ -42,7 +42,7 @@ ServerExchangeCoordinator.debug = false
 -- Intersection.resetVehicles()
 -------------------------------------------------------------------
 
-Intersection.initSequences()
+Intersection.initPhases()
 Intersection.debug = true
 enterLane(Zugname, c1Lane8)
 enterLane(Zugname, c1Lane8)

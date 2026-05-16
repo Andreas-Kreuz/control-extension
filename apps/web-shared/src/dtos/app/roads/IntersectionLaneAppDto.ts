@@ -4,7 +4,7 @@ export interface IntersectionLaneAppDto {
   id: string;
   intersectionId: number;
   name: string;
-  phase: string;
+  currentIndication: string;
   vehicleMultiplier: number;
   eepSaveId: number;
   type: string;
@@ -12,6 +12,6 @@ export interface IntersectionLaneAppDto {
   waitingTrains: string[];
   waitingForGreenCyclesCount: number;
   directions: string[];
-  switchings: string[];
+  phases: string[];
   tracks: number[];
 }

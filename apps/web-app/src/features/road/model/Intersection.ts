@@ -1,12 +1,12 @@
-export interface IntersectionPhaseTrafficLight {
+export interface IntersectionPhaseSignalHead {
   signalId: number;
-  signalKind?: 'TRAFFIC' | 'PEDESTRIAN';
-  signalKey?: string;
-  signalName?: string;
+  signalHeadKind?: 'VEHICLE' | 'PEDESTRIAN';
+  signalHeadKey?: string;
+  signalHeadName?: string;
   type: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
-  trafficSignalName?: string;
-  pedestrianSignalName?: string;
-  use: 'TRAFFIC_ONLY' | 'PEDESTRIAN_ONLY' | 'TRAFFIC_AND_PEDESTRIAN';
+  vehicleSignalHeadName?: string;
+  pedestrianSignalHeadName?: string;
+  use: 'VEHICLE_ONLY' | 'PEDESTRIAN_ONLY' | 'VEHICLE_AND_PEDESTRIAN';
 }
 
 export interface IntersectionPhase {
@@ -14,18 +14,18 @@ export interface IntersectionPhase {
   name: string;
   order: number;
   prio: number;
-  greenPhaseSeconds: number;
-  trafficLights: IntersectionPhaseTrafficLight[];
+  greenTimeSeconds: number;
+  signalHeads: IntersectionPhaseSignalHead[];
 }
 
 export default interface Intersection {
   id: number;
   name: string;
-  timeForGreen: number;
+  greenTimeSeconds: number;
   ready: boolean;
-  currentSwitching: string;
-  manualSwitching: string;
-  nextSwitching: string;
+  currentPhase: string;
+  manualPhase: string;
+  nextPhase: string;
   staticCams: string[];
   phases: IntersectionPhase[];
 }

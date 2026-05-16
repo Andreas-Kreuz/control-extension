@@ -28,14 +28,14 @@ function CeRoadModule.init()
     RoadBridgeConnector.registerStatePublishers()
     RoadBridgeConnector.registerFunctions()
 
-    Intersection.initSequences()
+    Intersection.initPhases()
 
     initialized = true
 end
 
 function CeRoadModule.run()
     if not CeRoadModule.enabled then return end
-    Intersection.switchSequences()
+    Intersection.switchPhases()
 end
 
 return CeRoadModule

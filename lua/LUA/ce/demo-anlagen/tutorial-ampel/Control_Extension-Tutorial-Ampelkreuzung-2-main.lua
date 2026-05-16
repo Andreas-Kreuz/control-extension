@@ -3,7 +3,7 @@ local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 local Lane = require("ce.mods.road.Lane")
 local Intersection = require("ce.mods.road.Intersection")
--- local IntersectionSequence = require("ce.mods.road.IntersectionSequence")
+-- local TrafficPhase = require("ce.mods.road.TrafficPhase")
 
 Intersection.debug = true
 
@@ -102,44 +102,45 @@ w2 = Lane:new("W2", 105, K6)
 
 -- Fahrspuren fuer Strassenbahnen:
 os = Lane:new("OS", 107, S1)
-os:showRequestsOn(S1)
+-- requests are shown after signal groups are configured
 os:useSignalForQueue() -- Erfasst Anforderungen, wenn ein Fahrzeug an Signal 14 steht
 
 ws = Lane:new("WS", 108, S2)
-ws:showRequestsOn(S2)
+-- requests are shown after signal groups are configured
 ws:useTrackForQueue(2) -- Erfasst Anforderungen, wenn ein Fahrzeug auf Strasse 2 steht
 
 --------------------------------------------------------------
--- Definiere die Schaltungen und die Kreuzung
+-- Definiere die Phasen und die Kreuzung
 --------------------------------------------------------------
--- Eine Schaltung bestimmt, welche Fahrspuren gleichzeitig auf
+-- Eine Phase bestimmt, welche Fahrspuren gleichzeitig auf
 -- grün geschaltet werden dürfen, alle anderen sind rot
 
 k1 = Intersection:new("Tutorial 2")
+local sgLaneNorth = k1:newSignalGroup("sgLaneNorth"):addVehicleSignals(K1, K2)
+local sgLaneEast = k1:newSignalGroup("sgLaneEast"):addVehicleSignals(K3, K4)
+local sgLaneWest1 = k1:newSignalGroup("sgLaneWest1"):addVehicleSignals(K5)
+local sgLaneWest2 = k1:newSignalGroup("sgLaneWest2"):addVehicleSignals(K6, K7)
+local sgTramEastWest = k1:newSignalGroup("sgTramEastWest"):addTramSignals(S1)
+local sgTramWestEast = k1:newSignalGroup("sgTramWestEast"):addTramSignals(S2)
+local sgPedNorth = k1:newSignalGroup("sgPedNorth"):addPedestrianSignals(F1, F2)
+local sgPedEast = k1:newSignalGroup("sgPedEast"):addPedestrianSignals(F3, F4)
+local sgPedWest = k1:newSignalGroup("sgPedWest"):addPedestrianSignals(F5, F6)
+os:showRequestsOnSignalGroups(sgTramEastWest)
+ws:showRequestsOnSignalGroups(sgTramWestEast)
 
---- Tutorial 2: Schaltung 1
-local sch1 = k1:newSequence("Schaltung 1")
-sch1:addCarLights(K3)
-sch1:addCarLights(K4)
-sch1:addTramLights(S1)
-sch1:addCarLights(K5)
-sch1:addTramLights(S2)
-sch1:addPedestrianLights(F1, F2)
+--- Tutorial 2: Phase 1
+local phase1 = k1:newPhase("P1")
+phase1:addSignalGroup(sgLaneEast, sgLaneWest1, sgTramEastWest, sgTramWestEast, sgPedNorth)
 
---- Tutorial 2: Schaltung 2
-local sch2 = k1:newSequence("Schaltung 2")
-sch2:addCarLights(K6)
-sch2:addCarLights(K7)
-sch2:addPedestrianLights(F3, F4)
+--- Tutorial 2: Phase 2
+local phase2 = k1:newPhase("P2")
+phase2:addSignalGroup(sgLaneWest2, sgPedEast)
 
---- Tutorial 2: Schaltung 3
-local sch3 = k1:newSequence("Schaltung 3")
-sch3:addCarLights(K1)
-sch3:addCarLights(K2)
-sch3:addPedestrianLights(F3, F4)
-sch3:addPedestrianLights(F5, F6)
+--- Tutorial 2: Phase 3
+local phase3 = k1:newPhase("P3")
+phase3:addSignalGroup(sgLaneNorth, sgPedEast, sgPedWest)
 
--- Die Kreuzung soll die Schaltungen einfach nur in Ihrer Reihenfolge schalten
+-- Die Kreuzung soll die Phasen einfach nur in Ihrer Reihenfolge schalten
 k1:setSwitchInStrictOrder(true)
 
 local ControlExtension = require("ce.ControlExtension")

@@ -38,7 +38,7 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
       ...selectedIntersection,
       staticCams: selectedIntersection.staticCams.length > 0 ? selectedIntersection.staticCams : i.staticCams,
       phases: selectedIntersection.phases.length > 0 ? selectedIntersection.phases : i.phases,
-      timeForGreen: selectedIntersection.timeForGreen || i.timeForGreen,
+      greenTimeSeconds: selectedIntersection.greenTimeSeconds || i.greenTimeSeconds,
     };
   }
 
@@ -72,7 +72,7 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
         getDetails={(i) => {
           const details = detailsIntersection(i);
           return [
-            { title: 'Modus & Schaltung', component: <IntersectionControlSection intersection={details} /> },
+            { title: 'Modus & Phase', component: <IntersectionControlSection intersection={details} /> },
             // { title: 'Phasen', component: <IntersectionPhasesSection intersection={details} /> },
             { title: 'Kameras', component: <IntersectionCamsSection intersection={details} /> },
           ];

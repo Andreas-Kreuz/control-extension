@@ -1,167 +1,171 @@
 -- Lua code for testing the lane's functions
 describe("Lane ...", function ()
-    insulate("Register traffic lights", function ()
+    insulate("Register signals", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        local TrafficLightState = require("ce.mods.road.TrafficLightState")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local Lane = require("ce.mods.road.Lane")
         local signalId = 55
 
         -- Set the route for train "#Car1"
         EEPSetTrainRoute("#Car1", "Some Route")
-        -- Traffic Light which is visible to tell the lanes traffic to drive
-        local driveTrafficLight = TrafficLight:new("driveTrafficLight", signalId, TrafficLightModel.Unsichtbar_2er)
+        -- Signal which is visible to tell the lanes traffic to drive
+        local driveSignal = TrafficLight:new("driveSignal", signalId, TrafficLightModel.Unsichtbar_2er)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
-        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
+        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
 
-        local lane = Lane:new("Lane A", 34, laneTrafficLight)
-        local tlsBeforeDriveOn = lane.trafficLightsToDriveOn
+        local lane = Lane:new("Lane A", 34, laneSignal)
+        local tlsBeforeDriveOn = lane.signalsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
-        driveTrafficLight:applyToLane(lane)
+        driveSignal:applyToLane(lane)
 
-        it("driveTrafficLight has lane", function () assert.is_true(driveTrafficLight.lanes[lane]) end)
-        it("lane has driveTrafficLight with route !ALL!",
-           function () assert.same({}, lane.trafficLightsToDriveOn[driveTrafficLight]) end)
+        it("driveSignal has lane", function () assert.is_true(driveSignal.lanes[lane]) end)
+        it("lane has driveSignal with route !ALL!",
+           function () assert.same({}, lane.signalsToDriveOn[driveSignal]) end)
 
-        it("Lane has signal", function () assert.is_truthy(lane.trafficLightsToDriveOn) end)
-        it("Lane has signal", function () assert.are.same({}, lane.trafficLightsToDriveOn[driveTrafficLight]) end)
+        it("Lane has signal", function () assert.is_truthy(lane.signalsToDriveOn) end)
+        it("Lane has signal", function () assert.are.same({}, lane.signalsToDriveOn[driveSignal]) end)
         describe("Can drive at red", function ()
-            driveTrafficLight:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = laneTrafficLight.phase
+            driveSignal:switchTo(SignalIndication.RED)
+            local canDriveAtRed = laneSignal.currentIndication
             it("SignalId is correct", function ()
                 assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexRed,
-                              EEPGetSignal(driveTrafficLight.signalId))
+                              EEPGetSignal(driveSignal.signalId))
             end)
-            it("canDrive()", function () assert.equals(TrafficLightState.RED, canDriveAtRed) end)
+            it("canDrive()", function () assert.equals(SignalIndication.RED, canDriveAtRed) end)
         end)
         describe("Can drive at green", function ()
-            driveTrafficLight:switchTo(TrafficLightState.GREEN)
-            local canDriveAtGreen = laneTrafficLight.phase
+            driveSignal:switchTo(SignalIndication.GREEN)
+            local canDriveAtGreen = laneSignal.currentIndication
             it("SignalId is correct", function ()
                 assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexGreen,
-                              EEPGetSignal(driveTrafficLight.signalId))
+                              EEPGetSignal(driveSignal.signalId))
             end)
             it("SignalId is correct", function ()
                 assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexGreen,
-                              EEPGetSignal(laneTrafficLight.signalId))
+                              EEPGetSignal(laneSignal.signalId))
             end)
-            it("canDrive()", function () assert.equals(TrafficLightState.GREEN, canDriveAtGreen) end)
+            it("canDrive()", function () assert.equals(SignalIndication.GREEN, canDriveAtGreen) end)
         end)
     end)
     insulate("Can drive on route", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        local TrafficLightState = require("ce.mods.road.TrafficLightState")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local Lane = require("ce.mods.road.Lane")
 
         -- Set the route for train "#Car1"
         EEPSetTrainRoute("#Car1", "Matching Route")
-        -- Traffic Light which is visible to tell the lanes traffic to drive
+        -- Signal which is visible to tell the lanes traffic to drive
         local K1 = TrafficLight:new("K1", 55, TrafficLightModel.JS2_3er_mit_FG)
         local K2 = TrafficLight:new("K2", 56, TrafficLightModel.JS2_3er_mit_FG)
-        K1:switchTo(TrafficLightState.RED)
-        K2:switchTo(TrafficLightState.RED)
+        K1:switchTo(SignalIndication.RED)
+        K2:switchTo(SignalIndication.RED)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
-        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
+        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
 
         ---@type Lane
-        local lane = Lane:new("Lane A", 34, laneTrafficLight)
-        local tlsBeforeDriveOn = lane.trafficLightsToDriveOn
+        local lane = Lane:new("Lane A", 34, laneSignal)
+        local tlsBeforeDriveOn = lane.signalsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
         K1:applyToLane(lane)
         K2:applyToLane(lane, "Some other route", "Matching Route", "Another")
 
-        it("Lane has signal", function () assert.is_truthy(lane.trafficLightsToDriveOn) end)
-        it("Lane has signal", function () assert.are.same({}, lane.trafficLightsToDriveOn[K1]) end)
+        it("Lane has signal", function () assert.is_truthy(lane.signalsToDriveOn) end)
+        it("Lane has signal", function () assert.are.same({}, lane.signalsToDriveOn[K1]) end)
         it("Lane has signal", function ()
-            assert.are.same({ "Some other route", "Matching Route", "Another" }, lane.trafficLightsToDriveOn[K2])
+            assert.are.same({ "Some other route", "Matching Route", "Another" }, lane.signalsToDriveOn[K2])
         end)
         describe("K1 can drive at red", function ()
-            K1:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = laneTrafficLight.phase
+            K1:switchTo(SignalIndication.RED)
+            local canDriveAtRed = laneSignal.currentIndication
             local signalIndexK1 = EEPGetSignal(K1.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexRed, signalIndexK1) end)
-            it("canDrive()", function () assert.equals(TrafficLightState.RED, canDriveAtRed) end)
-            K1:switchTo(TrafficLightState.RED)
+            it("canDrive()", function () assert.equals(SignalIndication.RED, canDriveAtRed) end)
+            K1:switchTo(SignalIndication.RED)
         end)
         describe("K1 can drive at green", function ()
-            K1:switchTo(TrafficLightState.GREEN)
-            local canDriveAtGreen = laneTrafficLight.phase
+            K1:switchTo(SignalIndication.GREEN)
+            local canDriveAtGreen = laneSignal.currentIndication
             local signalIndexK1 = EEPGetSignal(K1.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexGreen, signalIndexK1) end)
-            it("canDrive()", function () assert.equals(TrafficLightState.GREEN, canDriveAtGreen) end)
-            K1:switchTo(TrafficLightState.RED)
+            it("canDrive()", function () assert.equals(SignalIndication.GREEN, canDriveAtGreen) end)
+            K1:switchTo(SignalIndication.RED)
         end)
         describe("K2 can drive at green", function ()
-            K2:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = laneTrafficLight.phase
+            K2:switchTo(SignalIndication.RED)
+            local canDriveAtRed = laneSignal.currentIndication
             local signalIndexK2 = EEPGetSignal(K2.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexRed, signalIndexK2) end)
-            it("canDrive()", function () assert.equals(TrafficLightState.RED, canDriveAtRed) end)
-            K2:switchTo(TrafficLightState.RED)
+            it("canDrive()", function () assert.equals(SignalIndication.RED, canDriveAtRed) end)
+            K2:switchTo(SignalIndication.RED)
         end)
         describe("K2 can drive at green", function ()
-            K2:switchTo(TrafficLightState.GREEN)
+            K2:switchTo(SignalIndication.GREEN)
             local signalIndexK2 = EEPGetSignal(K2.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_mit_FG.signalIndexGreen, signalIndexK2) end)
 
-            local canDriveNoVehicle = laneTrafficLight.phase
-            it("canDrive() noVehicle", function () assert.equals(TrafficLightState.RED, canDriveNoVehicle) end)
+            local canDriveNoVehicle = laneSignal.currentIndication
+            it("canDrive() noVehicle", function () assert.equals(SignalIndication.RED, canDriveNoVehicle) end)
 
             lane:vehicleEntered("#Car1")
             local firstVehiclesRoute1 = lane.firstVehiclesRoute
-            local canDriveAtGreen2 = laneTrafficLight.phase
+            local canDriveAtGreen2 = laneSignal.currentIndication
             it("canDrive() vehicleWithRoute", function ()
                 assert.equals("Matching Route", firstVehiclesRoute1)
             end)
             it("canDrive() vehicleWithRoute", function ()
-                assert.equals(TrafficLightState.GREEN, canDriveAtGreen2)
+                assert.equals(SignalIndication.GREEN, canDriveAtGreen2)
             end)
             lane:vehicleLeft("#Car1")
 
             lane:vehicleEntered("#Car2")
             local firstVehiclesRoute2 = lane.firstVehiclesRoute
-            local canDriveAtGreen3 = laneTrafficLight.phase
+            local canDriveAtGreen3 = laneSignal.currentIndication
             it("canDrive() vehicleWithRoute", function () assert.equals("Alle", firstVehiclesRoute2) end)
             it("canDrive() vehicleWithRoute", function ()
-                assert.equals(TrafficLightState.RED, canDriveAtGreen3)
+                assert.equals(SignalIndication.RED, canDriveAtGreen3)
             end)
             lane:vehicleLeft("#Car2")
 
-            K2:switchTo(TrafficLightState.RED)
+            K2:switchTo(SignalIndication.RED)
         end)
     end)
 
-    insulate("Lane based route drive signals", function ()
+    insulate("Lane based route drive signal groups", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local TrafficLight = require("ce.mods.road.TrafficLight")
+        local SignalGroup = require("ce.mods.road.SignalGroup")
         local Lane = require("ce.mods.road.Lane")
 
         local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
         local secondDefaultSignal = TrafficLight:new("Second Default", 58, TrafficLightModel.JS2_3er_mit_FG)
         local exclusiveSignal = TrafficLight:new("Exclusive", 56, TrafficLightModel.JS2_3er_mit_FG)
         local additionalSignal = TrafficLight:new("Additional", 57, TrafficLightModel.JS2_3er_mit_FG)
-        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneSignal)
+        local sgDefault = SignalGroup:new("sgDefault"):addVehicleSignals(defaultSignal, secondDefaultSignal)
+        local sgExclusive = SignalGroup:new("sgExclusive"):addVehicleSignals(exclusiveSignal)
+        local sgAdditional = SignalGroup:new("sgAdditional"):addVehicleSignals(additionalSignal)
 
-        lane:driveOnDefaultSignals(defaultSignal, secondDefaultSignal)
-        lane:routes("Exclusive Route"):driveOnlyOn(exclusiveSignal)
-        lane:routes("Additional Route"):driveAlsoOn(additionalSignal)
+        lane:driveOnDefaultSignalGroups(sgDefault)
+        lane:routes("Exclusive Route"):driveOnlyOnSignalGroups(sgExclusive)
+        lane:routes("Additional Route"):driveAlsoOnSignalGroups(sgAdditional)
 
         it("registers the default signal as fallback", function ()
-            assert.is_true(lane.defaultDriveTrafficLights[defaultSignal])
-            assert.is_true(lane.defaultDriveTrafficLights[secondDefaultSignal])
-            assert.are.same({}, lane.trafficLightsToDriveOn[defaultSignal])
-            assert.are.same({}, lane.trafficLightsToDriveOn[secondDefaultSignal])
+            assert.is_true(lane.defaultDriveSignals[defaultSignal])
+            assert.is_true(lane.defaultDriveSignals[secondDefaultSignal])
+            assert.are.same({}, lane.signalsToDriveOn[defaultSignal])
+            assert.are.same({}, lane.signalsToDriveOn[secondDefaultSignal])
             assert.is_true(defaultSignal.lanes[lane])
             assert.is_true(secondDefaultSignal.lanes[lane])
         end)
@@ -194,10 +198,11 @@ describe("Lane ...", function ()
         end)
     end)
 
-    insulate("Multi-signal route drive signals", function ()
+    insulate("Multi-group route drive signals", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local TrafficLight = require("ce.mods.road.TrafficLight")
+        local SignalGroup = require("ce.mods.road.SignalGroup")
         local Lane = require("ce.mods.road.Lane")
 
         local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
@@ -206,16 +211,19 @@ describe("Lane ...", function ()
         local secondExclusiveSignal = TrafficLight:new("Second Exclusive", 58, TrafficLightModel.JS2_3er_mit_FG)
         local additionalSignal = TrafficLight:new("Additional", 59, TrafficLightModel.JS2_3er_mit_FG)
         local secondAdditionalSignal = TrafficLight:new("Second Additional", 60, TrafficLightModel.JS2_3er_mit_FG)
-        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneSignal)
+        local sgDefault = SignalGroup:new("sgDefault"):addVehicleSignals(defaultSignal, secondDefaultSignal)
+        local sgExclusive = SignalGroup:new("sgExclusive"):addVehicleSignals(exclusiveSignal, secondExclusiveSignal)
+        local sgAdditional = SignalGroup:new("sgAdditional"):addVehicleSignals(additionalSignal, secondAdditionalSignal)
 
-        lane:driveOnDefaultSignals(defaultSignal, secondDefaultSignal)
-        lane:routes("Exclusive Route"):driveOnlyOn(exclusiveSignal, secondExclusiveSignal)
-        lane:routes("Additional Route"):driveAlsoOn(additionalSignal, secondAdditionalSignal)
+        lane:driveOnDefaultSignalGroups(sgDefault)
+        lane:routes("Exclusive Route"):driveOnlyOnSignalGroups(sgExclusive)
+        lane:routes("Additional Route"):driveAlsoOnSignalGroups(sgAdditional)
 
-        it("stores the lane traffic light and keeps the compatibility alias", function ()
-            assert.equals(laneTrafficLight, lane.laneTrafficLight)
-            assert.equals(laneTrafficLight, lane.trafficLight)
+        it("stores the lane signal", function ()
+            assert.equals(laneSignal, lane.laneSignal)
+            assert.equals(laneSignal, lane.laneSignal)
         end)
 
         it("allows route-specific additional signals from one call", function ()
@@ -236,8 +244,9 @@ describe("Lane ...", function ()
             assert.is_false(Lane.laneCanDrive(lane, { additionalSignal }))
         end)
 
-        it("requires at least one route for route-bound drive signals", function ()
-            assert.has_error(function () lane:routes():driveAlsoOn(additionalSignal) end, "Specify at least one route")
+        it("requires at least one route for route-bound drive signal groups", function ()
+            assert.has_error(function () lane:routes():driveAlsoOnSignalGroups(sgAdditional) end,
+                             "Specify at least one route")
         end)
     end)
     insulate("Legacy applyToLane maps to lane based route drive signals", function ()
@@ -248,72 +257,73 @@ describe("Lane ...", function ()
 
         local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
         local routeSignal = TrafficLight:new("Route", 56, TrafficLightModel.JS2_3er_mit_FG)
-        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneSignal)
 
         defaultSignal:applyToLane(lane)
         routeSignal:applyToLane(lane, "Route A")
 
         it("maps applyToLane without routes to the default signal", function ()
-            assert.is_true(lane.defaultDriveTrafficLights[defaultSignal])
-            assert.are.same({}, lane.trafficLightsToDriveOn[defaultSignal])
+            assert.is_true(lane.defaultDriveSignals[defaultSignal])
+            assert.are.same({}, lane.signalsToDriveOn[defaultSignal])
         end)
 
         it("maps applyToLane with routes to an additional route signal", function ()
             lane.firstVehiclesRoute = "Route A"
 
-            assert.are.same({ "Route A" }, lane.trafficLightsToDriveOn[routeSignal])
+            assert.are.same({ "Route A" }, lane.signalsToDriveOn[routeSignal])
             assert.is_true(Lane.laneCanDrive(lane, { defaultSignal }))
             assert.is_true(Lane.laneCanDrive(lane, { routeSignal }))
         end)
     end)
 
-    insulate("Register traffic lights", function ()
+    insulate("Register signals", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        local TrafficLightState = require("ce.mods.road.TrafficLightState")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local Lane = require("ce.mods.road.Lane")
         local signalId = 55
 
         -- Set the route for train "#Car1"
         EEPSetTrainRoute("#Car1", "Some Route")
-        -- Traffic Light which is visible to tell the lanes traffic to drive
+        -- Signal which is visible to tell the lanes traffic to drive
         local K1 = TrafficLight:new("K1", signalId, TrafficLightModel.JS2_3er_ohne_FG)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
         local L1 = TrafficLight:new("L1", 11, TrafficLightModel.Unsichtbar_2er)
 
         local lane = Lane:new("Lane A", 34, L1)
-        local tlsBeforeDriveOn = lane.trafficLightsToDriveOn
+        local tlsBeforeDriveOn = lane.signalsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
         K1:applyToLane(lane)
 
-        it("Lane has signal", function () assert.is_truthy(lane.trafficLightsToDriveOn) end)
-        it("Lane has signal", function () assert.are.same({}, lane.trafficLightsToDriveOn[K1]) end)
+        it("Lane has signal", function () assert.is_truthy(lane.signalsToDriveOn) end)
+        it("Lane has signal", function () assert.are.same({}, lane.signalsToDriveOn[K1]) end)
         describe("Can drive at red", function ()
-            K1:switchTo(TrafficLightState.RED)
-            local canDriveAtRed = L1.phase
+            K1:switchTo(SignalIndication.RED)
+            local canDriveAtRed = L1.currentIndication
             local k1SignalIndex = EEPGetSignal(K1.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_ohne_FG.signalIndexRed, k1SignalIndex) end)
-            it("canDrive()", function () assert.equals(TrafficLightState.RED, canDriveAtRed) end)
+            it("canDrive()", function () assert.equals(SignalIndication.RED, canDriveAtRed) end)
         end)
         describe("Can drive at green", function ()
-            K1:switchTo(TrafficLightState.GREEN)
-            local canDriveAtGreen = L1.phase
+            K1:switchTo(SignalIndication.GREEN)
+            local canDriveAtGreen = L1.currentIndication
             local k1SignalIndex = EEPGetSignal(K1.signalId)
             it("SignalId is correct",
                function () assert.equals(TrafficLightModel.JS2_3er_ohne_FG.signalIndexGreen, k1SignalIndex) end)
-            it("canDrive()", function () assert.equals(TrafficLightState.GREEN, canDriveAtGreen) end)
+            it("canDrive()", function () assert.equals(SignalIndication.GREEN, canDriveAtGreen) end)
         end)
     end)
 
-    insulate("Show requests on the correct traffic lights", function ()
+    insulate("Show requests on the correct signal groups", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        -- local TrafficLightState = require("ce.mods.road.TrafficLightState")
+        -- local SignalIndication = require("ce.mods.road.SignalIndication")
         local TrafficLight = require("ce.mods.road.TrafficLight")
+        local SignalGroup = require("ce.mods.road.SignalGroup")
         local Lane = require("ce.mods.road.Lane")
         local signalId = 55
 
@@ -335,7 +345,7 @@ describe("Lane ...", function ()
         EEPStructureSetLight("#24_REQUEST", false)
         EEPStructureSetLight("#34_REQUEST", false)
 
-        -- Traffic Light which is visible to tell the lanes traffic to drive
+        -- Signal which is visible to tell the lanes traffic to drive
         local K1 = TrafficLight:new("K1", signalId, TrafficLightModel.JS2_3er_ohne_FG, "#11_RED", "#12_GREEN",
                                     "#13_YELLOW", "#14_REQUEST")
         local K2 = TrafficLight:new("K2", signalId, TrafficLightModel.JS2_3er_ohne_FG, "#21_RED", "#22_GREEN",
@@ -344,16 +354,19 @@ describe("Lane ...", function ()
                                     "#33_YELLOW", "#34_REQUEST")
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
         local L1 = TrafficLight:new("L1", 11, TrafficLightModel.Unsichtbar_2er)
+        local sgK1 = SignalGroup:new("sgK1"):addVehicleSignals(K1)
+        local sgK2 = SignalGroup:new("sgK2"):addVehicleSignals(K2)
+        local sgK3 = SignalGroup:new("sgK3"):addVehicleSignals(K3)
 
         local lane = Lane:new("Lane A", 34, L1)
-        lane:showRequestsOn(K1)
-        lane:showRequestsOn(K2, "Route A")
-        lane:showRequestsOn(K3, "Route B", "Route C")
+        lane:showRequestsOnSignalGroups(sgK1)
+        lane:routes("Route A"):showRequestsOnSignalGroups(sgK2)
+        lane:routes("Route B", "Route C"):showRequestsOnSignalGroups(sgK3)
 
-        it("K1 is registered for !ALL!", function () assert.same({ K1 }, lane.requestTrafficLights["!ALL!"]) end)
-        it("K2 is registered for Route A", function () assert.same({ K2 }, lane.requestTrafficLights["Route A"]) end)
-        it("K3 is registered for Route B", function () assert.same({ K3 }, lane.requestTrafficLights["Route B"]) end)
-        it("K3 is registered for Route C", function () assert.same({ K3 }, lane.requestTrafficLights["Route C"]) end)
+        it("K1 is registered for !ALL!", function () assert.same({ K1 }, lane.requestSignals["!ALL!"]) end)
+        it("K2 is registered for Route A", function () assert.same({ K2 }, lane.requestSignals["Route A"]) end)
+        it("K3 is registered for Route B", function () assert.same({ K3 }, lane.requestSignals["Route B"]) end)
+        it("K3 is registered for Route C", function () assert.same({ K3 }, lane.requestSignals["Route C"]) end)
 
         lane:vehicleLeft("#Car4")
         local _, lightOnK1NoCar = EEPStructureGetLight("#14")
@@ -392,10 +405,11 @@ describe("Lane ...", function ()
         it("  Light on K3 NoCar", function () assert.is_false(lightOnK3NoCar2) end)
     end)
 
-    insulate("Route builder shows exclusive route requests only on the selected traffic light", function ()
+    insulate("Route builder shows exclusive route requests only on the selected signal group", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local TrafficLight = require("ce.mods.road.TrafficLight")
+        local SignalGroup = require("ce.mods.road.SignalGroup")
         local Lane = require("ce.mods.road.Lane")
 
         EEPSetTrainRoute("#Car1", "Route A")
@@ -415,16 +429,18 @@ describe("Lane ...", function ()
                                     "#13_YELLOW", "#14_REQUEST")
         local S3 = TrafficLight:new("S3", 56, TrafficLightModel.JS2_3er_ohne_FG, "#21_RED", "#22_GREEN",
                                     "#23_YELLOW", "#24_REQUEST")
-        local laneTrafficLight = TrafficLight:new("laneTrafficLight", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneTrafficLight)
+        local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
+        local lane = Lane:new("Lane A", 34, laneSignal)
+        local sgS2 = SignalGroup:new("sgS2"):addVehicleSignals(S2)
+        local sgS3 = SignalGroup:new("sgS3"):addVehicleSignals(S3)
 
-        lane:driveOnDefaultSignals(S2):showRequestsOn(S2)
-        lane:routes("Route A", "Route B"):driveOnlyOn(S3):showRequestsOn(S3)
+        lane:driveOnDefaultSignalGroups(sgS2):showRequestsOnSignalGroups(sgS2)
+        lane:routes("Route A", "Route B"):driveOnlyOnSignalGroups(sgS3):showRequestsOnSignalGroups(sgS3)
 
         it("registers selected route requests only on S3 and default requests on S2", function ()
-            assert.same({ S2 }, lane.requestTrafficLights["!ALL!"])
-            assert.same({ S3 }, lane.requestTrafficLights["Route A"])
-            assert.same({ S3 }, lane.requestTrafficLights["Route B"])
+            assert.same({ S2 }, lane.requestSignals["!ALL!"])
+            assert.same({ S3 }, lane.requestSignals["Route A"])
+            assert.same({ S3 }, lane.requestSignals["Route B"])
         end)
 
         lane:vehicleEntered("#Car1")
@@ -635,7 +651,7 @@ describe("Lane ...", function ()
     insulate("Loading", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        local TrafficLightState = require("ce.mods.road.TrafficLightState")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local Lane = require("ce.mods.road.Lane")
 
@@ -646,6 +662,6 @@ describe("Lane ...", function ()
         it("Lane loaded", function () assert.equals(4, lane.queue:size()) end)
         it("Lane loaded", function () assert.equals(4, lane.vehicleCount) end)
         it("Lane loaded", function () assert.equals(6, lane.waitCount) end)
-        it("Lane loaded", function () assert.equals(TrafficLightState.RED, lane.phase) end)
+        it("Lane loaded", function () assert.equals(SignalIndication.RED, lane.currentIndication) end)
     end)
 end)

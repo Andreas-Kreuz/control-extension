@@ -1,5 +1,5 @@
 -- TypeScript LuaDtos: apps/web-server/src/server/ce/dto/roads/
---   IntersectionLuaDto, IntersectionLaneLuaDto, IntersectionSwitchingLuaDto, IntersectionTrafficLightLuaDto
+--   IntersectionLuaDto, IntersectionLaneLuaDto, IntersectionPhaseLuaDto, IntersectionTrafficLightLuaDto
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadDtoFactory ...") end
 
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
@@ -11,10 +11,10 @@ local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
 ---@field createIntersectionDtoList fun(intersections: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
 ---@field createIntersectionLaneDto fun(lane: table, isSelected?: boolean):string,string,string|number,IntersectionLaneDto
 ---@field createIntersectionLaneDtoList fun(lanes: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
----@field createIntersectionSwitchingDto fun(switching: table, isSelected?: boolean):string,string,string|number,IntersectionSwitchingDto
----@field createIntersectionSwitchingDtoList fun(switchings: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
+---@field createIntersectionPhaseDto fun(phase: table, isSelected?: boolean):string,string,string|number,IntersectionPhaseDto
+---@field createIntersectionPhaseDtoList fun(phases: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
 ---@field createIntersectionTrafficLightDto fun(trafficLight: table, isSelected?: boolean):string,string,string|number,IntersectionTrafficLightDto
----@field createIntersectionTrafficLightDtoList fun(trafficLights: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
+---@field createIntersectionTrafficLightDtoList fun(signals: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
 ---@field createIntersectionModuleSettingDto fun(setting: table, isSelected?: boolean):string,string,string|number,IntersectionModuleSettingDto
 ---@field createIntersectionModuleSettingDtoList fun(settings: table, isSelectedByValue?: fun(value: table): boolean):string,string,table
 local RoadDtoFactory = {}
@@ -28,17 +28,17 @@ end
 local function copyPhases(phases)
     local copy = {}
     for key, phase in pairs(phases or {}) do
-        local trafficLights = {}
-        for tlKey, trafficLight in pairs(phase.trafficLights or {}) do
-            trafficLights[tlKey] = {
-                signalId = trafficLight.signalId,
-                signalKind = trafficLight.signalKind,
-                signalKey = trafficLight.signalKey,
-                signalName = trafficLight.signalName,
-                type = trafficLight.type,
-                trafficSignalName = trafficLight.trafficSignalName,
-                pedestrianSignalName = trafficLight.pedestrianSignalName,
-                use = trafficLight.use
+        local signalHeads = {}
+        for tlKey, signalHead in pairs(phase.signalHeads or {}) do
+            signalHeads[tlKey] = {
+                signalId = signalHead.signalId,
+                signalHeadKind = signalHead.signalHeadKind,
+                signalHeadKey = signalHead.signalHeadKey,
+                signalHeadName = signalHead.signalHeadName,
+                type = signalHead.type,
+                vehicleSignalHeadName = signalHead.vehicleSignalHeadName,
+                pedestrianSignalHeadName = signalHead.pedestrianSignalHeadName,
+                use = signalHead.use
             }
         end
         copy[key] = {
@@ -46,8 +46,8 @@ local function copyPhases(phases)
             name = phase.name,
             order = phase.order,
             prio = phase.prio,
-            greenPhaseSeconds = phase.greenPhaseSeconds,
-            trafficLights = trafficLights
+            greenTimeSeconds = phase.greenTimeSeconds,
+            signalHeads = signalHeads
         }
     end
     return copy
@@ -60,14 +60,14 @@ local function toIntersectionDto(intersection, isSelected)
         id = intersection.id,
     }
     dto.name             = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and intersection.name or ""
-    dto.currentSwitching = SyncPolicy.shouldPublishField(fieldPolicies, "currentSwitching", isSelected) and
-        intersection.currentSwitching or ""
-    dto.manualSwitching  = SyncPolicy.shouldPublishField(fieldPolicies, "manualSwitching", isSelected) and
-        intersection.manualSwitching or ""
-    dto.nextSwitching    = SyncPolicy.shouldPublishField(fieldPolicies, "nextSwitching", isSelected) and
-        intersection.nextSwitching or ""
-    dto.timeForGreen     = SyncPolicy.shouldPublishField(fieldPolicies, "timeForGreen", isSelected) and
-        intersection.timeForGreen or 0
+    dto.currentPhase = SyncPolicy.shouldPublishField(fieldPolicies, "currentPhase", isSelected) and
+        intersection.currentPhase or ""
+    dto.manualPhase  = SyncPolicy.shouldPublishField(fieldPolicies, "manualPhase", isSelected) and
+        intersection.manualPhase or ""
+    dto.nextPhase    = SyncPolicy.shouldPublishField(fieldPolicies, "nextPhase", isSelected) and
+        intersection.nextPhase or ""
+    dto.greenTimeSeconds     = SyncPolicy.shouldPublishField(fieldPolicies, "greenTimeSeconds", isSelected) and
+        intersection.greenTimeSeconds or 0
     dto.staticCams       = SyncPolicy.shouldPublishField(fieldPolicies, "staticCams", isSelected) and
         copyTable(intersection.staticCams) or {}
     dto.phases           = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
@@ -90,7 +90,7 @@ local function toIntersectionLaneDto(lane, isSelected)
         lane.intersectionId or 0
     dto.name                       = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and
         lane.name or ""
-    dto.phase                      = SyncPolicy.shouldPublishField(fieldPolicies, "phase", isSelected) and lane.phase or
+    dto.currentIndication          = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and lane.currentIndication or
         ""
     dto.vehicleMultiplier          = SyncPolicy.shouldPublishField(fieldPolicies, "vehicleMultiplier", isSelected) and
         lane.vehicleMultiplier or 0
@@ -106,23 +106,23 @@ local function toIntersectionLaneDto(lane, isSelected)
                                                                    isSelected) and lane.waitingForGreenCyclesCount or 0
     dto.directions                 = SyncPolicy.shouldPublishField(fieldPolicies, "directions", isSelected) and
         copyTable(lane.directions) or {}
-    dto.switchings                 = SyncPolicy.shouldPublishField(fieldPolicies, "switchings", isSelected) and
-        copyTable(lane.switchings) or {}
+    dto.phases                 = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
+        copyTable(lane.phases) or {}
     dto.tracks                     = SyncPolicy.shouldPublishField(fieldPolicies, "tracks", isSelected) and
         copyTable(lane.tracks) or {}
     return dto
 end
 
-local function toIntersectionSwitchingDto(switching, isSelected)
-    local fieldPolicies = RoadOptionsRegistry.getFieldPublishPolicies("intersectionSwitchings")
+local function toIntersectionPhaseDto(phase, isSelected)
+    local fieldPolicies = RoadOptionsRegistry.getFieldPublishPolicies("intersectionPhases")
     local dto           = {
-        ceType = RoadCeTypes.IntersectionSwitching,
-        id = switching.id,
+        ceType = RoadCeTypes.IntersectionPhase,
+        id = phase.id,
     }
     dto.intersectionId  = SyncPolicy.shouldPublishField(fieldPolicies, "intersectionId", isSelected) and
-        switching.intersectionId or ""
-    dto.name            = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and switching.name or ""
-    dto.prio            = SyncPolicy.shouldPublishField(fieldPolicies, "prio", isSelected) and switching.prio or 0
+        phase.intersectionId or ""
+    dto.name            = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and phase.name or ""
+    dto.prio            = SyncPolicy.shouldPublishField(fieldPolicies, "prio", isSelected) and phase.prio or 0
     return dto
 end
 
@@ -148,29 +148,29 @@ local function toIntersectionTrafficLightAxisStructureDto(axisStructure)
     }
 end
 
-local function toIntersectionTrafficLightDto(trafficLight, isSelected)
+local function toIntersectionTrafficLightDto(signal, isSelected)
     local fieldPolicies      = RoadOptionsRegistry.getFieldPublishPolicies("intersectionTrafficLights")
     local dto                = {
         ceType = RoadCeTypes.IntersectionTrafficLight,
-        id = trafficLight.id,
+        id = signal.id,
     }
     dto.signalId             = SyncPolicy.shouldPublishField(fieldPolicies, "signalId", isSelected) and
-        trafficLight.signalId or 0
-    dto.trafficSignalName    = SyncPolicy.shouldPublishField(fieldPolicies, "trafficSignalName", isSelected) and
-        trafficLight.trafficSignalName or ""
+        signal.signalId or 0
+    dto.vehicleSignalName    = SyncPolicy.shouldPublishField(fieldPolicies, "vehicleSignalName", isSelected) and
+        signal.vehicleSignalName or ""
     dto.pedestrianSignalName = SyncPolicy.shouldPublishField(fieldPolicies, "pedestrianSignalName", isSelected) and
-        trafficLight.pedestrianSignalName or ""
+        signal.pedestrianSignalName or ""
     dto.use                  = SyncPolicy.shouldPublishField(fieldPolicies, "use", isSelected) and
-        trafficLight.use or ""
+        signal.use or ""
     dto.modelId              = SyncPolicy.shouldPublishField(fieldPolicies, "modelId", isSelected) and
-        trafficLight.modelId or ""
-    dto.currentPhase         = SyncPolicy.shouldPublishField(fieldPolicies, "currentPhase", isSelected) and
-        trafficLight.currentPhase or ""
+        signal.modelId or ""
+    dto.currentIndication    = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and
+        signal.currentIndication or ""
     dto.intersectionId       = SyncPolicy.shouldPublishField(fieldPolicies, "intersectionId", isSelected) and
-        trafficLight.intersectionId or 0
+        signal.intersectionId or 0
     if SyncPolicy.shouldPublishField(fieldPolicies, "lightStructures", isSelected) then
         local lightStructures = {}
-        for key, lightStructure in pairs(trafficLight.lightStructures or {}) do
+        for key, lightStructure in pairs(signal.lightStructures or {}) do
             lightStructures[key] = toIntersectionTrafficLightStructureDto(lightStructure)
         end
         dto.lightStructures = lightStructures
@@ -179,7 +179,7 @@ local function toIntersectionTrafficLightDto(trafficLight, isSelected)
     end
     if SyncPolicy.shouldPublishField(fieldPolicies, "axisStructures", isSelected) then
         local axisStructures = {}
-        for key, axisStructure in pairs(trafficLight.axisStructures or {}) do
+        for key, axisStructure in pairs(signal.axisStructures or {}) do
             axisStructures[key] = toIntersectionTrafficLightAxisStructureDto(axisStructure)
         end
         dto.axisStructures = axisStructures
@@ -242,22 +242,22 @@ function RoadDtoFactory.createIntersectionLaneDtoList(lanes, isSelectedByValue)
                          isSelectedByValue)
 end
 
-function RoadDtoFactory.createIntersectionSwitchingDto(switching, isSelected)
-    return createDto(RoadCeTypes.IntersectionSwitching, "id", switching, toIntersectionSwitchingDto, isSelected)
+function RoadDtoFactory.createIntersectionPhaseDto(phase, isSelected)
+    return createDto(RoadCeTypes.IntersectionPhase, "id", phase, toIntersectionPhaseDto, isSelected)
 end
 
-function RoadDtoFactory.createIntersectionSwitchingDtoList(switchings, isSelectedByValue)
-    return createDtoList(RoadCeTypes.IntersectionSwitching, "id", switchings,
-                         RoadDtoFactory.createIntersectionSwitchingDto, isSelectedByValue)
+function RoadDtoFactory.createIntersectionPhaseDtoList(phases, isSelectedByValue)
+    return createDtoList(RoadCeTypes.IntersectionPhase, "id", phases,
+                         RoadDtoFactory.createIntersectionPhaseDto, isSelectedByValue)
 end
 
-function RoadDtoFactory.createIntersectionTrafficLightDto(trafficLight, isSelected)
-    return createDto(RoadCeTypes.IntersectionTrafficLight, "id", trafficLight, toIntersectionTrafficLightDto,
+function RoadDtoFactory.createIntersectionTrafficLightDto(signal, isSelected)
+    return createDto(RoadCeTypes.IntersectionTrafficLight, "id", signal, toIntersectionTrafficLightDto,
                      isSelected)
 end
 
-function RoadDtoFactory.createIntersectionTrafficLightDtoList(trafficLights, isSelectedByValue)
-    return createDtoList(RoadCeTypes.IntersectionTrafficLight, "id", trafficLights,
+function RoadDtoFactory.createIntersectionTrafficLightDtoList(signals, isSelectedByValue)
+    return createDtoList(RoadCeTypes.IntersectionTrafficLight, "id", signals,
                          RoadDtoFactory.createIntersectionTrafficLightDto, isSelectedByValue)
 end
 

@@ -21,7 +21,7 @@ const TransitTrainRoom = new DomainRoom('App.TransitTrain');
 
 const IntersectionListRoom = new DomainRoom('App.IntersectionList');
 const IntersectionRoom = new DomainRoom('App.Intersection');
-const IntersectionSwitchingListRoom = new DomainRoom('App.IntersectionSwitchingList');
+const IntersectionPhaseListRoom = new DomainRoom('App.IntersectionPhaseList');
 const RoadSettingsRoom = new DomainRoom('App.RoadSettings');
 export { ApiDataRoom };
 export { ServerStatsRoom };
@@ -41,5 +41,5 @@ export { TransitSettingsRoom };
 export { TransitTrainRoom };
 export { IntersectionListRoom };
 export { IntersectionRoom };
-export { IntersectionSwitchingListRoom };
+export { IntersectionPhaseListRoom };
 export { RoadSettingsRoom };

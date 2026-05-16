@@ -1,33 +1,33 @@
 // App contract populated by:
 // apps/web-server/src/server/mod/road/RoadSelector.ts
-export interface IntersectionPhaseTrafficLightAppDto {
+export interface IntersectionPhaseSignalHeadAppDto {
   signalId: number;
-  signalKind?: 'TRAFFIC' | 'PEDESTRIAN';
-  signalKey?: string;
-  signalName?: string;
+  signalHeadKind?: 'VEHICLE' | 'PEDESTRIAN';
+  signalHeadKey?: string;
+  signalHeadName?: string;
   type: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
-  trafficSignalName?: string;
-  pedestrianSignalName?: string;
-  use: 'TRAFFIC_ONLY' | 'PEDESTRIAN_ONLY' | 'TRAFFIC_AND_PEDESTRIAN';
+  vehicleSignalHeadName?: string;
+  pedestrianSignalHeadName?: string;
+  use: 'VEHICLE_ONLY' | 'PEDESTRIAN_ONLY' | 'VEHICLE_AND_PEDESTRIAN';
 }
 
-export interface IntersectionPhaseAppDto {
+export interface IntersectionPhaseTimingAppDto {
   id: string;
   name: string;
   order: number;
   prio: number;
-  greenPhaseSeconds: number;
-  trafficLights: IntersectionPhaseTrafficLightAppDto[];
+  greenTimeSeconds: number;
+  signalHeads: IntersectionPhaseSignalHeadAppDto[];
 }
 
 export interface IntersectionAppDto {
   id: number;
   name: string;
-  currentSwitching: string;
-  manualSwitching: string;
-  nextSwitching: string;
+  currentPhase: string;
+  manualPhase: string;
+  nextPhase: string;
   ready: boolean;
-  timeForGreen: number;
+  greenTimeSeconds: number;
   staticCams: string[];
-  phases: IntersectionPhaseAppDto[];
+  phases: IntersectionPhaseTimingAppDto[];
 }

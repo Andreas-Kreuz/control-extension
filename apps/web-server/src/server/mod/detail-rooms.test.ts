@@ -1,4 +1,4 @@
-import * as assert from 'node:assert/strict';
+﻿import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import RoadDataService from './road/RoadDataService';
@@ -130,11 +130,11 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
         I1: {
           id: 1,
           name: 'Crossing 1',
-          currentSwitching: 'S1',
-          manualSwitching: '',
-          nextSwitching: 'S2',
+          currentPhase: 'P1',
+          manualPhase: '',
+          nextPhase: 'P2',
           ready: true,
-          timeForGreen: 15,
+          greenTimeSeconds: 15,
           staticCams: [],
           phases: [],
         },
@@ -158,11 +158,11 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
     '1': {
       id: 1,
       name: 'Crossing 1',
-      currentSwitching: 'S1',
-      manualSwitching: '',
-      nextSwitching: 'S2',
+      currentPhase: 'P1',
+      manualPhase: '',
+      nextPhase: 'P2',
       ready: true,
-      timeForGreen: 15,
+      greenTimeSeconds: 15,
       staticCams: [],
       phases: [],
     },

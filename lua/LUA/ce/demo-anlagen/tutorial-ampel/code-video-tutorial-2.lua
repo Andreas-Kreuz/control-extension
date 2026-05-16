@@ -19,15 +19,18 @@ lane3 = Lane:new("FS3", 3, K5, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT
 lane4 = Lane:new("FS4", 4, K6, { Lane.Directions.LEFT })
 
 local c = Intersection:new("Einfache Kreuzung", 5)
-local sequenceA = c:newSequence("Schaltung A")
-sequenceA:addCarLights(K1)
-sequenceA:addPedestrianLights(K4, K6, F1, F2)
-local sequenceB = c:newSequence("Schaltung B")
-sequenceB:addCarLights(K2, K3)
-sequenceB:addPedestrianLights(K4, K6)
-local sequenceC = c:newSequence("Schaltung C")
-sequenceC:addCarLights(K4, K5, K6)
-sequenceC:addPedestrianLights(K1, K3)
+local sgLane1StraightRight = c:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1)
+local sgLane2Left = c:newSignalGroup("sgLane2Left"):addVehicleSignals(K2, K3)
+local sgLane3StraightRight = c:newSignalGroup("sgLane3StraightRight"):addVehicleSignals(K4, K5)
+local sgLane4Left = c:newSignalGroup("sgLane4Left"):addVehicleSignals(K6)
+local sgPedSouth = c:newSignalGroup("sgPedSouth"):addPedestrianSignals(K4, K6, F1, F2)
+local sgPedNorth = c:newSignalGroup("sgPedNorth"):addPedestrianSignals(K1, K3)
+local phase1 = c:newPhase("P1")
+phase1:addSignalGroup(sgLane1StraightRight, sgPedSouth)
+local phase2 = c:newPhase("P2")
+phase2:addSignalGroup(sgLane2Left, sgPedSouth)
+local phase3 = c:newPhase("P3")
+phase3:addSignalGroup(sgLane3StraightRight, sgLane4Left, sgPedNorth)
 
 
 -- Modulverwaltung der Lua-Bibliothek laden

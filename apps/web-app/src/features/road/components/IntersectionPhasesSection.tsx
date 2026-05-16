@@ -1,40 +1,40 @@
-﻿import Box from '@mui/material/Box';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import TypeCaption from '../../../shared/components/TypeCaption';
 import type Intersection from '../model/Intersection';
-import type { IntersectionPhase, IntersectionPhaseTrafficLight } from '../model/Intersection';
+import type { IntersectionPhase, IntersectionPhaseSignalHead } from '../model/Intersection';
 
 const rowLabelWidth = 72;
 const minPhaseWidth = 96;
 const rowHeight = 38;
 
 function phaseWidth(phase: IntersectionPhase) {
-  return Math.max(minPhaseWidth, phase.greenPhaseSeconds * 8);
+  return Math.max(minPhaseWidth, phase.greenTimeSeconds * 8);
 }
 
-function signalKindFor(trafficLight: IntersectionPhaseTrafficLight) {
-  return trafficLight.signalKind ?? (trafficLight.type === 'PEDESTRIAN' ? 'PEDESTRIAN' : 'TRAFFIC');
+function signalKindFor(signalHead: IntersectionPhaseSignalHead) {
+  return signalHead.signalHeadKind ?? (signalHead.type === 'PEDESTRIAN' ? 'PEDESTRIAN' : 'VEHICLE');
 }
 
-function signalKeyFor(trafficLight: IntersectionPhaseTrafficLight) {
-  return trafficLight.signalKey ?? `${trafficLight.signalId}:${signalKindFor(trafficLight)}`;
+function signalKeyFor(signalHead: IntersectionPhaseSignalHead) {
+  return signalHead.signalHeadKey ?? `${signalHead.signalId}:${signalKindFor(signalHead)}`;
 }
 
-function signalNameFor(trafficLight: IntersectionPhaseTrafficLight) {
-  if (trafficLight.signalName !== undefined) return trafficLight.signalName;
-  if (signalKindFor(trafficLight) === 'PEDESTRIAN') return trafficLight.pedestrianSignalName ?? '';
-  return trafficLight.trafficSignalName ?? '';
+function signalNameFor(signalHead: IntersectionPhaseSignalHead) {
+  if (signalHead.signalHeadName !== undefined) return signalHead.signalHeadName;
+  if (signalKindFor(signalHead) === 'PEDESTRIAN') return signalHead.pedestrianSignalHeadName ?? '';
+  return signalHead.vehicleSignalHeadName ?? '';
 }
 
 function signalRowsFor(phases: IntersectionPhase[]) {
-  const rows = new Map<string, IntersectionPhaseTrafficLight>();
+  const rows = new Map<string, IntersectionPhaseSignalHead>();
   phases.forEach((phase) => {
-    phase.trafficLights.forEach((trafficLight) => {
-      const signalKey = signalKeyFor(trafficLight);
-      if (!rows.has(signalKey)) rows.set(signalKey, trafficLight);
+    phase.signalHeads.forEach((signalHead) => {
+      const signalHeadKey = signalKeyFor(signalHead);
+      if (!rows.has(signalHeadKey)) rows.set(signalHeadKey, signalHead);
     });
   });
   return Array.from(rows.values()).sort(
@@ -45,28 +45,28 @@ function signalRowsFor(phases: IntersectionPhase[]) {
   );
 }
 
-function phaseHasSignal(phase: IntersectionPhase, signalKey: string) {
-  return phase.trafficLights.some((trafficLight) => signalKeyFor(trafficLight) === signalKey);
+function phaseHasSignal(phase: IntersectionPhase, signalHeadKey: string) {
+  return phase.signalHeads.some((signalHead) => signalKeyFor(signalHead) === signalHeadKey);
 }
 
-function signalRowNames(trafficLight: IntersectionPhaseTrafficLight) {
-  return [signalNameFor(trafficLight)];
+function signalRowNames(signalHead: IntersectionPhaseSignalHead) {
+  return [signalNameFor(signalHead)];
 }
 
-function signalTooltipName(trafficLight: IntersectionPhaseTrafficLight) {
-  return signalRowNames(trafficLight).filter(Boolean).join(' / ');
+function signalTooltipName(signalHead: IntersectionPhaseSignalHead) {
+  return signalRowNames(signalHead).filter(Boolean).join(' / ');
 }
 
-function signalTooltipText(trafficLight: IntersectionPhaseTrafficLight, green: boolean, phase: IntersectionPhase) {
-  const name = signalTooltipName(trafficLight);
+function signalTooltipText(signalHead: IntersectionPhaseSignalHead, green: boolean, phase: IntersectionPhase) {
+  const name = signalTooltipName(signalHead);
   const state = green ? 'Grün' : 'Rot';
   return name ? `${name}: ${state} in ${phase.name}` : `${state} in ${phase.name}`;
 }
 
 function phaseStateLabel(intersection: Intersection, phase: IntersectionPhase) {
-  if (intersection.currentSwitching === phase.name) return 'Aktuell';
-  if (intersection.nextSwitching === phase.name) return 'Nächste';
-  if (intersection.manualSwitching === phase.name) return 'Manuell';
+  if (intersection.currentPhase === phase.name) return 'Aktuell';
+  if (intersection.nextPhase === phase.name) return 'Nächste';
+  if (intersection.manualPhase === phase.name) return 'Manuell';
   return undefined;
 }
 
@@ -108,16 +108,16 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
                     {phase.name}
                   </Typography>
                   <Typography variant="caption" color={stateLabel ? 'primary' : 'textSecondary'} noWrap>
-                    {stateLabel ?? `${phase.greenPhaseSeconds}s`}
+                    {stateLabel ?? `${phase.greenTimeSeconds}s`}
                   </Typography>
                 </Box>
               );
             })}
           </Box>
-          {signalRows.map((trafficLight) => {
-            const signalKey = signalKeyFor(trafficLight);
+          {signalRows.map((signalHead) => {
+            const signalHeadKey = signalKeyFor(signalHead);
             return (
-              <Box key={signalKey} sx={{ display: 'flex', alignItems: 'center', height: rowHeight }}>
+              <Box key={signalHeadKey} sx={{ display: 'flex', alignItems: 'center', height: rowHeight }}>
                 <Stack
                   sx={{
                     width: rowLabelWidth,
@@ -128,17 +128,17 @@ function IntersectionPhasesSection({ intersection }: { intersection: Intersectio
                     lineHeight: 1.1,
                   }}
                 >
-                  {signalRowNames(trafficLight).map((name, index) => (
-                    <Typography key={`${signalKey}-${index}`} variant="caption" noWrap>
+                  {signalRowNames(signalHead).map((name, index) => (
+                    <Typography key={`${signalHeadKey}-${index}`} variant="caption" noWrap>
                       {name}
                     </Typography>
                   ))}
                 </Stack>
                 {phases.map((phase) => {
-                  const green = phaseHasSignal(phase, signalKey);
+                  const green = phaseHasSignal(phase, signalHeadKey);
                   const stateLabel = phaseStateLabel(intersection, phase);
                   return (
-                    <Tooltip key={`${phase.id}-${signalKey}`} title={signalTooltipText(trafficLight, green, phase)}>
+                    <Tooltip key={`${phase.id}-${signalHeadKey}`} title={signalTooltipText(signalHead, green, phase)}>
                       <Box
                         sx={{
                           width: phaseWidth(phase),

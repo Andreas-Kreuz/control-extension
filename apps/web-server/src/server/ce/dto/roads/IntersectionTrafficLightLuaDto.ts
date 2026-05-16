@@ -1,5 +1,5 @@
 // Lua DtoFactory: lua/LUA/ce/mods/road/data/RoadDtoFactory.lua
-// Room: intersection-traffic-lights
+// Room: intersection-signals
 export interface IntersectionTrafficLightStructureLuaDto {
   structureRed?: string;
   structureGreen?: string;
@@ -21,12 +21,13 @@ export interface IntersectionTrafficLightAxisStructureLuaDto {
 export interface IntersectionTrafficLightLuaDto {
   id: number;
   signalId: number;
-  trafficSignalName?: string;
+  vehicleSignalName?: string;
   pedestrianSignalName?: string;
-  use: 'TRAFFIC_ONLY' | 'PEDESTRIAN_ONLY' | 'TRAFFIC_AND_PEDESTRIAN';
+  use: 'VEHICLE_ONLY' | 'PEDESTRIAN_ONLY' | 'VEHICLE_AND_PEDESTRIAN';
   modelId: string;
-  currentPhase: string;
+  currentIndication: string;
   intersectionId: number;
   lightStructures: Record<string, IntersectionTrafficLightStructureLuaDto>;
   axisStructures: IntersectionTrafficLightAxisStructureLuaDto[];
 }
+

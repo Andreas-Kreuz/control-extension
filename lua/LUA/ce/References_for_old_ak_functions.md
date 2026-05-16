@@ -47,7 +47,7 @@ Die Neuseite bezieht sich auf `control-extension\lua\LUA\ce`.
 | 1:1 | `require("ak.road.TramSwitch")`                 | `require("ce.mods.road.TramSwitch")`                 | Tram-Umschaltung.                                 |
 | 1:1 | `require("ak.road.Lane")`                       | `require("ce.mods.road.Lane")`                       | Fahrspur.                                         |
 | 1:1 | `require("ak.road.Crossing")`                   | `require("ce.mods.road.Intersection")`               | Fachliche Umbenennung `Crossing -> Intersection`. |
-| 1:1 | `require("ak.road.CrossingSequence")`           | `require("ce.mods.road.IntersectionSequence")`       | Fachliche Umbenennung passend zur Intersection.   |
+| 1:1 | `require("ak.road.CrossingSequence")`           | `require("ce.mods.road.TrafficPhase")`       | Fachliche Umbenennung passend zur Intersection.   |
 | 1:1 | `ak/road/CrossingDtoFactory.lua`                | `ce/mods/road/data/RoadDtoFactory.lua`               | DTO-Fabrik fuer Kreuzungsdaten.                   |
 | 1:1 | `ak/road/TrafficLightModelDtoFactory.lua`       | `ce/mods/road/data/TrafficLightModelDtoFactory.lua`  | DTO-Fabrik fuer Signalmodelle.                    |
 
@@ -115,5 +115,5 @@ Diese Muster sind bei einer Migration besonders fehleranfaellig:
 
 - `ak.public-transport.*` wird nicht zu `ce.public-transport.*`, sondern zu `ce.mods.transit.*`.
 - `ak.road.Crossing` wird nicht zu `ce.mods.road.Crossing`, sondern zu `ce.mods.road.Intersection`.
-- `ak.road.CrossingSequence` wird nicht zu `ce.mods.road.CrossingSequence`, sondern zu `ce.mods.road.IntersectionSequence`.
+- `ak.road.CrossingSequence` wird nicht zu `ce.mods.road.CrossingSequence`, sondern zu `ce.mods.road.TrafficPhase`.
 - `ak.core.ModuleRegistry` hat keinen oeffentlichen 1:1-Ersatz unter `ce.hub.*`; fuer Anwender ist `ce.ControlExtension` der richtige Zielpfad.

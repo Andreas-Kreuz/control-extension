@@ -5,7 +5,7 @@ import RoadSelector from './RoadSelector';
 import {
   IntersectionRoom,
   IntersectionListRoom,
-  IntersectionSwitchingListRoom,
+  IntersectionPhaseListRoom,
   RoadSettingsRoom,
 } from '@ce/web-shared';
 import { Server } from 'socket.io';
@@ -27,9 +27,9 @@ export default class RoadDataService implements DomainRoomService {
         JSON.stringify(this.selector.getIntersection(IntersectionRoom.idOfRoom(room)) ?? null),
     });
     this.roomDataProviders.push({
-      roomType: IntersectionSwitchingListRoom,
-      id: 'IntersectionSwitchingListRoom',
-      jsonCreator: (_room: string) => JSON.stringify(this.selector.getIntersectionSwitchings()),
+      roomType: IntersectionPhaseListRoom,
+      id: 'IntersectionPhaseListRoom',
+      jsonCreator: (_room: string) => JSON.stringify(this.selector.getIntersectionPhases()),
     });
     this.roomDataProviders.push({
       roomType: RoadSettingsRoom,

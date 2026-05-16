@@ -1,4 +1,4 @@
-﻿export { CommandEvent } from './CommandEvent';
+export { CommandEvent } from './CommandEvent';
 export { RoadEvent } from './RoadEvent';
 export { LogEvent } from './LogEvent';
 export { PairingEvent } from './PairingEvent';
@@ -47,11 +47,11 @@ export type { RollingStockTexturesAppDto } from './dtos/app/trains/RollingStockT
 export type { RollingStockRotationAppDto } from './dtos/app/trains/RollingStockRotationAppDto';
 export type {
   IntersectionAppDto,
-  IntersectionPhaseAppDto,
-  IntersectionPhaseTrafficLightAppDto,
+  IntersectionPhaseTimingAppDto,
+  IntersectionPhaseSignalHeadAppDto,
 } from './dtos/app/roads/IntersectionAppDto';
 export type { IntersectionLaneAppDto } from './dtos/app/roads/IntersectionLaneAppDto';
-export type { IntersectionSwitchingAppDto } from './dtos/app/roads/IntersectionSwitchingAppDto';
+export type { IntersectionPhaseAppDto } from './dtos/app/roads/IntersectionPhaseAppDto';
 export type { IntersectionTrafficLightAppDto } from './dtos/app/roads/IntersectionTrafficLightAppDto';
 export type { TrafficLightModelAppDto } from './dtos/app/traffic-light-models/TrafficLightModelAppDto';
 export type { TransitLineAppDto } from './dtos/app/transit/TransitLineAppDto';
@@ -72,7 +72,7 @@ export { UpdateStatusRoom } from './rooms/DomainRoomRegistry';
 export { ScenarioRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionListRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionRoom } from './rooms/DomainRoomRegistry';
-export { IntersectionSwitchingListRoom } from './rooms/DomainRoomRegistry';
+export { IntersectionPhaseListRoom } from './rooms/DomainRoomRegistry';
 export { RoadSettingsRoom } from './rooms/DomainRoomRegistry';
 export { TrainListRoom } from './rooms/DomainRoomRegistry';
 export { TrainRoom } from './rooms/DomainRoomRegistry';

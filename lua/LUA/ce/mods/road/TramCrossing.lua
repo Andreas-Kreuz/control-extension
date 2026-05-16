@@ -5,14 +5,14 @@ local StorageUtility = require("ce.hub.util.StorageUtility")
 local Task = require("ce.hub.scheduler.Task")
 
 ---@class TramCrossingSignal
----Signal configuration used because one tram crossing can block several traffic lights at once.
+---Signal configuration used because one tram crossing can block several signals at once.
 ---@field signal number EEP signal ID
 ---@field signalPositionIfOccupied number Signal position used when at least one tram is inside the crossing
 ---@field signalPositionIfClear number Signal position used when the crossing is clear
 ---@field signalPositionYellow number Signal position used during the yellow phase
 
 ---@class TramCrossing
----Counts trams in one crossing so traffic lights stay red while any tram is still inside.
+---Counts trams in one crossing so signals stay red while any tram is still inside.
 ---The count is persisted in the primary signal tag so a Lua reload does not make an occupied crossing look clear.
 ---@field name string Crossing name for diagnostics and scheduled task names
 ---@field primarySignal number EEP signal ID whose tag stores the train count
@@ -20,7 +20,7 @@ local Task = require("ce.hub.scheduler.Task")
 ---@field securedIndicators TramCrossingSecuredIndicator[] Structure axes showing secured crossing state
 ---@field count number Number of trams currently counted inside the crossing
 ---@field secured boolean Whether the crossing signals currently secure the crossing with red
----@field yellowPhaseSeconds number Duration of the yellow phase before switching to occupied
+---@field yellowPhaseSeconds number Duration of the yellow phase before changing to occupied
 local TramCrossing = {}
 TramCrossing.__index = TramCrossing
 TramCrossing.defaultYellowPhaseSeconds = 2
@@ -43,7 +43,7 @@ local function parseCount(signal)
     return count
 end
 
----Creates the internal signal configuration for one traffic light.
+---Creates the internal signal configuration for one signal.
 ---This keeps the per-signal EEP positions together so all switch methods can treat every signal uniformly.
 ---@param signal number EEP signal ID
 ---@param signalPositionIfOccupied number Signal position for occupied/red
@@ -102,7 +102,7 @@ local function createSecuredIndicator(structureId, axis, axisValueUnsecured, axi
 end
 
 ---Creates a tram crossing and loads the current train count from the primary signal tag.
----The constructor signal stores the count; additional signals only follow switching.
+---The constructor signal stores the count; additional signals only follow state changes.
 ---Use this once per physical tram crossing so each instance has independent state and signal control.
 ---@param crossingName string Name of the crossing
 ---@param signal number Primary EEP signal ID
@@ -133,7 +133,7 @@ end
 
 ---Adds another signal controlled by this crossing.
 ---The added signal is switched with the crossing but does not store the count in its tag.
----Use this when several traffic lights must show the same crossing state without duplicating persistence.
+---Use this when several signals must show the same crossing state without duplicating persistence.
 ---@param signal number EEP signal ID
 ---@param signalPositionIfOccupied number Signal position when count is greater than 0
 ---@param signalPositionIfClear number Signal position when count is 0

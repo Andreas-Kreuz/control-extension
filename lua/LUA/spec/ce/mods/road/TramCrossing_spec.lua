@@ -87,7 +87,7 @@ insulate("ce.mods.road.TramCrossing", function ()
         assert.equals(2, EEPGetSignal(106))
     end)
 
-    it("adds more signals for switching without storing counts in them", function ()
+    it("adds more signals for phase without storing counts in them", function ()
         local crossing = TramCrossing:new("Crossing G", 107, 1, 2, 3)
         local returned = crossing:addSignal(108, 4, 5, 6)
 
