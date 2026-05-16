@@ -210,15 +210,15 @@ end
 function RoadDataCollector.collectModuleSettings()
     return {
         {
-            category = "Tipp-Texte fuer Signalgeber",
-            name = "Wartende Fahrzeuge",
-            description = "Jeder Signalgeber zeigt die wartenden Fahrzeuge",
+            category = "Tipp-Texte für Signale (allgemein)",
+            name = "Signal-ID",
+            description = "Zeigt an jedem Signal dessen Nummer als TippText",
             type = "boolean",
-            value = IntersectionSettings.showRequestsOnSignal,
-            eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
+            value = IntersectionSettings.showSignalIdOnSignal,
+            eepFunction = "IntersectionSettings.setShowSignalIdOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Signalgeber",
+            category = "Tipp-Texte für Signale (allgemein)",
             name = "Modellinformation",
             description = "Zeigt das Signalgebermodell und seine Signalbilder",
             type = "boolean",
@@ -226,7 +226,15 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowModelInfoOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Signalgeber",
+            category = "Tipp-Texte für Ampeln",
+            name = "Fahrspurnamen einblenden",
+            description = "Zeigt an Fahrspur-Signalen den Namen der Fahrspur",
+            type = "boolean",
+            value = IntersectionSettings.showLaneNamesOnSignal,
+            eepFunction = "IntersectionSettings.setShowLaneNamesOnSignal"
+        },
+        {
+            category = "Tipp-Texte für Ampeln",
             name = "Kurzname und Farbe",
             description = "Zeigt den farbigen Signalnamen und das aktuelle Signalbild",
             type = "boolean",
@@ -234,7 +242,15 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowNameAndPhaseOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Signalgeber",
+            category = "Tipp-Texte für Ampeln",
+            name = "Wartende Fahrzeuge",
+            description = "Fahrspur-Signale zeigen wartende Fahrzeuge",
+            type = "boolean",
+            value = IntersectionSettings.showRequestsOnSignal,
+            eepFunction = "IntersectionSettings.setShowRequestsOnSignal"
+        },
+        {
+            category = "Tipp-Texte für Ampeln",
             name = "Phasen",
             description = "Zeige die aktuelle Phase dieses Signalgebers",
             type = "boolean",
@@ -242,20 +258,12 @@ function RoadDataCollector.collectModuleSettings()
             eepFunction = "IntersectionSettings.setShowPhaseOnSignal"
         },
         {
-            category = "Tipp-Texte fuer Kreuzungen",
-            name = "Kreuzungsuebersicht einblenden",
+            category = "Tipp-Texte für Kreuzungen",
+            name = "Kreuzungsübersicht einblenden",
             description = "Zeigt Fahrspuren und deren Phase",
             type = "boolean",
             value = IntersectionSettings.showLanesOnStructure,
             eepFunction = "IntersectionSettings.setShowLanesOnStructure"
-        },
-        {
-            category = "Tipp-Texte fuer Signale (allgemein)",
-            name = "Signal-ID einblenden",
-            description = "Zeigt an jedem Signal dessen Nummer als TippText",
-            type = "boolean",
-            value = IntersectionSettings.showSignalIdOnSignal,
-            eepFunction = "IntersectionSettings.setShowSignalIdOnSignal"
         }
     }
 end

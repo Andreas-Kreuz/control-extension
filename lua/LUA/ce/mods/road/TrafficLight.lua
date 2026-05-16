@@ -49,6 +49,7 @@ function TrafficLight:new(name, signalId, trafficLightModel, redStructure, green
             SignalIndication.RED,
         debug = false,
         laneInfo = "",
+        laneNameInfo = "",
         phaseInfo = nil,
         buildInfo = "" .. tostring(signalId),
         lanes = {},
@@ -131,6 +132,11 @@ function TrafficLight:setPhaseInfo(phaseInfo) self.phaseInfo = phaseInfo end
 --
 function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
 
+--- Aktualsisiert den Namen fuer die Fahrspur dieser Ampel
+-- @param laneNameInfo TippText fuer den Fahrspurnamen
+--
+function TrafficLight:setLaneNameInfo(laneNameInfo) self.laneNameInfo = laneNameInfo end
+
 function TrafficLight:showInfoText(showInfo)
     if self.signalId > 0 then
         EEPShowInfoSignal(self.signalId, showInfo)
@@ -173,7 +179,7 @@ local function getSignalFunctionsTippText(signalId, trafficLightModel)
             table.insert(text, i)
             table.insert(text, ": ")
             table.insert(text, trafficLightModel:indicationOf(i) or action)
-            table.insert(text, EEPGetSignal(signalId) == i and "</b>" or "")
+            table.insert(text, EEPGetSignal(signalId) == i and "</b>." or ".")
         end
         return table.concat(text, "")
     else
@@ -234,46 +240,48 @@ function TrafficLight:refreshInfo()
     local showPhase = IntersectionSettings.showPhaseOnSignal
     local showAllSignals = IntersectionSettings.showSignalIdOnSignal
     local showModelInfo = IntersectionSettings.showModelInfoOnSignal
+    local showLaneName = IntersectionSettings.showLaneNamesOnSignal and self.laneNameInfo:len() > 0
     local showNameAndColor = IntersectionSettings.showNameAndPhaseOnSignal
     local showRequests = IntersectionSettings.showRequestsOnSignal and self.laneInfo:len() > 0
-    local showInfo = showPhase or showAllSignals or showModelInfo or showNameAndColor or showRequests
+    local showInfo = showAllSignals or showModelInfo or showLaneName or showNameAndColor or showRequests or showPhase
 
     self:showInfoText(showInfo)
     if showInfo then
         local infoText = "<j>"
 
-        if showNameAndColor and self.currentIndication then
-            local name = showNameAndColor and self:signalNamesTippText() or
-                "<b>" .. self:signalNamesText() .. "</b>"
-            infoText = fmt.appendUpTo1023(infoText, name)
-        else
-            local signalName = self:signalNamesText()
-            infoText = fmt.appendUpTo1023(infoText, signalName .. " (TrafficLight " .. self.signalId .. ")")
+        if showAllSignals then
+            infoText = fmt.appendUpTo1023(infoText, "Signal: " .. self.signalId)
         end
-
-        infoText = fmt.appendUpTo1023(infoText, "<br></j>")
 
         if showModelInfo then
             local signalFunctionsTippText = getSignalFunctionsTippText(self.signalId, self.trafficLightModel)
-            infoText = fmt.appendUpTo1023(infoText, "<br>" .. signalFunctionsTippText)
+            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
+            infoText = fmt.appendUpTo1023(infoText, signalFunctionsTippText)
+        end
+
+        if showLaneName then
+            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
+            infoText = fmt.appendUpTo1023(infoText, self.laneNameInfo)
+        end
+
+        if showNameAndColor and self.currentIndication then
+            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
+            infoText = fmt.appendUpTo1023(infoText, self:signalNamesTippText())
+        end
+
+        if showRequests then
+            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
+            infoText = fmt.appendUpTo1023(infoText, self.laneInfo)
         end
 
         if showPhase and self.phaseInfo then
-            local title = "<br><br><b>" .. "Phase: " .. "</b>"
-            if infoText:len() > 0 then infoText = fmt.appendUpTo1023(infoText, title) end
+            infoText = fmt.appendUpTo1023(infoText, "<br><br><b>" .. "Phase: " .. "</b>")
             infoText = fmt.appendUpTo1023(infoText, self.phaseInfo)
         end
 
         if showPhase and not showNameAndColor and self.currentIndication and self.reason then
-            local title = "<br><br>"
-            if infoText:len() > 0 then infoText = fmt.appendUpTo1023(infoText, title) end
+            infoText = fmt.appendUpTo1023(infoText, "<br><br>")
             infoText = fmt.appendUpTo1023(infoText, string.format(" %s (%s) ", self.currentIndication, self.reason))
-        end
-
-        if showRequests then
-            local title = "<br><b>" .. "Fahrspur/Wartezeit: " .. "</b>"
-            if infoText:len() > 0 then infoText = fmt.appendUpTo1023(infoText, title) end
-            infoText = fmt.appendUpTo1023(infoText, self.laneInfo)
         end
 
         self:changeInfoText(infoText)

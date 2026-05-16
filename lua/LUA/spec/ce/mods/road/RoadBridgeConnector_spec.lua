@@ -21,5 +21,11 @@ insulate("ce.mods.road.bridge.RoadBridgeConnector", function ()
 
         IncomingCommandExecutor.executeIncomingCommands("IntersectionSettings.setShowPhaseOnSignal|false")
         assert.is_false(IntersectionSettings.showPhaseOnSignal)
+
+        IncomingCommandExecutor.executeIncomingCommands("IntersectionSettings.setShowLaneNamesOnSignal|true")
+        assert.is_true(IntersectionSettings.showLaneNamesOnSignal)
+
+        IncomingCommandExecutor.executeIncomingCommands("IntersectionSettings.setShowLaneNamesOnSignal|false")
+        assert.is_false(IntersectionSettings.showLaneNamesOnSignal)
     end)
 end)

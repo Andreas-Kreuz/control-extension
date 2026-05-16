@@ -58,6 +58,7 @@
 ---@field debug boolean
 ---@field phaseInfo any
 ---@field laneInfo any
+---@field laneNameInfo any
 ---@field new fun(self: Signal, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):Signal
 ---@field newPedestrianOnly fun(self: Signal, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):Signal
 ---@field withPedestrian fun(self: Signal, pedestrianSignalName: string):Signal
@@ -73,6 +74,7 @@
 --- positionRedYellow?: number, positionPedestrian?: number):nil
 ---@field setPhaseInfo fun(self: Signal, phaseInfo: any):nil
 ---@field setLaneInfo fun(self: Signal, laneInfo: any):nil
+---@field setLaneNameInfo fun(self: Signal, laneNameInfo: any):nil
 ---@field showInfoText fun(self: Signal, showInfo: boolean):nil
 ---@field changeInfoText fun(self: Signal, infoText: string):nil
 ---@field refreshInfo fun(self: Signal):nil

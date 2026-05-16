@@ -4,6 +4,7 @@ insulate("ce.mods.road.TrafficLight", function ()
     before_each(function ()
         require("ce.hub.eep.EepSimulator")
         clearModule("ce.mods.road.TrafficLight")
+        clearModule("ce.mods.road.IntersectionSettings")
     end)
 
     it("stores the constructor name as traffic signal name", function ()
@@ -78,5 +79,40 @@ insulate("ce.mods.road.TrafficLight", function ()
 
         assert.equals("<fgrgb=128,128,128><b>K1</b><fgrgb=0,0,0>", signal:vehicleSignalNameTippText())
         assert.equals("<fgrgb=128,128,128><b>F1</b><fgrgb=0,0,0>", signal:pedestrianSignalNameTippText())
+    end)
+
+    it("renders selected tooltip sections in configured order", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local fmt = require("ce.hub.eep.TippTextFormatter")
+
+        local signal = TrafficLight:new("K1", -1, TrafficLightModel.NONE)
+        signal.currentIndication = SignalIndication.RED
+        signal:setLaneNameInfo(fmt.bgGrey("Lane 1"))
+        signal:setLaneInfo(fmt.lightGrey("BELEGT") .. "<br>#Car1")
+        signal:setPhaseInfo("<br><j>P1 " .. fmt.bgGreen("(Gruen)"))
+        IntersectionSettings.showSignalIdOnSignal = true
+        IntersectionSettings.showModelInfoOnSignal = true
+        IntersectionSettings.showLaneNamesOnSignal = true
+        IntersectionSettings.showNameAndPhaseOnSignal = true
+        IntersectionSettings.showRequestsOnSignal = true
+        IntersectionSettings.showPhaseOnSignal = true
+
+        local infoText
+        stub(signal, "showInfoText", function () end)
+        stub(signal, "changeInfoText", function (_, text) infoText = text end)
+
+        signal:refreshInfo()
+
+        assert.equals(
+            "<j>Signal: -2<br>" ..
+            "NO SIGNAL MODEL<br>" ..
+            "<bgrgb=196,196,196>Lane 1<bgrgb=255,255,255><br>" ..
+            "<bgrgb=255,96,96><b>K1</b><bgrgb=255,255,255><br>" ..
+            "<bgrgb=230,230,230><fgrgb=66,66,66>BELEGT<bgrgb=255,255,255><fgrgb=0,0,0><br>#Car1" ..
+            "<br><br><b>Phase: </b><br><j>P1 <bgrgb=0,192,0>(Gruen)<bgrgb=255,255,255>",
+            infoText)
     end)
 end)

@@ -5,6 +5,7 @@ local IntersectionSettings = {}
 IntersectionSettings.showRequestsOnSignal = false
 IntersectionSettings.showPhaseOnSignal = false
 IntersectionSettings.showModelInfoOnSignal = false
+IntersectionSettings.showLaneNamesOnSignal = false
 IntersectionSettings.showNameAndPhaseOnSignal = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showLanesOnStructure = false
@@ -19,6 +20,8 @@ function IntersectionSettings.loadSettingsFromSlot(eepSaveId)
         IntersectionSettings.showPhaseOnSignal
     IntersectionSettings.showModelInfoOnSignal = StorageUtility.toboolean(data["modelInfo"]) or
         IntersectionSettings.showModelInfoOnSignal
+    IntersectionSettings.showLaneNamesOnSignal = StorageUtility.toboolean(data["laneNameInfo"]) or
+        IntersectionSettings.showLaneNamesOnSignal
     IntersectionSettings.showNameAndPhaseOnSignal = StorageUtility.toboolean(data["nameSeqInfo"]) or
         IntersectionSettings.showNameAndPhaseOnSignal
     IntersectionSettings.showSignalIdOnSignal = StorageUtility.toboolean(data["sigInfo"]) or
@@ -33,6 +36,7 @@ function IntersectionSettings.saveSettings()
             reqInfo = tostring(IntersectionSettings.showRequestsOnSignal),
             seqInfo = tostring(IntersectionSettings.showPhaseOnSignal),
             modelInfo = tostring(IntersectionSettings.showModelInfoOnSignal),
+            laneNameInfo = tostring(IntersectionSettings.showLaneNamesOnSignal),
             nameSeqInfo = tostring(IntersectionSettings.showNameAndPhaseOnSignal),
             sigInfo = tostring(IntersectionSettings.showSignalIdOnSignal),
             laneInfo = tostring(IntersectionSettings.showLanesOnStructure)
@@ -50,6 +54,12 @@ end
 function IntersectionSettings.setShowModelInfoOnSignal(value)
     assert(value == true or value == false)
     IntersectionSettings.showModelInfoOnSignal = value
+    IntersectionSettings.saveSettings()
+end
+
+function IntersectionSettings.setShowLaneNamesOnSignal(value)
+    assert(value == true or value == false)
+    IntersectionSettings.showLaneNamesOnSignal = value
     IntersectionSettings.saveSettings()
 end
 

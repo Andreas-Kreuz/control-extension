@@ -256,7 +256,8 @@ local function recalculateSignalInfo(intersection)
     for _, lane in pairs(intersection.lanes) do
         local signalHead = lane.laneSignal
         signalHeadsToRefresh[signalHead.signalId] = signalHead
-        signalHead:setLaneInfo("<br></j>" .. lane:getRequestInfo() .. " / " .. lane.waitCount)
+        signalHead:setLaneNameInfo(fmt.bgLightBlue(lane.name) .. ".")
+        signalHead:setLaneInfo(lane:getRequestInfo())
     end
 
     for signalHead in pairs(signalHeads) do

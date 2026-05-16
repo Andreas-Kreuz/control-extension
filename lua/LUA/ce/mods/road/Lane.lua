@@ -314,23 +314,23 @@ function Lane:checkRequests()
     end
 
     local text = ""
-    if self.requestType == Lane.RequestType.NORMAL then
-        text = text .. fmt.bgGreen(self.name)
-    elseif self.requestType == Lane.RequestType.FUSSGAENGER then
-        text = text .. fmt.bgYellow(self.name)
-    elseif self.requestType == Lane.RequestType.ANFORDERUNG then
-        text = text .. fmt.bgBlue(self.name)
-    else
-        text = text .. fmt.red(self.name)
-    end
+    -- if self.requestType == Lane.RequestType.NORMAL then
+    --     text = text .. fmt.bgGreen(self.name)
+    -- elseif self.requestType == Lane.RequestType.FUSSGAENGER then
+    --     text = text .. fmt.bgYellow(self.name)
+    -- elseif self.requestType == Lane.RequestType.ANFORDERUNG then
+    --     text = text .. fmt.bgBlue(self.name)
+    -- else
+    --     text = text .. fmt.red(self.name)
+    -- end
 
-    text = text .. ": " .. (not self.queue:isEmpty() and fmt.lightGrey("BELEGT") or fmt.lightGrey("-FREI-")) .. " "
+    text = text .. (not self.queue:isEmpty() and fmt.bgGrey("BELEGT") or fmt.bgGrey("-FREI-")) .. " "
     if self.tracksUsedForRequest then
         text = text .. "(Strasse)"
     elseif self.signalUsedForRequest then
         text = text .. "(Ampel)"
     else
-        text = text .. "(" .. self.vehicleCount .. " gezaehlt)"
+        text = text .. "(" .. self.vehicleCount .. " gezaehlt " .. self.requestType .. ") "
     end
 
     for _, vehicle in ipairs(self.queue:elements()) do text = text .. "<br>" .. vehicle end
