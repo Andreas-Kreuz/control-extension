@@ -11,11 +11,23 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
         clearModule("ce.mods.transit.data.TransitTrain")
     end)
 
-    local function newTransitTrain()
+    local function newTransitTrain(hubTrain)
         local TransitTrain = require("ce.mods.transit.data.TransitTrain")
-        local hubTrain = { id = "T1", type = "Train" }
+        hubTrain = hubTrain or { id = "T1", type = "Train" }
         ---@cast hubTrain Train
         return TransitTrain:new(hubTrain)
+    end
+
+    local function newTransitTrainWithValueWriter()
+        local calls = {}
+        local hubTrain = {
+            id = "T1",
+            type = "Train",
+            setValue = function (_, key, value)
+                table.insert(calls, { key = key, value = value })
+            end
+        }
+        return newTransitTrain(hubTrain), calls
     end
 
     it("starts with an empty next station list", function ()
@@ -130,5 +142,42 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
                         { rollingStockName = "RS1", nextStop = "" },
                         { rollingStockName = "RS2", nextStop = "" },
                     }, calls)
+    end)
+
+    it("writes line through the hub train", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+        local transitTrain, calls = newTransitTrainWithValueWriter()
+        local model = { setLine = function () end }
+        EepSimulator.simulateAddTrain("T1", "RS1")
+        RollingStockRegistry.forName("RS1").model = model
+
+        transitTrain:setLine("10")
+
+        assert.same({ { key = TagKeys.Train.line, value = "10" } }, calls)
+    end)
+
+    it("writes destination through the hub train", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+        local transitTrain, calls = newTransitTrainWithValueWriter()
+        local model = { setDestination = function () end }
+        EepSimulator.simulateAddTrain("T1", "RS1")
+        RollingStockRegistry.forName("RS1").model = model
+
+        transitTrain:setDestination("Central")
+
+        assert.same({ { key = TagKeys.Train.destination, value = "Central" } }, calls)
+    end)
+
+    it("writes direction through the hub train", function ()
+        local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+        local transitTrain, calls = newTransitTrainWithValueWriter()
+
+        transitTrain:setDirection("North")
+
+        assert.same({ { key = TagKeys.Train.direction, value = "North" } }, calls)
     end)
 end)

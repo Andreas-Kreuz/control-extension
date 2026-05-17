@@ -62,15 +62,6 @@ function TransitTrain:setHubTrain(hubTrain)
     self.hubTrain = hubTrain
 end
 
-local function writeValueToRollingStock(trainName, key, value)
-    local carCount = EEPGetRollingstockItemsCount(trainName)
-    for i = 0, carCount - 1 do
-        local rollingStockName = EEPGetRollingstockItemName(trainName, i)
-        local rs = RollingStockRegistry.forName(rollingStockName)
-        rs:setValue(key, value)
-    end
-end
-
 local function updateRollingStockModels(trainName, updateModel)
     local carCount = EEPGetRollingstockItemsCount(trainName)
     for i = 0, carCount - 1 do
@@ -87,7 +78,7 @@ function TransitTrain:setLine(line)
     local oldLine = self.line
     if oldLine == line then return end
     self.line = line
-    writeValueToRollingStock(self.id, TagKeys.Train.line, line)
+    self.hubTrain:setValue(TagKeys.Train.line, line)
     updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setLine(rollingStockName, line)
     end)
@@ -114,7 +105,7 @@ function TransitTrain:setDestination(destination)
     local oldDestination = self.destination
     if oldDestination == destination then return end
     self.destination = destination
-    writeValueToRollingStock(self.id, TagKeys.Train.destination, destination)
+    self.hubTrain:setValue(TagKeys.Train.destination, destination)
     updateRollingStockModels(self.id, function (model, rollingStockName)
         model:setDestination(rollingStockName, destination)
     end)
@@ -165,7 +156,7 @@ function TransitTrain:setDirection(direction)
     local oldDirection = self.direction
     if oldDirection == direction then return end
     self.direction = direction
-    writeValueToRollingStock(self.id, TagKeys.Train.direction, direction)
+    self.hubTrain:setValue(TagKeys.Train.direction, direction)
     markDirty(self, "direction")
 end
 

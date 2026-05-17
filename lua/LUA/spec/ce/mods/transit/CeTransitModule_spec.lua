@@ -120,11 +120,32 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         CeTransitModule.run()
 
         local transitTrain = TransitTrainRegistry.find("#RouteUpdateTrain")
-        local storedValues = train:load()
         assert.equals("RU", transitTrain:getLine())
         assert.equals("Route Update Destination", transitTrain:getDestination())
-        assert.equals("RU", storedValues[TagKeys.Train.line])
-        assert.equals("Route Update Destination", storedValues[TagKeys.Train.destination])
+        assert.equals("RU", train:getValue(TagKeys.Train.line))
+        assert.equals("Route Update Destination", train:getValue(TagKeys.Train.destination))
+    end)
+
+    it("reconciles transit trains from cached hub values without reloading rolling stock tags", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+
+        EepSimulator.simulateAddTrain("#CachedTransitTrain", "CachedTransitTrain RS")
+        local train = TrainRegistry.forName("#CachedTransitTrain")
+        train:setValue(TagKeys.Train.line, "42")
+        train:setValue(TagKeys.Train.destination, "Cached Destination")
+        train:setValue(TagKeys.Train.direction, "North")
+        train.load = function () error("TransitTrainUpdater must not reload rolling stock tags") end
+
+        CeTransitModule.run()
+
+        local transitTrain = TransitTrainRegistry.find("#CachedTransitTrain")
+        assert.equals("42", transitTrain:getLine())
+        assert.equals("Cached Destination", transitTrain:getDestination())
+        assert.equals("North", transitTrain:getDirection())
     end)
 
     it("station DTO: platforms always present, queue absent when not selected (default options)", function ()
