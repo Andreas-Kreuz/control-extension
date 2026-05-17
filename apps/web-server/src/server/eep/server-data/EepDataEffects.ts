@@ -10,6 +10,10 @@ import { RoomEvent, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
+interface EepDataEffectsOptions {
+  debug?: boolean;
+}
+
 export default class EepDataEffects {
   private debug = false;
   private store = new EepDataReducer();
@@ -24,9 +28,11 @@ export default class EepDataEffects {
     private socketService: SocketService,
     private cacheService: CacheService,
     private interestSyncService?: InterestSyncService,
+    options: EepDataEffectsOptions = {},
   ) {
+    this.debug = options.debug ?? false;
     this.store.init(this.cacheService.readCache());
-    console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
+    if (this.debug) console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
 
     this.socketService.addOnSocketConnectedCallback((socket: Socket) => this.socketConnected(socket));
     this.stateController = new DomainRoomManager(io, interestSyncService);

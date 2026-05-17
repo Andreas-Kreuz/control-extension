@@ -11,6 +11,7 @@ import { Server } from 'socket.io';
 interface ServerMainOptions {
   adminSessionValue?: string;
   allowOpenServerRoute?: boolean;
+  debug?: boolean;
 }
 
 function dirPage(title: string, items: string): string {
@@ -29,6 +30,7 @@ export class ServerMain {
   private router: express.Router;
   private socketService: SocketService;
   private trustedServerAddressPolicy: TrustedServerAddressPolicy;
+  private debug: boolean;
 
   constructor(
     private serverConfigPath: string,
@@ -42,13 +44,14 @@ export class ServerMain {
     this.configureProcessDefaults();
     this.configureApplication();
     this.allowOpenServerRoute = this.options.allowOpenServerRoute ?? false;
+    this.debug = this.options.debug ?? true;
     this.trustedServerAddressPolicy = this.createTrustedServerAddressPolicy();
     this.io = this.createSocketIoServer();
     this.socketService = this.createSocketService();
   }
 
   public start() {
-    console.log('Starting Server with ' + this.serverConfigPath);
+    if (this.debug) console.log('Starting Server with ' + this.serverConfigPath);
     const appDir = this.resolveAppDirectory();
 
     this.registerApiRoutes();
@@ -56,7 +59,9 @@ export class ServerMain {
     this.registerStaticRoutes(appDir);
     this.registerSpaFallback(appDir);
     this.startHttpServer();
-    this.appEffects = new AppEffects(this.app, this.router, this.io, this.socketService, this.serverConfigPath);
+    this.appEffects = new AppEffects(this.app, this.router, this.io, this.socketService, this.serverConfigPath, {
+      debug: this.debug,
+    });
     this.appEffects.changeEepDirectory(this.appEffects.getEepDirectory());
   }
 
@@ -88,6 +93,7 @@ export class ServerMain {
     return new SocketService(this.io, {
       adminCookieName: this.adminCookieName,
       allowOpenServerRoute: this.allowOpenServerRoute,
+      debug: this.debug,
       ...(this.options.adminSessionValue !== undefined ? { adminSessionValue: this.options.adminSessionValue } : {}),
       trustedServerAddressPolicy: this.trustedServerAddressPolicy,
     });
@@ -166,7 +172,8 @@ export class ServerMain {
 
   private startHttpServer(): void {
     this.httpServer.listen(this.port, () => {
-      console.log('Express server listening on port ' + this.app.get('port') + ' ## ' + this.serverConfigPath);
+      if (this.debug)
+        console.log('Express server listening on port ' + this.app.get('port') + ' ## ' + this.serverConfigPath);
     });
   }
 

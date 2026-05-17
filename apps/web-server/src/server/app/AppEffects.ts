@@ -27,6 +27,10 @@ import * as path from 'path';
 import { performance } from 'perf_hooks';
 import { Server, Socket } from 'socket.io';
 
+interface AppEffectsOptions {
+  debug?: boolean;
+}
+
 export default class AppEffects {
   private debug = true;
   private serverConfigFile: string;
@@ -49,7 +53,9 @@ export default class AppEffects {
     private io: Server,
     private socketService: SocketService,
     private serverConfigPath: string,
+    options: AppEffectsOptions = {},
   ) {
+    this.debug = options.debug ?? true;
     this.serverConfigFile = path.resolve(this.serverConfigPath, 'settings.json');
     this.updateCheckService = new UpdateCheckService({ cacheDirectory: this.serverConfigPath });
     this.updateCheckService.onStatusChanged((status) => this.emitUpdateStatus(status));
@@ -250,7 +256,7 @@ export default class AppEffects {
         console.error(err);
       }
       if (dir) {
-        console.log('Directory set to : ' + dir);
+        if (this.debug) console.log('Directory set to : ' + dir);
         this.eepService = eepService;
         this.initServices(eepService);
         this.store.setEepDirOk(true);
@@ -280,6 +286,7 @@ export default class AppEffects {
       this.socketService,
       eepService as CacheService,
       this.interestSyncService,
+      { debug: this.debug },
     );
 
     // Init event handler
