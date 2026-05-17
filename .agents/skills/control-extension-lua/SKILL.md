@@ -30,6 +30,7 @@ Also read the domain guide that matches the task:
 6. Respect global callback registration patterns using `_G[...]`.
 7. Prefer chainable command methods for classes when it improves readability and matches nearby APIs.
 8. For DTO or contract changes, update Lua type definitions, Lua DTO docs, factories, matching server `*LuaDto` types, and affected server docs together.
+9. After Lua changes, run `cmd /c yarn run format:lua` before checks.
 
 ## Specs
 
