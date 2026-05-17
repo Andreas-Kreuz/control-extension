@@ -61,11 +61,7 @@ function IntersectionDirectionSelectorStory() {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Abbiegerichtung - Success aktiv
         </Typography>
-        <ToggleButtonGroup
-          color="success"
-          value={selectedDirections}
-          size="small"
-        >
+        <ToggleButtonGroup color="success" value={selectedDirections} size="small">
           {directions.map((direction) => {
             const DirectionIcon = directionIcons[direction];
 
@@ -151,9 +147,7 @@ function IntersectionDirectionSelectorStory() {
                         px: 1.5,
                         '&.Mui-disabled': {
                           color: selected ? 'common.white' : 'text.disabled',
-                          borderColor: selected
-                            ? (theme) => alpha(theme.palette.primary.main, 0.28)
-                            : undefined,
+                          borderColor: selected ? (theme) => alpha(theme.palette.primary.main, 0.28) : undefined,
                         },
                         '&.Mui-disabled.Mui-selected': {
                           color: 'common.white',

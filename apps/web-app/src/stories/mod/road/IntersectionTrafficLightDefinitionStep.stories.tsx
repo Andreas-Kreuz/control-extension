@@ -472,12 +472,7 @@ function TrafficLightDefinitionPrototype() {
     );
   }
 
-  function renderLightRow(
-    lane: LaneFixture,
-    group: SignalGroupFixture,
-    light: TrafficLightFixture,
-    readonly: boolean,
-  ) {
+  function renderLightRow(lane: LaneFixture, group: SignalGroupFixture, light: TrafficLightFixture, readonly: boolean) {
     return (
       <Box
         key={light.id}
@@ -643,10 +638,7 @@ function TrafficLightDefinitionPrototype() {
                 >
                   Warten
                 </ToggleButton>
-                <ToggleButton
-                  value="ALSO"
-                  title="Fahrzeuge fahren auch, wenn die Standard-Signalgruppe grün anzeigt."
-                >
+                <ToggleButton value="ALSO" title="Fahrzeuge fahren auch, wenn die Standard-Signalgruppe grün anzeigt.">
                   Fahren
                 </ToggleButton>
               </ToggleButtonGroup>

@@ -25,7 +25,11 @@ import TurnSlightLeftIcon from '@mui/icons-material/TurnSlightLeft';
 import TurnSlightRightIcon from '@mui/icons-material/TurnSlightRight';
 import WestIcon from '@mui/icons-material/West';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { IntersectionWizardApproach, IntersectionWizardTurnDirection, TrafficLightModelAppDto } from '@ce/web-shared';
+import type {
+  IntersectionWizardApproach,
+  IntersectionWizardTurnDirection,
+  TrafficLightModelAppDto,
+} from '@ce/web-shared';
 
 type LaneFixture = {
   id: string;

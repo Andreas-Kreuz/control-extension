@@ -5,30 +5,30 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionDto`
 
-| Name               | Typ                      |
-| ------------------ | ------------------------ |
-| `id`               | `number`                 |
-| `name`             | `string`                 |
-| `eepSaveId`        | `number`                 |
-| `scriptVariableName` | `string\|nil`          |
-| `currentPhase` | `string\|nil`            |
-| `manualPhase`  | `string\|nil`            |
-| `nextPhase`    | `string\|nil`            |
-| `ready`            | `boolean`                |
-| `greenTimeSeconds`     | `number`                 |
-| `tippStructure`    | `string\|nil`            |
-| `staticCams`       | `table`                  |
-| `phases`           | `IntersectionPhaseDto[]` |
-| `signalGroupDefinitions` | `IntersectionSignalGroupDto[]` |
-| `pedestrianCrossings` | `IntersectionPedestrianCrossingDto[]` |
+| Name                     | Typ                                   |
+| ------------------------ | ------------------------------------- |
+| `id`                     | `number`                              |
+| `name`                   | `string`                              |
+| `eepSaveId`              | `number`                              |
+| `scriptVariableName`     | `string\|nil`                         |
+| `currentPhase`           | `string\|nil`                         |
+| `manualPhase`            | `string\|nil`                         |
+| `nextPhase`              | `string\|nil`                         |
+| `ready`                  | `boolean`                             |
+| `greenTimeSeconds`       | `number`                              |
+| `tippStructure`          | `string\|nil`                         |
+| `staticCams`             | `table`                               |
+| `phases`                 | `IntersectionPhaseDto[]`              |
+| `signalGroupDefinitions` | `IntersectionSignalGroupDto[]`        |
+| `pedestrianCrossings`    | `IntersectionPedestrianCrossingDto[]` |
 
 ### `IntersectionSignalGroupDto`
 
-| Name          | Typ        |
-| ------------- | ---------- |
-| `name`        | `string`   |
-| `trafficType` | `string`   |
-| `signalIds`   | `number[]` |
+| Name                      | Typ        |
+| ------------------------- | ---------- |
+| `name`                    | `string`   |
+| `trafficType`             | `string`   |
+| `signalIds`               | `number[]` |
 | `pedestrianCrossingNames` | `string[]` |
 
 ### `IntersectionPedestrianCrossingDto`
@@ -37,32 +37,32 @@
 | -------------------- | ------------- |
 | `name`               | `string`      |
 | `scriptVariableName` | `string\|nil` |
-| `approach`            | `string`      |
+| `approach`           | `string`      |
 | `signalGroups`       | `string[]`    |
 
 ### `IntersectionPhaseDto`
 
-| Name                | Typ                                  |
-| ------------------- | ------------------------------------ |
-| `id`                | `string`                             |
-| `name`              | `string`                             |
-| `order`             | `number`                             |
-| `prio`              | `number`                             |
-| `greenTimeSeconds` | `number`                             |
-| `signalHeads`     | `IntersectionPhaseSignalHeadDto[]` |
+| Name               | Typ                                |
+| ------------------ | ---------------------------------- |
+| `id`               | `string`                           |
+| `name`             | `string`                           |
+| `order`            | `number`                           |
+| `prio`             | `number`                           |
+| `greenTimeSeconds` | `number`                           |
+| `signalHeads`      | `IntersectionPhaseSignalHeadDto[]` |
 
 ### `IntersectionPhaseSignalHeadDto`
 
-| Name                   | Typ           |
-| ---------------------- | ------------- |
-| `signalId`             | `number`      |
+| Name                       | Typ           |
+| -------------------------- | ------------- |
+| `signalId`                 | `number`      |
 | `signalHeadKind`           | `string`      |
 | `signalHeadKey`            | `string`      |
 | `signalHeadName`           | `string\|nil` |
-| `type`                 | `string`      |
+| `type`                     | `string`      |
 | `vehicleSignalHeadName`    | `string\|nil` |
 | `pedestrianSignalHeadName` | `string\|nil` |
-| `use`                  | `string`      |
+| `use`                      | `string`      |
 
 ## CeType `ce.mods.road.IntersectionLane`
 
@@ -74,16 +74,16 @@
 | `id`                         | `string` |
 | `intersectionId`             | `number` |
 | `name`                       | `string` |
-| `currentIndication`                      | `string` |
+| `currentIndication`          | `string` |
 | `vehicleMultiplier`          | `number` |
 | `laneSignalId`               | `number` |
 | `type`                       | `string` |
 | `countType`                  | `string` |
 | `waitingTrains`              | `table`  |
 | `waitingForGreenCyclesCount` | `number` |
-| pproach                  | string |
+| pproach                      | string   |
 | `directions`                 | `table`  |
-| `phases`                 | `table`  |
+| `phases`                     | `table`  |
 | `defaultSignalGroups`        | `table`  |
 | `tracks`                     | `table`  |
 
@@ -108,8 +108,8 @@
 | ---------------------- | ----------------------------------------------------- |
 | `id`                   | `number`                                              |
 | `signalId`             | `number`                                              |
-| `vehicleSignalName`        | `string\|nil`                                         |
-| `pedestrianSignalName`     | `string\|nil`                                         |
+| `vehicleSignalName`    | `string\|nil`                                         |
+| `pedestrianSignalName` | `string\|nil`                                         |
 | `use`                  | `string`                                              |
 | `modelId`              | `string`                                              |
 | `currentIndication`    | `string`                                              |
@@ -136,9 +136,9 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.TrafficLightModelDtoFactory.createTrafficLightModelDto`
 
-| Name        | Typ                                |
-| ----------- | ---------------------------------- |
-| `id`        | `string`                           |
-| `name`      | `string`                           |
-| `type`      | `string`                           |
-| `positions` | `TrafficLightModelPositionsDto`          |
+| Name        | Typ                             |
+| ----------- | ------------------------------- |
+| `id`        | `string`                        |
+| `name`      | `string`                        |
+| `type`      | `string`                        |
+| `positions` | `TrafficLightModelPositionsDto` |

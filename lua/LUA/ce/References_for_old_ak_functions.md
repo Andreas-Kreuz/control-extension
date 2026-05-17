@@ -47,7 +47,7 @@ Die Neuseite bezieht sich auf `control-extension\lua\LUA\ce`.
 | 1:1 | `require("ak.road.TramSwitch")`                 | `require("ce.mods.road.TramSwitch")`                 | Tram-Umschaltung.                                 |
 | 1:1 | `require("ak.road.Lane")`                       | `require("ce.mods.road.Lane")`                       | Fahrspur.                                         |
 | 1:1 | `require("ak.road.Crossing")`                   | `require("ce.mods.road.Intersection")`               | Fachliche Umbenennung `Crossing -> Intersection`. |
-| 1:1 | `require("ak.road.CrossingSequence")`           | `require("ce.mods.road.TrafficPhase")`       | Fachliche Umbenennung passend zur Intersection.   |
+| 1:1 | `require("ak.road.CrossingSequence")`           | `require("ce.mods.road.TrafficPhase")`               | Fachliche Umbenennung passend zur Intersection.   |
 | 1:1 | `ak/road/CrossingDtoFactory.lua`                | `ce/mods/road/data/RoadDtoFactory.lua`               | DTO-Fabrik fuer Kreuzungsdaten.                   |
 | 1:1 | `ak/road/TrafficLightModelDtoFactory.lua`       | `ce/mods/road/data/TrafficLightModelDtoFactory.lua`  | DTO-Fabrik fuer Signalmodelle.                    |
 

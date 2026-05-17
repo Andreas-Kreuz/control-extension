@@ -115,7 +115,7 @@ Typische Beispiele:
 | `require("ak.road.TrafficLight")`                        | `require("ce.mods.road.TrafficLight")`                      |
 | `require("ak.road.TrafficLightModel")`                   | `require("ce.mods.road.TrafficLightModel")`                 |
 | `require("ak.road.Crossing")`                            | `require("ce.mods.road.Intersection")`                      |
-| `require("ak.road.CrossingSequence")`                    | `require("ce.mods.road.TrafficPhase")`              |
+| `require("ak.road.CrossingSequence")`                    | `require("ce.mods.road.TrafficPhase")`                      |
 | `require("ak.road.Lane")`                                | `require("ce.mods.road.Lane")`                              |
 | `require("ak.public-transport.Line")`                    | `require("ce.mods.transit.Line")`                           |
 | `require("ak.public-transport.LineRegistry")`            | `require("ce.mods.transit.LineRegistry")`                   |

@@ -278,10 +278,7 @@ function testCodegenCreatesCompleteLaneSignalFromLaneSignalId(): void {
 
   const { lua } = generateIntersectionWizardLua(draft);
 
-  assert.match(
-    lua,
-    /local FS1Signal = TrafficLight:new\("FS1Signal", 101, TrafficLightModel\.Unsichtbar_2er\)/,
-  );
+  assert.match(lua, /local FS1Signal = TrafficLight:new\("FS1Signal", 101, TrafficLightModel\.Unsichtbar_2er\)/);
   assert.match(
     lua,
     /bahnhofHauptLane1 = Lane:new\("FS1", FS1Signal\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT\)/,
@@ -558,7 +555,10 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
       { name: 'sgLane8Left', ampelIds: ['ampel--2'] },
     ],
   );
-  assert.match(draft.generatedLua, /newSignalGroup\("sgPedNorthSouth"\)\n\s+:addPedestrianCrossing\([^)]*\)\n\s+:addPedestrianSignals\(/);
+  assert.match(
+    draft.generatedLua,
+    /newSignalGroup\("sgPedNorthSouth"\)\n\s+:addPedestrianCrossing\([^)]*\)\n\s+:addPedestrianSignals\(/,
+  );
   assert.match(draft.generatedLua, /c1PedNorthSouth = PedestrianCrossing:new\("Furt Nord-Sued"\)/);
   assert.match(draft.generatedLua, /local F2 = K4:withPedestrian\("F2"\)/);
   assert.match(draft.generatedLua, /local F1 = K7:withPedestrian\("F1"\)/);
@@ -705,9 +705,18 @@ function testCurrentIntersectionDraftLoadsC2StyleSignalGroups(): void {
     draft.generatedLua,
     /newSignalGroup\("sgLane3and4Straight"\)\n\s+:addVehicleSignals\([^)]*K106[^)]*K107[^)]*K109/s,
   );
-  assert.match(draft.generatedLua, /bahnhofstra_e_SchlossalleeLane3:driveOnDefaultSignalGroups\(.*sgLane3and4Straight/s);
-  assert.match(draft.generatedLua, /bahnhofstra_e_SchlossalleeLane4:driveOnDefaultSignalGroups\(.*sgLane3and4Straight/s);
-  assert.match(draft.generatedLua, /newSignalGroup\("sgPedDiagonal"\)\n\s+:addPedestrianCrossing\([^)]*\)\n\s+:addPedestrianSignals\(/);
+  assert.match(
+    draft.generatedLua,
+    /bahnhofstra_e_SchlossalleeLane3:driveOnDefaultSignalGroups\(.*sgLane3and4Straight/s,
+  );
+  assert.match(
+    draft.generatedLua,
+    /bahnhofstra_e_SchlossalleeLane4:driveOnDefaultSignalGroups\(.*sgLane3and4Straight/s,
+  );
+  assert.match(
+    draft.generatedLua,
+    /newSignalGroup\("sgPedDiagonal"\)\n\s+:addPedestrianCrossing\([^)]*\)\n\s+:addPedestrianSignals\(/,
+  );
   assert.match(draft.generatedLua, /:addStaticCam\("K2 Verkehrsüberwachung"\)/);
   assert.match(
     draft.generatedLua,
@@ -962,14 +971,8 @@ export async function run(): Promise<void> {
     'intersection wizard codegen creates complete lane signal from lane signal id',
     testCodegenCreatesCompleteLaneSignalFromLaneSignalId,
   );
-  await runTest(
-    'intersection wizard codegen creates pedestrian crossings',
-    testCodegenCreatesPedestrianCrossings,
-  );
-  await runTest(
-    'current intersection import keeps lane signal ids',
-    testCurrentIntersectionDraftKeepsLaneSignalIds,
-  );
+  await runTest('intersection wizard codegen creates pedestrian crossings', testCodegenCreatesPedestrianCrossings);
+  await runTest('current intersection import keeps lane signal ids', testCurrentIntersectionDraftKeepsLaneSignalIds);
   await runTest(
     'current intersection import loads c1-style signal groups',
     testCurrentIntersectionDraftLoadsC1StyleSignalGroups,
@@ -1000,4 +1003,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-

@@ -107,9 +107,7 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
       lane.heading ?? (lane as { compassDirection?: IntersectionWizardApproach }).compassDirection,
     ),
     turnDirections:
-      lane.turnDirections ??
-      (lane as { directions?: IntersectionWizardTurnDirection[] }).directions ??
-      [],
+      lane.turnDirections ?? (lane as { directions?: IntersectionWizardTurnDirection[] }).directions ?? [],
   }));
   const pedestrianCrossings =
     input.pedestrianCrossings?.map((crossing) => ({
@@ -121,9 +119,7 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
     input.signalGroups?.map((group) => ({
       ...group,
       turnDirections:
-        group.turnDirections ??
-        (group as { directions?: IntersectionWizardTurnDirection[] }).directions ??
-        [],
+        group.turnDirections ?? (group as { directions?: IntersectionWizardTurnDirection[] }).directions ?? [],
       trafficType:
         group.trafficType ?? group.laneIds.map((laneId) => legacyLaneTrafficTypes.get(laneId)).find(Boolean) ?? 'CAR',
     })) ?? createDefaultSignalGroups(lanes, (lane) => legacyLaneTrafficTypes.get(lane.id) ?? 'CAR');
@@ -137,9 +133,7 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
     signalGroups.some((group) => group.trafficType === 'PEDESTRIAN') ||
     ampeln.some(
       (ampel) =>
-        ampel.use === 'PEDESTRIAN_ONLY' ||
-        ampel.use === 'VEHICLE_AND_PEDESTRIAN' ||
-        ampel.trafficType === 'PEDESTRIAN',
+        ampel.use === 'PEDESTRIAN_ONLY' || ampel.use === 'VEHICLE_AND_PEDESTRIAN' || ampel.trafficType === 'PEDESTRIAN',
     );
   const draft: IntersectionWizardDraftAppDto = {
     id: input.id || `draft-${Date.now()}`,
@@ -293,4 +287,3 @@ export default class IntersectionWizardService implements DomainRoomService {
     };
   }
 }
-

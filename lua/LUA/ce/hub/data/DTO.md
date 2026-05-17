@@ -71,10 +71,10 @@ Wichtig:
 | Straßen                             | `ce.hub.RoadTrack`                      | `id`      |
 | Bahngleise                          | `ce.hub.RailTrack`                      | `id`      |
 | Straßenbahngleise                   | `ce.hub.TramTrack`                      | `id`      |
-| Ampelmodell-Definitionen            | `ce.mods.road.TrafficLightModel`          | `id`      |
+| Ampelmodell-Definitionen            | `ce.mods.road.TrafficLightModel`        | `id`      |
 | Kreuzungen                          | `ce.mods.road.Intersection`             | `id`      |
 | Kreuzungs-Fahrspuren                | `ce.mods.road.IntersectionLane`         | `id`      |
-| Kreuzungsphasen                     | `ce.mods.road.IntersectionPhase`      | `id`      |
+| Kreuzungsphasen                     | `ce.mods.road.IntersectionPhase`        | `id`      |
 | Kreuzungs-Signalgeber               | `ce.mods.road.IntersectionTrafficLight` | `id`      |
 | Kreuzungs-Moduleinstellungen        | `ce.mods.road.ModuleSetting`            | `name`    |
 | ÖPNV-Linien                         | `ce.mods.transit.Line`                  | `id`      |
@@ -479,16 +479,16 @@ Elementtyp: Ampelmodell-Definition
 
 Elementtyp: Kreuzung
 
-| Name               | Typ               | Wertebereich           | Beschreibung                                   |
-| ------------------ | ----------------- | ---------------------- | ---------------------------------------------- |
-| `id`               | `integer`         | laufende Nummer ab `1` | technischer Schlüssel der Erfassungsrunde      |
-| `name`             | `string`          | freier Text            | Kreuzungsname                                  |
-| `currentPhase` | `string` \| `nil` | Phasenname             | aktuell aktive Phase                           |
-| `manualPhase`  | `string` \| `nil` | Phasenname             | manuell gewählte Phase                         |
-| `nextPhase`    | `string` \| `nil` | Phasenname             | nächste geplante Phase                         |
+| Name               | Typ               | Wertebereich           | Beschreibung                                      |
+| ------------------ | ----------------- | ---------------------- | ------------------------------------------------- |
+| `id`               | `integer`         | laufende Nummer ab `1` | technischer Schlüssel der Erfassungsrunde         |
+| `name`             | `string`          | freier Text            | Kreuzungsname                                     |
+| `currentPhase`     | `string` \| `nil` | Phasenname             | aktuell aktive Phase                              |
+| `manualPhase`      | `string` \| `nil` | Phasenname             | manuell gewählte Phase                            |
+| `nextPhase`        | `string` \| `nil` | Phasenname             | nächste geplante Phase                            |
 | `ready`            | `boolean`         | `true`, `false`        | Ergebnis von `intersection:isGreenTimeFinished()` |
-| `greenTimeSeconds`     | `number`          | Sekunden               | Grünphasenlänge                                |
-| `staticCams`       | `string[]`        | Kameranamen            | Liste statischer Kameras der Kreuzung          |
+| `greenTimeSeconds` | `number`          | Sekunden               | Grünphasenlänge                                   |
+| `staticCams`       | `string[]`        | Kameranamen            | Liste statischer Kameras der Kreuzung             |
 
 ### `ce.mods.road.IntersectionLane`
 
@@ -507,33 +507,33 @@ Elementtyp: Fahrspur einer Kreuzung
 | `waitingTrains`              | `table`            | Queue-Inhalt                                                 | wartende Fahrzeuge/Züge in aktueller Reihenfolge |
 | `waitingForGreenCyclesCount` | `integer`          | `>= 0`                                                       | Anzahl Warteschleifen bis Grün                   |
 | `directions`                 | `table`            | projektabhängig                                              | Richtungsdefinition der Fahrspur                 |
-| `phases`                 | `string[]`         | Phasennamen                                                  | Phasen, die diese Fahrspur freigeben             |
+| `phases`                     | `string[]`         | Phasennamen                                                  | Phasen, die diese Fahrspur freigeben             |
 | `tracks`                     | `table`            | Track-IDs oder Highlight-Daten                               | für Hervorhebung genutzte Tracks                 |
 
 ### `ce.mods.road.IntersectionPhase`
 
 Elementtyp: Kreuzungsphase
 
-| Name             | Typ             | Wertebereich                    | Beschreibung                                                                                 |
-| ---------------- | --------------- | ------------------------------- | -------------------------------------------------------------------------------------------- |
-| `id`             | `string`        | `<crossingName>-<phaseName>`    | technischer Schlüssel                                                                        |
-| `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `ce.mods.road.Intersection.id` |
-| `name`           | `string`        | Phasenname                      | Name der Phase                                                                               |
-| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Phase                                                                          |
+| Name             | Typ             | Wertebereich                 | Beschreibung                                                                                 |
+| ---------------- | --------------- | ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `id`             | `string`        | `<crossingName>-<phaseName>` | technischer Schlüssel                                                                        |
+| `intersectionId` | `string`        | Kreuzungsname                | aktueller Code verwendet hier den Namen, nicht die numerische `ce.mods.road.Intersection.id` |
+| `name`           | `string`        | Phasenname                   | Name der Phase                                                                               |
+| `prio`           | `number \| nil` | projektabhängig              | Priorität der Phase                                                                          |
 
 ### `ce.mods.road.IntersectionTrafficLight`
 
 Elementtyp: Signalgeber innerhalb einer Kreuzung
 
-| Name              | Typ                           | Wertebereich                                | Beschreibung                |
-| ----------------- | ----------------------------- | ------------------------------------------- | --------------------------- |
-| `id`              | `integer \| string`           | Signal-ID                                   | technischer Schlüssel       |
-| `signalId`        | `integer`                     | Signal-ID                                   | referenziertes EEP-Signal   |
-| `modelId`         | `string`                      | Modellname                                  | referenziertes Ampelmodell  |
-| `currentIndication` | `number` \| `string` \| `nil` | projektabhängig                           | aktuelle interne Signalindikation |
-| `intersectionId`  | `integer`                     | referenziert `ce.mods.road.Intersection.id` | zugehörige Kreuzung         |
-| `lightStructures` | `table<string, object>`       | indexierte Map                              | zugehörige Lichtstrukturen  |
-| `axisStructures`  | `object[]`                    | Liste                                       | zugehörige Achsstrukturen   |
+| Name                | Typ                           | Wertebereich                                | Beschreibung                      |
+| ------------------- | ----------------------------- | ------------------------------------------- | --------------------------------- |
+| `id`                | `integer \| string`           | Signal-ID                                   | technischer Schlüssel             |
+| `signalId`          | `integer`                     | Signal-ID                                   | referenziertes EEP-Signal         |
+| `modelId`           | `string`                      | Modellname                                  | referenziertes Ampelmodell        |
+| `currentIndication` | `number` \| `string` \| `nil` | projektabhängig                             | aktuelle interne Signalindikation |
+| `intersectionId`    | `integer`                     | referenziert `ce.mods.road.Intersection.id` | zugehörige Kreuzung               |
+| `lightStructures`   | `table<string, object>`       | indexierte Map                              | zugehörige Lichtstrukturen        |
+| `axisStructures`    | `object[]`                    | Liste                                       | zugehörige Achsstrukturen         |
 
 Unterobjekt `lightStructures[*]`:
 

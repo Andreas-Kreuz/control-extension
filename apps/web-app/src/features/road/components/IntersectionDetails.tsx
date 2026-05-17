@@ -84,8 +84,7 @@ function IntersectionDetails() {
             >
               {phases.map((s) => {
                 const active = i.currentPhase === s.name;
-                const next =
-                  (i.nextPhase === s.name || i.manualPhase === s.name) && i.currentPhase !== s.name;
+                const next = (i.nextPhase === s.name || i.manualPhase === s.name) && i.currentPhase !== s.name;
                 const color = active ? 'primary' : next ? 'primary' : 'default';
                 const clickable = i.manualPhase ? true : false;
                 return (

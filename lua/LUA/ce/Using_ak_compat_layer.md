@@ -10,7 +10,7 @@ Abgedeckte Module:
 
 | Dein bisheriger `require`               | leitet intern weiter nach                    |
 | --------------------------------------- | -------------------------------------------- |
-| `ak.road.TrafficLight`                  | `ce.mods.road.TrafficLight`            |
+| `ak.road.TrafficLight`                  | `ce.mods.road.TrafficLight`                  |
 | `ak.road.TrafficLightModel`             | `ce.mods.road.TrafficLightModel`             |
 | `ak.road.TrafficLightState`             | `ce.mods.road.TrafficLightState`             |
 | `ak.road.Crossing`                      | `ce.mods.road.Intersection` (compat-Wrapper) |

@@ -1,10 +1,6 @@
 import { RollingStockAppDto } from '@ce/web-shared';
 import type { RollingStockDashboardCard } from '../components/panels/RollingStockDashboardGrid';
-import {
-  mergeRollingStockModelInfo,
-  sortedAxisKeysByName,
-  sortedNumberKeys,
-} from '../lib/trainDashboard';
+import { mergeRollingStockModelInfo, sortedAxisKeysByName, sortedNumberKeys } from '../lib/trainDashboard';
 import useRollingStockDynamic from './useRollingStockDynamic';
 import useSetRollingStockAxis from './useSetRollingStockAxis';
 

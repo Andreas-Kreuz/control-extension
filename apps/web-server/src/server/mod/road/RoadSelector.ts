@@ -93,10 +93,14 @@ export default class RoadSelector {
           signalGroups: phase.signalGroups ?? [],
         })),
         signalGroupDefinitions: dto.signalGroupDefinitions ?? [],
-        pedestrianCrossings: (dto.pedestrianCrossings ?? []).map((crossing) => ({
-          ...crossing,
-          approach: approachFromDto(crossing.approach, crossing.heading) ?? 'SOUTH',
-        })),
+        ...(dto.pedestrianCrossings !== undefined
+          ? {
+              pedestrianCrossings: dto.pedestrianCrossings.map((crossing) => ({
+                ...crossing,
+                approach: approachFromDto(crossing.approach, crossing.heading) ?? 'SOUTH',
+              })),
+            }
+          : {}),
       }),
     );
 

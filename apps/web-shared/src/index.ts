@@ -107,4 +107,3 @@ export { RollingStockRoom } from './rooms/DomainRoomRegistry';
 export type { ApprovePairingClientPayload } from './PairingEvent';
 export type { PairingStatusPayload } from './PairingEvent';
 export type { PendingPairingClient } from './PairingEvent';
-

@@ -146,10 +146,7 @@ function IntersectionLaneSignalGroupDndExample() {
   const [message, setMessage] = useState('Signalgruppe ziehen und auf eine Fahrspur fallen lassen.');
 
   const lanesById = useMemo(() => new Map(lanes.map((lane) => [lane.id, lane])), []);
-  const signalGroupsById = useMemo(
-    () => new Map(signalGroups.map((signalGroup) => [signalGroup.id, signalGroup])),
-    [],
-  );
+  const signalGroupsById = useMemo(() => new Map(signalGroups.map((signalGroup) => [signalGroup.id, signalGroup])), []);
   const usedAssignmentKeys = useMemo(
     () => new Set(assignments.map((assignment) => assignmentKey(assignment.laneId, assignment.routeName))),
     [assignments],

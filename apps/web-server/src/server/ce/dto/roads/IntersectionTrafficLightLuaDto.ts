@@ -30,4 +30,3 @@ export interface IntersectionTrafficLightLuaDto {
   lightStructures: Record<string, IntersectionTrafficLightStructureLuaDto>;
   axisStructures: IntersectionTrafficLightAxisStructureLuaDto[];
 }
-

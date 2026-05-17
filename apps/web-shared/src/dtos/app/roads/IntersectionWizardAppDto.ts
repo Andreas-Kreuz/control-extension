@@ -141,4 +141,3 @@ export interface IntersectionWizardGenerateResultAppDto {
   lua: string;
   warnings: string[];
 }
-

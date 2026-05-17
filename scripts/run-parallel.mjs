@@ -47,6 +47,9 @@ const maybeExit = () => {
 const startShutdown = (currentChild, code) => {
   if (!shutdownState) {
     shutdownState = { code };
+    if (code !== 0) {
+      console.error(`Parallel command exited with code ${code}: ${currentChild.commandLabel}`);
+    }
     killOthers(currentChild);
 
     forcedExitTimer = setTimeout(() => {

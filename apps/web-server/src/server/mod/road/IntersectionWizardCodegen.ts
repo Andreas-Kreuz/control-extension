@@ -408,7 +408,9 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
         ? [`setFahrzeugMultiplikator(${lane.vehicleMultiplier})`]
         : []),
     ];
-    bodyLines.push(`${variable} = ${chainCall(`Lane:new(${luaString(lane.name)}, ${laneSignalExpression})`, chainCalls)}`);
+    bodyLines.push(
+      `${variable} = ${chainCall(`Lane:new(${luaString(lane.name)}, ${laneSignalExpression})`, chainCalls)}`,
+    );
   });
 
   bodyLines.push(
@@ -453,9 +455,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
   draft.lanes.forEach((lane) => {
     const groups = draft.signalGroups.filter((group) => group.laneIds.includes(lane.id));
     if (groups.length > 1) {
-      warnings.push(
-        `${lane.name}: Mehrere Signalgruppen erfordern eine eigene unsichtbare Ampel als Fahrspur-Ampel.`,
-      );
+      warnings.push(`${lane.name}: Mehrere Signalgruppen erfordern eine eigene unsichtbare Ampel als Fahrspur-Ampel.`);
     }
     const groupVarList = groups
       .map((group) => groupVars.get(group.id))
@@ -654,9 +654,7 @@ export function createDraftFromCurrentIntersection(
     signalGroups.some((signalGroup) => signalGroup.trafficType === 'PEDESTRIAN') ||
     draftAmpeln.some(
       (ampel) =>
-        ampel.use === 'PEDESTRIAN_ONLY' ||
-        ampel.use === 'VEHICLE_AND_PEDESTRIAN' ||
-        ampel.trafficType === 'PEDESTRIAN',
+        ampel.use === 'PEDESTRIAN_ONLY' || ampel.use === 'VEHICLE_AND_PEDESTRIAN' || ampel.trafficType === 'PEDESTRIAN',
     );
   const hasMultipleLaneSignals =
     routeRules.length > 0 ||
@@ -719,4 +717,3 @@ export function createDefaultSignalGroups(
   });
   return Array.from(groups.values());
 }
-

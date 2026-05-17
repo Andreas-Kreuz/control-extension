@@ -78,9 +78,7 @@ function CompactAxisSlider(props: {
         value={value}
         valueLabelDisplay="auto"
         onChange={(_event, nextValue) => setValue(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
-        onChangeCommitted={(_event, nextValue) =>
-          props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)
-        }
+        onChangeCommitted={(_event, nextValue) => props.onCommit(Array.isArray(nextValue) ? nextValue[0] : nextValue)}
       />
     </Box>
   );

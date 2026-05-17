@@ -196,10 +196,7 @@ function EepPlacementGuide(props: { guide: EepPlacementGuideDimensions }) {
   );
 }
 
-function GuideEdgeTriangle(props: {
-  clearance: number;
-  edge: 'top' | 'right' | 'bottom' | 'left';
-}) {
+function GuideEdgeTriangle(props: { clearance: number; edge: 'top' | 'right' | 'bottom' | 'left' }) {
   const baseSize = Math.max(12, props.clearance * 1.5);
   const isHorizontalEdge = props.edge === 'top' || props.edge === 'bottom';
 
@@ -219,8 +216,7 @@ function GuideEdgeTriangle(props: {
         right: props.edge === 'right' ? -props.clearance : 'auto',
         top: props.edge === 'top' ? -props.clearance : props.edge === 'bottom' ? 'auto' : '50%',
         bottom: props.edge === 'bottom' ? -props.clearance : 'auto',
-        transform:
-          props.edge === 'top' || props.edge === 'bottom' ? 'translateX(-50%)' : 'translateY(-50%)',
+        transform: props.edge === 'top' || props.edge === 'bottom' ? 'translateX(-50%)' : 'translateY(-50%)',
         width: isHorizontalEdge ? baseSize : props.clearance,
         zIndex: 2,
       }}
@@ -282,10 +278,7 @@ function CompanionSidePanel(props: {
           <TransitPanel dashboard={props.dashboard} transitTrafficType={props.transitTrafficType} />
         )}
         {activeKey === 'axes' && (
-          <AxesPanel
-            dashboard={props.dashboard}
-            onRollingStockAxisCommit={props.onRollingStockAxisCommit}
-          />
+          <AxesPanel dashboard={props.dashboard} onRollingStockAxisCommit={props.onRollingStockAxisCommit} />
         )}
         {activeKey === 'textures' && <TexturesPanel dashboard={props.dashboard} />}
       </Box>
