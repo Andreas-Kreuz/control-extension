@@ -1,6 +1,5 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.measurement.TransitMeasurementRecorder ...") end
 
-local StorageUtility = require("ce.hub.util.StorageUtility")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
 
 local TransitMeasurementRecorder = {}
@@ -31,13 +30,7 @@ local function lineAndDestination(lineSegment, transitTrain)
 end
 
 local function isMeasurementTrain(train)
-    local carCount = EEPGetRollingstockItemsCount(train.name)
-    for i = 0, carCount - 1 do
-        local rollingStockName = EEPGetRollingstockItemName(train.name, i)
-        local values = StorageUtility.loadTableRollingStock(rollingStockName)
-        if values[TagKeys.Train.measurement] == "1" then return true end
-    end
-    return false
+    return train:getValue(TagKeys.Train.measurement) == "1"
 end
 
 local function stationLabel(station, previousStation)

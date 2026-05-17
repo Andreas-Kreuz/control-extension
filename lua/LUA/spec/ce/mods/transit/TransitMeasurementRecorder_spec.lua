@@ -64,6 +64,7 @@ insulate("TransitMeasurementRecorder", function ()
         local transitTrain = TransitTrainRegistry.forTrain(train)
         train:setRoute(route.routeName)
         transitTrain:changeDestination(route.destination, route.line.nr)
+        printedLines = {}
         return trainName
     end
 
@@ -290,6 +291,23 @@ insulate("TransitMeasurementRecorder", function ()
         Line.trainArrived(trainName, stationC)
 
         assert.are.equal(0, #printedLines)
+    end)
+
+    it("uses cached train values to detect measurement trains", function ()
+        local stationA, _, _, outbound = createMeasuredLine("MeasurementCachedFlag")
+        local trainName = createTrain(outbound, true)
+        local StorageUtility = require("ce.hub.util.StorageUtility")
+        local originalLoadTableRollingStock = StorageUtility.loadTableRollingStock
+        StorageUtility.loadTableRollingStock = function ()
+            error("TransitMeasurementRecorder must not reload rolling stock tags")
+        end
+
+        local ok, err = pcall(function ()
+            Line.trainDeparted(trainName, stationA)
+        end)
+        StorageUtility.loadTableRollingStock = originalLoadTableRollingStock
+
+        assert.is_true(ok, err)
     end)
 
     it("keeps elapsed times positive across midnight", function ()
