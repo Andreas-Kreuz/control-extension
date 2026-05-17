@@ -16,18 +16,19 @@ describe('Road', () => {
   it('opens the create intersection wizard with live code preview', () => {
     cy.visit('/simple/road/createIntersection');
     cy.contains('Kreuzung erstellen');
-    cy.contains('Vorbereitung');
-    cy.contains('Lua-Code');
     cy.contains('Signal-IDs und Modellinformationen');
-    cy.contains('Weiter').click();
+    cy.contains('button', 'Neue Kreuzung erstellen').click();
     cy.contains('Kreuzungsname');
+    cy.contains('Erweiterte Einstellungen').click();
+    cy.contains('Lua-Code sofort anzeigen').click();
+    cy.contains('Lua-Code');
   });
 
   it('supports router back and forward navigation between wizard steps', () => {
     cy.visit('/simple/road/createIntersection');
-    cy.contains('Weiter').click();
+    cy.contains('button', 'Neue Kreuzung erstellen').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection/kreuzung');
-    cy.contains('Fahrspuren').click();
+    cy.contains('Weiter').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection/fahrspuren');
     cy.go('back');
     cy.location('pathname').should('include', '/simple/road/createIntersection/kreuzung');
@@ -42,8 +43,8 @@ describe('Road', () => {
     cy.visit('/simple/road/1');
     cy.contains('Im Kreuzungs-Wizard öffnen').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection');
-    cy.location('search').should('include', 'intersectionId=1');
-    cy.contains('Kreuzung "Bahnhofstr. - Hauptstr." geladen.');
-    cy.contains('Lua-Code');
+    cy.location('search').should('include', 'draftId=current-1');
+    cy.contains('Kreuzungsname');
+    cy.get('input[value="Bahnhofstr. - Hauptstr."]').should('exist');
   });
 });

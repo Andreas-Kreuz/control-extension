@@ -37,9 +37,10 @@ async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
 async function withService(
   runCase: (ctx: { service: EepService; tempDir: string; seenEvents: string[] }) => Promise<void>,
   beforeInit?: (ctx: { tempDir: string }) => Promise<void>,
+  options?: ConstructorParameters<typeof EepService>[1],
 ): Promise<void> {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), 'eep-service-'));
-  const service = new EepService(false);
+  const service = new EepService(false, options);
   const seenEvents: string[] = [];
 
   try {
@@ -181,6 +182,19 @@ async function testDisconnectRemovesPipeDescriptor(): Promise<void> {
   }
 }
 
+async function testWriteCacheCanSkipServerStatePersistence(): Promise<void> {
+  await withService(
+    async ({ service, tempDir }) => {
+      service.writeCache({ eventCounter: 7, ceTypes: { 'ce.test': { id: { id: 'id' } } } });
+
+      assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverCache)), false);
+      assert.equal(await readFile(path.join(tempDir, FileNames.serverEventCounter), { encoding: 'utf8' }), '7');
+    },
+    undefined,
+    { persistServerState: false },
+  );
+}
+
 const staleEvent = JSON.stringify({
   eventCounter: 1,
   type: 'DataChanged',
@@ -206,6 +220,10 @@ export async function run(): Promise<void> {
   await runTest('EepService watcher reads future pending events', testWatcherReadsFuturePendingEventsFile);
   await runTest('EepService creates and replaces the pipe descriptor', testCreatesAndReplacesPipeDescriptor);
   await runTest('EepService disconnect removes the pipe descriptor', testDisconnectRemovesPipeDescriptor);
+  await runTest(
+    'EepService can skip server-state.json persistence while writing the counter',
+    testWriteCacheCanSkipServerStatePersistence,
+  );
 }
 
 if (require.main === module) {

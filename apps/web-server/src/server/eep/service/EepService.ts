@@ -13,6 +13,10 @@ import { performance } from 'perf_hooks';
 /**
  * This service is responsible for the communication with EEP.
  */
+interface EepServiceOptions {
+  persistServerState?: boolean;
+}
+
 export default class EepService implements CacheService {
   private static filesToDeleteOnExit = new Set<string>();
   private static processCleanupRegistered = false;
@@ -34,7 +38,13 @@ export default class EepService implements CacheService {
     if (this.debug) console.log('Log was cleared');
   };
 
-  constructor(private debug = false) {
+  private readonly persistServerState: boolean;
+
+  constructor(
+    private debug = false,
+    options: EepServiceOptions = {},
+  ) {
+    this.persistServerState = options.persistServerState !== false;
     this.logFileMonitor = new LogFileMonitor(
       {
         onCleared: () => this.logWasCleared(),
@@ -119,9 +129,11 @@ export default class EepService implements CacheService {
     performance.mark('eep:start-write-cache-file');
     try {
       if (data) {
-        const cacheFile = path.resolve(this.requireDir(), FileNames.serverCache);
-        const fileContents = JSON.stringify(data);
-        fs.writeFileSync(cacheFile, fileContents);
+        if (this.persistServerState) {
+          const cacheFile = path.resolve(this.requireDir(), FileNames.serverCache);
+          const fileContents = JSON.stringify(data);
+          fs.writeFileSync(cacheFile, fileContents);
+        }
 
         if (d.eventCounter) {
           const counterFile = path.resolve(this.requireDir(), FileNames.serverEventCounter);

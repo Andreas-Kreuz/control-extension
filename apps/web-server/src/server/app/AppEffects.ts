@@ -35,6 +35,7 @@ export default class AppEffects {
   private interestSyncService: InterestSyncService | null = null;
   private store = new AppReducer();
   private TESTMODE = false;
+  private persistServerState = true;
   private updateCheckService: UpdateCheckService;
   private updateSearchStarted = false;
 
@@ -147,6 +148,7 @@ export default class AppEffects {
       const options = new CommandLineParser().parseOptions();
       appConfig.eepDir = path.resolve(options['exchange-dir'] || '../web-app/cypress/io');
       this.TESTMODE = options.testmode || false;
+      this.persistServerState = options['skip-server-state-persistence'] !== true;
       if (!this.TESTMODE && fs.statSync(this.serverConfigFile).isFile()) {
         const data = fs.readFileSync(this.serverConfigFile, { encoding: 'utf8' });
         const config = JSON.parse(data);
@@ -242,7 +244,7 @@ export default class AppEffects {
     const completeDir = path.resolve(eepDir, 'LUA/ce/databridge/exchange/');
 
     // Check the directory and register handlers on success
-    const eepService = new EepService(this.debug);
+    const eepService = new EepService(this.debug, { persistServerState: this.persistServerState });
     eepService.reInit(completeDir, (err: string | null, dir: string | null) => {
       if (err) {
         console.error(err);
