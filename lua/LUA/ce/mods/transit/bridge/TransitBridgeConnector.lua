@@ -20,7 +20,12 @@ end
 function TransitBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand(
         "TransitSettings.setShowDepartureTippText",
-        function (param) TransitSettings.setShowDepartureTippText(toBooleanSetting(param)) end
+        function (param)
+            assert(TransitSettings.saveSlot,
+                   "TransitSettings.setShowDepartureTippText from Web App needs " ..
+                   "Transit.loadSettingsFromSlot(eepSaveId) or TransitSettings.loadSettingsFromSlot(eepSaveId) first.")
+            TransitSettings.setShowDepartureTippText(toBooleanSetting(param))
+        end
     )
 end
 

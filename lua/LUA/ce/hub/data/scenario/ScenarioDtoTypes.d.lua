@@ -14,3 +14,5 @@
 ---@field activeTrain string|nil          -- Policy: always
 ---@field activeRollingStock string|nil   -- Policy: always
 ---@field timeLapse number|nil            -- Policy: always
+---@field staticCameras string[]          -- Policy: always
+---@field dynamicCameras string[]         -- Policy: always

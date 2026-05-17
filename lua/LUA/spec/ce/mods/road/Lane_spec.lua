@@ -1,5 +1,37 @@
 -- Lua code for testing the lane's functions
 describe("Lane ...", function ()
+    insulate("Approach compatibility", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        it("stores approach and exposes legacy opposite heading", function ()
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
+                :setApproach(Lane.Approach.NORTH)
+
+            assert.equals(Lane.Approach.NORTH, lane.approach)
+            assert.equals(Lane.Heading.SOUTH, lane.heading)
+        end)
+
+        it("maps legacy heading to opposite approach", function ()
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", 67, TrafficLightModel.Unsichtbar_2er))
+                :setHeading(Lane.Heading.NORTH)
+
+            assert.equals(Lane.Approach.SOUTH, lane.approach)
+            assert.equals(Lane.Heading.NORTH, lane.heading)
+        end)
+
+        it("rejects invalid approaches", function ()
+            local printStub = stub(_G, "print")
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", 68, TrafficLightModel.Unsichtbar_2er))
+            lane:setApproach("UP")
+
+            assert.equals(Lane.Approach.SOUTH, lane.approach)
+            assert.stub(printStub).was_called_with("[#Lane] No such approach: UP")
+            printStub:revert()
+        end)
+    end)
     insulate("Register signals", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
@@ -15,7 +47,7 @@ describe("Lane ...", function ()
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
         local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
 
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", laneSignal)
         local tlsBeforeDriveOn = lane.signalsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
@@ -68,7 +100,7 @@ describe("Lane ...", function ()
         local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
 
         ---@type Lane
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", laneSignal)
         local tlsBeforeDriveOn = lane.signalsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
@@ -152,7 +184,7 @@ describe("Lane ...", function ()
         local exclusiveSignal = TrafficLight:new("Exclusive", 56, TrafficLightModel.JS2_3er_mit_FG)
         local additionalSignal = TrafficLight:new("Additional", 57, TrafficLightModel.JS2_3er_mit_FG)
         local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", laneSignal)
         local sgDefault = SignalGroup:new("sgDefault"):addVehicleSignals(defaultSignal, secondDefaultSignal)
         local sgExclusive = SignalGroup:new("sgExclusive"):addVehicleSignals(exclusiveSignal)
         local sgAdditional = SignalGroup:new("sgAdditional"):addVehicleSignals(additionalSignal)
@@ -212,7 +244,7 @@ describe("Lane ...", function ()
         local additionalSignal = TrafficLight:new("Additional", 59, TrafficLightModel.JS2_3er_mit_FG)
         local secondAdditionalSignal = TrafficLight:new("Second Additional", 60, TrafficLightModel.JS2_3er_mit_FG)
         local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", laneSignal)
         local sgDefault = SignalGroup:new("sgDefault"):addVehicleSignals(defaultSignal, secondDefaultSignal)
         local sgExclusive = SignalGroup:new("sgExclusive"):addVehicleSignals(exclusiveSignal, secondExclusiveSignal)
         local sgAdditional = SignalGroup:new("sgAdditional"):addVehicleSignals(additionalSignal, secondAdditionalSignal)
@@ -258,7 +290,7 @@ describe("Lane ...", function ()
         local defaultSignal = TrafficLight:new("Default", 55, TrafficLightModel.JS2_3er_mit_FG)
         local routeSignal = TrafficLight:new("Route", 56, TrafficLightModel.JS2_3er_mit_FG)
         local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", laneSignal)
 
         defaultSignal:applyToLane(lane)
         routeSignal:applyToLane(lane, "Route A")
@@ -292,7 +324,7 @@ describe("Lane ...", function ()
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
         local L1 = TrafficLight:new("L1", 11, TrafficLightModel.Unsichtbar_2er)
 
-        local lane = Lane:new("Lane A", 34, L1)
+        local lane = Lane:new("Lane A", L1)
         local tlsBeforeDriveOn = lane.signalsToDriveOn
         it("Lane has signal", function () assert.is_nil(tlsBeforeDriveOn) end)
 
@@ -358,7 +390,7 @@ describe("Lane ...", function ()
         local sgK2 = SignalGroup:new("sgK2"):addVehicleSignals(K2)
         local sgK3 = SignalGroup:new("sgK3"):addVehicleSignals(K3)
 
-        local lane = Lane:new("Lane A", 34, L1)
+        local lane = Lane:new("Lane A", L1)
         lane:showRequestsOnSignalGroups(sgK1)
         lane:routes("Route A"):showRequestsOnSignalGroups(sgK2)
         lane:routes("Route B", "Route C"):showRequestsOnSignalGroups(sgK3)
@@ -430,7 +462,7 @@ describe("Lane ...", function ()
         local S3 = TrafficLight:new("S3", 56, TrafficLightModel.JS2_3er_ohne_FG, "#21_RED", "#22_GREEN",
                                     "#23_YELLOW", "#24_REQUEST")
         local laneSignal = TrafficLight:new("laneSignal", 11, TrafficLightModel.Unsichtbar_2er)
-        local lane = Lane:new("Lane A", 34, laneSignal)
+        local lane = Lane:new("Lane A", laneSignal)
         local sgS2 = SignalGroup:new("sgS2"):addVehicleSignals(S2)
         local sgS3 = SignalGroup:new("sgS3"):addVehicleSignals(S3)
 
@@ -457,17 +489,16 @@ describe("Lane ...", function ()
         it("does not turn on S3 request light for another route", function () assert.is_false(lightOnS3RouteC) end)
     end)
 
-    describe("Legacy loading", function ()
-        insulate("No saved vehicles, but a counter", function ()
+    describe("Tag text loading", function ()
+        insulate("No queued vehicles, but a counter", function ()
             require("ce.hub.eep.EepSimulator")
-            local StorageUtility = require("ce.hub.util.StorageUtility")
             local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
             local TrafficLight = require("ce.mods.road.TrafficLight")
             local Lane = require("ce.mods.road.Lane")
             local signalId = 55
 
-            StorageUtility.saveTable(34, { f = "4" })
-            local lane = Lane:new("Lane A", 34, TrafficLight:new("X", signalId, TrafficLightModel.Unsichtbar_2er))
+            EEPSignalSetTagText(signalId, "f=4,")
+            local lane = Lane:new("Lane A", TrafficLight:new("X", signalId, TrafficLightModel.Unsichtbar_2er))
             insulate("Vehicles have generic names", function ()
                 it("Queue looks as follows", function ()
                     assert.are.same({ "train 1", "train 2", "train 3", "train 4" }, lane.queue:elements())
@@ -518,7 +549,7 @@ describe("Lane ...", function ()
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
             local lane =
-                Lane:new("Lane A", 34, TrafficLight:new("LANE A", signalId, TrafficLightModel.Unsichtbar_2er))
+                Lane:new("Lane A", TrafficLight:new("LANE A", signalId, TrafficLightModel.Unsichtbar_2er))
 
             it("Traffic lights are not used", function () assert.is_false(lane.signalUsedForRequest) end)
             it("Traffic lights there is no entry in the table",
@@ -536,7 +567,7 @@ describe("Lane ...", function ()
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
             local lane =
-                Lane:new("Lane A", 34, TrafficLight:new("LANE A", signalId, TrafficLightModel.Unsichtbar_2er))
+                Lane:new("Lane A", TrafficLight:new("LANE A", signalId, TrafficLightModel.Unsichtbar_2er))
 
             lane:useSignalForQueue()
             lane:checkRequests()
@@ -561,7 +592,7 @@ describe("Lane ...", function ()
 
             EepSimulator.simulateQueueTrainOnSignal(signalId, "#Car1")
             EepSimulator.simulateQueueTrainOnSignal(signalId, "#Car2")
-            local lane = Lane:new("Lane A", 34, TrafficLight:new("K1", signalId, TrafficLightModel.Unsichtbar_2er))
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", signalId, TrafficLightModel.Unsichtbar_2er))
             lane:useSignalForQueue()
             lane:checkRequests()
 
@@ -589,7 +620,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
-            local lane = Lane:new("Lane A", 34, TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
 
             it("Traffic lights are not used", function () assert.is_false(lane.tracksUsedForRequest) end)
             it("Traffic lights there is no entry in the table",
@@ -606,7 +637,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
-            local lane = Lane:new("Lane A", 34, TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
 
             lane:useTrackForQueue(roadId)
             lane:checkRequests()
@@ -629,7 +660,7 @@ describe("Lane ...", function ()
             EEPSetTrainRoute("#Car1", "Some Route")
 
             EepSimulator.simulatePlaceTrainOnRoadTrack(roadId, "#Car1")
-            local lane = Lane:new("Lane A", 34, TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
+            local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
             lane:useTrackForQueue(roadId)
             lane:checkRequests()
             lane:checkRequests()
@@ -655,13 +686,86 @@ describe("Lane ...", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local Lane = require("ce.mods.road.Lane")
 
-        EEPSaveData(888, "f=4,p=Rot,q=#Mittelklasse_PKW_blau_NP1|#Citaro_01c_LE-Ue_UK2_v7;001" ..
+        EEPSignalSetTagText(66, "f=4,p=Rot,q=#Mittelklasse_PKW_blau_NP1|#Citaro_01c_LE-Ue_UK2_v7;001" ..
             "|#Auflieger_Mobil_HB3|#Kaessbohrer Tankauflieger BP (v8),w=6,")
-        local lane = Lane:new("Lane A", 888, TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
+        local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
 
         it("Lane loaded", function () assert.equals(4, lane.queue:size()) end)
         it("Lane loaded", function () assert.equals(4, lane.vehicleCount) end)
         it("Lane loaded", function () assert.equals(6, lane.waitCount) end)
         it("Lane loaded", function () assert.equals(SignalIndication.RED, lane.currentIndication) end)
+    end)
+
+    insulate("Lane signal registration", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        it("switches the invisible lane signal when a registered light structure is already green", function ()
+            EEPStructureSetLight("#S1_Rot", false)
+            EEPStructureSetLight("#S1_Gruen", false)
+            EEPStructureSetLight("#S1_Gelb", false)
+            local K1 = TrafficLight:newPlainLightStructure("S1", "#S1_Rot", "#S1_Gruen", "#S1_Gelb")
+            K1:switchTo(SignalIndication.GREEN)
+            local laneSignal = TrafficLight:new("Lane Signal", 169, TrafficLightModel.Unsichtbar_2er)
+            local lane = Lane:new("Lane Registered Green", laneSignal)
+
+            lane:driveOnDefaultSignals(K1)
+
+            assert.equals(SignalIndication.GREEN, laneSignal.currentIndication)
+            assert.equals(TrafficLightModel.Unsichtbar_2er.signalIndexGreen, EEPGetSignal(169))
+        end)
+    end)
+
+    insulate("Signal tag persistence", function ()
+        require("ce.hub.eep.EepSimulator")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local SignalIndication = require("ce.mods.road.SignalIndication")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local Lane = require("ce.mods.road.Lane")
+
+        it("stores lane state in the lane signal tag text", function ()
+            EEPSetTrainRoute("#Car1", "Some Route")
+            EEPSignalSetTagText(166, "x=keep,")
+            local laneSignal = TrafficLight:new("K1", 166, TrafficLightModel.Unsichtbar_2er)
+            local lane = Lane:new("Lane Tag", laneSignal)
+
+            lane:vehicleEntered("#Car1")
+            lane:incrementWaitCount()
+            local ok, tagText = EEPSignalGetTagText(166)
+
+            assert.is_true(ok)
+            assert.equals("f=1,p=Rot,q=#Car1,w=1,x=keep,", tagText)
+        end)
+
+        it("stores lane state only in the lane signal tag text", function ()
+            EEPSetTrainRoute("#Car2", "Some Route")
+            local laneSignal = TrafficLight:new("K2", 167, TrafficLightModel.Unsichtbar_2er)
+            local lane = Lane:new("Lane Slot Tag", laneSignal)
+
+            lane:vehicleEntered("#Car2")
+            local okTag, tagText = EEPSignalGetTagText(167)
+            local okSlot = EEPLoadData(889)
+
+            assert.is_true(okTag)
+            assert.is_false(okSlot)
+            assert.equals("f=1,p=Rot,q=#Car2,w=0,", tagText)
+        end)
+
+        it("loads lane state from the lane signal tag text", function ()
+            EEPSetTrainRoute("#Car1", "Some Route")
+            EEPSignalSetTagText(168, "f=2,p=Gruen,q=#Car1|#Car2,w=3,")
+            local laneSignal = TrafficLight:new("K3", 168, TrafficLightModel.Unsichtbar_2er)
+
+            local lane = Lane:new("Lane Tag Load", laneSignal)
+
+            assert.equals(2, lane.vehicleCount)
+            assert.equals(3, lane.waitCount)
+            assert.equals(SignalIndication.GREEN, lane.currentIndication)
+            assert.equals(2, lane.queue:size())
+            assert.equals("#Car1", lane.queue:firstElement())
+        end)
     end)
 end)

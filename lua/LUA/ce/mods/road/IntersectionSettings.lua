@@ -10,24 +10,25 @@ IntersectionSettings.showNameAndPhaseOnSignal = false
 IntersectionSettings.showSignalIdOnSignal = false
 IntersectionSettings.showLanesOnStructure = false
 
+local function loadBoolean(data, key, fallback)
+    if data[key] == nil then return fallback end
+    return StorageUtility.toboolean(data[key])
+end
+
 function IntersectionSettings.loadSettingsFromSlot(eepSaveId)
     StorageUtility.registerId(eepSaveId, "Intersection settings")
     IntersectionSettings.saveSlot = eepSaveId
     local data = StorageUtility.loadTable(IntersectionSettings.saveSlot, "Intersection settings")
-    IntersectionSettings.showRequestsOnSignal = StorageUtility.toboolean(data["reqInfo"]) or
-        IntersectionSettings.showRequestsOnSignal
-    IntersectionSettings.showPhaseOnSignal = StorageUtility.toboolean(data["seqInfo"]) or
-        IntersectionSettings.showPhaseOnSignal
-    IntersectionSettings.showModelInfoOnSignal = StorageUtility.toboolean(data["modelInfo"]) or
-        IntersectionSettings.showModelInfoOnSignal
-    IntersectionSettings.showLaneNamesOnSignal = StorageUtility.toboolean(data["laneNameInfo"]) or
-        IntersectionSettings.showLaneNamesOnSignal
-    IntersectionSettings.showNameAndPhaseOnSignal = StorageUtility.toboolean(data["nameSeqInfo"]) or
-        IntersectionSettings.showNameAndPhaseOnSignal
-    IntersectionSettings.showSignalIdOnSignal = StorageUtility.toboolean(data["sigInfo"]) or
-        IntersectionSettings.showSignalIdOnSignal
-    IntersectionSettings.showLanesOnStructure = StorageUtility.toboolean(data["laneInfo"]) or
-        IntersectionSettings.showLanesOnStructure
+    IntersectionSettings.showRequestsOnSignal = loadBoolean(data, "reqInfo", IntersectionSettings.showRequestsOnSignal)
+    IntersectionSettings.showPhaseOnSignal = loadBoolean(data, "seqInfo", IntersectionSettings.showPhaseOnSignal)
+    IntersectionSettings.showModelInfoOnSignal = loadBoolean(data, "modelInfo",
+        IntersectionSettings.showModelInfoOnSignal)
+    IntersectionSettings.showLaneNamesOnSignal = loadBoolean(data, "laneNameInfo",
+                                                             IntersectionSettings.showLaneNamesOnSignal)
+    IntersectionSettings.showNameAndPhaseOnSignal = loadBoolean(data, "nameSeqInfo",
+                                                                IntersectionSettings.showNameAndPhaseOnSignal)
+    IntersectionSettings.showSignalIdOnSignal = loadBoolean(data, "sigInfo", IntersectionSettings.showSignalIdOnSignal)
+    IntersectionSettings.showLanesOnStructure = loadBoolean(data, "laneInfo", IntersectionSettings.showLanesOnStructure)
 end
 
 function IntersectionSettings.saveSettings()

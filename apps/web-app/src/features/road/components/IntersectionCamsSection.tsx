@@ -5,12 +5,16 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { useSocket } from '../../../app/hooks/useSocket';
 import { CommandEvent } from '@ce/web-shared';
 import Intersection from '../model/Intersection';
 import TypeCaption from '../../../shared/components/TypeCaption';
 
 function IntersectionCamsSection({ intersection: i }: { intersection: Intersection }) {
+  const theme = useTheme();
+  const showCameraNames = useMediaQuery(theme.breakpoints.down('lg'));
   const socket = useSocket();
 
   function changeCam(camName: string) {
@@ -19,7 +23,7 @@ function IntersectionCamsSection({ intersection: i }: { intersection: Intersecti
 
   if (!i.staticCams || i.staticCams.length === 0) {
     return (
-      <Alert severity="info" sx={{ m: 2, border: 1, borderColor: 'info.main', alignItems: 'top' }} icon={false}>
+      <Alert severity="info" sx={{ border: 1, borderColor: 'info.main', alignItems: 'top' }} icon={false}>
         <Typography variant="body2" sx={{ fontWeight: 'bolder' }} gutterBottom>
           Tipp: Kameras hinzufügen
         </Typography>
@@ -38,16 +42,19 @@ function IntersectionCamsSection({ intersection: i }: { intersection: Intersecti
   }
 
   return (
-    <Stack sx={{ px: 2, pt: 1, pb: 2 }}>
+    <Stack>
       <TypeCaption>Kameras</TypeCaption>
-      <Stack direction="row" sx={{ pt: 1, flexWrap: 'wrap' }}>
+      <Stack
+        direction={showCameraNames ? 'column' : 'row'}
+        sx={{ pt: 1, flexWrap: showCameraNames ? 'nowrap' : 'wrap', alignItems: 'flex-start' }}
+      >
         {i.staticCams.map((c, j) => (
-          <Tooltip key={c} title={c}>
+          <Tooltip key={c} title={c} disableHoverListener={showCameraNames} disableTouchListener={showCameraNames}>
             <Chip
-              sx={{ mr: 1, mb: 1, justifyContent: 'flex-start' }}
+              sx={{ mr: showCameraNames ? 0 : 1, mb: 1, maxWidth: 1, justifyContent: 'flex-start' }}
               color="secondary"
               icon={<CamIcon />}
-              label={(i.staticCams.length === 1 && c) || j}
+              label={showCameraNames || i.staticCams.length === 1 ? c : j}
               variant="outlined"
               clickable
               onClick={() => changeCam(c)}

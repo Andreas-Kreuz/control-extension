@@ -68,8 +68,8 @@ K2 = TrafficLight:new("K2", 24, TrafficLightModel.JS2_3er_mit_FG) -- NORTH STRAI
 
 -- Erzeuge Kreuzung und Fahrspuren
 crossing = Intersection:new("Dein Kreuzungsname")
-lane1 = Lane:new("Lane 1 N", 1, K1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
-lane2 = Lane:new("Lane 2 S", 2, K2, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
+lane1 = Lane:new("Lane 1 N", K1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
+lane2 = Lane:new("Lane 2 S", K2, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
 
 -- Lege Signalgruppen und Phasen an
 local sgK1Vehicle = crossing:newSignalGroup("sgK1Vehicle"):addVehicleSignals(K1)

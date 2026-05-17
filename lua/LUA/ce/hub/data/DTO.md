@@ -126,6 +126,8 @@ Elementtyp: Szenarioinfo
 | `activeTrain`        | `string` \| `nil` | Zugname         | aktiver Zug aus `EEPGetTrainActive()`                    |
 | `activeRollingStock` | `string` \| `nil` | Fahrzeugname    | aktives Rollmaterial aus `EEPRollingstockGetActive()`    |
 | `timeLapse`          | `number` \| `nil` | Zeitraffer      | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()`       |
+| `staticCameras`      | `string[]`        | Kameranamen     | statische Kameras aus `.anl3` `<Kammerasammlung>`        |
+| `dynamicCameras`     | `string[]`        | Kameranamen     | dynamische Kameras aus `.anl3` `<Kammerasammlung>`       |
 
 ### `ce.hub.Route`
 

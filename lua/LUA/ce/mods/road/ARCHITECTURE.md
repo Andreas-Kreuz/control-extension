@@ -1,4 +1,4 @@
-# Architektur `ce.mods.road`
+﻿# Architektur `ce.mods.road`
 
 ## Zweck
 
@@ -151,7 +151,7 @@ Zustandsbehaftetes Fachobjekt für eine Fahrspur.
 Verantwortlichkeiten:
 
 - Verwaltung von Fahrzeugwarteschlange, Fahrzeuganzahl, Wartezyklen und aktueller Fahrspurphase
-- Persistenz des Fahrspurzustands über `StorageUtility`
+- Persistenz des Fahrspurzustands im Tipptext des Fahrspur-Signals
 - Ermittlung von Anforderungen über Kontaktpunkte, Signale oder reservierte Straßentracks
 - Berechnung von Fahrspurprioritäten für die Phasenwahl
 - Zuordnung zusätzlicher Anforderungs-Signalgruppen abhängig von Routen
@@ -186,7 +186,7 @@ Persistierte Felder pro Fahrspur:
 - `p`: letzte Phase
 - `q`: Warteschlange als Pipe-getrennter String
 
-Wichtig: `StorageUtility.saveTable()` und `loadTable()` arbeiten nur mit String-Werten. `Lane` serialisiert Zahlen, Status und Warteschlangen deshalb explizit als Strings.
+Wichtig: Signal-Tipptexte speichern nur Strings. `Lane` serialisiert Zahlen, Status und Warteschlangen deshalb explizit als Strings.
 
 ### [TrafficLight.lua](./TrafficLight.lua)
 
@@ -372,7 +372,7 @@ Aktuelle Rolle:
 Der reguläre Ablauf für eine automatisch geschaltete Kreuzung ist aktuell:
 
 1. Anwendercode erzeugt `TrafficLightModel`, `TrafficLight`, `Lane`, `TrafficPhase` und `Intersection`.
-2. `Lane:new(..., laneSignal, ...)` registriert den Save-Slot, setzt das eine EEP-kontrollierende Fahrspur-Signal und lädt gespeicherten Zustand.
+2. `Lane:new(..., laneSignal, ...)` setzt das eine EEP-kontrollierende Fahrspur-Signal und lädt gespeicherten Zustand aus dessen Tipptext.
 3. Zusätzliche Freigabe-Signalgruppen werden optional über `driveOnDefaultSignalGroups(...)`, `routes(...):driveAlsoOnSignalGroups(...)` oder `routes(...):driveOnlyOnSignalGroups(...)` verdrahtet.
 4. Phasen registrieren ihre Ampeln über `TrafficPhase:addSignalGroup(...)`.
 5. `CeRoadModule.init()` registriert Web-Anbindung und ruft `Intersection.initPhases()` auf.
@@ -393,7 +393,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 3. `Lane:checkRequests()` baut den Anforderungstext neu auf.
 4. `refreshRequests(...)` informiert verknüpfte Anforderungsampeln.
 5. `updateLaneSignal(...)` prüft anhand der freigebenden Ampeln und optionaler Routen, ob die sichtbare Fahrspurampel Grün zeigen darf.
-6. Der Fahrspurzustand wird über `StorageUtility` gespeichert.
+6. Der Fahrspurzustand wird im Tipptext des Fahrspur-Signals gespeichert.
 
 ## Zustand
 
@@ -442,7 +442,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 
 Das Paket nutzt aktuell zwei Persistenzformen:
 
-- `Lane` speichert Laufzeitzustand pro Fahrspur über `StorageUtility`
+- `Lane` speichert Laufzeitzustand pro Fahrspur im Tipptext des Fahrspur-Signals
 - `IntersectionSettings` speichert die globalen Anzeigeeinstellungen über `StorageUtility`
 
 Persistiert werden nur String-Werte. Deshalb serialisieren die Module Zahlen, Booleans und Warteschlangen vor dem Speichern.
@@ -461,7 +461,7 @@ Nicht persistent sind insbesondere:
 - Eine `TrafficPhase` darf nur `TrafficLight`-Objekte enthalten.
 - `Intersection.initPhases()` muss nach Abschluss der Konfiguration laufen, bevor `switchPhases()` sinnvoll arbeitet.
 - `TrafficPhase:initPhase()` erwartet, dass die Ampeln ihre Fahrspuren bereits kennen.
-- `Lane` und `IntersectionSettings` dürfen in `StorageUtility` nur String-Werte ablegen.
+- `Lane` serialisiert in den Signal-Tipptext und `IntersectionSettings` in `StorageUtility` nur String-Werte.
 - Negative interne Signal-IDs stehen für logisch verwaltete Ampeln; `Signal:switchSignal(...)` setzt in diesem Fall kein EEP-Signal.
 - `lightStructures` und `axisStructures` müssen auf existierende EEP-Strukturen beziehungsweise Achsen verweisen; die Hilfsklassen validieren das sofort.
 - Die Web-Kommandos für Kreuzungen werden ausschließlich über `RoadBridgeConnector.registerFunctions()` freigegeben.
@@ -475,7 +475,7 @@ Schon kleine Änderungen in `TrafficPhase:tasksForPhaseChangeFrom(...)` können 
 
 ### Verlorene oder fehlerhafte Persistenz
 
-Änderungen an `Lane`-Persistenz oder `IntersectionSettings.saveSettings()/loadSettingsFromSlot()` können bestehende Anlagenzustände unlesbar machen oder Bool-Werte falsch interpretieren.
+Änderungen an `Lane`-Tipptext-Persistenz oder `IntersectionSettings.saveSettings()/loadSettingsFromSlot()` können bestehende Anlagenzustände unlesbar machen oder Bool-Werte falsch interpretieren.
 
 ### Falsche Fahrspurzuteilung
 
@@ -500,7 +500,7 @@ Wenn `Intersection.initPhases()`, `TrafficLight:applyToLane(...)` oder `Lane:dri
 - `ce.hub`: `ModuleRegistry`, `StatePublisherRegistry` und weitere Hub-Infrastruktur
 - `ce.hub.scheduler`: `Scheduler`, `Task` und `CeHubModule`
 - `ce.hub.publish`: `DataChangeBus` für Web-Zustandsänderungen
-- `ce.hub.util`: `StorageUtility` für Persistenz
+- `ce.hub.util`: `StorageUtility` für Persistenz-Helfer und Tipptext-Serialisierung
 - `ce.hub.util.Queue`: Warteschlangen der Fahrspuren
 - `ce.hub.eep.TippTextFormatter`: Aufbau der Tipptexte
 

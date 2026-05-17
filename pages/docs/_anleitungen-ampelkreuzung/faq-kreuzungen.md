@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Lua in Kreuzungen
 type: Tipps & Tricks
@@ -171,7 +171,7 @@ local K2 = TrafficLight:new("K2", 91, TrafficLightModel.JS2_3er_ohne_FG)
 local K3 = TrafficLight:new("K3", 26, TrafficLightModel.JS2_3er_mit_FG)
 
 -- K1 wird als Fahrspur-Ampel verwendet
-c1Lane1 = Lane:new("K1 - Fahrspur 1", 110, K1, {Lane.Directions.STRAIGHT})
+c1Lane1 = Lane:new("K1 - Fahrspur 1", K1, {Lane.Directions.STRAIGHT})
 
 -- In der Signalgruppe werden K1, K2 und K3 gemeinsam geschaltet
 c1 = Intersection:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
@@ -219,7 +219,7 @@ local K5 = TrafficLight:new("K5", 143, TrafficLightModel.JS2_3er_mit_FG)
 local K6 = TrafficLight:new("K6", 140, TrafficLightModel.JS2_2er_OFF_YELLOW_GREEN)
 
 -- Fahrspur 4 führt geradeaus und rechts entlang.
-lane4 = Lane:new("K1 - Fahrspur 4", 4, lane4Sig, {Lane.Directions.STRAIGHT, Lane.Directions.RIGHT})
+lane4 = Lane:new("K1 - Fahrspur 4", lane4Sig, {Lane.Directions.STRAIGHT, Lane.Directions.RIGHT})
 
 -- Kreuzung mit zwei Phasen anlegen und die Ampeln K4, K5 und K6 verwenden
 c1 = Intersection:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen

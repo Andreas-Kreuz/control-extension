@@ -60,7 +60,7 @@ insulate("ce.mods.road.SignalGroup", function ()
 
         local K1 = TrafficLight:new("K1", -1, TrafficLightModel.NONE)
         local K2 = TrafficLight:new("K2", -1, TrafficLightModel.NONE)
-        local lane = Lane:new("Lane 1", -1, K1)
+        local lane = Lane:new("Lane 1", K1)
         local sgA = SignalGroup:new("sgLane1Straight"):addVehicleSignals(K1)
         local sgB = SignalGroup:new("sgLane1Right"):addVehicleSignals(K2)
 

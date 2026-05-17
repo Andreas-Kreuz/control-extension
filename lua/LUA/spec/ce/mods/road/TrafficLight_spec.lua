@@ -18,6 +18,22 @@ insulate("ce.mods.road.TrafficLight", function ()
         assert.equals(TrafficLight.Use.VEHICLE_ONLY, signal.use)
     end)
 
+    it("creates plain structure lights without a real EEP signal", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+
+        EEPStructureSetLight("#1_Rot", false)
+        EEPStructureSetLight("#1_Gruen", false)
+        EEPStructureSetLight("#1_Gelb", false)
+        EEPStructureSetLight("#1_A", false)
+        local signal = TrafficLight:newPlainLightStructure("S1", "#1_Rot", "#1_Gruen", "#1_Gelb", "#1_A")
+
+        assert.equals("S1", signal.vehicleSignalName)
+        assert.equals(TrafficLightModel.NONE, signal.trafficLightModel)
+        assert.equals(TrafficLight.Use.VEHICLE_ONLY, signal.use)
+        assert.is_true(signal.signalId < 0)
+    end)
+
     it("adds a pedestrian signal name with chainable withPedestrian", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
@@ -109,9 +125,9 @@ insulate("ce.mods.road.TrafficLight", function ()
         assert.equals(
             "<j>Signal: -2<br>" ..
             "NO SIGNAL MODEL<br>" ..
-            "<bgrgb=196,196,196>Lane 1<bgrgb=255,255,255><br>" ..
+            "<bgrgb=160,160,160>Lane 1<bgrgb=255,255,255><br>" ..
             "<bgrgb=255,96,96><b>K1</b><bgrgb=255,255,255><br>" ..
-            "<bgrgb=230,230,230><fgrgb=66,66,66>BELEGT<bgrgb=255,255,255><fgrgb=0,0,0><br>#Car1" ..
+            "<bgrgb=196,196,196><fgrgb=66,66,66>BELEGT<bgrgb=255,255,255><fgrgb=0,0,0><br>#Car1" ..
             "<br><br><b>Phase: </b><br><j>P1 <bgrgb=0,192,0>(Gruen)<bgrgb=255,255,255>",
             infoText)
     end)

@@ -10,6 +10,110 @@ local function padnum(d)
     return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
 end
 
+local function createSignalGroupDto(signalGroup)
+    local signalIds = {}
+    local trafficType = "CAR"
+    local pedestrianCrossingNames = {}
+    for signalHead, signalType in pairs(signalGroup:getSignalHeads()) do
+        table.insert(signalIds, signalHead.signalId)
+        trafficType = signalType
+    end
+    for _, crossing in ipairs(signalGroup.getPedestrianCrossings and signalGroup:getPedestrianCrossings() or {}) do
+        table.insert(pedestrianCrossingNames, crossing:getName())
+    end
+    table.sort(signalIds)
+    table.sort(pedestrianCrossingNames)
+    return {
+        name = signalGroup.name,
+        trafficType = trafficType,
+        signalIds = signalIds,
+        pedestrianCrossingNames = pedestrianCrossingNames
+    }
+end
+
+local function createPedestrianCrossingDto(crossing, signalGroupNames)
+    return {
+        name = crossing:getName(),
+        scriptVariableName = crossing:getScriptVariableName(),
+        approach = crossing:getApproach(),
+        signalGroups = signalGroupNames
+    }
+end
+
+local function defaultSignalGroupsForLane(intersection, lane)
+    local signalGroupNames = {}
+    local defaultDriveSignals = lane.defaultDriveSignals or {}
+    for _, signalGroup in ipairs(intersection.signalGroups or {}) do
+        local hasMatchingSignal = false
+        for signalHead, signalType in pairs(signalGroup:getSignalHeads()) do
+            if signalType ~= "PEDESTRIAN" and (defaultDriveSignals[signalHead] or signalHead == lane.laneSignal) then
+                hasMatchingSignal = true
+            end
+        end
+        if hasMatchingSignal then table.insert(signalGroupNames, signalGroup.name) end
+    end
+    return signalGroupNames
+end
+
+local function signalGroupsForSignals(intersection, signals)
+    local signalGroupNames = {}
+    for _, signalGroup in ipairs(intersection.signalGroups or {}) do
+        local hasMatchingSignal = false
+        for signalHead, signalType in pairs(signalGroup:getSignalHeads()) do
+            if signalType ~= "PEDESTRIAN" and signals[signalHead] then hasMatchingSignal = true end
+        end
+        if hasMatchingSignal then table.insert(signalGroupNames, signalGroup.name) end
+    end
+    table.sort(signalGroupNames)
+    return signalGroupNames
+end
+
+local function requestSignalsForRoute(lane, route)
+    local requestSignals = lane.requestSignals and lane.requestSignals[route]
+    local signals = {}
+    for _, signal in ipairs(requestSignals or {}) do signals[signal] = true end
+    return signals
+end
+
+local function hasRequestOnRouteGroups(intersection, lane, route, signalGroupNames)
+    local requestGroupNames = signalGroupsForSignals(intersection, requestSignalsForRoute(lane, route))
+    local requestGroupSet = {}
+    for _, name in ipairs(requestGroupNames) do requestGroupSet[name] = true end
+    for _, name in ipairs(signalGroupNames) do
+        if requestGroupSet[name] then return true end
+    end
+    return false
+end
+
+local function routeRulesForLane(intersection, lane)
+    local rulesByKey = {}
+    for route, routeRules in pairs(lane.routeDriveRules or {}) do
+        for mode, signals in pairs(routeRules) do
+            local signalGroupNames = signalGroupsForSignals(intersection, signals)
+            if #signalGroupNames > 0 then
+                local showRequests = hasRequestOnRouteGroups(intersection, lane, route, signalGroupNames)
+                local key = mode .. "|" .. table.concat(signalGroupNames, ",") .. "|" .. tostring(showRequests)
+                rulesByKey[key] = rulesByKey[key] or {
+                    routeNames = {},
+                    signalGroups = signalGroupNames,
+                    mode = mode,
+                    showRequests = showRequests
+                }
+                table.insert(rulesByKey[key].routeNames, route)
+            end
+        end
+    end
+
+    local rules = {}
+    for _, rule in pairs(rulesByKey) do
+        table.sort(rule.routeNames)
+        table.insert(rules, rule)
+    end
+    table.sort(rules, function (a, b)
+        return table.concat(a.routeNames, ",") < table.concat(b.routeNames, ",")
+    end)
+    return rules
+end
 local function createPhaseDto(intersection, phase, order)
     local signalHeads = {}
     local signalGroups = {}
@@ -56,6 +160,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
     local intersectionPhases = {}
     local intersectionTrafficLights = {}
     local allLanes = {}
+    local laneIntersections = {}
     local lanePhases = {}
 
     local intersectionIdCounter = 0
@@ -73,15 +178,45 @@ function RoadDataCollector.collectCrossings(allIntersections)
         local dto = {
             id = intersectionIdCounter,
             name = intersection.name,
+            eepSaveId = intersection.eepSaveId or -1,
+            scriptVariableName = intersection.getScriptVariableName and
+                intersection:getScriptVariableName() or intersection.scriptVariableName,
             currentPhase = type(currentPhase) == "table" and currentPhase.name or currentPhase,
             manualPhase = type(manualPhase) == "table" and manualPhase.name or manualPhase,
             nextPhase = type(nextPhase) == "table" and nextPhase.name or nextPhase,
             ready = intersection.isGreenTimeFinished and intersection:isGreenTimeFinished() or intersection.ready,
             greenTimeSeconds = intersection.getGreenTimeSeconds and
                 intersection:getGreenTimeSeconds() or intersection.greenTimeSeconds,
+            switchInStrictOrder = intersection.switchInStrictOrder == true,
+            tippStructure = intersection.tippStructure,
             staticCams = intersection.getStaticCams and intersection:getStaticCams() or intersection.staticCams,
-            phases = {}
+            phases = {},
+            signalGroupDefinitions = {},
+            pedestrianCrossings = {}
         }
+        local pedestrianCrossingsByName = {}
+        for _, signalGroup in ipairs(intersection.signalGroups or {}) do
+            table.insert(dto.signalGroupDefinitions, createSignalGroupDto(signalGroup))
+            local pedestrianCrossings = signalGroup.getPedestrianCrossings and
+                signalGroup:getPedestrianCrossings() or {}
+            for _, crossing in ipairs(pedestrianCrossings) do
+                local crossingEntry = pedestrianCrossingsByName[crossing:getName()]
+                if not crossingEntry then
+                    crossingEntry = {
+                        crossing = crossing,
+                        signalGroups = {}
+                    }
+                    pedestrianCrossingsByName[crossing:getName()] = crossingEntry
+                end
+                table.insert(crossingEntry.signalGroups, signalGroup.name)
+            end
+        end
+        for _, crossingEntry in pairs(pedestrianCrossingsByName) do
+            table.sort(crossingEntry.signalGroups)
+            table.insert(dto.pedestrianCrossings,
+                         createPedestrianCrossingDto(crossingEntry.crossing, crossingEntry.signalGroups))
+        end
+        table.sort(dto.pedestrianCrossings, function (a, b) return a.name < b.name end)
         table.insert(intersections, dto)
 
         local signalHeads = {}
@@ -96,6 +231,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
 
             for lane in pairs(phase.lanes) do
                 allLanes[lane] = dto.id
+                laneIntersections[lane] = intersection
                 lanePhases[lane] = lanePhases[lane] or {}
                 table.insert(lanePhases[lane], phase.name)
             end
@@ -181,13 +317,16 @@ function RoadDataCollector.collectCrossings(allIntersections)
             name = lane.name,
             currentIndication = currentIndication,
             vehicleMultiplier = lane.fahrzeugMultiplikator,
-            eepSaveId = lane.eepSaveId,
+            laneSignalId = lane.laneSignal and lane.laneSignal.signalId or nil,
             type = laneType,
             countType = countType,
             waitingTrains = {},
             waitingForGreenCyclesCount = lane.waitCount,
+            approach = lane.approach,
             directions = lane.directions,
             phases = lanePhases[lane] or {},
+            defaultSignalGroups = defaultSignalGroupsForLane(laneIntersections[lane], lane),
+            routeRules = routeRulesForLane(laneIntersections[lane], lane),
             tracks = lane.tracksForHighlighting or {}
         }
         for i, value in pairs(lane.queue:elements()) do dto.waitingTrains[i] = value end

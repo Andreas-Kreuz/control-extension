@@ -4,13 +4,31 @@
 ---@field ceType string
 ---@field id number
 ---@field name string
+---@field eepSaveId number
+---@field scriptVariableName string|nil
 ---@field currentPhase string|nil
 ---@field manualPhase string|nil
 ---@field nextPhase string|nil
 ---@field ready boolean
 ---@field greenTimeSeconds number
+---@field switchInStrictOrder boolean
+---@field tippStructure string|nil
 ---@field staticCams table
 ---@field phases IntersectionPhaseTimingDto[]
+---@field signalGroupDefinitions IntersectionSignalGroupDto[]
+---@field pedestrianCrossings IntersectionPedestrianCrossingDto[]
+
+---@class IntersectionSignalGroupDto
+---@field name string
+---@field trafficType string
+---@field signalIds number[]
+---@field pedestrianCrossingNames string[]
+
+---@class IntersectionPedestrianCrossingDto
+---@field name string
+---@field scriptVariableName string|nil
+---@field approach string
+---@field signalGroups string[]
 
 ---@class IntersectionPhaseSignalHeadDto
 ---@field signalId number
@@ -38,14 +56,23 @@
 ---@field name string
 ---@field currentIndication string
 ---@field vehicleMultiplier number
----@field eepSaveId number
+---@field laneSignalId number|nil
 ---@field type string
 ---@field countType string
 ---@field waitingTrains table
 ---@field waitingForGreenCyclesCount number
+---@field approach string|nil
 ---@field directions table
 ---@field phases table
+---@field defaultSignalGroups table
+---@field routeRules IntersectionLaneRouteRuleDto[]
 ---@field tracks table
+
+---@class IntersectionLaneRouteRuleDto
+---@field routeNames string[]
+---@field signalGroups string[]
+---@field mode string
+---@field showRequests boolean
 
 ---@class IntersectionPhaseDto
 ---@field ceType string

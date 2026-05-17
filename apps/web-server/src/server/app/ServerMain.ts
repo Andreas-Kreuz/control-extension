@@ -67,6 +67,7 @@ export class ServerMain {
   private configureApplication(): void {
     this.app.set('port', this.port);
     this.app.use(cors(this.createCorsOptions()));
+    this.app.use(express.json({ limit: '1mb' }));
   }
 
   private createTrustedServerAddressPolicy(): TrustedServerAddressPolicy {

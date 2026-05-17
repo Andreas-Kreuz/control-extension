@@ -110,6 +110,10 @@ export default class EepService implements CacheService {
     }
   }
 
+  public getExchangeDirectory(): string {
+    return this.requireDir();
+  }
+
   public writeCache(data: unknown): void {
     const d = data as { eventCounter?: number };
     performance.mark('eep:start-write-cache-file');

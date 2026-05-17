@@ -7,6 +7,7 @@ import {
   IntersectionListRoom,
   IntersectionPhaseListRoom,
   RoadSettingsRoom,
+  RoadTrafficLightModelsRoom,
 } from '@ce/web-shared';
 import { Server } from 'socket.io';
 
@@ -35,6 +36,11 @@ export default class RoadDataService implements DomainRoomService {
       roomType: RoadSettingsRoom,
       id: 'RoadSettingsRoom',
       jsonCreator: (_room: string) => JSON.stringify(this.selector.getModuleSettings()),
+    });
+    this.roomDataProviders.push({
+      roomType: RoadTrafficLightModelsRoom,
+      id: 'RoadTrafficLightModelsRoom',
+      jsonCreator: (_room: string) => JSON.stringify(this.selector.getTrafficLightModels()),
     });
   }
 

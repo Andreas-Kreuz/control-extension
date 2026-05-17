@@ -9,13 +9,18 @@ function normalizeIntersection(intersection: Partial<Intersection>): Intersectio
   return {
     id: intersection.id ?? 0,
     name: intersection.name ?? '',
+    eepSaveId: intersection.eepSaveId ?? -1,
+    ...(intersection.scriptVariableName !== undefined ? { scriptVariableName: intersection.scriptVariableName } : {}),
+    switchInStrictOrder: intersection.switchInStrictOrder ?? false,
     greenTimeSeconds: intersection.greenTimeSeconds ?? 0,
     ready: intersection.ready ?? false,
     currentPhase: intersection.currentPhase ?? '',
     manualPhase: intersection.manualPhase ?? '',
     nextPhase: intersection.nextPhase ?? '',
+    ...(intersection.tippStructure !== undefined ? { tippStructure: intersection.tippStructure } : {}),
     staticCams: intersection.staticCams ?? [],
     phases: intersection.phases ?? [],
+    signalGroupDefinitions: intersection.signalGroupDefinitions ?? [],
   };
 }
 

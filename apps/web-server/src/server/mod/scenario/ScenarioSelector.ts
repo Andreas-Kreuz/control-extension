@@ -32,6 +32,8 @@ export default class ScenarioSelector {
         ...optionalProperty('activeTrain', dto.activeTrain),
         ...optionalProperty('activeRollingStock', dto.activeRollingStock),
         ...optionalProperty('timeLapse', dto.timeLapse),
+        staticCameras: dto.staticCameras ?? [],
+        dynamicCameras: dto.dynamicCameras ?? [],
       };
     });
   }

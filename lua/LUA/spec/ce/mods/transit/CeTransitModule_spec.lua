@@ -57,8 +57,16 @@ insulate("ce.mods.transit.CeTransitModule", function ()
     end)
 
     it("returns the module from loadSettingsFromSlot for chaining", function ()
+        local StorageUtility = require("ce.hub.util.StorageUtility")
         local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local TransitSettings = require("ce.mods.transit.TransitSettings")
+
         assert.equals(CeTransitModule, CeTransitModule:loadSettingsFromSlot(25))
+
+        TransitSettings.setShowDepartureTippText(true)
+
+        local data = StorageUtility.loadTable(25, "Transit settings")
+        assert.equals("true", data["depInfo"])
     end)
 
     it("registers depot signals and forces required hub update policies", function ()

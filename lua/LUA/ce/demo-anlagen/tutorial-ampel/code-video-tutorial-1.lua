@@ -8,8 +8,8 @@ local K1 = TrafficLight:new("K1", 13, TrafficLightModel.JS2_3er_mit_FG)
 local K2 = TrafficLight:new("K2", 24, TrafficLightModel.JS2_3er_ohne_FG)
 local K3 = TrafficLight:new("K3", 15, TrafficLightModel.JS2_3er_mit_FG)
 
-lane1 = Lane:new("FS1", 1, K1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
-lane2 = Lane:new("FS2", 2, K2, { Lane.Directions.LEFT })
+lane1 = Lane:new("FS1", K1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
+lane2 = Lane:new("FS2", K2, { Lane.Directions.LEFT })
 
 local c = Intersection:new("Einfache Kreuzung")
 local sgLane1StraightRight = c:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1)

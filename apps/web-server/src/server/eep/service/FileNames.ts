@@ -6,5 +6,6 @@ export enum FileNames {
   serverIsRunning = 'server-is-running',
   serverTransport = 'server-transport.json',
   serverCache = 'server-state.json',
+  persistentServerState = 'persistent-server-state.json',
   serverEventCounter = 'server-state.counter',
 }

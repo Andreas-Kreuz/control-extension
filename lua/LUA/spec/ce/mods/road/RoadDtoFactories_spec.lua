@@ -13,6 +13,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local intersection = {
             id = 1,
             name = "A",
+            eepSaveId = 77,
+            scriptVariableName = "c1",
             currentPhase = "P1",
             manualPhase = "P2",
             nextPhase = "P3",
@@ -26,6 +28,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                     order = 1,
                     prio = 2,
                     greenTimeSeconds = 15,
+                    signalGroups = { "sgLane1Straight" },
                     signalHeads = {
                         {
                             signalId = 1,
@@ -56,11 +59,11 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             name = "L1",
             currentIndication = "GREEN",
             vehicleMultiplier = 2,
-            eepSaveId = 5,
             type = "NORMAL",
             countType = "TRACKS",
             waitingTrains = { "T1" },
             waitingForGreenCyclesCount = 4,
+            approach = "SOUTH",
             directions = { "LEFT" },
             phases = { "P1" },
             tracks = { 10 },
@@ -151,12 +154,17 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
+                        eepSaveId = 77,
+                        scriptVariableName = "c1",
                         currentPhase = "", -- oninterest, never selected
                         manualPhase = "",  -- oninterest, never selected
                         nextPhase = "",    -- oninterest, never selected
                         ready = false,         -- oninterest, never selected
                         greenTimeSeconds = 15,
+                        switchInStrictOrder = false,
                         staticCams = { "Cam 1" },
+                        signalGroupDefinitions = {},
+                        pedestrianCrossings = {},
                         phases = {
                             {
                                 id = "A-P1",
@@ -164,6 +172,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                 order = 1,
                                 prio = 2,
                                 greenTimeSeconds = 15,
+                                signalGroups = { "sgLane1Straight" },
                                 signalHeads = {
                                     {
                                         signalId = 1,
@@ -191,12 +200,17 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
-                        currentPhase = "P1",
+            eepSaveId = 77,
+            scriptVariableName = "c1",
+            currentPhase = "P1",
                         manualPhase = "P2",
                         nextPhase = "P3",
                         ready = true,
                         greenTimeSeconds = 15,
+                        switchInStrictOrder = false,
                         staticCams = { "Cam 1" },
+                        signalGroupDefinitions = {},
+                        pedestrianCrossings = {},
                         phases = {
                             {
                                 id = "A-P1",
@@ -204,6 +218,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                 order = 1,
                                 prio = 2,
                                 greenTimeSeconds = 15,
+                                signalGroups = { "sgLane1Straight" },
                                 signalHeads = {
                                     {
                                         signalId = 1,
@@ -237,13 +252,15 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         name = "L1",
                         currentIndication = "", -- oninterest, never selected
                         vehicleMultiplier = 2,
-                        eepSaveId = 5,
                         type = "NORMAL",
                         countType = "TRACKS",
                         waitingTrains = {},             -- oninterest, never selected
                         waitingForGreenCyclesCount = 0, -- oninterest, never selected
+                        approach = "SOUTH",
                         directions = { "LEFT" },
                         phases = { "P1" },
+                        defaultSignalGroups = {},
+                        routeRules = {},
                         tracks = { 10 }
                     }, laneDto)
         assert.same({
@@ -253,13 +270,15 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         name = "L1",
                         currentIndication = "GREEN",
                         vehicleMultiplier = 2,
-                        eepSaveId = 5,
                         type = "NORMAL",
                         countType = "TRACKS",
                         waitingTrains = { "T1" },
                         waitingForGreenCyclesCount = 4,
+                        approach = "SOUTH",
                         directions = { "LEFT" },
                         phases = { "P1" },
+                        defaultSignalGroups = {},
+                        routeRules = {},
                         tracks = { 10 }
                     }, selectedLaneDto)
         assert.equals("ce.mods.road.IntersectionPhase", phaseCeType)
@@ -384,7 +403,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                                                         [1] = {
                                                                             id = 1,
                                                                             name = "A",
-                                                                            currentPhase = "P1",
+            eepSaveId = 77,
+            scriptVariableName = "c1",
+            currentPhase = "P1",
                                                                             manualPhase = "P2",
                                                                             nextPhase = "P3",
                                                                             ready = true,
@@ -476,5 +497,138 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                             }
                         }
                     }, data.intersections[1].phases[1])
+    end)
+
+    it("collects lane signal group links when one default drive signal belongs to a combined group", function ()
+        require("ce.hub.eep.EepSimulator")
+        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+
+        local signalHead1 = {
+            signalId = 1,
+            vehicleSignalName = "K1",
+            use = "VEHICLE_ONLY",
+            currentIndication = "RED",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local signalHead2 = {
+            signalId = 2,
+            vehicleSignalName = "K2",
+            use = "VEHICLE_ONLY",
+            currentIndication = "RED",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local queue = { elements = function () return {} end }
+        local lane1 = {
+            name = "Spur 1",
+            laneSignal = signalHead1,
+            defaultDriveSignals = { [signalHead1] = true },
+            fahrzeugMultiplikator = 1,
+            trafficType = "NORMAL",
+            waitCount = 0,
+            directions = { "STRAIGHT" },
+            queue = queue
+        }
+        local lane2 = {
+            name = "Spur 2",
+            laneSignal = signalHead2,
+            defaultDriveSignals = { [signalHead2] = true },
+            fahrzeugMultiplikator = 1,
+            trafficType = "NORMAL",
+            waitCount = 0,
+            directions = { "STRAIGHT" },
+            queue = queue
+        }
+        local signalGroup = {
+            name = "sgCombined",
+            getSignalHeads = function () return { [signalHead1] = "CAR", [signalHead2] = "CAR" } end
+        }
+        local phase = {
+            name = "P1",
+            prio = 4,
+            greenTimeSeconds = 12,
+            lanes = { [lane1] = true, [lane2] = true },
+            signalGroups = { signalGroup },
+            signalHeads = { [signalHead1] = "CAR", [signalHead2] = "CAR" }
+        }
+        local crossing = {
+            name = "A",
+            signalGroups = { signalGroup },
+            staticCams = {},
+            getCurrentPhase = function () return nil end,
+            getManualPhase = function () return nil end,
+            getNextPhase = function () return nil end,
+            isGreenTimeFinished = function () return true end,
+            getGreenTimeSeconds = function () return 15 end,
+            getStaticCams = function (self) return self.staticCams end,
+            getPhases = function () return { phase } end
+        }
+
+        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local groupsByLane = {}
+        for _, laneDto in ipairs(data.intersectionLanes) do groupsByLane[laneDto.name] = laneDto.defaultSignalGroups end
+
+        assert.same({ "sgCombined" }, groupsByLane["Spur 1"])
+        assert.same({ "sgCombined" }, groupsByLane["Spur 2"])
+    end)
+
+    it("collects implicit lane signal group links from the lane signal", function ()
+        require("ce.hub.eep.EepSimulator")
+        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+
+        local laneSignal = {
+            signalId = 92,
+            vehicleSignalName = "K1",
+            use = "VEHICLE_AND_PEDESTRIAN",
+            currentIndication = "RED",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local queue = { elements = function () return {} end }
+        local lane = {
+            name = "Spur 1",
+            laneSignal = laneSignal,
+            fahrzeugMultiplikator = 1,
+            trafficType = "NORMAL",
+            waitCount = 0,
+            directions = { "STRAIGHT" },
+            queue = queue
+        }
+        local vehicleGroup = {
+            name = "sgLane1Straight",
+            getSignalHeads = function () return { [laneSignal] = "CAR" } end
+        }
+        local pedestrianGroup = {
+            name = "sgPedWestEast",
+            getSignalHeads = function () return { [laneSignal] = "PEDESTRIAN" } end
+        }
+        local phase = {
+            name = "P1",
+            prio = 4,
+            greenTimeSeconds = 12,
+            lanes = { [lane] = true },
+            signalGroups = { vehicleGroup, pedestrianGroup },
+            signalHeads = { [laneSignal] = "CAR" }
+        }
+        local crossing = {
+            name = "A",
+            signalGroups = { vehicleGroup, pedestrianGroup },
+            staticCams = {},
+            getCurrentPhase = function () return nil end,
+            getManualPhase = function () return nil end,
+            getNextPhase = function () return nil end,
+            isGreenTimeFinished = function () return true end,
+            getGreenTimeSeconds = function () return 15 end,
+            getStaticCams = function (self) return self.staticCams end,
+            getPhases = function () return { phase } end
+        }
+
+        local data = RoadDataCollector.collectCrossings({ A = crossing })
+
+        assert.same({ "sgLane1Straight" }, data.intersectionLanes[1].defaultSignalGroups)
     end)
 end)

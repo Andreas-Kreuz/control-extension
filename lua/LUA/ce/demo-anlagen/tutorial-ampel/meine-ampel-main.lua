@@ -46,20 +46,20 @@ local F12 = K11:withPedestrian("F12")
 --   |        |     |      +------------------ Fahrspur-Ampel - da wartet der Verkehr
 --   |        |     |      |           +------ Signal-ID dieser Ampel
 --   |        |     |      |           |   +-- Modell kann rot, gelb, gruen und FG schalten
-n1 = Lane:new("N1", 100, K1, { "STRAIGHT", "RIGHT" })
-n2 = Lane:new("N2", 101, K3, { "LEFT" }) -- zusätzlich in der Phase K2
+n1 = Lane:new("N1", K1, { "STRAIGHT", "RIGHT" })
+n2 = Lane:new("N2", K3, { "LEFT" }) -- zusätzlich in der Phase K2
 
 -- Fahrspuren im Osten
-o1 = Lane:new("O1", 104, K4, { "STRAIGHT", "RIGHT" })
-o2 = Lane:new("O2", 105, K6, { "LEFT" }) -- zusätzlich in der Phase K5
+o1 = Lane:new("O1", K4, { "STRAIGHT", "RIGHT" })
+o2 = Lane:new("O2", K6, { "LEFT" }) -- zusätzlich in der Phase K5
 
 -- Fahrspuren im Sueden
-s1 = Lane:new("S1", 107, K7, { "STRAIGHT", "RIGHT" })
-s2 = Lane:new("S2", 108, K8, { "LEFT" }) -- zusätzlich in der Phase K9
+s1 = Lane:new("S1", K7, { "STRAIGHT", "RIGHT" })
+s2 = Lane:new("S2", K8, { "LEFT" }) -- zusätzlich in der Phase K9
 
 -- Fahrspuren im Westen
-w1 = Lane:new("W1", 111, K10, { "STRAIGHT", "RIGHT" })
-w2 = Lane:new("W2", 112, K12, { "LEFT" }) -- Zusätzlich in der Phase K11
+w1 = Lane:new("W1", K10, { "STRAIGHT", "RIGHT" })
+w2 = Lane:new("W2", K12, { "LEFT" }) -- Zusätzlich in der Phase K11
 
 --------------------------------------------------------------
 -- Definiere die Phasen und die Kreuzung

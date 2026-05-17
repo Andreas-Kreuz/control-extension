@@ -1,12 +1,13 @@
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
+import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import { useSocket } from '../../../app/hooks/useSocket';
 import { RoadEvent } from '@ce/web-shared';
 import Intersection from '../model/Intersection';
 import useIntersectionPhase from '../hooks/useIntersectionPhase';
 import TypeCaption from '../../../shared/components/TypeCaption';
+import FullBleedDivider from '../../../shared/components/sections/FullBleedDivider';
 
 function IntersectionControlSection({ intersection: i }: { intersection: Intersection }) {
   const theme = useTheme();
@@ -22,7 +23,7 @@ function IntersectionControlSection({ intersection: i }: { intersection: Interse
   }
 
   return (
-    <Stack sx={{ px: 2, pt: 1, pb: 2 }}>
+    <Stack>
       <TypeCaption>Modus</TypeCaption>
       <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
         <Chip
@@ -38,7 +39,9 @@ function IntersectionControlSection({ intersection: i }: { intersection: Interse
           onClick={() => sendSwitchManually(i.name, i.currentPhase)}
         />
       </Stack>
-      <Divider sx={{ my: 1 }} />
+      <Box sx={{ my: 1 }}>
+        <FullBleedDivider />
+      </Box>
       <TypeCaption>Phase</TypeCaption>
       <Stack direction="row" sx={{ pt: 1, flexWrap: 'wrap' }}>
         {phases.map((s) => {

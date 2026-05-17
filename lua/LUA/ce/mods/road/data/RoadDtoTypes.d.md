@@ -9,13 +9,36 @@
 | ------------------ | ------------------------ |
 | `id`               | `number`                 |
 | `name`             | `string`                 |
+| `eepSaveId`        | `number`                 |
+| `scriptVariableName` | `string\|nil`          |
 | `currentPhase` | `string\|nil`            |
 | `manualPhase`  | `string\|nil`            |
 | `nextPhase`    | `string\|nil`            |
 | `ready`            | `boolean`                |
 | `greenTimeSeconds`     | `number`                 |
+| `tippStructure`    | `string\|nil`            |
 | `staticCams`       | `table`                  |
 | `phases`           | `IntersectionPhaseDto[]` |
+| `signalGroupDefinitions` | `IntersectionSignalGroupDto[]` |
+| `pedestrianCrossings` | `IntersectionPedestrianCrossingDto[]` |
+
+### `IntersectionSignalGroupDto`
+
+| Name          | Typ        |
+| ------------- | ---------- |
+| `name`        | `string`   |
+| `trafficType` | `string`   |
+| `signalIds`   | `number[]` |
+| `pedestrianCrossingNames` | `string[]` |
+
+### `IntersectionPedestrianCrossingDto`
+
+| Name                 | Typ           |
+| -------------------- | ------------- |
+| `name`               | `string`      |
+| `scriptVariableName` | `string\|nil` |
+| `approach`            | `string`      |
+| `signalGroups`       | `string[]`    |
 
 ### `IntersectionPhaseDto`
 
@@ -53,13 +76,15 @@
 | `name`                       | `string` |
 | `currentIndication`                      | `string` |
 | `vehicleMultiplier`          | `number` |
-| `eepSaveId`                  | `number` |
+| `laneSignalId`               | `number` |
 | `type`                       | `string` |
 | `countType`                  | `string` |
 | `waitingTrains`              | `table`  |
 | `waitingForGreenCyclesCount` | `number` |
+| pproach                  | string |
 | `directions`                 | `table`  |
 | `phases`                 | `table`  |
+| `defaultSignalGroups`        | `table`  |
 | `tracks`                     | `table`  |
 
 ## CeType `ce.mods.road.IntersectionPhase`

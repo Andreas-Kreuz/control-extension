@@ -22,6 +22,15 @@ local function addSignalsToGroup(self, signalType, ...)
     return self
 end
 
+local function addPedestrianCrossingsToGroup(self, ...)
+    for _, crossing in ipairs({ ... }) do
+        assert(crossing and crossing.getType and crossing:getType() == "PedestrianCrossing",
+               "Specify PedestrianCrossing instances")
+        table.insert(self.pedestrianCrossings, crossing)
+    end
+    return self
+end
+
 function SignalGroup.getType() return "SignalGroup" end
 
 function SignalGroup:new(name)
@@ -29,6 +38,7 @@ function SignalGroup:new(name)
     local o = {
         type = "SignalGroup",
         name = name,
+        pedestrianCrossings = {},
         signalHeads = {}
     }
     self.__index = self
@@ -47,7 +57,11 @@ function SignalGroup:addTramSignals(...) return addSignalsToGroup(self, SignalGr
 
 function SignalGroup:addPedestrianSignals(...) return addSignalsToGroup(self, SignalGroup.Type.PEDESTRIAN, ...) end
 
+function SignalGroup:addPedestrianCrossing(...) return addPedestrianCrossingsToGroup(self, ...) end
+
 function SignalGroup:getSignalHeads() return self.signalHeads end
+
+function SignalGroup:getPedestrianCrossings() return self.pedestrianCrossings end
 
 function SignalGroup:containsSignalHead(signal)
     return self.signalHeads[signal] ~= nil

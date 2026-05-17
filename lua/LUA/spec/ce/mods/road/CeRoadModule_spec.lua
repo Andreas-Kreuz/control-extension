@@ -24,6 +24,7 @@ insulate("ce.mods.road.CeRoadModule", function ()
                 order = 1,
                 prio = 1,
                 greenTimeSeconds = 15,
+                signalGroups = {},
                 signalHeads = { { signalId = 1, type = "CAR" } }
             }
         }

@@ -84,10 +84,10 @@ S2 = TrafficLight:new("S2", -1, TrafficLightModel.NONE, "#5435_Straba Signal Hal
 
 -- Erzeuge Kreuzung und Fahrspuren
 crossing = Intersection:new("Dein Kreuzungsname")
-lane1 = Lane:new("Lane 1 N", 1, L1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
-lane2 = Lane:new("Lane 2 E", 2, L2, { Lane.Directions.LEFT, Lane.Directions.RIGHT })
-lane3 = Lane:new("Lane 3 S", 3, L3, { Lane.Directions.LEFT })
-lane4 = Lane:new("Lane 4 S", 4, L4, { Lane.Directions.STRAIGHT })
+lane1 = Lane:new("Lane 1 N", L1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
+lane2 = Lane:new("Lane 2 E", L2, { Lane.Directions.LEFT, Lane.Directions.RIGHT })
+lane3 = Lane:new("Lane 3 S", L3, { Lane.Directions.LEFT })
+lane4 = Lane:new("Lane 4 S", L4, { Lane.Directions.STRAIGHT })
 
 local sgLane1StraightRight = crossing:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1, K2)
 local sgLane2Left = crossing:newSignalGroup("sgLane2Left"):addVehicleSignals(K6)

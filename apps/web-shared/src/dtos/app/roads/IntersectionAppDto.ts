@@ -17,17 +17,39 @@ export interface IntersectionPhaseTimingAppDto {
   order: number;
   prio: number;
   greenTimeSeconds: number;
+  signalGroups: string[];
   signalHeads: IntersectionPhaseSignalHeadAppDto[];
+}
+
+export interface IntersectionSignalGroupAppDto {
+  name: string;
+  trafficType: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
+  signalIds: number[];
+  pedestrianCrossingNames?: string[];
+}
+
+export interface IntersectionPedestrianCrossingAppDto {
+  name: string;
+  scriptVariableName?: string;
+  approach?: string;
+  heading?: string;
+  signalGroups: string[];
 }
 
 export interface IntersectionAppDto {
   id: number;
   name: string;
+  eepSaveId?: number;
+  scriptVariableName?: string;
+  switchInStrictOrder?: boolean;
   currentPhase: string;
   manualPhase: string;
   nextPhase: string;
   ready: boolean;
   greenTimeSeconds: number;
+  tippStructure?: string;
   staticCams: string[];
   phases: IntersectionPhaseTimingAppDto[];
+  signalGroupDefinitions: IntersectionSignalGroupAppDto[];
+  pedestrianCrossings?: IntersectionPedestrianCrossingAppDto[];
 }

@@ -14,6 +14,7 @@ insulate("ce.mods.transit.bridge.TransitBridgeConnector", function ()
         local TransitSettings = require("ce.mods.transit.TransitSettings")
         local TransitBridgeConnector = require("ce.mods.transit.bridge.TransitBridgeConnector")
 
+        TransitSettings.loadSettingsFromSlot(42)
         TransitBridgeConnector.registerFunctions()
 
         IncomingCommandExecutor.executeIncomingCommands("TransitSettings.setShowDepartureTippText|true")
@@ -21,5 +22,36 @@ insulate("ce.mods.transit.bridge.TransitBridgeConnector", function ()
 
         IncomingCommandExecutor.executeIncomingCommands("TransitSettings.setShowDepartureTippText|false")
         assert.is_false(TransitSettings.showDepartureTippText)
+    end)
+
+    it("does not accept Web App setting changes before a transit settings slot is configured", function ()
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local TransitSettings = require("ce.mods.transit.TransitSettings")
+        local TransitBridgeConnector = require("ce.mods.transit.bridge.TransitBridgeConnector")
+        local printedError = nil
+
+        local printStub = stub(_G, "print", function (message) printedError = message end)
+        finally(function () printStub:revert() end)
+
+        TransitBridgeConnector.registerFunctions()
+        IncomingCommandExecutor.executeIncomingCommands("TransitSettings.setShowDepartureTippText|true")
+
+        assert.is_false(TransitSettings.showDepartureTippText)
+        assert.matches("TransitSettings.setShowDepartureTippText from Web App needs", printedError)
+    end)
+
+    it("persists tooltip setting changes from Web App commands when a settings slot is configured", function ()
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local StorageUtility = require("ce.hub.util.StorageUtility")
+        local TransitSettings = require("ce.mods.transit.TransitSettings")
+        local TransitBridgeConnector = require("ce.mods.transit.bridge.TransitBridgeConnector")
+
+        TransitSettings.loadSettingsFromSlot(43)
+        TransitBridgeConnector.registerFunctions()
+
+        IncomingCommandExecutor.executeIncomingCommands("TransitSettings.setShowDepartureTippText|true")
+
+        local data = StorageUtility.loadTable(43, "Transit settings")
+        assert.equals("true", data["depInfo"])
     end)
 end)

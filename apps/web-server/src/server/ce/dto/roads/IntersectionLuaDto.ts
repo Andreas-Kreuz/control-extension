@@ -17,17 +17,39 @@ export interface IntersectionPhaseTimingLuaDto {
   order: number;
   prio: number;
   greenTimeSeconds: number;
+  signalGroups?: string[];
   signalHeads: IntersectionPhaseSignalHeadLuaDto[];
+}
+
+export interface IntersectionSignalGroupLuaDto {
+  name: string;
+  trafficType: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
+  signalIds: number[];
+  pedestrianCrossingNames?: string[];
+}
+
+export interface IntersectionPedestrianCrossingLuaDto {
+  name: string;
+  scriptVariableName?: string;
+  approach?: string;
+  heading?: string;
+  signalGroups: string[];
 }
 
 export interface IntersectionLuaDto {
   id: number;
   name: string;
+  eepSaveId?: number;
+  scriptVariableName?: string;
+  switchInStrictOrder?: boolean;
   currentPhase: string;
   manualPhase: string;
   nextPhase: string;
   ready: boolean;
   greenTimeSeconds: number;
+  tippStructure?: string;
   staticCams: string[];
   phases: IntersectionPhaseTimingLuaDto[];
+  signalGroupDefinitions?: IntersectionSignalGroupLuaDto[];
+  pedestrianCrossings?: IntersectionPedestrianCrossingLuaDto[];
 }

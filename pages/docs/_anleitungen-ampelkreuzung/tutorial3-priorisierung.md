@@ -1,4 +1,4 @@
----
+Ôªø---
 layout: page_with_toc
 title: Ampelsteuerung 3
 type: Tutorial mit Anlage
@@ -95,7 +95,7 @@ Durch das Einbeziehen der Wartezeit wird sichergestellt, dass jede Fahrspur ber√
 
   ```lua
   local laneSignal1 = TrafficLight:new("LANE WS", 15, TrafficLightModel.Unsichtbar_2er)
-  lane = Lane:new("WS", 108, laneSignal1)
+  lane = Lane:new("WS", laneSignal1)
   lane:useTrackForQueue(2) -- Erfasst Anforderungen, wenn ein Fahrzeug auf Strasse 2 steht
   ```
 

@@ -8,6 +8,7 @@ local SignalGroup = require("ce.mods.road.SignalGroup")
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local fmt = require("ce.hub.eep.TippTextFormatter")
+local StorageUtility = require("ce.hub.util.StorageUtility")
 
 local allIntersections = {}
 local Intersection = {}
@@ -31,6 +32,10 @@ end
 function Intersection.getType() return "Intersection" end
 
 function Intersection:getName() return self.name end
+
+function Intersection:getEepSaveId() return self.eepSaveId end
+
+function Intersection:getScriptVariableName() return self._scriptVariableName end
 
 function Intersection:getPhases() return self.phases end
 
@@ -89,6 +94,7 @@ end
 function Intersection:setSwitchInStrictOrder(value)
     assert(value == true or value == false, "Use Intersection:setSwitchInStrictOrder(true|false)")
     self.switchInStrictOrder = value
+    return self
 end
 
 function Intersection:getGreenTimeSeconds() return self.greenTimeSeconds end
@@ -101,7 +107,10 @@ function Intersection:setGreenReached(greenReached) self.greenReached = greenRea
 
 function Intersection:isGreenReached() return self.greenReached end
 
-function Intersection:setTippStructure(tippStructure) self.tippStructure = tippStructure end
+function Intersection:setTippStructure(tippStructure)
+    self.tippStructure = tippStructure
+    return self
+end
 
 function Intersection:getStaticCams() return self.staticCams end
 
@@ -111,6 +120,23 @@ function Intersection.resetVehicles()
     for _, intersection in pairs(allIntersections) do
         print(string.format("[#Intersection] SETZE ZURUECK: %s", intersection.name))
         if intersection.lanes then for _, lane in pairs(intersection.lanes) do lane:resetVehicles() end end
+    end
+end
+
+local function save(intersection)
+    if intersection.eepSaveId ~= -1 then
+        StorageUtility.saveTable(intersection.eepSaveId, {
+                                     scriptVariableName = intersection._scriptVariableName or ""
+                                 }, "Intersection " .. intersection.name)
+    end
+end
+
+local function load(intersection)
+    if intersection.eepSaveId ~= -1 then
+        local data = StorageUtility.loadTable(intersection.eepSaveId, "Intersection " .. intersection.name)
+        if not intersection._scriptVariableName or intersection._scriptVariableName == "" then
+            intersection._scriptVariableName = data["scriptVariableName"]
+        end
     end
 end
 
@@ -127,6 +153,8 @@ function Intersection:new(name, greenTimeSeconds)
         greenTimeFinished = true,
         greenTimeSeconds = greenTimeSeconds or 15,
         switchInStrictOrder = false,
+        eepSaveId = -1,
+        _scriptVariableName = nil,
         tippStructure = nil,
         staticCams = {}
     }
@@ -136,6 +164,22 @@ function Intersection:new(name, greenTimeSeconds)
     allIntersections[name] = o
     table.sort(allIntersections, function (name1, name2) return name1 < name2 end)
     return o
+end
+
+function Intersection:withStorage(eepSaveId)
+    eepSaveId = eepSaveId or -1
+    assert(type(eepSaveId) == "number")
+    self.eepSaveId = eepSaveId
+    if eepSaveId ~= -1 then StorageUtility.registerId(eepSaveId, "Intersection " .. self.name) end
+    load(self)
+    save(self)
+    return self
+end
+
+function Intersection:scriptVariableName(scriptVariableName)
+    self._scriptVariableName = scriptVariableName
+    save(self)
+    return self
 end
 
 function Intersection:newSignalGroup(name)

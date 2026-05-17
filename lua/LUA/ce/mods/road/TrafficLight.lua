@@ -21,6 +21,7 @@ TrafficLight.Use = {
 local registeredSignals = {}
 local counter = -1
 
+
 ---
 ---@param name string Name der Ampel
 ---@param signalId number ID der Ampel auf der Anlage (Eine Ampel von diesem Typ sollte auf der Anlage sein)
@@ -74,6 +75,11 @@ function TrafficLight:newPedestrianOnly(name, signalId, trafficLightModel, redSt
                                         yellowStructure, requestStructure)
     return self:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
                     requestStructure):asPedestrianOnly()
+end
+
+function TrafficLight:newPlainLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure)
+    local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+    return self:new(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure, requestStructure)
 end
 
 function TrafficLight:withPedestrian(pedestrianSignalName)

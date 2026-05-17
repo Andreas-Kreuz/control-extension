@@ -16,6 +16,45 @@ import {
   TrafficLightModelAppDto,
 } from '@ce/web-shared';
 
+const knownTrafficLightModelConstants: Record<string, string> = {
+  MA1_STRAB_4er_2_gruen: 'MA1_STRAB_4er_2_gruen',
+  MA1_STRAB_4er_3_gruen: 'MA1_STRAB_4er_3_gruen',
+  MA1_STRAB_3er_2_gruen: 'MA1_STRAB_3er_2_gruen',
+  Ampel_NP1_mit_FG: 'NP1_3er_mit_FG',
+  Ampel_NP1_ohne_FG: 'NP1_3er_ohne_FG',
+  Ak_Ampel_2er_nur_FG: 'JS2_2er_nur_FG',
+  'Ampel_2er_Aus_Gelb-Grün': 'JS2_2er_OFF_YELLOW_GREEN',
+  Ampel_3er_XXX_mit_FG: 'JS2_3er_mit_FG',
+  Ampel_3er_XXX_ohne_FG: 'JS2_3er_ohne_FG',
+  'Unsichtbares Signal': 'Unsichtbar_2er',
+  'NO SIGNAL MODEL': 'NONE',
+};
+
+const oppositeApproach: Record<string, string> = {
+  NORTH: 'SOUTH',
+  NORTH_EAST: 'SOUTH_WEST',
+  EAST: 'WEST',
+  SOUTH_EAST: 'NORTH_WEST',
+  SOUTH: 'NORTH',
+  SOUTH_WEST: 'NORTH_EAST',
+  WEST: 'EAST',
+  NORTH_WEST: 'SOUTH_EAST',
+};
+
+function approachFromDto(approach: string | undefined, legacyHeading?: string): string | undefined {
+  if (approach !== undefined) return approach;
+  return legacyHeading !== undefined ? oppositeApproach[legacyHeading] : undefined;
+}
+
+export function trafficLightModelConstantForName(modelName: string | undefined): string | undefined {
+  if (!modelName) return undefined;
+  if (knownTrafficLightModelConstants[modelName]) return knownTrafficLightModelConstants[modelName];
+  const found = Object.entries(knownTrafficLightModelConstants).find(([name]) =>
+    modelName.toLocaleLowerCase().includes(name.toLocaleLowerCase()),
+  );
+  return found?.[1];
+}
+
 // Maps Lua road DTOs into road AppDtos and road setting AppDtos.
 // Lua inputs: ce.mods.road.Intersection, lanes, phases, signal heads, settings.
 export default class RoadSelector {
@@ -39,34 +78,53 @@ export default class RoadSelector {
       (dto) => ({
         id: dto.id,
         name: dto.name ?? '',
+        eepSaveId: dto.eepSaveId ?? -1,
+        ...(dto.scriptVariableName !== undefined ? { scriptVariableName: dto.scriptVariableName } : {}),
+        switchInStrictOrder: dto.switchInStrictOrder ?? false,
         currentPhase: dto.currentPhase ?? '',
         manualPhase: dto.manualPhase ?? '',
         nextPhase: dto.nextPhase ?? '',
         ready: dto.ready ?? false,
         greenTimeSeconds: dto.greenTimeSeconds ?? 0,
+        ...(dto.tippStructure !== undefined ? { tippStructure: dto.tippStructure } : {}),
         staticCams: dto.staticCams ?? [],
-        phases: dto.phases ?? [],
+        phases: (dto.phases ?? []).map((phase) => ({
+          ...phase,
+          signalGroups: phase.signalGroups ?? [],
+        })),
+        signalGroupDefinitions: dto.signalGroupDefinitions ?? [],
+        pedestrianCrossings: (dto.pedestrianCrossings ?? []).map((crossing) => ({
+          ...crossing,
+          approach: approachFromDto(crossing.approach, crossing.heading) ?? 'SOUTH',
+        })),
       }),
     );
 
     this.intersectionLanes = this.mapCeType<IntersectionLaneLuaDto, IntersectionLaneAppDto>(
       state,
       CeTypes.RoadIntersectionLane,
-      (dto) => ({
-        id: dto.id,
-        intersectionId: dto.intersectionId,
-        name: dto.name,
-        currentIndication: dto.currentIndication,
-        vehicleMultiplier: dto.vehicleMultiplier,
-        eepSaveId: dto.eepSaveId,
-        type: dto.type,
-        countType: dto.countType,
-        waitingTrains: dto.waitingTrains,
-        waitingForGreenCyclesCount: dto.waitingForGreenCyclesCount,
-        directions: dto.directions,
-        phases: dto.phases,
-        tracks: dto.tracks,
-      }),
+      (dto) => {
+        const approach = approachFromDto(dto.approach, dto.heading);
+        return {
+          id: dto.id,
+          intersectionId: dto.intersectionId,
+          name: dto.name,
+          currentIndication: dto.currentIndication,
+          vehicleMultiplier: dto.vehicleMultiplier,
+          ...(dto.laneSignalId !== undefined ? { laneSignalId: dto.laneSignalId } : {}),
+          type: dto.type,
+          countType: dto.countType,
+          waitingTrains: dto.waitingTrains,
+          waitingForGreenCyclesCount: dto.waitingForGreenCyclesCount,
+          ...(approach !== undefined ? { approach } : {}),
+          ...(dto.heading !== undefined ? { heading: dto.heading } : {}),
+          directions: dto.directions,
+          phases: dto.phases,
+          defaultSignalGroups: dto.defaultSignalGroups ?? [],
+          routeRules: dto.routeRules ?? [],
+          tracks: dto.tracks,
+        };
+      },
     );
 
     this.intersectionPhases = this.mapCeType<IntersectionPhaseLuaDto, IntersectionPhaseAppDto>(
@@ -100,18 +158,22 @@ export default class RoadSelector {
     this.trafficLightModels = this.mapCeType<TrafficLightModelLuaDto, TrafficLightModelAppDto>(
       state,
       CeTypes.RoadTrafficLightModel,
-      (dto) => ({
-        id: dto.id,
-        name: dto.name,
-        type: dto.type,
-        positionRed: dto.positionRed,
-        positionGreen: dto.positionGreen,
-        positionYellow: dto.positionYellow,
-        positionRedYellow: dto.positionRedYellow,
-        positionPedestrians: dto.positionPedestrians,
-        positionOff: dto.positionOff,
-        positionOffBlinking: dto.positionOffBlinking,
-      }),
+      (dto) => {
+        const luaConstant = trafficLightModelConstantForName(dto.name);
+        return {
+          id: dto.id,
+          name: dto.name,
+          type: dto.type,
+          ...(luaConstant !== undefined ? { luaConstant } : {}),
+          positionRed: dto.positionRed,
+          positionGreen: dto.positionGreen,
+          positionYellow: dto.positionYellow,
+          positionRedYellow: dto.positionRedYellow,
+          positionPedestrians: dto.positionPedestrians,
+          positionOff: dto.positionOff,
+          positionOffBlinking: dto.positionOffBlinking,
+        };
+      },
     );
 
     this.moduleSettings = { moduleName: 'Einstellungen für Kreuzungen', settings: [] };

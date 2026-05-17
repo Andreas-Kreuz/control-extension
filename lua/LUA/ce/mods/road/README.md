@@ -1,7 +1,7 @@
 ---
 layout: page_with_toc
 title: Ampeln? Automatisch!
-subtitle: Du willst Dich nicht mehr um die Steuerung Deiner Ampeln kÃ¼mmern? - Dann beschreibe in Lua, wie Deine Kreuzung aussieht und das Skript Intersection Ã¼bernimmt fÃ¼r Dich den Rest.
+subtitle: Du willst Dich nicht mehr um die Steuerung Deiner Ampeln kümmern? - Dann beschreibe in Lua, wie Deine Kreuzung aussieht und das Skript Intersection übernimmt für Dich den Rest.
 permalink: lua/LUA/ce/mods/road/
 feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
@@ -9,7 +9,7 @@ img: '/docs/assets/headers/SourceCode.png'
 
 # Motivation
 
-Willst Du mehr? - Lege Kontaktpunkte fÃ¼r die VerkehrszÃ¤hlung an, damit die Ampel mit dem meisten Andrang bevorzugt geschaltet wird.
+Willst Du mehr? - Lege Kontaktpunkte für die Verkehrszählung an, damit die Ampel mit dem meisten Andrang bevorzugt geschaltet wird.
 
 Das bekommst Du:
 
@@ -23,7 +23,7 @@ Das bekommst Du:
 
 Laden mit: `local TrafficLightModel = require("ce.mods.road.TrafficLightModel")`
 
-Beschreibt das Modell einer Ampel mit den Phasen fÃ¼r rot, grÃ¼n, gelb und rot-gelb, sowie dem FuÃŸgÃ¤ngersignal (falls vorhanden - dann hat die Ampel fÃ¼r den StraÃŸenverkehr rot)
+Beschreibt das Modell einer Ampel mit den Phasen für rot, grün, gelb und rot-gelb, sowie dem Fußgängersignal (falls vorhanden - dann hat die Ampel für den Straßenverkehr rot)
 
 ### `TrafficLightModel:new()` - Ampelmodell anlegen
 
@@ -31,22 +31,22 @@ Beschreibt das Modell einer Ampel mit den Phasen fÃ¼r rot, grÃ¼n, gelb und rot-g
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `TrafficLightModel:new(name, signalIndexRed, signalIndexGreen, signalIndexYellow, signalIndexRedYellow, signalIndexPedestrian, signalIndexSwitchOff, signalIndexBlinkYellow)` |
 
-Jedes `TrafficLightModel` beschreibt, welche Signalstellung in EEP verwendet werden muss, um eine Ampel rot, rot-gelb, grÃ¼n oder gelb zu schalten. Auch kann hinterlegt werden, welche Signalstellung fÃ¼r FuÃŸgÃ¤nger grÃ¼n und welche fÃ¼r Ampel aus oder blinkend genutzt werden soll.
-Mit der Funktion legst Du neue Modelle an. Das machst Du fÃ¼r jedes 3D-Modell, dass Du in einer Ampel nutzen mÃ¶chstest, falls das Modell
+Jedes `TrafficLightModel` beschreibt, welche Signalstellung in EEP verwendet werden muss, um eine Ampel rot, rot-gelb, grün oder gelb zu schalten. Auch kann hinterlegt werden, welche Signalstellung für Fußgänger grün und welche für Ampel aus oder blinkend genutzt werden soll.
+Mit der Funktion legst Du neue Modelle an. Das machst Du für jedes 3D-Modell, dass Du in einer Ampel nutzen möchstest, falls das Modell
 nicht schon mitgeliefert wird.
 
 | Parameter                | Typ    | Bedeutung                                                                        |
 | ------------------------ | ------ | -------------------------------------------------------------------------------- |
 | name                     | string | Name des Ampeltyps                                                               |
-| signalIndexRed           | number | Signalstellung im Signaldialog fÃ¼r rot (Index in der Liste "Stellung" im Dialog) |
-| signalIndexGreen         | number | Signalstellung im Signaldialog fÃ¼r grÃ¼n                                          |
-| _signalIndexYellow_      | number | Signalstellung im Signaldialog fÃ¼r gelb (optional, sonst rot)                    |
-| _signalIndexRedYellow_   | number | Signalstellung im Signaldialog fÃ¼r rot-gelben (optional, sonst rot)              |
-| _signalIndexPedestrian_  | number | Signalstellung im Signaldialog fÃ¼r FuÃŸgÃ¤nger-grÃ¼n (optional, sonst rot)          |
-| _signalIndexSwitchOff_   | number | Signalstellung im Signaldialog fÃ¼r Ampel aus (optional, sonst grÃ¼n)              |
-| _signalIndexBlinkYellow_ | number | Signalstellung im Signaldialog fÃ¼r Ampel blinkt gelb                             |
+| signalIndexRed           | number | Signalstellung im Signaldialog für rot (Index in der Liste "Stellung" im Dialog) |
+| signalIndexGreen         | number | Signalstellung im Signaldialog für grün                                          |
+| _signalIndexYellow_      | number | Signalstellung im Signaldialog für gelb (optional, sonst rot)                    |
+| _signalIndexRedYellow_   | number | Signalstellung im Signaldialog für rot-gelben (optional, sonst rot)              |
+| _signalIndexPedestrian_  | number | Signalstellung im Signaldialog für Fußgänger-grün (optional, sonst rot)          |
+| _signalIndexSwitchOff_   | number | Signalstellung im Signaldialog für Ampel aus (optional, sonst grün)              |
+| _signalIndexBlinkYellow_ | number | Signalstellung im Signaldialog für Ampel blinkt gelb                             |
 
-| RÃ¼ckgabewert                                            |
+| Rückgabewert                                            |
 | ------------------------------------------------------- |
 | `TrafficLightModel` (neu erstellte Tabelle bzw. Objekt) |
 
@@ -57,9 +57,9 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 ```lua
 -- Fuer die Strassenbahnsignale von MA1 - http://www.eep.euma.de/downloads/V80MA1F003.zip
--- 4er Signal, Stellung 2 als grÃ¼n, z.B. Strab_Sig_09_LG auf gerade schalten
--- 4er Signal, Stellung 3 als grÃ¼n, z.B. Strab_Sig_09_LG auf links schalten
--- 3er Signal, Stellung 3 als grÃ¼n, z.B. Ak_Strab_Sig_05_gerade oder
+-- 4er Signal, Stellung 2 als grün, z.B. Strab_Sig_09_LG auf gerade schalten
+-- 4er Signal, Stellung 3 als grün, z.B. Strab_Sig_09_LG auf links schalten
+-- 3er Signal, Stellung 3 als grün, z.B. Ak_Strab_Sig_05_gerade oder
 --                                       Ak_Strab_Sig_05_gerade schalten
 TrafficLightModel.MA1_STRAB_4er_2_gruen = TrafficLightModel:new("MA1_STRAB_4er_2_gruen", 1, 2, 4, 4)
 TrafficLightModel.MA1_STRAB_4er_3_gruen = TrafficLightModel:new("MA1_STRAB_4er_3_gruen", 1, 3, 4, 4)
@@ -74,15 +74,15 @@ TrafficLightModel.NP1_3er_ohne_FG = TrafficLightModel:new("Ampel_NP1_ohne_FG", 1
 TrafficLightModel.JS2_2er_nur_FG = TrafficLightModel:new("Ak_Ampel_2er_nur_FG", 1, 1, 1, 1, 2, 3, 3)
 TrafficLightModel.JS2_3er_mit_FG = TrafficLightModel:new("Ampel_3er_XXX_mit_FG", 1, 3, 5, 2, 6, 7, 8)
 TrafficLightModel.JS2_3er_ohne_FG = TrafficLightModel:new("Ampel_3er_XXX_ohne_FG", 1, 3, 5, 2, 1, 6, 7)
--- Zusatzampeln mit nur GELB und GRÃœN
-TrafficLightModel.JS2_2er_OFF_YELLOW_GREEN = TrafficLightModel:new("Ampel_2er_Aus_Gelb-GrÃ¼n", 1, 3, 5, 1, 1, 2, 6)
+-- Zusatzampeln mit nur GELB und GRÜN
+TrafficLightModel.JS2_2er_OFF_YELLOW_GREEN = TrafficLightModel:new("Ampel_2er_Aus_Gelb-Grün", 1, 3, 5, 1, 1, 2, 6)
 ```
 
 ## Klasse `TrafficLight`
 
 Laden mit: `local TrafficLight = require("ce.mods.road.TrafficLight")`
 
-Diese Klasse wird dazu verwendet eine Signal auf der Anlage (signalId) mit einem Modell zu verknÃ¼pfen. Eine so verknÃ¼pfte Ampel kann dann einer Fahrspur zugewiesen werden. Die Ampel gilt fÃ¼r eine bestimmte Richtung und damit gegebenenfall fÃ¼r eine oder mehrere Fahrspuren.
+Diese Klasse wird dazu verwendet eine Signal auf der Anlage (signalId) mit einem Modell zu verknüpfen. Eine so verknüpfte Ampel kann dann einer Fahrspur zugewiesen werden. Die Ampel gilt für eine bestimmte Richtung und damit gegebenenfall für eine oder mehrere Fahrspuren.
 
 ### `TrafficLight:new()` - Ampel anlegen
 
@@ -90,34 +90,34 @@ Diese Klasse wird dazu verwendet eine Signal auf der Anlage (signalId) mit einem
 | ---------------------------------------------------------------------------------------------------------------------- |
 | `TrafficLight:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure, requestStructure)` |
 
-Jedes `TrafficLight` verbindet ein bestimmtes Signal anhand der Signal-ID mit einem Ampelmodell. FÃ¼r die einfache Unterscheidung kann ein Name vergeben werden. Mit dieser Funktion legst Du eine neue Ampel an. Das machst Du fÃ¼r alle Signale in EEP, die Du in der Kreuzung als Ampel verwenden mÃ¶chtest.
+Jedes `TrafficLight` verbindet ein bestimmtes Signal anhand der Signal-ID mit einem Ampelmodell. Für die einfache Unterscheidung kann ein Name vergeben werden. Mit dieser Funktion legst Du eine neue Ampel an. Das machst Du für alle Signale in EEP, die Du in der Kreuzung als Ampel verwenden möchtest.
 
 | Parameter            | Typ                 | Bedeutung                                                                        |
 | -------------------- | ------------------- | -------------------------------------------------------------------------------- |
 | `name`               | `string`            | Name des Verkehrssignals, z.B. "K1", "K2", "P1", "B1", "L1"                      |
 | `signalId`           | `number`            | Die Signal-ID im Modul oben                                                      |
-| `trafficLightModel`  | `TrafficLightModel` | Das verknÃ¼pfte Modell. Die Ampel muss dieses Modell in 3D nutzen.                |
-| _`redStructure`_     | `string`            | Immobilien-ID in EEP fÃ¼r rot deren Licht eingeschaltet wird (optional)           |
-| _`greenStructure`_   | `string`            | Immobilien-ID in EEP fÃ¼r grÃ¼n deren Licht eingeschaltet wird (optional)          |
-| _`yellowStructure`_  | `string`            | Immobilien-ID in EEP fÃ¼r gelb deren Licht eingeschaltet wird (optional)          |
-| _`requestStructure`_ | `string`            | Immobilien-ID in EEP fÃ¼r Anforderungen deren Licht eingeschaltet wird (optional) |
+| `trafficLightModel`  | `TrafficLightModel` | Das verknüpfte Modell. Die Ampel muss dieses Modell in 3D nutzen.                |
+| _`redStructure`_     | `string`            | Immobilien-ID in EEP für rot deren Licht eingeschaltet wird (optional)           |
+| _`greenStructure`_   | `string`            | Immobilien-ID in EEP für grün deren Licht eingeschaltet wird (optional)          |
+| _`yellowStructure`_  | `string`            | Immobilien-ID in EEP für gelb deren Licht eingeschaltet wird (optional)          |
+| _`requestStructure`_ | `string`            | Immobilien-ID in EEP für Anforderungen deren Licht eingeschaltet wird (optional) |
 
-| RÃ¼ckgabewert                                       |
+| Rückgabewert                                       |
 | -------------------------------------------------- |
 | `TrafficLight` (neu erstellte Tabelle bzw. Objekt) |
 
 **Beachte**: Die Funktion musst mit `:new()` statt `.new()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
 
-_Vorschlag fÃ¼r den selbst vergebenen Namen:_
+_Vorschlag für den selbst vergebenen Namen:_
 
-- `K1`, `K2`, `K3`, ... fÃ¼r Kfz
-- `F1`, `F2`, `F3`, ... fÃ¼r FuÃŸgÃ¤nger
-- `P1`, `S2`, `P3`, ... fÃ¼r Tram
-- `B1`, `B2`, `B3`, ... fÃ¼r Bus
-- `L1`, `L2`, `L3`, ... fÃ¼r unsichtbare Fahrspur-Ampeln
+- `K1`, `K2`, `K3`, ... für Kfz
+- `F1`, `F2`, `F3`, ... für Fußgänger
+- `P1`, `S2`, `P3`, ... für Tram
+- `B1`, `B2`, `B3`, ... für Bus
+- `L1`, `L2`, `L3`, ... für unsichtbare Fahrspur-Ampeln
 
-### FuÃŸgÃ¤ngersignale benennen
+### Fußgängersignale benennen
 
 | Aufruf                                                                              |
 | ----------------------------------------------------------------------------------- |
@@ -125,7 +125,7 @@ _Vorschlag fÃ¼r den selbst vergebenen Namen:_
 | `TrafficLight:newPedestrianOnly("F1", 20, TrafficLightModel.JS2_2er_nur_FG)`        |
 | `TrafficLight:new("F1", 20, TrafficLightModel.JS2_2er_nur_FG):asPedestrianOnly()`   |
 
-Ein `TrafficLight` kann ein Verkehrssignal, ein FuÃŸgÃ¤ngersignal oder beides zugleich darstellen.
+Ein `TrafficLight` kann ein Verkehrssignal, ein Fußgängersignal oder beides zugleich darstellen.
 Intern werden die Namen als `vehicleSignalName` und `pedestrianSignalName` getrennt gespeichert.
 
 ### Fahrspur-Ampeln und Signalgruppen
@@ -137,31 +137,31 @@ Intern werden die Namen als `vehicleSignalName` und `pedestrianSignalName` getre
 | `lane:routes(route...):driveAlsoOnSignalGroups(signalGroup...)`                      |
 | `lane:routes(route...):driveOnlyOnSignalGroups(signalGroup...):showRequestsOnSignalGroups(signalGroup...)` |
 
-Der Verkehr einer Fahrspur wird in EEP immer von genau einem Fahrspur-Signal gesteuert: dem `laneSignal` aus `Lane:new(...)`. Wenn mehrere sichtbare Ampeln entscheiden sollen, ob ein Fahrzeug fahren darf, nimm fÃ¼r `laneSignal` ein unsichtbares Signal. Dieses unsichtbare Signal hÃ¤lt die Fahrzeuge in EEP an oder gibt sie frei.
+Der Verkehr einer Fahrspur wird in EEP immer von genau einem Fahrspur-Signal gesteuert: dem `laneSignal` aus `Lane:new(...)`. Wenn mehrere sichtbare Ampeln entscheiden sollen, ob ein Fahrzeug fahren darf, nimm für `laneSignal` ein unsichtbares Signal. Dieses unsichtbare Signal hält die Fahrzeuge in EEP an oder gibt sie frei.
 
-Signalgruppen beschreiben die VerkehrsstrÃ¶me, die eine Fahrspur freigeben kÃ¶nnen. Dazu ist die Route des aktuell an der ersten Stelle stehenden Fahrzeugs ausschlaggebend:
+Signalgruppen beschreiben die Verkehrsströme, die eine Fahrspur freigeben können. Dazu ist die Route des aktuell an der ersten Stelle stehenden Fahrzeugs ausschlaggebend:
 
-- `lane:driveOnDefaultSignalGroups(...)`: Standard-Signalgruppen. Der Fahrspurverkehr fÃ¤hrt, wenn eine dieser Signalgruppen grÃ¼n ist, auÃŸer fÃ¼r die erste Fahrzeugroute gilt gerade eine passende exklusive Regel.
-- `lane:routes(...):driveAlsoOnSignalGroups(...)`: zusÃ¤tzliche Signalgruppen. Der Fahrspurverkehr fÃ¤hrt fÃ¼r diese Routen auch dann, wenn eine dieser Signalgruppen grÃ¼n ist.
-- `lane:routes(...):driveOnlyOnSignalGroups(...)`: exklusive Signalgruppen. Der Fahrspurverkehr fÃ¤hrt fÃ¼r diese Routen nur dann, wenn eine dieser Signalgruppen grÃ¼n ist; Standard-Signalgruppen zÃ¤hlen dann nicht.
+- `lane:driveOnDefaultSignalGroups(...)`: Standard-Signalgruppen. Der Fahrspurverkehr fährt, wenn eine dieser Signalgruppen grün ist, außer für die erste Fahrzeugroute gilt gerade eine passende exklusive Regel.
+- `lane:routes(...):driveAlsoOnSignalGroups(...)`: zusätzliche Signalgruppen. Der Fahrspurverkehr fährt für diese Routen auch dann, wenn eine dieser Signalgruppen grün ist.
+- `lane:routes(...):driveOnlyOnSignalGroups(...)`: exklusive Signalgruppen. Der Fahrspurverkehr fährt für diese Routen nur dann, wenn eine dieser Signalgruppen grün ist; Standard-Signalgruppen zählen dann nicht.
 
-`routes(...)` ist vor `driveAlsoOnSignalGroups(...)` und `driveOnlyOnSignalGroups(...)` Pflicht und muss mindestens eine Route enthalten. Alle drei Methoden kÃ¶nnen mehrere Signalgruppen in einem Aufruf bekommen.
+`routes(...)` ist vor `driveAlsoOnSignalGroups(...)` und `driveOnlyOnSignalGroups(...)` Pflicht und muss mindestens eine Route enthalten. Alle drei Methoden können mehrere Signalgruppen in einem Aufruf bekommen.
 
-Ã„ltere direkte TrafficLight-Schreibweisen wie `TrafficLight:applyToLane(...)`, `driveOnDefaultSignals(...)`, `driveOnlyOn(...)`, `driveAlsoOn(...)` und `showRequestsOn(...)` bleiben zur KompatibilitÃ¤t erhalten. Neue Anlagen sollten Signalgruppen verwenden.
+Ältere direkte TrafficLight-Schreibweisen wie `TrafficLight:applyToLane(...)`, `driveOnDefaultSignals(...)`, `driveOnlyOn(...)`, `driveAlsoOn(...)` und `showRequestsOn(...)` bleiben zur Kompatibilität erhalten. Neue Anlagen sollten Signalgruppen verwenden.
 
 | Parameter      | Typ                 | Bedeutung                                                       |
 | -------------- | ------------------- | --------------------------------------------------------------- |
-| `signalGroup` | `SignalGroup`, ... | Eine oder mehrere Signalgruppen, deren GrÃ¼n die Fahrspur freigibt. |
-| `route`        | `string`, ...       | Eine oder mehrere Routen, fÃ¼r die eine Routensignal-Regel gilt. |
+| `signalGroup` | `SignalGroup`, ... | Eine oder mehrere Signalgruppen, deren Grün die Fahrspur freigibt. |
+| `route`        | `string`, ...       | Eine oder mehrere Routen, für die eine Routensignal-Regel gilt. |
 
 Beispiele:
 
 ```lua
 -- Eine einfache Fahrspur: K1 ist das sichtbare Signal (eine Ampel) und steuert direkt EEP.
-local lane = Lane:new("K1L1", 101, K1)
+local lane = Lane:new("K1L1", K1)
 
 -- Andere sichtbare Ampeln entscheiden, ein unsichtbares Signal steuert die Fahrspur EEP.
-local lane = Lane:new("L1", 102, L1_unsichtbar)
+local lane = Lane:new("L1", L1_unsichtbar)
 lane:driveOnDefaultSignalGroups(sgLane1Straight):showRequestsOnSignalGroups(sgLane1Straight)
 
 lane:routes("Tram 11 Heiderand", "Tram 11 Rehfeld")
@@ -173,7 +173,7 @@ lane:routes("Rechtsabbieger")
     :showRequestsOnSignalGroups(sgLane1Right)
 ```
 
-| RÃ¼ckgabewert                                                           |
+| Rückgabewert                                                           |
 | ---------------------------------------------------------------------- |
 | `Lane` bzw. bei `routes(...)` bis zum Abschluss der Kette ein Builder. |
 
@@ -185,25 +185,25 @@ lane:routes("Rechtsabbieger")
 | ------------------------------------------------------------------------------------------------- |
 | `Signal:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure)` |
 
-FÃ¼gt bis zu vier Immobilien zu einer Ampel `TrafficLight` hinzu, deren Licht ein oder ausgeschaltet wird, sobald die Ampel auf rot, gelb oder grÃ¼n geschaltet wird bzw. wenn sich die Anforderung an der Ampel Ã¤ndert.
+Fügt bis zu vier Immobilien zu einer Ampel `TrafficLight` hinzu, deren Licht ein oder ausgeschaltet wird, sobald die Ampel auf rot, gelb oder grün geschaltet wird bzw. wenn sich die Anforderung an der Ampel ändert.
 
 | Parameter            | Typ      | Bedeutung                                                                        |
 | -------------------- | -------- | -------------------------------------------------------------------------------- |
-| `redStructure`       | `string` | Immobilien-ID in EEP fÃ¼r rot deren Licht eingeschaltet wird                      |
-| `greenStructure`     | `string` | Immobilien-ID in EEP fÃ¼r grÃ¼n deren Licht eingeschaltet wird                     |
-| _`yellowStructure`_  | `string` | Immobilien-ID in EEP fÃ¼r gelb deren Licht eingeschaltet wird (optional)          |
-| _`requestStructure`_ | `string` | Immobilien-ID in EEP fÃ¼r Anforderungen deren Licht eingeschaltet wird (optional) |
+| `redStructure`       | `string` | Immobilien-ID in EEP für rot deren Licht eingeschaltet wird                      |
+| `greenStructure`     | `string` | Immobilien-ID in EEP für grün deren Licht eingeschaltet wird                     |
+| _`yellowStructure`_  | `string` | Immobilien-ID in EEP für gelb deren Licht eingeschaltet wird (optional)          |
+| _`requestStructure`_ | `string` | Immobilien-ID in EEP für Anforderungen deren Licht eingeschaltet wird (optional) |
 
-| RÃ¼ckgabewert                                                                                   |
+| Rückgabewert                                                                                   |
 | ---------------------------------------------------------------------------------------------- |
-| Signal (Tabelle bzw. Objekt) - Die Ampel, welcher die Lichtimmobilen hinzugefÃ¼gt werden. |
+| Signal (Tabelle bzw. Objekt) - Die Ampel, welcher die Lichtimmobilen hinzugefügt werden. |
 
 **Beachte**: Die Funktion musst mit `:addLightStructure()` statt `.addLightStructure()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 _Hinweis:_
-Passende Modelle fÃ¼r die Steuerung der Immobilien mit Licht findest Du im Modellset V10MA1F011.
-Download unter <https://eep.euma.de/downloads.php> - Im Modell befindet sich eine ausfÃ¼hrliche Doku.
+Passende Modelle für die Steuerung der Immobilien mit Licht findest Du im Modellset V10MA1F011.
+Download unter <https://eep.euma.de/downloads.php> - Im Modell befindet sich eine ausführliche Doku.
 
 ### `Signal:addAxisStructure()` - Achssteuerung von Immobilien
 
@@ -213,21 +213,21 @@ Download unter <https://eep.euma.de/downloads.php> - Im Modell befindet sich ein
 | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `Signal:addAxisStructure(structureName, axisName, positionDefault, positionRed, positionGreen, positionRed, positionPedestrian)` |
 
-FÃ¼gt bis zu vier Immobilien zu einer Ampel `TrafficLight` hinzu, deren Licht ein oder ausgeschaltet wird, sobald die Ampel auf rot, gelb oder grÃ¼n geschaltet wird bzw. wenn sich die Anforderung an der Ampel Ã¤ndert.
+Fügt bis zu vier Immobilien zu einer Ampel `TrafficLight` hinzu, deren Licht ein oder ausgeschaltet wird, sobald die Ampel auf rot, gelb oder grün geschaltet wird bzw. wenn sich die Anforderung an der Ampel ändert.
 
 | Parameter            | Typ                 | Bedeutung                                                                |
 | -------------------- | ------------------- | ------------------------------------------------------------------------ |
 | `structureName`      | `string`            | Name der Immobilie, deren Achse gesteuert werden soll                    |
 | `axisName`           | `number`            | Name der Achse in der Immobilie, die gesteuert werden soll               |
-| `positionDefault`    | `TrafficLightModel` | Grundstellung der Achse (wird fÃ¼r alle nicht angegebenen Phasen genutzt) |
+| `positionDefault`    | `TrafficLightModel` | Grundstellung der Achse (wird für alle nicht angegebenen Phasen genutzt) |
 | `positionRed`        | `string`            | Achsstellung bei rot                                                     |
-| `positionGreen`      | `string`            | Achsstellung bei grÃ¼n                                                    |
+| `positionGreen`      | `string`            | Achsstellung bei grün                                                    |
 | `positionRed`        | `string`            | Achsstellung bei gelb                                                    |
 | `positionPedestrian` | `string`            | Achsstellung bei FG                                                      |
 
-| RÃ¼ckgabewert                                                                                   |
+| Rückgabewert                                                                                   |
 | ---------------------------------------------------------------------------------------------- |
-| Signal (Tabelle bzw. Objekt) - Die Ampel, welcher die Achsenimmobilie hinzugefÃ¼gt wurde. |
+| Signal (Tabelle bzw. Objekt) - Die Ampel, welcher die Achsenimmobilie hinzugefügt wurde. |
 
 **Beachte**: Die Funktion musst mit `:addAxisStructure()` statt `.addAxisStructure()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
@@ -238,6 +238,21 @@ Laden mit: `local Lane = require("ce.mods.road.Lane")`
 
 Eine Fahrspur definiert sich dadurch, dass darin Autos in einer Schlange an einer Fahrspur-Ampel anstehen.
 Die Fahrspur-Ampel ist zwingend notwendig und kann direkt oder indirekt in Phasen verwendet werden.
+
+### `Lane.Approach` - Zufahrt
+
+`Lane.Approach` beschreibt, aus welcher Himmelsrichtung Fahrzeuge in die Kreuzung einfahren. Neue Anlagen sollten `Lane:setApproach(...)` verwenden.
+
+- `Lane.Approach.NORTH`
+- `Lane.Approach.NORTH_EAST`
+- `Lane.Approach.EAST`
+- `Lane.Approach.SOUTH_EAST`
+- `Lane.Approach.SOUTH`
+- `Lane.Approach.SOUTH_WEST`
+- `Lane.Approach.WEST`
+- `Lane.Approach.NORTH_WEST`
+
+Migration: `Lane.Heading` und `Lane:setHeading(...)` bleiben als Kompatibilitätsschicht erhalten, sind aber veraltet. Ein altes `Lane.Heading.NORTH` entspricht neu `Lane.Approach.SOUTH`, weil `Approach` die Zufahrt in die Kreuzung beschreibt.
 
 ### `Lane.Directions` - Fahrrichtungen
 
@@ -253,115 +268,114 @@ Um die Fahrtrichtungen einer Fahrspur festzulegen, nutze einen der folgenden Wer
 
 | Aufruf                                                                 |
 | ---------------------------------------------------------------------- |
-| `Lane:new(name, eepSaveId, laneSignal, directions, trafficType)` |
+| `Lane:new(name, laneSignal, directions, trafficType)` |
 
-Jede Fahrspur `Lane` bekommt genau ein `laneSignal`. Diese Ampel ist das EEP-Fahrspur-Signal, das Fahrzeuge wirklich anhÃ¤lt oder freigibt. Bei einfachen Fahrspuren kann das die sichtbare Ampel sein. Wenn mehrere Ampeln Ã¼ber dieselbe Fahrspur entscheiden sollen, ist `laneSignal` ein unsichtbares Signal.
+Jede Fahrspur `Lane` bekommt genau ein `laneSignal`. Diese Ampel ist das EEP-Fahrspur-Signal, das Fahrzeuge wirklich anhält oder freigibt. Bei einfachen Fahrspuren kann das die sichtbare Ampel sein. Wenn mehrere Ampeln über dieselbe Fahrspur entscheiden sollen, ist `laneSignal` ein unsichtbares Signal.
 
 | Parameter          | Typ                        | Bedeutung                                                          |
 | ------------------ | -------------------------- | ------------------------------------------------------------------ |
 | `name`             | `string`                   | Name der Fahrspur, z.B. "L1", "L2", ... oder "K1L1", "K1L2", ...   |
-| `eepSaveId`        | `number`                   | Freie EEP-Speicher-ID (1 - 1000), fÃ¼r die Datenablage der Fahrspur |
 | `laneSignal` | `TrafficLight`             | Das eine EEP-Signal, das den Verkehr auf dieser Fahrspur steuert.  |
 | `directions`       | `{ Lane.Directions, ... }` | Tabelle mit einer oder mehreren Richtungen (optional)              |
-| `trafficType`      | `string`                   | Verkehrstyp (OBSOLET, MUSS IN `TrafficLight` Ã¼bertragen werden)    |
+| `trafficType`      | `string`                   | Verkehrstyp (OBSOLET, MUSS IN `TrafficLight` übertragen werden)    |
 
-| RÃ¼ckgabewert                               |
+| Rückgabewert                               |
 | ------------------------------------------ |
 | `Lane` (neu erstellte Tabelle bzw. Objekt) |
 
 **Beachte**: Die Funktion musst mit `:new()` statt `.new()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
 
-### `Lane:vehicleEntered()` / `lane:vehicleLeft(Zugname)` - Fahrzeuge mit Kontaktpunkten zÃ¤hlen
+### `Lane:vehicleEntered()` / `lane:vehicleLeft(Zugname)` - Fahrzeuge mit Kontaktpunkten zählen
 
 1. _Fahrspur betreten_<br> Rufe im Kontaktpunkt die Funktion `lane:vehicleEntered(Zugname)` auf, wenn ein Fahrzeug den Bereich betritt.
 
-2. _Fahrspur verlassen_<br> Rufe im Kontaktpunkt die Funktion `lane:vehicleLeft(Zugname)` auf, wenn ein Fahrzeug den Bereich verlÃ¤sst.
+2. _Fahrspur verlassen_<br> Rufe im Kontaktpunkt die Funktion `lane:vehicleLeft(Zugname)` auf, wenn ein Fahrzeug den Bereich verlässt.
 
 [Mehr Informationen zur Fahrzeugerkennung in der Dokumentation](../../../docs/anleitungen-ampelkreuzung/tutorial3-priorisierung).
 
 ### `Lane:useSignalForQueue()` - Fahrzeuge an der Fahrspur-Ampel erkennen (NICHT EMPFOHLEN)
 
-Dies zÃ¤hlt die Fahrzeig an der Fahrzeugampel. Da die Funktion aber nur zwischen Vor- und Hauptsignal funktioniert, wird sie nicht empfohlen! [Mehr Informationen zur Fahrzeugerkennung in der Dokumentation](../../../docs/anleitungen-ampelkreuzung/tutorial3-priorisierung).
+Dies zählt die Fahrzeig an der Fahrzeugampel. Da die Funktion aber nur zwischen Vor- und Hauptsignal funktioniert, wird sie nicht empfohlen! [Mehr Informationen zur Fahrzeugerkennung in der Dokumentation](../../../docs/anleitungen-ampelkreuzung/tutorial3-priorisierung).
 
-### `Lane:useTrackForQueue(roadId)` - Fahrzeuge an der StraÃŸe erkennen (NICHT EMPFOHLEN)
+### `Lane:useTrackForQueue(roadId)` - Fahrzeuge an der Straße erkennen (NICHT EMPFOHLEN)
 
-Um die Fahrspur zu priorisieren, wenn sich **ein beliebiges Fahrzeug** auf der StraÃŸe vor der Ampel befindet, muss die ID des StraÃŸenstÃ¼cks einmalig hinterlegt werden: `lane:useTrackForQueue(strassenId)`. Da die Funtion aber weder die Reihenfolge der Fahrzeuge erkennt noch mehrere Fahrzeuge pro Track, wird sie nicht empfohlen! [Mehr Informationen zur Fahrzeugerkennung in der Dokumentation](../../../docs/anleitungen-ampelkreuzung/tutorial3-priorisierung).
+Um die Fahrspur zu priorisieren, wenn sich **ein beliebiges Fahrzeug** auf der Straße vor der Ampel befindet, muss die ID des Straßenstücks einmalig hinterlegt werden: `lane:useTrackForQueue(strassenId)`. Da die Funtion aber weder die Reihenfolge der Fahrzeuge erkennt noch mehrere Fahrzeuge pro Track, wird sie nicht empfohlen! [Mehr Informationen zur Fahrzeugerkennung in der Dokumentation](../../../docs/anleitungen-ampelkreuzung/tutorial3-priorisierung).
 
 ## Klasse `TrafficPhase`
 
 Laden mit: `local TrafficPhase = require("ce.mods.road.TrafficPhase")`
 
-Die Phase `TrafficPhase` ist verantwortlich fÃ¼r den Wechsel zwischen den roten und grÃ¼nen Ampelphasen. Jede Phase bekommt dafÃ¼r mindestens eine Signalgruppe.
-Es sollten mindestens zwei Phasen `TrafficPhase` in einer Kreuzung angelegt werden. FÃ¼r das Anlegen neuer Phasen wird die Funktion `Intersection:newPhase(name)` empfohlen.
+Die Phase `TrafficPhase` ist verantwortlich für den Wechsel zwischen den roten und grünen Ampelphasen. Jede Phase bekommt dafür mindestens eine Signalgruppe.
+Es sollten mindestens zwei Phasen `TrafficPhase` in einer Kreuzung angelegt werden. Für das Anlegen neuer Phasen wird die Funktion `Intersection:newPhase(name)` empfohlen.
 
-Wird dazu verwendet, mehrere Fahrspuren gleichzeitig zu schalten. Es muss sichergestellt werden, dass sich die Fahrwege der Fahrspuren einer Phase nicht Ã¼berlappen.
+Wird dazu verwendet, mehrere Fahrspuren gleichzeitig zu schalten. Es muss sichergestellt werden, dass sich die Fahrwege der Fahrspuren einer Phase nicht überlappen.
 
 - `TrafficPhase:new(name)` - legt eine neue Phase an
 
-- `Intersection:newSignalGroup(name)` legt eine Signalgruppe fÃ¼r einen Verkehrsfluss an.
+- `Intersection:newSignalGroup(name)` legt eine Signalgruppe für einen Verkehrsfluss an.
 
-- `SignalGroup:addVehicleSignals(K1)` fÃ¼gt ein oder mehrere physische `TrafficLight`-Objekte hinzu, fÃ¼r die mit den Zyklen Rot, Rot-Gelb, GrÃ¼n und Gelb geschaltet wird.
+- `SignalGroup:addVehicleSignals(K1)` fügt ein oder mehrere physische `TrafficLight`-Objekte hinzu, für die mit den Zyklen Rot, Rot-Gelb, Grün und Gelb geschaltet wird.
 
-- `SignalGroup:addTramSignals(S1)` fÃ¼gt ein oder mehrere physische `TrafficLight`-Objekte hinzu, fÃ¼r die mit den Zyklen Rot, GrÃ¼n und Gelb geschaltet wird.
+- `SignalGroup:addTramSignals(S1)` fügt ein oder mehrere physische `TrafficLight`-Objekte hinzu, für die mit den Zyklen Rot, Grün und Gelb geschaltet wird.
 
-- `SignalGroup:addPedestrianSignals(F1)` fÃ¼gt ein oder mehrere physische `TrafficLight`-Objekte hinzu, fÃ¼r die mit den Zyklen Rot und FuÃŸgÃ¤nger-GrÃ¼n geschaltet wird.
+- `SignalGroup:addPedestrianSignals(F1)` fügt ein oder mehrere physische `TrafficLight`-Objekte hinzu, für die mit den Zyklen Rot und Fußgänger-Grün geschaltet wird.
 
-- `TrafficPhase:addSignalGroup(signalGroup...)` fÃ¼gt eine oder mehrere Signalgruppen zur Phase hinzu.
+- `TrafficPhase:addSignalGroup(signalGroup...)` fügt eine oder mehrere Signalgruppen zur Phase hinzu.
 
-### `SignalGroup:addVehicleSignals()` - Ampeln fÃ¼r Kfz hinzufÃ¼gen
+### `SignalGroup:addVehicleSignals()` - Ampeln für Kfz hinzufügen
 
 | Aufruf                                   |
 | ---------------------------------------- |
 | `signalGroup:addVehicleSignals(...)` |
 
-FÃ¼gt eine oder mehrere Ampeln vom Typ `TrafficLight` als Kfz-Ampeln zur Signalgruppe hinzu. Diese schalten nacheinander "Rot", "Rot-Gelb", "GrÃ¼n", "Gelb", "Rot".
+Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Kfz-Ampeln zur Signalgruppe hinzu. Diese schalten nacheinander "Rot", "Rot-Gelb", "Grün", "Gelb", "Rot".
 
 | Parameter | Typ                 | Bedeutung                                                    |
 | --------- | ------------------- | ------------------------------------------------------------ |
 | `...`     | `TrafficLight`, ... | Eine oder mehrere Ampeln (kommasepariert, nicht als Tabelle) |
 
-| RÃ¼ckgabewert                                            |
+| Rückgabewert                                            |
 | ------------------------------------------------------- |
-| `SignalGroup`, der die Ampel hinzugefÃ¼gt wurde |
+| `SignalGroup`, der die Ampel hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addVehicleSignals()` statt `.addVehicleSignals()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
 
-### `SignalGroup:addPedestrianSignals()` - Ampeln fÃ¼r FuÃŸgÃ¤nger hinzufÃ¼gen
+### `SignalGroup:addPedestrianSignals()` - Ampeln für Fußgänger hinzufügen
 
 | Aufruf                                          |
 | ----------------------------------------------- |
 | `signalGroup:addPedestrianSignals(...)` |
 
-FÃ¼gt eine oder mehrere Ampeln vom Typ `TrafficLight` als FuÃŸgÃ¤nger-Ampeln zur Signalgruppe hinzu. Diese schalten nacheinander "Rot", "GrÃ¼n FuÃŸgÃ¤nger", "Rot"
+Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Fußgänger-Ampeln zur Signalgruppe hinzu. Diese schalten nacheinander "Rot", "Grün Fußgänger", "Rot"
 
 | Parameter | Typ                 | Bedeutung                                                    |
 | --------- | ------------------- | ------------------------------------------------------------ |
 | `...`     | `TrafficLight`, ... | Eine oder mehrere Ampeln (kommasepariert, nicht als Tabelle) |
 
-| RÃ¼ckgabewert                                            |
+| Rückgabewert                                            |
 | ------------------------------------------------------- |
-| `SignalGroup`, der die Ampel hinzugefÃ¼gt wurde |
+| `SignalGroup`, der die Ampel hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addPedestrianSignals()` statt `.addPedestrianSignals()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
 
-### `SignalGroup:addTramSignals()` - Ampeln fÃ¼r Trams hinzufÃ¼gen
+### `SignalGroup:addTramSignals()` - Ampeln für Trams hinzufügen
 
 | Aufruf                                    |
 | ----------------------------------------- |
 | `signalGroup:addTramSignals(...)` |
 
-FÃ¼gt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Signalgruppe hinzu. Diese schalten nacheinander "Rot", "GrÃ¼n", "Gelb", "Rot".
+Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Signalgruppe hinzu. Diese schalten nacheinander "Rot", "Grün", "Gelb", "Rot".
 
 | Parameter | Typ                 | Bedeutung                                                    |
 | --------- | ------------------- | ------------------------------------------------------------ |
 | `...`     | `TrafficLight`, ... | Eine oder mehrere Ampeln (kommasepariert, nicht als Tabelle) |
 
-| RÃ¼ckgabewert                                            |
+| Rückgabewert                                            |
 | ------------------------------------------------------- |
-| `SignalGroup`, der die Ampel hinzugefÃ¼gt wurde |
+| `SignalGroup`, der die Ampel hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:addTramSignals()` statt `.addTramSignals()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
@@ -376,14 +390,14 @@ Laden mit: `local Intersection = require("ce.mods.road.Intersection")`
 | ------------------------------------------- |
 | `Intersection:new(name, greenTimeSeconds)` |
 
-Legt eine neue Kreuzung an und registriert diese im Modul Kreuzungen. Nachdem Phasen zur Kreuzung hinzugefÃ¼gt wurden, funktioniert diese automatisch.
+Legt eine neue Kreuzung an und registriert diese im Modul Kreuzungen. Nachdem Phasen zur Kreuzung hinzugefügt wurden, funktioniert diese automatisch.
 
 | Parameter             | Typ      | Bedeutung                                                             |
 | --------------------- | -------- | --------------------------------------------------------------------- |
 | `name`                | `string` | Name der Kreuzung, z.B. "Bahnshofsstr. / Hauptstr." oder "Kreuzung 1" |
-| _`greenTimeSeconds`_ | `number` | LÃ¤nge einer GrÃ¼nphase                                                 |
+| _`greenTimeSeconds`_ | `number` | Länge einer Grünphase                                                 |
 
-| RÃ¼ckgabewert                                       |
+| Rückgabewert                                       |
 | -------------------------------------------------- |
 | `Intersection` (neu erstellte Tabelle bzw. Objekt) |
 
@@ -396,15 +410,15 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 | ----------------------------------- |
 | `Intersection:newSignalGroup(name)` |
 
-Legt eine Signalgruppe fÃ¼r einen Verkehrsfluss an. Jede logische Nutzung eines physischen `TrafficLight` darf nur in einer Signalgruppe vorkommen. Ein kombiniertes Fahrzeug-/FuÃŸgÃ¤ngersignal kann also einmal als Fahrzeug-Signal und einmal als FuÃŸgÃ¤nger-Signal verwendet werden, aber nicht in derselben Phase gleichzeitig freigegeben werden.
+Legt eine Signalgruppe für einen Verkehrsfluss an. Jede logische Nutzung eines physischen `TrafficLight` darf nur in einer Signalgruppe vorkommen. Ein kombiniertes Fahrzeug-/Fußgängersignal kann also einmal als Fahrzeug-Signal und einmal als Fußgänger-Signal verwendet werden, aber nicht in derselben Phase gleichzeitig freigegeben werden.
 
 | Parameter | Typ      | Bedeutung                                                |
 | --------- | -------- | -------------------------------------------------------- |
 | `name`    | `string` | Name der Signalgruppe, z.B. `sgLane1Straight` oder `sgPedNorthSouth` |
 
-| RÃ¼ckgabewert                                                |
+| Rückgabewert                                                |
 | ----------------------------------------------------------- |
-| `SignalGroup`, die der Kreuzung hinzugefÃ¼gt wurde |
+| `SignalGroup`, die der Kreuzung hinzugefügt wurde |
 
 ### `Intersection:newPhase()` - Eine Phase in einer Kreuzung erstellen
 
@@ -412,32 +426,32 @@ Legt eine Signalgruppe fÃ¼r einen Verkehrsfluss an. Jede logische Nutzung eines 
 | -------------------------------- |
 | `Intersection:newPhase(name)` |
 
-FÃ¼gt eine neue Phase zur Kreuzung hinzu. Signalgruppen werden danach mit `TrafficPhase:addSignalGroup(...)` zur Phase hinzugefÃ¼gt.
+Fügt eine neue Phase zur Kreuzung hinzu. Signalgruppen werden danach mit `TrafficPhase:addSignalGroup(...)` zur Phase hinzugefügt.
 
 | Parameter | Typ      | Bedeutung                                        |
 | --------- | -------- | ------------------------------------------------ |
 | `name`    | `string` | Name der Phase, z.B. "P1" oder "Phase A" |
 
-| RÃ¼ckgabewert                                               |
+| Rückgabewert                                               |
 | ---------------------------------------------------------- |
-| `TrafficPhase`, die der Kreuzung hinzugefÃ¼gt wurde |
+| `TrafficPhase`, die der Kreuzung hinzugefügt wurde |
 
 **Beachte**: Die Funktion musst mit `:newPhase()` statt `.newPhase()` aufgerufen werden -
 also mit einem Doppelpunkt und nicht mit einem Punkt.
 
-### `Intersection:addStaticCam()` - Eine Kamera zu dieser Kreuzung hinzufÃ¼gen
+### `Intersection:addStaticCam()` - Eine Kamera zu dieser Kreuzung hinzufügen
 
 | Aufruf                            |
 | --------------------------------- |
 | `Intersection:addStaticCam(name)` |
 
-FÃ¼gt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "GrÃ¼n", "Gelb", "Rot"
+Fügt eine oder mehrere Ampeln vom Typ `TrafficLight` als Tram-Ampeln zur Kreuzung hinzu. Diese Schalten nacheinander "Rot", "Grün", "Gelb", "Rot"
 
 | Parameter | Typ      | Bedeutung                         |
 | --------- | -------- | --------------------------------- |
 | `name`    | `string` | Name der statischen Kamera in EEP |
 
-| RÃ¼ckgabewert |
+| Rückgabewert |
 | ------------ |
 | `nil`        |
 
@@ -456,17 +470,17 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
   )
 
   function EEPMain()
-      ControlExtension.runTasks() -- FÃ¼hrt alle anstehenden Aktionen der registrierten Module aus
+      ControlExtension.runTasks() -- Führt alle anstehenden Aktionen der registrierten Module aus
       return 1
   end
   ```
 
-- **Fahrspuren mit Anforderungen und Fahrspuren die durch unterschiedliche Ampeln gesteuert werden benÃ¶tigen zwingend ZÃ¤hlfunktionen** fÃ¼r die Fahrzeuge dieser Fahrspur. FÃ¼r andere Fahrspuren ist dies optional.
+- **Fahrspuren mit Anforderungen und Fahrspuren die durch unterschiedliche Ampeln gesteuert werden benötigen zwingend Zählfunktionen** für die Fahrzeuge dieser Fahrspur. Für andere Fahrspuren ist dies optional.
   - `lane:vehicleEntered(Zugname)` - im Kontaktpunkt aufrufen, wenn eine Fahrspur betreten wird (z.B. 50m vor der Ampel; aber nur auf dieser Fahrspursfahrbahn)
 
   - `lane:vehicleLeft(Zugname)` - im Kontaktpunkt aufrufen, wenn eine Fahrspur verlassen wird (hinter der Ampel)
 
-  In der ZÃ¤hlfunktion MUSS der Zugname benutzt werden, da die Anforderungen und unterschiedlichen Ampeln durch die Routen der Fahrzeuge berechnet werden. Dazu dient folgender Quellcode:
+  In der Zählfunktion MUSS der Zugname benutzt werden, da die Anforderungen und unterschiedlichen Ampeln durch die Routen der Fahrzeuge berechnet werden. Dazu dient folgender Quellcode:
 
   ```lua
   ------------------------------------------------
@@ -491,4 +505,4 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
   })
   ```
 
-  **Beachte:** Die ZÃ¤hlfunktionen mÃ¼ssen beim Betreten und Verlassen einer Fahrspur verwendet werden.
+  **Beachte:** Die Zählfunktionen müssen beim Betreten und Verlassen einer Fahrspur verwendet werden.

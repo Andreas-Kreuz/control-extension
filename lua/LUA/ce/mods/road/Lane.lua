@@ -26,8 +26,33 @@ Lane.Directions = {
     HALF_RIGHT = "HALF-RIGHT",
     RIGHT = "RIGHT"
 }
+---@type table<string, LaneApproach>
+Lane.Approach = {
+    NORTH = "NORTH",
+    NORTH_EAST = "NORTH_EAST",
+    EAST = "EAST",
+    SOUTH_EAST = "SOUTH_EAST",
+    SOUTH = "SOUTH",
+    SOUTH_WEST = "SOUTH_WEST",
+    WEST = "WEST",
+    NORTH_WEST = "NORTH_WEST"
+}
+---@deprecated Use Lane.Approach and setApproach(...). Heading describes the opposite cardinal value.
+---@type table<string, LaneHeading>
+Lane.Heading = Lane.Approach
 ---@type table<string, LaneType>
 Lane.Type = { BUS = "BUS", CAR = "CAR", TRAM = "TRAM", PEDESTRIAN = "PEDESTRIAN", BICYCLE = "BICYCLE" }
+
+local oppositeCompassDirections = {
+    [Lane.Approach.NORTH] = Lane.Approach.SOUTH,
+    [Lane.Approach.NORTH_EAST] = Lane.Approach.SOUTH_WEST,
+    [Lane.Approach.EAST] = Lane.Approach.WEST,
+    [Lane.Approach.SOUTH_EAST] = Lane.Approach.NORTH_WEST,
+    [Lane.Approach.SOUTH] = Lane.Approach.NORTH,
+    [Lane.Approach.SOUTH_WEST] = Lane.Approach.NORTH_EAST,
+    [Lane.Approach.WEST] = Lane.Approach.EAST,
+    [Lane.Approach.NORTH_WEST] = Lane.Approach.SOUTH_EAST
+}
 
 ---Liefert true, wenn das erste Fahrzeug fahren darf (anhand der für die Fahrspur gültigen Ampeln)
 ---Is true, if the first vehicle can drive (according to the lane's signals)
@@ -172,34 +197,58 @@ local function queueFromText(pipeSeparatedText, count)
     return queue
 end
 
+local function createLaneData(lane)
+    return {
+        f = tostring(lane.vehicleCount),
+        w = tostring(lane.waitCount),
+        p = tostring(lane.currentIndication),
+        q = queueToText(lane.queue)
+    }
+end
+
+
+local function getLaneSignalId(lane)
+    return lane.laneSignal and lane.laneSignal.signalId and lane.laneSignal.signalId > 0 and lane.laneSignal.signalId or
+        nil
+end
+
+local function loadLaneSignalTagData(lane)
+    if type(EEPSignalGetTagText) ~= "function" then return {} end
+
+    local signalId = getLaneSignalId(lane)
+    if not signalId then return {} end
+
+    local ok, tagText = EEPSignalGetTagText(signalId)
+    if not ok then return {} end
+
+    return StorageUtility.parseTableFromString(tagText)
+end
+
+local function saveLaneSignalTagData(lane, laneData)
+    if type(EEPSignalSetTagText) ~= "function" then return end
+
+    local signalId = getLaneSignalId(lane)
+    if not signalId then return end
+
+    local tagData = loadLaneSignalTagData(lane)
+    for key, value in pairs(laneData) do tagData[key] = value end
+    EEPSignalSetTagText(signalId, StorageUtility.encodeTable(tagData))
+end
+
 local function save(lane)
-    if lane.eepSaveId ~= -1 then
-        local data = {}
-        data["f"] = tostring(lane.vehicleCount)
-        data["w"] = tostring(lane.waitCount)
-        data["p"] = tostring(lane.currentIndication)
-        data["q"] = queueToText(lane.queue)
-        StorageUtility.saveTable(lane.eepSaveId, data, "Lane " .. lane.name)
-    end
+    local data = createLaneData(lane)
+    saveLaneSignalTagData(lane, data)
 end
 
 local function load(lane)
-    if lane.eepSaveId ~= -1 then
-        local data = StorageUtility.loadTable(lane.eepSaveId, "Lane " .. lane.name)
-        lane.vehicleCount = data["f"] and tonumber(data["f"]) or 0
-        lane.waitCount = data["w"] and tonumber(data["w"]) or 0
-        lane.currentIndication = data["p"] or SignalIndication.RED
-        lane.queue = queueFromText(data["q"], lane.vehicleCount)
-        lane:checkRequests()
-        updateLaneSignal(lane, "Neu geladen")
-    else
-        lane.vehicleCount = 0
-        lane.waitCount = 0
-        lane.currentIndication = SignalIndication.RED
-        lane.queue = Queue:new()
-        lane:checkRequests()
-        updateLaneSignal(lane, "Neu geladen")
-    end
+    local data = loadLaneSignalTagData(lane)
+
+    lane.vehicleCount = data["f"] and tonumber(data["f"]) or 0
+    lane.waitCount = data["w"] and tonumber(data["w"]) or 0
+    lane.currentIndication = data["p"] or SignalIndication.RED
+    lane.queue = queueFromText(data["q"], lane.vehicleCount)
+    lane:checkRequests()
+    updateLaneSignal(lane, "Neu geladen")
 
     if not lane.queue:isEmpty() then
         local _, route = EEPGetTrainRoute(lane.queue:firstElement())
@@ -456,6 +505,7 @@ local function routeBuilderDriveOnAll(builder, mode, ...)
     local signals = { ... }
     assert(#signals > 0, "Specify at least one signal")
     for _, signal in ipairs(signals) do routeBuilderDriveOn(builder, signal, mode) end
+    updateLaneSignal(builder.lane, "Route drive signals registered")
     return builder
 end
 function RouteDriveBuilder:driveOnlyOn(...)
@@ -578,12 +628,65 @@ function Lane:setHighLightingTracks(...)
     return self
 end
 
-function Lane:setDirections(...)
-    for _, direction in pairs(...) do
-        if not Lane.Directions[direction] then print(string.format("[#Lane] No such direction: %s", direction)) end
+local function isTurnDirection(direction)
+    if Lane.Directions[direction] then return true end
+    for _, knownDirection in pairs(Lane.Directions) do
+        if knownDirection == direction then return true end
+    end
+    return false
+end
+
+local function turnDirectionsFrom(...)
+    local turnDirections = { ... }
+    if #turnDirections == 1 and type(turnDirections[1]) == "table" then turnDirections = turnDirections[1] end
+    if #turnDirections == 0 then return { Lane.Directions.LEFT, Lane.Directions.STRAIGHT, Lane.Directions.RIGHT } end
+    return turnDirections
+end
+
+local function isApproach(approach)
+    if Lane.Approach[approach] then return true end
+    for _, knownApproach in pairs(Lane.Approach) do
+        if knownApproach == approach then return true end
+    end
+    return false
+end
+
+function Lane.approachFromHeading(heading) return oppositeCompassDirections[heading] end
+
+function Lane.headingFromApproach(approach) return oppositeCompassDirections[approach] end
+
+function Lane:setApproach(approach)
+    if not isApproach(approach) then
+        print(string.format("[#Lane] No such approach: %s", tostring(approach)))
+    else
+        self.approach = approach
+        self.heading = Lane.headingFromApproach(approach)
+    end
+    return self
+end
+
+function Lane:setHeading(heading)
+    if not isApproach(heading) then
+        print(string.format("[#Lane] No such heading: %s", tostring(heading)))
+    else
+        self:setApproach(Lane.approachFromHeading(heading))
+    end
+    return self
+end
+
+function Lane:setTurnDirections(...)
+    local turnDirections = turnDirectionsFrom(...)
+    for _, direction in ipairs(turnDirections) do
+        if not isTurnDirection(direction) then print(string.format("[#Lane] No such direction: %s", direction)) end
     end
 
-    self.directions = ... or { "LEFT", "STRAIGHT", "RIGHT" }
+    self.turnDirections = turnDirections
+    self.directions = turnDirections
+    return self
+end
+
+function Lane:setDirections(...)
+    return self:setTurnDirections(...)
 end
 
 function Lane:setTrafficType(signalType)
@@ -593,37 +696,35 @@ function Lane:setTrafficType(signalType)
         self.signalType = signalType
         self.trafficType = signalType
     end
+    return self
 end
 
 --- Erzeugt eine Fahrspur, welche durch genau ein EEP-Fahrspur-Signal gesteuert wird.
 ---@param name string @Name der Fahrspur einer Kreuzung
----@param eepSaveId number, @EEPSaveSlot-Id fuer das Speichern der Fahrspur
 ---@param laneSignal TrafficLight @das einzelne EEP-Fahrspur-Signal, das Fahrzeuge anhaelt oder freigibt
----@param directions? string[] eine oder mehrere Ampeln
----@param signalType? string (default: "NORMAL")
+---@param turnDirections? string[] alte Schreibweise; bitte setTurnDirections(...) verwenden
+---@param signalType? string alte Schreibweise; bitte setTrafficType(...) verwenden
 ---@return Lane
-function Lane:new(name, eepSaveId, laneSignal, directions, signalType)
+function Lane:new(name, laneSignal, turnDirections, signalType)
     assert(name, "Bitte geben Sie den Namen \"name\" fuer diese Fahrspur an.")
     assert(type(name) == "string", "Need 'name' as string")
-    assert(eepSaveId, "Bitte geben Sie den Wert \"eepSaveId\" fuer diese Fahrspur an.")
-    assert(type(eepSaveId) == "number")
     assert(laneSignal,
            "Specify a single \"laneSignal\" for this lane (the EEP signal controlling the lane traffic).")
     assert(laneSignal.type == "TrafficLight",
            "Specify a single \"laneSignal\" for this lane (the EEP signal controlling the lane traffic).")
-    -- assert(signalId, "Bitte geben Sie den Wert \"signalId\" fuer diese Fahrspur an.")
-    if eepSaveId ~= -1 then StorageUtility.registerId(eepSaveId, "Lane " .. name) end
     local o = {
         name = name,
         type = "Lane",
-        eepSaveId = eepSaveId,
         laneSignal = laneSignal,
         requestType = Lane.RequestType.NORMAL,
         routesToCount = {},
         signalUsedForRequest = false,
         tracksUsedForRequest = false,
         tracksForRequests = {},
-        directions = directions or { "LEFT", "STRAIGHT", "RIGHT" },
+        approach = Lane.Approach.SOUTH,
+        heading = Lane.Heading.NORTH,
+        turnDirections = { Lane.Directions.LEFT, Lane.Directions.STRAIGHT, Lane.Directions.RIGHT },
+        directions = { Lane.Directions.LEFT, Lane.Directions.STRAIGHT, Lane.Directions.RIGHT },
         signalType = signalType or "NORMAL",
         trafficType = signalType or "NORMAL",
         vehicleCount = 0,
@@ -633,6 +734,8 @@ function Lane:new(name, eepSaveId, laneSignal, directions, signalType)
 
     self.__index = self
     setmetatable(o, self)
+    o:setApproach(o.approach)
+    if turnDirections then o:setTurnDirections(turnDirections) end
     laneSignal:applyToLane(o)
     load(o)
     return o
@@ -661,6 +764,7 @@ function Lane:driveOnDefaultSignals(...)
 
     self.defaultDriveSignals = newDefaultDriveSignals
     for signal in pairs(newDefaultDriveSignals) do self.signalsToDriveOn[signal] = {} end
+    updateLaneSignal(self, "Drive signals registered")
     return self
 end
 
