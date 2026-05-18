@@ -6,7 +6,6 @@ import { findLuaCommand, REQUIRED_LUA_VERSION } from './lua-runtime.mjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, '..');
-const pagesRoot = path.join(repoRoot, 'pages');
 
 const REQUIRED_RUBY_VERSION = '3.3';
 const REQUIRED_BUNDLER_VERSION = '4';
@@ -44,13 +43,6 @@ const tools = [
     requiredFor: 'dev:docs, test:docs, check',
     check: () => matchesVersion('bundle', '--version', REQUIRED_BUNDLER_VERSION),
     help: `Install Bundler ${REQUIRED_BUNDLER_VERSION}.x for the active Ruby in PATH and regenerate \`pages/Gemfile.lock\` with that Bundler version.`,
-  },
-  {
-    name: 'jekyll',
-    purpose: 'Jekyll docs stack',
-    requiredFor: 'dev:docs, test:docs, check',
-    check: () => isAvailable('bundle', `exec ruby -e "require 'jekyll'; require 'jemoji'"`, pagesRoot),
-    help: 'Run `bundle install` in `pages/` with Ruby 3.3 and Bundler 4 from PATH so the Jekyll gems, including `jemoji`, load successfully.',
   },
 ];
 
