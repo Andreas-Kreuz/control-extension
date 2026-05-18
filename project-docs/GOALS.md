@@ -11,13 +11,13 @@
 - [x] Einfaches Einbinden der Control Extension \
        Funktioniert mit minimalem Code: [lua/LUA/ce/README.md](../lua/LUA/ce/README.md)
 
-- [ ] TODO: Internes Halten der kompletten erfassten Daten \
-       geplant mit [lua/LUA/ce/hub/publish/InternalDataStore.lua](../lua/LUA/ce/hub/publish/InternalDataStore.lua)
+- [ ] ~~Internes Halten der kompletten erfassten Daten \
+       geplant mit [lua/LUA/ce/hub/publish/InternalDataStore.lua](../lua/LUA/ce/hub/publish/InternalDataStore.lua)~~
 
 - [ ] TODO: Erfassung weiterer Daten mit Lua-Funktionen \
        Prüfen von Daten für Signale, Weichen, Züge, Rollmaterial, usw.
 
-- [ ] TODO: Erfassung der Anlagedatei von EEP \
+- [x] TODO: Erfassung der Anlagedatei von EEP \
        Suche nach Lua internen Möglichkeiten zur Analyse der Anlagendatei
 
 ## Ziele für Data Bridge `lua/LUA/ce/databridge`
@@ -27,7 +27,7 @@ siehe [lua/LUA/ce/hub/databridge/README.md](../lua/LUA/ce/databridge/README.md)
 - [x] Eventbasierte Bereitstellung der Daten an den EEP-Webserver
 - [x] Log-Ausgabe aus EEP als Datei
 - [x] Entgegennahme von Lua-Kommandos
-- [ ] Bereitstellung aller internen Daten als Datei
+- [ ] ~~Bereitstellung aller internen Daten als Datei~~
 
 ## Ziele für Web-Server
 
@@ -44,8 +44,8 @@ siehe [apps/web-app/README.md](../apps/web-app/README.md)
 - [x] Anzeige und durchsuchen der Web-API
 - [x] Anzeige der Züge
   - [x] Kameras auf Züge ausrichten
-  - [ ] TODO: Züge filtern
-  - [ ] TODO: Tag-Texte anzeigen
+  - [x] Züge filtern
+  - [x] Tag-Texte anzeigen
 - [ ] TODO: Anzeige von Immobilien, Weichen, Speicherplätzen
 
 ## Ziele für Module (generell)
