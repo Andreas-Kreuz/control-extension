@@ -16,6 +16,8 @@ export type IntersectionWizardTrafficType = 'CAR' | 'BUS' | 'TRAM' | 'BICYCLE' |
 
 export type IntersectionWizardAmpelUse = 'VEHICLE_ONLY' | 'PEDESTRIAN_ONLY' | 'VEHICLE_AND_PEDESTRIAN';
 
+export type IntersectionWizardLaneCountType = 'CONTACTS' | 'SIGNALS' | 'TRACKS';
+
 export interface IntersectionWizardSignalLookupAppDto {
   id: string;
   found: boolean;
@@ -32,7 +34,11 @@ export interface IntersectionWizardSignalLookupAppDto {
 export interface IntersectionWizardLaneAppDto {
   id: string;
   name: string;
+  luaVariableName?: string;
   vehicleMultiplier?: number;
+  countType?: IntersectionWizardLaneCountType;
+  requestTrackIds?: number[];
+  highlightTrackIds?: number[];
   signalId: string;
   approach?: IntersectionWizardApproach;
   heading?: IntersectionWizardApproach;
@@ -91,6 +97,7 @@ export interface IntersectionWizardSignalGroupAppDto {
 export interface IntersectionWizardPhaseAppDto {
   id: string;
   name: string;
+  greenTimeSeconds?: number;
   signalGroupIds: string[];
 }
 
@@ -105,14 +112,22 @@ export interface IntersectionWizardRouteRuleAppDto {
   showRequests: boolean;
 }
 
+export interface IntersectionWizardDefaultRequestDisplayAppDto {
+  laneId: string;
+  signalGroupId: string;
+}
+
 export interface IntersectionWizardDraftAppDto {
   id: string;
   name: string;
   luaVariableName: string;
+  greenTimeSeconds?: number;
   intersectionEepSaveId?: number;
   tippStructure?: string;
   switchInStrictOrder?: boolean;
   showLuaCodeImmediately?: boolean;
+  manualLuaVariableNames?: boolean;
+  individualLanePhaseSettings?: boolean;
   supportPedestrianSignals?: boolean;
   supportMultipleLaneSignals?: boolean;
   staticCams?: string[];
@@ -123,6 +138,7 @@ export interface IntersectionWizardDraftAppDto {
   ampeln: IntersectionWizardAmpelAppDto[];
   signalGroups: IntersectionWizardSignalGroupAppDto[];
   routeRules?: IntersectionWizardRouteRuleAppDto[];
+  defaultRequestDisplays?: IntersectionWizardDefaultRequestDisplayAppDto[];
   phases: IntersectionWizardPhaseAppDto[];
   generatedLua: string;
 }

@@ -47,6 +47,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import {
   CeTypes,
   CommandEvent,
+  IntersectionListRoom,
   RoadTrafficLightModelsRoom,
   ScenarioRoom,
   TrackType,
@@ -54,6 +55,7 @@ import {
 } from '@ce/web-shared';
 import type {
   DataSlotAppDto,
+  IntersectionAppDto,
   IntersectionWizardAmpelAppDto,
   IntersectionWizardApproach,
   IntersectionWizardTurnDirection,
@@ -145,6 +147,32 @@ const cardTitleIconSx = {
   flex: '0 0 32px',
   color: 'text.primary',
 };
+const readonlyTextFieldSx = {
+  '& .MuiInputBase-root': {
+    bgcolor: 'action.disabledBackground',
+    color: 'text.secondary',
+  },
+  '& .MuiInputBase-input': {
+    caretColor: 'transparent',
+    cursor: 'text',
+    userSelect: 'text',
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'action.disabledBackground',
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'action.disabled',
+  },
+  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'action.disabled',
+    borderWidth: 1,
+  },
+};
+const checkboxHelperSx = {
+  pl: 4,
+  mt: -0.5,
+  color: 'text.secondary',
+};
 const trafficTypeIcons = {
   CAR: DirectionsCarIcon,
   BUS: DirectionsBusIcon,
@@ -203,7 +231,9 @@ function createDraft(): IntersectionWizardDraftAppDto {
     luaVariableName: 'kreuzung',
     intersectionEepSaveId: -1,
     switchInStrictOrder: false,
-    showLuaCodeImmediately: false,
+    showLuaCodeImmediately: true,
+    manualLuaVariableNames: false,
+    individualLanePhaseSettings: false,
     supportPedestrianSignals: false,
     supportMultipleLaneSignals: false,
     staticCams: [],
@@ -214,6 +244,7 @@ function createDraft(): IntersectionWizardDraftAppDto {
     ampeln: [],
     signalGroups: [],
     routeRules: [],
+    defaultRequestDisplays: [],
     phases: [],
     generatedLua: '',
   };
@@ -261,6 +292,9 @@ function laneLuaVariableName(
   intersectionPrefix: string,
   used: Set<string>,
 ) {
+  if (lane.luaVariableName?.trim()) {
+    return uniqueLuaIdentifier(lane.luaVariableName, `lane${index + 1}`, used);
+  }
   const numberedLane = /^(?:lane|spur|fahrstreifen|fs)\s*(\d+[a-z]?)$/i.exec(lane.name.trim());
   if (numberedLane) {
     const prefix = lowerFirst(sanitizeLuaIdentifier(intersectionPrefix, 'kreuzung'));
@@ -413,13 +447,13 @@ function toggleDirectionSelection(
 
 function hasAdvancedIntersectionSettings(draft: IntersectionWizardDraftAppDto) {
   return Boolean(
-    draft.tippStructure?.trim() ||
+    draft.greenTimeSeconds !== undefined ||
     (draft.switchInStrictOrder ?? false) ||
     (draft.showLuaCodeImmediately ?? false) ||
+    (draft.manualLuaVariableNames ?? false) ||
+    (draft.individualLanePhaseSettings ?? false) ||
     (draft.supportPedestrianSignals ?? false) ||
-    (draft.supportMultipleLaneSignals ?? false) ||
-    (draft.intersectionEepSaveId ?? -1) !== -1 ||
-    (draft.staticCams?.length ?? 0) > 0,
+    (draft.supportMultipleLaneSignals ?? false),
   );
 }
 
@@ -428,6 +462,26 @@ function defaultPhases(): IntersectionWizardPhaseAppDto[] {
     { id: 'phase-1', name: 'P1', signalGroupIds: [] },
     { id: 'phase-2', name: 'P2', signalGroupIds: [] },
   ];
+}
+
+function optionalPositiveNumber(value: string): number | undefined {
+  if (!value.trim()) return undefined;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : undefined;
+}
+
+function firstFreeCxName(existingNames: string[]) {
+  const usedNumbers = new Set(
+    existingNames
+      .map((name) => /^c(\d+)$/i.exec(name.trim())?.[1])
+      .filter((value): value is string => Boolean(value))
+      .map(Number),
+  );
+  let nextNumber = 1;
+  while (usedNumbers.has(nextNumber)) {
+    nextNumber += 1;
+  }
+  return `c${nextNumber}`;
 }
 
 function intersectionLuaBlock(lua: string): string {
@@ -538,6 +592,7 @@ function IntersectionCreateWizard() {
   const [ceTypeRoutes, setCeTypeRoutes] = useState<string[]>([]);
   const [freeSlots, setFreeSlots] = useState<DataSlotAppDto[]>([]);
   const [scenarioStaticCameras, setScenarioStaticCameras] = useState<string[]>([]);
+  const [scenarioIntersectionNames, setScenarioIntersectionNames] = useState<string[]>([]);
   const [roadTrainRoutes, setRoadTrainRoutes] = useState<string[]>([]);
   const [tramTrainRoutes, setTramTrainRoutes] = useState<string[]>([]);
   const [trafficLightModels, setTrafficLightModels] = useState<Record<string, TrafficLightModelAppDto>>({});
@@ -595,6 +650,16 @@ function IntersectionCreateWizard() {
   useApiDataRoomHandler(CeTypes.HubFreeSlot, (payload: string) => {
     const data = JSON.parse(payload) as Record<string, DataSlotAppDto>;
     setFreeSlots(Object.values(data).sort((a, b) => Number(a.id) - Number(b.id)));
+  });
+
+  useDomainRoomHandler(IntersectionListRoom, 'All', (payload: string) => {
+    const data = JSON.parse(payload) as Record<string, Partial<IntersectionAppDto>>;
+    setScenarioIntersectionNames(
+      Object.values(data).flatMap((intersection) => [
+        ...(intersection.scriptVariableName ? [intersection.scriptVariableName] : []),
+        ...(intersection.name ? [intersection.name] : []),
+      ]),
+    );
   });
 
   useDomainRoomHandler(ScenarioRoom, 'current', (payload: string) => {
@@ -926,6 +991,7 @@ function IntersectionCreateWizard() {
         ampelIds: ampel ? group.ampelIds.filter((ampelId) => ampelId !== ampel.id) : group.ampelIds,
       })),
       routeRules: (draft.routeRules ?? []).filter((rule) => rule.laneId !== lane.id),
+      defaultRequestDisplays: (draft.defaultRequestDisplays ?? []).filter((entry) => entry.laneId !== lane.id),
     });
   }
 
@@ -1065,6 +1131,26 @@ function IntersectionCreateWizard() {
     );
   }
 
+  function hasDefaultRequestDisplay(laneId: string, signalGroupId: string) {
+    return (draft.defaultRequestDisplays ?? []).some(
+      (entry) => entry.laneId === laneId && entry.signalGroupId === signalGroupId,
+    );
+  }
+
+  function updateDefaultRequestDisplay(laneId: string, signalGroupId: string, enabled: boolean) {
+    const current = draft.defaultRequestDisplays ?? [];
+    updateDraft({
+      defaultRequestDisplays: enabled
+        ? [...current, { laneId, signalGroupId }].filter(
+            (entry, index, entries) =>
+              entries.findIndex(
+                (candidate) => candidate.laneId === entry.laneId && candidate.signalGroupId === entry.signalGroupId,
+              ) === index,
+          )
+        : current.filter((entry) => !(entry.laneId === laneId && entry.signalGroupId === signalGroupId)),
+    });
+  }
+
   function routeSelectionForSignalGroup(
     lane: IntersectionWizardLaneAppDto,
     group: IntersectionWizardSignalGroupAppDto,
@@ -1151,6 +1237,9 @@ function IntersectionCreateWizard() {
       ampeln: draft.ampeln.filter((ampel) => !removableAmpelIds.includes(ampel.id)),
       signalGroups: draft.signalGroups.filter((entry) => entry.id !== group.id),
       routeRules: routeRulesWithoutSignalGroup(group.id),
+      defaultRequestDisplays: (draft.defaultRequestDisplays ?? []).filter(
+        (entry) => entry.laneId !== lane.id || entry.signalGroupId !== group.id,
+      ),
       phases: draft.phases.map((phase) => ({
         ...phase,
         signalGroupIds: phase.signalGroupIds.filter((signalGroupId) => signalGroupId !== group.id),
@@ -1289,6 +1378,7 @@ function IntersectionCreateWizard() {
   function removeSignalGroup(id: string) {
     updateDraft({
       signalGroups: draft.signalGroups.filter((group) => group.id !== id),
+      defaultRequestDisplays: (draft.defaultRequestDisplays ?? []).filter((entry) => entry.signalGroupId !== id),
       routeRules: (draft.routeRules ?? [])
         .map((rule) => ({
           ...rule,
@@ -1425,7 +1515,18 @@ function IntersectionCreateWizard() {
     if (sendPreparationSettings) {
       sendRoadModulePreparationSettings();
     }
-    void persistAndNavigate(1);
+    const defaultCxName = firstFreeCxName(scenarioIntersectionNames);
+    const draftToStart =
+      draft.name.trim() || draft.luaVariableName !== 'kreuzung'
+        ? draft
+        : {
+            ...draft,
+            name: defaultCxName,
+            luaVariableName: defaultCxName,
+            lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, defaultCxName),
+          };
+    if (draftToStart !== draft) setDraft(draftToStart);
+    void persistAndNavigate(1, draftToStart);
   }
 
   function stepContent() {
@@ -1488,6 +1589,7 @@ function IntersectionCreateWizard() {
                 lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, luaVariableName),
               });
             }}
+            helperText="Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße."
             fullWidth
           />
           <TextField
@@ -1500,6 +1602,53 @@ function IntersectionCreateWizard() {
                 lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, luaVariableName),
               });
             }}
+            helperText="Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw."
+            fullWidth
+          />
+          <FormControl fullWidth>
+            <InputLabel id="intersection-storage-slot-label">Kreuzungs-Speicherplatz</InputLabel>
+            <Select
+              labelId="intersection-storage-slot-label"
+              label="Kreuzungs-Speicherplatz"
+              value={draft.intersectionEepSaveId ?? -1}
+              onChange={(event) => updateDraft({ intersectionEepSaveId: Number(event.target.value) })}
+            >
+              <MenuItem value={-1}>Nicht speichern (-1)</MenuItem>
+              {storageSlotOptions.map((slot) => (
+                <MenuItem key={slot.id} value={Number(slot.id)}>
+                  {slot.id} {slot.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.75 }}>
+              Optional: Hinterlegt Informationen zur Kreuzung mit EEPSaveData.
+            </Typography>
+          </FormControl>
+          <Autocomplete
+            multiple
+            freeSolo
+            options={cameraOptions}
+            value={draft.staticCams ?? []}
+            filterSelectedOptions
+            onChange={(_event, value) =>
+              updateDraft({
+                staticCams: Array.from(new Set(value.map((cameraName) => cameraName.trim()).filter(Boolean))),
+              })
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Statische Kameras"
+                helperText="Optional: Wähle Kameras für diese Kreuzung aus, um schnell hinzuspringen."
+              />
+            )}
+          />
+          <TextField
+            label="Tipp-Text-Immobilie"
+            value={draft.tippStructure ?? ''}
+            onChange={(event) => updateDraft({ tippStructure: event.target.value || undefined })}
+            placeholder="#5573_Schaltschrank-Ampel2_SK2"
+            helperText="Optional: Hier wird auf Wunsch die Phase der Kreuzung angezeigt."
             fullWidth
           />
           <FormControlLabel
@@ -1514,45 +1663,16 @@ function IntersectionCreateWizard() {
           {showAdvancedIntersectionSettings && (
             <Stack spacing={2} sx={{ pl: { xs: 0, sm: 4 } }}>
               <TextField
-                label="TippStructure"
-                value={draft.tippStructure ?? ''}
-                onChange={(event) => updateDraft({ tippStructure: event.target.value || undefined })}
-                placeholder="#5573_Schaltschrank-Ampel2_SK2"
-                helperText="Optional: Struktur, an der die Fahrspur-Übersicht angezeigt wird."
+                label="Standard-Grünzeit (s)"
+                type="number"
+                value={draft.greenTimeSeconds ?? ''}
+                onChange={(event) => updateDraft({ greenTimeSeconds: optionalPositiveNumber(event.target.value) })}
+                helperText="Optional: Leeres Feld nutzt die Standardzeit der Runtime."
+                size="small"
+                inputProps={{ min: 1, 'aria-label': 'Standard-Grünzeit' }}
                 fullWidth
               />
-              <FormControl fullWidth>
-                <InputLabel id="intersection-storage-slot-label">Kreuzungs-Speicherplatz</InputLabel>
-                <Select
-                  labelId="intersection-storage-slot-label"
-                  label="Kreuzungs-Speicherplatz"
-                  value={draft.intersectionEepSaveId ?? -1}
-                  onChange={(event) => updateDraft({ intersectionEepSaveId: Number(event.target.value) })}
-                >
-                  <MenuItem value={-1}>Nicht speichern (-1)</MenuItem>
-                  {storageSlotOptions.map((slot) => (
-                    <MenuItem key={slot.id} value={Number(slot.id)}>
-                      {slot.id} {slot.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Autocomplete
-                multiple
-                freeSolo
-                options={cameraOptions}
-                value={draft.staticCams ?? []}
-                filterSelectedOptions
-                onChange={(_event, value) =>
-                  updateDraft({
-                    staticCams: Array.from(new Set(value.map((cameraName) => cameraName.trim()).filter(Boolean))),
-                  })
-                }
-                renderInput={(params) => (
-                  <TextField {...params} label="Statische Kameras" helperText="Optional: freie Eingabe möglich." />
-                )}
-              />
-              <Stack spacing={0.5}>
+              <Stack spacing={0}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -1562,11 +1682,11 @@ function IntersectionCreateWizard() {
                   }
                   label="Fußgängerampeln unterstützen"
                 />
-                <Typography variant="caption" color="text.secondary" sx={{ pl: 4 }}>
+                <Typography variant="caption" sx={checkboxHelperSx}>
                   Optional: Ermöglicht die Verwendung von Fußgängerampeln und -furten.
                 </Typography>
               </Stack>
-              <Stack spacing={0.5}>
+              <Stack spacing={0}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -1576,23 +1696,53 @@ function IntersectionCreateWizard() {
                   }
                   label="Mehrere Ampelbilder für eine Fahrspur unterstützen"
                 />
-                <Typography variant="caption" color="text.secondary" sx={{ pl: 4 }}>
+                <Typography variant="caption" sx={checkboxHelperSx}>
                   Optional: Ermöglicht auf einer Spur unterschiedliche Ampeln, z.B. Rechtsabbiegerpfeile oder
                   Abbiegesignale für die Tram.
                 </Typography>
               </Stack>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={draft.showLuaCodeImmediately ?? false}
-                    onChange={(event) => updateDraft({ showLuaCodeImmediately: event.target.checked })}
-                  />
-                }
-                label="Lua-Code sofort anzeigen"
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ pl: 4 }}>
-                Optional: Der Lua Code wird bereits vor der Zusammenfassung in allen Schritten angezeigt.
-              </Typography>
+              <Stack spacing={0}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={draft.manualLuaVariableNames ?? false}
+                      onChange={(event) => updateDraft({ manualLuaVariableNames: event.target.checked })}
+                    />
+                  }
+                  label="Lua-Variablennamen selbst festlegen"
+                />
+                <Typography variant="caption" sx={checkboxHelperSx}>
+                  Optional: Vergib die Variablennamen für die Fahrspuren und Signalgruppen selbst.
+                </Typography>
+              </Stack>
+              <Stack spacing={0}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={draft.individualLanePhaseSettings ?? false}
+                      onChange={(event) => updateDraft({ individualLanePhaseSettings: event.target.checked })}
+                    />
+                  }
+                  label="Individuelle Einstellungen für Fahrspuren und Phasen"
+                />
+                <Typography variant="caption" sx={checkboxHelperSx}>
+                  Optional: Multiplikator für erkannte Fahrzeuge, Länge einzelner Phasen.
+                </Typography>
+              </Stack>
+              <Stack spacing={0}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={draft.showLuaCodeImmediately ?? true}
+                      onChange={(event) => updateDraft({ showLuaCodeImmediately: event.target.checked })}
+                    />
+                  }
+                  label="Lua-Code sofort anzeigen"
+                />
+                <Typography variant="caption" sx={checkboxHelperSx}>
+                  Optional: Der Lua Code wird bereits vor der Zusammenfassung in allen Schritten angezeigt.
+                </Typography>
+              </Stack>
             </Stack>
           )}
         </Stack>
@@ -1725,31 +1875,15 @@ function IntersectionCreateWizard() {
                           </Typography>
                           <TextField
                             value={luaVariableName}
+                            onChange={(event) => updateLane(lane.id, { luaVariableName: event.target.value })}
                             size="small"
                             fullWidth
-                            InputProps={{ readOnly: true }}
-                            inputProps={{ tabIndex: -1, 'aria-label': `Lua-Variablenname ${lane.name}` }}
-                            sx={{
-                              '& .MuiInputBase-root': {
-                                bgcolor: 'action.disabledBackground',
-                                color: 'text.secondary',
-                              },
-                              '& .MuiInputBase-input': {
-                                caretColor: 'transparent',
-                                cursor: 'text',
-                                userSelect: 'text',
-                              },
-                              '& .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'action.disabledBackground',
-                              },
-                              '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'action.disabled',
-                              },
-                              '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: 'action.disabled',
-                                borderWidth: 1,
-                              },
+                            InputProps={{ readOnly: !(draft.manualLuaVariableNames ?? false) }}
+                            inputProps={{
+                              ...(draft.manualLuaVariableNames ? {} : { tabIndex: -1 }),
+                              'aria-label': `Lua-Variablenname ${lane.name}`,
                             }}
+                            sx={draft.manualLuaVariableNames ? undefined : readonlyTextFieldSx}
                           />
                         </Stack>
                         <Stack spacing={0.5}>
@@ -1899,6 +2033,37 @@ function IntersectionCreateWizard() {
                       </Box>
                     </Stack>
                   </Box>
+                  {draft.individualLanePhaseSettings && (
+                    <>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Box
+                        sx={{
+                          display: 'grid',
+                          gap: 1.25,
+                          gridTemplateColumns: { xs: '1fr', md: '10rem minmax(16rem, 1fr)' },
+                          alignItems: 'end',
+                          pr: 5,
+                        }}
+                      >
+                        <Stack spacing={0.5}>
+                          <Typography variant="caption" color="text.secondary">
+                            Fahrzeugmultiplikator
+                          </Typography>
+                          <TextField
+                            type="number"
+                            value={lane.vehicleMultiplier ?? 1}
+                            onChange={(event) =>
+                              updateLane(lane.id, {
+                                vehicleMultiplier: optionalPositiveNumber(event.target.value) ?? 1,
+                              })
+                            }
+                            size="small"
+                            inputProps={{ min: 1, 'aria-label': `Fahrzeugmultiplikator ${lane.name}` }}
+                          />
+                        </Stack>
+                      </Box>
+                    </>
+                  )}
                 </Paper>
               );
             })}
@@ -2007,6 +2172,7 @@ function IntersectionCreateWizard() {
           pedestrianCrossings: (draft.pedestrianCrossings ?? []).filter((crossing) => crossing.approach === approach),
         }))
         .filter((entry) => entry.lanes.length > 0 || entry.pedestrianCrossings.length > 0);
+      const signalGroupNamesEditable = draft.manualLuaVariableNames ?? false;
 
       function renderReadonlyTurnDirections(directions: IntersectionWizardTurnDirection[]) {
         return (
@@ -2187,9 +2353,24 @@ function IntersectionCreateWizard() {
                   value={group.name}
                   onChange={(event) => updateSignalGroup(group.id, { name: event.target.value })}
                   size="small"
-                  inputProps={{ maxLength: 24, 'aria-label': `Signalgruppe ${group.name}` }}
+                  InputProps={{ readOnly: !signalGroupNamesEditable }}
+                  inputProps={{
+                    maxLength: 24,
+                    ...(signalGroupNamesEditable ? {} : { tabIndex: -1 }),
+                    'aria-label': `Signalgruppe ${group.name}`,
+                  }}
+                  sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hasDefaultRequestDisplay(lane.id, group.id)}
+                    onChange={(event) => updateDefaultRequestDisplay(lane.id, group.id, event.target.checked)}
+                  />
+                }
+                label="Anforderungen anzeigen"
+              />
               <Stack spacing={1}>
                 {ampeln.map((ampel) => renderAmpelRow(lane, group, ampel, ampel.id === laneAmpel.id))}
                 <Button size="small" startIcon={<AddIcon />} onClick={() => addAmpelToSignalGroup(group)}>
@@ -2224,6 +2405,28 @@ function IntersectionCreateWizard() {
                   </IconButton>
                 )}
               </Stack>
+              {(variant === 'standard' || variant === 'route') && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={
+                        variant === 'route'
+                          ? (routeRule?.showRequests ?? hasDefaultRequestDisplay(lane.id, group.id))
+                          : hasDefaultRequestDisplay(lane.id, group.id)
+                      }
+                      onChange={(event) => {
+                        if (variant === 'route' && routeRule) {
+                          updateRouteRule(routeRule.id, { showRequests: event.target.checked });
+                        } else {
+                          updateDefaultRequestDisplay(lane.id, group.id, event.target.checked);
+                        }
+                      }}
+                    />
+                  }
+                  label="Anforderungen anzeigen"
+                  sx={{ alignSelf: 'flex-start', mr: 0 }}
+                />
+              )}
               <Box
                 sx={{
                   display: 'grid',
@@ -2358,7 +2561,13 @@ function IntersectionCreateWizard() {
                   value={group.name}
                   onChange={(event) => updateSignalGroup(group.id, { name: event.target.value })}
                   size="small"
-                  inputProps={{ maxLength: 24, 'aria-label': `Signalgruppe ${group.name}` }}
+                  InputProps={{ readOnly: !signalGroupNamesEditable }}
+                  inputProps={{
+                    maxLength: 24,
+                    ...(signalGroupNamesEditable ? {} : { tabIndex: -1 }),
+                    'aria-label': `Signalgruppe ${group.name}`,
+                  }}
+                  sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
               <Stack spacing={1}>
@@ -2601,7 +2810,13 @@ function IntersectionCreateWizard() {
                   value={group.name}
                   onChange={(event) => updateSignalGroup(group.id, { name: event.target.value })}
                   size="small"
-                  inputProps={{ maxLength: 32, 'aria-label': `Signalgruppe ${group.name}` }}
+                  InputProps={{ readOnly: !signalGroupNamesEditable }}
+                  inputProps={{
+                    maxLength: 32,
+                    ...(signalGroupNamesEditable ? {} : { tabIndex: -1 }),
+                    'aria-label': `Signalgruppe ${group.name}`,
+                  }}
+                  sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
               <Stack spacing={1}>
@@ -2628,7 +2843,7 @@ function IntersectionCreateWizard() {
                 <Stack spacing={1.5}>
                   <Stack direction="row" spacing={1} alignItems="baseline">
                     <ApproachIcon fontSize="small" sx={{ alignSelf: 'center' }} />
-                    <Typography variant="h6">{approachLabels[approach]}</Typography>
+                    <Typography variant="h6">Zufahrt aus {approachLabels[approach]}</Typography>
                   </Stack>
                   <Stack spacing={1}>{lanes.map((lane) => renderLaneCard(lane))}</Stack>
                   {pedestrianCrossings.length > 0 && (
@@ -2716,22 +2931,38 @@ function IntersectionCreateWizard() {
                   </Box>
                   {draft.phases.map((phase) => (
                     <Box key={phase.id} sx={{ p: 1, borderRight: 1, borderColor: 'divider' }}>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <TextField
-                          value={phase.name}
-                          size="small"
-                          inputProps={{ maxLength: 12, 'aria-label': `Verkehrsphase ${phase.name}` }}
-                          onChange={(event) => updatePhase(phase.id, { name: event.target.value })}
-                          sx={{ minWidth: 0 }}
-                        />
-                        <IconButton
-                          size="small"
-                          aria-label={`Verkehrsphase ${phase.name || phase.id} löschen`}
-                          title="Verkehrsphase löschen"
-                          onClick={() => removePhase(phase.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                      <Stack spacing={1.5}>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <TextField
+                            label="Phasenname"
+                            value={phase.name}
+                            size="small"
+                            inputProps={{ maxLength: 12, 'aria-label': `Verkehrsphase ${phase.name}` }}
+                            onChange={(event) => updatePhase(phase.id, { name: event.target.value })}
+                            sx={{ width: 112, minWidth: 0 }}
+                          />
+                          <IconButton
+                            size="small"
+                            aria-label={`Verkehrsphase ${phase.name || phase.id} löschen`}
+                            title="Verkehrsphase löschen"
+                            onClick={() => removePhase(phase.id)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                        {draft.individualLanePhaseSettings && (
+                          <TextField
+                            label="Grünzeit (s)"
+                            type="number"
+                            value={phase.greenTimeSeconds ?? ''}
+                            size="small"
+                            inputProps={{ min: 1, 'aria-label': `Grünzeit ${phase.name}` }}
+                            onChange={(event) =>
+                              updatePhase(phase.id, { greenTimeSeconds: optionalPositiveNumber(event.target.value) })
+                            }
+                            sx={{ width: 112 }}
+                          />
+                        )}
                       </Stack>
                     </Box>
                   ))}
@@ -2817,7 +3048,7 @@ function IntersectionCreateWizard() {
   }
 
   const isSummaryStep = activeStep === steps.length - 1;
-  const showCodePreview = (draft.showLuaCodeImmediately ?? false) || isSummaryStep;
+  const showCodePreview = (draft.showLuaCodeImmediately ?? true) || isSummaryStep;
 
   return (
     <PageContainer>

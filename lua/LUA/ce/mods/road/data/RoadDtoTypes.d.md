@@ -85,6 +85,9 @@
 | `directions`                 | `table`  |
 | `phases`                     | `table`  |
 | `defaultSignalGroups`        | `table`  |
+| `defaultRequestSignalGroups` | `table`  |
+| `requestTrackIds`            | `table`  |
+| `highlightTrackIds`          | `table`  |
 | `tracks`                     | `table`  |
 
 ## CeType `ce.mods.road.IntersectionPhase`

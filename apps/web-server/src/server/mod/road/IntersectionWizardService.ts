@@ -14,6 +14,7 @@ import {
   IntersectionWizardApproach,
   IntersectionWizardDraftAppDto,
   IntersectionWizardDraftSummaryAppDto,
+  IntersectionWizardLaneCountType,
   IntersectionWizardTurnDirection,
   IntersectionWizardSignalLookupAppDto,
   IntersectionWizardTrafficType,
@@ -40,6 +41,23 @@ function defaultState(): IntersectionWizardState {
 function normalizeStorageSlot(value: unknown): number {
   const numeric = Number(value ?? -1);
   return Number.isFinite(numeric) ? numeric : -1;
+}
+
+function optionalNumber(value: unknown): number | undefined {
+  if (typeof value === 'string' && value.trim() === '') return undefined;
+  if (value === null || value === undefined) return undefined;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+function optionalNumberArray(value: unknown): number[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const numbers = value.map(Number).filter((entry) => Number.isFinite(entry));
+  return numbers.length > 0 ? numbers : undefined;
+}
+
+function normalizeLaneCountType(value: unknown): IntersectionWizardLaneCountType | undefined {
+  return value === 'CONTACTS' || value === 'SIGNALS' || value === 'TRACKS' ? value : undefined;
 }
 
 const oppositeApproach: Record<IntersectionWizardApproach, IntersectionWizardApproach> = {
@@ -97,18 +115,27 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
       ((lane as { trafficType?: IntersectionWizardTrafficType }).trafficType ?? 'CAR') as IntersectionWizardTrafficType,
     ]),
   );
-  const lanes = (input.lanes ?? []).map((lane) => ({
-    id: lane.id,
-    name: lane.name,
-    ...(lane.vehicleMultiplier !== undefined ? { vehicleMultiplier: lane.vehicleMultiplier } : {}),
-    signalId: lane.signalId,
-    approach: normalizeApproach(
-      lane.approach,
-      lane.heading ?? (lane as { compassDirection?: IntersectionWizardApproach }).compassDirection,
-    ),
-    turnDirections:
-      lane.turnDirections ?? (lane as { directions?: IntersectionWizardTurnDirection[] }).directions ?? [],
-  }));
+  const lanes = (input.lanes ?? []).map((lane) => {
+    const countType = normalizeLaneCountType(lane.countType);
+    const requestTrackIds = optionalNumberArray(lane.requestTrackIds);
+    const highlightTrackIds = optionalNumberArray(lane.highlightTrackIds);
+    return {
+      id: lane.id,
+      name: lane.name,
+      ...(lane.luaVariableName?.trim() ? { luaVariableName: lane.luaVariableName } : {}),
+      ...(lane.vehicleMultiplier !== undefined ? { vehicleMultiplier: lane.vehicleMultiplier } : {}),
+      ...(countType ? { countType } : {}),
+      ...(requestTrackIds ? { requestTrackIds } : {}),
+      ...(highlightTrackIds ? { highlightTrackIds } : {}),
+      signalId: lane.signalId,
+      approach: normalizeApproach(
+        lane.approach,
+        lane.heading ?? (lane as { compassDirection?: IntersectionWizardApproach }).compassDirection,
+      ),
+      turnDirections:
+        lane.turnDirections ?? (lane as { directions?: IntersectionWizardTurnDirection[] }).directions ?? [],
+    };
+  });
   const pedestrianCrossings =
     input.pedestrianCrossings?.map((crossing) => ({
       ...crossing,
@@ -135,14 +162,18 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
       (ampel) =>
         ampel.use === 'PEDESTRIAN_ONLY' || ampel.use === 'VEHICLE_AND_PEDESTRIAN' || ampel.trafficType === 'PEDESTRIAN',
     );
+  const greenTimeSeconds = optionalNumber(input.greenTimeSeconds);
   const draft: IntersectionWizardDraftAppDto = {
     id: input.id || `draft-${Date.now()}`,
     name: input.name ?? '',
     luaVariableName: input.luaVariableName ?? 'kreuzung',
+    ...(greenTimeSeconds !== undefined ? { greenTimeSeconds } : {}),
     intersectionEepSaveId: normalizeStorageSlot(input.intersectionEepSaveId),
     ...(input.tippStructure !== undefined ? { tippStructure: input.tippStructure } : {}),
     switchInStrictOrder: input.switchInStrictOrder ?? false,
-    showLuaCodeImmediately: input.showLuaCodeImmediately ?? false,
+    showLuaCodeImmediately: input.showLuaCodeImmediately ?? true,
+    manualLuaVariableNames: input.manualLuaVariableNames ?? false,
+    individualLanePhaseSettings: input.individualLanePhaseSettings ?? false,
     supportPedestrianSignals: input.supportPedestrianSignals ?? inferredSupportPedestrianSignals,
     supportMultipleLaneSignals: input.supportMultipleLaneSignals ?? inferredSupportMultipleLaneSignals,
     staticCams: input.staticCams ?? [],
@@ -153,7 +184,15 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
     ampeln,
     signalGroups,
     routeRules: input.routeRules ?? [],
-    phases: input.phases ?? [],
+    defaultRequestDisplays: input.defaultRequestDisplays ?? [],
+    phases:
+      input.phases?.map((phase) => {
+        const phaseGreenTimeSeconds = optionalNumber(phase.greenTimeSeconds);
+        return {
+          ...phase,
+          ...(phaseGreenTimeSeconds !== undefined ? { greenTimeSeconds: phaseGreenTimeSeconds } : {}),
+        };
+      }) ?? [],
     generatedLua: '',
   };
   const generated = generateIntersectionWizardLua(draft);

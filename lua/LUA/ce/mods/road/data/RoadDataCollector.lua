@@ -68,11 +68,29 @@ local function signalGroupsForSignals(intersection, signals)
     return signalGroupNames
 end
 
+local function sortedNumberKeys(values)
+    local keys = {}
+    for value in pairs(values or {}) do table.insert(keys, value) end
+    table.sort(keys)
+    return keys
+end
+
+local function sortedNumberValues(values)
+    local sortedValues = {}
+    for _, value in ipairs(values or {}) do table.insert(sortedValues, value) end
+    table.sort(sortedValues)
+    return sortedValues
+end
+
 local function requestSignalsForRoute(lane, route)
     local requestSignals = lane.requestSignals and lane.requestSignals[route]
     local signals = {}
     for _, signal in ipairs(requestSignals or {}) do signals[signal] = true end
     return signals
+end
+
+local function defaultRequestSignalGroupsForLane(intersection, lane)
+    return signalGroupsForSignals(intersection, requestSignalsForRoute(lane, "!ALL!"))
 end
 
 local function hasRequestOnRouteGroups(intersection, lane, route, signalGroupNames)
@@ -327,6 +345,9 @@ function RoadDataCollector.collectCrossings(allIntersections)
             phases = lanePhases[lane] or {},
             defaultSignalGroups = defaultSignalGroupsForLane(laneIntersections[lane], lane),
             routeRules = routeRulesForLane(laneIntersections[lane], lane),
+            defaultRequestSignalGroups = defaultRequestSignalGroupsForLane(laneIntersections[lane], lane),
+            requestTrackIds = sortedNumberKeys(lane.tracksForRequests),
+            highlightTrackIds = sortedNumberValues(lane.tracksForHighlighting),
             tracks = lane.tracksForHighlighting or {}
         }
         for i, value in pairs(lane.queue:elements()) do dto.waitingTrains[i] = value end

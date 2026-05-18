@@ -26,5 +26,8 @@ export interface IntersectionLaneLuaDto {
   phases: string[];
   defaultSignalGroups?: string[];
   routeRules?: IntersectionLaneRouteRuleLuaDto[];
+  defaultRequestSignalGroups?: string[];
+  requestTrackIds?: number[];
+  highlightTrackIds?: number[];
   tracks: number[];
 }

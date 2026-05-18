@@ -26,5 +26,8 @@ export interface IntersectionLaneAppDto {
   phases: string[];
   defaultSignalGroups: string[];
   routeRules?: IntersectionLaneRouteRuleAppDto[];
+  defaultRequestSignalGroups?: string[];
+  requestTrackIds?: number[];
+  highlightTrackIds?: number[];
   tracks: number[];
 }

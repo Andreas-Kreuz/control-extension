@@ -166,6 +166,13 @@ local function toIntersectionLaneDto(lane, isSelected)
         copyTable(lane.defaultSignalGroups) or {}
     dto.routeRules               = SyncPolicy.shouldPublishField(fieldPolicies, "routeRules", isSelected) and
         copyLaneRouteRules(lane.routeRules) or {}
+    dto.defaultRequestSignalGroups = SyncPolicy.shouldPublishField(fieldPolicies, "defaultRequestSignalGroups",
+                                                                   isSelected) and
+        copyTable(lane.defaultRequestSignalGroups) or {}
+    dto.requestTrackIds            = SyncPolicy.shouldPublishField(fieldPolicies, "requestTrackIds", isSelected) and
+        copyTable(lane.requestTrackIds) or {}
+    dto.highlightTrackIds          = SyncPolicy.shouldPublishField(fieldPolicies, "highlightTrackIds", isSelected) and
+        copyTable(lane.highlightTrackIds) or {}
     dto.tracks                     = SyncPolicy.shouldPublishField(fieldPolicies, "tracks", isSelected) and
         copyTable(lane.tracks) or {}
     return dto

@@ -100,6 +100,9 @@ function laneVariableName(
   intersectionPrefix: string,
   used: Set<string>,
 ): string {
+  if (lane.luaVariableName?.trim()) {
+    return uniqueIdentifier(lane.luaVariableName, `lane${index + 1}`, used);
+  }
   const numberedLane = /^(?:lane|spur|fahrstreifen|fs)\s*(\d+[a-z]?)$/i.exec(lane.name.trim());
   if (numberedLane) {
     const prefix = lowerFirst(sanitizeIdentifier(intersectionPrefix, 'kreuzung'));
@@ -233,8 +236,16 @@ function chainCall(base: string, calls: string[]): string {
   return `${base}\n${calls.map((call) => `    :${call}`).join('\n')}`;
 }
 
-function phaseCall(intersectionVar: string, phaseName: string, groupVarList: string[]): string {
-  const newPhase = `${intersectionVar}:newPhase(${luaString(phaseName)})`;
+function phaseCall(
+  intersectionVar: string,
+  phaseName: string,
+  groupVarList: string[],
+  greenTimeSeconds?: number,
+): string {
+  const newPhase =
+    greenTimeSeconds !== undefined
+      ? `${intersectionVar}:newPhase(${luaString(phaseName)}, ${greenTimeSeconds})`
+      : `${intersectionVar}:newPhase(${luaString(phaseName)})`;
   if (groupVarList.length <= 1) return chainCall(newPhase, [`addSignalGroup(${groupVarList.join(', ')})`]);
   return chainCall(newPhase, [`addSignalGroup(\n        ${groupVarList.join(',\n        ')}\n    )`]);
 }
@@ -246,6 +257,12 @@ function intersectionChainCalls(draft: IntersectionWizardDraftAppDto, variableNa
     `withStorage(${draft.intersectionEepSaveId ?? -1})`,
     ...(draft.switchInStrictOrder ? ['setSwitchInStrictOrder(true)'] : []),
   ];
+}
+
+function intersectionConstructor(draft: IntersectionWizardDraftAppDto): string {
+  const args = [luaString(draft.name)];
+  if (draft.greenTimeSeconds !== undefined) args.push(String(draft.greenTimeSeconds));
+  return `Intersection:new(${args.join(', ')})`;
 }
 
 function isPlainLightStructure(ampel: IntersectionWizardAmpelAppDto): boolean {
@@ -400,6 +417,8 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     const laneSignalExpression = laneSignalVarsBySignalId.get(lane.signalId.trim()) ?? 'nil';
     const type = laneTrafficType(draft, lane);
     const turnDirectionArguments = luaTurnDirections(lane.turnDirections);
+    const requestTrackIds = lane.requestTrackIds ?? [];
+    const highlightTrackIds = lane.highlightTrackIds ?? [];
     const chainCalls = [
       `setApproach(Lane.Approach.${normalizeApproach(lane.approach, lane.heading)})`,
       ...(turnDirectionArguments ? [`setTurnDirections(${turnDirectionArguments})`] : []),
@@ -407,6 +426,9 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       ...(lane.vehicleMultiplier && lane.vehicleMultiplier !== 1
         ? [`setFahrzeugMultiplikator(${lane.vehicleMultiplier})`]
         : []),
+      ...(lane.countType === 'SIGNALS' ? ['useSignalForQueue()'] : []),
+      ...(lane.countType === 'TRACKS' ? requestTrackIds.map((trackId) => `useTrackForQueue(${trackId})`) : []),
+      ...(highlightTrackIds.length > 0 ? [`setHighLightingTracks(${highlightTrackIds.join(', ')})`] : []),
     ];
     bodyLines.push(
       `${variable} = ${chainCall(`Lane:new(${luaString(lane.name)}, ${laneSignalExpression})`, chainCalls)}`,
@@ -416,7 +438,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
   bodyLines.push(
     '',
     '-- Kreuzung',
-    `local ${prefix} = ${chainCall(`Intersection:new(${luaString(draft.name)})`, intersectionChainCalls(draft, prefix))}`,
+    `local ${prefix} = ${chainCall(intersectionConstructor(draft), intersectionChainCalls(draft, prefix))}`,
   );
   if ((draft.pedestrianCrossings ?? []).length > 0) {
     bodyLines.push('', '-- Fussgaengerfurten');
@@ -461,7 +483,13 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       .map((group) => groupVars.get(group.id))
       .filter((value): value is string => Boolean(value));
     if (groupVarList.length > 0) {
-      bodyLines.push(`${laneVars.get(lane.id)}:driveOnDefaultSignalGroups(${groupVarList.join(', ')})`);
+      const requestGroupVarList = (draft.defaultRequestDisplays ?? [])
+        .filter((entry) => entry.laneId === lane.id)
+        .map((entry) => groupVars.get(entry.signalGroupId))
+        .filter((value): value is string => Boolean(value));
+      const calls =
+        requestGroupVarList.length > 0 ? [`showRequestsOnSignalGroups(${requestGroupVarList.join(', ')})`] : [];
+      bodyLines.push(chainCall(`${laneVars.get(lane.id)}:driveOnDefaultSignalGroups(${groupVarList.join(', ')})`, calls));
     }
   });
 
@@ -496,7 +524,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     const groupVarList = phase.signalGroupIds
       .map((id) => groupVars.get(id))
       .filter((value): value is string => Boolean(value));
-    bodyLines.push(phaseCall(prefix, phase.name, groupVarList));
+    bodyLines.push(phaseCall(prefix, phase.name, groupVarList, phase.greenTimeSeconds));
   });
   lines.push(...indentBlock(bodyLines), 'end', `-- END Kreuzung ${prefix}${crossingCommentName}`);
 
@@ -542,6 +570,15 @@ export function createDraftFromCurrentIntersection(
     id: `lane-${index + 1}`,
     name: lane.name || `FS${index + 1}`,
     vehicleMultiplier: lane.vehicleMultiplier,
+    ...(lane.countType === 'SIGNALS' || lane.countType === 'TRACKS' || lane.countType === 'CONTACTS'
+      ? { countType: lane.countType }
+      : {}),
+    ...(lane.requestTrackIds && lane.requestTrackIds.length > 0 ? { requestTrackIds: lane.requestTrackIds } : {}),
+    ...(lane.highlightTrackIds && lane.highlightTrackIds.length > 0
+      ? { highlightTrackIds: lane.highlightTrackIds }
+      : lane.tracks.length > 0
+        ? { highlightTrackIds: lane.tracks }
+        : {}),
     signalId: String(lane.laneSignalId ?? ''),
     approach: normalizeApproach(lane.approach, lane.heading),
     turnDirections: normalizeTurnDirections(lane.directions),
@@ -650,6 +687,14 @@ export function createDraftFromCurrentIntersection(
       }))
       .filter((rule) => rule.laneId && rule.routeNames.length > 0 && rule.signalGroupIds.length > 0),
   );
+  const defaultRequestDisplays = lanes.flatMap((lane, laneIndex) =>
+    (lane.defaultRequestSignalGroups ?? [])
+      .map((signalGroupName) => ({
+        laneId: draftLanes[laneIndex]?.id ?? '',
+        signalGroupId: signalGroupIdsByName.get(signalGroupName) ?? '',
+      }))
+      .filter((entry) => entry.laneId && entry.signalGroupId),
+  );
   const hasPedestrianSignals =
     signalGroups.some((signalGroup) => signalGroup.trafficType === 'PEDESTRIAN') ||
     draftAmpeln.some(
@@ -666,9 +711,11 @@ export function createDraftFromCurrentIntersection(
     id: `current-${intersection.id}`,
     name: intersection.name,
     luaVariableName: prefix,
+    ...(intersection.greenTimeSeconds > 0 ? { greenTimeSeconds: intersection.greenTimeSeconds } : {}),
     intersectionEepSaveId: intersection.eepSaveId ?? -1,
     ...(intersection.tippStructure !== undefined ? { tippStructure: intersection.tippStructure } : {}),
     switchInStrictOrder: intersection.switchInStrictOrder ?? false,
+    showLuaCodeImmediately: true,
     supportPedestrianSignals: hasPedestrianSignals,
     supportMultipleLaneSignals: hasMultipleLaneSignals,
     staticCams: intersection.staticCams ?? [],
@@ -679,9 +726,11 @@ export function createDraftFromCurrentIntersection(
     ampeln: draftAmpeln,
     signalGroups,
     routeRules,
+    defaultRequestDisplays,
     phases: intersection.phases.map((phase) => ({
       id: `phase-${phase.name}`,
       name: phase.name,
+      ...(phase.greenTimeSeconds > 0 ? { greenTimeSeconds: phase.greenTimeSeconds } : {}),
       signalGroupIds: signalGroups
         .filter((signalGroup) => phase.signalGroups.includes(signalGroup.name))
         .map((signalGroup) => signalGroup.id),

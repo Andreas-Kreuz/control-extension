@@ -66,6 +66,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             approach = "SOUTH",
             directions = { "LEFT" },
             phases = { "P1" },
+            defaultRequestSignalGroups = { "sgLane1Straight" },
+            requestTrackIds = { 11, 12 },
+            highlightTrackIds = { 10 },
             tracks = { 10 },
             hidden = true
         }
@@ -261,6 +264,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         phases = { "P1" },
                         defaultSignalGroups = {},
                         routeRules = {},
+                        defaultRequestSignalGroups = { "sgLane1Straight" },
+                        requestTrackIds = { 11, 12 },
+                        highlightTrackIds = { 10 },
                         tracks = { 10 }
                     }, laneDto)
         assert.same({
@@ -279,6 +285,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         phases = { "P1" },
                         defaultSignalGroups = {},
                         routeRules = {},
+                        defaultRequestSignalGroups = { "sgLane1Straight" },
+                        requestTrackIds = { 11, 12 },
+                        highlightTrackIds = { 10 },
                         tracks = { 10 }
                     }, selectedLaneDto)
         assert.equals("ce.mods.road.IntersectionPhase", phaseCeType)
@@ -530,6 +539,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             trafficType = "NORMAL",
             waitCount = 0,
             directions = { "STRAIGHT" },
+            requestSignals = { ["!ALL!"] = { signalHead1 } },
+            tracksForRequests = { [17] = true, [11] = true },
+            tracksForHighlighting = { 23, 24 },
             queue = queue
         }
         local lane2 = {
@@ -598,6 +610,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             directions = { "STRAIGHT" },
             queue = queue
         }
+        lane.requestSignals = { ["!ALL!"] = { laneSignal } }
+        lane.tracksForRequests = { [17] = true, [11] = true }
+        lane.tracksForHighlighting = { 23, 24 }
         local vehicleGroup = {
             name = "sgLane1Straight",
             getSignalHeads = function () return { [laneSignal] = "CAR" } end
@@ -630,5 +645,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local data = RoadDataCollector.collectCrossings({ A = crossing })
 
         assert.same({ "sgLane1Straight" }, data.intersectionLanes[1].defaultSignalGroups)
+        assert.same({ "sgLane1Straight" }, data.intersectionLanes[1].defaultRequestSignalGroups)
+        assert.same({ 11, 17 }, data.intersectionLanes[1].requestTrackIds)
+        assert.same({ 23, 24 }, data.intersectionLanes[1].highlightTrackIds)
+        assert.same({ 23, 24 }, data.intersectionLanes[1].tracks)
     end)
 end)

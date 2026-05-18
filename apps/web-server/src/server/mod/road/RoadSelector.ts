@@ -126,6 +126,9 @@ export default class RoadSelector {
           phases: dto.phases,
           defaultSignalGroups: dto.defaultSignalGroups ?? [],
           routeRules: dto.routeRules ?? [],
+          defaultRequestSignalGroups: dto.defaultRequestSignalGroups ?? [],
+          requestTrackIds: dto.requestTrackIds ?? [],
+          highlightTrackIds: dto.highlightTrackIds ?? dto.tracks,
           tracks: dto.tracks,
         };
       },

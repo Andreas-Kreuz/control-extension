@@ -66,6 +66,9 @@
 ---@field phases table
 ---@field defaultSignalGroups table
 ---@field routeRules IntersectionLaneRouteRuleDto[]
+---@field defaultRequestSignalGroups table
+---@field requestTrackIds table
+---@field highlightTrackIds table
 ---@field tracks table
 
 ---@class IntersectionLaneRouteRuleDto

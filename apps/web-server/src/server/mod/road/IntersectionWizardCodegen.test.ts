@@ -218,6 +218,47 @@ function testCodegenCreatesMultipleDefaultSignalGroupsOnOneLane(): void {
   assert.match(lua, /bahnhofHauptLane1:driveOnDefaultSignalGroups\(SG_Geradeaus, SG_Rechts\)/);
 }
 
+function testCodegenCreatesGreenTimesAndLaneSetup(): void {
+  const draft = makeDraft();
+  draft.greenTimeSeconds = 18;
+  Object.assign(draft.lanes[0]!, {
+    luaVariableName: 'customLane',
+    vehicleMultiplier: 3,
+    countType: 'SIGNALS',
+    highlightTrackIds: [17, 18],
+  });
+  Object.assign(draft.lanes[1]!, {
+    countType: 'TRACKS',
+    requestTrackIds: [91, 92],
+  });
+  draft.phases = [{ id: 'phase-1', name: 'P1', greenTimeSeconds: 7, signalGroupIds: ['sg-1', 'sg-2'] }];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.match(lua, /Intersection:new\("Bahnhofstraße - Hauptstraße", 18\)/);
+  assert.match(
+    lua,
+    /customLane = Lane:new\("FS1", K1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT\)\n\s+:setFahrzeugMultiplikator\(3\)\n\s+:useSignalForQueue\(\)\n\s+:setHighLightingTracks\(17, 18\)/,
+  );
+  assert.match(
+    lua,
+    /bahnhofHauptLane2 = Lane:new\("FS2", S1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.LEFT\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)\n\s+:useTrackForQueue\(91\)\n\s+:useTrackForQueue\(92\)/,
+  );
+  assert.match(lua, /bahnhofHaupt:newPhase\("P1", 7\)/);
+}
+
+function testCodegenCreatesDefaultRequestDisplays(): void {
+  const draft = makeDraft();
+  draft.defaultRequestDisplays = [{ laneId: 'lane-1', signalGroupId: 'sg-1' }];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.match(
+    lua,
+    /bahnhofHauptLane1:driveOnDefaultSignalGroups\(SG_Geradeaus\)\n\s+:showRequestsOnSignalGroups\(SG_Geradeaus\)/,
+  );
+}
+
 function testCodegenCreatesRouteSpecificSignalGroupRules(): void {
   const draft = makeDraft();
   draft.signalGroups[1]!.laneIds = [];
@@ -380,6 +421,9 @@ function testCurrentIntersectionDraftKeepsLaneSignalIds(): void {
       directions: ['STRAIGHT', 'RIGHT'],
       phases: ['P1'],
       defaultSignalGroups: ['SG Spur 4 Rechts'],
+      defaultRequestSignalGroups: ['SG Spur 4 Rechts'],
+      requestTrackIds: [],
+      highlightTrackIds: [201, 202],
       tracks: [],
     },
   ];
@@ -403,17 +447,27 @@ function testCurrentIntersectionDraftKeepsLaneSignalIds(): void {
   assert.ok(importedLane);
   assert.equal(importedLane.signalId, '89');
   assert.equal(importedLane.vehicleMultiplier, 15);
+  assert.equal(importedLane.countType, 'SIGNALS');
+  assert.deepEqual(importedLane.highlightTrackIds, [201, 202]);
+  assert.deepEqual(draft.defaultRequestDisplays, [{ laneId: 'lane-1', signalGroupId: 'sg-1' }]);
   assert.equal(draft.luaVariableName, 'c1');
   assert.equal(draft.intersectionEepSaveId, 77);
   assert.equal(draft.switchInStrictOrder, true);
+  assert.equal(draft.greenTimeSeconds, 12);
+  assert.equal(draft.phases[0]?.greenTimeSeconds, 12);
   assert.match(
     draft.generatedLua,
-    /local c1 = Intersection:new\("Bahnhofstraße - Hauptstraße"\)\n\s+:setTippStructure\("#5573_Schaltschrank-Ampel2_SK2"\)\n\s+:scriptVariableName\("c1"\)\n\s+:withStorage\(77\)\n\s+:setSwitchInStrictOrder\(true\)/,
+    /local c1 = Intersection:new\("Bahnhofstraße - Hauptstraße", 12\)\n\s+:setTippStructure\("#5573_Schaltschrank-Ampel2_SK2"\)\n\s+:scriptVariableName\("c1"\)\n\s+:withStorage\(77\)\n\s+:setSwitchInStrictOrder\(true\)/,
   );
   assert.match(
     draft.generatedLua,
-    /Lane:new\("Spur 4", lane4Sig\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT, Lane\.Directions\.RIGHT\)\n\s+:setFahrzeugMultiplikator\(15\)/,
+    /Lane:new\("Spur 4", lane4Sig\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT, Lane\.Directions\.RIGHT\)\n\s+:setFahrzeugMultiplikator\(15\)\n\s+:useSignalForQueue\(\)\n\s+:setHighLightingTracks\(201, 202\)/,
   );
+  assert.match(
+    draft.generatedLua,
+    /c1Lane4:driveOnDefaultSignalGroups\(SG_Spur_4_Rechts\)\n\s+:showRequestsOnSignalGroups\(SG_Spur_4_Rechts\)/,
+  );
+  assert.match(draft.generatedLua, /c1:newPhase\("P1", 12\)/);
 }
 
 function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
@@ -581,7 +635,7 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
     draft.generatedLua,
     /bahnhofstra_e_Hauptstra_eLane4:routes\("Tram 11 Heiderand", "Tram 11 Rehfeld"\)\n\s+:driveOnlyOnSignalGroups\(sgLane8Left\)\n\s+:showRequestsOnSignalGroups\(sgLane8Left\)/,
   );
-  assert.match(draft.generatedLua, /newPhase\("P2"\)\n\s+:addSignalGroup\(.*sgLane4Right.*sgLane8Left/s);
+  assert.match(draft.generatedLua, /newPhase\("P2", 15\)\n\s+:addSignalGroup\(.*sgLane4Right.*sgLane8Left/s);
 }
 
 function testCurrentIntersectionDraftLoadsC2StyleSignalGroups(): void {
@@ -726,7 +780,7 @@ function testCurrentIntersectionDraftLoadsC2StyleSignalGroups(): void {
     draft.generatedLua,
     /Lane:new\("Spur 5", K108\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.LEFT\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)\n\s+:setFahrzeugMultiplikator\(15\)/,
   );
-  assert.match(draft.generatedLua, /newPhase\("P2a"\)\n\s+:addSignalGroup\(.*sgLane3and4Straight.*sgPedDiagonal/s);
+  assert.match(draft.generatedLua, /newPhase\("P2a", 15\)\n\s+:addSignalGroup\(.*sgLane3and4Straight.*sgPedDiagonal/s);
 }
 
 function testCurrentIntersectionFallbackGroupsSignalGroupsByApproachAndTurnDirections(): void {
@@ -958,6 +1012,14 @@ export async function run(): Promise<void> {
   await runTest(
     'intersection wizard codegen creates multiple default signal groups on one lane',
     testCodegenCreatesMultipleDefaultSignalGroupsOnOneLane,
+  );
+  await runTest(
+    'intersection wizard codegen creates green times and lane setup',
+    testCodegenCreatesGreenTimesAndLaneSetup,
+  );
+  await runTest(
+    'intersection wizard codegen creates default request displays',
+    testCodegenCreatesDefaultRequestDisplays,
   );
   await runTest(
     'intersection wizard codegen creates route-specific signal group rules',
