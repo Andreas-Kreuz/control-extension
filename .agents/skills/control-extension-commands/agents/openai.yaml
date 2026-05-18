@@ -1,0 +1,4 @@
+interface:
+  display_name: "Control Extension Commands"
+  short_description: "Approval workflow for sandbox-sensitive project commands"
+  default_prompt: "Use $control-extension-commands before running Cypress, broad yarn checks, app tests, Jekyll, or release builds in control-extension."
