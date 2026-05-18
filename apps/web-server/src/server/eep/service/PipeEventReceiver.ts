@@ -19,6 +19,7 @@ export class PipeEventReceiver {
     this.server.listen(this.pipeName, () => {
       if (this.debug) console.log('PipeEventReceiver listening on ' + this.pipeName);
     });
+    this.server.unref();
   }
 
   stop(): void {

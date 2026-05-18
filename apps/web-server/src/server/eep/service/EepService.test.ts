@@ -174,8 +174,10 @@ async function testDisconnectRemovesPipeDescriptor(): Promise<void> {
     });
 
     assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverTransport)), true);
+    assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverIsRunning)), true);
     service.disconnect();
     assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverTransport)), false);
+    assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverIsRunning)), false);
   } finally {
     service.disconnect();
     await rm(tempDir, { recursive: true, force: true });
@@ -219,7 +221,7 @@ export async function run(): Promise<void> {
   await runTest('EepService startup reads events-from-ce with pending marker', testStartupReadsPendingEventsFile);
   await runTest('EepService watcher reads future pending events', testWatcherReadsFuturePendingEventsFile);
   await runTest('EepService creates and replaces the pipe descriptor', testCreatesAndReplacesPipeDescriptor);
-  await runTest('EepService disconnect removes the pipe descriptor', testDisconnectRemovesPipeDescriptor);
+  await runTest('EepService disconnect removes runtime marker files', testDisconnectRemovesPipeDescriptor);
   await runTest(
     'EepService can skip server-state.json persistence while writing the counter',
     testWriteCacheCanSkipServerStatePersistence,

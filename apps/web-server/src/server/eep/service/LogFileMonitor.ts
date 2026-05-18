@@ -34,6 +34,7 @@ export class LogFileMonitor {
       this.logFileWatcher = fs.watch(path.dirname(this.logFilePath), {}, () => {
         this.reconcile();
       });
+      this.logFileWatcher.unref?.();
       this.logFileWatcher.on('error', (error) => {
         if (this.debug) console.log(error);
         this.logFileWatcher?.close();
@@ -44,6 +45,7 @@ export class LogFileMonitor {
       this.logFileWatcher = undefined;
     }
     this.pollTimer = setInterval(() => this.reconcile(), this.pollIntervalMs);
+    this.pollTimer.unref?.();
     this.reconcile();
   }
 

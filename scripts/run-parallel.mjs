@@ -11,25 +11,51 @@ if (commands.length === 0) {
 const isWindows = process.platform === 'win32';
 const shellCommand = isWindows ? process.env.ComSpec || 'cmd.exe' : '/bin/sh';
 const shellArgs = (command) => (isWindows ? ['/d', '/s', '/c', command] : ['-lc', command]);
-const shutdownGraceMs = 5000;
+const shutdownGraceMs = 10000;
+const forceShutdownGraceMs = 5000;
 
 const children = new Set();
 let completedChildren = 0;
 let shutdownState = null;
 let forcedExitTimer = null;
+let finalExitTimer = null;
+const shutdownErrors = [];
 
-const killChild = (child) => {
+const taskkillChild = (child, force) => {
+  const args = ['/T', ...(force ? ['/F'] : []), '/PID', String(child.pid)];
+  const taskkill = spawn('taskkill', args, { stdio: 'ignore' });
+  taskkill.on('error', (error) => {
+    shutdownErrors.push(`taskkill ${args.join(' ')} failed for ${child.commandLabel}: ${error.message}`);
+  });
+  taskkill.on('exit', (code) => {
+    if (code && code !== 128) {
+      shutdownErrors.push(`taskkill ${args.join(' ')} exited with code ${code} for ${child.commandLabel}`);
+    }
+  });
+};
+
+const requestChildShutdown = (child) => {
   if (isWindows && child.pid) {
-    spawn('taskkill', ['/T', '/F', '/PID', String(child.pid)], { stdio: 'ignore' });
+    taskkillChild(child, false);
+    child.kill();
   } else {
     child.kill('SIGTERM');
   }
 };
 
-const killOthers = (currentChild) => {
+const forceChildShutdown = (child) => {
+  if (isWindows && child.pid) {
+    taskkillChild(child, true);
+    child.kill();
+  } else {
+    child.kill('SIGKILL');
+  }
+};
+
+const requestOthersToStop = (currentChild) => {
   for (const child of children) {
     if (child !== currentChild && !child.killed) {
-      killChild(child);
+      requestChildShutdown(child);
     }
   }
 };
@@ -40,8 +66,23 @@ const maybeExit = () => {
       clearTimeout(forcedExitTimer);
       forcedExitTimer = null;
     }
+    if (finalExitTimer) {
+      clearTimeout(finalExitTimer);
+      finalExitTimer = null;
+    }
     process.exit(shutdownState?.code ?? 0);
   }
+};
+
+const reportShutdownTimeout = (label) => {
+  const stillRunning = [...children].map((child) => child.commandLabel).filter(Boolean);
+  if (stillRunning.length > 0) {
+    console.error(`${label}: ${stillRunning.join(', ')}`);
+  }
+  for (const error of shutdownErrors) {
+    console.error(error);
+  }
+  return stillRunning;
 };
 
 const startShutdown = (currentChild, code) => {
@@ -50,14 +91,23 @@ const startShutdown = (currentChild, code) => {
     if (code !== 0) {
       console.error(`Parallel command exited with code ${code}: ${currentChild.commandLabel}`);
     }
-    killOthers(currentChild);
+    requestOthersToStop(currentChild);
 
     forcedExitTimer = setTimeout(() => {
-      const stillRunning = [...children].map((child) => child.commandLabel).filter(Boolean);
-      if (stillRunning.length > 0) {
-        console.error(`Timed out waiting for parallel command shutdown: ${stillRunning.join(', ')}`);
+      const stillRunning = reportShutdownTimeout('Timed out waiting for graceful parallel command shutdown');
+      for (const child of children) {
+        forceChildShutdown(child);
       }
-      process.exit(shutdownState.code);
+
+      finalExitTimer = setTimeout(() => {
+        reportShutdownTimeout('Timed out waiting for forced parallel command shutdown');
+        process.exit(shutdownState.code);
+      }, forceShutdownGraceMs);
+      finalExitTimer.unref?.();
+
+      if (stillRunning.length === 0) {
+        maybeExit();
+      }
     }, shutdownGraceMs);
 
     forcedExitTimer.unref?.();
@@ -97,7 +147,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     if (!shutdownState) {
       shutdownState = { code: 1 };
       for (const child of children) {
-        killChild(child);
+        requestChildShutdown(child);
       }
     }
   });

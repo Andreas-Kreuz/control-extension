@@ -12,3 +12,36 @@ const server = new ServerMain(serverConfigDir, serverPort, {
   debug: !testMode,
 });
 server.start();
+
+let shutdownInProgress = false;
+
+async function stopServer(exitCode: number): Promise<void> {
+  if (shutdownInProgress) {
+    process.exit(1);
+  }
+
+  shutdownInProgress = true;
+  try {
+    await server.stop();
+    process.exit(exitCode);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGBREAK'] as const) {
+  process.once(signal, () => {
+    void stopServer(0);
+  });
+}
+
+process.once('uncaughtException', (error) => {
+  console.error(error);
+  void stopServer(1);
+});
+
+process.once('unhandledRejection', (reason) => {
+  console.error(reason);
+  void stopServer(1);
+});

@@ -40,6 +40,7 @@ export default class AppEffects {
   private store = new AppReducer();
   private TESTMODE = false;
   private persistServerState = true;
+  private stopped = false;
   private updateCheckService: UpdateCheckService;
   private updateSearchStarted = false;
 
@@ -243,6 +244,11 @@ export default class AppEffects {
   }
 
   public changeEepDirectory(eepDir: string) {
+    if (this.stopped) {
+      return;
+    }
+
+    this.eepDataEffects?.stop();
     this.eepService?.disconnect();
     this.eepService = null;
 
@@ -252,6 +258,11 @@ export default class AppEffects {
     // Check the directory and register handlers on success
     const eepService = new EepService(this.debug, { persistServerState: this.persistServerState });
     eepService.reInit(completeDir, (err: string | null, dir: string | null) => {
+      if (this.stopped) {
+        eepService.disconnect();
+        return;
+      }
+
       if (err) {
         console.error(err);
       }
@@ -271,6 +282,17 @@ export default class AppEffects {
       if (this.debug) console.log('🟦 EMIT to all IO: ' + SettingsEvent.Host, this.getHostname());
       this.io.to(SettingsEvent.Room).emit(SettingsEvent.Host, this.store.getHostname());
     });
+  }
+
+  public stop(): void {
+    this.stopped = true;
+    this.updateCheckService.stop();
+    this.updateSearchStarted = false;
+    this.statistics.stop();
+    this.eepDataEffects?.stop();
+    this.eepService?.disconnect();
+    this.eepService = null;
+    this.interestSyncService = null;
   }
 
   private initServices(eepService: EepService) {

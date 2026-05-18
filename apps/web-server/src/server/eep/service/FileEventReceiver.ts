@@ -26,6 +26,7 @@ export class FileEventReceiver {
         this.readJsonFile(jsonFile, jsonReadyFile);
       }
     });
+    this.watcher.unref?.();
   }
 
   detach(): void {

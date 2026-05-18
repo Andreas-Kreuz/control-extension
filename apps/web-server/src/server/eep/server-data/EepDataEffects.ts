@@ -46,6 +46,10 @@ export default class EepDataEffects {
     this.stateController.registerService(domainRoomService);
   }
 
+  stop(): void {
+    clearInterval(this.refreshTimer);
+  }
+
   private socketConnected(socket: Socket) {
     socket.on(RoomEvent.JoinRoom, (rooms: { room: string }) => {
       if (!this.socketService.ensureApprovedSocket(socket, rooms.room)) {

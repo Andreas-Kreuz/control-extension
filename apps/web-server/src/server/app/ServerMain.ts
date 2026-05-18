@@ -5,6 +5,7 @@ import * as cors from 'cors';
 import { EventEmitter } from 'events';
 import * as express from 'express';
 import { createServer } from 'http';
+import type { Server as HttpServer } from 'http';
 import * as path from 'path';
 import { Server } from 'socket.io';
 
@@ -24,9 +25,10 @@ export class ServerMain {
   private adminCookieName = 'ce-admin-session';
   private app: express.Application;
   private allowOpenServerRoute: boolean;
-  private appEffects!: AppEffects;
-  private httpServer;
+  private appEffects: AppEffects | undefined;
+  private httpServer: HttpServer;
   private io: Server;
+  private isStopping = false;
   private router: express.Router;
   private socketService: SocketService;
   private trustedServerAddressPolicy: TrustedServerAddressPolicy;
@@ -63,6 +65,17 @@ export class ServerMain {
       debug: this.debug,
     });
     this.appEffects.changeEepDirectory(this.appEffects.getEepDirectory());
+  }
+
+  public async stop(): Promise<void> {
+    if (this.isStopping) {
+      return;
+    }
+
+    this.isStopping = true;
+    this.appEffects?.stop();
+    await this.closeSocketServer();
+    await this.closeHttpServer();
   }
 
   private configureProcessDefaults(): void {
@@ -174,6 +187,29 @@ export class ServerMain {
     this.httpServer.listen(this.port, () => {
       if (this.debug)
         console.log('Express server listening on port ' + this.app.get('port') + ' ## ' + this.serverConfigPath);
+    });
+  }
+
+  private closeSocketServer(): Promise<void> {
+    return new Promise((resolve) => {
+      this.io.close(() => resolve());
+    });
+  }
+
+  private closeHttpServer(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.httpServer.listening) {
+        resolve();
+        return;
+      }
+
+      this.httpServer.close((error?: Error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
     });
   }
 
