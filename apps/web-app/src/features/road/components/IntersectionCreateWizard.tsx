@@ -10,6 +10,12 @@ import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -71,6 +77,16 @@ import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
 import { ExplainedCheckbox } from '../../../shared/components/checkbox';
 import { FeedbackMessage } from '../../../shared/components/feedback';
+import { IconHeadline } from '../../../shared/components/headlines';
+import {
+  Approach,
+  ExpandableEditorTableRow,
+  FormApproachSelect,
+  FormSelect,
+  FormTextfield,
+  FormTurnToggle,
+  NeutralTurnToggle,
+} from '../../../shared/components/road';
 import { WizardStepper } from '../../../shared/components/stepper';
 import { useApiDataRoomHandler, useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
 import {
@@ -150,26 +166,15 @@ const cardTitleIconSx = {
   flex: '0 0 32px',
   color: 'text.primary',
 };
-const readonlyTextFieldSx = {
-  '& .MuiInputBase-root': {
-    bgcolor: 'action.disabledBackground',
-    color: 'text.secondary',
-  },
-  '& .MuiInputBase-input': {
-    caretColor: 'transparent',
-    cursor: 'text',
-    userSelect: 'text',
-  },
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'action.disabledBackground',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'action.disabled',
-  },
-  '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'action.disabled',
-    borderWidth: 1,
-  },
+const editorSectionGridSx = {
+  display: 'grid',
+  gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' },
+  gap: 1.5,
+  alignItems: 'start',
+};
+const compactTableColumnSx = {
+  width: '1px',
+  whiteSpace: 'nowrap',
 };
 const trafficTypeIcons = {
   CAR: DirectionsCarIcon,
@@ -468,6 +473,10 @@ function optionalPositiveNumber(value: string): number | undefined {
   return Number.isFinite(numeric) && numeric > 0 ? numeric : undefined;
 }
 
+function readonlyTitle(title: string, readonly: boolean) {
+  return readonly ? `${title} (nur lesbar)` : title;
+}
+
 function firstFreeCxName(existingNames: string[]) {
   const usedNumbers = new Set(
     existingNames
@@ -510,6 +519,8 @@ function IntersectionCreateWizard() {
   const [trafficLightModels, setTrafficLightModels] = useState<Record<string, TrafficLightModelAppDto>>({});
   const [showAdvancedIntersectionSettings, setShowAdvancedIntersectionSettings] = useState(false);
   const [sendPreparationSettings, setSendPreparationSettings] = useState(true);
+  const [expandedLaneId, setExpandedLaneId] = useState<string | null>(null);
+  const [expandedPedestrianCrossingId, setExpandedPedestrianCrossingId] = useState<string | null>(null);
   const draftIdFromUrl = searchParams.get('draftId') ?? '';
   const intersectionIdFromUrl = searchParams.get('intersectionId') ?? '';
   const roadPathPrefix = location.pathname.startsWith('/simple/road')
@@ -909,22 +920,22 @@ function IntersectionCreateWizard() {
       routeRules: (draft.routeRules ?? []).filter((rule) => rule.laneId !== lane.id),
       defaultRequestDisplays: (draft.defaultRequestDisplays ?? []).filter((entry) => entry.laneId !== lane.id),
     });
+    setExpandedLaneId((current) => (current === lane.id ? null : current));
   }
 
   function addLane() {
     const laneNr = draft.lanes.length + 1;
+    const lane: IntersectionWizardLaneAppDto = {
+      id: `lane-${laneNr}`,
+      name: autoLaneName(draft.luaVariableName, laneNr),
+      signalId: '',
+      approach: 'SOUTH',
+      turnDirections: ['STRAIGHT'],
+    };
     updateDraft({
-      lanes: [
-        ...draft.lanes,
-        {
-          id: `lane-${laneNr}`,
-          name: autoLaneName(draft.luaVariableName, laneNr),
-          signalId: '',
-          approach: 'SOUTH',
-          turnDirections: ['STRAIGHT'],
-        },
-      ],
+      lanes: [...draft.lanes, lane],
     });
+    setExpandedLaneId(lane.id);
   }
 
   function nextAmpelName() {
@@ -1002,6 +1013,7 @@ function IntersectionCreateWizard() {
         },
       ],
     });
+    setExpandedPedestrianCrossingId(crossing.id);
   }
 
   function updatePedestrianCrossing(
@@ -1030,6 +1042,7 @@ function IntersectionCreateWizard() {
         signalGroupIds: phase.signalGroupIds.filter((signalGroupId) => signalGroupId !== crossing.signalGroupId),
       })),
     });
+    setExpandedPedestrianCrossingId((current) => (current === crossing.id ? null : current));
   }
 
   function routeRulesWithoutSignalGroup(signalGroupId: string) {
@@ -1485,414 +1498,306 @@ function IntersectionCreateWizard() {
 
     if (activeStep === 2) {
       const laneVariableNames = laneLuaVariableNames(draft.lanes, draft.luaVariableName || 'kreuzung');
+      const signalModelOptionsForLane = (lane: IntersectionWizardLaneAppDto, index: number) => {
+        const laneAmpel = selectedLaneAmpel(lane) ?? {
+          ...ampelForLane(lane, index + 1),
+          id: laneAmpelId(lane),
+        };
+        const selectedModelValue = laneAmpel.modelConstant || laneAmpel.modelName;
+        const modelOptions =
+          selectedModelValue &&
+          !trafficLightModelOptions.some(
+            (option) => (option.model.luaConstant ?? option.model.name) === selectedModelValue,
+          )
+            ? [
+                {
+                  model: {
+                    id: selectedModelValue,
+                    name: selectedModelValue,
+                    luaConstant: selectedModelValue,
+                  } as TrafficLightModelAppDto,
+                  label: selectedModelValue,
+                },
+                ...trafficLightModelOptions,
+              ]
+            : trafficLightModelOptions;
+
+        return { laneAmpel, modelOptions, selectedModelValue };
+      };
+
+      function renderLaneEditor(lane: IntersectionWizardLaneAppDto, index: number) {
+        const luaVariableName = laneVariableNames.get(lane.id) ?? `lane${index + 1}`;
+        const { laneAmpel, modelOptions, selectedModelValue } = signalModelOptionsForLane(lane, index);
+        const luaVariableReadonly = !(draft.manualLuaVariableNames ?? false);
+
+        return (
+          <Box sx={{ py: 2 }}>
+            <Stack spacing={2.5}>
+              <Stack spacing={1.25}>
+                <Typography variant="subtitle2">Fahrspur</Typography>
+                <Box sx={editorSectionGridSx}>
+                  <FormApproachSelect
+                    id={`${lane.id}-approach`}
+                    value={lane.approach ?? 'SOUTH'}
+                    infoText="Aus dieser Richtung kommen Fahrzeuge."
+                    onChange={(approach) => updateLane(lane.id, { approach })}
+                  />
+                  <FormTurnToggle
+                    label="Abbiegerichtungen"
+                    value={lane.turnDirections}
+                    infoText="Wähle die Abbiegerichtungen."
+                    onChange={(turnDirections) => updateLane(lane.id, { turnDirections })}
+                  />
+                  <FormTextfield
+                    label="Name der Fahrspur"
+                    value={lane.name}
+                    infoText="Dient nur der Anzeige."
+                    inputProps={{ maxLength: 10, 'aria-label': `Name der Fahrspur ${lane.name}` }}
+                    onChange={(event) => updateLane(lane.id, { name: event.target.value })}
+                  />
+                </Box>
+              </Stack>
+              <Stack spacing={1.25}>
+                <Typography variant="subtitle2">Fahrspur-Signal</Typography>
+                <Box sx={editorSectionGridSx}>
+                  <FormTextfield
+                    label="Signal-ID"
+                    value={lane.signalId}
+                    infoText="Fahrspur-Signal-ID aus EEP."
+                    inputProps={{ inputMode: 'numeric', maxLength: 4, 'aria-label': `Signal-ID ${lane.name}` }}
+                    onBlur={() => void enrichLaneAmpelFromSignal(lane)}
+                    onChange={(event) =>
+                      updateLaneAndAmpel(lane, { signalId: event.target.value }, { signalId: event.target.value })
+                    }
+                  />
+                  <FormTextfield
+                    label="Ampelname"
+                    value={laneAmpel.name}
+                    infoText="Angezeigter Name der Ampel."
+                    inputProps={{ maxLength: 4, 'aria-label': `Ampelname ${lane.name}` }}
+                    onChange={(event) => updateLaneAndAmpel(lane, {}, { name: event.target.value })}
+                  />
+                  <FormSelect
+                    id={`${lane.id}-signal-model`}
+                    label="Ampelmodell"
+                    value={selectedModelValue}
+                    infoText="Wähle aus der Liste aus."
+                    onChange={(value) => {
+                      const option = modelOptions.find(
+                        (entry) => (entry.model.luaConstant ?? entry.model.name) === value,
+                      );
+                      updateLaneAndAmpel(
+                        lane,
+                        {},
+                        {
+                          modelName: option?.model.name ?? value,
+                          modelConstant: option?.model.luaConstant ?? value,
+                        },
+                      );
+                    }}
+                    options={modelOptions.map((option) => {
+                      const value = option.model.luaConstant ?? option.model.name;
+                      return {
+                        value,
+                        label: compactTrafficLightModelLabel(option.model),
+                      };
+                    })}
+                  />
+                </Box>
+              </Stack>
+              <Stack spacing={1.25}>
+                <Typography variant="subtitle2">Erweiterte Einstellungen</Typography>
+                <Box sx={editorSectionGridSx}>
+                  <FormTextfield
+                    label={readonlyTitle('Lua-Variablenname', luaVariableReadonly)}
+                    value={luaVariableName}
+                    infoText="Eindeutiger Name für Kontaktpunkte."
+                    InputProps={{ readOnly: luaVariableReadonly }}
+                    inputProps={{
+                      readOnly: luaVariableReadonly,
+                      'aria-label': `Lua-Variablenname ${lane.name}`,
+                    }}
+                    onChange={(event) => {
+                      if (luaVariableReadonly) return;
+                      updateLane(lane.id, { luaVariableName: event.target.value });
+                    }}
+                  />
+                  {draft.individualLanePhaseSettings && (
+                    <FormTextfield
+                      label="Fahrzeugmultiplikator"
+                      type="number"
+                      value={lane.vehicleMultiplier ?? 1}
+                      infoText="Je höher, desto mehr Priorität."
+                      inputProps={{ min: 1, 'aria-label': `Fahrzeugmultiplikator ${lane.name}` }}
+                      onChange={(event) =>
+                        updateLane(lane.id, {
+                          vehicleMultiplier: optionalPositiveNumber(event.target.value) ?? 1,
+                        })
+                      }
+                    />
+                  )}
+                </Box>
+              </Stack>
+            </Stack>
+          </Box>
+        );
+      }
+
+      function renderLaneTable() {
+        return (
+          <Stack spacing={1.5}>
+            <IconHeadline text="Fahrspuren" icon={<DirectionsCarIcon />} variant="h6" />
+            <TableContainer component={Paper} variant="outlined">
+              <Table
+                size="small"
+                aria-label="Fahrspuren mit Editor"
+                sx={{
+                  '& tbody tr:last-of-type td': {
+                    borderBottom: 0,
+                  },
+                }}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ width: 56 }} />
+                    <TableCell sx={compactTableColumnSx}>Zufahrt aus</TableCell>
+                    <TableCell sx={compactTableColumnSx}>Abbiegerichtungen</TableCell>
+                    <TableCell sx={compactTableColumnSx}>Fahrspur</TableCell>
+                    <TableCell sx={compactTableColumnSx}>Signal</TableCell>
+                    <TableCell sx={compactTableColumnSx}>Ampel</TableCell>
+                    <TableCell sx={compactTableColumnSx}>Ampelmodell</TableCell>
+                    <TableCell />
+                    <TableCell align="right" sx={{ width: 56 }} />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {draft.lanes.map((lane, index) => {
+                    const { laneAmpel, selectedModelValue } = signalModelOptionsForLane(lane, index);
+                    return (
+                      <ExpandableEditorTableRow
+                        key={lane.id}
+                        ariaLabel={lane.name || 'Fahrspur'}
+                        expanded={expandedLaneId === lane.id}
+                        dataCellCount={7}
+                        deletable
+                        editor={renderLaneEditor(lane, index)}
+                        onDelete={() => removeLane(lane)}
+                        onToggle={() => setExpandedLaneId((current) => (current === lane.id ? null : lane.id))}
+                      >
+                        <TableCell sx={compactTableColumnSx}>
+                          <Approach approach={lane.approach ?? 'SOUTH'} />
+                        </TableCell>
+                        <TableCell sx={compactTableColumnSx}>
+                          <NeutralTurnToggle value={lane.turnDirections} />
+                        </TableCell>
+                        <TableCell sx={compactTableColumnSx}>{lane.name || '-'}</TableCell>
+                        <TableCell sx={compactTableColumnSx}>{lane.signalId || '-'}</TableCell>
+                        <TableCell sx={compactTableColumnSx}>{laneAmpel.name || '-'}</TableCell>
+                        <TableCell sx={compactTableColumnSx}>{selectedModelValue || '-'}</TableCell>
+                        <TableCell />
+                      </ExpandableEditorTableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={addLane}>
+                Fahrspur hinzufügen
+              </Button>
+            </Box>
+          </Stack>
+        );
+      }
+
+      function renderPedestrianCrossingEditor(crossing: IntersectionWizardPedestrianCrossingAppDto) {
+        return (
+          <Box sx={{ py: 2 }}>
+            <Box sx={editorSectionGridSx}>
+              <FormSelect
+                id={`${crossing.id}-approach`}
+                label="Überquerung von"
+                value={crossing.approach}
+                infoText="Aus dieser Richtung wird die Straße überquert."
+                renderValue={(value) => <Approach approach={value} />}
+                onChange={(approach) => updatePedestrianCrossing(crossing, { approach })}
+                options={approaches.map((approach) => ({
+                  value: approach,
+                  label: <Approach approach={approach} />,
+                }))}
+              />
+              <FormTextfield
+                label="Name der Furt"
+                value={crossing.name}
+                infoText="Dient nur der Anzeige."
+                inputProps={{ maxLength: 32, 'aria-label': `Name der Furt ${crossing.name}` }}
+                onChange={(event) => updatePedestrianCrossing(crossing, { name: event.target.value })}
+              />
+            </Box>
+          </Box>
+        );
+      }
+
+      function renderPedestrianCrossingTable() {
+        return (
+          <Stack spacing={1.5}>
+            <IconHeadline text="Fußgängerfurten" icon={<DirectionsWalkIcon />} variant="h6" />
+            <TableContainer component={Paper} variant="outlined">
+              <Table
+                size="small"
+                aria-label="Fußgängerfurten mit Editor"
+                sx={{
+                  '& tbody tr:last-of-type td': {
+                    borderBottom: 0,
+                  },
+                }}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ width: 56 }} />
+                    <TableCell sx={compactTableColumnSx}>Überquerung von</TableCell>
+                    <TableCell sx={compactTableColumnSx}>Fußgängerfurt</TableCell>
+                    <TableCell />
+                    <TableCell align="right" sx={{ width: 56 }} />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(draft.pedestrianCrossings ?? []).map((crossing) => (
+                    <ExpandableEditorTableRow
+                      key={crossing.id}
+                      ariaLabel={crossing.name || 'Fußgängerfurt'}
+                      expanded={expandedPedestrianCrossingId === crossing.id}
+                      dataCellCount={3}
+                      deletable
+                      editor={renderPedestrianCrossingEditor(crossing)}
+                      onDelete={() => removePedestrianCrossing(crossing)}
+                      onToggle={() =>
+                        setExpandedPedestrianCrossingId((current) => (current === crossing.id ? null : crossing.id))
+                      }
+                    >
+                      <TableCell sx={compactTableColumnSx}>
+                        <Approach approach={crossing.approach} />
+                      </TableCell>
+                      <TableCell sx={compactTableColumnSx}>{crossing.name || '-'}</TableCell>
+                      <TableCell />
+                    </ExpandableEditorTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={addPedestrianCrossing}>
+                Fußgängerfurt hinzufügen
+              </Button>
+            </Box>
+          </Stack>
+        );
+      }
+
       return (
         <Stack spacing={2}>
-          <Stack spacing={1.5}>
-            {draft.lanes.map((lane, index) => {
-              const luaVariableName = laneVariableNames.get(lane.id) ?? `lane${index + 1}`;
-              const laneAmpel = selectedLaneAmpel(lane) ?? {
-                ...ampelForLane(lane, index + 1),
-                id: laneAmpelId(lane),
-              };
-              const selectedModelValue = laneAmpel.modelConstant || laneAmpel.modelName;
-              const modelOptions =
-                selectedModelValue &&
-                !trafficLightModelOptions.some(
-                  (option) => (option.model.luaConstant ?? option.model.name) === selectedModelValue,
-                )
-                  ? [
-                      {
-                        model: {
-                          id: selectedModelValue,
-                          name: selectedModelValue,
-                          luaConstant: selectedModelValue,
-                        } as TrafficLightModelAppDto,
-                        label: selectedModelValue,
-                      },
-                      ...trafficLightModelOptions,
-                    ]
-                  : trafficLightModelOptions;
-
-              return (
-                <Paper
-                  key={lane.id}
-                  variant="outlined"
-                  sx={{
-                    p: 1.5,
-                    position: 'relative',
-                    containerType: 'inline-size',
-                    '& .lane-card-grid': {
-                      display: 'grid',
-                      gap: 2,
-                      gridTemplateColumns: '1fr',
-                      pr: 5,
-                    },
-                    '& .lane-section-title': {
-                      display: 'none',
-                    },
-                    '& .lane-section-row': {
-                      display: 'grid',
-                      gap: 1.25,
-                      gridTemplateColumns: '1fr',
-                      alignItems: 'end',
-                    },
-                    '& .lane-turn-field': {
-                      minWidth: 0,
-                      alignSelf: 'start',
-                    },
-                    '& .signal-model-field': {
-                      minWidth: 0,
-                    },
-                    '@container (min-width: 36rem)': {
-                      '& .lane-card-grid': {
-                        gap: 2.5,
-                      },
-                      '& .lane-section-title': {
-                        display: 'block',
-                      },
-                      '& .lane-section-row': {
-                        gridTemplateColumns: '10rem 11rem 8rem minmax(15rem, 1fr)',
-                      },
-                      '& .signal-section-row': {
-                        gridTemplateColumns: '4.5rem 4.5rem minmax(13rem, 1fr)',
-                        justifyContent: 'start',
-                      },
-                    },
-                    '@container (min-width: 76rem)': {
-                      '& .lane-card-grid': {
-                        gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)',
-                        alignItems: 'start',
-                      },
-                    },
-                  }}
-                >
-                  <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
-                    <IconButton
-                      size="small"
-                      color="error"
-                      aria-label={`${lane.name} entfernen`}
-                      title={`${lane.name} entfernen`}
-                      onClick={() => removeLane(lane)}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5, pr: 5 }}>
-                    <Box sx={cardTitleIconSx}>
-                      <DirectionsCarIcon fontSize="medium" />
-                    </Box>
-                    <Typography variant="h5" sx={{ lineHeight: 1.2 }}>
-                      {lane.name || 'Fahrspur'}
-                    </Typography>
-                  </Stack>
-                  <Box className="lane-card-grid">
-                    <Stack spacing={1.25} sx={{ minWidth: 0 }}>
-                      <Typography className="lane-section-title" variant="subtitle2">
-                        Fahrspur
-                      </Typography>
-                      <Box className="lane-section-row">
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Name der Fahrspur
-                          </Typography>
-                          <TextField
-                            value={lane.name}
-                            onChange={(event) => updateLane(lane.id, { name: event.target.value })}
-                            size="small"
-                            fullWidth
-                            inputProps={{ maxLength: 10, 'aria-label': `Name der Fahrspur ${lane.name}` }}
-                          />
-                        </Stack>
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Lua-Variablenname
-                          </Typography>
-                          <TextField
-                            value={luaVariableName}
-                            onChange={(event) => updateLane(lane.id, { luaVariableName: event.target.value })}
-                            size="small"
-                            fullWidth
-                            InputProps={{ readOnly: !(draft.manualLuaVariableNames ?? false) }}
-                            inputProps={{
-                              ...(draft.manualLuaVariableNames ? {} : { tabIndex: -1 }),
-                              'aria-label': `Lua-Variablenname ${lane.name}`,
-                            }}
-                            sx={draft.manualLuaVariableNames ? undefined : readonlyTextFieldSx}
-                          />
-                        </Stack>
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Zufahrt aus
-                          </Typography>
-                          <FormControl size="small" fullWidth>
-                            <Select
-                              value={lane.approach ?? 'SOUTH'}
-                              inputProps={{ 'aria-label': `Zufahrt aus ${lane.name}` }}
-                              onChange={(event) =>
-                                updateLane(lane.id, {
-                                  approach: event.target.value as IntersectionWizardApproach,
-                                })
-                              }
-                            >
-                              {approaches.map((approach) => {
-                                const ApproachIcon = approachIcons[approach];
-                                return (
-                                  <MenuItem key={approach} value={approach}>
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                      <ApproachIcon fontSize="small" />
-                                      <span>{approachLabels[approach]}</span>
-                                    </Stack>
-                                  </MenuItem>
-                                );
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Stack>
-                        <Stack className="lane-turn-field" spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Abbiegerichtungen der Fahrspur
-                          </Typography>
-                          <ToggleButtonGroup
-                            color="primary"
-                            value={lane.turnDirections}
-                            size="small"
-                            sx={{
-                              flexWrap: 'wrap',
-                              '& .MuiToggleButtonGroup-grouped': {
-                                minHeight: 40,
-                              },
-                            }}
-                          >
-                            {turnDirections.map((direction) => {
-                              const DirectionIcon = turnDirectionIcons[direction];
-                              return (
-                                <ToggleButton
-                                  key={direction}
-                                  value={direction}
-                                  aria-label={turnDirectionLabels[direction]}
-                                  title={turnDirectionLabels[direction]}
-                                  onClick={() =>
-                                    updateLane(lane.id, {
-                                      turnDirections: toggleDirectionSelection(lane.turnDirections, direction),
-                                    })
-                                  }
-                                  sx={{
-                                    px: 1.5,
-                                    color: 'grey.900',
-                                    '&.Mui-selected, &.Mui-selected:hover': {
-                                      color: 'common.white',
-                                      bgcolor: 'primary.main',
-                                      borderColor: 'primary.main',
-                                    },
-                                  }}
-                                >
-                                  <DirectionIcon fontSize="small" />
-                                </ToggleButton>
-                              );
-                            })}
-                          </ToggleButtonGroup>
-                        </Stack>
-                      </Box>
-                    </Stack>
-                    <Stack spacing={1.25} sx={{ minWidth: 0 }}>
-                      <Typography className="lane-section-title" variant="subtitle2">
-                        Fahrspur-Ampel
-                      </Typography>
-                      <Box className="lane-section-row signal-section-row">
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Signal-ID
-                          </Typography>
-                          <TextField
-                            value={lane.signalId}
-                            onChange={(event) =>
-                              updateLaneAndAmpel(
-                                lane,
-                                { signalId: event.target.value },
-                                { signalId: event.target.value },
-                              )
-                            }
-                            onBlur={() => void enrichLaneAmpelFromSignal(lane)}
-                            size="small"
-                            fullWidth
-                            inputProps={{ inputMode: 'numeric', maxLength: 4, 'aria-label': `Signal-ID ${lane.name}` }}
-                          />
-                        </Stack>
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Ampelname
-                          </Typography>
-                          <TextField
-                            value={laneAmpel.name}
-                            onChange={(event) => updateLaneAndAmpel(lane, {}, { name: event.target.value })}
-                            size="small"
-                            fullWidth
-                            inputProps={{ maxLength: 4, 'aria-label': `Ampelname ${lane.name}` }}
-                          />
-                        </Stack>
-                        <Stack className="signal-model-field" spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Ampelmodell
-                          </Typography>
-                          <FormControl size="small" fullWidth>
-                            <Select
-                              value={selectedModelValue}
-                              inputProps={{ 'aria-label': `Ampelmodell ${lane.name}` }}
-                              onChange={(event) => {
-                                const value = event.target.value;
-                                const option = modelOptions.find(
-                                  (entry) => (entry.model.luaConstant ?? entry.model.name) === value,
-                                );
-                                updateLaneAndAmpel(
-                                  lane,
-                                  {},
-                                  {
-                                    modelName: option?.model.name ?? value,
-                                    modelConstant: option?.model.luaConstant ?? value,
-                                  },
-                                );
-                              }}
-                            >
-                              {modelOptions.map((option) => {
-                                const value = option.model.luaConstant ?? option.model.name;
-                                return (
-                                  <MenuItem key={value} value={value}>
-                                    {compactTrafficLightModelLabel(option.model)}
-                                  </MenuItem>
-                                );
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Stack>
-                      </Box>
-                    </Stack>
-                  </Box>
-                  {draft.individualLanePhaseSettings && (
-                    <>
-                      <Divider sx={{ my: 1.5 }} />
-                      <Box
-                        sx={{
-                          display: 'grid',
-                          gap: 1.25,
-                          gridTemplateColumns: { xs: '1fr', md: '10rem minmax(16rem, 1fr)' },
-                          alignItems: 'end',
-                          pr: 5,
-                        }}
-                      >
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Fahrzeugmultiplikator
-                          </Typography>
-                          <TextField
-                            type="number"
-                            value={lane.vehicleMultiplier ?? 1}
-                            onChange={(event) =>
-                              updateLane(lane.id, {
-                                vehicleMultiplier: optionalPositiveNumber(event.target.value) ?? 1,
-                              })
-                            }
-                            size="small"
-                            inputProps={{ min: 1, 'aria-label': `Fahrzeugmultiplikator ${lane.name}` }}
-                          />
-                        </Stack>
-                      </Box>
-                    </>
-                  )}
-                </Paper>
-              );
-            })}
-          </Stack>
-          <Button startIcon={<AddIcon />} onClick={addLane}>
-            Fahrspur hinzufügen
-          </Button>
-          {draft.supportPedestrianSignals && (
-            <>
-              <Divider />
-              <Stack spacing={1.5}>
-                {(draft.pedestrianCrossings ?? []).map((crossing) => {
-                  return (
-                    <Paper
-                      key={crossing.id}
-                      variant="outlined"
-                      sx={{ p: 1.5, position: 'relative', containerType: 'inline-size' }}
-                    >
-                      <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          aria-label={`${crossing.name} entfernen`}
-                          title={`${crossing.name} entfernen`}
-                          onClick={() => removePedestrianCrossing(crossing)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5, pr: 5 }}>
-                        <Box sx={cardTitleIconSx}>
-                          <DirectionsWalkIcon fontSize="medium" />
-                        </Box>
-                        <Typography variant="h5" sx={{ lineHeight: 1.2 }}>
-                          Fußgängerfurt
-                        </Typography>
-                      </Stack>
-                      <Box
-                        sx={{
-                          display: 'grid',
-                          gap: 1.25,
-                          gridTemplateColumns: { xs: '1fr', md: 'minmax(12rem, 1fr) 12rem' },
-                          alignItems: 'end',
-                        }}
-                      >
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Name der Furt
-                          </Typography>
-                          <TextField
-                            value={crossing.name}
-                            onChange={(event) => updatePedestrianCrossing(crossing, { name: event.target.value })}
-                            size="small"
-                            fullWidth
-                            inputProps={{ maxLength: 32, 'aria-label': `Name der Furt ${crossing.name}` }}
-                          />
-                        </Stack>
-                        <Stack spacing={0.5}>
-                          <Typography variant="caption" color="text.secondary">
-                            Überquerung von
-                          </Typography>
-                          <FormControl size="small" fullWidth>
-                            <Select
-                              value={crossing.approach}
-                              inputProps={{ 'aria-label': `Überquerung von ${crossing.name}` }}
-                              onChange={(event) =>
-                                updatePedestrianCrossing(crossing, {
-                                  approach: event.target.value as IntersectionWizardApproach,
-                                })
-                              }
-                            >
-                              {approaches.map((approach) => {
-                                const OptionIcon = approachIcons[approach];
-                                return (
-                                  <MenuItem key={approach} value={approach}>
-                                    <Stack direction="row" spacing={1} alignItems="center">
-                                      <OptionIcon fontSize="small" />
-                                      <span>{approachLabels[approach]}</span>
-                                    </Stack>
-                                  </MenuItem>
-                                );
-                              })}
-                            </Select>
-                          </FormControl>
-                        </Stack>
-                      </Box>
-                    </Paper>
-                  );
-                })}
-                <Button startIcon={<AddIcon />} onClick={addPedestrianCrossing}>
-                  Fußgängerfurt hinzufügen
-                </Button>
-              </Stack>
-            </>
-          )}
+          {renderLaneTable()}
+          {draft.supportPedestrianSignals && renderPedestrianCrossingTable()}
         </Stack>
       );
     }
@@ -2081,19 +1986,21 @@ function IntersectionCreateWizard() {
             <Stack key={`${lane.id}-${group.id}-${variant}`} spacing={1.5}>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  Signalgruppe
+                  {readonlyTitle('Signalgruppe', !signalGroupNamesEditable)}
                 </Typography>
                 <TextField
                   value={group.name}
-                  onChange={(event) => updateSignalGroup(group.id, { name: event.target.value })}
+                  onChange={(event) => {
+                    if (!signalGroupNamesEditable) return;
+                    updateSignalGroup(group.id, { name: event.target.value });
+                  }}
                   size="small"
                   InputProps={{ readOnly: !signalGroupNamesEditable }}
                   inputProps={{
                     maxLength: 24,
-                    ...(signalGroupNamesEditable ? {} : { tabIndex: -1 }),
+                    readOnly: !signalGroupNamesEditable,
                     'aria-label': `Signalgruppe ${group.name}`,
                   }}
-                  sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
               <ExplainedCheckbox
@@ -2281,19 +2188,21 @@ function IntersectionCreateWizard() {
               </Box>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  Signalgruppe
+                  {readonlyTitle('Signalgruppe', !signalGroupNamesEditable)}
                 </Typography>
                 <TextField
                   value={group.name}
-                  onChange={(event) => updateSignalGroup(group.id, { name: event.target.value })}
+                  onChange={(event) => {
+                    if (!signalGroupNamesEditable) return;
+                    updateSignalGroup(group.id, { name: event.target.value });
+                  }}
                   size="small"
                   InputProps={{ readOnly: !signalGroupNamesEditable }}
                   inputProps={{
                     maxLength: 24,
-                    ...(signalGroupNamesEditable ? {} : { tabIndex: -1 }),
+                    readOnly: !signalGroupNamesEditable,
                     'aria-label': `Signalgruppe ${group.name}`,
                   }}
-                  sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
               <Stack spacing={1}>
@@ -2532,19 +2441,21 @@ function IntersectionCreateWizard() {
               </Stack>
               <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  Signalgruppe
+                  {readonlyTitle('Signalgruppe', !signalGroupNamesEditable)}
                 </Typography>
                 <TextField
                   value={group.name}
-                  onChange={(event) => updateSignalGroup(group.id, { name: event.target.value })}
+                  onChange={(event) => {
+                    if (!signalGroupNamesEditable) return;
+                    updateSignalGroup(group.id, { name: event.target.value });
+                  }}
                   size="small"
                   InputProps={{ readOnly: !signalGroupNamesEditable }}
                   inputProps={{
                     maxLength: 32,
-                    ...(signalGroupNamesEditable ? {} : { tabIndex: -1 }),
+                    readOnly: !signalGroupNamesEditable,
                     'aria-label': `Signalgruppe ${group.name}`,
                   }}
-                  sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
               <Stack spacing={1}>

@@ -1,5 +1,6 @@
-﻿import DashboardIcon from '@mui/icons-material/Dashboard';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import type { Meta, StoryObj } from '@storybook/react';
+import { trainSections } from '../../features/trains/components/trainSectionPresentation';
 import IconHeaderCard from '../../shared/components/cards/IconHeaderCard';
 
 const meta = {
@@ -14,6 +15,14 @@ export const TitleAndIcon: Story = {
   args: {
     title: 'Title',
     icon: <DashboardIcon color="primary" />,
+    headerOnly: true,
+  },
+};
+
+export const TrainAxesCard: Story = {
+  args: {
+    title: trainSections.trainAxes.title,
+    icon: trainSections.trainAxes.icon,
     headerOnly: true,
   },
 };

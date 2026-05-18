@@ -489,7 +489,9 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
         .filter((value): value is string => Boolean(value));
       const calls =
         requestGroupVarList.length > 0 ? [`showRequestsOnSignalGroups(${requestGroupVarList.join(', ')})`] : [];
-      bodyLines.push(chainCall(`${laneVars.get(lane.id)}:driveOnDefaultSignalGroups(${groupVarList.join(', ')})`, calls));
+      bodyLines.push(
+        chainCall(`${laneVars.get(lane.id)}:driveOnDefaultSignalGroups(${groupVarList.join(', ')})`, calls),
+      );
     }
   });
 
