@@ -1,29 +1,21 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react';
-import Alert from '@mui/material/Alert';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import Step from '@mui/material/Step';
-import StepButton from '@mui/material/StepButton';
-import Stepper from '@mui/material/Stepper';
 import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
@@ -77,7 +69,18 @@ import { useSocket } from '../../../app/hooks/useSocket';
 import { useSocketUrl } from '../../../app/hooks/useSocketUrl';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
+import { ExplainedCheckbox } from '../../../shared/components/checkbox';
+import { FeedbackMessage } from '../../../shared/components/feedback';
+import { WizardStepper } from '../../../shared/components/stepper';
 import { useApiDataRoomHandler, useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
+import {
+  IntersectionWizardCodePreview,
+  IntersectionWizardNavigation,
+  IntersectionWizardPhasePlanStep,
+  IntersectionWizardSettingsStep,
+  IntersectionWizardStartStep,
+  IntersectionWizardSummaryStep,
+} from './intersection-wizard';
 
 const steps = ['Vorbereitung', 'Kreuzung', 'Fahrspuren', 'Signalgruppen & Ampeln', 'Verkehrsphasen', 'Zusammenfassung'];
 const stepKeys = ['start', 'kreuzung', 'fahrspuren', 'signalgruppen', 'verkehrsphasen', 'zusammenfassung'] as const;
@@ -167,11 +170,6 @@ const readonlyTextFieldSx = {
     borderColor: 'action.disabled',
     borderWidth: 1,
   },
-};
-const checkboxHelperSx = {
-  pl: 4,
-  mt: -0.5,
-  color: 'text.secondary',
 };
 const trafficTypeIcons = {
   CAR: DirectionsCarIcon,
@@ -489,92 +487,6 @@ function intersectionLuaBlock(lua: string): string {
   return match?.[0] ?? lua;
 }
 
-function CodePreview({
-  lua,
-  warnings,
-  copyEnabled,
-  onCopyIntersection,
-  onCopyAll,
-  fullWidth = false,
-}: {
-  lua: string;
-  warnings: string[];
-  copyEnabled: boolean;
-  onCopyIntersection: () => void;
-  onCopyAll: () => void;
-  fullWidth?: boolean;
-}) {
-  return (
-    <Paper
-      sx={{
-        position: fullWidth ? 'static' : { xs: 'static', xl: 'sticky' },
-        top: fullWidth ? 'auto' : { xl: 88 },
-        overflow: fullWidth ? 'visible' : { xs: 'visible', xl: 'hidden' },
-        alignSelf: fullWidth ? 'stretch' : { xl: 'start' },
-        height: fullWidth ? 'auto' : { xl: 'calc(100vh - 104px)' },
-        minHeight: fullWidth ? 0 : { xl: 'calc(100vh - 104px)' },
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <Stack sx={{ p: 2 }} spacing={1}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
-          <Typography variant="h6" sx={{ flex: 1 }}>
-            Lua-Code
-          </Typography>
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<ContentCopyIcon />}
-            disabled={!copyEnabled || !lua}
-            onClick={onCopyIntersection}
-          >
-            Kreuzung kopieren
-          </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<ContentCopyIcon />}
-            disabled={!copyEnabled || !lua}
-            onClick={onCopyAll}
-          >
-            Alles kopieren
-          </Button>
-        </Stack>
-        <Typography variant="caption" color="text.secondary">
-          Kreuzung kopieren: Kopiert den Kreuzungscode, kann genutzt werden, um eine Kreuzung mit gleichem Namen zu
-          überschreiben oder anzulegen.
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Alles kopieren: Nur beim erstmal notwendig, wenn die require-Befehle fehlen.
-        </Typography>
-        {warnings.map((warning) => (
-          <Alert key={warning} severity="warning">
-            {warning}
-          </Alert>
-        ))}
-      </Stack>
-      <Divider />
-      <Box
-        component="pre"
-        sx={{
-          flex: fullWidth ? 'none' : { xl: 1 },
-          m: 0,
-          p: 2,
-          overflowX: 'auto',
-          overflowY: fullWidth ? 'visible' : { xs: 'visible', xl: 'auto' },
-          bgcolor: '#101418',
-          color: '#e7edf3',
-          fontSize: 13,
-          lineHeight: 1.5,
-        }}
-      >
-        {lua || '-- Der Lua-Code erscheint hier, sobald Angaben vorhanden sind.'}
-      </Box>
-    </Paper>
-  );
-}
-
 function IntersectionCreateWizard() {
   const socket = useSocket();
   const socketUrl = useSocketUrl();
@@ -777,14 +689,18 @@ function IntersectionCreateWizard() {
   const loadCurrentIntersection = useCallback(
     async (intersectionId: string, attempt = 0) => {
       if (!intersectionId) return;
-      const response = await fetch(route(`/current/${encodeURIComponent(intersectionId)}`, socketUrl));
-      if (response.ok) {
-        const loaded = (await response.json()) as IntersectionWizardDraftAppDto;
-        setDraft(loaded);
-        setShowAdvancedIntersectionSettings(hasAdvancedIntersectionSettings(loaded));
-        setLoadedIntersectionId(intersectionId);
-        navigateToStep(1, { draftId: loaded.id, removeIntersectionId: true, replace: true });
-        return;
+      try {
+        const response = await fetch(route(`/current/${encodeURIComponent(intersectionId)}`, socketUrl));
+        if (response.ok) {
+          const loaded = (await response.json()) as IntersectionWizardDraftAppDto;
+          setDraft(loaded);
+          setShowAdvancedIntersectionSettings(hasAdvancedIntersectionSettings(loaded));
+          setLoadedIntersectionId(intersectionId);
+          navigateToStep(1, { draftId: loaded.id, removeIntersectionId: true, replace: true });
+          return;
+        }
+      } catch (_error) {
+        // Retry below; this request can race the test server startup or a transient reconnect.
       }
       if (attempt < 10) {
         window.setTimeout(() => void loadCurrentIntersection(intersectionId, attempt + 1), 150);
@@ -1489,14 +1405,12 @@ function IntersectionCreateWizard() {
   function navigationButtons() {
     const nextDisabled = activeStep === steps.length - 1 || (activeStep === 2 && draft.lanes.length === 0);
     return (
-      <Stack direction="row" spacing={1}>
-        <Button disabled={activeStep === 0} onClick={() => void persistAndNavigate(Math.max(activeStep - 1, 0))}>
-          Zurück
-        </Button>
-        <Button variant="contained" disabled={nextDisabled} onClick={goToNextStep}>
-          Weiter
-        </Button>
-      </Stack>
+      <IntersectionWizardNavigation
+        activeStep={activeStep}
+        nextDisabled={nextDisabled}
+        onBack={() => void persistAndNavigate(Math.max(activeStep - 1, 0))}
+        onNext={goToNextStep}
+      />
     );
   }
 
@@ -1531,221 +1445,41 @@ function IntersectionCreateWizard() {
 
   function stepContent() {
     if (activeStep === 0) {
-      if (intersectionIdFromUrl && !draftIdFromUrl) {
-        return (
-          <Stack spacing={2} alignItems="flex-start">
-            <Typography variant="h5">Kreuzung wird geladen</Typography>
-            <Typography color="text.secondary">
-              Die bestehende Kreuzung wird aus dem aktuellen Anlagenzustand übernommen.
-            </Typography>
-          </Stack>
-        );
-      }
-
       return (
-        <Stack spacing={2} alignItems="flex-start">
-          <Typography variant="h5">Neue Kreuzung erstellen</Typography>
-          <Typography color="text.secondary">
-            Starte den Assistenten, um Fahrspuren, Fahrspur-Ampeln, Signalgruppen und Verkehrsphasen zu erfassen.
-          </Typography>
-          <Alert severity="info">
-            Platziere eine Ampel auf allen Fahrspuren, die gesteuert werden sollen. Willst du eine Fahrspur durch
-            unterschiedliche Ampeln in verschiedene Abbiegerichtungen steuern, dann platziere ein unsichtbares Signal.
-          </Alert>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={sendPreparationSettings}
-                onChange={(event) => setSendPreparationSettings(event.target.checked)}
-              />
-            }
-            label="Signal-IDs und Modellinformationen in EEP anzeigen"
-          />
-          {sendPreparationSettings && (
-            <Alert severity="warning">
-              Beim Start werden Signal-IDs und Modellinformationen als Tipptexte in EEP angezeigt. Das überschreibt
-              vorhandene Tipptexte an Signalen.
-            </Alert>
-          )}
-          <Button variant="contained" onClick={startNewIntersection}>
-            Neue Kreuzung erstellen
-          </Button>
-        </Stack>
+        <IntersectionWizardStartStep
+          isLoadingIntersection={Boolean(intersectionIdFromUrl && !draftIdFromUrl)}
+          sendPreparationSettings={sendPreparationSettings}
+          onSendPreparationSettingsChange={setSendPreparationSettings}
+          onStartNewIntersection={startNewIntersection}
+        />
       );
     }
 
     if (activeStep === 1) {
       return (
-        <Stack spacing={2}>
-          <TextField
-            label="Kreuzungsname"
-            value={draft.name}
-            onChange={(event) => {
-              const name = event.target.value;
-              const luaVariableName = slug(name, 'kreuzung');
-              updateDraft({
-                name,
-                luaVariableName,
-                lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, luaVariableName),
-              });
-            }}
-            helperText="Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße."
-            fullWidth
-          />
-          <TextField
-            label="Lua-Variable"
-            value={draft.luaVariableName}
-            onChange={(event) => {
-              const luaVariableName = event.target.value;
-              updateDraft({
-                luaVariableName,
-                lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, luaVariableName),
-              });
-            }}
-            helperText="Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw."
-            fullWidth
-          />
-          <FormControl fullWidth>
-            <InputLabel id="intersection-storage-slot-label">Kreuzungs-Speicherplatz</InputLabel>
-            <Select
-              labelId="intersection-storage-slot-label"
-              label="Kreuzungs-Speicherplatz"
-              value={draft.intersectionEepSaveId ?? -1}
-              onChange={(event) => updateDraft({ intersectionEepSaveId: Number(event.target.value) })}
-            >
-              <MenuItem value={-1}>Nicht speichern (-1)</MenuItem>
-              {storageSlotOptions.map((slot) => (
-                <MenuItem key={slot.id} value={Number(slot.id)}>
-                  {slot.id} {slot.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.75 }}>
-              Optional: Hinterlegt Informationen zur Kreuzung mit EEPSaveData.
-            </Typography>
-          </FormControl>
-          <Autocomplete
-            multiple
-            freeSolo
-            options={cameraOptions}
-            value={draft.staticCams ?? []}
-            filterSelectedOptions
-            onChange={(_event, value) =>
-              updateDraft({
-                staticCams: Array.from(new Set(value.map((cameraName) => cameraName.trim()).filter(Boolean))),
-              })
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Statische Kameras"
-                helperText="Optional: Wähle Kameras für diese Kreuzung aus, um schnell hinzuspringen."
-              />
-            )}
-          />
-          <TextField
-            label="Tipp-Text-Immobilie"
-            value={draft.tippStructure ?? ''}
-            onChange={(event) => updateDraft({ tippStructure: event.target.value || undefined })}
-            placeholder="#5573_Schaltschrank-Ampel2_SK2"
-            helperText="Optional: Hier wird auf Wunsch die Phase der Kreuzung angezeigt."
-            fullWidth
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showAdvancedIntersectionSettings}
-                onChange={(event) => setShowAdvancedIntersectionSettings(event.target.checked)}
-              />
-            }
-            label="Erweiterte Einstellungen"
-          />
-          {showAdvancedIntersectionSettings && (
-            <Stack spacing={2} sx={{ pl: { xs: 0, sm: 4 } }}>
-              <TextField
-                label="Standard-Grünzeit (s)"
-                type="number"
-                value={draft.greenTimeSeconds ?? ''}
-                onChange={(event) => updateDraft({ greenTimeSeconds: optionalPositiveNumber(event.target.value) })}
-                helperText="Optional: Leeres Feld nutzt die Standardzeit der Runtime."
-                size="small"
-                inputProps={{ min: 1, 'aria-label': 'Standard-Grünzeit' }}
-                fullWidth
-              />
-              <Stack spacing={0}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={draft.supportPedestrianSignals ?? false}
-                      onChange={(event) => updateDraft({ supportPedestrianSignals: event.target.checked })}
-                    />
-                  }
-                  label="Fußgängerampeln unterstützen"
-                />
-                <Typography variant="caption" sx={checkboxHelperSx}>
-                  Optional: Ermöglicht die Verwendung von Fußgängerampeln und -furten.
-                </Typography>
-              </Stack>
-              <Stack spacing={0}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={draft.supportMultipleLaneSignals ?? false}
-                      onChange={(event) => updateDraft({ supportMultipleLaneSignals: event.target.checked })}
-                    />
-                  }
-                  label="Mehrere Ampelbilder für eine Fahrspur unterstützen"
-                />
-                <Typography variant="caption" sx={checkboxHelperSx}>
-                  Optional: Ermöglicht auf einer Spur unterschiedliche Ampeln, z.B. Rechtsabbiegerpfeile oder
-                  Abbiegesignale für die Tram.
-                </Typography>
-              </Stack>
-              <Stack spacing={0}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={draft.manualLuaVariableNames ?? false}
-                      onChange={(event) => updateDraft({ manualLuaVariableNames: event.target.checked })}
-                    />
-                  }
-                  label="Lua-Variablennamen selbst festlegen"
-                />
-                <Typography variant="caption" sx={checkboxHelperSx}>
-                  Optional: Vergib die Variablennamen für die Fahrspuren und Signalgruppen selbst.
-                </Typography>
-              </Stack>
-              <Stack spacing={0}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={draft.individualLanePhaseSettings ?? false}
-                      onChange={(event) => updateDraft({ individualLanePhaseSettings: event.target.checked })}
-                    />
-                  }
-                  label="Individuelle Einstellungen für Fahrspuren und Phasen"
-                />
-                <Typography variant="caption" sx={checkboxHelperSx}>
-                  Optional: Multiplikator für erkannte Fahrzeuge, Länge einzelner Phasen.
-                </Typography>
-              </Stack>
-              <Stack spacing={0}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={draft.showLuaCodeImmediately ?? true}
-                      onChange={(event) => updateDraft({ showLuaCodeImmediately: event.target.checked })}
-                    />
-                  }
-                  label="Lua-Code sofort anzeigen"
-                />
-                <Typography variant="caption" sx={checkboxHelperSx}>
-                  Optional: Der Lua Code wird bereits vor der Zusammenfassung in allen Schritten angezeigt.
-                </Typography>
-              </Stack>
-            </Stack>
-          )}
-        </Stack>
+        <IntersectionWizardSettingsStep
+          cameraOptions={cameraOptions}
+          draft={draft}
+          showAdvancedIntersectionSettings={showAdvancedIntersectionSettings}
+          storageSlotOptions={storageSlotOptions}
+          onDraftPatch={updateDraft}
+          onIntersectionNameChange={(name) => {
+            const luaVariableName = slug(name, 'kreuzung');
+            updateDraft({
+              name,
+              luaVariableName,
+              lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, luaVariableName),
+            });
+          }}
+          onLuaVariableNameChange={(luaVariableName) =>
+            updateDraft({
+              luaVariableName,
+              lanes: renameAutoLaneNames(draft.lanes, draft.luaVariableName, luaVariableName),
+            })
+          }
+          onOptionalPositiveNumber={optionalPositiveNumber}
+          onShowAdvancedIntersectionSettingsChange={setShowAdvancedIntersectionSettings}
+        />
       );
     }
 
@@ -2362,14 +2096,10 @@ function IntersectionCreateWizard() {
                   sx={signalGroupNamesEditable ? undefined : readonlyTextFieldSx}
                 />
               </Stack>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={hasDefaultRequestDisplay(lane.id, group.id)}
-                    onChange={(event) => updateDefaultRequestDisplay(lane.id, group.id, event.target.checked)}
-                  />
-                }
+              <ExplainedCheckbox
+                checked={hasDefaultRequestDisplay(lane.id, group.id)}
                 label="Anforderungen anzeigen"
+                onChange={(_event, checked) => updateDefaultRequestDisplay(lane.id, group.id, checked)}
               />
               <Stack spacing={1}>
                 {ampeln.map((ampel) => renderAmpelRow(lane, group, ampel, ampel.id === laneAmpel.id))}
@@ -2406,25 +2136,21 @@ function IntersectionCreateWizard() {
                 )}
               </Stack>
               {(variant === 'standard' || variant === 'route') && (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={
-                        variant === 'route'
-                          ? (routeRule?.showRequests ?? hasDefaultRequestDisplay(lane.id, group.id))
-                          : hasDefaultRequestDisplay(lane.id, group.id)
-                      }
-                      onChange={(event) => {
-                        if (variant === 'route' && routeRule) {
-                          updateRouteRule(routeRule.id, { showRequests: event.target.checked });
-                        } else {
-                          updateDefaultRequestDisplay(lane.id, group.id, event.target.checked);
-                        }
-                      }}
-                    />
+                <ExplainedCheckbox
+                  checked={
+                    variant === 'route'
+                      ? (routeRule?.showRequests ?? hasDefaultRequestDisplay(lane.id, group.id))
+                      : hasDefaultRequestDisplay(lane.id, group.id)
                   }
                   label="Anforderungen anzeigen"
                   sx={{ alignSelf: 'flex-start', mr: 0 }}
+                  onChange={(_event, checked) => {
+                    if (variant === 'route' && routeRule) {
+                      updateRouteRule(routeRule.id, { showRequests: checked });
+                    } else {
+                      updateDefaultRequestDisplay(lane.id, group.id, checked);
+                    }
+                  }}
                 />
               )}
               <Box
@@ -2641,7 +2367,9 @@ function IntersectionCreateWizard() {
               ) : simpleGroup ? (
                 renderSignalGroupPanel(lane, simpleGroup, laneAmpel, 'simple')
               ) : (
-                <Alert severity="warning">Für diese Fahrspur ist noch keine Signalgruppe angelegt.</Alert>
+                <FeedbackMessage severity="warning">
+                  Für diese Fahrspur ist noch keine Signalgruppe angelegt.
+                </FeedbackMessage>
               )}
             </Stack>
           </Paper>
@@ -2865,186 +2593,23 @@ function IntersectionCreateWizard() {
     }
 
     if (activeStep === 4) {
-      const laneAmpelIds = new Set(draft.lanes.map((lane) => laneAmpelId(lane)));
-      const signalGroupGridColumns =
-        draft.phases.length > 0
-          ? `minmax(15rem, 1.2fr) repeat(${draft.phases.length}, minmax(6.25rem, 0.7fr))`
-          : 'minmax(15rem, 1fr)';
-
-      function ampelLabel(ampel: IntersectionWizardAmpelAppDto) {
-        return ampel.name.trim() || ampel.signalId.trim() || ampel.id;
-      }
-
-      function signalNamesForGroup(group: IntersectionWizardSignalGroupAppDto): string[] {
-        const names = new Map<string, string>();
-
-        group.ampelIds
-          .filter((ampelId) => !laneAmpelIds.has(ampelId))
-          .forEach((ampelId) => {
-            const ampel = draft.ampeln.find((entry) => entry.id === ampelId);
-            if (ampel) names.set(ampel.id, ampelLabel(ampel));
-          });
-
-        draft.lanes.forEach((lane) => {
-          const defaultGroups = draft.signalGroups.filter((entry) => entry.laneIds.includes(lane.id));
-          if (defaultGroups.length !== 1 || defaultGroups[0]?.id !== group.id) return;
-
-          const laneAmpel = selectedLaneAmpel(lane) ?? {
-            ...ampelForLane(lane, draft.ampeln.length + 1),
-            id: laneAmpelId(lane),
-          };
-          names.set(laneAmpel.id, ampelLabel(laneAmpel));
-        });
-
-        return Array.from(names.values());
-      }
-
       return (
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="h6" sx={{ flex: 1 }}>
-              Signalzeitenplan
-            </Typography>
-            <Button startIcon={<AddIcon />} onClick={addPhase}>
-              Phase hinzufügen
-            </Button>
-          </Stack>
-          {draft.signalGroups.length === 0 ? (
-            <Alert severity="warning">Lege zuerst Signalgruppen an, um Verkehrsphasen zu planen.</Alert>
-          ) : (
-            <Paper variant="outlined" sx={{ overflowX: 'auto' }}>
-              <Box sx={{ minWidth: draft.phases.length > 0 ? 480 + draft.phases.length * 104 : 480 }}>
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: signalGroupGridColumns,
-                    borderBottom: 1,
-                    borderColor: 'divider',
-                    bgcolor: 'grey.50',
-                  }}
-                >
-                  <Box sx={{ p: 1.25, borderRight: 1, borderColor: 'divider' }}>
-                    <Typography variant="subtitle2">Signalgruppe</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      geschaltete Ampeln
-                    </Typography>
-                  </Box>
-                  {draft.phases.map((phase) => (
-                    <Box key={phase.id} sx={{ p: 1, borderRight: 1, borderColor: 'divider' }}>
-                      <Stack spacing={1.5}>
-                        <Stack direction="row" spacing={0.5} alignItems="center">
-                          <TextField
-                            label="Phasenname"
-                            value={phase.name}
-                            size="small"
-                            inputProps={{ maxLength: 12, 'aria-label': `Verkehrsphase ${phase.name}` }}
-                            onChange={(event) => updatePhase(phase.id, { name: event.target.value })}
-                            sx={{ width: 112, minWidth: 0 }}
-                          />
-                          <IconButton
-                            size="small"
-                            aria-label={`Verkehrsphase ${phase.name || phase.id} löschen`}
-                            title="Verkehrsphase löschen"
-                            onClick={() => removePhase(phase.id)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                        {draft.individualLanePhaseSettings && (
-                          <TextField
-                            label="Grünzeit (s)"
-                            type="number"
-                            value={phase.greenTimeSeconds ?? ''}
-                            size="small"
-                            inputProps={{ min: 1, 'aria-label': `Grünzeit ${phase.name}` }}
-                            onChange={(event) =>
-                              updatePhase(phase.id, { greenTimeSeconds: optionalPositiveNumber(event.target.value) })
-                            }
-                            sx={{ width: 112 }}
-                          />
-                        )}
-                      </Stack>
-                    </Box>
-                  ))}
-                </Box>
-                {draft.signalGroups.map((group) => {
-                  const signalNames = signalNamesForGroup(group);
-                  return (
-                    <Box
-                      key={group.id}
-                      sx={{
-                        display: 'grid',
-                        gridTemplateColumns: signalGroupGridColumns,
-                        borderBottom: 1,
-                        borderColor: 'divider',
-                        '&:last-child': { borderBottom: 0 },
-                      }}
-                    >
-                      <Box sx={{ p: 1.25, borderRight: 1, borderColor: 'divider' }}>
-                        <Typography variant="body2" fontWeight={600}>
-                          {group.name || group.id}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {signalNames.length > 0 ? signalNames.join(', ') : 'Keine Ampel zugeordnet'}
-                        </Typography>
-                      </Box>
-                      {draft.phases.map((phase) => {
-                        const isActive = phase.signalGroupIds.includes(group.id);
-                        return (
-                          <Box key={phase.id} sx={{ p: 1, borderRight: 1, borderColor: 'divider' }}>
-                            <Button
-                              fullWidth
-                              variant={isActive ? 'contained' : 'outlined'}
-                              color={isActive ? 'success' : 'inherit'}
-                              onClick={() => togglePhaseSignalGroup(phase, group.id)}
-                              sx={{
-                                minHeight: 44,
-                                borderColor: isActive ? 'success.main' : 'divider',
-                                bgcolor: isActive ? 'success.main' : 'background.paper',
-                                color: isActive ? 'common.white' : 'text.secondary',
-                                '&:hover': {
-                                  bgcolor: isActive ? 'success.dark' : 'grey.50',
-                                  borderColor: isActive ? 'success.dark' : 'text.secondary',
-                                },
-                              }}
-                            >
-                              {isActive ? 'Grün' : '-'}
-                            </Button>
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Paper>
-          )}
-          {draft.phases.length === 0 && (
-            <Alert severity="info">
-              Füge mindestens eine Verkehrsphase hinzu und markiere die grünen Signalgruppen.
-            </Alert>
-          )}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={draft.switchInStrictOrder ?? false}
-                onChange={(event) => updateDraft({ switchInStrictOrder: event.target.checked })}
-              />
-            }
-            label="Verkehrsphasen strikt in der angelegten Reihenfolge schalten"
-          />
-        </Stack>
+        <IntersectionWizardPhasePlanStep
+          draft={draft}
+          createAmpelForLane={ampelForLane}
+          laneAmpelId={laneAmpelId}
+          selectedLaneAmpel={selectedLaneAmpel}
+          onAddPhase={addPhase}
+          onDraftPatch={updateDraft}
+          onOptionalPositiveNumber={optionalPositiveNumber}
+          onRemovePhase={removePhase}
+          onTogglePhaseSignalGroup={togglePhaseSignalGroup}
+          onUpdatePhase={updatePhase}
+        />
       );
     }
 
-    return (
-      <Stack spacing={2}>
-        {status && <Alert severity="success">{status}</Alert>}
-        <Typography variant="body2" color="text.secondary">
-          Der fertige Lua-Code kann jetzt über die Kopierbuttons in der Codevorschau übernommen werden.
-        </Typography>
-      </Stack>
-    );
+    return <IntersectionWizardSummaryStep status={status} />;
   }
 
   const isSummaryStep = activeStep === steps.length - 1;
@@ -3065,19 +2630,15 @@ function IntersectionCreateWizard() {
           }}
         >
           <Stack spacing={3} sx={{ minWidth: 0 }}>
-            <Paper sx={{ p: 2 }}>
-              <Stepper activeStep={activeStep - 1} alternativeLabel nonLinear>
-                {wizardSteps.map((step, index) => (
-                  <Step key={step}>
-                    <StepButton onClick={() => void persistAndNavigate(index + 1)}>{step}</StepButton>
-                  </Step>
-                ))}
-              </Stepper>
-            </Paper>
+            <WizardStepper
+              activeStep={activeStep - 1}
+              steps={wizardSteps.map((label) => ({ label }))}
+              onStepSelect={(index) => void persistAndNavigate(index + 1)}
+            />
             {navigationButtons()}
             <Paper sx={{ p: 3 }}>{stepContent()}</Paper>
             {showCodePreview && isSummaryStep && (
-              <CodePreview
+              <IntersectionWizardCodePreview
                 lua={generatedLua}
                 warnings={warnings}
                 copyEnabled
@@ -3089,7 +2650,7 @@ function IntersectionCreateWizard() {
             {navigationButtons()}
           </Stack>
           {showCodePreview && !isSummaryStep && (
-            <CodePreview
+            <IntersectionWizardCodePreview
               lua={generatedLua}
               warnings={warnings}
               copyEnabled={false}
