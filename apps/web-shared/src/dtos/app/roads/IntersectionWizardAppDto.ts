@@ -12,11 +12,17 @@ export type IntersectionWizardApproach =
   | 'WEST'
   | 'NORTH_WEST';
 
-export type IntersectionWizardTrafficType = 'CAR' | 'BUS' | 'TRAM' | 'BICYCLE' | 'PEDESTRIAN';
+export type IntersectionWizardTrafficType = 'CAR' | 'TRAM' | 'PEDESTRIAN';
 
 export type IntersectionWizardAmpelUse = 'VEHICLE_ONLY' | 'PEDESTRIAN_ONLY' | 'VEHICLE_AND_PEDESTRIAN';
 
+export type IntersectionWizardAmpelKind = 'SIGNAL' | 'STRUCTURE_LIGHT';
+
 export type IntersectionWizardLaneCountType = 'CONTACTS' | 'SIGNALS' | 'TRACKS';
+
+export type IntersectionWizardLaneSignalSource = 'OWN' | 'SIGNAL_GROUP';
+
+export type IntersectionWizardSignalGroupAssignmentMode = 'DEFAULT' | 'ONLY' | 'ALSO';
 
 export interface IntersectionWizardSignalLookupAppDto {
   id: string;
@@ -39,26 +45,35 @@ export interface IntersectionWizardLaneAppDto {
   countType?: IntersectionWizardLaneCountType;
   requestTrackIds?: number[];
   highlightTrackIds?: number[];
-  signalId: string;
-  approach?: IntersectionWizardApproach;
-  heading?: IntersectionWizardApproach;
-  turnDirections: IntersectionWizardTurnDirection[];
+  approach: IntersectionWizardApproach;
+  signalSource: IntersectionWizardLaneSignalSource;
+  signalGroupSignalId?: string;
+  signal: IntersectionWizardLaneSignalAppDto;
+  signalGroupAssignments: IntersectionWizardSignalGroupAssignmentAppDto[];
 }
 
-export interface IntersectionWizardPedestrianCrossingAppDto {
-  id: string;
+export interface IntersectionWizardLaneSignalAppDto {
   name: string;
-  luaVariableName?: string;
-  approach: IntersectionWizardApproach;
-  heading?: IntersectionWizardApproach;
+  signalId?: string;
+  modelName: string;
+  modelConstant: string;
+  lightStructures?: IntersectionWizardLightStructureAppDto[];
+  axisStructures?: IntersectionWizardAxisStructureAppDto[];
+}
+
+export interface IntersectionWizardSignalGroupAssignmentAppDto {
   signalGroupId: string;
+  mode: IntersectionWizardSignalGroupAssignmentMode;
+  routeNames?: string[];
 }
 
 export interface IntersectionWizardAmpelAppDto {
   id: string;
   name: string;
+  kind?: IntersectionWizardAmpelKind;
   pedestrianName?: string;
-  signalId: string;
+  signalId?: string;
+  sourceAmpelId?: string;
   use: IntersectionWizardAmpelUse;
   trafficType: IntersectionWizardTrafficType;
   modelName: string;
@@ -88,9 +103,12 @@ export interface IntersectionWizardAxisStructureAppDto {
 export interface IntersectionWizardSignalGroupAppDto {
   id: string;
   name: string;
-  laneIds: string[];
+  approach: IntersectionWizardApproach;
   turnDirections: IntersectionWizardTurnDirection[];
   trafficType: IntersectionWizardTrafficType;
+  showRequests: boolean;
+  pedestrianCrossingName?: string;
+  pedestrianCrossingLuaVariableName?: string;
   ampelIds: string[];
 }
 
@@ -99,22 +117,6 @@ export interface IntersectionWizardPhaseAppDto {
   name: string;
   greenTimeSeconds?: number;
   signalGroupIds: string[];
-}
-
-export type IntersectionWizardRouteRuleMode = 'ONLY' | 'ALSO';
-
-export interface IntersectionWizardRouteRuleAppDto {
-  id: string;
-  laneId: string;
-  routeNames: string[];
-  signalGroupIds: string[];
-  mode: IntersectionWizardRouteRuleMode;
-  showRequests: boolean;
-}
-
-export interface IntersectionWizardDefaultRequestDisplayAppDto {
-  laneId: string;
-  signalGroupId: string;
 }
 
 export interface IntersectionWizardDraftAppDto {
@@ -130,15 +132,13 @@ export interface IntersectionWizardDraftAppDto {
   individualLanePhaseSettings?: boolean;
   supportPedestrianSignals?: boolean;
   supportMultipleLaneSignals?: boolean;
+  supportStructureLightSignals?: boolean;
   staticCams?: string[];
   createdAt: string;
   updatedAt: string;
   lanes: IntersectionWizardLaneAppDto[];
-  pedestrianCrossings?: IntersectionWizardPedestrianCrossingAppDto[];
   ampeln: IntersectionWizardAmpelAppDto[];
   signalGroups: IntersectionWizardSignalGroupAppDto[];
-  routeRules?: IntersectionWizardRouteRuleAppDto[];
-  defaultRequestDisplays?: IntersectionWizardDefaultRequestDisplayAppDto[];
   phases: IntersectionWizardPhaseAppDto[];
   generatedLua: string;
 }

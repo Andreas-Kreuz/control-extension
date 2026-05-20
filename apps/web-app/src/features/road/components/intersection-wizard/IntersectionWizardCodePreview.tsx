@@ -33,6 +33,9 @@ function IntersectionWizardCodePreview({
         alignSelf: fullWidth ? 'stretch' : { xl: 'start' },
         height: fullWidth ? 'auto' : { xl: 'calc(100vh - 104px)' },
         minHeight: fullWidth ? 0 : { xl: 'calc(100vh - 104px)' },
+        minWidth: 0,
+        maxWidth: '100%',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -75,10 +78,15 @@ function IntersectionWizardCodePreview({
         component="pre"
         sx={{
           flex: fullWidth ? 'none' : { xl: 1 },
+          minWidth: 0,
+          maxWidth: '100%',
+          width: '100%',
+          boxSizing: 'border-box',
           m: 0,
           p: 2,
-          overflowX: 'auto',
+          overflowX: 'scroll',
           overflowY: fullWidth ? 'visible' : { xs: 'visible', xl: 'auto' },
+          whiteSpace: 'pre',
           bgcolor: '#101418',
           color: '#e7edf3',
           fontSize: 13,

@@ -5,9 +5,9 @@ import RoadSelector from './RoadSelector';
 import { trafficLightModelConstantForName } from './RoadSelector';
 import PersistentServerStateService from './PersistentServerStateService';
 import {
-  createDefaultSignalGroups,
   createDraftFromCurrentIntersection,
   generateIntersectionWizardLua,
+  normalizeLegacyDraftInput,
 } from './IntersectionWizardCodegen';
 import {
   IntersectionWizardAmpelAppDto,
@@ -15,9 +15,7 @@ import {
   IntersectionWizardDraftAppDto,
   IntersectionWizardDraftSummaryAppDto,
   IntersectionWizardLaneCountType,
-  IntersectionWizardTurnDirection,
   IntersectionWizardSignalLookupAppDto,
-  IntersectionWizardTrafficType,
   TrafficLightModelAppDto,
 } from '@ce/web-shared';
 import express from 'express';
@@ -109,13 +107,8 @@ function modelFromSignalName(signalName: string | undefined, models: Record<stri
 
 function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): IntersectionWizardDraftAppDto {
   const timestamp = nowIso();
-  const legacyLaneTrafficTypes = new Map(
-    (input.lanes ?? []).map((lane) => [
-      lane.id,
-      ((lane as { trafficType?: IntersectionWizardTrafficType }).trafficType ?? 'CAR') as IntersectionWizardTrafficType,
-    ]),
-  );
-  const lanes = (input.lanes ?? []).map((lane) => {
+  const normalizedInput = normalizeLegacyDraftInput(input);
+  const lanes = (normalizedInput.lanes ?? []).map((lane) => {
     const countType = normalizeLaneCountType(lane.countType);
     const requestTrackIds = optionalNumberArray(lane.requestTrackIds);
     const highlightTrackIds = optionalNumberArray(lane.highlightTrackIds);
@@ -127,66 +120,86 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
       ...(countType ? { countType } : {}),
       ...(requestTrackIds ? { requestTrackIds } : {}),
       ...(highlightTrackIds ? { highlightTrackIds } : {}),
-      signalId: lane.signalId,
-      approach: normalizeApproach(
-        lane.approach,
-        lane.heading ?? (lane as { compassDirection?: IntersectionWizardApproach }).compassDirection,
-      ),
-      turnDirections:
-        lane.turnDirections ?? (lane as { directions?: IntersectionWizardTurnDirection[] }).directions ?? [],
+      approach: normalizeApproach(lane.approach),
+      signalSource: lane.signalSource === 'SIGNAL_GROUP' ? ('SIGNAL_GROUP' as const) : ('OWN' as const),
+      ...(lane.signalGroupSignalId ? { signalGroupSignalId: lane.signalGroupSignalId } : {}),
+      signal: {
+        name: lane.signal?.name?.trim() ? lane.signal.name : `${lane.name || lane.id}Signal`,
+        ...(lane.signal?.signalId?.trim() ? { signalId: lane.signal.signalId } : {}),
+        modelName: lane.signal?.modelName || 'Unsichtbar_2er',
+        modelConstant: lane.signal?.modelConstant || 'Unsichtbar_2er',
+        lightStructures: (lane.signal?.lightStructures ?? []).slice(0, 4),
+        axisStructures: lane.signal?.axisStructures ?? [],
+      },
+      signalGroupAssignments: (lane.signalGroupAssignments ?? [])
+        .filter((assignment) => assignment.signalGroupId)
+        .map((assignment) => ({
+          signalGroupId: assignment.signalGroupId,
+          mode:
+            assignment.mode === 'ONLY'
+              ? ('ONLY' as const)
+              : assignment.mode === 'ALSO'
+                ? ('ALSO' as const)
+                : ('DEFAULT' as const),
+          ...(assignment.routeNames && assignment.routeNames.length > 0
+            ? { routeNames: assignment.routeNames.filter((routeName) => routeName.trim()) }
+            : {}),
+        })),
     };
   });
-  const pedestrianCrossings =
-    input.pedestrianCrossings?.map((crossing) => ({
-      ...crossing,
-      approach: normalizeApproach(crossing.approach, crossing.heading),
-    })) ?? [];
-  const ampeln = input.ampeln ?? [];
-  const signalGroups =
-    input.signalGroups?.map((group) => ({
-      ...group,
-      turnDirections:
-        group.turnDirections ?? (group as { directions?: IntersectionWizardTurnDirection[] }).directions ?? [],
-      trafficType:
-        group.trafficType ?? group.laneIds.map((laneId) => legacyLaneTrafficTypes.get(laneId)).find(Boolean) ?? 'CAR',
-    })) ?? createDefaultSignalGroups(lanes, (lane) => legacyLaneTrafficTypes.get(lane.id) ?? 'CAR');
-  const inferredSupportMultipleLaneSignals =
-    (input.routeRules ?? []).length > 0 ||
-    signalGroups.some((group) =>
-      group.laneIds.some((laneId) => signalGroups.filter((entry) => entry.laneIds.includes(laneId)).length > 1),
-    );
+  const ampeln = (normalizedInput.ampeln ?? []).map((ampel) => ({
+    ...ampel,
+    kind:
+      ampel.kind ??
+      (ampel.lightStructures && ampel.lightStructures.length > 0 && !ampel.signalId?.trim()
+        ? ('STRUCTURE_LIGHT' as const)
+        : ('SIGNAL' as const)),
+    ...(ampel.signalId?.trim() ? { signalId: ampel.signalId } : {}),
+    lightStructures: (ampel.lightStructures ?? []).slice(0, 4),
+    axisStructures: ampel.axisStructures ?? [],
+  }));
+  const signalGroups = (normalizedInput.signalGroups ?? []).map((group) => ({
+    ...group,
+    name: group.name,
+    approach: normalizeApproach(group.approach),
+    turnDirections: group.trafficType === 'PEDESTRIAN' ? [] : group.turnDirections,
+    trafficType: group.trafficType ?? 'CAR',
+    showRequests: group.showRequests ?? false,
+    ampelIds: group.ampelIds ?? [],
+  }));
+  const inferredSupportMultipleLaneSignals = lanes.some((lane) => lane.signalGroupAssignments.length > 1);
   const inferredSupportPedestrianSignals =
-    pedestrianCrossings.length > 0 ||
     signalGroups.some((group) => group.trafficType === 'PEDESTRIAN') ||
     ampeln.some(
       (ampel) =>
         ampel.use === 'PEDESTRIAN_ONLY' || ampel.use === 'VEHICLE_AND_PEDESTRIAN' || ampel.trafficType === 'PEDESTRIAN',
     );
-  const greenTimeSeconds = optionalNumber(input.greenTimeSeconds);
+  const inferredSupportStructureLightSignals = ampeln.some((ampel) => ampel.kind === 'STRUCTURE_LIGHT');
+  const greenTimeSeconds = optionalNumber(normalizedInput.greenTimeSeconds);
   const draft: IntersectionWizardDraftAppDto = {
-    id: input.id || `draft-${Date.now()}`,
-    name: input.name ?? '',
-    luaVariableName: input.luaVariableName ?? 'kreuzung',
+    id: normalizedInput.id || `draft-${Date.now()}`,
+    name: normalizedInput.name ?? '',
+    luaVariableName: normalizedInput.luaVariableName ?? 'kreuzung',
     ...(greenTimeSeconds !== undefined ? { greenTimeSeconds } : {}),
-    intersectionEepSaveId: normalizeStorageSlot(input.intersectionEepSaveId),
-    ...(input.tippStructure !== undefined ? { tippStructure: input.tippStructure } : {}),
-    switchInStrictOrder: input.switchInStrictOrder ?? false,
-    showLuaCodeImmediately: input.showLuaCodeImmediately ?? true,
-    manualLuaVariableNames: input.manualLuaVariableNames ?? false,
-    individualLanePhaseSettings: input.individualLanePhaseSettings ?? false,
-    supportPedestrianSignals: input.supportPedestrianSignals ?? inferredSupportPedestrianSignals,
-    supportMultipleLaneSignals: input.supportMultipleLaneSignals ?? inferredSupportMultipleLaneSignals,
-    staticCams: input.staticCams ?? [],
-    createdAt: input.createdAt ?? timestamp,
+    intersectionEepSaveId: normalizeStorageSlot(normalizedInput.intersectionEepSaveId),
+    ...(normalizedInput.tippStructure !== undefined ? { tippStructure: normalizedInput.tippStructure } : {}),
+    switchInStrictOrder: normalizedInput.switchInStrictOrder ?? false,
+    showLuaCodeImmediately: normalizedInput.showLuaCodeImmediately ?? true,
+    manualLuaVariableNames: normalizedInput.manualLuaVariableNames ?? false,
+    individualLanePhaseSettings: normalizedInput.individualLanePhaseSettings ?? false,
+    supportPedestrianSignals: (normalizedInput.supportPedestrianSignals ?? false) || inferredSupportPedestrianSignals,
+    supportMultipleLaneSignals:
+      (normalizedInput.supportMultipleLaneSignals ?? false) || inferredSupportMultipleLaneSignals,
+    supportStructureLightSignals:
+      (normalizedInput.supportStructureLightSignals ?? false) || inferredSupportStructureLightSignals,
+    staticCams: normalizedInput.staticCams ?? [],
+    createdAt: normalizedInput.createdAt ?? timestamp,
     updatedAt: timestamp,
     lanes,
-    pedestrianCrossings,
     ampeln,
     signalGroups,
-    routeRules: input.routeRules ?? [],
-    defaultRequestDisplays: input.defaultRequestDisplays ?? [],
     phases:
-      input.phases?.map((phase) => {
+      normalizedInput.phases?.map((phase) => {
         const phaseGreenTimeSeconds = optionalNumber(phase.greenTimeSeconds);
         return {
           ...phase,
@@ -318,6 +331,7 @@ export default class IntersectionWizardService implements DomainRoomService {
     return {
       id: `ampel-${signalId || index}`,
       name: `A${index}`,
+      kind: 'SIGNAL',
       signalId,
       use: 'VEHICLE_ONLY',
       trafficType: 'CAR',

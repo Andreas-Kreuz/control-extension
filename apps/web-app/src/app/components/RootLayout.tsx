@@ -35,6 +35,7 @@ function RootLayout({ navItems }: RootLayoutProps) {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const hideNav = location.pathname.startsWith('/road/createIntersection');
 
   const setSheet = useCallback((content: ReactNode, options?: { permanentOnTablet?: boolean; key?: string }) => {
     setSideSheetState({
@@ -87,16 +88,20 @@ function RootLayout({ navItems }: RootLayoutProps) {
           </Toolbar>
         </AppBar>
 
-        {isDesktop && <NavDesktop items={visibleNavItems} activeIndex={activeIndex} onNavigate={handleNavigation} />}
+        {isDesktop && !hideNav && (
+          <NavDesktop items={visibleNavItems} activeIndex={activeIndex} onNavigate={handleNavigation} />
+        )}
 
-        {isTablet && <NavTablet items={visibleNavItems} activeIndex={activeIndex} onNavigate={handleNavigation} />}
+        {isTablet && !hideNav && (
+          <NavTablet items={visibleNavItems} activeIndex={activeIndex} onNavigate={handleNavigation} />
+        )}
 
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             minWidth: 0,
-            pb: isMobile ? '56px' : 0,
+            pb: isMobile && !hideNav ? '56px' : 0,
           }}
         >
           <Toolbar variant={toolbarVariant} />
@@ -142,7 +147,9 @@ function RootLayout({ navItems }: RootLayoutProps) {
           </Drawer>
         )}
 
-        {isMobile && <NavMobile items={visibleNavItems} activeIndex={activeIndex} onNavigate={handleNavigation} />}
+        {isMobile && !hideNav && (
+          <NavMobile items={visibleNavItems} activeIndex={activeIndex} onNavigate={handleNavigation} />
+        )}
       </Box>
     </SideSheetContext.Provider>
   );

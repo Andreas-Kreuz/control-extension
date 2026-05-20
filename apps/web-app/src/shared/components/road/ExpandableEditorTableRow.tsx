@@ -24,12 +24,18 @@ function ExpandableEditorTableRow(props: {
         hover
         selected={props.expanded}
         onClick={props.onToggle}
-        sx={{
+        sx={(theme) => ({
           cursor: 'pointer',
+          bgcolor: props.expanded ? alpha(theme.palette.primary.main, 0.08) : undefined,
+          boxShadow: props.expanded ? `inset 3px 0 0 ${theme.palette.primary.main}` : undefined,
+          transition: 'background-color 120ms ease',
+          '&:hover': {
+            bgcolor: props.expanded ? alpha(theme.palette.primary.main, 0.12) : undefined,
+          },
           '& > .MuiTableCell-root': {
             borderBottomWidth: props.expanded ? 0 : 1,
           },
-        }}
+        })}
       >
         <TableCell>
           <IconButton

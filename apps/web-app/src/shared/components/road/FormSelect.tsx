@@ -3,6 +3,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import type { SelectProps } from '@mui/material/Select';
 import type { ReactNode } from 'react';
 
 export interface FormSelectOption<TValue extends string> {
@@ -18,6 +19,7 @@ export interface FormSelectProps<TValue extends string> {
   onChange: (value: TValue) => void;
   options: FormSelectOption<TValue>[];
   renderValue?: (value: TValue) => ReactNode;
+  size?: SelectProps['size'];
   value: TValue;
 }
 
@@ -29,6 +31,7 @@ function FormSelect<TValue extends string>({
   onChange,
   options,
   renderValue,
+  size,
   value,
 }: FormSelectProps<TValue>) {
   const labelId = `${id}-label`;
@@ -38,6 +41,7 @@ function FormSelect<TValue extends string>({
     <FormControl
       fullWidth
       error={hasError}
+      size={size}
       sx={
         !hasError && infoText
           ? {

@@ -1,8 +1,12 @@
-﻿import * as assert from 'node:assert/strict';
+import * as assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { createDraftFromCurrentIntersection, generateIntersectionWizardLua } from './IntersectionWizardCodegen';
+import {
+  createDraftFromCurrentIntersection,
+  generateIntersectionWizardLua,
+  signalGroupName,
+} from './IntersectionWizardCodegen';
 import PersistentServerStateService from './PersistentServerStateService';
 import { FileNames } from '../../eep/service/FileNames';
 import type {
@@ -36,14 +40,31 @@ function makeDraft(): IntersectionWizardDraftAppDto {
       {
         id: 'lane-1',
         name: 'FS1',
-        signalId: '101',
-        turnDirections: ['STRAIGHT'],
+        approach: 'SOUTH',
+        signalSource: 'OWN',
+        signal: {
+          name: 'lane1Sig',
+          signalId: '101',
+          modelName: 'Unsichtbar_2er',
+          modelConstant: 'Unsichtbar_2er',
+        },
+        signalGroupAssignments: [{ signalGroupId: 'sg-1', mode: 'DEFAULT' }],
       },
       {
         id: 'lane-2',
         name: 'FS2',
-        signalId: '-1',
-        turnDirections: ['LEFT'],
+        approach: 'SOUTH',
+        signalSource: 'SIGNAL_GROUP',
+        signalGroupSignalId: 'sg-2',
+        signal: {
+          name: 'lane2Sig',
+          modelName: 'Unsichtbar_2er',
+          modelConstant: 'Unsichtbar_2er',
+        },
+        signalGroupAssignments: [
+          { signalGroupId: 'sg-1', mode: 'DEFAULT' },
+          { signalGroupId: 'sg-2', mode: 'ONLY', routeNames: ['Tram 11 Heiderand'] },
+        ],
       },
     ],
     ampeln: [
@@ -67,10 +88,9 @@ function makeDraft(): IntersectionWizardDraftAppDto {
       {
         id: 'ampel-102',
         name: 'S1',
-        signalId: '-1',
         use: 'VEHICLE_ONLY',
         trafficType: 'TRAM',
-        modelName: 'MA1_STRAB_3er_2_gruen',
+        modelName: 'NONE',
         modelConstant: 'NONE',
         lightStructures: [
           {
@@ -85,18 +105,20 @@ function makeDraft(): IntersectionWizardDraftAppDto {
     signalGroups: [
       {
         id: 'sg-1',
-        name: 'SG Geradeaus',
-        laneIds: ['lane-1'],
+        name: 'sgSouthCarStraight',
+        approach: 'SOUTH',
         turnDirections: ['STRAIGHT'],
         trafficType: 'CAR',
+        showRequests: true,
         ampelIds: ['ampel-101'],
       },
       {
         id: 'sg-2',
-        name: 'SG Tram Links',
-        laneIds: ['lane-2'],
+        name: 'sgSouthTramLeft',
+        approach: 'SOUTH',
         turnDirections: ['LEFT'],
         trafficType: 'TRAM',
+        showRequests: true,
         ampelIds: ['ampel-102'],
       },
     ],
@@ -107,370 +129,186 @@ function makeDraft(): IntersectionWizardDraftAppDto {
 
 function testCodegenCreatesIntersectionSetup(): void {
   const { lua, warnings } = generateIntersectionWizardLua(makeDraft());
+  const kreuzungIndex = lua.indexOf('-- Kreuzung');
+  const ampelnIndex = lua.indexOf('-- Ampeln');
 
   assert.equal(warnings.length, 0);
+  assert.ok(kreuzungIndex > 0 && ampelnIndex > kreuzungIndex);
   assert.match(lua, /\n-- START Kreuzung bahnhofHaupt \(Bahnhofstraße - Hauptstraße\)\ndo\n/);
-  assert.match(lua, /TrafficLight:new\("K1", 101, TrafficLightModel\.JS2_3er_mit_FG\)/);
+  assert.match(
+    lua,
+    /local bahnhofHaupt = Intersection:new\("Bahnhofstraße - Hauptstraße"\)\n\s+:scriptVariableName\("bahnhofHaupt"\)\n\s+:withStorage\(42\)/,
+  );
+  assert.match(lua, /:setSwitchInStrictOrder\(true\)/);
   assert.match(lua, /local K1 = TrafficLight:new\("K1", 101, TrafficLightModel\.JS2_3er_mit_FG\)/);
   assert.match(
     lua,
-    /local S1 = TrafficLight:newPlainLightStructure\("S1", "#2_Rot", "#2_Gruen", "#2_Gelb", "#2_Anforderung"\)/,
-  );
-  assert.match(lua, /:addLightStructure\("#1_Rot",\n\s+"#1_Gruen",\n\s+"#1_Gelb",\n\s+"#1_Anforderung"\n\s+\)/);
-  assert.match(
-    lua,
-    /bahnhofHauptLane1 = Lane:new\("FS1", K1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT\)/,
+    /local K1Light1 = TrafficLight:newPlainLightStructure\("K1Light1",\n\s+"#1_Rot",\n\s+"#1_Gruen",\n\s+"#1_Gelb",\n\s+"#1_Anforderung"\n\s+\)/,
   );
   assert.match(
     lua,
-    /Intersection:new\("Bahnhofstraße - Hauptstraße"\)\n\s+:scriptVariableName\("bahnhofHaupt"\)\n\s+:withStorage\(42\)/,
+    /local S1 = TrafficLight:newPlainLightStructure\("S1",\n\s+"#2_Rot",\n\s+"#2_Gruen",\n\s+"#2_Gelb",\n\s+"#2_Anforderung"\n\s+\)/,
   );
-  assert.match(lua, /:setSwitchInStrictOrder\(true\)/);
-  assert.match(lua, /newSignalGroup\("SG Geradeaus"\)\n\s+:addVehicleSignals\(K1\)/);
-  assert.match(lua, /newSignalGroup\("SG Tram Links"\)\n\s+:addTramSignals\(S1\)/);
+  assert.match(lua, /local lane1Sig = TrafficLight:new\("lane1Sig", 101, TrafficLightModel\.Unsichtbar_2er\)/);
+  assert.match(lua, /local sgSouthCarStraight = bahnhofHaupt\n\s+:newSignalGroup\("sgSouthCarStraight"\)\n\s+:addVehicleSignals\(K1, K1Light1\)/);
+  assert.match(lua, /local sgSouthTramLeft = bahnhofHaupt\n\s+:newSignalGroup\("sgSouthTramLeft"\)\n\s+:addTramSignals\(S1\)/);
+  assert.match(
+    lua,
+    /bahnhofHauptLane1 = Lane:new\("FS1", lane1Sig\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT\)/,
+  );
+  assert.match(
+    lua,
+    /bahnhofHauptLane2 = Lane:new\("FS2", S1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT, Lane\.Directions\.LEFT\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)/,
+  );
+  assert.match(
+    lua,
+    /bahnhofHauptLane1:driveOnDefaultSignalGroups\(sgSouthCarStraight\)\n\s+:showRequestsOnSignalGroups\(sgSouthCarStraight\)/,
+  );
+  assert.match(
+    lua,
+    /bahnhofHauptLane2:routes\("Tram 11 Heiderand"\)\n\s+:driveOnlyOnSignalGroups\(sgSouthTramLeft\)\n\s+:showRequestsOnSignalGroups\(sgSouthTramLeft\)/,
+  );
   assert.match(lua, /bahnhofHaupt:addStaticCam\("K1 Verkehrsueberwachung"\)/);
-  assert.match(lua, /bahnhofHaupt:newPhase\("P1"\)\n\s+:addSignalGroup\(\n\s+SG_Geradeaus,\n\s+SG_Tram_Links\n\s+\)/);
-  assert.match(lua, /\nend\n-- END Kreuzung bahnhofHaupt \(Bahnhofstraße - Hauptstraße\)$/);
+  assert.match(lua, /bahnhofHaupt:newPhase\("P1"\)\n\s+:addSignalGroup\(\n\s+sgSouthCarStraight,\n\s+sgSouthTramLeft/);
 }
 
-function testCodegenKeepsPositiveSignalIdForLightStructureAmpel(): void {
+function testSignalGroupNameOrdersDirectionsLeftToRight(): void {
+  assert.equal(
+    signalGroupName('SOUTH', 'CAR', ['RIGHT', 'LEFT', 'HALF_RIGHT', 'STRAIGHT', 'HALF_LEFT']),
+    'sgSouthCarLeftHalfLeftStraightHalfRightRight',
+  );
+}
+
+function testCodegenCreatesDedicatedPlainLightForAttachedLightStructure(): void {
   const draft = makeDraft();
-  draft.ampeln = [
-    {
-      id: 'ampel-108',
-      name: 'S1',
-      signalId: '108',
-      use: 'VEHICLE_ONLY',
-      trafficType: 'TRAM',
-      modelName: 'Unsichtbar_2er',
-      modelConstant: 'Unsichtbar_2er',
-      lightStructures: [
-        {
-          structureRed: '#5537_Straba Signal Halt',
-          structureGreen: '#5538_Straba Signal links',
-          structureYellow: '#5539_Straba Signal anhalten',
-          structureRequest: '#5540_Straba Signal A',
-        },
-      ],
-    },
-  ];
-  draft.lanes = [
-    {
-      id: 'lane-1',
-      name: 'FS1',
-      signalId: '108',
-      turnDirections: ['LEFT'],
-    },
-  ];
-  draft.signalGroups = [
-    {
-      id: 'sg-1',
-      name: 'SG Tram',
-      laneIds: ['lane-1'],
-      turnDirections: ['LEFT'],
-      trafficType: 'TRAM',
-      ampelIds: ['ampel-108'],
-    },
-  ];
+  draft.ampeln[1] = {
+    id: 'ampel-102',
+    name: 'S1',
+    signalId: '108',
+    use: 'VEHICLE_ONLY',
+    trafficType: 'TRAM',
+    modelName: 'Unsichtbar_2er',
+    modelConstant: 'Unsichtbar_2er',
+    lightStructures: [
+      {
+        structureRed: '#5537_Straba Signal Halt',
+        structureGreen: '#5538_Straba Signal links',
+        structureYellow: '#5539_Straba Signal anhalten',
+        structureRequest: '#5540_Straba Signal A',
+      },
+    ],
+  };
 
   const { lua } = generateIntersectionWizardLua(draft);
 
   assert.match(lua, /local S1 = TrafficLight:new\("S1", 108, TrafficLightModel\.Unsichtbar_2er\)/);
-  assert.match(lua, /:addLightStructure\("#5537_Straba Signal Halt",/);
-  assert.doesNotMatch(lua, /newPlainLightStructure\("S1"/);
   assert.match(
     lua,
-    /Lane:new\("FS1", S1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.LEFT\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)/,
+    /local S1Light1 = TrafficLight:newPlainLightStructure\("S1Light1",\n\s+"#5537_Straba Signal Halt",\n\s+"#5538_Straba Signal links",\n\s+"#5539_Straba Signal anhalten",\n\s+"#5540_Straba Signal A"\n\s+\)/,
   );
+  assert.doesNotMatch(lua, /:addLightStructure\(/);
+  assert.match(lua, /bahnhofHaupt\n\s+:newSignalGroup\("sgSouthTramLeft"\)\n\s+:addTramSignals\(S1, S1Light1\)/);
 }
 
-function testCodegenWarnsForMultipleGroupsOnOneLane(): void {
+function testCodegenWarnsForMultipleGroupsWithoutDefault(): void {
   const draft = makeDraft();
-  draft.signalGroups.push({
-    id: 'sg-3',
-    name: 'SG Rechts',
-    laneIds: ['lane-1'],
-    turnDirections: ['RIGHT'],
-    trafficType: 'CAR',
-    ampelIds: ['ampel-101'],
-  });
+  draft.lanes[1]!.signalGroupAssignments = [
+    { signalGroupId: 'sg-1', mode: 'ONLY', routeNames: ['A'] },
+    { signalGroupId: 'sg-2', mode: 'ALSO', routeNames: ['B'] },
+  ];
 
   const { warnings } = generateIntersectionWizardLua(draft);
 
-  assert.deepEqual(warnings, [
-    'FS1: Mehrere Signalgruppen erfordern eine eigene unsichtbare Ampel als Fahrspur-Ampel.',
-  ]);
-}
-
-function testCodegenCreatesMultipleDefaultSignalGroupsOnOneLane(): void {
-  const draft = makeDraft();
-  draft.signalGroups.push({
-    id: 'sg-3',
-    name: 'SG Rechts',
-    laneIds: ['lane-1'],
-    turnDirections: ['RIGHT'],
-    trafficType: 'CAR',
-    ampelIds: ['ampel-101'],
-  });
-
-  const { lua } = generateIntersectionWizardLua(draft);
-
-  assert.match(lua, /bahnhofHauptLane1:driveOnDefaultSignalGroups\(SG_Geradeaus, SG_Rechts\)/);
-}
-
-function testCodegenCreatesGreenTimesAndLaneSetup(): void {
-  const draft = makeDraft();
-  draft.greenTimeSeconds = 18;
-  Object.assign(draft.lanes[0]!, {
-    luaVariableName: 'customLane',
-    vehicleMultiplier: 3,
-    countType: 'SIGNALS',
-    highlightTrackIds: [17, 18],
-  });
-  Object.assign(draft.lanes[1]!, {
-    countType: 'TRACKS',
-    requestTrackIds: [91, 92],
-  });
-  draft.phases = [{ id: 'phase-1', name: 'P1', greenTimeSeconds: 7, signalGroupIds: ['sg-1', 'sg-2'] }];
-
-  const { lua } = generateIntersectionWizardLua(draft);
-
-  assert.match(lua, /Intersection:new\("Bahnhofstraße - Hauptstraße", 18\)/);
-  assert.match(
-    lua,
-    /customLane = Lane:new\("FS1", K1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT\)\n\s+:setFahrzeugMultiplikator\(3\)\n\s+:useSignalForQueue\(\)\n\s+:setHighLightingTracks\(17, 18\)/,
-  );
-  assert.match(
-    lua,
-    /bahnhofHauptLane2 = Lane:new\("FS2", S1\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.LEFT\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)\n\s+:useTrackForQueue\(91\)\n\s+:useTrackForQueue\(92\)/,
-  );
-  assert.match(lua, /bahnhofHaupt:newPhase\("P1", 7\)/);
-}
-
-function testCodegenCreatesDefaultRequestDisplays(): void {
-  const draft = makeDraft();
-  draft.defaultRequestDisplays = [{ laneId: 'lane-1', signalGroupId: 'sg-1' }];
-
-  const { lua } = generateIntersectionWizardLua(draft);
-
-  assert.match(
-    lua,
-    /bahnhofHauptLane1:driveOnDefaultSignalGroups\(SG_Geradeaus\)\n\s+:showRequestsOnSignalGroups\(SG_Geradeaus\)/,
-  );
-}
-
-function testCodegenCreatesRouteSpecificSignalGroupRules(): void {
-  const draft = makeDraft();
-  draft.signalGroups[1]!.laneIds = [];
-  draft.routeRules = [
-    {
-      id: 'route-rule-1',
-      laneId: 'lane-2',
-      routeNames: ['Tram 11 Heiderand', 'Tram 11 Rehfeld'],
-      signalGroupIds: ['sg-2'],
-      mode: 'ONLY',
-      showRequests: true,
-    },
-  ];
-
-  const { lua } = generateIntersectionWizardLua(draft);
-
-  assert.match(
-    lua,
-    /bahnhofHauptLane2:routes\("Tram 11 Heiderand", "Tram 11 Rehfeld"\)\n\s+:driveOnlyOnSignalGroups\(SG_Tram_Links\)\n\s+:showRequestsOnSignalGroups\(SG_Tram_Links\)/,
-  );
-}
-
-function testCodegenCreatesAlsoDriveRouteSpecificSignalGroupRules(): void {
-  const draft = makeDraft();
-  draft.signalGroups[1]!.laneIds = [];
-  draft.routeRules = [
-    {
-      id: 'route-rule-1',
-      laneId: 'lane-2',
-      routeNames: ['Tram 11 Heiderand'],
-      signalGroupIds: ['sg-2'],
-      mode: 'ALSO',
-      showRequests: true,
-    },
-  ];
-
-  const { lua } = generateIntersectionWizardLua(draft);
-
-  assert.match(
-    lua,
-    /bahnhofHauptLane2:routes\("Tram 11 Heiderand"\)\n\s+:driveAlsoOnSignalGroups\(SG_Tram_Links\)\n\s+:showRequestsOnSignalGroups\(SG_Tram_Links\)/,
-  );
-}
-
-function testCodegenCreatesCompleteLaneSignalFromLaneSignalId(): void {
-  const draft = makeDraft();
-  draft.ampeln = [];
-  draft.lanes = [
-    {
-      id: 'lane-1',
-      name: 'FS1',
-      signalId: '101',
-      turnDirections: ['STRAIGHT'],
-    },
-  ];
-  draft.signalGroups = [];
-  draft.phases = [];
-
-  const { lua } = generateIntersectionWizardLua(draft);
-
-  assert.match(lua, /local FS1Signal = TrafficLight:new\("FS1Signal", 101, TrafficLightModel\.Unsichtbar_2er\)/);
-  assert.match(
-    lua,
-    /bahnhofHauptLane1 = Lane:new\("FS1", FS1Signal\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT\)/,
-  );
-  assert.doesNotMatch(lua, /Lane:new\("FS1", nil/);
+  assert.deepEqual(warnings, ['FS2: Mehrere Signalgruppen erfordern mindestens eine Standard-Signalgruppe.']);
 }
 
 function testCodegenCreatesPedestrianCrossings(): void {
   const draft = makeDraft();
-  draft.ampeln.push({
-    id: 'ampel-ped-1',
-    name: 'F1',
-    signalId: '201',
-    use: 'PEDESTRIAN_ONLY',
-    trafficType: 'PEDESTRIAN',
-    modelName: 'JS2_2er_nur_FG',
-    modelConstant: 'JS2_2er_nur_FG',
-  });
+  draft.ampeln.push(
+    {
+      id: 'ampel-ped-1',
+      name: 'F1',
+      signalId: '201',
+      use: 'PEDESTRIAN_ONLY',
+      trafficType: 'PEDESTRIAN',
+      modelName: 'JS2_2er_nur_FG',
+      modelConstant: 'JS2_2er_nur_FG',
+    },
+    {
+      id: 'ampel-ped-2',
+      name: 'F2',
+      signalId: '202',
+      use: 'PEDESTRIAN_ONLY',
+      trafficType: 'PEDESTRIAN',
+      modelName: 'JS2_2er_nur_FG',
+      modelConstant: 'JS2_2er_nur_FG',
+    },
+  );
   draft.signalGroups.push({
     id: 'sg-ped-1',
-    name: 'sgPedCrossingNorth1',
-    laneIds: [],
-    turnDirections: ['STRAIGHT'],
+    name: 'sgNorthPed',
+    approach: 'NORTH',
+    turnDirections: [],
     trafficType: 'PEDESTRIAN',
-    ampelIds: ['ampel-ped-1'],
+    showRequests: false,
+    pedestrianCrossingName: 'Furt Nord',
+    pedestrianCrossingLuaVariableName: 'c1PedNorth',
+    ampelIds: ['ampel-ped-1', 'ampel-ped-2'],
   });
-  draft.pedestrianCrossings = [
-    {
-      id: 'ped-crossing-1',
-      name: 'pedCrossingNorth1',
-      luaVariableName: 'c1PedCrossingNorth1',
-      approach: 'SOUTH',
-      signalGroupId: 'sg-ped-1',
-    },
-  ];
 
   const { lua } = generateIntersectionWizardLua(draft);
 
-  assert.match(lua, /local PedestrianCrossing = require\("ce\.mods\.road\.PedestrianCrossing"\)/);
   assert.match(
     lua,
-    /c1PedCrossingNorth1 = PedestrianCrossing:new\("pedCrossingNorth1"\)\n\s+:scriptVariableName\("c1PedCrossingNorth1"\)\n\s+:setApproach\(PedestrianCrossing\.Approach\.SOUTH\)/,
+    /c1PedNorth = PedestrianCrossing:new\("Furt Nord"\)\n\s+:scriptVariableName\("c1PedNorth"\)\n\s+:setApproach\(PedestrianCrossing\.Approach\.NORTH\)/,
   );
   assert.match(
     lua,
-    /newSignalGroup\("sgPedCrossingNorth1"\)\n\s+:addPedestrianCrossing\(c1PedCrossingNorth1\)\n\s+:addPedestrianSignals\(F1\)/,
+    /newSignalGroup\("sgNorthPed"\)\n\s+:addPedestrianCrossing\(c1PedNorth\)\n\s+:addPedestrianSignals\(F1, F2\)/,
   );
 }
 
-function testCurrentIntersectionDraftKeepsLaneSignalIds(): void {
+function testCurrentIntersectionDraftKeepsImportedLanesWithoutFallbackDefaults(): void {
   const intersection: IntersectionAppDto = {
-    id: 1,
-    name: 'Bahnhofstraße - Hauptstraße',
-    scriptVariableName: 'c1',
-    eepSaveId: 77,
-    currentPhase: 'P1',
+    id: 3,
+    name: 'Neue Kreuzung',
+    currentPhase: '',
     manualPhase: '',
     nextPhase: '',
     ready: true,
-    greenTimeSeconds: 12,
-    tippStructure: '#5573_Schaltschrank-Ampel2_SK2',
+    greenTimeSeconds: 0,
     staticCams: [],
-    switchInStrictOrder: true,
-    signalGroupDefinitions: [{ name: 'SG Spur 4 Rechts', trafficType: 'CAR', signalIds: [89] }],
-    phases: [
-      {
-        id: '1-P1',
-        name: 'P1',
-        order: 1,
-        prio: 0,
-        greenTimeSeconds: 12,
-        signalGroups: ['SG Spur 4 Rechts'],
-        signalHeads: [
-          {
-            signalId: 89,
-            signalHeadKind: 'VEHICLE',
-            signalHeadKey: '89:VEHICLE',
-            signalHeadName: 'lane4Sig',
-            type: 'CAR',
-            vehicleSignalHeadName: 'lane4Sig',
-            use: 'VEHICLE_ONLY',
-          },
-        ],
-      },
-    ],
+    signalGroupDefinitions: [],
+    phases: [],
   };
   const lanes: IntersectionLaneAppDto[] = [
     {
-      id: '1-Spur 4',
-      intersectionId: 1,
-      name: 'Spur 4',
+      id: '3-Spur 1',
+      intersectionId: 3,
+      name: 'Spur 1',
       currentIndication: 'RED',
-      vehicleMultiplier: 15,
-      laneSignalId: 89,
+      vehicleMultiplier: 1,
+      laneSignalId: 101,
+      approach: 'NORTH',
       type: 'NORMAL',
       countType: 'SIGNALS',
       waitingTrains: [],
       waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT', 'RIGHT'],
-      phases: ['P1'],
-      defaultSignalGroups: ['SG Spur 4 Rechts'],
-      defaultRequestSignalGroups: ['SG Spur 4 Rechts'],
-      requestTrackIds: [],
-      highlightTrackIds: [201, 202],
+      directions: ['STRAIGHT'],
+      phases: [],
+      defaultSignalGroups: [],
       tracks: [],
     },
   ];
-  const ampeln: IntersectionTrafficLightAppDto[] = [
-    {
-      id: 89,
-      signalId: 89,
-      vehicleSignalName: 'lane4Sig',
-      use: 'VEHICLE_ONLY',
-      modelId: 'Unsichtbar_2er',
-      currentIndication: 'RED',
-      intersectionId: 1,
-      lightStructures: {},
-      axisStructures: [],
-    },
-  ];
 
-  const draft = createDraftFromCurrentIntersection(intersection, lanes, ampeln);
-  const importedLane = draft.lanes[0];
+  const draft = createDraftFromCurrentIntersection(intersection, lanes, []);
 
-  assert.ok(importedLane);
-  assert.equal(importedLane.signalId, '89');
-  assert.equal(importedLane.vehicleMultiplier, 15);
-  assert.equal(importedLane.countType, 'SIGNALS');
-  assert.deepEqual(importedLane.highlightTrackIds, [201, 202]);
-  assert.deepEqual(draft.defaultRequestDisplays, [{ laneId: 'lane-1', signalGroupId: 'sg-1' }]);
-  assert.equal(draft.luaVariableName, 'c1');
-  assert.equal(draft.intersectionEepSaveId, 77);
-  assert.equal(draft.switchInStrictOrder, true);
-  assert.equal(draft.greenTimeSeconds, 12);
-  assert.equal(draft.phases[0]?.greenTimeSeconds, 12);
-  assert.match(
-    draft.generatedLua,
-    /local c1 = Intersection:new\("Bahnhofstraße - Hauptstraße", 12\)\n\s+:setTippStructure\("#5573_Schaltschrank-Ampel2_SK2"\)\n\s+:scriptVariableName\("c1"\)\n\s+:withStorage\(77\)\n\s+:setSwitchInStrictOrder\(true\)/,
-  );
-  assert.match(
-    draft.generatedLua,
-    /Lane:new\("Spur 4", lane4Sig\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.STRAIGHT, Lane\.Directions\.RIGHT\)\n\s+:setFahrzeugMultiplikator\(15\)\n\s+:useSignalForQueue\(\)\n\s+:setHighLightingTracks\(201, 202\)/,
-  );
-  assert.match(
-    draft.generatedLua,
-    /c1Lane4:driveOnDefaultSignalGroups\(SG_Spur_4_Rechts\)\n\s+:showRequestsOnSignalGroups\(SG_Spur_4_Rechts\)/,
-  );
-  assert.match(draft.generatedLua, /c1:newPhase\("P1", 12\)/);
+  assert.equal(draft.lanes.length, 1);
+  assert.equal(draft.signalGroups.length, 0);
+  assert.deepEqual(draft.lanes[0]?.signalGroupAssignments, []);
 }
 
-function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
+function testCurrentIntersectionDraftLoadsHohenfurtStyleSignalGroups(): void {
   const intersection: IntersectionAppDto = {
     id: 1,
     name: 'Bahnhofstraße - Hauptstraße',
@@ -479,17 +317,11 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
     nextPhase: '',
     ready: true,
     greenTimeSeconds: 15,
-    tippStructure: '#5573_Schaltschrank-Ampel2_SK2',
     staticCams: [],
     signalGroupDefinitions: [
       { name: 'sgLane4Straight', trafficType: 'CAR', signalIds: [142] },
       { name: 'sgLane4Right', trafficType: 'CAR', signalIds: [140] },
-      {
-        name: 'sgPedNorthSouth',
-        trafficType: 'PEDESTRIAN',
-        signalIds: [86, 142],
-        pedestrianCrossingNames: ['Furt Nord-Sued'],
-      },
+      { name: 'sgPedNorthSouth', trafficType: 'PEDESTRIAN', signalIds: [86, 142] },
       { name: 'sgLane8Left', trafficType: 'TRAM', signalIds: [-2] },
     ],
     pedestrianCrossings: [
@@ -527,10 +359,27 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
       directions: ['STRAIGHT', 'RIGHT'],
       phases: ['P2'],
       defaultSignalGroups: ['sgLane4Straight', 'sgLane4Right'],
+      defaultRequestSignalGroups: ['sgLane4Right'],
+      tracks: [],
+    },
+    {
+      id: '1-Spur 8',
+      intersectionId: 1,
+      name: 'Spur 8',
+      currentIndication: 'RED',
+      vehicleMultiplier: 1,
+      laneSignalId: 88,
+      type: 'TRAM',
+      countType: 'SIGNALS',
+      waitingTrains: [],
+      waitingForGreenCyclesCount: 0,
+      directions: ['LEFT'],
+      phases: ['P2'],
+      defaultSignalGroups: [],
       tracks: [],
       routeRules: [
         {
-          routeNames: ['Tram 11 Heiderand', 'Tram 11 Rehfeld'],
+          routeNames: ['Tram 11 Heiderand'],
           signalGroups: ['sgLane8Left'],
           mode: 'ONLY',
           showRequests: true,
@@ -559,7 +408,14 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
       modelId: 'JS2_2er_OFF_YELLOW_GREEN',
       currentIndication: 'RED',
       intersectionId: 1,
-      lightStructures: {},
+      lightStructures: {
+        '0': {
+          structureRed: '#140_Rot',
+          structureGreen: '#140_Gruen',
+          structureYellow: '#140_Gelb',
+          structureRequest: '#140_Anforderung',
+        },
+      },
       axisStructures: [],
     },
     {
@@ -582,7 +438,14 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
       modelId: 'NONE',
       currentIndication: 'RED',
       intersectionId: 1,
-      lightStructures: {},
+      lightStructures: {
+        '0': {
+          structureRed: '#2_Rot',
+          structureGreen: '#2_Gruen',
+          structureYellow: '#2_Gelb',
+          structureRequest: '#2_Anforderung',
+        },
+      },
       axisStructures: [],
     },
   ];
@@ -591,380 +454,35 @@ function testCurrentIntersectionDraftLoadsC1StyleSignalGroups(): void {
 
   assert.equal(draft.supportPedestrianSignals, true);
   assert.equal(draft.supportMultipleLaneSignals, true);
-  assert.deepEqual(draft.pedestrianCrossings, [
-    {
-      id: 'ped-crossing-1',
-      name: 'Furt Nord-Sued',
-      luaVariableName: 'c1PedNorthSouth',
-      approach: 'SOUTH',
-      signalGroupId: 'sg-3',
-    },
-  ]);
-  assert.deepEqual(
-    draft.signalGroups.map((group) => ({ name: group.name, ampelIds: group.ampelIds })),
-    [
-      { name: 'sgLane4Straight', ampelIds: ['ampel-142'] },
-      { name: 'sgLane4Right', ampelIds: ['ampel-140'] },
-      { name: 'sgPedNorthSouth', ampelIds: ['ampel-142', 'ampel-86'] },
-      { name: 'sgLane8Left', ampelIds: ['ampel--2'] },
-    ],
-  );
-  assert.match(
-    draft.generatedLua,
-    /newSignalGroup\("sgPedNorthSouth"\)\n\s+:addPedestrianCrossing\([^)]*\)\n\s+:addPedestrianSignals\(/,
-  );
-  assert.match(draft.generatedLua, /c1PedNorthSouth = PedestrianCrossing:new\("Furt Nord-Sued"\)/);
-  assert.match(draft.generatedLua, /local F2 = K4:withPedestrian\("F2"\)/);
-  assert.match(draft.generatedLua, /local F1 = K7:withPedestrian\("F1"\)/);
-  assert.match(draft.generatedLua, /newSignalGroup\("sgPedNorthSouth"\).*:addPedestrianSignals\([^)]*F2[^)]*F1/s);
-  assert.match(
-    draft.generatedLua,
-    /bahnhofstra_e_Hauptstra_eLane4:driveOnDefaultSignalGroups\(.*sgLane4Straight.*sgLane4Right/s,
-  );
-  assert.deepEqual(draft.routeRules, [
-    {
-      id: 'route-rule-1-1',
-      laneId: 'lane-1',
-      routeNames: ['Tram 11 Heiderand', 'Tram 11 Rehfeld'],
-      signalGroupIds: ['sg-4'],
-      mode: 'ONLY',
-      showRequests: true,
-    },
-  ]);
-  assert.match(
-    draft.generatedLua,
-    /bahnhofstra_e_Hauptstra_eLane4:routes\("Tram 11 Heiderand", "Tram 11 Rehfeld"\)\n\s+:driveOnlyOnSignalGroups\(sgLane8Left\)\n\s+:showRequestsOnSignalGroups\(sgLane8Left\)/,
-  );
-  assert.match(draft.generatedLua, /newPhase\("P2", 15\)\n\s+:addSignalGroup\(.*sgLane4Right.*sgLane8Left/s);
-}
-
-function testCurrentIntersectionDraftLoadsC2StyleSignalGroups(): void {
-  const intersection: IntersectionAppDto = {
-    id: 2,
-    name: 'Bahnhofstraße - Schlossallee',
-    currentPhase: 'P2a',
-    manualPhase: '',
-    nextPhase: '',
-    ready: true,
-    greenTimeSeconds: 15,
-    tippStructure: '#609_Schaltschrank-Ampel2_SK2',
-    staticCams: ['K2 Verkehrsüberwachung'],
-    signalGroupDefinitions: [
-      { name: 'sgLane3and4Straight', trafficType: 'CAR', signalIds: [106, 107, 109] },
-      { name: 'sgLane5Left', trafficType: 'TRAM', signalIds: [108] },
-      { name: 'sgPedDiagonal', trafficType: 'PEDESTRIAN', signalIds: [111, 112] },
-    ],
-    phases: [
-      {
-        id: '2-P2a',
-        name: 'P2a',
-        order: 1,
-        prio: 0,
-        greenTimeSeconds: 15,
-        signalGroups: ['sgLane3and4Straight', 'sgPedDiagonal'],
-        signalHeads: [],
-      },
-    ],
-  };
-  const lanes: IntersectionLaneAppDto[] = [
-    {
-      id: '2-Spur 3',
-      intersectionId: 2,
-      name: 'Spur 3',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 107,
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT', 'RIGHT'],
-      phases: ['P2a'],
-      defaultSignalGroups: ['sgLane3and4Straight'],
-      tracks: [],
-    },
-    {
-      id: '2-Spur 4',
-      intersectionId: 2,
-      name: 'Spur 4',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 106,
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT'],
-      phases: ['P2a'],
-      defaultSignalGroups: ['sgLane3and4Straight'],
-      tracks: [],
-    },
-    {
-      id: '2-Spur 5',
-      intersectionId: 2,
-      name: 'Spur 5',
-      currentIndication: 'RED',
-      vehicleMultiplier: 15,
-      laneSignalId: 108,
-      type: 'TRAM',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['LEFT'],
-      phases: ['P2a'],
-      defaultSignalGroups: ['sgLane5Left'],
-      tracks: [],
-    },
-  ];
-  const ampeln: IntersectionTrafficLightAppDto[] = [
-    ...[106, 107, 109, 108].map((signalId) => ({
-      id: signalId,
-      signalId,
-      vehicleSignalName: `K${signalId}`,
-      use: 'VEHICLE_ONLY' as const,
-      modelId: signalId === 108 ? 'Unsichtbar_2er' : 'JS2_3er_mit_FG',
-      currentIndication: 'RED',
-      intersectionId: 2,
-      lightStructures: {},
-      axisStructures: [],
-    })),
-    ...[111, 112].map((signalId) => ({
-      id: signalId,
-      signalId,
-      pedestrianSignalName: `F${signalId}`,
-      use: 'PEDESTRIAN_ONLY' as const,
-      modelId: 'JS2_2er_nur_FG',
-      currentIndication: 'RED',
-      intersectionId: 2,
-      lightStructures: {},
-      axisStructures: [
-        {
-          structureName: `#${signalId}_Warnblink`,
-          axisName: 'Blinklicht',
-          positionDefault: 0,
-          positionRedYellow: 50,
-        },
-      ],
-    })),
-  ];
-
-  const draft = createDraftFromCurrentIntersection(intersection, lanes, ampeln);
-  const straightGroup = draft.signalGroups.find((group) => group.name === 'sgLane3and4Straight');
-
-  assert.equal(draft.supportPedestrianSignals, true);
-  assert.equal(draft.supportMultipleLaneSignals, false);
-  assert.ok(straightGroup);
-  assert.deepEqual(straightGroup.laneIds, ['lane-1', 'lane-2']);
-  assert.match(
-    draft.generatedLua,
-    /newSignalGroup\("sgLane3and4Straight"\)\n\s+:addVehicleSignals\([^)]*K106[^)]*K107[^)]*K109/s,
-  );
-  assert.match(
-    draft.generatedLua,
-    /bahnhofstra_e_SchlossalleeLane3:driveOnDefaultSignalGroups\(.*sgLane3and4Straight/s,
-  );
-  assert.match(
-    draft.generatedLua,
-    /bahnhofstra_e_SchlossalleeLane4:driveOnDefaultSignalGroups\(.*sgLane3and4Straight/s,
-  );
-  assert.match(
-    draft.generatedLua,
-    /newSignalGroup\("sgPedDiagonal"\)\n\s+:addPedestrianCrossing\([^)]*\)\n\s+:addPedestrianSignals\(/,
-  );
-  assert.match(draft.generatedLua, /:addStaticCam\("K2 Verkehrsüberwachung"\)/);
-  assert.match(
-    draft.generatedLua,
-    /TrafficLight:newPedestrianOnly\("F111", 111, TrafficLightModel\.JS2_2er_nur_FG\)\n\s+:addAxisStructure/,
-  );
-  assert.match(
-    draft.generatedLua,
-    /Lane:new\("Spur 5", K108\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.LEFT\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)\n\s+:setFahrzeugMultiplikator\(15\)/,
-  );
-  assert.match(draft.generatedLua, /newPhase\("P2a", 15\)\n\s+:addSignalGroup\(.*sgLane3and4Straight.*sgPedDiagonal/s);
-}
-
-function testCurrentIntersectionFallbackGroupsSignalGroupsByApproachAndTurnDirections(): void {
-  const intersection: IntersectionAppDto = {
-    id: 3,
-    name: 'Neue Kreuzung',
-    currentPhase: '',
-    manualPhase: '',
-    nextPhase: '',
-    ready: true,
-    greenTimeSeconds: 0,
-    staticCams: [],
-    signalGroupDefinitions: [],
-    phases: [],
-  };
-  const lanes: IntersectionLaneAppDto[] = [
-    {
-      id: '3-Spur 1',
-      intersectionId: 3,
-      name: 'Spur 1',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 101,
-      approach: 'NORTH',
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT'],
-      phases: [],
-      defaultSignalGroups: [],
-      tracks: [],
-    },
-    {
-      id: '3-Spur 2',
-      intersectionId: 3,
-      name: 'Spur 2',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 102,
-      approach: 'NORTH',
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT'],
-      phases: [],
-      defaultSignalGroups: [],
-      tracks: [],
-    },
-    {
-      id: '3-Spur 3',
-      intersectionId: 3,
-      name: 'Spur 3',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 103,
-      approach: 'EAST',
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT'],
-      phases: [],
-      defaultSignalGroups: [],
-      tracks: [],
-    },
-    {
-      id: '3-Spur 4',
-      intersectionId: 3,
-      name: 'Spur 4',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 104,
-      approach: 'NORTH_EAST',
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['LEFT', 'HALF_LEFT', 'STRAIGHT'],
-      phases: [],
-      defaultSignalGroups: [],
-      tracks: [],
-    },
-  ];
-
-  const draft = createDraftFromCurrentIntersection(intersection, lanes, []);
-
+  assert.equal(draft.supportStructureLightSignals, true);
   assert.deepEqual(
     draft.signalGroups.map((group) => ({
       name: group.name,
-      laneIds: group.laneIds,
-      turnDirections: group.turnDirections,
+      ampelIds: group.ampelIds,
+      showRequests: group.showRequests,
     })),
     [
-      { name: 'nStraight', laneIds: ['lane-1', 'lane-2'], turnDirections: ['STRAIGHT'] },
-      { name: 'eStraight', laneIds: ['lane-3'], turnDirections: ['STRAIGHT'] },
-      {
-        name: 'neLeftHalfLeftStraight',
-        laneIds: ['lane-4'],
-        turnDirections: ['LEFT', 'HALF_LEFT', 'STRAIGHT'],
-      },
+      { name: 'sgSouthCarStraightRight', ampelIds: ['ampel-142'], showRequests: false },
+      { name: 'sgSouthCarStraightRight2', ampelIds: ['ampel-140', 'ampel-140-light-1'], showRequests: true },
+      { name: 'sgSouthPed', ampelIds: ['ampel-86', 'ampel-142'], showRequests: false },
+      { name: 'sgSouthTramLeft', ampelIds: ['ampel--2'], showRequests: false },
     ],
   );
-}
-
-function testCurrentIntersectionImportConvertsLegacyHeadingToApproach(): void {
-  const intersection: IntersectionAppDto = {
-    id: 4,
-    name: 'Legacy Kreuzung',
-    currentPhase: '',
-    manualPhase: '',
-    nextPhase: '',
-    ready: true,
-    greenTimeSeconds: 0,
-    staticCams: [],
-    signalGroupDefinitions: [],
-    phases: [],
-  };
-  const lanes: IntersectionLaneAppDto[] = [
-    {
-      id: '4-Spur 1',
-      intersectionId: 4,
-      name: 'Spur 1',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 101,
-      heading: 'NORTH',
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT'],
-      phases: [],
-      defaultSignalGroups: [],
-      tracks: [],
-    },
-  ];
-
-  const draft = createDraftFromCurrentIntersection(intersection, lanes, []);
-
-  assert.equal(draft.lanes[0]?.approach, 'SOUTH');
-  assert.match(draft.generatedLua, /:setApproach\(Lane\.Approach\.SOUTH\)/);
-  assert.equal(draft.signalGroups[0]?.name, 'sStraight');
-}
-
-function testCurrentIntersectionImportKeepsApproachWithoutInversion(): void {
-  const intersection: IntersectionAppDto = {
-    id: 5,
-    name: 'Approach Kreuzung',
-    currentPhase: '',
-    manualPhase: '',
-    nextPhase: '',
-    ready: true,
-    greenTimeSeconds: 0,
-    staticCams: [],
-    signalGroupDefinitions: [],
-    phases: [],
-  };
-  const lanes: IntersectionLaneAppDto[] = [
-    {
-      id: '5-Spur 1',
-      intersectionId: 5,
-      name: 'Spur 1',
-      currentIndication: 'RED',
-      vehicleMultiplier: 1,
-      laneSignalId: 101,
-      approach: 'NORTH',
-      type: 'NORMAL',
-      countType: 'SIGNALS',
-      waitingTrains: [],
-      waitingForGreenCyclesCount: 0,
-      directions: ['STRAIGHT'],
-      phases: [],
-      defaultSignalGroups: [],
-      tracks: [],
-    },
-  ];
-
-  const draft = createDraftFromCurrentIntersection(intersection, lanes, []);
-
-  assert.equal(draft.lanes[0]?.approach, 'NORTH');
-  assert.match(draft.generatedLua, /:setApproach\(Lane\.Approach\.NORTH\)/);
-  assert.equal(draft.signalGroups[0]?.name, 'nStraight');
+  assert.deepEqual(draft.lanes[0]?.signalGroupAssignments, [
+    { signalGroupId: 'sg-1', mode: 'DEFAULT' },
+    { signalGroupId: 'sg-2', mode: 'DEFAULT' },
+  ]);
+  assert.deepEqual(draft.lanes[1]?.signalGroupAssignments, [
+    { signalGroupId: 'sg-4', mode: 'ONLY', routeNames: ['Tram 11 Heiderand'] },
+  ]);
+  assert.match(draft.generatedLua, /local S3 = TrafficLight:newPlainLightStructure\("S3"/);
+  assert.match(draft.generatedLua, /local K5Light1 = TrafficLight:newPlainLightStructure\("K5Light1"/);
+  assert.doesNotMatch(draft.generatedLua, /:addLightStructure\(/);
+  assert.match(
+    draft.generatedLua,
+    /bahnhofstra_e_Hauptstra_eLane8:routes\("Tram 11 Heiderand"\)\n\s+:driveOnlyOnSignalGroups\(sgSouthTramLeft\)/,
+  );
+  assert.match(draft.generatedLua, /c1PedNorthSouth = PedestrianCrossing:new\("Furt Nord-Sued"\)/);
 }
 
 async function testPersistentServerStatePreservesOtherKeys(): Promise<void> {
@@ -1005,55 +523,25 @@ async function testPersistentServerStateRecoversFromCorruptJson(): Promise<void>
 export async function run(): Promise<void> {
   await runTest('intersection wizard codegen creates setup Lua', testCodegenCreatesIntersectionSetup);
   await runTest(
-    'intersection wizard codegen keeps positive signal id for light structure Ampel',
-    testCodegenKeepsPositiveSignalIdForLightStructureAmpel,
-  );
-  await runTest('intersection wizard codegen warns for multi-group lanes', testCodegenWarnsForMultipleGroupsOnOneLane);
-  await runTest(
-    'intersection wizard codegen creates multiple default signal groups on one lane',
-    testCodegenCreatesMultipleDefaultSignalGroupsOnOneLane,
+    'intersection wizard signal group names order directions left to right',
+    testSignalGroupNameOrdersDirectionsLeftToRight,
   );
   await runTest(
-    'intersection wizard codegen creates green times and lane setup',
-    testCodegenCreatesGreenTimesAndLaneSetup,
+    'intersection wizard codegen creates dedicated plain light for attached light structure',
+    testCodegenCreatesDedicatedPlainLightForAttachedLightStructure,
   );
   await runTest(
-    'intersection wizard codegen creates default request displays',
-    testCodegenCreatesDefaultRequestDisplays,
-  );
-  await runTest(
-    'intersection wizard codegen creates route-specific signal group rules',
-    testCodegenCreatesRouteSpecificSignalGroupRules,
-  );
-  await runTest(
-    'intersection wizard codegen creates ALSO route-specific signal group rules',
-    testCodegenCreatesAlsoDriveRouteSpecificSignalGroupRules,
-  );
-  await runTest(
-    'intersection wizard codegen creates complete lane signal from lane signal id',
-    testCodegenCreatesCompleteLaneSignalFromLaneSignalId,
+    'intersection wizard codegen warns for multi-group lanes without default',
+    testCodegenWarnsForMultipleGroupsWithoutDefault,
   );
   await runTest('intersection wizard codegen creates pedestrian crossings', testCodegenCreatesPedestrianCrossings);
-  await runTest('current intersection import keeps lane signal ids', testCurrentIntersectionDraftKeepsLaneSignalIds);
   await runTest(
-    'current intersection import loads c1-style signal groups',
-    testCurrentIntersectionDraftLoadsC1StyleSignalGroups,
+    'current intersection import keeps imported lanes without fallback defaults',
+    testCurrentIntersectionDraftKeepsImportedLanesWithoutFallbackDefaults,
   );
   await runTest(
-    'current intersection import loads c2-style signal groups',
-    testCurrentIntersectionDraftLoadsC2StyleSignalGroups,
-  );
-  await runTest(
-    'current intersection fallback groups signal groups by approach and turn directions',
-    testCurrentIntersectionFallbackGroupsSignalGroupsByApproachAndTurnDirections,
-  );
-  await runTest(
-    'current intersection import converts legacy heading to approach',
-    testCurrentIntersectionImportConvertsLegacyHeadingToApproach,
-  );
-  await runTest(
-    'current intersection import keeps approach without inversion',
-    testCurrentIntersectionImportKeepsApproachWithoutInversion,
+    'current intersection import loads Hohenfurt-style signal groups',
+    testCurrentIntersectionDraftLoadsHohenfurtStyleSignalGroups,
   );
   await runTest('persistent server state preserves other keys', testPersistentServerStatePreservesOtherKeys);
   await runTest('persistent server state recovers from corrupt JSON', testPersistentServerStateRecoversFromCorruptJson);

@@ -29,13 +29,16 @@ describe('Road', () => {
     cy.contains('button', 'Neue Kreuzung erstellen').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection/kreuzung');
     cy.contains('Weiter').click();
+    cy.location('pathname').should('include', '/simple/road/createIntersection/signalgruppen');
+    cy.contains('Signalgruppen');
+    cy.contains('Weiter').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection/fahrspuren');
     cy.go('back');
-    cy.location('pathname').should('include', '/simple/road/createIntersection/kreuzung');
-    cy.contains('Kreuzungsname');
+    cy.location('pathname').should('include', '/simple/road/createIntersection/signalgruppen');
+    cy.contains('Signalgruppen');
     cy.go('forward');
     cy.location('pathname').should('include', '/simple/road/createIntersection/fahrspuren');
-    cy.contains('Fahrspuren');
+    cy.contains('Fahrspurzuweisung');
   });
 
   it('starts the create intersection wizard from the selected crossing side panel', () => {
@@ -43,8 +46,7 @@ describe('Road', () => {
     cy.visit('/simple/road/1');
     cy.contains('Im Kreuzungs-Wizard öffnen').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection');
-    cy.location('search').should('include', 'draftId=current-1');
-    cy.contains('Kreuzungsname');
-    cy.get('input[value="Bahnhofstr. - Hauptstr."]').should('exist');
+    cy.location('search').should('include', 'intersectionId=1');
+    cy.contains('Kreuzung erstellen');
   });
 });

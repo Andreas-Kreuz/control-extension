@@ -32,6 +32,25 @@ function IntersectionWizardSettingsStep({
   showAdvancedIntersectionSettings,
   storageSlotOptions,
 }: IntersectionWizardSettingsStepProps) {
+  const hasPedestrianSignalGroups = draft.signalGroups.some((group) => group.trafficType === 'PEDESTRIAN');
+  const hasMultipleSignalGroupLanes = draft.lanes.some((lane) => lane.signalGroupAssignments.length > 1);
+  const hasStructureLightSignals = draft.ampeln.some(
+    (ampel) =>
+      ampel.kind === 'STRUCTURE_LIGHT' || (!ampel.signalId?.trim() && (ampel.lightStructures ?? []).length > 0),
+  );
+  const supportPedestrianSignals = (draft.supportPedestrianSignals ?? false) || hasPedestrianSignalGroups;
+  const supportMultipleLaneSignals = (draft.supportMultipleLaneSignals ?? false) || hasMultipleSignalGroupLanes;
+  const supportStructureLightSignals = (draft.supportStructureLightSignals ?? false) || hasStructureLightSignals;
+  const hasSelectedAdvancedSettings = Boolean(
+    draft.greenTimeSeconds !== undefined ||
+    draft.manualLuaVariableNames ||
+    draft.individualLanePhaseSettings ||
+    (draft.showLuaCodeImmediately ?? true) ||
+    supportMultipleLaneSignals ||
+    supportStructureLightSignals,
+  );
+  const showAdvancedSettings = showAdvancedIntersectionSettings || hasSelectedAdvancedSettings;
+
   return (
     <Stack spacing={2}>
       <TextField
@@ -41,22 +60,15 @@ function IntersectionWizardSettingsStep({
         helperText="Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße."
         fullWidth
       />
-      <TextField
-        label="Lua-Variable"
-        value={draft.luaVariableName}
-        onChange={(event) => onLuaVariableNameChange(event.target.value)}
-        helperText="Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw."
-        fullWidth
-      />
       <FormControl fullWidth>
-        <InputLabel id="intersection-storage-slot-label">Kreuzungs-Speicherplatz</InputLabel>
+        <InputLabel id="intersection-storage-slot-label">Speicherplatz in EEP</InputLabel>
         <Select
           labelId="intersection-storage-slot-label"
-          label="Kreuzungs-Speicherplatz"
+          label="Speicherplatz in EEP"
           value={draft.intersectionEepSaveId ?? -1}
           onChange={(event) => onDraftPatch({ intersectionEepSaveId: Number(event.target.value) })}
         >
-          <MenuItem value={-1}>Nicht speichern (-1)</MenuItem>
+          <MenuItem value={-1}>Nicht in EEP speichern</MenuItem>
           {storageSlotOptions.map((slot) => (
             <MenuItem key={slot.id} value={Number(slot.id)}>
               {slot.id} {slot.name}
@@ -64,7 +76,7 @@ function IntersectionWizardSettingsStep({
           ))}
         </Select>
         <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.75 }}>
-          Optional: Hinterlegt Informationen zur Kreuzung mit EEPSaveData.
+          Optional: Speichert die Einstellungen der Kreuzung in EEP.
         </Typography>
       </FormControl>
       <Autocomplete
@@ -81,66 +93,100 @@ function IntersectionWizardSettingsStep({
         renderInput={(params) => (
           <TextField
             {...params}
-            label="Statische Kameras"
-            helperText="Optional: Wähle Kameras für diese Kreuzung aus, um schnell hinzuspringen."
+            label="Kameras der Kreuzung"
+            helperText="Optional: Gib hier alle EEP-Kameras mit denen du schnell zur Kreuzung springen kannst."
           />
         )}
       />
       <TextField
-        label="Tipp-Text-Immobilie"
+        label="Phasenanzeige-Immobilie"
         value={draft.tippStructure ?? ''}
         onChange={(event) => onDraftPatch({ tippStructure: event.target.value || undefined })}
         placeholder="#5573_Schaltschrank-Ampel2_SK2"
-        helperText="Optional: Hier wird auf Wunsch die Phase der Kreuzung angezeigt."
+        helperText="Optional: Immobilie, an der die aktuelle Phase als Immobilie angezeigt wird."
         fullWidth
       />
       <ExplainedCheckbox
-        checked={showAdvancedIntersectionSettings}
+        checked={supportPedestrianSignals}
+        disabled={hasPedestrianSignalGroups}
+        label="Fußgängerfurten verwenden"
+        explanation="Aktiviert Ampelgruppen für Fußgängerfurten."
+        onChange={(_event, checked) => onDraftPatch({ supportPedestrianSignals: checked })}
+      />
+      <ExplainedCheckbox
+        checked={showAdvancedSettings}
+        disabled={hasSelectedAdvancedSettings}
         label="Erweiterte Einstellungen"
         onChange={(_event, checked) => onShowAdvancedIntersectionSettingsChange(checked)}
       />
-      {showAdvancedIntersectionSettings && (
+      {showAdvancedSettings && (
         <Stack spacing={2} sx={{ pl: { xs: 0, sm: 4 } }}>
-          <TextField
-            label="Standard-Grünzeit (s)"
-            type="number"
-            value={draft.greenTimeSeconds ?? ''}
-            onChange={(event) => onDraftPatch({ greenTimeSeconds: onOptionalPositiveNumber(event.target.value) })}
-            helperText="Optional: Leeres Feld nutzt die Standardzeit der Runtime."
-            size="small"
-            inputProps={{ min: 1, 'aria-label': 'Standard-Grünzeit' }}
-            fullWidth
-          />
-          <ExplainedCheckbox
-            checked={draft.supportPedestrianSignals ?? false}
-            label="Fußgängerampeln unterstützen"
-            explanation="Optional: Ermöglicht die Verwendung von Fußgängerampeln und -furten."
-            onChange={(_event, checked) => onDraftPatch({ supportPedestrianSignals: checked })}
-          />
-          <ExplainedCheckbox
-            checked={draft.supportMultipleLaneSignals ?? false}
-            label="Mehrere Ampelbilder für eine Fahrspur unterstützen"
-            explanation="Optional: Ermöglicht auf einer Spur unterschiedliche Ampeln, z.B. Rechtsabbiegerpfeile oder Abbiegesignale für die Tram."
-            onChange={(_event, checked) => onDraftPatch({ supportMultipleLaneSignals: checked })}
-          />
-          <ExplainedCheckbox
-            checked={draft.manualLuaVariableNames ?? false}
-            label="Lua-Variablennamen selbst festlegen"
-            explanation="Optional: Vergib die Variablennamen für die Fahrspuren und Signalgruppen selbst."
-            onChange={(_event, checked) => onDraftPatch({ manualLuaVariableNames: checked })}
-          />
-          <ExplainedCheckbox
-            checked={draft.individualLanePhaseSettings ?? false}
-            label="Individuelle Einstellungen für Fahrspuren und Phasen"
-            explanation="Optional: Multiplikator für erkannte Fahrzeuge, Länge einzelner Phasen."
-            onChange={(_event, checked) => onDraftPatch({ individualLanePhaseSettings: checked })}
-          />
-          <ExplainedCheckbox
-            checked={draft.showLuaCodeImmediately ?? true}
-            label="Lua-Code sofort anzeigen"
-            explanation="Optional: Der Lua Code wird bereits vor der Zusammenfassung in allen Schritten angezeigt."
-            onChange={(_event, checked) => onDraftPatch({ showLuaCodeImmediately: checked })}
-          />
+          <Stack spacing={1.5}>
+            <Stack spacing={0.25}>
+              <Typography variant="subtitle2">EEP-Optionen</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Optionen für besondere Ampel- oder Fahrspur-Setups in EEP.
+              </Typography>
+            </Stack>
+            <ExplainedCheckbox
+              checked={supportMultipleLaneSignals}
+              disabled={hasMultipleSignalGroupLanes}
+              label="Mehrere Ampelbilder für eine Fahrspur unterstützen"
+              explanation="Optional: Ermöglicht auf einer Spur unterschiedliche Ampeln, z.B. Rechtsabbiegerpfeile oder Abbiegesignale für die Tram."
+              onChange={(_event, checked) => onDraftPatch({ supportMultipleLaneSignals: checked })}
+            />
+            <ExplainedCheckbox
+              checked={supportStructureLightSignals}
+              disabled={hasStructureLightSignals}
+              label="Immobilien-Ampeln benutzen"
+              explanation="Zeigt Immobilien Ampeln an."
+              onChange={(_event, checked) => onDraftPatch({ supportStructureLightSignals: checked })}
+            />
+            <ExplainedCheckbox
+              checked={draft.individualLanePhaseSettings ?? false}
+              label="Individuelle Einstellungen für Fahrspuren und Phasen"
+              explanation="Optional: Multiplikator für erkannte Fahrzeuge, Länge einzelner Phasen."
+              onChange={(_event, checked) => onDraftPatch({ individualLanePhaseSettings: checked })}
+            />
+            <TextField
+              label="Standard-Grünzeit (s)"
+              type="number"
+              value={draft.greenTimeSeconds ?? ''}
+              onChange={(event) => onDraftPatch({ greenTimeSeconds: onOptionalPositiveNumber(event.target.value) })}
+              helperText="Optional: Leeres Feld nutzt die Standardzeit der Runtime."
+              size="small"
+              inputProps={{ min: 1, 'aria-label': 'Standard-Grünzeit' }}
+              fullWidth
+            />
+          </Stack>
+          <Stack spacing={1.5}>
+            <Stack spacing={0.25}>
+              <Typography variant="subtitle2">Lua & Code</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Technische Einstellungen für den erzeugten Lua-Code.
+              </Typography>
+            </Stack>
+            <ExplainedCheckbox
+              checked={draft.showLuaCodeImmediately ?? true}
+              label="Lua-Code sofort anzeigen"
+              explanation="Optional: Der Lua Code wird bereits vor der Zusammenfassung in allen Schritten angezeigt."
+              onChange={(_event, checked) => onDraftPatch({ showLuaCodeImmediately: checked })}
+            />
+            <ExplainedCheckbox
+              checked={draft.manualLuaVariableNames ?? false}
+              label="Lua-Variablennamen selbst festlegen"
+              explanation="Optional: Vergib die Variablennamen für die Fahrspuren und Signalgruppen selbst."
+              onChange={(_event, checked) => onDraftPatch({ manualLuaVariableNames: checked })}
+            />
+            <TextField
+              label="Lua-Variable"
+              value={draft.luaVariableName}
+              onChange={(event) => onLuaVariableNameChange(event.target.value)}
+              helperText="Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw."
+              size="small"
+              fullWidth
+            />
+          </Stack>
         </Stack>
       )}
     </Stack>
