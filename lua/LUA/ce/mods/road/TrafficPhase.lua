@@ -35,7 +35,7 @@ local function assertNoVehiclePedestrianConflict(phase, signalHead, signalType)
            "Ein Signal darf in derselben Phase nicht gleichzeitig Fahrzeug- und Fu\223g\228ngerverkehr freigeben.")
 end
 
-function TrafficPhase:addSignalGroup(...)
+function TrafficPhase:addSignalGroups(...)
     for _, signalGroup in ipairs({ ... }) do
         assert(signalGroup and signalGroup.getType and signalGroup:getType() == "SignalGroup",
                "Specify SignalGroup instances")
@@ -47,6 +47,8 @@ function TrafficPhase:addSignalGroup(...)
     end
     return self
 end
+
+function TrafficPhase:addSignalGroup(...) return self:addSignalGroups(...) end
 
 function TrafficPhase:initPhase()
     self.lanes = {}

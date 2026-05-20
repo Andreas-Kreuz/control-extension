@@ -21,6 +21,17 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             ready = true,
             greenTimeSeconds = 15,
             staticCams = { "Cam 1" },
+            signalGroupDefinitions = {
+                {
+                    name = "sgLane1Left",
+                    scriptVariableName = "sgLane1Left",
+                    approach = "WEST",
+                    turnDirections = { "LEFT" },
+                    trafficType = "CAR",
+                    signalIds = { 1 },
+                    pedestrianCrossingNames = { "Furt West" }
+                }
+            },
             phases = {
                 {
                     id = "A-P1",
@@ -57,6 +68,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             id = "1-L1",
             intersectionId = 1,
             name = "L1",
+            scriptVariableName = "c1Lane1",
             currentIndication = "GREEN",
             vehicleMultiplier = 2,
             type = "NORMAL",
@@ -166,7 +178,17 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         greenTimeSeconds = 15,
                         switchInStrictOrder = false,
                         staticCams = { "Cam 1" },
-                        signalGroupDefinitions = {},
+                        signalGroupDefinitions = {
+                            {
+                                name = "sgLane1Left",
+                                scriptVariableName = "sgLane1Left",
+                                approach = "WEST",
+                                turnDirections = { "LEFT" },
+                                trafficType = "CAR",
+                                signalIds = { 1 },
+                                pedestrianCrossingNames = { "Furt West" }
+                            }
+                        },
                         pedestrianCrossings = {},
                         phases = {
                             {
@@ -212,7 +234,17 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         greenTimeSeconds = 15,
                         switchInStrictOrder = false,
                         staticCams = { "Cam 1" },
-                        signalGroupDefinitions = {},
+                        signalGroupDefinitions = {
+                            {
+                                name = "sgLane1Left",
+                                scriptVariableName = "sgLane1Left",
+                                approach = "WEST",
+                                turnDirections = { "LEFT" },
+                                trafficType = "CAR",
+                                signalIds = { 1 },
+                                pedestrianCrossingNames = { "Furt West" }
+                            }
+                        },
                         pedestrianCrossings = {},
                         phases = {
                             {
@@ -253,6 +285,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
+                        scriptVariableName = "c1Lane1",
                         currentIndication = "", -- oninterest, never selected
                         vehicleMultiplier = 2,
                         type = "NORMAL",
@@ -274,6 +307,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
+                        scriptVariableName = "c1Lane1",
                         currentIndication = "GREEN",
                         vehicleMultiplier = 2,
                         type = "NORMAL",
@@ -533,6 +567,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local queue = { elements = function () return {} end }
         local lane1 = {
             name = "Spur 1",
+            _scriptVariableName = "c1Lane1",
+            getScriptVariableName = function (self) return self._scriptVariableName end,
             laneSignal = signalHead1,
             defaultDriveSignals = { [signalHead1] = true },
             fahrzeugMultiplikator = 1,
@@ -556,6 +592,12 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         }
         local signalGroup = {
             name = "sgCombined",
+            _scriptVariableName = "sgCombinedScript",
+            approach = "WEST",
+            turnDirections = { "LEFT" },
+            getApproach = function (self) return self.approach end,
+            getTurnDirections = function (self) return self.turnDirections end,
+            getScriptVariableName = function (self) return self._scriptVariableName end,
             getSignalHeads = function () return { [signalHead1] = "CAR", [signalHead2] = "CAR" } end
         }
         local phase = {
@@ -585,6 +627,10 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
 
         assert.same({ "sgCombined" }, groupsByLane["Spur 1"])
         assert.same({ "sgCombined" }, groupsByLane["Spur 2"])
+        assert.equals("sgCombinedScript", data.intersections[1].signalGroupDefinitions[1].scriptVariableName)
+        assert.equals("WEST", data.intersections[1].signalGroupDefinitions[1].approach)
+        assert.same({ "LEFT" }, data.intersections[1].signalGroupDefinitions[1].turnDirections)
+        assert.equals("c1Lane1", data.intersectionLanes[1].scriptVariableName)
     end)
 
     it("collects implicit lane signal group links from the lane signal", function ()
@@ -649,5 +695,57 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         assert.same({ 11, 17 }, data.intersectionLanes[1].requestTrackIds)
         assert.same({ 23, 24 }, data.intersectionLanes[1].highlightTrackIds)
         assert.same({ 23, 24 }, data.intersectionLanes[1].tracks)
+    end)
+    it("does not publish scriptVariableName methods when metadata is unset", function ()
+        require("ce.hub.eep.EepSimulator")
+        local json = require("ce.third-party.json")
+        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+        local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
+
+        local queue = { elements = function () return {} end }
+        local lane = {
+            name = "Spur 1",
+            scriptVariableName = function () end,
+            getScriptVariableName = function () return nil end,
+            defaultDriveSignals = {},
+            fahrzeugMultiplikator = 1,
+            trafficType = "NORMAL",
+            waitCount = 0,
+            directions = { "STRAIGHT" },
+            requestSignals = {},
+            tracksForRequests = {},
+            tracksForHighlighting = {},
+            queue = queue
+        }
+        local phase = {
+            name = "P1",
+            prio = 1,
+            greenTimeSeconds = 12,
+            lanes = { [lane] = true },
+            signalGroups = {},
+            signalHeads = {}
+        }
+        local crossing = {
+            name = "A",
+            scriptVariableName = function () end,
+            getScriptVariableName = function () return nil end,
+            signalGroups = {},
+            staticCams = {},
+            getCurrentPhase = function () return nil end,
+            getManualPhase = function () return nil end,
+            getNextPhase = function () return nil end,
+            isGreenTimeFinished = function () return true end,
+            getGreenTimeSeconds = function () return 15 end,
+            getStaticCams = function (self) return self.staticCams end,
+            getPhases = function () return { phase } end
+        }
+
+        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local _, _, intersections = RoadDtoFactory.createIntersectionDtoList(data.intersections)
+        local _, _, lanes = RoadDtoFactory.createIntersectionLaneDtoList(data.intersectionLanes)
+
+        assert.is_nil(intersections[1].scriptVariableName)
+        assert.is_nil(lanes[1].scriptVariableName)
+        assert.has_no.errors(function () json.encode({ intersections = intersections, lanes = lanes }) end)
     end)
 end)

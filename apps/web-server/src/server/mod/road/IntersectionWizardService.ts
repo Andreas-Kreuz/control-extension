@@ -184,7 +184,7 @@ function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): Intersec
     intersectionEepSaveId: normalizeStorageSlot(normalizedInput.intersectionEepSaveId),
     ...(normalizedInput.tippStructure !== undefined ? { tippStructure: normalizedInput.tippStructure } : {}),
     switchInStrictOrder: normalizedInput.switchInStrictOrder ?? false,
-    showLuaCodeImmediately: normalizedInput.showLuaCodeImmediately ?? true,
+    showLuaCodeImmediately: normalizedInput.showLuaCodeImmediately ?? false,
     manualLuaVariableNames: normalizedInput.manualLuaVariableNames ?? false,
     individualLanePhaseSettings: normalizedInput.individualLanePhaseSettings ?? false,
     supportPedestrianSignals: (normalizedInput.supportPedestrianSignals ?? false) || inferredSupportPedestrianSignals,

@@ -3,6 +3,14 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.SignalGroup ...") end
 local SignalGroup = {}
 SignalGroup.Type = { BUS = "BUS", CAR = "CAR", TRAM = "TRAM", PEDESTRIAN = "PEDESTRIAN", BICYCLE = "BICYCLE" }
 
+local function isKnownValue(values, value)
+    if values[value] then return true end
+    for _, knownValue in pairs(values) do
+        if knownValue == value then return true end
+    end
+    return false
+end
+
 local function logicalUseFor(signalType)
     if signalType == SignalGroup.Type.PEDESTRIAN then return "PEDESTRIAN" end
     return "VEHICLE"
@@ -38,6 +46,9 @@ function SignalGroup:new(name)
     local o = {
         type = "SignalGroup",
         name = name,
+        _scriptVariableName = nil,
+        approach = nil,
+        turnDirections = {},
         pedestrianCrossings = {},
         signalHeads = {}
     }
@@ -46,6 +57,43 @@ function SignalGroup:new(name)
 end
 
 function SignalGroup:getName() return self.name end
+
+function SignalGroup:getScriptVariableName() return self._scriptVariableName end
+
+function SignalGroup:setScriptVariableName(scriptVariableName)
+    assert(type(scriptVariableName) == "string", "Need 'scriptVariableName' as string")
+    self._scriptVariableName = scriptVariableName
+    return self
+end
+
+function SignalGroup:scriptVariableName(scriptVariableName) return self:setScriptVariableName(scriptVariableName) end
+
+function SignalGroup:getApproach() return self.approach end
+
+function SignalGroup:getTurnDirections() return self.turnDirections end
+
+function SignalGroup:setApproach(approach)
+    local Lane = require("ce.mods.road.Lane")
+    if not isKnownValue(Lane.Approach, approach) then
+        print(string.format("[#SignalGroup] No such approach: %s", tostring(approach)))
+    else
+        self.approach = approach
+    end
+    return self
+end
+
+function SignalGroup:setTurnDirections(...)
+    local Lane = require("ce.mods.road.Lane")
+    local turnDirections = { ... }
+    if #turnDirections == 1 and type(turnDirections[1]) == "table" then turnDirections = turnDirections[1] end
+    for _, direction in ipairs(turnDirections) do
+        if not isKnownValue(Lane.Directions, direction) then
+            print(string.format("[#SignalGroup] No such direction: %s", tostring(direction)))
+        end
+    end
+    self.turnDirections = turnDirections
+    return self
+end
 
 function SignalGroup:addSignals(signalType, ...)
     return addSignalsToGroup(self, signalType, ...)
@@ -57,7 +105,9 @@ function SignalGroup:addTramSignals(...) return addSignalsToGroup(self, SignalGr
 
 function SignalGroup:addPedestrianSignals(...) return addSignalsToGroup(self, SignalGroup.Type.PEDESTRIAN, ...) end
 
-function SignalGroup:addPedestrianCrossing(...) return addPedestrianCrossingsToGroup(self, ...) end
+function SignalGroup:addPedestrianCrossings(...) return addPedestrianCrossingsToGroup(self, ...) end
+
+function SignalGroup:addPedestrianCrossing(...) return self:addPedestrianCrossings(...) end
 
 function SignalGroup:getSignalHeads() return self.signalHeads end
 

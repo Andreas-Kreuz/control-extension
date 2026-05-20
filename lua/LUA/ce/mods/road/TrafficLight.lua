@@ -31,8 +31,8 @@ local counter = -1
 ---@param yellowStructure? string Immobilie fuer Signalbild gelb (Licht an / aus)
 ---@param requestStructure? string Immobilie fuer Signalbild "A" (Licht an / aus)
 --
-function TrafficLight:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                          requestStructure)
+function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
+                                   requestStructure)
     assert(signalId, "Specify a signalId")
     assert(trafficLightModel, "Specify a trafficLightModel")
     local error = string.format("TrafficLight ID already used: %s - %s", signalId, trafficLightModel.name)
@@ -71,23 +71,32 @@ function TrafficLight:new(name, signalId, trafficLightModel, redStructure, green
     return o
 end
 
+function TrafficLight:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
+                          requestStructure)
+    return self:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
+                             requestStructure)
+end
+
 function TrafficLight:newPedestrianOnly(name, signalId, trafficLightModel, redStructure, greenStructure,
                                         yellowStructure, requestStructure)
-    return self:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                    requestStructure):asPedestrianOnly()
+    return self:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
+                             requestStructure):asPedestrianOnly()
 end
 
-function TrafficLight:newPlainLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure)
+function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure)
     local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-    return self:new(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure, requestStructure)
+    return self:newForSignal(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure,
+                             requestStructure)
 end
 
-function TrafficLight:withPedestrian(pedestrianSignalName)
+function TrafficLight:asPedestrianSignal(pedestrianSignalName)
     assert(type(pedestrianSignalName) == "string", "Need 'pedestrianSignalName' as string")
     self.pedestrianSignalName = pedestrianSignalName
     self.use = TrafficLight.Use.VEHICLE_AND_PEDESTRIAN
     return self
 end
+
+function TrafficLight:withPedestrian(pedestrianSignalName) return self:asPedestrianSignal(pedestrianSignalName) end
 
 function TrafficLight:asPedestrianOnly()
     self.pedestrianSignalName = self.pedestrianSignalName or self.vehicleSignalName

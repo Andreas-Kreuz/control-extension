@@ -59,6 +59,9 @@ local function copySignalGroupDefinitions(signalGroupDefinitions)
     for key, signalGroup in pairs(signalGroupDefinitions or {}) do
         copy[key] = {
             name = signalGroup.name,
+            scriptVariableName = signalGroup.scriptVariableName,
+            approach = signalGroup.approach,
+            turnDirections = copyTable(signalGroup.turnDirections),
             trafficType = signalGroup.trafficType,
             signalIds = copyTable(signalGroup.signalIds),
             pedestrianCrossingNames = copyTable(signalGroup.pedestrianCrossingNames)
@@ -142,6 +145,8 @@ local function toIntersectionLaneDto(lane, isSelected)
         lane.intersectionId or 0
     dto.name                       = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and
         lane.name or ""
+    dto.scriptVariableName         = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
+        lane.scriptVariableName or nil
     dto.currentIndication          = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and lane.currentIndication or
         ""
     dto.vehicleMultiplier          = SyncPolicy.shouldPublishField(fieldPolicies, "vehicleMultiplier", isSelected) and

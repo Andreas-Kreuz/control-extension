@@ -24,12 +24,15 @@
 
 ### `IntersectionSignalGroupDto`
 
-| Name                      | Typ        |
-| ------------------------- | ---------- |
-| `name`                    | `string`   |
-| `trafficType`             | `string`   |
-| `signalIds`               | `number[]` |
-| `pedestrianCrossingNames` | `string[]` |
+| Name                      | Typ           |
+| ------------------------- | ------------- |
+| `name`                    | `string`      |
+| `scriptVariableName`      | `string\|nil` |
+| `approach`                | `string\|nil` |
+| `turnDirections`          | `table`       |
+| `trafficType`             | `string`      |
+| `signalIds`               | `number[]`    |
+| `pedestrianCrossingNames` | `string[]`    |
 
 ### `IntersectionPedestrianCrossingDto`
 
@@ -69,26 +72,27 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.RoadDtoFactory.createIntersectionLaneDto`
 
-| Name                         | Typ      |
-| ---------------------------- | -------- |
-| `id`                         | `string` |
-| `intersectionId`             | `number` |
-| `name`                       | `string` |
-| `currentIndication`          | `string` |
-| `vehicleMultiplier`          | `number` |
-| `laneSignalId`               | `number` |
-| `type`                       | `string` |
-| `countType`                  | `string` |
-| `waitingTrains`              | `table`  |
-| `waitingForGreenCyclesCount` | `number` |
-| pproach                      | string   |
-| `directions`                 | `table`  |
-| `phases`                     | `table`  |
-| `defaultSignalGroups`        | `table`  |
-| `defaultRequestSignalGroups` | `table`  |
-| `requestTrackIds`            | `table`  |
-| `highlightTrackIds`          | `table`  |
-| `tracks`                     | `table`  |
+| Name                         | Typ           |
+| ---------------------------- | ------------- |
+| `id`                         | `string`      |
+| `intersectionId`             | `number`      |
+| `name`                       | `string`      |
+| `scriptVariableName`         | `string\|nil` |
+| `currentIndication`          | `string`      |
+| `vehicleMultiplier`          | `number`      |
+| `laneSignalId`               | `number`      |
+| `type`                       | `string`      |
+| `countType`                  | `string`      |
+| `waitingTrains`              | `table`       |
+| `waitingForGreenCyclesCount` | `number`      |
+| pproach                      | string        |
+| `directions`                 | `table`       |
+| `phases`                     | `table`       |
+| `defaultSignalGroups`        | `table`       |
+| `defaultRequestSignalGroups` | `table`       |
+| `requestTrackIds`            | `table`       |
+| `highlightTrackIds`          | `table`       |
+| `tracks`                     | `table`       |
 
 ## CeType `ce.mods.road.IntersectionPhase`
 

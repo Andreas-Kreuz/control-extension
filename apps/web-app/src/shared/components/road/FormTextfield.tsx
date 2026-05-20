@@ -17,7 +17,7 @@ const hiddenInfoTextSx = {
 
 function FormTextfield({ errorTexts = [], infoText, sx, ...props }: FormTextfieldProps) {
   const hasError = errorTexts.length > 0;
-  const helperText = hasError ? errorTexts.join(' ') : infoText;
+  const helperText = hasError ? <strong>{errorTexts.join(' ')}</strong> : infoText;
   return (
     <TextField
       {...props}

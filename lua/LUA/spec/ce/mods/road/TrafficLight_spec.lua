@@ -11,13 +11,22 @@ insulate("ce.mods.road.TrafficLight", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
-        local signal = TrafficLight:new("K1", -1, TrafficLightModel.NONE)
+        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE)
 
         assert.equals("K1", signal.vehicleSignalName)
         assert.is_nil(signal.pedestrianSignalName)
         assert.equals(TrafficLight.Use.VEHICLE_ONLY, signal.use)
     end)
 
+    it("keeps new as compatibility alias", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+
+        local signal = TrafficLight:new("K2", -1, TrafficLightModel.NONE)
+
+        assert.equals("K2", signal.vehicleSignalName)
+        assert.equals(TrafficLight.Use.VEHICLE_ONLY, signal.use)
+    end)
     it("creates plain structure lights without a real EEP signal", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
@@ -26,7 +35,7 @@ insulate("ce.mods.road.TrafficLight", function ()
         EEPStructureSetLight("#1_Gruen", false)
         EEPStructureSetLight("#1_Gelb", false)
         EEPStructureSetLight("#1_A", false)
-        local signal = TrafficLight:newPlainLightStructure("S1", "#1_Rot", "#1_Gruen", "#1_Gelb", "#1_A")
+        local signal = TrafficLight:newForLightStructure("S1", "#1_Rot", "#1_Gruen", "#1_Gelb", "#1_A")
 
         assert.equals("S1", signal.vehicleSignalName)
         assert.equals(TrafficLightModel.NONE, signal.trafficLightModel)
@@ -34,12 +43,12 @@ insulate("ce.mods.road.TrafficLight", function ()
         assert.is_true(signal.signalId < 0)
     end)
 
-    it("adds a pedestrian signal name with chainable withPedestrian", function ()
+    it("adds a pedestrian signal name with chainable asPedestrianSignal", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
-        local signal = TrafficLight:new("K1", -1, TrafficLightModel.NONE)
-        local returned = signal:withPedestrian("F1")
+        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE)
+        local returned = signal:asPedestrianSignal("F1")
 
         assert.equals(signal, returned)
         assert.equals("K1", signal.vehicleSignalName)
@@ -76,7 +85,7 @@ insulate("ce.mods.road.TrafficLight", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local SignalIndication = require("ce.mods.road.SignalIndication")
 
-        local signal = TrafficLight:new("K1", -1, TrafficLightModel.NONE):withPedestrian("F1")
+        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE):asPedestrianSignal("F1")
         signal.currentIndication = SignalIndication.PEDESTRIAN
 
         assert.equals(
@@ -90,7 +99,7 @@ insulate("ce.mods.road.TrafficLight", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local SignalIndication = require("ce.mods.road.SignalIndication")
 
-        local signal = TrafficLight:new("K1", -1, TrafficLightModel.NONE):withPedestrian("F1")
+        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE):asPedestrianSignal("F1")
         signal.currentIndication = SignalIndication.OFF
 
         assert.equals("<fgrgb=128,128,128><b>K1</b><fgrgb=0,0,0>", signal:vehicleSignalNameTippText())
@@ -104,7 +113,7 @@ insulate("ce.mods.road.TrafficLight", function ()
         local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
         local fmt = require("ce.hub.eep.TippTextFormatter")
 
-        local signal = TrafficLight:new("K1", -1, TrafficLightModel.NONE)
+        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE)
         signal.currentIndication = SignalIndication.RED
         signal:setLaneNameInfo(fmt.bgGrey("Lane 1"))
         signal:setLaneInfo(fmt.lightGrey("BELEGT") .. "<br>#Car1")

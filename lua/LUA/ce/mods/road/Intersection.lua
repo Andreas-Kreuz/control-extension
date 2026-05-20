@@ -5,6 +5,8 @@ local Task = require("ce.hub.scheduler.Task")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
 local TrafficPhase = require("ce.mods.road.TrafficPhase")
 local SignalGroup = require("ce.mods.road.SignalGroup")
+local Lane = require("ce.mods.road.Lane")
+local PedestrianCrossing = require("ce.mods.road.PedestrianCrossing")
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local fmt = require("ce.hub.eep.TippTextFormatter")
@@ -114,7 +116,14 @@ end
 
 function Intersection:getStaticCams() return self.staticCams end
 
-function Intersection:addStaticCam(cameraName) table.insert(self.staticCams, cameraName) end
+function Intersection:addStaticCams(...)
+    for _, cameraName in ipairs({ ... }) do
+        table.insert(self.staticCams, cameraName)
+    end
+    return self
+end
+
+function Intersection:addStaticCam(cameraName) return self:addStaticCams(cameraName) end
 
 function Intersection.resetVehicles()
     for _, intersection in pairs(allIntersections) do
@@ -146,6 +155,7 @@ function Intersection:new(name, greenTimeSeconds)
         currentPhase = nil,
         phases = {},
         signalGroups = {},
+        pedestrianCrossings = {},
         signalGroupsBySignalUse = {},
         lanes = {},
         signals = {},
@@ -176,16 +186,38 @@ function Intersection:withStorage(eepSaveId)
     return self
 end
 
-function Intersection:scriptVariableName(scriptVariableName)
+
+function Intersection:setScriptVariableName(scriptVariableName)
     self._scriptVariableName = scriptVariableName
     save(self)
     return self
 end
 
+function Intersection:scriptVariableName(scriptVariableName) return self:setScriptVariableName(scriptVariableName) end
+
 function Intersection:newSignalGroup(name)
     local signalGroup = SignalGroup:new(name)
     table.insert(self.signalGroups, signalGroup)
     return signalGroup
+end
+
+local function addLane(intersection, lane)
+    for _, existingLane in ipairs(intersection.lanes) do
+        if existingLane == lane or existingLane.name == lane.name then return lane end
+    end
+    table.insert(intersection.lanes, lane)
+    lane._owningIntersection = intersection
+    return lane
+end
+
+function Intersection:newLane(name, laneSignal)
+    return addLane(self, Lane:new(name, laneSignal))
+end
+
+function Intersection:newPedestrianCrossing(name)
+    local pedestrianCrossing = PedestrianCrossing:new(name)
+    table.insert(self.pedestrianCrossings, pedestrianCrossing)
+    return pedestrianCrossing
 end
 
 function Intersection:signalGroupForSignalUse(signalHead, signalType)
@@ -400,7 +432,13 @@ function Intersection.initPhases()
             end
         end
 
-        for _, lane in pairs(myLanes) do table.insert(intersection.lanes, lane) end
+        for _, lane in pairs(myLanes) do
+            if lane._owningIntersection == intersection then
+                addLane(intersection, lane)
+            else
+                table.insert(intersection.lanes, lane)
+            end
+        end
         table.sort(intersection.lanes, function (a, b) return a.name < b.name end)
     end
 end

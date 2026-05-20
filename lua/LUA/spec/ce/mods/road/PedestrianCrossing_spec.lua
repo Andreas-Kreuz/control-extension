@@ -12,7 +12,7 @@ insulate("ce.mods.road.PedestrianCrossing", function ()
         local PedestrianCrossing = require("ce.mods.road.PedestrianCrossing")
 
         local crossing = PedestrianCrossing:new("Furt Nord")
-            :scriptVariableName("c1PedCrossingNorth1")
+            :setScriptVariableName("c1PedCrossingNorth1")
             :setApproach(PedestrianCrossing.Approach.NORTH)
 
         assert.equals("PedestrianCrossing", crossing:getType())
@@ -22,6 +22,13 @@ insulate("ce.mods.road.PedestrianCrossing", function ()
         assert.equals(PedestrianCrossing.Heading.SOUTH, crossing:getHeading())
     end)
 
+    it("keeps scriptVariableName as compatibility alias", function ()
+        local PedestrianCrossing = require("ce.mods.road.PedestrianCrossing")
+        local crossing = PedestrianCrossing:new("Furt Nord")
+
+        assert.equals(crossing, crossing:scriptVariableName("c1PedCrossingNorth1"))
+        assert.equals("c1PedCrossingNorth1", crossing:getScriptVariableName())
+    end)
     it("maps legacy heading to opposite approach", function ()
         local PedestrianCrossing = require("ce.mods.road.PedestrianCrossing")
 
@@ -50,10 +57,10 @@ insulate("ce.mods.road.PedestrianCrossing", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
-        local F1 = TrafficLight:newPedestrianOnly("F1", -1, TrafficLightModel.NONE)
+        local F1 = TrafficLight:newForSignal("F1", -1, TrafficLightModel.NONE):asPedestrianOnly()
         local crossing = PedestrianCrossing:new("Furt Nord")
         local signalGroup = SignalGroup:new("sgPedNorth")
-            :addPedestrianCrossing(crossing)
+            :addPedestrianCrossings(crossing)
             :addPedestrianSignals(F1)
 
         assert.equals(crossing, signalGroup:getPedestrianCrossings()[1])

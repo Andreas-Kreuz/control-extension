@@ -103,6 +103,7 @@ export interface IntersectionWizardAxisStructureAppDto {
 export interface IntersectionWizardSignalGroupAppDto {
   id: string;
   name: string;
+  luaVariableName?: string;
   approach: IntersectionWizardApproach;
   turnDirections: IntersectionWizardTurnDirection[];
   trafficType: IntersectionWizardTrafficType;

@@ -118,12 +118,18 @@ function uniqueIdentifier(preferred: string, fallback: string, used: Set<string>
   return candidate;
 }
 
-function ampelVariableName(ampel: IntersectionWizardAmpelAppDto, index: number, used: Set<string>): string {
-  return uniqueIdentifier(ampel.name, `K${index + 1}`, used);
+function ampelVariableName(
+  ampel: IntersectionWizardAmpelAppDto,
+  index: number,
+  intersectionPrefix: string,
+  used: Set<string>,
+): string {
+  const suffix = upperFirst(sanitizeIdentifier(ampel.name, `K${index + 1}`));
+  return uniqueIdentifier(`${intersectionPrefix}${suffix}`, `${intersectionPrefix}K${index + 1}`, used);
 }
 
-function laneSignalVariableName(lane: IntersectionWizardLaneAppDto, index: number, used: Set<string>): string {
-  return uniqueIdentifier(lane.signal.name, `lane${index + 1}Signal`, used);
+function laneSignalVariableName(index: number, intersectionPrefix: string, used: Set<string>): string {
+  return uniqueIdentifier(`${intersectionPrefix}Lane${index + 1}Signal`, `lane${index + 1}Signal`, used);
 }
 
 function laneVariableName(
@@ -131,16 +137,12 @@ function laneVariableName(
   index: number,
   intersectionPrefix: string,
   used: Set<string>,
+  useManualLuaVariableNames: boolean,
 ): string {
-  if (lane.luaVariableName?.trim()) {
+  if (useManualLuaVariableNames && lane.luaVariableName?.trim()) {
     return uniqueIdentifier(lane.luaVariableName, `lane${index + 1}`, used);
   }
-  const numberedLane = /^(?:lane|spur|fahrstreifen|fs)\s*(\d+[a-z]?)$/i.exec(lane.name.trim());
-  if (numberedLane) {
-    const prefix = lowerFirst(sanitizeIdentifier(intersectionPrefix, 'kreuzung'));
-    return uniqueIdentifier(`${prefix}Lane${numberedLane[1]}`, `${prefix}Lane${index + 1}`, used);
-  }
-  return uniqueIdentifier(lowerFirst(sanitizeIdentifier(lane.name, `lane${index + 1}`)), `lane${index + 1}`, used);
+  return uniqueIdentifier(`${intersectionPrefix}Lane${index + 1}`, `lane${index + 1}`, used);
 }
 
 function pedestrianCrossingVariableName(
@@ -148,19 +150,37 @@ function pedestrianCrossingVariableName(
   index: number,
   intersectionPrefix: string,
   used: Set<string>,
+  useManualLuaVariableNames: boolean,
 ): string {
-  if (group.pedestrianCrossingLuaVariableName?.trim()) {
+  if (useManualLuaVariableNames && group.pedestrianCrossingLuaVariableName?.trim()) {
     return uniqueIdentifier(group.pedestrianCrossingLuaVariableName, `pedCrossing${index + 1}`, used);
   }
   const prefix = lowerFirst(sanitizeIdentifier(intersectionPrefix, 'kreuzung'));
-  const crossingName = upperFirst(
-    sanitizeIdentifier(group.pedestrianCrossingName || `${group.name}Crossing`, `PedCrossing${index + 1}`),
-  );
-  return uniqueIdentifier(`${prefix}${crossingName}`, `${prefix}PedCrossing${index + 1}`, used);
+  const base = `${prefix}Ped${approachNameSuffix[group.approach]}`;
+  let candidate = base;
+  let suffix = 2;
+  while (used.has(candidate)) {
+    candidate = `${base}${suffix}`;
+    suffix += 1;
+  }
+  used.add(candidate);
+  return candidate;
 }
 
-function signalGroupVariableName(group: IntersectionWizardSignalGroupAppDto, index: number, used: Set<string>): string {
-  return uniqueIdentifier(group.name, `sg${index + 1}`, used);
+function signalGroupVariableName(
+  group: IntersectionWizardSignalGroupAppDto,
+  index: number,
+  intersectionPrefix: string,
+  used: Set<string>,
+  useManualLuaVariableNames: boolean,
+): string {
+  return uniqueIdentifier(
+    useManualLuaVariableNames && group.luaVariableName?.trim()
+      ? group.luaVariableName
+      : `${intersectionPrefix}${upperFirst(group.name)}`,
+    `sg${index + 1}`,
+    used,
+  );
 }
 
 function isApproach(value: string | undefined): value is IntersectionWizardApproach {
@@ -199,11 +219,50 @@ function normalizeTrafficType(type: string | undefined): IntersectionWizardTraff
   return 'CAR';
 }
 
+function normalizeDirection(direction: string): IntersectionWizardTurnDirection | undefined {
+  if (direction === 'LEFT') return 'LEFT';
+  if (direction === 'HALF_LEFT' || direction === 'HALF-LEFT') return 'HALF_LEFT';
+  if (direction === 'STRAIGHT') return 'STRAIGHT';
+  if (direction === 'HALF_RIGHT' || direction === 'HALF-RIGHT') return 'HALF_RIGHT';
+  if (direction === 'RIGHT') return 'RIGHT';
+  return undefined;
+}
+
 function normalizeDirections(directions: string[] | undefined): IntersectionWizardTurnDirection[] {
-  const normalized = (directions ?? []).filter((direction): direction is IntersectionWizardTurnDirection =>
-    ['LEFT', 'HALF_LEFT', 'STRAIGHT', 'HALF_RIGHT', 'RIGHT'].includes(direction),
-  );
+  const normalized = (directions ?? [])
+    .map(normalizeDirection)
+    .filter((direction): direction is IntersectionWizardTurnDirection => direction !== undefined);
   return normalized.length > 0 ? normalized : ['STRAIGHT'];
+}
+
+function normalizeOptionalDirections(directions: string[] | undefined): IntersectionWizardTurnDirection[] | undefined {
+  if (!directions) return undefined;
+  return directions
+    .map(normalizeDirection)
+    .filter((direction): direction is IntersectionWizardTurnDirection => direction !== undefined);
+}
+
+function directionWordsFromText(value: string | undefined): IntersectionWizardTurnDirection[] {
+  const text = (value ?? '').toLocaleLowerCase();
+  const directions: IntersectionWizardTurnDirection[] = [];
+  if (text.includes('links') || text.includes('left')) directions.push('LEFT');
+  if (text.includes('geradeaus') || text.includes('straight')) directions.push('STRAIGHT');
+  if (text.includes('rechts') || text.includes('right')) directions.push('RIGHT');
+  return directions;
+}
+
+function inferTurnDirectionsFromGreenLightStructures(
+  ampeln: IntersectionWizardAmpelAppDto[],
+  ampelIds: string[],
+): IntersectionWizardTurnDirection[] {
+  const directions = new Set<IntersectionWizardTurnDirection>();
+  ampelIds.forEach((ampelId) => {
+    const ampel = ampeln.find((entry) => entry.id === ampelId);
+    ampel?.lightStructures?.forEach((structure) => {
+      directionWordsFromText(structure.structureGreen).forEach((direction) => directions.add(direction));
+    });
+  });
+  return orderedTurnDirections(Array.from(directions));
 }
 
 function orderedTurnDirections(directions: IntersectionWizardTurnDirection[]): IntersectionWizardTurnDirection[] {
@@ -237,6 +296,10 @@ function uniqueSignalGroupName(preferredName: string, usedNames: Set<string>): s
 
 function luaTurnDirections(directions: IntersectionWizardTurnDirection[]): string {
   return directions.map((direction) => `Lane.Directions.${direction}`).join(', ');
+}
+
+function automaticIntersectionVariableName(draft: IntersectionWizardDraftAppDto): string {
+  return /^c\d+$/i.test(draft.luaVariableName.trim()) ? draft.luaVariableName : 'c1';
 }
 
 function modelExpression(model: { modelConstant?: string; modelName?: string }): string {
@@ -282,10 +345,7 @@ function trafficLightBaseConstructor(ampel: IntersectionWizardAmpelAppDto): stri
     return plainLightStructureConstructor(ampel.name, structure);
   }
   const signalId = positiveSignalId(ampel.signalId) ?? 0;
-  if (ampel.use === 'PEDESTRIAN_ONLY') {
-    return `TrafficLight:newPedestrianOnly(${luaString(ampel.name)}, ${signalId}, ${modelExpression(ampel)})`;
-  }
-  return `TrafficLight:new(${luaString(ampel.name)}, ${signalId}, ${modelExpression(ampel)})`;
+  return `TrafficLight:newForSignal(${luaString(ampel.name)}, ${signalId}, ${modelExpression(ampel)})`;
 }
 
 function laneSignalBaseConstructor(signal: IntersectionWizardLaneSignalAppDto): string {
@@ -293,7 +353,7 @@ function laneSignalBaseConstructor(signal: IntersectionWizardLaneSignalAppDto): 
     const structure = signal.lightStructures?.[0] ?? {};
     return plainLightStructureConstructor(signal.name, structure);
   }
-  return `TrafficLight:new(${luaString(signal.name)}, ${
+  return `TrafficLight:newForSignal(${luaString(signal.name)}, ${
     positiveSignalId(signal.signalId) ?? 0
   }, ${modelExpression(signal)})`;
 }
@@ -302,7 +362,7 @@ function plainLightStructureConstructor(
   name: string,
   structure: NonNullable<IntersectionWizardAmpelAppDto['lightStructures']>[number],
 ) {
-  return `TrafficLight:newPlainLightStructure(${luaString(name)},\n    ${[
+  return `TrafficLight:newForLightStructure(${luaString(name)},\n    ${[
     luaValue(structure.structureRed),
     luaValue(structure.structureGreen),
     luaValue(structure.structureYellow),
@@ -330,6 +390,12 @@ function trafficLightChainCalls(ampel: IntersectionWizardAmpelAppDto | Intersect
   return axisStructureCalls(ampel);
 }
 
+function sortedDeclarationLines(entries: { variable: string; line: string }[]): string[] {
+  return entries
+    .sort((a, b) => a.variable.localeCompare(b.variable, undefined, { numeric: true }))
+    .map((entry) => entry.line);
+}
+
 function chainCall(base: string, calls: string[]): string {
   if (calls.length === 0) return base;
   return `${base}\n${calls.map((call) => `    :${call}`).join('\n')}`;
@@ -345,8 +411,8 @@ function phaseCall(
     greenTimeSeconds !== undefined
       ? `${intersectionVar}:newPhase(${luaString(phaseName)}, ${greenTimeSeconds})`
       : `${intersectionVar}:newPhase(${luaString(phaseName)})`;
-  if (groupVarList.length <= 1) return chainCall(newPhase, [`addSignalGroup(${groupVarList.join(', ')})`]);
-  return chainCall(newPhase, [`addSignalGroup(\n        ${groupVarList.join(',\n        ')}\n    )`]);
+  if (groupVarList.length <= 1) return chainCall(newPhase, [`addSignalGroups(${groupVarList.join(', ')})`]);
+  return chainCall(newPhase, [`addSignalGroups(\n        ${groupVarList.join(',\n        ')}\n    )`]);
 }
 
 function intersectionConstructor(draft: IntersectionWizardDraftAppDto): string {
@@ -355,11 +421,19 @@ function intersectionConstructor(draft: IntersectionWizardDraftAppDto): string {
   return `Intersection:new(${args.join(', ')})`;
 }
 
+function staticCamsCall(draft: IntersectionWizardDraftAppDto): string[] {
+  const staticCams = (draft.staticCams ?? []).filter((cameraName) => cameraName.trim());
+  if (staticCams.length === 0) return [];
+  if (staticCams.length === 1) return [`addStaticCams(${luaString(staticCams[0]!)})`];
+  return [`addStaticCams(\n        ${staticCams.map(luaString).join(',\n        ')}\n    )`];
+}
+
 function intersectionChainCalls(draft: IntersectionWizardDraftAppDto, variableName: string): string[] {
   return [
+    `setScriptVariableName(${luaString(variableName)})`,
     ...(draft.tippStructure ? [`setTippStructure(${luaString(draft.tippStructure)})`] : []),
-    `scriptVariableName(${luaString(variableName)})`,
     `withStorage(${draft.intersectionEepSaveId ?? -1})`,
+    ...staticCamsCall(draft),
     ...(draft.switchInStrictOrder ? ['setSwitchInStrictOrder(true)'] : []),
   ];
 }
@@ -392,25 +466,70 @@ function laneTrafficType(
   return groupTypes.find((type) => type === 'TRAM') ?? groupTypes[0] ?? 'CAR';
 }
 
-function laneTurnDirections(
-  draft: IntersectionWizardDraftAppDto,
+function derivedLaneApproachFromSignalGroups(
+  signalGroups: IntersectionWizardSignalGroupAppDto[],
   lane: IntersectionWizardLaneAppDto,
-): IntersectionWizardTurnDirection[] {
-  const directions = assignedGroups(draft, lane)
-    .filter((entry) => entry.group.trafficType !== 'PEDESTRIAN')
-    .flatMap((entry) => entry.group.turnDirections);
-  return Array.from(new Set(directions));
+): IntersectionWizardApproach {
+  return (
+    lane.signalGroupAssignments
+      .map((assignment) => signalGroups.find((signalGroup) => signalGroup.id === assignment.signalGroupId))
+      .find((group) => group?.trafficType !== 'PEDESTRIAN')?.approach ?? lane.approach
+  );
 }
 
 function signalGroupAddCall(group: IntersectionWizardSignalGroupAppDto, signalVars: string[]): string {
   return `${trafficTypeSignalFunction[group.trafficType]}(${signalVars.join(', ')})`;
 }
 
+function signalGroupLaneSignalAmpelIds(
+  draft: IntersectionWizardDraftAppDto,
+  group: IntersectionWizardSignalGroupAppDto,
+): string[] {
+  const positiveSignalAmpelIds = group.ampelIds.filter((ampelId) => {
+    const ampel = draft.ampeln.find((entry) => entry.id === ampelId);
+    return Boolean(ampel && ampelKind(ampel) !== 'STRUCTURE_LIGHT' && positiveSignalId(ampel.signalId) !== undefined);
+  });
+  if (positiveSignalAmpelIds.length > 0) return positiveSignalAmpelIds;
+  return group.ampelIds.length === 1 ? group.ampelIds : [];
+}
+
+function signalGroupLaneSignalAmpelId(
+  draft: IntersectionWizardDraftAppDto,
+  group: IntersectionWizardSignalGroupAppDto,
+  lane: IntersectionWizardLaneAppDto,
+): string | undefined {
+  const laneSignalId = positiveSignalId(lane.signal.signalId);
+  if (laneSignalId !== undefined) {
+    const matchingAmpelId = group.ampelIds.find((ampelId) => {
+      const ampel = draft.ampeln.find((entry) => entry.id === ampelId);
+      return Boolean(
+        ampel && ampelKind(ampel) !== 'STRUCTURE_LIGHT' && positiveSignalId(ampel.signalId) === laneSignalId,
+      );
+    });
+    if (matchingAmpelId) return matchingAmpelId;
+  }
+  const signalAmpelIds = signalGroupLaneSignalAmpelIds(draft, group);
+  return signalAmpelIds.length === 1 ? signalAmpelIds[0] : undefined;
+}
+
+function signalGroupMetadataCalls(group: IntersectionWizardSignalGroupAppDto, variableName: string): string[] {
+  return [
+    `setScriptVariableName(${luaString(variableName)})`,
+    `setApproach(Lane.Approach.${group.approach})`,
+    ...(group.trafficType === 'PEDESTRIAN' || group.turnDirections.length === 0
+      ? []
+      : [`setTurnDirections(${luaTurnDirections(group.turnDirections)})`]),
+  ];
+}
+
 export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppDto): {
   lua: string;
   warnings: string[];
 } {
-  const prefix = sanitizeIdentifier(draft.luaVariableName || 'kreuzung', 'kreuzung');
+  const useManualLuaVariableNames = draft.manualLuaVariableNames === true;
+  const prefix = useManualLuaVariableNames
+    ? sanitizeIdentifier(draft.luaVariableName || 'kreuzung', 'kreuzung')
+    : lowerFirst(sanitizeIdentifier(automaticIntersectionVariableName(draft), 'c1'));
   const crossingCommentName = draft.name.trim() ? ` (${draft.name.trim()})` : '';
   const warnings: string[] = [];
   const vehicleAmpelVars = new Map<string, string>();
@@ -424,6 +543,10 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
   const usedLaneVars = new Set<string>();
   const usedGroupVars = new Set<string>();
   const usedCrossingVars = new Set<string>();
+
+  draft.lanes.forEach((lane, index) => {
+    laneVars.set(lane.id, laneVariableName(lane, index, prefix, usedLaneVars, useManualLuaVariableNames));
+  });
 
   const lines: string[] = [
     '-- Von der Control Extension erzeugter Kreuzungs-Setup-Code',
@@ -442,32 +565,44 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     '',
     '-- Ampeln',
   ];
+  const ampelLines: { variable: string; line: string }[] = [];
+  const pedestrianAmpelLines: { variable: string; line: string }[] = [];
 
   draft.ampeln.forEach((ampel, index) => {
-    const variable = ampelVariableName(ampel, index, usedAmpelVars);
+    const variable = ampelVariableName(ampel, index, prefix, usedAmpelVars);
     const sourceVariable = ampel.sourceAmpelId ? vehicleAmpelVars.get(ampel.sourceAmpelId) : undefined;
     if (ampel.sourceAmpelId && sourceVariable && ampel.trafficType === 'PEDESTRIAN') {
-      bodyLines.push(`local ${variable} = ${sourceVariable}:withPedestrian(${luaString(ampel.name)})`);
+      pedestrianAmpelLines.push({
+        variable,
+        line: `local ${variable} = ${sourceVariable}:asPedestrianSignal(${luaString(ampel.name)})`,
+      });
       pedestrianAmpelVars.set(ampel.id, variable);
       return;
     }
-    bodyLines.push(
-      `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
-    );
-    vehicleAmpelVars.set(ampel.id, variable);
     if (ampel.use === 'PEDESTRIAN_ONLY' || ampel.trafficType === 'PEDESTRIAN') {
+      pedestrianAmpelLines.push({
+        variable,
+        line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
+      });
       pedestrianAmpelVars.set(ampel.id, variable);
+      return;
     }
+    ampelLines.push({
+      variable,
+      line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
+    });
+    vehicleAmpelVars.set(ampel.id, variable);
     if (ampel.use === 'VEHICLE_AND_PEDESTRIAN') {
       const pedestrianVariable = uniqueIdentifier(
-        ampel.pedestrianName || `F${index + 1}`,
-        `F${index + 1}`,
+        `${prefix}${upperFirst(sanitizeIdentifier(ampel.pedestrianName || `F${index + 1}`, `F${index + 1}`))}`,
+        `${prefix}F${index + 1}`,
         usedAmpelVars,
       );
       pedestrianAmpelVars.set(ampel.id, pedestrianVariable);
-      bodyLines.push(
-        `local ${pedestrianVariable} = ${variable}:withPedestrian(${luaString(ampel.pedestrianName || pedestrianVariable)})`,
-      );
+      pedestrianAmpelLines.push({
+        variable: pedestrianVariable,
+        line: `local ${pedestrianVariable} = ${variable}:asPedestrianSignal(${luaString(ampel.pedestrianName || pedestrianVariable)})`,
+      });
     }
     const extraLightStructures = lightStructures(ampel).slice(isPlainLightStructure(ampel) ? 1 : 0);
     const extraLightVars = extraLightStructures.map((structure, lightIndex) => {
@@ -476,44 +611,98 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
         `${variable}Light${lightIndex + 1}`,
         usedAmpelVars,
       );
-      bodyLines.push(
-        `local ${lightVariable} = ${plainLightStructureConstructor(`${ampel.name}Light${lightIndex + 1}`, structure)}`,
-      );
+      ampelLines.push({
+        variable: lightVariable,
+        line: `local ${lightVariable} = ${plainLightStructureConstructor(`${ampel.name}Light${lightIndex + 1}`, structure)}`,
+      });
       return lightVariable;
     });
     if (extraLightVars.length > 0) lightStructureAmpelVars.set(ampel.id, extraLightVars);
   });
-
-  const ownLaneSignals = draft.lanes.filter((lane) => lane.signalSource === 'OWN');
-  if (ownLaneSignals.length > 0) {
-    bodyLines.push('', '-- Fahrspur-Ampeln');
-    ownLaneSignals.forEach((lane, index) => {
-      const variable = laneSignalVariableName(lane, index, usedAmpelVars);
-      laneSignalVars.set(lane.id, variable);
-      bodyLines.push(
-        `local ${variable} = ${chainCall(laneSignalBaseConstructor(lane.signal), trafficLightChainCalls(lane.signal))}`,
-      );
-    });
+  bodyLines.push(...sortedDeclarationLines(ampelLines));
+  if (pedestrianAmpelLines.length > 0) {
+    bodyLines.push('', '-- Fussg.-Ampeln', ...sortedDeclarationLines(pedestrianAmpelLines));
   }
+
+  const laneSignalLines: { variable: string; line: string }[] = [];
+  draft.lanes.forEach((lane, index) => {
+    const laneVariable = laneVars.get(lane.id);
+    if (!laneVariable) return;
+    const variable = laneSignalVariableName(index, prefix, usedAmpelVars);
+    laneSignalVars.set(lane.id, variable);
+    if (lane.signalSource === 'SIGNAL_GROUP') {
+      const group = draft.signalGroups.find((entry) => entry.id === lane.signalGroupSignalId);
+      const signalAmpelId = group ? signalGroupLaneSignalAmpelId(draft, group, lane) : undefined;
+      if (!signalAmpelId) {
+        laneSignalLines.push({ variable, line: `local ${variable} = nil` });
+        return;
+      }
+      laneSignalLines.push({
+        variable,
+        line: `local ${variable} = ${vehicleAmpelVars.get(signalAmpelId) ?? 'nil'}`,
+      });
+      return;
+    }
+    laneSignalLines.push({
+      variable,
+      line: `local ${variable} = ${chainCall(laneSignalBaseConstructor(lane.signal), trafficLightChainCalls(lane.signal))}`,
+    });
+  });
+  if (laneSignalLines.length > 0) {
+    bodyLines.push('', '-- Fahrspur-Ampeln');
+    bodyLines.push(...sortedDeclarationLines(laneSignalLines));
+  }
+
+  bodyLines.push('', '-- Fahrspuren');
+  draft.lanes.forEach((lane) => {
+    const variable = laneVars.get(lane.id);
+    if (!variable) return;
+    const laneSignalExpression = laneSignalVars.get(lane.id) ?? 'nil';
+    const type = laneTrafficType(draft, lane);
+    const requestTrackIds = lane.requestTrackIds ?? [];
+    const highlightTrackIds = lane.highlightTrackIds ?? [];
+    const chainCalls = [
+      `setScriptVariableName(${luaString(variable)})`,
+      ...(type === 'CAR' ? [] : [`setTrafficType(${trafficTypeLuaType[type]})`]),
+      ...(lane.vehicleMultiplier && lane.vehicleMultiplier !== 1
+        ? [`setVehicleMultiplier(${lane.vehicleMultiplier})`]
+        : []),
+      ...(lane.countType === 'SIGNALS' ? ['useSignalForQueue()'] : []),
+      ...(lane.countType === 'TRACKS' ? requestTrackIds.map((trackId) => `useTrackForQueue(${trackId})`) : []),
+      ...(highlightTrackIds.length > 0 ? [`setHighlightTracks(${highlightTrackIds.join(', ')})`] : []),
+    ];
+    bodyLines.push(
+      `${variable} = ${chainCall(`${prefix}:newLane(${luaString(lane.name)}, ${laneSignalExpression})`, chainCalls)}`,
+    );
+  });
 
   const pedestrianGroups = draft.signalGroups.filter((group) => group.trafficType === 'PEDESTRIAN');
   if (pedestrianGroups.length > 0) {
     bodyLines.push('', '-- Fussgaengerfurten');
     pedestrianGroups.forEach((group, index) => {
-      const variable = pedestrianCrossingVariableName(group, index, prefix, usedCrossingVars);
+      const variable = pedestrianCrossingVariableName(
+        group,
+        index,
+        prefix,
+        usedCrossingVars,
+        useManualLuaVariableNames,
+      );
       pedestrianCrossingVars.set(group.id, variable);
       bodyLines.push(
-        `${variable} = ${chainCall(`PedestrianCrossing:new(${luaString(group.pedestrianCrossingName || group.name)})`, [
-          `scriptVariableName(${luaString(variable)})`,
-          `setApproach(PedestrianCrossing.Approach.${group.approach})`,
-        ])}`,
+        `local ${variable} = ${chainCall(
+          `${prefix}:newPedestrianCrossing(${luaString(group.pedestrianCrossingName || group.name)})`,
+          [
+            `setScriptVariableName(${luaString(variable)})`,
+            `setApproach(PedestrianCrossing.Approach.${group.approach})`,
+          ],
+        )}`,
       );
     });
   }
 
   bodyLines.push('', '-- Signalgruppen');
   draft.signalGroups.forEach((group, index) => {
-    const variable = signalGroupVariableName(group, index, usedGroupVars);
+    const variable = signalGroupVariableName(group, index, prefix, usedGroupVars, useManualLuaVariableNames);
     groupVars.set(group.id, variable);
     const signalVars = group.ampelIds
       .flatMap((id) => {
@@ -522,45 +711,14 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       })
       .filter((value): value is string => Boolean(value));
     const signalGroupCalls = [
+      ...signalGroupMetadataCalls(group, variable),
       ...(group.trafficType === 'PEDESTRIAN'
-        ? [`addPedestrianCrossing(${pedestrianCrossingVars.get(group.id) ?? 'nil'})`]
+        ? [`addPedestrianCrossings(${pedestrianCrossingVars.get(group.id) ?? 'nil'})`]
         : []),
       signalGroupAddCall(group, signalVars),
     ];
     bodyLines.push(
       `local ${variable} = ${chainCall(`${prefix}\n    :newSignalGroup(${luaString(group.name)})`, signalGroupCalls)}`,
-    );
-  });
-
-  bodyLines.push('', '-- Fahrspuren');
-  draft.lanes.forEach((lane, index) => {
-    const variable = laneVariableName(lane, index, prefix, usedLaneVars);
-    laneVars.set(lane.id, variable);
-    const laneSignalExpression =
-      lane.signalSource === 'SIGNAL_GROUP'
-        ? (() => {
-            const group = draft.signalGroups.find((entry) => entry.id === lane.signalGroupSignalId);
-            if (!group || group.ampelIds.length !== 1) return 'nil';
-            return vehicleAmpelVars.get(group.ampelIds[0]!) ?? 'nil';
-          })()
-        : (laneSignalVars.get(lane.id) ?? 'nil');
-    const type = laneTrafficType(draft, lane);
-    const turnDirectionArguments = luaTurnDirections(laneTurnDirections(draft, lane));
-    const requestTrackIds = lane.requestTrackIds ?? [];
-    const highlightTrackIds = lane.highlightTrackIds ?? [];
-    const chainCalls = [
-      `setApproach(Lane.Approach.${lane.approach})`,
-      ...(turnDirectionArguments ? [`setTurnDirections(${turnDirectionArguments})`] : []),
-      ...(type === 'CAR' ? [] : [`setTrafficType(${trafficTypeLuaType[type]})`]),
-      ...(lane.vehicleMultiplier && lane.vehicleMultiplier !== 1
-        ? [`setFahrzeugMultiplikator(${lane.vehicleMultiplier})`]
-        : []),
-      ...(lane.countType === 'SIGNALS' ? ['useSignalForQueue()'] : []),
-      ...(lane.countType === 'TRACKS' ? requestTrackIds.map((trackId) => `useTrackForQueue(${trackId})`) : []),
-      ...(highlightTrackIds.length > 0 ? [`setHighLightingTracks(${highlightTrackIds.join(', ')})`] : []),
-    ];
-    bodyLines.push(
-      `${variable} = ${chainCall(`Lane:new(${luaString(lane.name)}, ${laneSignalExpression})`, chainCalls)}`,
     );
   });
 
@@ -603,15 +761,6 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       if (group.showRequests) calls.push(`showRequestsOnSignalGroups(${groupVar})`);
       bodyLines.push(chainCall(`${laneVar}:routes(${routeNames.map(luaString).join(', ')})`, calls));
     });
-  }
-
-  if ((draft.staticCams ?? []).length > 0) {
-    bodyLines.push('', '-- Statische Kameras');
-    (draft.staticCams ?? [])
-      .filter((cameraName) => cameraName.trim())
-      .forEach((cameraName) => {
-        bodyLines.push(`${prefix}:addStaticCam(${luaString(cameraName)})`);
-      });
   }
 
   bodyLines.push('', '-- Verkehrsphasen');
@@ -715,9 +864,11 @@ export function createDraftFromCurrentIntersection(
   const draftLanes: IntersectionWizardLaneAppDto[] = lanes.map((lane, index) => {
     const laneSignalId = String(lane.laneSignalId ?? '');
     const matchingTrafficLight = draftAmpeln.find((ampel) => ampel.signalId === laneSignalId);
+    const tracks = lane.tracks ?? [];
     return {
       id: `lane-${index + 1}`,
       name: lane.name || `FS${index + 1}`,
+      ...(lane.scriptVariableName?.trim() ? { luaVariableName: lane.scriptVariableName } : {}),
       vehicleMultiplier: lane.vehicleMultiplier,
       ...(lane.countType === 'SIGNALS' || lane.countType === 'TRACKS' || lane.countType === 'CONTACTS'
         ? { countType: lane.countType }
@@ -725,8 +876,8 @@ export function createDraftFromCurrentIntersection(
       ...(lane.requestTrackIds && lane.requestTrackIds.length > 0 ? { requestTrackIds: lane.requestTrackIds } : {}),
       ...(lane.highlightTrackIds && lane.highlightTrackIds.length > 0
         ? { highlightTrackIds: lane.highlightTrackIds }
-        : lane.tracks.length > 0
-          ? { highlightTrackIds: lane.tracks }
+        : tracks.length > 0
+          ? { highlightTrackIds: tracks }
           : {}),
       approach: normalizeApproach(lane.approach, lane.heading),
       signalSource: 'OWN',
@@ -747,15 +898,25 @@ export function createDraftFromCurrentIntersection(
       );
     const trafficType = normalizeTrafficType(definition.trafficType);
     const firstLane = groupLanes[0]?.draftLane;
-    const approach = firstLane?.approach ?? 'SOUTH';
+    const approach = isApproach(definition.approach) ? definition.approach : (firstLane?.approach ?? 'SOUTH');
+    const definitionTurnDirections = normalizeOptionalDirections(definition.turnDirections);
+    const ampelIds = definition.signalIds
+      .flatMap((signalId) => draftAmpelIdsBySignalId.get(String(signalId)) ?? [])
+      .filter((ampelId): ampelId is string => Boolean(ampelId));
+    const lightStructureTurnDirections = inferTurnDirectionsFromGreenLightStructures(draftAmpeln, ampelIds);
     const turnDirections =
       trafficType === 'PEDESTRIAN'
-        ? (['STRAIGHT'] as IntersectionWizardTurnDirection[])
-        : Array.from(new Set(groupLanes.flatMap(({ lane }) => normalizeDirections(lane.directions))));
+        ? []
+        : definitionTurnDirections && definitionTurnDirections.length > 0
+          ? definitionTurnDirections
+          : lightStructureTurnDirections.length > 0
+            ? lightStructureTurnDirections
+            : Array.from(new Set(groupLanes.flatMap(({ lane }) => normalizeDirections(lane.directions))));
     const importedName = signalGroupName(approach, trafficType, turnDirections);
     signalGroups.push({
       id: `sg-${index + 1}`,
       name: uniqueSignalGroupName(importedName, usedSignalGroupNames),
+      luaVariableName: definition.scriptVariableName?.trim() || definition.name,
       approach,
       turnDirections,
       trafficType,
@@ -763,14 +924,12 @@ export function createDraftFromCurrentIntersection(
       ...(definition.pedestrianCrossingNames?.[0]
         ? { pedestrianCrossingName: definition.pedestrianCrossingNames[0] }
         : {}),
-      ampelIds: definition.signalIds
-        .flatMap((signalId) => draftAmpelIdsBySignalId.get(String(signalId)) ?? [])
-        .filter((ampelId): ampelId is string => Boolean(ampelId)),
+      ampelIds,
     });
   });
 
   if (signalGroups.length === 0 && phasesBySignalGroup.size > 0) {
-    Array.from(phasesBySignalGroup.entries()).forEach(([_name, phaseNames], index) => {
+    Array.from(phasesBySignalGroup.entries()).forEach(([name, phaseNames], index) => {
       const groupLanes = lanes
         .map((lane, laneIndex) => ({ lane, draftLane: draftLanes[laneIndex] }))
         .filter(({ lane }) => lane.phases.some((phaseName) => phaseNames.includes(phaseName)));
@@ -782,7 +941,7 @@ export function createDraftFromCurrentIntersection(
       const approach = groupLanes[0]?.draftLane?.approach ?? 'SOUTH';
       const turnDirections =
         trafficType === 'PEDESTRIAN'
-          ? (['STRAIGHT'] as IntersectionWizardTurnDirection[])
+          ? []
           : Array.from(new Set(groupLanes.flatMap(({ lane }) => normalizeDirections(lane.directions))));
       const signalIds = new Set(
         intersection.phases
@@ -793,6 +952,7 @@ export function createDraftFromCurrentIntersection(
       signalGroups.push({
         id: `sg-${index + 1}`,
         name: uniqueSignalGroupName(signalGroupName(approach, trafficType, turnDirections), usedSignalGroupNames),
+        luaVariableName: name,
         approach,
         turnDirections,
         trafficType,
@@ -813,6 +973,16 @@ export function createDraftFromCurrentIntersection(
     });
   }
   const signalGroupById = new Map(signalGroups.map((signalGroup) => [signalGroup.id, signalGroup]));
+  const positiveSignalIdsByGroupId = new Map(
+    signalGroups.map((signalGroup) => [
+      signalGroup.id,
+      new Set(
+        signalGroup.ampelIds
+          .map((ampelId) => positiveSignalId(draftAmpeln.find((ampel) => ampel.id === ampelId)?.signalId))
+          .filter((signalId): signalId is number => signalId !== undefined),
+      ),
+    ]),
+  );
   lanes.forEach((lane, laneIndex) => {
     const draftLane = draftLanes[laneIndex];
     if (!draftLane) return;
@@ -833,12 +1003,13 @@ export function createDraftFromCurrentIntersection(
       ),
     ];
     draftLane.signalGroupAssignments = assignments;
+    draftLane.approach = derivedLaneApproachFromSignalGroups(signalGroups, draftLane);
     const laneSignalId = String(lane.laneSignalId ?? '');
+    const positiveLaneSignalId = positiveSignalId(laneSignalId);
     const matchingSignalGroupAssignment = assignments.find((assignment) => {
       const group = signalGroupById.get(assignment.signalGroupId);
-      if (!group || group.ampelIds.length !== 1) return false;
-      const groupSignalId = draftAmpeln.find((ampel) => ampel.id === group.ampelIds[0])?.signalId;
-      return groupSignalId === laneSignalId;
+      if (!group || positiveLaneSignalId === undefined) return false;
+      return positiveSignalIdsByGroupId.get(group.id)?.has(positiveLaneSignalId) ?? false;
     });
     if (matchingSignalGroupAssignment) {
       draftLane.signalSource = 'SIGNAL_GROUP';
@@ -854,6 +1025,14 @@ export function createDraftFromCurrentIntersection(
           group.showRequests = true;
         }
       }
+    });
+    (lane.routeRules ?? []).forEach((rule) => {
+      if (!rule.showRequests) return;
+      rule.signalGroups.forEach((name) => {
+        const signalGroupId = signalGroupIdsBySourceName.get(name);
+        const group = signalGroupId ? signalGroupById.get(signalGroupId) : undefined;
+        if (group) group.showRequests = true;
+      });
     });
   });
 
@@ -889,7 +1068,7 @@ export function createDraftFromCurrentIntersection(
     intersectionEepSaveId: intersection.eepSaveId ?? -1,
     ...(intersection.tippStructure !== undefined ? { tippStructure: intersection.tippStructure } : {}),
     switchInStrictOrder: intersection.switchInStrictOrder ?? false,
-    showLuaCodeImmediately: true,
+    showLuaCodeImmediately: false,
     supportPedestrianSignals: hasPedestrianSignals,
     supportMultipleLaneSignals: hasMultipleLaneSignals,
     supportStructureLightSignals: hasStructureLightSignals,
@@ -959,6 +1138,7 @@ export function normalizeLegacyDraftInput(input: LegacyDraftInput): Partial<Inte
       trafficType: normalizeTrafficType(group.trafficType),
       showRequests:
         group.showRequests ?? input.defaultRequestDisplays?.some((entry) => entry.signalGroupId === group.id) ?? false,
+      ...(group.luaVariableName ? { luaVariableName: group.luaVariableName } : {}),
       ...(group.pedestrianCrossingName ? { pedestrianCrossingName: group.pedestrianCrossingName } : {}),
       ...(group.pedestrianCrossingLuaVariableName
         ? { pedestrianCrossingLuaVariableName: group.pedestrianCrossingLuaVariableName }

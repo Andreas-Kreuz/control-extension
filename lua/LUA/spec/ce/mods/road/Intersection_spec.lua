@@ -134,6 +134,33 @@ insulate("Crossing", function ()
         assert.matches("scriptVariableName=c1", StorageUtility.calcEepLuaData())
     end)
 
+    it("creates lanes through the intersection", function ()
+        local intersection = Intersection:new("Owned Lane Crossing")
+        local signal = TrafficLight:new("LaneSignal", 120, TrafficLightModel.Unsichtbar_2er)
+
+        local lane = intersection:newLane("Lane A", signal):setScriptVariableName("c1LaneA")
+
+        assert.equals(lane, intersection.lanes[1])
+        assert.equals("c1LaneA", lane:getScriptVariableName())
+    end)
+
+    it("creates pedestrian crossings through the intersection", function ()
+        local intersection = Intersection:new("Owned Crossing")
+
+        local pedestrianCrossing = intersection:newPedestrianCrossing("Furt A"):setScriptVariableName("c1PedA")
+
+        assert.equals(pedestrianCrossing, intersection.pedestrianCrossings[1])
+        assert.equals("c1PedA", pedestrianCrossing:getScriptVariableName())
+    end)
+
+    it("keeps static camera methods chainable", function ()
+        local intersection = Intersection:new("Camera Crossing")
+
+        assert.equals(intersection, intersection:addStaticCam("Cam 1"))
+        assert.equals(intersection, intersection:addStaticCams("Cam 2", "Cam 3"))
+        assert.are.same({ "Cam 1", "Cam 2", "Cam 3" }, intersection:getStaticCams())
+    end)
+
     insulate("Check initial stuff", function ()
         it("Lanes are there", function ()
             assert.is_same(lane1, crossing.lanes[1])

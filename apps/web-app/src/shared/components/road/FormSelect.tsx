@@ -36,7 +36,7 @@ function FormSelect<TValue extends string>({
 }: FormSelectProps<TValue>) {
   const labelId = `${id}-label`;
   const hasError = errorTexts.length > 0;
-  const helperText = hasError ? errorTexts.join(' ') : infoText;
+  const helperText = hasError ? <strong>{errorTexts.join(' ')}</strong> : infoText;
   return (
     <FormControl
       fullWidth

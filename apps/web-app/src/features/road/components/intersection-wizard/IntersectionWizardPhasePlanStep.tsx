@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
@@ -39,6 +40,7 @@ const signalGroupTurnOrder = {
 export interface IntersectionWizardPhasePlanStepProps {
   draft: IntersectionWizardDraftAppDto;
   ampelLabel: (ampelId: string) => string;
+  phaseErrors?: Record<string, { greenTimeSeconds?: string[]; name?: string[]; signalGroupIds?: string[] }>;
   onAddPhase: () => void;
   onDraftPatch: (patch: Partial<IntersectionWizardDraftAppDto>) => void;
   onOptionalPositiveNumber: (value: string) => number | undefined;
@@ -50,6 +52,7 @@ export interface IntersectionWizardPhasePlanStepProps {
 function IntersectionWizardPhasePlanStep({
   ampelLabel,
   draft,
+  phaseErrors = {},
   onAddPhase,
   onDraftPatch,
   onOptionalPositiveNumber,
@@ -61,7 +64,6 @@ function IntersectionWizardPhasePlanStep({
     draft.phases.length > 0
       ? `minmax(20rem, 1.2fr) repeat(${draft.phases.length}, minmax(6.25rem, 0.7fr))`
       : 'minmax(20rem, 1fr)';
-
   function orderTurnDirections(directions: IntersectionWizardTurnDirection[]) {
     return [...directions].sort((a, b) => signalGroupTurnOrder[a] - signalGroupTurnOrder[b]);
   }
@@ -84,6 +86,25 @@ function IntersectionWizardPhasePlanStep({
     return [approachLabels[group.approach], trafficTypeLabels[group.trafficType], directionText]
       .filter(Boolean)
       .join(' · ');
+  }
+
+  function formatPhaseList(names: string[]) {
+    if (names.length === 0) return 'keine';
+    if (names.length === 1) return names[0];
+    return `${names.slice(0, -1).join(', ')} und ${names[names.length - 1]}`;
+  }
+
+  function phaseSignalGroupInfoText(phase: IntersectionWizardPhaseAppDto) {
+    return `Schaltet ${phase.signalGroupIds.length} ${
+      phase.signalGroupIds.length === 1 ? 'Signalgruppe' : 'Signalgruppen'
+    }`;
+  }
+
+  function signalGroupPhaseInfoText(group: IntersectionWizardSignalGroupAppDto) {
+    const phaseNames = draft.phases
+      .filter((phase) => phase.signalGroupIds.includes(group.id))
+      .map((phase) => phase.name || phase.id);
+    return `Phasen: ${formatPhaseList(phaseNames)}.`;
   }
 
   return (
@@ -123,37 +144,73 @@ function IntersectionWizardPhasePlanStep({
                 </Box>
                 {draft.phases.map((phase) => (
                   <Box key={phase.id} sx={{ p: 1, borderRight: 1, borderColor: 'divider' }}>
+                    {(() => {
+                      const errors = phaseErrors[phase.id] ?? {};
+                      return (
                     <Stack spacing={1.5}>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        {draft.manualLuaVariableNames ? (
-                          <TextField
-                            label="Phasenname"
-                            value={phase.name}
-                            size="small"
-                            inputProps={{ maxLength: 12, 'aria-label': `Ampelphase ${phase.name}` }}
-                            onChange={(event) => onUpdatePhase(phase.id, { name: event.target.value })}
-                            sx={{ width: 112, minWidth: 0 }}
-                          />
-                        ) : (
-                          <Typography variant="subtitle2" sx={{ width: 72 }}>
-                            {phase.name}
-                          </Typography>
-                        )}
+                      <Box sx={{ minHeight: draft.manualLuaVariableNames ? 40 : 28, position: 'relative', pr: 4 }}>
+                        <Box sx={{ display: 'inline-flex', position: 'relative' }}>
+                          {draft.manualLuaVariableNames ? (
+                            <Badge
+                              anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+                              badgeContent="!"
+                              color="error"
+                              invisible={phase.signalGroupIds.length > 0}
+                              overlap="rectangular"
+                            >
+                              <TextField
+                                label="Phasenname"
+                                value={phase.name}
+                                size="small"
+                                error={Boolean(errors.name?.length)}
+                                helperText={errors.name?.length ? <strong>{errors.name.join(' ')}</strong> : undefined}
+                                inputProps={{ maxLength: 12, 'aria-label': `Ampelphase ${phase.name}` }}
+                                onChange={(event) => onUpdatePhase(phase.id, { name: event.target.value })}
+                                sx={{ width: 112, minWidth: 0 }}
+                              />
+                            </Badge>
+                          ) : (
+                            <Badge
+                              anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+                              badgeContent="!"
+                              color="error"
+                              invisible={phase.signalGroupIds.length > 0}
+                              overlap="rectangular"
+                            >
+                              <Typography variant="subtitle2" sx={{ width: 72 }}>
+                                {phase.name}
+                              </Typography>
+                            </Badge>
+                          )}
+                        </Box>
                         <IconButton
                           size="small"
                           aria-label={`Ampelphase ${phase.name || phase.id} löschen`}
                           title="Ampelphase löschen"
                           onClick={() => onRemovePhase(phase.id)}
+                          sx={{ position: 'absolute', right: 0, top: 0 }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
-                      </Stack>
+                      </Box>
+                      {!draft.manualLuaVariableNames &&
+                        errors.name?.map((errorText) => (
+                          <Typography key={errorText} variant="caption" color="error">
+                            {errorText}
+                          </Typography>
+                        ))}
                       {draft.individualLanePhaseSettings && (
                         <TextField
                           label="Grünzeit (s)"
                           type="number"
                           value={phase.greenTimeSeconds ?? ''}
                           size="small"
+                          error={Boolean(errors.greenTimeSeconds?.length)}
+                          helperText={
+                            errors.greenTimeSeconds?.length ? (
+                              <strong>{errors.greenTimeSeconds.join(' ')}</strong>
+                            ) : undefined
+                          }
                           inputProps={{ min: 1, 'aria-label': `Grünzeit ${phase.name}` }}
                           onChange={(event) =>
                             onUpdatePhase(phase.id, { greenTimeSeconds: onOptionalPositiveNumber(event.target.value) })
@@ -161,17 +218,28 @@ function IntersectionWizardPhasePlanStep({
                           sx={{ width: 112 }}
                         />
                       )}
-                      {phase.signalGroupIds.length === 0 && (
-                        <Typography variant="caption" color="warning.main">
-                          Keine Ampelgruppe grün
-                        </Typography>
-                      )}
+                      <Typography
+                        variant="caption"
+                        color={phase.signalGroupIds.length === 0 || errors.signalGroupIds?.length ? 'error' : 'text.secondary'}
+                        sx={{ minHeight: 18 }}
+                      >
+                        {errors.signalGroupIds?.length ? (
+                          <strong>{errors.signalGroupIds.join(' ')}</strong>
+                        ) : phase.signalGroupIds.length === 0 ? (
+                          <strong>Keine Ampelgruppe grün</strong>
+                        ) : (
+                          phaseSignalGroupInfoText(phase)
+                        )}
+                      </Typography>
                     </Stack>
+                      );
+                    })()}
                   </Box>
                 ))}
               </Box>
               {draft.signalGroups.map((group) => {
                 const signalNames = signalNamesForGroup(group);
+                const hasGreenPhase = draft.phases.some((phase) => phase.signalGroupIds.includes(group.id));
                 return (
                   <Box
                     key={group.id}
@@ -194,14 +262,34 @@ function IntersectionWizardPhasePlanStep({
                           />
                         </Box>
                         <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={600}>
-                            {group.name || group.id}
-                          </Typography>
+                          <Badge
+                            anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+                            badgeContent="!"
+                            color="error"
+                            invisible={hasGreenPhase}
+                            overlap="rectangular"
+                            sx={{ alignSelf: 'flex-start' }}
+                          >
+                            <Typography variant="body2" fontWeight={600}>
+                              {group.name || group.id}
+                            </Typography>
+                          </Badge>
                           <Typography variant="caption" color="text.secondary">
                             {signalGroupSummary(group)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {signalNames.length > 0 ? signalNames.join(', ') : 'Keine Ampel zugeordnet'}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color={hasGreenPhase ? 'text.secondary' : 'error'}
+                            sx={{ minHeight: 18 }}
+                          >
+                            {hasGreenPhase ? (
+                              signalGroupPhaseInfoText(group)
+                            ) : (
+                              <strong>Wird nicht grüngeschaltet</strong>
+                            )}
                           </Typography>
                         </Stack>
                       </Stack>

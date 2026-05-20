@@ -23,6 +23,9 @@ export interface IntersectionPhaseTimingAppDto {
 
 export interface IntersectionSignalGroupAppDto {
   name: string;
+  scriptVariableName?: string;
+  approach?: string;
+  turnDirections?: string[];
   trafficType: 'BUS' | 'CAR' | 'TRAM' | 'PEDESTRIAN' | 'BICYCLE';
   signalIds: number[];
   pedestrianCrossingNames?: string[];

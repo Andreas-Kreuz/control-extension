@@ -16,7 +16,7 @@ function FeedbackMessages({ messages, severity = 'info', sx }: FeedbackMessagesP
   return (
     <Stack spacing={1} sx={sx}>
       {messages.map((message, index) => (
-        <FeedbackMessage key={typeof message === 'string' ? message : index} severity={severity}>
+        <FeedbackMessage key={`${typeof message === 'string' ? message : 'message'}-${index}`} severity={severity}>
           {message}
         </FeedbackMessage>
       ))}

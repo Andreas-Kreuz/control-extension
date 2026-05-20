@@ -19,8 +19,8 @@ describe('Road', () => {
     cy.contains('Signal-IDs und Modellinformationen');
     cy.contains('button', 'Neue Kreuzung erstellen').click();
     cy.contains('Kreuzungsname');
-    cy.contains('Erweiterte Einstellungen').click();
-    cy.contains('Lua-Code sofort anzeigen').click();
+    cy.contains('label', 'Erweiterte Einstellungen').find('input').check({ force: true });
+    cy.contains('label', 'Lua-Code sofort anzeigen').find('input').check({ force: true });
     cy.contains('Lua-Code');
   });
 
@@ -30,15 +30,15 @@ describe('Road', () => {
     cy.location('pathname').should('include', '/simple/road/createIntersection/kreuzung');
     cy.contains('Weiter').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection/signalgruppen');
-    cy.contains('Signalgruppen');
+    cy.contains('Ampelgruppen');
     cy.contains('Weiter').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection/fahrspuren');
     cy.go('back');
     cy.location('pathname').should('include', '/simple/road/createIntersection/signalgruppen');
-    cy.contains('Signalgruppen');
+    cy.contains('Ampelgruppen');
     cy.go('forward');
     cy.location('pathname').should('include', '/simple/road/createIntersection/fahrspuren');
-    cy.contains('Fahrspurzuweisung');
+    cy.contains('Fahrspuren');
   });
 
   it('starts the create intersection wizard from the selected crossing side panel', () => {
@@ -46,7 +46,7 @@ describe('Road', () => {
     cy.visit('/simple/road/1');
     cy.contains('Im Kreuzungs-Wizard öffnen').click();
     cy.location('pathname').should('include', '/simple/road/createIntersection');
-    cy.location('search').should('include', 'intersectionId=1');
+    cy.location('search').should('include', 'draftId=current-1');
     cy.contains('Kreuzung erstellen');
   });
 });

@@ -8,6 +8,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FeedbackMessages } from '../../../../shared/components/feedback';
 
 export interface IntersectionWizardCodePreviewProps {
+  errors?: string[];
   lua: string;
   warnings: string[];
   copyEnabled: boolean;
@@ -18,6 +19,7 @@ export interface IntersectionWizardCodePreviewProps {
 
 function IntersectionWizardCodePreview({
   copyEnabled,
+  errors = [],
   fullWidth = false,
   lua,
   onCopyAll,
@@ -71,6 +73,7 @@ function IntersectionWizardCodePreview({
         <Typography variant="caption" color="text.secondary">
           Alles kopieren: Nur beim erstmal notwendig, wenn die require-Befehle fehlen.
         </Typography>
+        <FeedbackMessages messages={errors} severity="error" />
         <FeedbackMessages messages={warnings} severity="warning" />
       </Stack>
       <Divider />

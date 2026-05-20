@@ -10,6 +10,10 @@ local function padnum(d)
     return #dec > 0 and ("%.12f"):format(d) or ("%s%03d%s"):format(dec, #n, n)
 end
 
+local function optionalValueFromGetterOrField(value, getterName, fieldName)
+    if value and type(value[getterName]) == "function" then return value[getterName](value) end
+    return value and value[fieldName] or nil
+end
 local function createSignalGroupDto(signalGroup)
     local signalIds = {}
     local trafficType = "CAR"
@@ -25,6 +29,10 @@ local function createSignalGroupDto(signalGroup)
     table.sort(pedestrianCrossingNames)
     return {
         name = signalGroup.name,
+        scriptVariableName = optionalValueFromGetterOrField(signalGroup, "getScriptVariableName",
+                                                        "_scriptVariableName"),
+        approach = optionalValueFromGetterOrField(signalGroup, "getApproach", "approach"),
+        turnDirections = optionalValueFromGetterOrField(signalGroup, "getTurnDirections", "turnDirections"),
         trafficType = trafficType,
         signalIds = signalIds,
         pedestrianCrossingNames = pedestrianCrossingNames
@@ -197,8 +205,8 @@ function RoadDataCollector.collectCrossings(allIntersections)
             id = intersectionIdCounter,
             name = intersection.name,
             eepSaveId = intersection.eepSaveId or -1,
-            scriptVariableName = intersection.getScriptVariableName and
-                intersection:getScriptVariableName() or intersection.scriptVariableName,
+            scriptVariableName = optionalValueFromGetterOrField(intersection, "getScriptVariableName",
+                                                                "scriptVariableName"),
             currentPhase = type(currentPhase) == "table" and currentPhase.name or currentPhase,
             manualPhase = type(manualPhase) == "table" and manualPhase.name or manualPhase,
             nextPhase = type(nextPhase) == "table" and nextPhase.name or nextPhase,
@@ -333,6 +341,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
             id = intersectionId .. "-" .. lane.name,
             intersectionId = intersectionId,
             name = lane.name,
+            scriptVariableName = optionalValueFromGetterOrField(lane, "getScriptVariableName", "_scriptVariableName"),
             currentIndication = currentIndication,
             vehicleMultiplier = lane.fahrzeugMultiplikator,
             laneSignalId = lane.laneSignal and lane.laneSignal.signalId or nil,

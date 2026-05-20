@@ -20,6 +20,9 @@
 
 ---@class IntersectionSignalGroupDto
 ---@field name string
+---@field scriptVariableName string|nil
+---@field approach string|nil
+---@field turnDirections table
 ---@field trafficType string
 ---@field signalIds number[]
 ---@field pedestrianCrossingNames string[]
@@ -54,6 +57,7 @@
 ---@field id string
 ---@field intersectionId number
 ---@field name string
+---@field scriptVariableName string|nil
 ---@field currentIndication string
 ---@field vehicleMultiplier number
 ---@field laneSignalId number|nil

@@ -32,10 +32,14 @@ function PedestrianCrossing:new(name)
     return o
 end
 
-function PedestrianCrossing:scriptVariableName(scriptVariableName)
+function PedestrianCrossing:setScriptVariableName(scriptVariableName)
     assert(type(scriptVariableName) == "string", "Need 'scriptVariableName' as string")
     self._scriptVariableName = scriptVariableName
     return self
+end
+
+function PedestrianCrossing:scriptVariableName(scriptVariableName)
+    return self:setScriptVariableName(scriptVariableName)
 end
 
 function PedestrianCrossing:setApproach(approach)

@@ -12,6 +12,14 @@ import { ExplainedCheckbox } from '../../../../shared/components/checkbox';
 export interface IntersectionWizardSettingsStepProps {
   cameraOptions: string[];
   draft: IntersectionWizardDraftAppDto;
+  errorTexts?: {
+    greenTimeSeconds?: string[];
+    intersectionEepSaveId?: string[];
+    luaVariableName?: string[];
+    name?: string[];
+    staticCams?: string[];
+    tippStructure?: string[];
+  };
   showAdvancedIntersectionSettings: boolean;
   storageSlotOptions: DataSlotAppDto[];
   onDraftPatch: (patch: Partial<IntersectionWizardDraftAppDto>) => void;
@@ -24,6 +32,7 @@ export interface IntersectionWizardSettingsStepProps {
 function IntersectionWizardSettingsStep({
   cameraOptions,
   draft,
+  errorTexts = {},
   onDraftPatch,
   onIntersectionNameChange,
   onLuaVariableNameChange,
@@ -45,7 +54,7 @@ function IntersectionWizardSettingsStep({
     draft.greenTimeSeconds !== undefined ||
     draft.manualLuaVariableNames ||
     draft.individualLanePhaseSettings ||
-    (draft.showLuaCodeImmediately ?? true) ||
+    (draft.showLuaCodeImmediately ?? false) ||
     supportMultipleLaneSignals ||
     supportStructureLightSignals,
   );
@@ -57,10 +66,15 @@ function IntersectionWizardSettingsStep({
         label="Kreuzungsname"
         value={draft.name}
         onChange={(event) => onIntersectionNameChange(event.target.value)}
-        helperText="Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße."
+        error={Boolean(errorTexts.name?.length)}
+        helperText={
+          errorTexts.name?.length
+            ? <strong>{errorTexts.name.join(' ')}</strong>
+            : 'Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße.'
+        }
         fullWidth
       />
-      <FormControl fullWidth>
+      <FormControl fullWidth error={Boolean(errorTexts.intersectionEepSaveId?.length)}>
         <InputLabel id="intersection-storage-slot-label">Speicherplatz in EEP</InputLabel>
         <Select
           labelId="intersection-storage-slot-label"
@@ -75,8 +89,14 @@ function IntersectionWizardSettingsStep({
             </MenuItem>
           ))}
         </Select>
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.75 }}>
-          Optional: Speichert die Einstellungen der Kreuzung in EEP.
+        <Typography
+          variant="caption"
+          color={errorTexts.intersectionEepSaveId?.length ? 'error' : 'text.secondary'}
+          sx={{ mt: 0.5, ml: 1.75 }}
+        >
+          {errorTexts.intersectionEepSaveId?.length
+            ? <strong>{errorTexts.intersectionEepSaveId.join(' ')}</strong>
+            : 'Optional: Speichert die Einstellungen der Kreuzung in EEP.'}
         </Typography>
       </FormControl>
       <Autocomplete
@@ -94,7 +114,12 @@ function IntersectionWizardSettingsStep({
           <TextField
             {...params}
             label="Kameras der Kreuzung"
-            helperText="Optional: Gib hier alle EEP-Kameras mit denen du schnell zur Kreuzung springen kannst."
+            error={Boolean(errorTexts.staticCams?.length)}
+            helperText={
+              errorTexts.staticCams?.length
+                ? <strong>{errorTexts.staticCams.join(' ')}</strong>
+                : 'Optional: Gib hier alle EEP-Kameras mit denen du schnell zur Kreuzung springen kannst.'
+            }
           />
         )}
       />
@@ -103,7 +128,12 @@ function IntersectionWizardSettingsStep({
         value={draft.tippStructure ?? ''}
         onChange={(event) => onDraftPatch({ tippStructure: event.target.value || undefined })}
         placeholder="#5573_Schaltschrank-Ampel2_SK2"
-        helperText="Optional: Immobilie, an der die aktuelle Phase als Immobilie angezeigt wird."
+        error={Boolean(errorTexts.tippStructure?.length)}
+        helperText={
+          errorTexts.tippStructure?.length
+            ? <strong>{errorTexts.tippStructure.join(' ')}</strong>
+            : 'Optional: Immobilie, an der die aktuelle Phase als Immobilie angezeigt wird.'
+        }
         fullWidth
       />
       <ExplainedCheckbox
@@ -153,7 +183,12 @@ function IntersectionWizardSettingsStep({
               type="number"
               value={draft.greenTimeSeconds ?? ''}
               onChange={(event) => onDraftPatch({ greenTimeSeconds: onOptionalPositiveNumber(event.target.value) })}
-              helperText="Optional: Leeres Feld nutzt die Standardzeit der Runtime."
+              error={Boolean(errorTexts.greenTimeSeconds?.length)}
+              helperText={
+                errorTexts.greenTimeSeconds?.length
+                  ? <strong>{errorTexts.greenTimeSeconds.join(' ')}</strong>
+                  : 'Optional: Leeres Feld nutzt die Standardzeit der Runtime.'
+              }
               size="small"
               inputProps={{ min: 1, 'aria-label': 'Standard-Grünzeit' }}
               fullWidth
@@ -167,7 +202,7 @@ function IntersectionWizardSettingsStep({
               </Typography>
             </Stack>
             <ExplainedCheckbox
-              checked={draft.showLuaCodeImmediately ?? true}
+              checked={draft.showLuaCodeImmediately ?? false}
               label="Lua-Code sofort anzeigen"
               explanation="Optional: Der Lua Code wird bereits vor der Zusammenfassung in allen Schritten angezeigt."
               onChange={(_event, checked) => onDraftPatch({ showLuaCodeImmediately: checked })}
@@ -178,14 +213,21 @@ function IntersectionWizardSettingsStep({
               explanation="Optional: Vergib die Variablennamen für die Fahrspuren und Signalgruppen selbst."
               onChange={(_event, checked) => onDraftPatch({ manualLuaVariableNames: checked })}
             />
-            <TextField
-              label="Lua-Variable"
-              value={draft.luaVariableName}
-              onChange={(event) => onLuaVariableNameChange(event.target.value)}
-              helperText="Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw."
-              size="small"
-              fullWidth
-            />
+            {draft.manualLuaVariableNames && (
+              <TextField
+                label="Lua-Variable"
+                value={draft.luaVariableName}
+                onChange={(event) => onLuaVariableNameChange(event.target.value)}
+                error={Boolean(errorTexts.luaVariableName?.length)}
+                helperText={
+                  errorTexts.luaVariableName?.length
+                    ? <strong>{errorTexts.luaVariableName.join(' ')}</strong>
+                    : 'Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw.'
+                }
+                size="small"
+                fullWidth
+              />
+            )}
           </Stack>
         </Stack>
       )}

@@ -329,6 +329,7 @@ function Lane:setLaneType(requestType)
            "Diese Fahrspur hatte schon den Anforderungstyp: '" .. self.requestType .. "' und kann daher nicht auf '" ..
            requestType .. "' gesetzt werden.")
     self.requestType = requestType
+    return self
 end
 
 function Lane:getVehicleCountRoutes(routes)
@@ -611,9 +612,13 @@ function Lane:getWaitCount() return self.waitCount end
 
 function Lane:getVehicleCount() return self.vehicleCount end
 
-function Lane:setFahrzeugMultiplikator(fahrzeugMultiplikator)
+function Lane:setVehicleMultiplier(fahrzeugMultiplikator)
     self.fahrzeugMultiplikator = fahrzeugMultiplikator
     return self
+end
+
+function Lane:setFahrzeugMultiplikator(fahrzeugMultiplikator)
+    return self:setVehicleMultiplier(fahrzeugMultiplikator)
 end
 
 function Lane:switchSignalTo(indication, grund)
@@ -621,12 +626,14 @@ function Lane:switchSignalTo(indication, grund)
     self.currentIndication = indication
 end
 
-function Lane:setHighLightingTracks(...)
+function Lane:setHighlightTracks(...)
     for _, track in ipairs({ ... }) do assert(type(track) == "number", "Provide tracks as numbers") end
 
     self.tracksForHighlighting = { ... } or {}
     return self
 end
+
+function Lane:setHighLightingTracks(...) return self:setHighlightTracks(...) end
 
 local function isTurnDirection(direction)
     if Lane.Directions[direction] then return true end
@@ -698,6 +705,16 @@ function Lane:setTrafficType(signalType)
     end
     return self
 end
+
+function Lane:getScriptVariableName() return self._scriptVariableName end
+
+function Lane:setScriptVariableName(scriptVariableName)
+    assert(type(scriptVariableName) == "string", "Need 'scriptVariableName' as string")
+    self._scriptVariableName = scriptVariableName
+    return self
+end
+
+function Lane:scriptVariableName(scriptVariableName) return self:setScriptVariableName(scriptVariableName) end
 
 --- Erzeugt eine Fahrspur, welche durch genau ein EEP-Fahrspur-Signal gesteuert wird.
 ---@param name string @Name der Fahrspur einer Kreuzung

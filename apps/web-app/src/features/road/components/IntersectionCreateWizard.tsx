@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -177,7 +178,7 @@ function CompactToggleField(props: {
 }) {
   const errorTexts = props.errorTexts ?? [];
   const hasError = errorTexts.length > 0;
-  const helperText = hasError ? errorTexts.join(' ') : props.infoText;
+  const helperText = hasError ? <strong>{errorTexts.join(' ')}</strong> : props.infoText;
   return (
     <Stack
       spacing={0.5}
@@ -207,7 +208,7 @@ function createDraft(): IntersectionWizardDraftAppDto {
     luaVariableName: 'kreuzung',
     intersectionEepSaveId: -1,
     switchInStrictOrder: false,
-    showLuaCodeImmediately: true,
+    showLuaCodeImmediately: false,
     manualLuaVariableNames: false,
     individualLanePhaseSettings: false,
     supportPedestrianSignals: false,
@@ -224,16 +225,6 @@ function createDraft(): IntersectionWizardDraftAppDto {
   };
 }
 
-function slug(value: string, fallback: string) {
-  const normalized = value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^A-Za-z0-9_]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  const result = normalized || fallback;
-  return result.charAt(0).toLowerCase() + result.slice(1);
-}
-
 function sanitizeLuaIdentifier(value: string, fallback: string) {
   const ascii = value
     .normalize('NFD')
@@ -244,17 +235,20 @@ function sanitizeLuaIdentifier(value: string, fallback: string) {
   return /^[A-Za-z_]/.test(withFallback) ? withFallback : `${fallback}_${withFallback}`;
 }
 
-function lowerFirst(value: string) {
-  return value.charAt(0).toLowerCase() + value.slice(1);
+function automaticIntersectionLuaVariableName(draft: IntersectionWizardDraftAppDto) {
+  return /^c\d+$/i.test(draft.luaVariableName.trim()) ? draft.luaVariableName : 'c1';
 }
 
-function laneLuaDisplayName(lane: IntersectionWizardLaneAppDto, index: number, intersectionPrefix: string) {
-  if (lane.luaVariableName?.trim()) return sanitizeLuaIdentifier(lane.luaVariableName, `lane${index + 1}`);
-  const numberedLane = /^(?:lane|spur|fahrstreifen|fs)\s*(\d+[a-z]?)$/i.exec(lane.name.trim());
-  if (numberedLane) {
-    return `${lowerFirst(sanitizeLuaIdentifier(intersectionPrefix, 'kreuzung'))}Lane${numberedLane[1]}`;
+function laneLuaDisplayName(
+  lane: IntersectionWizardLaneAppDto,
+  index: number,
+  _intersectionPrefix: string,
+  useManualLuaVariableNames: boolean,
+) {
+  if (useManualLuaVariableNames && lane.luaVariableName?.trim()) {
+    return sanitizeLuaIdentifier(lane.luaVariableName, `lane${index + 1}`);
   }
-  return lowerFirst(sanitizeLuaIdentifier(lane.name, `lane${index + 1}`));
+  return `lane${index + 1}`;
 }
 
 function route(path: string, socketUrl: string) {
@@ -327,8 +321,72 @@ function isStructureLightAmpel(ampel: IntersectionWizardAmpelAppDto) {
   return ampel.kind === 'STRUCTURE_LIGHT' || (!ampel.signalId?.trim() && (ampel.lightStructures ?? []).length > 0);
 }
 
+function positiveSignalId(signalId: string | undefined) {
+  const numeric = Number(signalId);
+  return Number.isInteger(numeric) && numeric > 0 ? numeric : undefined;
+}
+
+function signalGroupRealEepSignalAmpels(
+  group: IntersectionWizardSignalGroupAppDto,
+  ampeln: IntersectionWizardAmpelAppDto[],
+) {
+  return group.ampelIds
+    .map((ampelId) => ampeln.find((ampel) => ampel.id === ampelId))
+    .filter((ampel): ampel is IntersectionWizardAmpelAppDto =>
+      Boolean(ampel && !isStructureLightAmpel(ampel) && positiveSignalId(ampel.signalId) !== undefined),
+    );
+}
+
+function signalGroupLaneSignalOptionsForLane(
+  group: IntersectionWizardSignalGroupAppDto | undefined,
+  lane: IntersectionWizardLaneAppDto,
+  ampeln: IntersectionWizardAmpelAppDto[],
+) {
+  if (!group) return [];
+  const laneSignalId = positiveSignalId(lane.signal.signalId);
+  return signalGroupRealEepSignalAmpels(group, ampeln).map((ampel) => ({
+    group,
+    ampel,
+    detected: laneSignalId !== undefined && positiveSignalId(ampel.signalId) === laneSignalId,
+  }));
+}
+
+function laneSignalOptionValue(groupId: string, ampelId: string) {
+  return `${groupId}|${ampelId}`;
+}
+
 function emptyLaneSignal(name: string): IntersectionWizardLaneSignalAppDto {
   return { name, modelName: 'Unsichtbar_2er', modelConstant: 'Unsichtbar_2er', lightStructures: [] };
+}
+
+function effectiveLaneSignalGroupAssignments(
+  lane: IntersectionWizardLaneAppDto,
+  signalGroups: IntersectionWizardSignalGroupAppDto[],
+): IntersectionWizardLaneAppDto['signalGroupAssignments'] {
+  const availableGroups = signalGroups.filter(
+    (group) => group.trafficType !== 'PEDESTRIAN' && group.approach === lane.approach,
+  );
+  const availableGroupIds = new Set(availableGroups.map((group) => group.id));
+  const currentAssignments = lane.signalGroupAssignments.filter((assignment) =>
+    availableGroupIds.has(assignment.signalGroupId),
+  );
+  if (
+    availableGroups.length === 1 &&
+    !currentAssignments.some((assignment) => assignment.signalGroupId === availableGroups[0].id)
+  ) {
+    return [{ signalGroupId: availableGroups[0].id, mode: 'DEFAULT' }];
+  }
+  return currentAssignments;
+}
+
+function normalizeDraftLaneAssignments(draft: IntersectionWizardDraftAppDto): IntersectionWizardDraftAppDto {
+  return {
+    ...draft,
+    lanes: draft.lanes.map((lane) => ({
+      ...lane,
+      signalGroupAssignments: effectiveLaneSignalGroupAssignments(lane, draft.signalGroups),
+    })),
+  };
 }
 
 function compactTrafficLightModelLabel(model: TrafficLightModelAppDto): string {
@@ -352,6 +410,17 @@ function signalGroupSummary(group: IntersectionWizardSignalGroupAppDto) {
   return ['Schaltet gemeinsam', approachLabels[group.approach], trafficType, directionText].filter(Boolean).join(' · ');
 }
 
+function validationErrorCount(fields: Record<string, string[] | undefined> | undefined): number {
+  return Object.values(fields ?? {}).reduce((count, errorTexts) => count + (errorTexts?.length ?? 0), 0);
+}
+
+function ampelNameForSignalGroup(
+  group: IntersectionWizardSignalGroupAppDto,
+  ampel: IntersectionWizardAmpelAppDto,
+): string {
+  return group.trafficType === 'PEDESTRIAN' ? (ampel.pedestrianName ?? ampel.name) : ampel.name;
+}
+
 function WizardSectionTitle(props: { children: ReactNode; helper: string }) {
   return (
     <Stack spacing={0.25}>
@@ -361,6 +430,464 @@ function WizardSectionTitle(props: { children: ReactNode; helper: string }) {
       </Typography>
     </Stack>
   );
+}
+
+type ValidationFields<T extends string> = Partial<Record<T, string[]>>;
+
+type IntersectionWizardValidation = {
+  ampelErrors: Record<
+    string,
+    ValidationFields<
+      | 'model'
+      | 'name'
+      | 'signalId'
+      | 'sourceAmpelId'
+      | 'structureGreen'
+      | 'structureRed'
+      | 'structureRequest'
+      | 'structureYellow'
+    >
+  >;
+  errors: string[];
+  laneErrors: Record<
+    string,
+    ValidationFields<
+      | 'approach'
+      | 'assignments'
+      | 'name'
+      | 'routeNames'
+      | 'signalGroupSignalId'
+      | 'signalId'
+      | 'signalModel'
+      | 'signalName'
+    >
+  >;
+  phaseErrors: Record<string, ValidationFields<'greenTimeSeconds' | 'name' | 'signalGroupIds'>>;
+  settingsErrors: ValidationFields<
+    'greenTimeSeconds' | 'intersectionEepSaveId' | 'luaVariableName' | 'name' | 'staticCams' | 'tippStructure'
+  >;
+  signalGroupErrors: Record<string, ValidationFields<'ampelIds' | 'turnDirections'>>;
+  stepErrorCounts: Record<number, number>;
+  warnings: string[];
+};
+
+const luaIdentifierPattern = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const eepStructureNamePattern = /^#\d+/;
+const eepStructureNameErrorText =
+  'Gib den Lua-Namen der Immobilie aus den Objekteigenschaften in EEP ein, z.B. #321_...';
+const eepSignalIdErrorText = 'Gib die Signal-ID aus den Objekteigenschaften in EEP an.';
+type DuplicateTrafficLightOwner = {
+  field: string;
+  label: string;
+  signalKind: 'LANE' | 'PEDESTRIAN' | 'TRAFFIC';
+  signalGroupName?: string;
+  stepIndex: number;
+  target: ValidationFields<string>;
+};
+
+function createWizardValidation(): IntersectionWizardValidation {
+  return {
+    ampelErrors: {},
+    errors: [],
+    laneErrors: {},
+    phaseErrors: {},
+    settingsErrors: {},
+    signalGroupErrors: {},
+    stepErrorCounts: {},
+    warnings: [],
+  };
+}
+
+function addValidationError<T extends string>(
+  validation: IntersectionWizardValidation,
+  stepIndex: number,
+  target: ValidationFields<T>,
+  field: T,
+  message: string,
+) {
+  target[field] = [...(target[field] ?? []), message];
+  validation.errors.push(message);
+  validation.stepErrorCounts[stepIndex] = (validation.stepErrorCounts[stepIndex] ?? 0) + 1;
+}
+
+function isPositiveIntegerValue(value: string | number | undefined): boolean {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  return Number.isInteger(numeric) && numeric > 0;
+}
+
+function validateLuaIdentifier(value: string | undefined): boolean {
+  return Boolean(value?.trim() && luaIdentifierPattern.test(value.trim()));
+}
+
+function modelValue(model: Pick<IntersectionWizardAmpelAppDto, 'modelConstant' | 'modelName'>): string {
+  return model.modelConstant || model.modelName;
+}
+
+function validateIntersectionWizardDraft(
+  draft: IntersectionWizardDraftAppDto,
+  knownCameraNames: string[],
+  knownRouteNames: string[],
+  trafficLightModelOptions: TrafficLightModelOption[],
+): IntersectionWizardValidation {
+  const validation = createWizardValidation();
+  const knownCameras = new Set(knownCameraNames);
+  const knownRoutes = new Set(knownRouteNames);
+
+  if (!draft.name.trim()) {
+    addValidationError(validation, 1, validation.settingsErrors, 'name', 'Gib einen Kreuzungsnamen ein.');
+  }
+  if (!Number.isInteger(draft.intersectionEepSaveId ?? -1) || (draft.intersectionEepSaveId ?? -1) < -1) {
+    addValidationError(
+      validation,
+      1,
+      validation.settingsErrors,
+      'intersectionEepSaveId',
+      'Der EEP-Speicherplatz muss -1 oder eine positive Zahl sein.',
+    );
+  }
+  if (draft.greenTimeSeconds !== undefined && !isPositiveIntegerValue(draft.greenTimeSeconds)) {
+    addValidationError(
+      validation,
+      1,
+      validation.settingsErrors,
+      'greenTimeSeconds',
+      'Die Standard-Grünzeit muss eine positive ganze Zahl sein.',
+    );
+  }
+  if (draft.tippStructure?.trim() && !eepStructureNamePattern.test(draft.tippStructure.trim())) {
+    addValidationError(validation, 1, validation.settingsErrors, 'tippStructure', eepStructureNameErrorText);
+  }
+  if (draft.manualLuaVariableNames && !validateLuaIdentifier(draft.luaVariableName)) {
+    addValidationError(
+      validation,
+      1,
+      validation.settingsErrors,
+      'luaVariableName',
+      'Die Lua-Variable muss mit einem Buchstaben oder _ beginnen und darf nur Buchstaben, Zahlen und _ enthalten.',
+    );
+  }
+  (draft.staticCams ?? []).forEach((cameraName) => {
+    if (knownCameras.size > 0 && cameraName.trim() && !knownCameras.has(cameraName)) {
+      validation.warnings.push(`Kamera "${cameraName}" ist in EEP nicht bekannt. Prüfe die Schreibweise.`);
+    }
+  });
+
+  if (draft.signalGroups.length === 0) {
+    validation.errors.push('Lege mindestens eine Ampelgruppe an.');
+    validation.stepErrorCounts[2] = (validation.stepErrorCounts[2] ?? 0) + 1;
+  }
+
+  const signalIdOwners = new Map<number, DuplicateTrafficLightOwner[]>();
+  const ampelNameOwners = new Map<string, DuplicateTrafficLightOwner[]>();
+  function registerSignalId(
+    signalId: string | undefined,
+    owner: string,
+    stepIndex: number,
+    target: ValidationFields<string>,
+    field: string,
+    signalKind: DuplicateTrafficLightOwner['signalKind'],
+    signalGroupName?: string,
+  ) {
+    const numeric = positiveSignalId(signalId);
+    if (numeric === undefined) return;
+    signalIdOwners.set(numeric, [
+      ...(signalIdOwners.get(numeric) ?? []),
+      { field, label: owner, signalGroupName, signalKind, stepIndex, target },
+    ]);
+  }
+  function registerAmpelName(
+    name: string | undefined,
+    _owner: string,
+    stepIndex: number,
+    target: ValidationFields<string>,
+    field: string,
+    signalGroupName: string,
+  ) {
+    const trimmedName = name?.trim();
+    if (!trimmedName) return;
+    const key = trimmedName.toLocaleLowerCase();
+    ampelNameOwners.set(key, [
+      ...(ampelNameOwners.get(key) ?? []),
+      { field, label: trimmedName, signalGroupName, stepIndex, target },
+    ]);
+  }
+
+  draft.signalGroups.forEach((group) => {
+    const groupErrors = (validation.signalGroupErrors[group.id] = validation.signalGroupErrors[group.id] ?? {});
+    const groupAmpeln = group.ampelIds
+      .map((ampelId) => draft.ampeln.find((ampel) => ampel.id === ampelId))
+      .filter((ampel): ampel is IntersectionWizardAmpelAppDto => Boolean(ampel));
+    const signalAmpeln = groupAmpeln.filter((ampel) => !isStructureLightAmpel(ampel));
+    const structureAmpeln = groupAmpeln.filter(isStructureLightAmpel);
+    const hasAssignedLaneSignal = draft.lanes.some(
+      (lane) =>
+        effectiveLaneSignalGroupAssignments(lane, draft.signalGroups).some(
+          (assignment) => assignment.signalGroupId === group.id,
+        ) && positiveSignalId(lane.signal.signalId) !== undefined,
+    );
+
+    if (group.trafficType !== 'PEDESTRIAN' && group.turnDirections.length === 0) {
+      addValidationError(
+        validation,
+        2,
+        groupErrors,
+        'turnDirections',
+        `${group.name}: Wähle mindestens eine Richtung.`,
+      );
+    }
+    if (signalAmpeln.length === 0 && !(structureAmpeln.length > 0 && hasAssignedLaneSignal)) {
+      addValidationError(
+        validation,
+        2,
+        groupErrors,
+        'ampelIds',
+        `${group.name}: Füge mindestens eine EEP-Ampel hinzu.`,
+      );
+    }
+
+    groupAmpeln.forEach((ampel) => {
+      const ampelErrors = (validation.ampelErrors[ampel.id] = validation.ampelErrors[ampel.id] ?? {});
+      const effectiveAmpelName = ampelNameForSignalGroup(group, ampel);
+      if (!effectiveAmpelName.trim()) {
+        addValidationError(validation, 2, ampelErrors, 'name', 'Gib einen Namen ein.');
+      } else {
+        registerAmpelName(effectiveAmpelName, effectiveAmpelName, 2, ampelErrors, 'name', group.name);
+      }
+      if (isStructureLightAmpel(ampel)) {
+        const structure = ampel.lightStructures?.[0];
+        if (!structure?.structureRed?.trim()) {
+          addValidationError(validation, 2, ampelErrors, 'structureRed', 'Gib die Immobilie für Rot ein.');
+        } else if (!eepStructureNamePattern.test(structure.structureRed.trim())) {
+          addValidationError(validation, 2, ampelErrors, 'structureRed', eepStructureNameErrorText);
+        }
+        if (!structure?.structureGreen?.trim()) {
+          addValidationError(validation, 2, ampelErrors, 'structureGreen', 'Gib die Immobilie für Grün ein.');
+        } else if (!eepStructureNamePattern.test(structure.structureGreen.trim())) {
+          addValidationError(validation, 2, ampelErrors, 'structureGreen', eepStructureNameErrorText);
+        }
+        if (structure?.structureYellow?.trim() && !eepStructureNamePattern.test(structure.structureYellow.trim())) {
+          addValidationError(validation, 2, ampelErrors, 'structureYellow', eepStructureNameErrorText);
+        }
+        if (structure?.structureRequest?.trim() && !eepStructureNamePattern.test(structure.structureRequest.trim())) {
+          addValidationError(validation, 2, ampelErrors, 'structureRequest', eepStructureNameErrorText);
+        }
+        return;
+      }
+      if (group.trafficType === 'PEDESTRIAN' && ampel.sourceAmpelId) {
+        const source = draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId);
+        if (!source || isStructureLightAmpel(source)) {
+          addValidationError(validation, 2, ampelErrors, 'sourceAmpelId', 'Wähle eine vorhandene Fahrzeug-Ampel.');
+        }
+        return;
+      }
+      if (!isPositiveIntegerValue(ampel.signalId)) {
+        addValidationError(validation, 2, ampelErrors, 'signalId', eepSignalIdErrorText);
+      } else {
+        registerSignalId(
+          ampel.signalId,
+          effectiveAmpelName || group.name,
+          2,
+          ampelErrors,
+          'signalId',
+          group.trafficType === 'PEDESTRIAN' ? 'PEDESTRIAN' : 'TRAFFIC',
+          group.name,
+        );
+      }
+      const selectedModel = modelValue(ampel);
+      if (!selectedModel) {
+        addValidationError(validation, 2, ampelErrors, 'model', 'Wähle ein Signal-Modell.');
+      }
+    });
+  });
+
+  if (draft.lanes.length === 0) {
+    validation.errors.push('Lege mindestens eine Fahrspur an.');
+    validation.stepErrorCounts[3] = (validation.stepErrorCounts[3] ?? 0) + 1;
+  }
+
+  draft.lanes.forEach((lane) => {
+    const laneErrors = (validation.laneErrors[lane.id] = validation.laneErrors[lane.id] ?? {});
+    const availableGroups = draft.signalGroups.filter(
+      (group) => group.trafficType !== 'PEDESTRIAN' && group.approach === lane.approach,
+    );
+    const effectiveAssignments = effectiveLaneSignalGroupAssignments(lane, draft.signalGroups);
+    const assignedExistingGroups = effectiveAssignments
+      .map((assignment) => ({
+        assignment,
+        group: draft.signalGroups.find((group) => group.id === assignment.signalGroupId),
+      }))
+      .filter((entry): entry is typeof entry & { group: IntersectionWizardSignalGroupAppDto } => Boolean(entry.group));
+
+    if (!lane.name.trim()) {
+      addValidationError(validation, 3, laneErrors, 'name', 'Gib einen Fahrspurnamen ein.');
+    }
+    if (availableGroups.length === 0) {
+      addValidationError(
+        validation,
+        3,
+        laneErrors,
+        'approach',
+        `${lane.name || 'Fahrspur'}: Diese Zufahrt hat keine Signalgruppe.`,
+      );
+    }
+    if (assignedExistingGroups.length === 0) {
+      addValidationError(
+        validation,
+        3,
+        laneErrors,
+        'assignments',
+        `${lane.name || 'Fahrspur'}: Wähle mindestens eine Signalgruppe.`,
+      );
+    }
+    if (
+      assignedExistingGroups.length > 1 &&
+      !assignedExistingGroups.some(({ assignment }) => assignment.mode === 'DEFAULT')
+    ) {
+      addValidationError(
+        validation,
+        3,
+        laneErrors,
+        'assignments',
+        `${lane.name || 'Fahrspur'}: Wähle bei mehreren Signalgruppen mindestens eine Standard-Signalgruppe.`,
+      );
+    }
+    assignedExistingGroups.forEach(({ assignment }) => {
+      const routeNames = (assignment.routeNames ?? []).map((routeName) => routeName.trim()).filter(Boolean);
+      if ((assignment.mode === 'ONLY' || assignment.mode === 'ALSO') && routeNames.length === 0) {
+        addValidationError(
+          validation,
+          3,
+          laneErrors,
+          'routeNames',
+          `${lane.name || 'Fahrspur'}: Gib mindestens eine Route ein.`,
+        );
+      }
+      routeNames.forEach((routeName) => {
+        if (knownRoutes.size > 0 && !knownRoutes.has(routeName)) {
+          validation.warnings.push(`Route "${routeName}" ist in EEP nicht bekannt. Prüfe die Schreibweise.`);
+        }
+      });
+    });
+
+    if (lane.signalSource === 'SIGNAL_GROUP') {
+      const signalGroup = assignedExistingGroups.find(({ group }) => group.id === lane.signalGroupSignalId)?.group;
+      const signalOptions = signalGroupLaneSignalOptionsForLane(signalGroup, lane, draft.ampeln);
+      const hasSelectedSignal = signalOptions.some(
+        ({ ampel }) => positiveSignalId(ampel.signalId) === positiveSignalId(lane.signal.signalId),
+      );
+      if (!signalGroup || !hasSelectedSignal) {
+        addValidationError(
+          validation,
+          3,
+          laneErrors,
+          'signalGroupSignalId',
+          `${lane.name || 'Fahrspur'}: Wähle ein Fahrspursignal aus einer zugeordneten Signalgruppe.`,
+        );
+      }
+    } else {
+      if (!lane.signal.name.trim()) {
+        addValidationError(validation, 3, laneErrors, 'signalName', 'Gib einen Namen für das Fahrspursignal ein.');
+      }
+      if (!isPositiveIntegerValue(lane.signal.signalId)) {
+        addValidationError(validation, 3, laneErrors, 'signalId', eepSignalIdErrorText);
+      } else {
+        registerSignalId(
+          lane.signal.signalId,
+          `${lane.name || 'Fahrspur'} Fahrspursignal`,
+          3,
+          laneErrors,
+          'signalId',
+          'LANE',
+        );
+      }
+      const selectedModel = modelValue(lane.signal);
+      if (!selectedModel) {
+        addValidationError(validation, 3, laneErrors, 'signalModel', 'Wähle ein Signal-Modell.');
+      }
+    }
+  });
+
+  signalIdOwners.forEach((owners, signalId) => {
+    if (owners.length <= 1) return;
+    // One EEP signal may intentionally show both the vehicle/tram light and the pedestrian light.
+    if (
+      owners.length === 2 &&
+      owners.some((owner) => owner.signalKind === 'TRAFFIC') &&
+      owners.some((owner) => owner.signalKind === 'PEDESTRIAN')
+    ) {
+      return;
+    }
+    owners.forEach((owner) => {
+      const otherOwner = owners.find((candidate) => candidate !== owner);
+      const otherText = otherOwner?.signalGroupName
+        ? `${otherOwner.label} in Signalgruppe ${otherOwner.signalGroupName}`
+        : (otherOwner?.label ?? 'eine andere Ampel');
+      addValidationError(
+        validation,
+        owner.stepIndex,
+        owner.target,
+        owner.field,
+        `EEP-Signal-ID ${signalId} wird hier und für ${otherText} definiert.`,
+      );
+    });
+  });
+  ampelNameOwners.forEach((owners) => {
+    if (owners.length <= 1) return;
+    owners.forEach((owner) => {
+      const otherOwner = owners.find((candidate) => candidate !== owner);
+      addValidationError(
+        validation,
+        owner.stepIndex,
+        owner.target,
+        owner.field,
+        `Ampelname "${owner.label}" wird hier und für ${otherOwner?.label ?? 'eine andere Ampel'} in Signalgruppe ${
+          otherOwner?.signalGroupName ?? 'einer anderen Ampelgruppe'
+        } definiert.`,
+      );
+    });
+  });
+
+  if (draft.phases.length === 0) {
+    validation.errors.push('Lege mindestens eine Ampelphase an.');
+    validation.stepErrorCounts[4] = (validation.stepErrorCounts[4] ?? 0) + 1;
+  }
+  draft.phases.forEach((phase) => {
+    const phaseErrors = (validation.phaseErrors[phase.id] = validation.phaseErrors[phase.id] ?? {});
+    if (!phase.name.trim()) {
+      addValidationError(validation, 4, phaseErrors, 'name', 'Gib einen Phasennamen ein.');
+    }
+    if (phase.greenTimeSeconds !== undefined && !isPositiveIntegerValue(phase.greenTimeSeconds)) {
+      addValidationError(
+        validation,
+        4,
+        phaseErrors,
+        'greenTimeSeconds',
+        'Die Grünzeit muss eine positive ganze Zahl sein.',
+      );
+    }
+    if (phase.signalGroupIds.some((signalGroupId) => !draft.signalGroups.some((group) => group.id === signalGroupId))) {
+      addValidationError(
+        validation,
+        4,
+        phaseErrors,
+        'signalGroupIds',
+        'Diese Phase enthält eine gelöschte Ampelgruppe.',
+      );
+    }
+  });
+  const signalGroupsWithoutGreenPhase = draft.signalGroups.filter(
+    (group) => draft.phases.length > 0 && !draft.phases.some((phase) => phase.signalGroupIds.includes(group.id)),
+  );
+  if (signalGroupsWithoutGreenPhase.length > 0) {
+    validation.errors.push(
+      `Jede Ampelgruppe braucht mindestens eine grüne Phase. Wähle Grün für: ${signalGroupsWithoutGreenPhase
+        .map((group) => group.name || group.id)
+        .join(', ')}.`,
+    );
+    validation.stepErrorCounts[4] = (validation.stepErrorCounts[4] ?? 0) + 1;
+  }
+
+  return validation;
 }
 
 function intersectionLuaBlock(lua: string): string {
@@ -388,7 +915,7 @@ function IntersectionCreateWizard() {
   const [scenarioIntersectionNames, setScenarioIntersectionNames] = useState<string[]>([]);
   const [trafficLightModels, setTrafficLightModels] = useState<Record<string, TrafficLightModelAppDto>>({});
   const [showAdvancedIntersectionSettings, setShowAdvancedIntersectionSettings] = useState(false);
-  const [sendPreparationSettings, setSendPreparationSettings] = useState(true);
+  const [sendPreparationSettings, setSendPreparationSettings] = useState(false);
   const [expandedAmpelId, setExpandedAmpelId] = useState('');
   const draftIdFromUrl = searchParams.get('draftId') ?? '';
   const intersectionIdFromUrl = searchParams.get('intersectionId') ?? '';
@@ -421,6 +948,13 @@ function IntersectionCreateWizard() {
     if (selectedSlot === -1 || options.some((slot) => Number(slot.id) === selectedSlot)) return options;
     return [{ id: String(selectedSlot), name: 'Aktuell', data: '' }, ...options];
   }, [draft.intersectionEepSaveId, freeSlots]);
+  const validation = useMemo(
+    () => validateIntersectionWizardDraft(draft, scenarioStaticCameras, routeOptions, trafficLightModelOptions),
+    [draft, routeOptions, scenarioStaticCameras, trafficLightModelOptions],
+  );
+  const previewErrors = useMemo(() => Array.from(new Set(validation.errors)), [validation.errors]);
+  const previewWarnings = useMemo(() => [...validation.warnings, ...warnings], [validation.warnings, warnings]);
+  const hasBlockingValidationErrors = validation.errors.length > 0;
 
   const wizardUrl = useCallback(
     (stepIndex: number, options: { draftId?: string; removeIntersectionId?: boolean } = {}) => {
@@ -517,7 +1051,7 @@ function IntersectionCreateWizard() {
         const response = await fetch(route('/generate', socketUrl), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(draft),
+          body: JSON.stringify(normalizeDraftLaneAssignments(draft)),
         });
         if (!response.ok) return;
         const result = (await response.json()) as IntersectionWizardGenerateResultAppDto;
@@ -535,7 +1069,7 @@ function IntersectionCreateWizard() {
       const response = await fetch(route('/drafts', socketUrl), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...draftToPersist, generatedLua }),
+        body: JSON.stringify({ ...normalizeDraftLaneAssignments(draftToPersist), generatedLua }),
       });
       if (!response.ok) return undefined;
       return (await response.json()) as IntersectionWizardDraftAppDto;
@@ -712,11 +1246,20 @@ function IntersectionCreateWizard() {
       nextAmpeln = [...nextAmpeln, ...missing];
       ampelIds = [...ampelIds, ...missing.map((ampel) => ampel.id)];
     }
+    const nextSignalGroups = draft.signalGroups.map((entry) =>
+      entry.id === id ? { ...nextGroup, ampelIds, pedestrianCrossingName: nextGroup.pedestrianCrossingName } : entry,
+    );
     updateDraft({
       ampeln: nextAmpeln,
-      signalGroups: draft.signalGroups.map((entry) =>
-        entry.id === id ? { ...nextGroup, ampelIds, pedestrianCrossingName: nextGroup.pedestrianCrossingName } : entry,
-      ),
+      signalGroups: nextSignalGroups,
+      lanes: draft.lanes.map((lane) => ({
+        ...lane,
+        signalGroupSignalId:
+          nextSignalGroups.some((group) => group.id === lane.signalGroupSignalId && group.approach === lane.approach)
+            ? lane.signalGroupSignalId
+            : undefined,
+        signalGroupAssignments: effectiveLaneSignalGroupAssignments(lane, nextSignalGroups),
+      })),
     });
   }
 
@@ -848,13 +1391,6 @@ function IntersectionCreateWizard() {
     return draft.signalGroups.filter((group) => group.trafficType !== 'PEDESTRIAN' && group.approach === lane.approach);
   }
 
-  function signalGroupAmpelNames(group: IntersectionWizardSignalGroupAppDto) {
-    return group.ampelIds
-      .map((ampelId) => draft.ampeln.find((ampel) => ampel.id === ampelId)?.name)
-      .filter(Boolean)
-      .join(', ');
-  }
-
   function addPhase() {
     const id = uniqueId(
       'phase',
@@ -922,13 +1458,13 @@ function IntersectionCreateWizard() {
   }
 
   function copyAllLua() {
-    if (!generatedLua || activeStep !== steps.length - 1) return;
+    if (!generatedLua || activeStep !== steps.length - 1 || hasBlockingValidationErrors) return;
     void navigator.clipboard.writeText(generatedLua);
     setStatus('Vollständiger Lua-Code kopiert.');
   }
 
   function copyIntersectionLua() {
-    if (!generatedLua || activeStep !== steps.length - 1) return;
+    if (!generatedLua || activeStep !== steps.length - 1 || hasBlockingValidationErrors) return;
     void navigator.clipboard.writeText(intersectionLuaBlock(generatedLua));
     setStatus('Kreuzungscode kopiert.');
   }
@@ -972,7 +1508,11 @@ function IntersectionCreateWizard() {
     return selected && !isStructureLightAmpel(selected) ? [selected, ...sameApproachAmpeln] : sameApproachAmpeln;
   }
 
-  function renderTurnDirectionToggle(group: IntersectionWizardSignalGroupAppDto, sx?: SxProps<Theme>) {
+  function renderTurnDirectionToggle(
+    group: IntersectionWizardSignalGroupAppDto,
+    sx?: SxProps<Theme>,
+    errorTexts?: string[],
+  ) {
     function toggleTurnDirection(turnDirection: IntersectionWizardTurnDirection) {
       const nextTurns = group.turnDirections.includes(turnDirection)
         ? group.turnDirections.filter((selectedTurnDirection) => selectedTurnDirection !== turnDirection)
@@ -985,6 +1525,7 @@ function IntersectionCreateWizard() {
     return (
       <CompactToggleField
         label="Abbiegerichtungen"
+        errorTexts={errorTexts}
         infoText="Diese Abbiegerichtungen gelten für die Ampelgruppe."
         sx={
           sx ?? {
@@ -1032,22 +1573,30 @@ function IntersectionCreateWizard() {
     const selectedModelValue = modelSelectValue(ampel);
     const options = modelOptionsWithSelected(selectedModelValue);
     const sourceOptions = sourceSignalOptions(group, ampel);
+    const errors = validation.ampelErrors[ampel.id] ?? {};
+    const nameValue = ampelNameForSignalGroup(group, ampel);
+    const namePatch =
+      group.trafficType === 'PEDESTRIAN'
+        ? (name: string) => ({ pedestrianName: name })
+        : (name: string) => ({ name });
     return (
       <Stack spacing={1.25} sx={{ pt: 3, pb: 1.5, maxWidth: 720 }}>
         <FormTextfield
           label="Name"
-          value={ampel.name}
+          value={nameValue}
           size="small"
           infoText="Lua-Variablenname der Ampel."
-          inputProps={{ maxLength: 8, 'aria-label': `Ampelname ${ampel.name}` }}
-          onChange={(event) => patchAmpel(ampel.id, { name: event.target.value })}
+          errorTexts={errors.name}
+          inputProps={{ maxLength: 8, 'aria-label': `Ampelname ${nameValue}` }}
+          onChange={(event) => patchAmpel(ampel.id, namePatch(event.target.value))}
         />
         {group.trafficType === 'PEDESTRIAN' && (
           <CompactToggleField
             label="Signal definieren"
+            errorTexts={errors.sourceAmpelId}
             infoText="Vorhandene Ampeln mit Fußgängersignalen wiederverwenden"
           >
-            <FormControl size="small" fullWidth>
+            <FormControl size="small" fullWidth error={Boolean(errors.sourceAmpelId?.length)}>
               <Select
                 value={ampel.sourceAmpelId ?? '__OWN__'}
                 inputProps={{ 'aria-label': `Quelle ${ampel.name}` }}
@@ -1071,13 +1620,18 @@ function IntersectionCreateWizard() {
           label="Signal-ID"
           value={ampel.signalId ?? ''}
           size="small"
-          infoText="Positive EEP-Signal-ID."
+          infoText="Signal-ID aus den Objekteigenschaften in EEP."
+          errorTexts={errors.signalId}
           inputProps={{ inputMode: 'numeric', 'aria-label': `Signal-ID ${ampel.name}` }}
           onBlur={(event) => void updateAmpelSignalId(ampel, event.target.value)}
           onChange={(event) => patchAmpel(ampel.id, { signalId: event.target.value })}
         />
-        <CompactToggleField label="Signal-Modell" infoText="Notwendig für die Anzeige von rot, gelb, grün, usw.">
-          <FormControl size="small" fullWidth>
+        <CompactToggleField
+          label="Signal-Modell"
+          errorTexts={errors.model}
+          infoText="Notwendig für die Anzeige von rot, gelb, grün, usw."
+        >
+          <FormControl size="small" fullWidth error={Boolean(errors.model?.length)}>
             <Select
               value={selectedModelValue}
               inputProps={{ 'aria-label': `Signal-Modell ${ampel.name}` }}
@@ -1106,6 +1660,7 @@ function IntersectionCreateWizard() {
   }
 
   function renderStructureAmpelEditor(ampel: IntersectionWizardAmpelAppDto) {
+    const errors = validation.ampelErrors[ampel.id] ?? {};
     return (
       <Stack spacing={1.25} sx={{ mt: 1, py: 1.5, maxWidth: 720 }}>
         <FormTextfield
@@ -1113,6 +1668,7 @@ function IntersectionCreateWizard() {
           value={ampel.name}
           size="small"
           infoText="Lua-Variablenname der Immobilien-Ampel."
+          errorTexts={errors.name}
           inputProps={{ maxLength: 16, 'aria-label': `Ampelname ${ampel.name}` }}
           onChange={(event) => patchAmpel(ampel.id, { name: event.target.value })}
         />
@@ -1131,6 +1687,15 @@ function IntersectionCreateWizard() {
             value={ampel.lightStructures?.[0]?.[key] ?? ''}
             size="small"
             infoText="Vollständiger Immobilienname des gesteuerten Lichts."
+            errorTexts={
+              key === 'structureRed'
+                ? errors.structureRed
+                : key === 'structureGreen'
+                  ? errors.structureGreen
+                  : key === 'structureYellow'
+                    ? errors.structureYellow
+                    : errors.structureRequest
+            }
             onChange={(event) => updateAmpelLightStructure(ampel, key, event.target.value)}
           />
         ))}
@@ -1169,22 +1734,37 @@ function IntersectionCreateWizard() {
                   </TableCell>
                 </TableRow>
               ) : (
-                ampeln.map((ampel) => (
-                  <ExpandableEditorTableRow
-                    key={ampel.id}
-                    ariaLabel={ampel.name}
-                    expanded={expandedAmpelId === ampel.id}
-                    dataCellCount={3}
-                    deletable={group.ampelIds.length > 1}
-                    editor={renderSignalAmpelEditor(group, ampel)}
-                    onDelete={() => removeAmpelFromGroup(group, ampel.id)}
-                    onToggle={() => toggleExpandedAmpel(ampel.id)}
-                  >
-                    <TableCell>{ampel.name || '-'}</TableCell>
-                    <TableCell>{ampel.signalId || '-'}</TableCell>
-                    <TableCell>{modelSelectValue(ampel) || '-'}</TableCell>
-                  </ExpandableEditorTableRow>
-                ))
+                ampeln.map((ampel) => {
+                  const isExpanded = expandedAmpelId === ampel.id;
+                  const errorCount = validationErrorCount(validation.ampelErrors[ampel.id]);
+                  const displayName = ampelNameForSignalGroup(group, ampel);
+                  return (
+                    <ExpandableEditorTableRow
+                      key={ampel.id}
+                      ariaLabel={displayName}
+                      expanded={isExpanded}
+                      dataCellCount={3}
+                      deletable={group.ampelIds.length > 1}
+                      editor={renderSignalAmpelEditor(group, ampel)}
+                      onDelete={() => removeAmpelFromGroup(group, ampel.id)}
+                      onToggle={() => toggleExpandedAmpel(ampel.id)}
+                    >
+                      <TableCell>
+                        <Badge
+                          anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+                          badgeContent={errorCount}
+                          color="error"
+                          invisible={isExpanded || errorCount === 0}
+                          sx={{ pl: errorCount > 0 && !isExpanded ? 2 : 0, '& .MuiBadge-badge': { left: 0, top: 2 } }}
+                        >
+                          <Box component="span">{displayName || '-'}</Box>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{ampel.signalId || '-'}</TableCell>
+                      <TableCell>{modelSelectValue(ampel) || '-'}</TableCell>
+                    </ExpandableEditorTableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -1231,19 +1811,31 @@ function IntersectionCreateWizard() {
                 </TableRow>
               ) : (
                 ampeln.map((ampel) => {
+                  const isExpanded = expandedAmpelId === ampel.id;
+                  const errorCount = validationErrorCount(validation.ampelErrors[ampel.id]);
                   const structure = ampel.lightStructures?.[0];
                   return (
                     <ExpandableEditorTableRow
                       key={ampel.id}
                       ariaLabel={ampel.name}
-                      expanded={expandedAmpelId === ampel.id}
+                      expanded={isExpanded}
                       dataCellCount={5}
                       deletable={group.ampelIds.length > 1}
                       editor={renderStructureAmpelEditor(ampel)}
                       onDelete={() => removeAmpelFromGroup(group, ampel.id)}
                       onToggle={() => toggleExpandedAmpel(ampel.id)}
                     >
-                      <TableCell>{ampel.name || '-'}</TableCell>
+                      <TableCell>
+                        <Badge
+                          anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+                          badgeContent={errorCount}
+                          color="error"
+                          invisible={isExpanded || errorCount === 0}
+                          sx={{ pl: errorCount > 0 && !isExpanded ? 2 : 0, '& .MuiBadge-badge': { left: 0, top: 2 } }}
+                        >
+                          <Box component="span">{ampel.name || '-'}</Box>
+                        </Badge>
+                      </TableCell>
                       <TableCell>{compactStructureName(structure?.structureRed)}</TableCell>
                       <TableCell>{compactStructureName(structure?.structureYellow)}</TableCell>
                       <TableCell>{compactStructureName(structure?.structureGreen)}</TableCell>
@@ -1270,11 +1862,12 @@ function IntersectionCreateWizard() {
         <Stack direction="row" spacing={1} alignItems="center">
           <IconHeadline text="Ampelgruppen" variant="h6" />
         </Stack>
-        {draft.signalGroups.length === 0 && (
-          <FeedbackMessage severity="info">Lege mindestens eine Ampelgruppe an.</FeedbackMessage>
-        )}
         <Stack spacing={2} sx={{ bgcolor: 'grey.50', p: 1.5, borderRadius: 1 }}>
+          {draft.signalGroups.length === 0 && (
+            <FeedbackMessage severity="info">Lege mindestens eine Ampelgruppe an.</FeedbackMessage>
+          )}
           {draft.signalGroups.map((group) => {
+            const groupErrors = validation.signalGroupErrors[group.id] ?? {};
             const selectableTrafficTypes = trafficTypes.filter(
               (type) => type !== 'PEDESTRIAN' || supportsPedestrianSignals,
             );
@@ -1298,6 +1891,11 @@ function IntersectionCreateWizard() {
                 }}
               >
                 <Stack spacing={1.5}>
+                  {[...(groupErrors.ampelIds ?? []), ...(groupErrors.turnDirections ?? [])].map((errorText) => (
+                    <FeedbackMessage key={errorText} severity="error">
+                      {errorText}
+                    </FeedbackMessage>
+                  ))}
                   <IconHeadlineDelete
                     text={`Ampelgruppe ${group.name}`}
                     icon={<TrafficIcon />}
@@ -1408,7 +2006,8 @@ function IntersectionCreateWizard() {
                           })}
                         </ToggleButtonGroup>
                       </CompactToggleField>
-                      {group.trafficType !== 'PEDESTRIAN' && renderTurnDirectionToggle(group)}
+                      {group.trafficType !== 'PEDESTRIAN' &&
+                        renderTurnDirectionToggle(group, undefined, groupErrors.turnDirections)}
                       <Stack
                         spacing={0.5}
                         sx={{
@@ -1486,23 +2085,59 @@ function IntersectionCreateWizard() {
   function renderLaneSignalFields(lane: IntersectionWizardLaneAppDto) {
     const selectedModelValue = modelSelectValue(lane.signal);
     const options = modelOptionsWithSelected(selectedModelValue);
-    const selectableSignalGroups = lane.signalGroupAssignments
+    const errors = validation.laneErrors[lane.id] ?? {};
+    const effectiveAssignments = effectiveLaneSignalGroupAssignments(lane, draft.signalGroups);
+    const selectableSignalGroupOptions = effectiveAssignments
       .map((assignment) => draft.signalGroups.find((group) => group.id === assignment.signalGroupId))
-      .filter((group): group is IntersectionWizardSignalGroupAppDto => Boolean(group && group.ampelIds.length === 1));
+      .flatMap((group) => signalGroupLaneSignalOptionsForLane(group, lane, draft.ampeln));
+      const selectedLaneSignalOption =
+      selectableSignalGroupOptions.find(
+        ({ group, ampel }) =>
+          group.id === lane.signalGroupSignalId &&
+          positiveSignalId(ampel.signalId) === positiveSignalId(lane.signal.signalId),
+      ) ??
+      selectableSignalGroupOptions.find(({ group }) => group.id === lane.signalGroupSignalId) ??
+      selectableSignalGroupOptions.find(({ detected }) => detected);
     if (lane.signalSource === 'SIGNAL_GROUP') {
       return (
-        <FormControl size="small" fullWidth>
+        <FormControl size="small" fullWidth error={Boolean(errors.signalGroupSignalId?.length)}>
           <Select
-            value={lane.signalGroupSignalId ?? ''}
+            value={
+              selectedLaneSignalOption
+                ? laneSignalOptionValue(selectedLaneSignalOption.group.id, selectedLaneSignalOption.ampel.id)
+                : ''
+            }
             inputProps={{ 'aria-label': `Fahrspursignal ${lane.name}` }}
-            onChange={(event) => patchLane(lane.id, { signalGroupSignalId: event.target.value })}
+            onChange={(event) => {
+              const selectedOption = selectableSignalGroupOptions.find(
+                ({ group, ampel }) => laneSignalOptionValue(group.id, ampel.id) === event.target.value,
+              );
+              if (!selectedOption) return;
+              patchLane(lane.id, {
+                signalGroupSignalId: selectedOption.group.id,
+                signal: {
+                  ...lane.signal,
+                name: ampelNameForSignalGroup(selectedOption.group, selectedOption.ampel),
+                signalId: selectedOption.ampel.signalId,
+                  modelName: selectedOption.ampel.modelName,
+                  modelConstant: selectedOption.ampel.modelConstant,
+                  lightStructures: selectedOption.ampel.lightStructures,
+                  axisStructures: selectedOption.ampel.axisStructures,
+                },
+              });
+            }}
           >
-            {selectableSignalGroups.map((group) => (
-              <MenuItem key={group.id} value={group.id}>
-                {group.name} ({signalGroupAmpelNames(group)})
+            {selectableSignalGroupOptions.map(({ group, ampel }) => (
+              <MenuItem key={`${group.id}-${ampel.id}`} value={laneSignalOptionValue(group.id, ampel.id)}>
+                {group.name} ({ampelNameForSignalGroup(group, ampel)})
               </MenuItem>
             ))}
           </Select>
+          {errors.signalGroupSignalId?.length && (
+            <FormHelperText>
+              <strong>{errors.signalGroupSignalId.join(' ')}</strong>
+            </FormHelperText>
+          )}
         </FormControl>
       );
     }
@@ -1513,17 +2148,19 @@ function IntersectionCreateWizard() {
           value={lane.signal.name}
           size="small"
           infoText="Lua-Variablenname des Fahrspursignals."
+          errorTexts={errors.signalName}
           onChange={(event) => patchLane(lane.id, { signal: { ...lane.signal, name: event.target.value } })}
         />
         <FormTextfield
           label="Signal-ID"
           value={lane.signal.signalId ?? ''}
           size="small"
-          infoText="Positive EEP-Signal-ID des Fahrspursignals."
+          infoText="Signal-ID aus den Objekteigenschaften in EEP."
+          errorTexts={errors.signalId}
           inputProps={{ inputMode: 'numeric' }}
           onChange={(event) => patchLane(lane.id, { signal: { ...lane.signal, signalId: event.target.value } })}
         />
-        <FormControl size="small" fullWidth>
+        <FormControl size="small" fullWidth error={Boolean(errors.signalModel?.length)}>
           <Select
             value={selectedModelValue}
             onChange={(event) => {
@@ -1547,6 +2184,11 @@ function IntersectionCreateWizard() {
               );
             })}
           </Select>
+          {errors.signalModel?.length && (
+            <FormHelperText>
+              <strong>{errors.signalModel.join(' ')}</strong>
+            </FormHelperText>
+          )}
         </FormControl>
       </Box>
     );
@@ -1555,8 +2197,10 @@ function IntersectionCreateWizard() {
   function renderLaneAssignmentRows(lane: IntersectionWizardLaneAppDto, showAssignmentControls: boolean) {
     const availableGroups = availableSignalGroupsForLane(lane);
     const showSelectionCheckboxes = availableGroups.length > 1;
+    const laneErrors = validation.laneErrors[lane.id] ?? {};
+    const effectiveAssignments = effectiveLaneSignalGroupAssignments(lane, draft.signalGroups);
     return availableSignalGroupsForLane(lane).map((group) => {
-      const assignment = lane.signalGroupAssignments.find((entry) => entry.signalGroupId === group.id);
+      const assignment = effectiveAssignments.find((entry) => entry.signalGroupId === group.id);
       const selected = Boolean(assignment) || !showSelectionCheckboxes;
       return (
         <Box
@@ -1644,7 +2288,13 @@ function IntersectionCreateWizard() {
                         ))
                       }
                       onChange={(_event, values) => patchLaneAssignment(lane, group.id, { routeNames: values })}
-                      renderInput={(params) => <FormTextfield {...params} infoText="Routen für diese Zuweisung." />}
+                      renderInput={(params) => (
+                        <FormTextfield
+                          {...params}
+                          errorTexts={laneErrors.routeNames}
+                          infoText="Routen für diese Zuweisung."
+                        />
+                      )}
                     />
                   )}
                 </>
@@ -1657,29 +2307,57 @@ function IntersectionCreateWizard() {
   }
 
   function renderLanesStep() {
+    const nonPedestrianSignalGroups = draft.signalGroups.filter((group) => group.trafficType !== 'PEDESTRIAN');
+    const signalGroupsWithoutMatchingLane = nonPedestrianSignalGroups.filter(
+      (group) => !draft.lanes.some((lane) => lane.approach === group.approach),
+    );
+    const signalGroupsWithoutLaneAssignment = nonPedestrianSignalGroups.filter(
+      (group) =>
+        !draft.lanes.some((lane) =>
+          effectiveLaneSignalGroupAssignments(lane, draft.signalGroups).some(
+            (assignment) => assignment.signalGroupId === group.id,
+          ),
+        ),
+    );
     const validApproaches = Array.from(
-      new Set(draft.signalGroups.filter((group) => group.trafficType !== 'PEDESTRIAN').map((group) => group.approach)),
+      new Set(nonPedestrianSignalGroups.map((group) => group.approach)),
     );
     return (
       <Stack spacing={2}>
         <Stack direction="row" spacing={1} alignItems="center">
           <IconHeadline text="Fahrspuren" variant="h6" />
         </Stack>
-        {validApproaches.length === 0 && (
-          <FeedbackMessage severity="warning">
-            Lege zuerst mindestens eine Fahrzeug- oder Tram/Bus-Signalgruppe an.
-          </FeedbackMessage>
-        )}
         <Stack spacing={2} sx={{ bgcolor: 'grey.50', p: 1.5, borderRadius: 1 }}>
+          {validApproaches.length === 0 && (
+            <FeedbackMessage severity="warning">
+              Lege zuerst mindestens eine Fahrzeug- oder Tram/Bus-Signalgruppe an.
+            </FeedbackMessage>
+          )}
+          {validApproaches.length > 0 && draft.lanes.length === 0 && (
+            <FeedbackMessage severity="info">Lege mindestens eine Fahrspur an.</FeedbackMessage>
+          )}
+          {signalGroupsWithoutMatchingLane.length > 0 && (
+            <FeedbackMessage severity="warning">
+              Lege für diese Ampelgruppen eine Fahrspur mit gleicher Zufahrt an:{' '}
+              {signalGroupsWithoutMatchingLane.map((group) => group.name).join(', ')}.
+            </FeedbackMessage>
+          )}
+          {signalGroupsWithoutLaneAssignment.length > 0 && (
+            <FeedbackMessage severity="warning">
+              Wähle diese Ampelgruppen in den passenden Fahrspuren aus:{' '}
+              {signalGroupsWithoutLaneAssignment.map((group) => group.name).join(', ')}.
+            </FeedbackMessage>
+          )}
           {draft.lanes.map((lane, laneIndex) => {
-            const selectedAssignments = lane.signalGroupAssignments;
+            const laneErrors = validation.laneErrors[lane.id] ?? {};
+            const selectedAssignments = effectiveLaneSignalGroupAssignments(lane, draft.signalGroups);
             const showAssignmentControls = selectedAssignments.length > 1;
             const hasDefault = selectedAssignments.some((assignment) => assignment.mode === 'DEFAULT');
-            const selectableSignalGroups = selectedAssignments
+            const selectableSignalGroupOptions = selectedAssignments
               .map((assignment) => draft.signalGroups.find((group) => group.id === assignment.signalGroupId))
-              .filter((group): group is IntersectionWizardSignalGroupAppDto =>
-                Boolean(group && group.ampelIds.length === 1),
-              );
+              .flatMap((group) => signalGroupLaneSignalOptionsForLane(group, lane, draft.ampeln));
+            const defaultLaneSignalOption =
+              selectableSignalGroupOptions.find(({ detected }) => detected) ?? selectableSignalGroupOptions[0];
             return (
               <Paper
                 key={lane.id}
@@ -1692,19 +2370,35 @@ function IntersectionCreateWizard() {
                 }}
               >
                 <Stack spacing={0.5}>
+                  {laneErrors.assignments?.map((errorText) => (
+                    <FeedbackMessage key={errorText} severity="error">
+                      {errorText}
+                    </FeedbackMessage>
+                  ))}
                   <IconHeadlineDelete
-                    text={`Fahrspur ${lane.name} (${laneLuaDisplayName(lane, laneIndex, draft.luaVariableName)})`}
+                    text={`Fahrspur ${lane.name} (${laneLuaDisplayName(
+                      lane,
+                      laneIndex,
+                      draft.manualLuaVariableNames
+                        ? draft.luaVariableName
+                        : automaticIntersectionLuaVariableName(draft),
+                      draft.manualLuaVariableNames === true,
+                    )})`}
                     icon={<DirectionsCarIcon />}
                     variant="h6"
                     ariaLabel={`Fahrspur ${lane.name} löschen`}
                     onDelete={() => removeLane(lane.id)}
                   />
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
+                  <WizardSectionTitle helper="Diese Angaben gelten für diese Fahrspur.">
+                    Standort und Gültigkeit
+                  </WizardSectionTitle>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, pt: 1, gap: 1.5 }}>
                     <FormTextfield
                       label="Fahrspurname"
                       value={lane.name}
                       size="small"
                       infoText="Name der Fahrspur im generierten Lua-Code."
+                      errorTexts={laneErrors.name}
                       onChange={(event) => patchLane(lane.id, { name: event.target.value })}
                     />
                     <FormSelect
@@ -1713,6 +2407,7 @@ function IntersectionCreateWizard() {
                       value={lane.approach}
                       size="small"
                       infoText="Nur Richtungen mit Signalgruppen können genutzt werden."
+                      errorTexts={laneErrors.approach}
                       renderValue={(value) => <Approach approach={value} />}
                       onChange={(approach) => {
                         const signalGroupsForApproach = draft.signalGroups.filter(
@@ -1737,22 +2432,25 @@ function IntersectionCreateWizard() {
                     />
                   </Box>
                   <Stack spacing={0.75}>
-                    <Typography variant="subtitle2">Signalgruppen</Typography>
+                    <WizardSectionTitle helper="Wähle Ampelgruppen deren Grün für diese Fahrspur gilt.">
+                      Ampelgruppen
+                    </WizardSectionTitle>
                     <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
                       {renderLaneAssignmentRows(lane, showAssignmentControls)}
                     </Paper>
                   </Stack>
                   {selectedAssignments.length > 1 && !hasDefault && (
-                    <FeedbackMessage severity="warning">
+                    <FeedbackMessage severity={laneErrors.assignments?.length ? 'error' : 'warning'}>
                       Bei mehreren Signalgruppen muss mindestens eine Standard-Signalgruppe gewählt werden.
                     </FeedbackMessage>
                   )}
                   <Stack spacing={1} sx={{ pt: 1 }}>
-                    <Typography variant="subtitle2">Fahrspursignal</Typography>
+                    <WizardSectionTitle helper="Gib das EEP-Signal an, dass diese Fahrspur steuert.">
+                      Fahrspursignal
+                    </WizardSectionTitle>
                     <ToggleButtonGroup
                       exclusive
                       size="small"
-                      sx={{ mb: 1 }}
                       value={lane.signalSource}
                       onChange={(_event, value) => {
                         if (!value) return;
@@ -1760,8 +2458,21 @@ function IntersectionCreateWizard() {
                           signalSource: value,
                           signalGroupSignalId:
                             value === 'SIGNAL_GROUP'
-                              ? (selectableSignalGroups[0]?.id ?? lane.signalGroupSignalId)
+                              ? (defaultLaneSignalOption?.group.id ?? lane.signalGroupSignalId)
                               : undefined,
+                          ...(value === 'SIGNAL_GROUP' && defaultLaneSignalOption
+                            ? {
+                                signal: {
+                                  ...lane.signal,
+                                  name: ampelNameForSignalGroup(defaultLaneSignalOption.group, defaultLaneSignalOption.ampel),
+                                  signalId: defaultLaneSignalOption.ampel.signalId,
+                                  modelName: defaultLaneSignalOption.ampel.modelName,
+                                  modelConstant: defaultLaneSignalOption.ampel.modelConstant,
+                                  lightStructures: defaultLaneSignalOption.ampel.lightStructures,
+                                  axisStructures: defaultLaneSignalOption.ampel.axisStructures,
+                                },
+                              }
+                            : {}),
                         });
                       }}
                     >
@@ -1775,7 +2486,7 @@ function IntersectionCreateWizard() {
                       </ToggleButton>
                       <ToggleButton
                         value="SIGNAL_GROUP"
-                        disabled={selectableSignalGroups.length === 0}
+                        disabled={selectableSignalGroupOptions.length === 0}
                         sx={{
                           '&.Mui-selected, &.Mui-selected:hover': selectedSignalGroupSx,
                         }}
@@ -1783,7 +2494,7 @@ function IntersectionCreateWizard() {
                         Aus Signalgruppe
                       </ToggleButton>
                     </ToggleButtonGroup>
-                    {renderLaneSignalFields(lane)}
+                    <Box sx={{ pt: 1 }}>{renderLaneSignalFields(lane)}</Box>
                   </Stack>
                 </Stack>
               </Paper>
@@ -1815,10 +2526,11 @@ function IntersectionCreateWizard() {
         <IntersectionWizardSettingsStep
           cameraOptions={cameraOptions}
           draft={draft}
+          errorTexts={validation.settingsErrors}
           showAdvancedIntersectionSettings={showAdvancedIntersectionSettings}
           storageSlotOptions={storageSlotOptions}
           onDraftPatch={updateDraft}
-          onIntersectionNameChange={(name) => updateDraft({ name, luaVariableName: slug(name, 'kreuzung') })}
+          onIntersectionNameChange={(name) => updateDraft({ name })}
           onLuaVariableNameChange={(luaVariableName) => updateDraft({ luaVariableName })}
           onOptionalPositiveNumber={optionalPositiveNumber}
           onShowAdvancedIntersectionSettingsChange={setShowAdvancedIntersectionSettings}
@@ -1832,6 +2544,7 @@ function IntersectionCreateWizard() {
         <IntersectionWizardPhasePlanStep
           draft={draft}
           ampelLabel={(ampelId) => draft.ampeln.find((ampel) => ampel.id === ampelId)?.name ?? ampelId}
+          phaseErrors={validation.phaseErrors}
           onAddPhase={addPhase}
           onDraftPatch={updateDraft}
           onOptionalPositiveNumber={optionalPositiveNumber}
@@ -1845,7 +2558,7 @@ function IntersectionCreateWizard() {
   }
 
   const isSummaryStep = activeStep === steps.length - 1;
-  const showCodePreview = (draft.showLuaCodeImmediately ?? true) || isSummaryStep;
+  const showCodePreview = (draft.showLuaCodeImmediately ?? false) || isSummaryStep;
 
   return (
     <PageContainer>
@@ -1864,16 +2577,20 @@ function IntersectionCreateWizard() {
           <Stack spacing={3} sx={{ minWidth: 0 }}>
             <WizardStepper
               activeStep={activeStep - 1}
-              steps={wizardSteps.map((label) => ({ label }))}
+              steps={wizardSteps.map((label, index) => ({
+                label,
+                errorCount: index <= activeStep - 1 ? (validation.stepErrorCounts[index + 1] ?? 0) : 0,
+              }))}
               onStepSelect={(index) => void persistAndNavigate(index + 1)}
             />
             {navigationButtons()}
             <Paper sx={{ p: 3 }}>{stepContent()}</Paper>
             {showCodePreview && isSummaryStep && (
               <IntersectionWizardCodePreview
+                errors={previewErrors}
                 lua={generatedLua}
-                warnings={warnings}
-                copyEnabled
+                warnings={previewWarnings}
+                copyEnabled={!hasBlockingValidationErrors}
                 onCopyIntersection={copyIntersectionLua}
                 onCopyAll={copyAllLua}
                 fullWidth
@@ -1883,8 +2600,9 @@ function IntersectionCreateWizard() {
           </Stack>
           {showCodePreview && !isSummaryStep && (
             <IntersectionWizardCodePreview
+              errors={previewErrors}
               lua={generatedLua}
-              warnings={warnings}
+              warnings={previewWarnings}
               copyEnabled={false}
               onCopyIntersection={copyIntersectionLua}
               onCopyAll={copyAllLua}

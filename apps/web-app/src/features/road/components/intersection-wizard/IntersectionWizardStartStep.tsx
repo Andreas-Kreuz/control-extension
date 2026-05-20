@@ -1,7 +1,6 @@
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ExplainedCheckbox } from '../../../../shared/components/checkbox';
 import { FeedbackMessage } from '../../../../shared/components/feedback';
 
 export interface IntersectionWizardStartStepProps {
@@ -38,11 +37,14 @@ function IntersectionWizardStartStep({
         Platziere eine Ampel auf allen Fahrspuren, die gesteuert werden sollen. Willst du eine Fahrspur durch
         unterschiedliche Ampeln in verschiedene Abbiegerichtungen steuern, dann platziere ein unsichtbares Signal.
       </FeedbackMessage>
-      <ExplainedCheckbox
-        checked={sendPreparationSettings}
-        label="Signal-IDs und Modellinformationen in EEP anzeigen"
-        onChange={(_event, checked) => onSendPreparationSettingsChange(checked)}
-      />
+      <Button
+        aria-pressed={sendPreparationSettings}
+        color="secondary"
+        variant={sendPreparationSettings ? 'contained' : 'outlined'}
+        onClick={() => onSendPreparationSettingsChange(!sendPreparationSettings)}
+      >
+        Signal-IDs und Modellinformationen in EEP anzeigen: {sendPreparationSettings ? 'Ja' : 'Nein'}
+      </Button>
       {sendPreparationSettings && (
         <FeedbackMessage severity="warning">
           Beim Start werden Signal-IDs und Modellinformationen als Tipptexte in EEP angezeigt. Das überschreibt

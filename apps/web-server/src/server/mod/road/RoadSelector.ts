@@ -113,6 +113,7 @@ export default class RoadSelector {
           id: dto.id,
           intersectionId: dto.intersectionId,
           name: dto.name,
+          ...(dto.scriptVariableName !== undefined ? { scriptVariableName: dto.scriptVariableName } : {}),
           currentIndication: dto.currentIndication,
           vehicleMultiplier: dto.vehicleMultiplier,
           ...(dto.laneSignalId !== undefined ? { laneSignalId: dto.laneSignalId } : {}),

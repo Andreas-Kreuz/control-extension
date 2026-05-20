@@ -85,9 +85,11 @@
 ---@field laneInfo any
 ---@field laneNameInfo any
 ---@field buildInfo string
+---@field newForSignal fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
 ---@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
 ---@field newPedestrianOnly fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field newPlainLightStructure fun(self: TrafficLight, name: string, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
+---@field newForLightStructure fun(self: TrafficLight, name: string, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
+---@field asPedestrianSignal fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
 ---@field withPedestrian fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
 ---@field asPedestrianOnly fun(self: TrafficLight):TrafficLight
 ---@field vehicleSignalNameTippText fun(self: TrafficLight):string
@@ -145,6 +147,7 @@
 ---@field laneCanDrive fun(lane: Lane, signals: table):boolean
 ---@field laneSignal TrafficLight
 ---@field name string
+---@field _scriptVariableName string|nil
 ---@field new fun(self: Lane, name: string, laneSignal: TrafficLight, turnDirections?: string[], signalType?: string):Lane
 ---@field queue Queue
 ---@field activeLaneSettings any
@@ -166,13 +169,18 @@
 --- Starts route-bound drive signal registration. At least one route is required.
 ---@field routes fun(self: Lane, ...: string):LaneRouteDriveBuilder
 ---@field routesToCount table
+---@field getScriptVariableName fun(self: Lane):string|nil
+---@field scriptVariableName fun(self: Lane, scriptVariableName: string):Lane
+---@field setScriptVariableName fun(self: Lane, scriptVariableName: string):Lane
 ---@field setDirections fun(self: Lane, ...: LaneDirection):Lane
 ---@field setApproach fun(self: Lane, approach: LaneApproach):Lane
 ---@field setHeading fun(self: Lane, heading: LaneHeading):Lane Deprecated: use setApproach
 ---@field setTurnDirections fun(self: Lane, ...: LaneDirection):Lane
+---@field setVehicleMultiplier fun(self: Lane, vehicleMultiplier: number):Lane
 ---@field setFahrzeugMultiplikator fun(self: Lane, fahrzeugMultiplikator: number):Lane
+---@field setHighlightTracks fun(self: Lane, ...: number):Lane
 ---@field setHighLightingTracks fun(self: Lane, ...: any):Lane
----@field setLaneType fun(self: Lane, requestType: LaneRequestType):nil
+---@field setLaneType fun(self: Lane, requestType: LaneRequestType):Lane
 ---@field setTrafficType fun(self: Lane, trafficType: LaneType):Lane
 ---@field showRequestsOn fun(self: Lane, signal: TrafficLight, ...: string):nil
 ---@field showRequestsOnSignalGroups fun(self: Lane, ...: SignalGroup):Lane
@@ -221,22 +229,34 @@
 ---@field getHeading fun(self: PedestrianCrossing):LaneHeading Deprecated: opposite of approach
 ---@field new fun(self: PedestrianCrossing, name: string):PedestrianCrossing
 ---@field scriptVariableName fun(self: PedestrianCrossing, scriptVariableName: string):PedestrianCrossing
+---@field setScriptVariableName fun(self: PedestrianCrossing, scriptVariableName: string):PedestrianCrossing
 ---@field setApproach fun(self: PedestrianCrossing, approach: LaneApproach):PedestrianCrossing
 ---@field setHeading fun(self: PedestrianCrossing, heading: LaneHeading):PedestrianCrossing Deprecated: use setApproach
 
 ---@class SignalGroup
 ---@field type string
 ---@field name string
+---@field _scriptVariableName string|nil
+---@field approach LaneApproach|nil
+---@field turnDirections LaneDirection[]
 ---@field signalHeads table<Signal, SignalType>
 ---@field pedestrianCrossings PedestrianCrossing[]
 ---@field Type table<string, SignalType>
 ---@field getType fun(self: SignalGroup):string
 ---@field new fun(self: SignalGroup, name: string):SignalGroup
 ---@field getName fun(self: SignalGroup):string
+---@field getScriptVariableName fun(self: SignalGroup):string|nil
+---@field setScriptVariableName fun(self: SignalGroup, scriptVariableName: string):SignalGroup
+---@field scriptVariableName fun(self: SignalGroup, scriptVariableName: string):SignalGroup
+---@field getApproach fun(self: SignalGroup):LaneApproach|nil
+---@field getTurnDirections fun(self: SignalGroup):LaneDirection[]
+---@field setApproach fun(self: SignalGroup, approach: LaneApproach):SignalGroup
+---@field setTurnDirections fun(self: SignalGroup, ...: LaneDirection):SignalGroup
 ---@field addSignals fun(self: SignalGroup, signalType: SignalType, ...: Signal):SignalGroup
 ---@field addVehicleSignals fun(self: SignalGroup, ...: Signal):SignalGroup
 ---@field addTramSignals fun(self: SignalGroup, ...: Signal):SignalGroup
 ---@field addPedestrianSignals fun(self: SignalGroup, ...: Signal):SignalGroup
+---@field addPedestrianCrossings fun(self: SignalGroup, ...: PedestrianCrossing):SignalGroup
 ---@field addPedestrianCrossing fun(self: SignalGroup, ...: PedestrianCrossing):SignalGroup
 ---@field getSignalHeads fun(self: SignalGroup):table<Signal, SignalType>
 ---@field getPedestrianCrossings fun(self: SignalGroup):PedestrianCrossing[]
@@ -265,6 +285,7 @@
 ---@field tasksForPhaseChangeFrom fun(self: TrafficPhase, oldPhase?: TrafficPhase, afterRedTask?: any):table
 ---@field getLanes fun(self: TrafficPhase):table<Lane, boolean>
 ---@field lanesNamesText fun(self: TrafficPhase):string
+---@field addSignalGroups fun(self: TrafficPhase, ...: SignalGroup):TrafficPhase
 ---@field addSignalGroup fun(self: TrafficPhase, ...: SignalGroup):TrafficPhase
 ---@field lanesSortedByPriority fun(self: TrafficPhase):Lane[], number, number
 ---@field lanesSortedByName fun(self: TrafficPhase):Lane[]
@@ -279,6 +300,7 @@
 ---@field currentPhase TrafficPhase
 ---@field phases TrafficPhase[]
 ---@field signalGroups SignalGroup[]
+---@field pedestrianCrossings PedestrianCrossing[]
 ---@field signalGroupsBySignalUse table<string, table<TrafficLight, SignalGroup>>
 ---@field greenTimeFinished boolean
 ---@field greenReached boolean
@@ -314,12 +336,16 @@
 ---@field isGreenReached fun(self: Intersection):boolean
 ---@field setTippStructure fun(self: Intersection, tippStructure: string):Intersection
 ---@field getStaticCams fun(self: Intersection):string[]
----@field addStaticCam fun(self: Intersection, kameraName: string):nil
+---@field addStaticCams fun(self: Intersection, ...: string):Intersection
+---@field addStaticCam fun(self: Intersection, kameraName: string):Intersection
 ---@field resetVehicles fun():nil
 ---@field new fun(self: Intersection, name: string, greenTimeSeconds?: number):Intersection
 ---@field withStorage fun(self: Intersection, eepSaveId?: number):Intersection
 ---@field scriptVariableName fun(self: Intersection, scriptVariableName: string):Intersection
+---@field setScriptVariableName fun(self: Intersection, scriptVariableName: string):Intersection
 ---@field newSignalGroup fun(self: Intersection, name: string):SignalGroup
+---@field newLane fun(self: Intersection, name: string, laneSignal: TrafficLight):Lane
+---@field newPedestrianCrossing fun(self: Intersection, name: string):PedestrianCrossing
 ---@field signalGroupForSignalUse fun(self: Intersection, signalHead: TrafficLight, signalType: SignalType):SignalGroup
 ---@field newPhase fun(self: Intersection, name: string, greenTimeSeconds?: number):TrafficPhase
 ---@field addPhase fun(self: Intersection, phase: TrafficPhase):TrafficPhase
