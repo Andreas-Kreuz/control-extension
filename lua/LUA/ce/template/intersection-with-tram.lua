@@ -99,7 +99,7 @@ local sgTramNorthSouth = crossing:newSignalGroup("sgTramNorthSouth"):addTramSign
 local sgPedEast = crossing:newSignalGroup("sgPedEast"):addPedestrianSignals(K3, K6)
 local sgPedNorthSouth = crossing:newSignalGroup("sgPedNorthSouth"):addPedestrianSignals(K1, K2, K8, K9)
 
--- Lege fest, welche Signalgruppen für eine Kreuzung gelten
+-- Lege fest, welche Ampelgruppen für eine Kreuzung gelten
 lane1:driveOnDefaultSignalGroups(sgLane1StraightRight)
 lane2:driveOnDefaultSignalGroups(sgLane2Left)
 lane2:routes("Rechtsabbieger"):driveAlsoOnSignalGroups(sgLane2Right)

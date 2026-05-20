@@ -547,13 +547,13 @@ function TrafficLightDefinitionPrototype() {
       <Stack key={group.id} spacing={1.5}>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
-            Signalgruppe
+            Ampelgruppe
           </Typography>
           <TextField
             value={group.name}
             onChange={(event) => updateSignalGroup(lane.id, group.id, { name: event.target.value })}
             size="small"
-            inputProps={{ maxLength: 24, 'aria-label': `Signalgruppe ${group.name}` }}
+            inputProps={{ maxLength: 24, 'aria-label': `Ampelgruppe ${group.name}` }}
           />
         </Stack>
         <Stack spacing={1}>
@@ -572,13 +572,13 @@ function TrafficLightDefinitionPrototype() {
         <Stack spacing={1.5}>
           <Stack direction="row" spacing={1} alignItems="center">
             <Typography variant="subtitle2" sx={{ flex: 1 }}>
-              {defaultCard ? `Standard-Signalgruppe: ${group.name}` : `Signalgruppe: ${group.name}`}
+              {defaultCard ? `Standard-Ampelgruppe: ${group.name}` : `Ampelgruppe: ${group.name}`}
             </Typography>
             {!defaultCard && (
               <IconButton
                 size="small"
-                aria-label={`Signalgruppe ${group.name || group.id} löschen`}
-                title="Signalgruppe löschen"
+                aria-label={`Ampelgruppe ${group.name || group.id} löschen`}
+                title="Ampelgruppe löschen"
                 onClick={() => deleteSignalGroup(lane.id, group.id)}
               >
                 <DeleteOutlinedIcon fontSize="small" />
@@ -595,7 +595,7 @@ function TrafficLightDefinitionPrototype() {
           >
             <Stack spacing={0.5}>
               <Typography variant="caption" color="text.secondary">
-                Abbiegerichtungen der Signalgruppe
+                Abbiegerichtungen der Ampelgruppe
               </Typography>
               {renderSignalGroupTurnDirections(lane, group)}
             </Stack>
@@ -634,11 +634,11 @@ function TrafficLightDefinitionPrototype() {
               >
                 <ToggleButton
                   value="ONLY"
-                  title="Fahrzeuge mit diesen Routen warten, wenn die Standard-Signalgruppe grün anzeigt."
+                  title="Fahrzeuge mit diesen Routen warten, wenn die Standard-Ampelgruppe grün anzeigt."
                 >
                   Warten
                 </ToggleButton>
-                <ToggleButton value="ALSO" title="Fahrzeuge fahren auch, wenn die Standard-Signalgruppe grün anzeigt.">
+                <ToggleButton value="ALSO" title="Fahrzeuge fahren auch, wenn die Standard-Ampelgruppe grün anzeigt.">
                   Fahren
                 </ToggleButton>
               </ToggleButtonGroup>
@@ -646,13 +646,13 @@ function TrafficLightDefinitionPrototype() {
           </Box>
           <Stack spacing={0.5}>
             <Typography variant="caption" color="text.secondary">
-              Signalgruppe
+              Ampelgruppe
             </Typography>
             <TextField
               value={group.name}
               onChange={(event) => updateSignalGroup(lane.id, group.id, { name: event.target.value })}
               size="small"
-              inputProps={{ maxLength: 24, 'aria-label': `Signalgruppe ${group.name}` }}
+              inputProps={{ maxLength: 24, 'aria-label': `Ampelgruppe ${group.name}` }}
             />
           </Stack>
           <Stack spacing={1}>
@@ -674,7 +674,7 @@ function TrafficLightDefinitionPrototype() {
         <Stack spacing={1.5}>
           <Stack direction="row" spacing={1} alignItems="center">
             <Typography variant="h5" sx={{ flex: 1 }}>
-              Signalgruppen für {lane.name}
+              Ampelgruppen für {lane.name}
             </Typography>
             <Button size="small" startIcon={<AddIcon />} onClick={() => addSignalGroup(lane.id)}>
               Richtungsampel hinzufügen
@@ -702,7 +702,7 @@ function TrafficLightDefinitionPrototype() {
             renderSimpleSignalGroup(lane, firstGroup)
           ) : (
             <Typography variant="body2" color="text.secondary">
-              Keine Signalgruppe angelegt.
+              Keine Ampelgruppe angelegt.
             </Typography>
           )}
         </Stack>

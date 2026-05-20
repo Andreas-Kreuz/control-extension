@@ -31,7 +31,7 @@ function IntersectionWizardStartStep({
     <Stack spacing={2} alignItems="flex-start">
       <Typography variant="h5">Neue Kreuzung erstellen</Typography>
       <Typography color="text.secondary">
-        Starte den Assistenten, um Fahrspuren, Fahrspur-Ampeln, Signalgruppen und Verkehrsphasen zu erfassen.
+        Starte den Assistenten, um Fahrspuren, Fahrspur-Ampeln, Ampelgruppen und Verkehrsphasen zu erfassen.
       </Typography>
       <FeedbackMessage severity="info">
         Platziere eine Ampel auf allen Fahrspuren, die gesteuert werden sollen. Willst du eine Fahrspur durch

@@ -96,7 +96,7 @@ function IntersectionWizardPhasePlanStep({
 
   function phaseSignalGroupInfoText(phase: IntersectionWizardPhaseAppDto) {
     return `Schaltet ${phase.signalGroupIds.length} ${
-      phase.signalGroupIds.length === 1 ? 'Signalgruppe' : 'Signalgruppen'
+      phase.signalGroupIds.length === 1 ? 'Ampelgruppe' : 'Ampelgruppen'
     }`;
   }
 

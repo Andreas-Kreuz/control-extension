@@ -81,7 +81,7 @@ function DirectionTrafficLightStory() {
   return (
     <Stack spacing={2.5}>
       <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-        <ExampleCard title="Signalgruppe Auto">
+        <ExampleCard title="Ampelgruppe Auto">
           <SignalGroupTrafficLightPreview trafficType="CAR" turnDirections={['HALF_LEFT', 'STRAIGHT', 'HALF_RIGHT']} />
         </ExampleCard>
         <ExampleCard title="Auto Kombi links">
@@ -92,7 +92,7 @@ function DirectionTrafficLightStory() {
         </ExampleCard>
       </Stack>
       <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-        <ExampleCard title="Signalgruppe Tram">
+        <ExampleCard title="Ampelgruppe Tram">
           <SignalGroupTrafficLightPreview trafficType="TRAM" turnDirections={['HALF_LEFT', 'STRAIGHT', 'HALF_RIGHT']} />
         </ExampleCard>
         <ExampleCard title="Fußgänger">

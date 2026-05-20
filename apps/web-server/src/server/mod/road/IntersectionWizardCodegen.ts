@@ -700,7 +700,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     });
   }
 
-  bodyLines.push('', '-- Signalgruppen');
+  bodyLines.push('', '-- Ampelgruppen');
   draft.signalGroups.forEach((group, index) => {
     const variable = signalGroupVariableName(group, index, prefix, usedGroupVars, useManualLuaVariableNames);
     groupVars.set(group.id, variable);
@@ -722,7 +722,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     );
   });
 
-  bodyLines.push('', '-- Zuordnung der Signalgruppen zu Fahrspuren');
+  bodyLines.push('', '-- Zuordnung der Ampelgruppen zu Fahrspuren');
   draft.lanes.forEach((lane) => {
     const assignments = assignedGroups(draft, lane);
     const defaultGroupVars = assignments
@@ -730,7 +730,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       .map((entry) => groupVars.get(entry.group.id))
       .filter((value): value is string => Boolean(value));
     if (assignments.length > 1 && defaultGroupVars.length === 0) {
-      warnings.push(`${lane.name}: Mehrere Signalgruppen erfordern mindestens eine Standard-Signalgruppe.`);
+      warnings.push(`${lane.name}: Mehrere Ampelgruppen erfordern mindestens eine Standard-Ampelgruppe.`);
     }
     if (defaultGroupVars.length > 0) {
       const requestGroupVars = assignments

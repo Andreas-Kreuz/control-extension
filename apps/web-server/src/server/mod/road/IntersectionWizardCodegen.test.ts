@@ -577,7 +577,7 @@ function testCodegenCreatesIntersectionSetup(): void {
   const laneSignalIndex = lua.indexOf('-- Fahrspur-Ampeln');
   const lanesIndex = lua.indexOf('-- Fahrspuren');
   const pedestrianCrossingsIndex = lua.indexOf('-- Fussgaengerfurten');
-  const signalGroupsIndex = lua.indexOf('-- Signalgruppen');
+  const signalGroupsIndex = lua.indexOf('-- Ampelgruppen');
 
   assert.equal(warnings.length, 0);
   assert.ok(kreuzungIndex > 0 && ampelnIndex > kreuzungIndex);
@@ -762,7 +762,7 @@ function testCodegenWarnsForMultipleGroupsWithoutDefault(): void {
 
   const { warnings } = generateIntersectionWizardLua(draft);
 
-  assert.deepEqual(warnings, ['FS2: Mehrere Signalgruppen erfordern mindestens eine Standard-Signalgruppe.']);
+  assert.deepEqual(warnings, ['FS2: Mehrere Ampelgruppen erfordern mindestens eine Standard-Ampelgruppe.']);
 }
 
 function testCodegenCreatesPedestrianCrossings(): void {

@@ -132,7 +132,7 @@ _**Tipp:** Das [PDF-Dokument Kreuzungsaufbau.pdf](../../assets/Kreuzungsaufbau.p
 
 Notiere Dir, welche _Fahrspuren_ es gibt und wie die IDs der zu schaltenden Ampeln heißen - merke Dir dabei, welche unterschiedlichen Ampelmodelle eingesetzt werden.
 
-**Wichtige Unterscheidung dabei:** Welche Ampeln steuern den Verkehr direkt (das sind die Fahrspur-Ampeln) und welche Ampeln müssen neben den Fahrspur-Ampeln noch in Signalgruppen berücksichtigt werden.
+**Wichtige Unterscheidung dabei:** Welche Ampeln steuern den Verkehr direkt (das sind die Fahrspur-Ampeln) und welche Ampeln müssen neben den Fahrspur-Ampeln noch in Ampelgruppen berücksichtigt werden.
 
 In der Beispielanlage sind es:
 
@@ -150,15 +150,15 @@ In der Beispielanlage sind es:
 - **Nur die Fahrspur-Ampel steuert Fahrzeuge.** Nur die Ampel auf der Fahrspur darf die Fahrzeuge durch das Ampelbild steuern.
   Du kannst aber weitere Ampeln für Fahrzeuge aufstellen, z.B. eine zweite Ampel auf der linken Straßenseite oder ein dritte über dem Verkehr. Nur die Fahrspur-Ampel darf den Verkehr auf der Straße steuern - alle anderen Ampeln müssen so aufgestellt werden, dass sie den Verkehr nicht beeinflussen.
 
-- **Fahrspuren werden nicht geschaltet, sondern Signalgruppen.** Jede Phase der Kreuzung schaltet bestimmte Signalgruppen auf grün. Dabei wird auch die Fahrspur-Ampel gesteuert.
-  - Im einfachen Fall ist die Fahrspur-Ampel Teil genau einer Signalgruppe
+- **Fahrspuren werden nicht geschaltet, sondern Ampelgruppen.** Jede Phase der Kreuzung schaltet bestimmte Ampelgruppen auf grün. Dabei wird auch die Fahrspur-Ampel gesteuert.
+  - Im einfachen Fall ist die Fahrspur-Ampel Teil genau einer Ampelgruppe
   - Später werden wir Szenarien haben, in denen die Fahrspur-Ampel unsichtbar ist, da mehrere andere Ampeln für die Fahrspur gelten. Der Verkehr wird dann abhängig von den anderen Ampeln gesteuert.
 
 - **Empfehlung: Erstelle immer eigene Fahrspuren für Linksabbieger, wenn diese den Gegenverkehr kreuzen**.
   Wenn Du dich nicht selbst darum kümmern willst, dass Fahrzeuge den Gegenverkehr beachten, dann solltest Du immer eigene Linksabbieger-Fahrspuren anlegen. Schalte Linksabbieger-Fahrspuren nur dann auf grün, wenn der Gegenverkehr den Fahrweg der Linksabbieger nicht kreuzen kann.
   - **Alternative:** Du kannst auch eigene unsichtbaren Ampeln in der Mitte der Kreuzung einbauen und die Linkabbieder nur dann fahren lassen, wenn kein Gegenverkehr kommt. Dies musst Du jedoch selbst machen.
 
-Erst im nächsten Schritt werden mehrere Signalgruppen der _Fahrspuren_ in Phasen zusammengefasst.
+Erst im nächsten Schritt werden mehrere Ampelgruppen der _Fahrspuren_ in Phasen zusammengefasst.
 
 ## Schreibe die Ampeln und Fahrspuren in das Haupt-Skript
 
@@ -208,36 +208,36 @@ Schreibe danach die Fahrspuren in das Skript:
 --   |        |     |      +------------------ Fahrspur-Ampel - da wartet der Verkehr
 --   |        |     |      |  +--------------- Richtungen dieser Fahrspur
 n1 = Lane:new("N1", K1, {'STRAIGHT', 'RIGHT'})
-n2 = Lane:new("N2", K3, {'LEFT'}) -- zusätzlich in der Signalgruppe: K2
+n2 = Lane:new("N2", K3, {'LEFT'}) -- zusätzlich in der Ampelgruppe: K2
 
 -- Fahrspuren im Osten
 o1 = Lane:new("O1", K4, {'STRAIGHT', 'RIGHT'})
-o2 = Lane:new("O2", K6, {'LEFT'}) -- zusätzlich in der Signalgruppe: K5
+o2 = Lane:new("O2", K6, {'LEFT'}) -- zusätzlich in der Ampelgruppe: K5
 
 -- Fahrspuren im Sueden
 s1 = Lane:new("S1", K7, {'STRAIGHT', 'RIGHT'})
-s2 = Lane:new("S2", K8, {"LEFT"}) -- zusätzlich in der Signalgruppe: K9
+s2 = Lane:new("S2", K8, {"LEFT"}) -- zusätzlich in der Ampelgruppe: K9
 
 -- Fahrspuren im Westen
 w1 = Lane:new("W1", K10, {'STRAIGHT', 'RIGHT'})
-w2 = Lane:new("W2", K12, {'LEFT'}) -- zusätzlich in der Signalgruppe: K11
+w2 = Lane:new("W2", K12, {'LEFT'}) -- zusätzlich in der Ampelgruppe: K11
 ```
 
 - Klicke in EEP auf _"Skript neu laden"_ und wechsle in den 3D-Modus. <br> 😀 **Wenn Du alles richtig gemacht hast**, siehst Du weiterhin an allen Signalen Tipp-Texte mit den IDs dieser Signale und keine Fehlermeldung im Log.
 
 **Was ist grade passiert?**
 
-- Du hast soeben die Ampeln `TrafficLight` und die Fahrspuren `Lane` der Kreuzung festgelegt. Jede kann für sich allein geschaltet werden oder zusammen mit anderen Fahrspuren. Die Zusammenfassung in Signalgruppen und Phasen kommt im nächsten Schritt.
+- Du hast soeben die Ampeln `TrafficLight` und die Fahrspuren `Lane` der Kreuzung festgelegt. Jede kann für sich allein geschaltet werden oder zusammen mit anderen Fahrspuren. Die Zusammenfassung in Ampelgruppen und Phasen kommt im nächsten Schritt.
 
-## Schalte die Signalgruppen nun zu Phasen zusammen
+## Schalte die Ampelgruppen nun zu Phasen zusammen
 
-Eine _Phase_ `TrafficPhase` legt fest, welche _Signalgruppen_ gleichzeitig "grün" bekommen sollen. An einer Kreuzung ist immer nur eine Phase aktiv.
+Eine _Phase_ `TrafficPhase` legt fest, welche _Ampelgruppen_ gleichzeitig "grün" bekommen sollen. An einer Kreuzung ist immer nur eine Phase aktiv.
 
-Das macht die Automatik dann für Dich: Bevor eine neue Phase ihre Signalgruppen auf "grün" schaltet, werden erst alle Signalgeber der vorherigen Phase auf rot geschaltet - wenn sie nicht mehr in der neuen Phase enthalten sind.
+Das macht die Automatik dann für Dich: Bevor eine neue Phase ihre Ampelgruppen auf "grün" schaltet, werden erst alle Signalgeber der vorherigen Phase auf rot geschaltet - wenn sie nicht mehr in der neuen Phase enthalten sind.
 
-❗ _**Beachte**: Eine **Phase** darf **Signalgruppen** nur so schalten, dass sich die Fahrzeuge der Fahrspuren überlappungsfrei fahren können._
+❗ _**Beachte**: Eine **Phase** darf **Ampelgruppen** nur so schalten, dass sich die Fahrzeuge der Fahrspuren überlappungsfrei fahren können._
 
-Notiere Dir nun, welche der _Signalgruppen_ zu _Phasen_ zusammengefasst werden sollen.
+Notiere Dir nun, welche der _Ampelgruppen_ zu _Phasen_ zusammengefasst werden sollen.
 
 ![BILD](../../assets/tutorial/kreuzung/kreuzungsaufbau-tutorial-schaltungen.png)
 
@@ -245,11 +245,11 @@ Notiere Dir nun, welche der _Signalgruppen_ zu _Phasen_ zusammengefasst werden s
 Im Beispiel siehst Du, dass Fahrspuren in mehreren Phasen enthalten sein können.
 Es würde jedoch genügen, entweder die Phasen 1 bis 4 oder die Phasen 5 bis 8 zu verwenden, da in diesen jeweils alle Fahrspuren enthalten sind._
 
-## Schreibe die Signalgruppen und Phasen in das Haupt-Skript
+## Schreibe die Ampelgruppen und Phasen in das Haupt-Skript
 
 ```lua
 --------------------------------------------------------------
--- Definiere die Signalgruppen, Phasen und die Kreuzung
+-- Definiere die Ampelgruppen, Phasen und die Kreuzung
 --------------------------------------------------------------
 -- Eine Phase bestimmt, welche Fahrspuren gleichzeitig auf
 -- grün geschaltet werden dürfen, alle anderen sind rot
@@ -296,7 +296,7 @@ phase4:addSignalGroup(sgEastLeft, sgWestLeft, sgPedNorth, sgPedSouth)
 
 **Was ist grade passiert?**
 
-- Du hast soeben die Fahrspuren zu Signalgruppen und Phasen zusammengefasst und diese einer Kreuzung zugewiesen. Durch die Aufrufe in `EEPMain()` plant die Kreuzung automatisch ihre Phasen, der Planer führt sie aus.
+- Du hast soeben die Fahrspuren zu Ampelgruppen und Phasen zusammengefasst und diese einer Kreuzung zugewiesen. Durch die Aufrufe in `EEPMain()` plant die Kreuzung automatisch ihre Phasen, der Planer führt sie aus.
 
 ## Schalte die Hilfsfunktionen wieder aus
 
@@ -326,7 +326,7 @@ Du hast diese Anleitung abgeschlossen 🍀
 
 **So kannst Du weitermachen**:
 
-- Füge noch fehlende Fahrspuren zu Signalgruppen und Phasen hinzu. Können noch weitere Fußgänger-Ampeln geschaltet werden?
+- Füge noch fehlende Fahrspuren zu Ampelgruppen und Phasen hinzu. Können noch weitere Fußgänger-Ampeln geschaltet werden?
 
 - Reihenfolge der Phasen ändern:
 

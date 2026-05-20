@@ -210,7 +210,7 @@ function IntersectionWizardSettingsStep({
             <ExplainedCheckbox
               checked={draft.manualLuaVariableNames ?? false}
               label="Lua-Variablennamen selbst festlegen"
-              explanation="Optional: Vergib die Variablennamen für die Fahrspuren und Signalgruppen selbst."
+              explanation="Optional: Vergib die Variablennamen für die Fahrspuren und Ampelgruppen selbst."
               onChange={(_event, checked) => onDraftPatch({ manualLuaVariableNames: checked })}
             />
             {draft.manualLuaVariableNames && (

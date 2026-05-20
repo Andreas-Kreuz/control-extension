@@ -461,7 +461,7 @@ end
 local function assertIndependentLaneSignalForMultipleGroups(lane, signalGroups)
     local signals, signalGroupCount = signalsFromSignalGroups(signalGroups)
     assert(signalGroupCount <= 1 or not signals[lane.laneSignal],
-           "Wenn eine Fahrspur durch mehrere Signalgruppen gesteuert wird, ben\246tigt sie eine unabh\228ngige " ..
+           "Wenn eine Fahrspur durch mehrere Ampelgruppen gesteuert wird, ben\246tigt sie eine unabh\228ngige " ..
            "Ampel - verwende eine eigene unsichtbare Ampel.")
     return signals
 end

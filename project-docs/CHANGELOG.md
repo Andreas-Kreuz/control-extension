@@ -131,3 +131,56 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 - 🐞 Der aktive Zug wird nicht mehr angezeigt, wenn das Hub-Modul nicht geladen ist
 - 🐞 Alte Statistik-Route wurde entfernt; Statistik- und Versionsinfos liegen nun in der Einblicke-Seite
 - 🐞 Mehrere UI-Korrekturen an Navigation, Textdarstellung, Abständen, Karten und Zugauswahl
+
+## **Control Extension v0.0.8-alpha** Vorschauversion
+
+### Neu in v0.0.8-alpha
+
+- ⭐ Neu: Kreuzungsassistent in der App zum Erstellen und Überarbeiten von Kreuzungen.
+  - Lua-Code für Fahrspuren, Ampelgruppen, Phasen, Fußgängerquerungen, Strukturlichter und routenabhängige Freigaben
+- ⭐ Neu: Detailansicht für Rollmaterial-Modelle mit zusammengefassten Modellinformationen inkl. Anzeige von Kennzeichen und Fahrzeugnummern für Rollmaterial
+- ⭐ ÖPNV-Linien unterstützen Depotabschnitte, Depotanzeigen und das Setzen eines Fahrzeugverbands auf einen Linienabschnitt
+
+### Lua Änderungen in v0.0.8-alpha
+
+- ⭐ 🚅🚅🚅 Es werden viel mehr Daten aus der `.anl3` gelesen und stehen in Server, API und App zur Verfügung.
+  Der Hub kann nun Routen, Züge, Rollmaterial, Signale, Weichen, Gleise, Kontakte und Kameras aus der Anlage vorab laden und dadurch viele EEP-Aufrufe während der Laufzeit vermeiden.
+
+- ⭐ 🚅🚅🚅 Performance: Die Data Bridge sendet EEP-Ereignisse standardmäßig über eine Pipe an den Server.
+  Dadurch ist für Daten keine Datei mehr möglich; Austausch über Dateien ist weiterhin als Fallback auswählbar.
+
+- ⭐ Die Data Bridge puffert ausgehende Ereignisse, bis sie erfolgreich übertragen wurden.
+  Nach Server-Neustarts oder neuer Server-Sitzung wird automatisch ein vollständiger Sync angefordert.
+
+- ⭐ Neue EEP-Funkktionaufruf-Analyse.
+  Mit `ControlExtension.setOptions({ eepCallAnalysis = { enabled = true, runs = 100 } })` kann eine begrenzte Messung der EEP-Aufrufe in `eep-call-analysis.json` geschrieben werden.
+
+- ⭐ Das Road-Modul nutzt nun Kreuzungsphasen und Ampelgruppen als zentrale Begriffe.
+  `IntersectionSwitching` wurde durch `TrafficPhase`/`IntersectionPhase` ersetzt; Ampelgruppen können mehrere sichtbare Ampeln und routenabhängige Fahrspurregeln bündeln.
+
+- ⭐ Gesicherter Straßenbahnübergang: `TramCrossing`.
+  `TramCrossing` zählt einfahrende und ausfahrende Straßenbahnen, speichert den Zustand am Signal und kann mehrere Signale sowie Sicherungsanzeigen gemeinsam schalten.
+
+- ⭐ Fahrspuren können mit `driveOnDefaultSignalGroups(...)`, `driveOnlyOnSignalGroups(...)`, `driveAlsoOnSignalGroups(...)` und `showRequestsOnSignalGroups(...)` konfiguriert werden.
+
+- ⭐ Das Transit-Modul unterstützt Messfahrten.
+  Fahrzeuge mit Tag `v=1` protokollieren Soll-/Ist-Abfahrten, Fahrzeiten, Standzeiten und übersprungene Stationen.
+
+- ⭐ Das Transit-Modul kann an Depot-Signalen wartende Fahrzeuge automatisch auf geänderte Routen prüfen und sie auf neue Strecken schicken.
+
+- ⭐ `Train` und `RollingStock` unterstützen getrennte Kennzeichen und Fahrzeugnummern über die Tag-Schlüssel `p` und `w`.
+
+### Behobene Fehler in v0.0.8-alpha
+
+- 🐞 Server-Tests speichern keinen Serverzustand mehr im `exchange`-Verzeichnis
+- 🐞 Alte `events-from-ce`-Dateien werden weiterhin nur verarbeitet, wenn sie ausdrücklich als pending markiert sind
+- 🐞 Ausgewählter Zug wird auch nach Lua-Neustarts in der Web-App aktualisiert
+- 🐞 Fehler beim Datei-I/O, beim Lesen eingehender Kommandos und beim Log-Schreiben werden robuster behandelt
+- 🐞 Die App leert die Loganzeige beim Neuladen zuverlässiger
+- 🐞 Demo-Anlage aus Tutorial 3 überschreiben `os` nicht mehr
+
+### Dokumentation in v0.0.8-alpha
+
+- 📖 Ampel- und Kreuzungstutorials wurden auf Ampelgruppen, Phasen und den neuen Kreuzungsassistenten angepasst
+- 📖 Road-, Hub-, Data-Bridge- und DTO-Dokumentation wurde für neue Routen-, Kreuzungs-, Signal- und Rollmaterialfelder aktualisiert
+- 📖 Entwicklerhinweise für Windows-Kommandos, Lua-Formatierung und Projektprüfungen wurden ergänzt

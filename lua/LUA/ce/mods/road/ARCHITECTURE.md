@@ -92,7 +92,7 @@ Zentrales Fachobjekt für eine Kreuzung und Haupt-Orchestrator der Verkehrslogik
 Verantwortlichkeiten:
 
 - Verwaltung aller Kreuzungen in `Intersection.allIntersections`
-- Halten von Phasen, Fahrspuren, Signalen, Signalgruppen, optionalen Kameras und einer optionalen Tipptext-Struktur
+- Halten von Phasen, Fahrspuren, Signalen, Ampelgruppen, optionalen Kameras und einer optionalen Tipptext-Struktur
 - Umschalten zwischen Automatikmodus, manueller Phase und strikter Reihenfolge
 - Berechnung der nächsten Phase über manuelle Vorgabe, Rundlauf oder Prioritätsvergleich
 - Planung der zeitlichen Schaltfolge über `Task` und `Scheduler`
@@ -125,7 +125,7 @@ Fachobjekt für eine Phase innerhalb einer Kreuzung.
 
 Verantwortlichkeiten:
 
-- Gruppierung von Signalgruppen nach Typ
+- Gruppierung von Ampelgruppen nach Typ
 - Ableitung der zugehörigen Fahrspuren aus den registrierten Ampeln
 - Vergleich alter und neuer Phase
 - Erzeugung des zeitlichen Umschaltplans
@@ -142,7 +142,7 @@ Aktueller Stand der Typen:
 
 - Definiert sind `BUS`, `CAR`, `TRAM`, `PEDESTRIAN` und `BICYCLE`
 - Im Kernpfad verwendet werden aktuell `CAR`, `TRAM` und `PEDESTRIAN`
-- Öffentlich befüllt wird eine Phase mit `TrafficPhase:addSignalGroup(...)`. Die Signalgruppen selbst werden über `SignalGroup:addVehicleSignals(...)`, `SignalGroup:addTramSignals(...)` und `SignalGroup:addPedestrianSignals(...)` aufgebaut.
+- Öffentlich befüllt wird eine Phase mit `TrafficPhase:addSignalGroup(...)`. Die Ampelgruppen selbst werden über `SignalGroup:addVehicleSignals(...)`, `SignalGroup:addTramSignals(...)` und `SignalGroup:addPedestrianSignals(...)` aufgebaut.
 
 ### [Lane.lua](./Lane.lua)
 
@@ -154,7 +154,7 @@ Verantwortlichkeiten:
 - Persistenz des Fahrspurzustands im Tipptext des Fahrspur-Signals
 - Ermittlung von Anforderungen über Kontaktpunkte, Signale oder reservierte Straßentracks
 - Berechnung von Fahrspurprioritäten für die Phasenwahl
-- Zuordnung zusätzlicher Anforderungs-Signalgruppen abhängig von Routen
+- Zuordnung zusätzlicher Anforderungs-Ampelgruppen abhängig von Routen
 - Spiegelung des Fahrzustands auf das eine EEP-Fahrspur-Signal `laneSignal`
 
 Wichtige Betriebsarten für Anforderungen:
@@ -206,7 +206,7 @@ Besonderheiten:
 
 - negative oder nicht nutzbare Signal-IDs werden intern auf eigene negative IDs abgebildet; diese Ampeln sind logisch verwaltet und schalten kein EEP-Signal
 - `lightStructures` und `axisStructures` ergänzen die eigentliche Signalsteuerung
-- `Lane:driveOnDefaultSignalGroups(...)`, `Lane:routes(...):driveOnlyOnSignalGroups(...)` und `Lane:routes(...):driveAlsoOnSignalGroups(...)` koppeln Fahrspuren an Freigabe-Signalgruppen
+- `Lane:driveOnDefaultSignalGroups(...)`, `Lane:routes(...):driveOnlyOnSignalGroups(...)` und `Lane:routes(...):driveAlsoOnSignalGroups(...)` koppeln Fahrspuren an Freigabe-Ampelgruppen
 - `driveOnDefaultSignalGroups(...)` setzt Standard-Freigaben; `driveAlsoOnSignalGroups(...)` ergänzt sie für benannte Routen; `driveOnlyOnSignalGroups(...)` ersetzt sie für benannte Routen
 - `routes(...)` muss mindestens eine Route enthalten
 - ältere direkte TrafficLight-Lane-APIs bleiben zur Kompatibilität erhalten und delegieren auf die Lane-API
@@ -373,7 +373,7 @@ Der reguläre Ablauf für eine automatisch geschaltete Kreuzung ist aktuell:
 
 1. Anwendercode erzeugt `TrafficLightModel`, `TrafficLight`, `Lane`, `TrafficPhase` und `Intersection`.
 2. `Lane:new(..., laneSignal, ...)` setzt das eine EEP-kontrollierende Fahrspur-Signal und lädt gespeicherten Zustand aus dessen Tipptext.
-3. Zusätzliche Freigabe-Signalgruppen werden optional über `driveOnDefaultSignalGroups(...)`, `routes(...):driveAlsoOnSignalGroups(...)` oder `routes(...):driveOnlyOnSignalGroups(...)` verdrahtet.
+3. Zusätzliche Freigabe-Ampelgruppen werden optional über `driveOnDefaultSignalGroups(...)`, `routes(...):driveAlsoOnSignalGroups(...)` oder `routes(...):driveOnlyOnSignalGroups(...)` verdrahtet.
 4. Phasen registrieren ihre Ampeln über `TrafficPhase:addSignalGroup(...)`.
 5. `CeRoadModule.init()` registriert Web-Anbindung und ruft `Intersection.initPhases()` auf.
 6. `Intersection.initPhases()` leitet aus allen Phasen die effektiven Fahrspuren und Ampeln je Kreuzung ab.
@@ -407,7 +407,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 
 `TrafficPhase` hält:
 
-- die zugeordneten Signalgruppen und logischen Signal-Head-Verwendungen mit Typ
+- die zugeordneten Ampelgruppen und logischen Signal-Head-Verwendungen mit Typ
 - die daraus abgeleiteten Fahrspuren in `lanes`
 - die zuletzt berechnete mittlere Priorität `prio`
 

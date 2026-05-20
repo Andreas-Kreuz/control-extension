@@ -89,7 +89,7 @@ local F6 = K7:withPedestrian("F6")
 -- Die Fahrspur N wird durch die Fahrspur-Ampel L1 (Signal ID 07) gesteuert
 -- K1 und K2 müssen später gleichzeitig leuchten (Signal ID 08, 15)
 n = Lane:new("N", L1)
--- Signalgruppen fuer N werden nach der Kreuzung angelegt
+-- Ampelgruppen fuer N werden nach der Kreuzung angelegt
 
 -- Die Fahrspur O1 wird durch die Fahrspur-Ampel K2 (Signal 09) gesteuert
 -- K4 muss später gleichzeitig leuchten (Signal ID 10)

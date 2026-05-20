@@ -87,7 +87,7 @@ insulate("ce.mods.road.SignalGroup", function ()
         local sgA = SignalGroup:new("sgLane1Straight"):addVehicleSignals(K1)
         local sgB = SignalGroup:new("sgLane1Right"):addVehicleSignals(K2)
 
-        local expectedError = "Wenn eine Fahrspur durch mehrere Signalgruppen gesteuert wird, " ..
+        local expectedError = "Wenn eine Fahrspur durch mehrere Ampelgruppen gesteuert wird, " ..
             "ben\246tigt sie eine unabh\228ngige Ampel - verwende eine eigene unsichtbare Ampel."
         assert.has_error(function ()
                              lane:driveOnDefaultSignalGroups(sgA, sgB)

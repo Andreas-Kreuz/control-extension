@@ -1,17 +1,17 @@
 # Ampelkreuzung
 
-Jede Ampelkreuzung besteht aus Fahrspuren und Fußgängerfurten.
-Ampeln regeln welche Fahrzeuge fahren und welche Fußgänger gehen dürfen.
+Jede Ampelkreuzung besteht aus Fahrspuren und FuÃŸgÃ¤ngerfurten.
+Ampeln regeln welche Fahrzeuge fahren und welche FuÃŸgÃ¤nger gehen dÃ¼rfen.
 
 ## Begriffe
 
 - **Ampel** / **Signal**:
 
-  _Eine Ampel regelt, wer fahren darf und kann rot, gelb oder grün sein. Eine Kreuzungsschaltung legt fest, welche Ampeln gleichzeitig grün sein dürfen. Für eine bestimmte **Fahrspur** / **Lane** können mehrere unterschiedliche Ampeln gelten. Ampeln können auch für mehrere Fahrspuren gelten._
+  _Eine Ampel regelt, wer fahren darf und kann rot, gelb oder grÃ¼n sein. Eine Kreuzungsschaltung legt fest, welche Ampeln gleichzeitig grÃ¼n sein dÃ¼rfen. FÃ¼r eine bestimmte **Fahrspur** / **Lane** kÃ¶nnen mehrere unterschiedliche Ampeln gelten. Ampeln kÃ¶nnen auch fÃ¼r mehrere Fahrspuren gelten._
 
-  _Jede Ampel gilt für eine bestimmte **Richtung**, z.B. nur für Links. Alle Ampeln, die an einer ankommenden Straße für die selbe Richtung gelten, müssen gleichzeitig geschaltet werden, d.h. alle Linksabbieger-Ampel gleichzeitig._
+  _Jede Ampel gilt fÃ¼r eine bestimmte **Richtung**, z.B. nur fÃ¼r Links. Alle Ampeln, die an einer ankommenden StraÃŸe fÃ¼r die selbe Richtung gelten, mÃ¼ssen gleichzeitig geschaltet werden, d.h. alle Linksabbieger-Ampel gleichzeitig._
 
-  _An jeder einzelnen Ampelkreuzung in Dresden werden die einzelnen Ampeln wie folgt markiert: Es gibt es eine Markierung aus Buchstaben ("B" für Bus, "K" für Kraftverkehr, "S" für Straßenbahn, "F" für Fußgänger) und Zahl 1 .. n. Ampeln können an diesen Markierungen F1, F2, ..., K1, K2, ... unterschieden werden._
+  _An jeder einzelnen Ampelkreuzung in Dresden werden die einzelnen Ampeln wie folgt markiert: Es gibt es eine Markierung aus Buchstaben ("B" fÃ¼r Bus, "K" fÃ¼r Kraftverkehr, "S" fÃ¼r StraÃŸenbahn, "F" fÃ¼r FuÃŸgÃ¤nger) und Zahl 1 .. n. Ampeln kÃ¶nnen an diesen Markierungen F1, F2, ..., K1, K2, ... unterschieden werden._
 
 - **Fahrspur** / **Lane**:
 
@@ -19,59 +19,59 @@ Ampeln regeln welche Fahrzeuge fahren und welche Fußgänger gehen dürfen.
 
   _Jede Fahrspur hat eine Fahrspur-Ampel, an der sich die Fahrzeuge anstellen. Dies ist die einzige Ampel, die den Verkehr der Fahrspur steuert._
 
-  _Jede Fahrspur hat mindestens eine **Richtung**, in der sie in einer gegenüberliegenden oder abbiegenden Straße mündet, z.B. Geradeaus, Rechts, Links._
+  _Jede Fahrspur hat mindestens eine **Richtung**, in der sie in einer gegenÃ¼berliegenden oder abbiegenden StraÃŸe mÃ¼ndet, z.B. Geradeaus, Rechts, Links._
 
-  _Im einfachen Fall gilt eine Ampel für alle Richtungen einer Fahrspur. Eine Fahrspur kann durch unterschiedliche **Ampeln** für mehrere **Richtungen** gesteuert werden, die dann nur für solche Fahrzeuge gelten, die in bestimmte Richtungen wollen. Das erste Fahrzeug in einer Fahrsprur kann fahren, wenn die für das Fahrzeug passende Ampel grün geschaltet wurde._
+  _Im einfachen Fall gilt eine Ampel fÃ¼r alle Richtungen einer Fahrspur. Eine Fahrspur kann durch unterschiedliche **Ampeln** fÃ¼r mehrere **Richtungen** gesteuert werden, die dann nur fÃ¼r solche Fahrzeuge gelten, die in bestimmte Richtungen wollen. Das erste Fahrzeug in einer Fahrsprur kann fahren, wenn die fÃ¼r das Fahrzeug passende Ampel grÃ¼n geschaltet wurde._
 
-- **Fußgängerampel** / **Pedestrian Light**:
+- **FuÃŸgÃ¤ngerampel** / **Pedestrian Light**:
 
-  _Eine Fußgängerampel regelt, ob ein Fußgänger die Straße überqueren darf und kann rot oder grün sein. Eine Kreuzungsschaltung legt fest, welche Fußgängerampeln gleichzeitig mit anderen Ampeln grün sein dürfen._
+  _Eine FuÃŸgÃ¤ngerampel regelt, ob ein FuÃŸgÃ¤nger die StraÃŸe Ã¼berqueren darf und kann rot oder grÃ¼n sein. Eine Kreuzungsschaltung legt fest, welche FuÃŸgÃ¤ngerampeln gleichzeitig mit anderen Ampeln grÃ¼n sein dÃ¼rfen._
 
-- **Fußgängerfurt** / **Pedestrian Crossing**:
+- **FuÃŸgÃ¤ngerfurt** / **Pedestrian Crossing**:
 
-  _Fußgänger dürfen Kreuzungen nur an einer Fußgängerfurt überqueren. Dies wird durch Fußgängerampeln geregelt._
+  _FuÃŸgÃ¤nger dÃ¼rfen Kreuzungen nur an einer FuÃŸgÃ¤ngerfurt Ã¼berqueren. Dies wird durch FuÃŸgÃ¤ngerampeln geregelt._
 
 - **Kreuzung** / **Crossing**
 
-  _An einer Kreuzung treffen mindestens zwei Straßen aufeinander. An einer Ampelkreuzung werden verschiedene Phasen genutzt, um den Verkehr zu steuern. Die Phasen folgen entweder nach Zeit aufeinander oder anhand des Verkehrsaufkommens. Eine Nachtschaltung kann optional eingeschaltet werden._
+  _An einer Kreuzung treffen mindestens zwei StraÃŸen aufeinander. An einer Ampelkreuzung werden verschiedene Phasen genutzt, um den Verkehr zu steuern. Die Phasen folgen entweder nach Zeit aufeinander oder anhand des Verkehrsaufkommens. Eine Nachtschaltung kann optional eingeschaltet werden._
 
 - **Phase** / **Circuit**
 
-  _Eine Phase ermöglicht das gleichzeitige Schalten mehrerer Ampeln für Fahrspuren und Fußgänderfurten. Dabei müssen zusammengehörende Richtungsampeln gleichzeitig geschaltet werden._
+  _Eine Phase ermÃ¶glicht das gleichzeitige Schalten mehrerer Ampeln fÃ¼r Fahrspuren und FuÃŸgÃ¤nderfurten. Dabei mÃ¼ssen zusammengehÃ¶rende Richtungsampeln gleichzeitig geschaltet werden._
 
-  _Eine Phase kann auch alle Ampeln einer Kreuzung für den Nachtbetrieb ausschalten oder gelb blinken lassen._
+  _Eine Phase kann auch alle Ampeln einer Kreuzung fÃ¼r den Nachtbetrieb ausschalten oder gelb blinken lassen._
 
 ## Ampelkreuzung in EEP
 
 ## Fahrspur in EEP
 
-Jede Fahrspur hat genau ein Signal, dass den Verkehr der Fahrspur steuert. Im einfachsten Fall ist das die Ampel, die den Verkehr für alle Richtungen steuert.
-Werden zusätzliche Ampeln genutzt, dann dürfen diese keinesfalls auf der selben Fahrspur stehen, da sonst die Steuerung nicht funktioniert. Stattdessen müssen diese auf der Gegenfahrbahn oder einer unsichtbaren Straße plaziert werden.
+Jede Fahrspur hat genau ein Signal, dass den Verkehr der Fahrspur steuert. Im einfachsten Fall ist das die Ampel, die den Verkehr fÃ¼r alle Richtungen steuert.
+Werden zusÃ¤tzliche Ampeln genutzt, dann dÃ¼rfen diese keinesfalls auf der selben Fahrspur stehen, da sonst die Steuerung nicht funktioniert. Stattdessen mÃ¼ssen diese auf der Gegenfahrbahn oder einer unsichtbaren StraÃŸe plaziert werden.
 
-Die Fahrzeuge eine Fahrspur können erkannt werden durch:
+Die Fahrzeuge eine Fahrspur kÃ¶nnen erkannt werden durch:
 
-- Zählen mit Kontaktpunkten (empfohlen)
-- Zählen am Signal - es wird das Signal der Fahrspur verwendet
-- Belegung der Straße
+- ZÃ¤hlen mit Kontaktpunkten (empfohlen)
+- ZÃ¤hlen am Signal - es wird das Signal der Fahrspur verwendet
+- Belegung der StraÃŸe
 
 ### Fahrspuren mit mehreren Ampeln
 
 Der Verkehr einer Fahrspur kann durch mehrere Ampeln gesteuert werden:
 
-- Neben der normalen Ampel gibt es eine Zusatz-Ampel nur für Rechtsabbieger
-- Auf einer Fahrspur für Straßenbahnen gibt es eine Ampel für linksabbiegende und eine Ampel für
-  geradeausfahrende Straßenbahnen
+- Neben der normalen Ampel gibt es eine Zusatz-Ampel nur fÃ¼r Rechtsabbieger
+- Auf einer Fahrspur fÃ¼r StraÃŸenbahnen gibt es eine Ampel fÃ¼r linksabbiegende und eine Ampel fÃ¼r
+  geradeausfahrende StraÃŸenbahnen
 
-Gelten mehrere Ampeln unterschiedlicher Richtungen für eine Fahrspur, dann muss die Fahrspur-Ampel ein unsichtbares Signal sein.
+Gelten mehrere Ampeln unterschiedlicher Richtungen fÃ¼r eine Fahrspur, dann muss die Fahrspur-Ampel ein unsichtbares Signal sein.
 
-In dem Fall darf das erste Fahrzeug immer dann Fahren, wenn eine für das Fahrzeug geltende Ampel grün anzeigt. Die Steuerung muss deshalb wissen, welche Ampel für das erste Fahrzeug gilt. Für die Erkennung welche der Ampeln für ein Fahrzeug gilt, kann die **Route** des Fahrzeugs genutzt werden. (_Geplant ist auch eine Erkennung anhand der Tags des ersten Fahrzeugs eines Zuges._)
+In dem Fall darf das erste Fahrzeug immer dann Fahren, wenn eine fÃ¼r das Fahrzeug geltende Ampel grÃ¼n anzeigt. Die Steuerung muss deshalb wissen, welche Ampel fÃ¼r das erste Fahrzeug gilt. FÃ¼r die Erkennung welche der Ampeln fÃ¼r ein Fahrzeug gilt, kann die **Route** des Fahrzeugs genutzt werden. (_Geplant ist auch eine Erkennung anhand der Tags des ersten Fahrzeugs eines Zuges._)
 
 ## Ampeln in EEP
 
-Eine Ampeln kann für mehrere Fahrspuren gelten
+Eine Ampeln kann fÃ¼r mehrere Fahrspuren gelten
 
-- für die komplette Fahrspur (alle Fahrzeuge können fahren) ODER
-- für einzelne Fahrzeuge der Fahrspur (nur wenn )
+- fÃ¼r die komplette Fahrspur (alle Fahrzeuge kÃ¶nnen fahren) ODER
+- fÃ¼r einzelne Fahrzeuge der Fahrspur (nur wenn )
 
 Eine Ampel kann geschaltet werden, wenn
 

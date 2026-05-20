@@ -727,7 +727,7 @@ function validateIntersectionWizardDraft(
         3,
         laneErrors,
         'approach',
-        `${lane.name || 'Fahrspur'}: Diese Zufahrt hat keine Signalgruppe.`,
+        `${lane.name || 'Fahrspur'}: Diese Zufahrt hat keine Ampelgruppe.`,
       );
     }
     if (assignedExistingGroups.length === 0) {
@@ -736,7 +736,7 @@ function validateIntersectionWizardDraft(
         3,
         laneErrors,
         'assignments',
-        `${lane.name || 'Fahrspur'}: Wähle mindestens eine Signalgruppe.`,
+        `${lane.name || 'Fahrspur'}: Wähle mindestens eine Ampelgruppe.`,
       );
     }
     if (
@@ -748,7 +748,7 @@ function validateIntersectionWizardDraft(
         3,
         laneErrors,
         'assignments',
-        `${lane.name || 'Fahrspur'}: Wähle bei mehreren Signalgruppen mindestens eine Standard-Signalgruppe.`,
+        `${lane.name || 'Fahrspur'}: Wähle bei mehreren Ampelgruppen mindestens eine Standard-Ampelgruppe.`,
       );
     }
     assignedExistingGroups.forEach(({ assignment }) => {
@@ -781,7 +781,7 @@ function validateIntersectionWizardDraft(
           3,
           laneErrors,
           'signalGroupSignalId',
-          `${lane.name || 'Fahrspur'}: Wähle ein Fahrspursignal aus einer zugeordneten Signalgruppe.`,
+          `${lane.name || 'Fahrspur'}: Wähle ein Fahrspursignal aus einer zugeordneten Ampelgruppe.`,
         );
       }
     } else {
@@ -820,7 +820,7 @@ function validateIntersectionWizardDraft(
     owners.forEach((owner) => {
       const otherOwner = owners.find((candidate) => candidate !== owner);
       const otherText = otherOwner?.signalGroupName
-        ? `${otherOwner.label} in Signalgruppe ${otherOwner.signalGroupName}`
+        ? `${otherOwner.label} in Ampelgruppe ${otherOwner.signalGroupName}`
         : (otherOwner?.label ?? 'eine andere Ampel');
       addValidationError(
         validation,
@@ -840,7 +840,7 @@ function validateIntersectionWizardDraft(
         owner.stepIndex,
         owner.target,
         owner.field,
-        `Ampelname "${owner.label}" wird hier und für ${otherOwner?.label ?? 'eine andere Ampel'} in Signalgruppe ${
+        `Ampelname "${owner.label}" wird hier und für ${otherOwner?.label ?? 'eine andere Ampel'} in Ampelgruppe ${
           otherOwner?.signalGroupName ?? 'einer anderen Ampelgruppe'
         } definiert.`,
       );
@@ -2270,7 +2270,7 @@ function IntersectionCreateWizard() {
                         })
                       }
                     >
-                      <MenuItem value="DEFAULT">Standard-Signalgruppe</MenuItem>
+                      <MenuItem value="DEFAULT">Standard-Ampelgruppe</MenuItem>
                       <MenuItem value="ONLY">Nur bei diesen Routen fahren</MenuItem>
                       <MenuItem value="ALSO">Auch bei diesen Routen fahren</MenuItem>
                     </Select>
@@ -2330,7 +2330,7 @@ function IntersectionCreateWizard() {
         <Stack spacing={2} sx={{ bgcolor: 'grey.50', p: 1.5, borderRadius: 1 }}>
           {validApproaches.length === 0 && (
             <FeedbackMessage severity="warning">
-              Lege zuerst mindestens eine Fahrzeug- oder Tram/Bus-Signalgruppe an.
+              Lege zuerst mindestens eine Fahrzeug- oder Tram/Bus-Ampelgruppe an.
             </FeedbackMessage>
           )}
           {validApproaches.length > 0 && draft.lanes.length === 0 && (
@@ -2406,7 +2406,7 @@ function IntersectionCreateWizard() {
                       label="Zufahrt"
                       value={lane.approach}
                       size="small"
-                      infoText="Nur Richtungen mit Signalgruppen können genutzt werden."
+                      infoText="Nur Richtungen mit Ampelgruppen können genutzt werden."
                       errorTexts={laneErrors.approach}
                       renderValue={(value) => <Approach approach={value} />}
                       onChange={(approach) => {
@@ -2441,7 +2441,7 @@ function IntersectionCreateWizard() {
                   </Stack>
                   {selectedAssignments.length > 1 && !hasDefault && (
                     <FeedbackMessage severity={laneErrors.assignments?.length ? 'error' : 'warning'}>
-                      Bei mehreren Signalgruppen muss mindestens eine Standard-Signalgruppe gewählt werden.
+                      Bei mehreren Ampelgruppen muss mindestens eine Standard-Ampelgruppe gewählt werden.
                     </FeedbackMessage>
                   )}
                   <Stack spacing={1} sx={{ pt: 1 }}>
@@ -2491,7 +2491,7 @@ function IntersectionCreateWizard() {
                           '&.Mui-selected, &.Mui-selected:hover': selectedSignalGroupSx,
                         }}
                       >
-                        Aus Signalgruppe
+                        Aus Ampelgruppe
                       </ToggleButton>
                     </ToggleButtonGroup>
                     <Box sx={{ pt: 1 }}>{renderLaneSignalFields(lane)}</Box>

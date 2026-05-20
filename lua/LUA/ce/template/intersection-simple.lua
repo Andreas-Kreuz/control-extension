@@ -71,7 +71,7 @@ crossing = Intersection:new("Dein Kreuzungsname")
 lane1 = Lane:new("Lane 1 N", K1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
 lane2 = Lane:new("Lane 2 S", K2, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
 
--- Lege Signalgruppen und Phasen an
+-- Lege Ampelgruppen und Phasen an
 local sgK1Vehicle = crossing:newSignalGroup("sgK1Vehicle"):addVehicleSignals(K1)
 local sgK2Vehicle = crossing:newSignalGroup("sgK2Vehicle"):addVehicleSignals(K2)
 local sgK1Pedestrian = crossing:newSignalGroup("sgK1Pedestrian"):addPedestrianSignals(K1)

@@ -143,7 +143,7 @@ function assignmentKey(laneId: string, routeName: string): string {
 function IntersectionLaneSignalGroupDndExample() {
   const [assignments, setAssignments] = useState(initialAssignments);
   const [selectedRouteName, setSelectedRouteName] = useState('');
-  const [message, setMessage] = useState('Signalgruppe ziehen und auf eine Fahrspur fallen lassen.');
+  const [message, setMessage] = useState('Ampelgruppe ziehen und auf eine Fahrspur fallen lassen.');
 
   const lanesById = useMemo(() => new Map(lanes.map((lane) => [lane.id, lane])), []);
   const signalGroupsById = useMemo(() => new Map(signalGroups.map((signalGroup) => [signalGroup.id, signalGroup])), []);
@@ -234,7 +234,7 @@ function IntersectionLaneSignalGroupDndExample() {
                   <LaneTitle lane={lane} />
                   {laneAssignments.length === 0 ? (
                     <Typography variant="body2" color="text.secondary">
-                      Keine Signalgruppe
+                      Keine Ampelgruppe
                     </Typography>
                   ) : (
                     <Stack spacing={0.75}>
@@ -278,7 +278,7 @@ function IntersectionLaneSignalGroupDndExample() {
 
         <Paper variant="outlined" sx={{ p: 2, width: { xs: 1, lg: 360 } }}>
           <Typography variant="h6" sx={{ mb: 1 }}>
-            Signalgruppen
+            Ampelgruppen
           </Typography>
           <Stack spacing={1}>
             {signalGroups.map((signalGroup) => (

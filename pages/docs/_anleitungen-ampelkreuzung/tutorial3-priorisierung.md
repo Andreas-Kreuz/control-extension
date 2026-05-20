@@ -14,7 +14,7 @@ published: false
 
 **Voraussetzungen:**
 
-- [Anleitung "Ampelkreuzung automatisch steuern"](ampelkreuzung) - fange hier an, um zu erfahren, was Kreuzung, Phase, Signalgruppe und Fahrspur bedeuten.
+- [Anleitung "Ampelkreuzung automatisch steuern"](ampelkreuzung) - fange hier an, um zu erfahren, was Kreuzung, Phase, Ampelgruppe und Fahrspur bedeuten.
 
 # Beispielanlage öffnen
 
