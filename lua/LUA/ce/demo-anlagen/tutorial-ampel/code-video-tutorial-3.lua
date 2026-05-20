@@ -104,9 +104,9 @@ w1 = Lane:new("W1", K5)
 w2 = Lane:new("W2", K6)
 
 -- Fahrspuren fuer Strassenbahnen:
-os = Lane:new("OS", S1)
+ost = Lane:new("OS", S1)
 -- requests are shown after signal groups are configured
-os:useSignalForQueue() -- Erfasst Anforderungen, wenn ein Fahrzeug an Signal 14 steht
+ost:useSignalForQueue() -- Erfasst Anforderungen, wenn ein Fahrzeug an Signal 14 steht
 
 ws = Lane:new("WS", S2)
 -- requests are shown after signal groups are configured
@@ -131,7 +131,7 @@ local sgPedEast = k1:newSignalGroup("sgPedEast"):addPedestrianSignals(F3, F4)
 local sgPedWest = k1:newSignalGroup("sgPedWest"):addPedestrianSignals(F5, F6)
 n:driveOnDefaultSignalGroups(sgLaneNorth)
 n:routes("Rechtsabbieger"):driveAlsoOnSignalGroups(sgLaneNorthRight)
-os:showRequestsOnSignalGroups(sgTramEastWest)
+ost:showRequestsOnSignalGroups(sgTramEastWest)
 ws:showRequestsOnSignalGroups(sgTramWestEast)
 
 --- Tutorial 2: Phase 1
