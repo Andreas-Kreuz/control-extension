@@ -70,7 +70,7 @@ const groups = [
       { name: 'test:lua', description: 'Lua-Tests mit busted schnell ohne Coverage ausführen' },
       { name: 'test:lua:coverage', description: 'Lua-Tests mit busted und Coverage ausführen' },
       { name: 'test:server', description: 'Server-Tests nach TypeScript-Build ausführen' },
-      { name: 'test:app', description: 'Web-App-E2E-Tests headless ausführen' },
+      { name: 'test:app', description: 'Web-App-E2E-Tests headless ausführen; Cypress-Args per -- weitergeben' },
       { name: 'test:app:ui', description: 'Interaktive Cypress-E2E-Umgebung starten' },
       { name: 'test:docs', description: 'Jekyll-Doku zur Validierung bauen' },
       { name: 'test:web', description: 'Server-Tests und Web-App-E2E-Tests ausführen' },
