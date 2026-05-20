@@ -4,12 +4,14 @@ local Queue = require("ce.hub.util.Queue")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local fmt = require("ce.hub.eep.TippTextFormatter")
+local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
 -- Lane starts here
 local Lane = {}
 Lane.debug = CeStartWithDebug or false
 local RouteDriveMode = { ONLY = "ONLY", ALSO = "ALSO" }
 local ROUTE_WILDCARD = "!ALL!"
+local DEFAULT_ROUTE = "Alle"
 
 ---@type table<string, LaneRequestType>
 Lane.RequestType = {
@@ -94,6 +96,17 @@ local EEPRegisterRoadTrack = EEPRegisterRoadTrack
 local EEPIsRoadTrackReserved = EEPIsRoadTrackReserved
 local EEPGetSignalTrainsCount = EEPGetSignalTrainsCount
 local EEPGetSignalTrainName = EEPGetSignalTrainName
+local function routeForTrain(trainName)
+    local train = TrainRegistry.find(trainName)
+    if train then
+        local route = train:getRoute()
+        if route and route ~= "" then return route end
+    end
+
+    local ok, route = EEPGetTrainRoute(trainName)
+    if ok then return route end
+    return DEFAULT_ROUTE
+end
 
 ---If trainname is provided, this function will add the train to the lane's queue
 ---@param lane Lane the current lane, where the correction will take place
@@ -120,8 +133,7 @@ local function addTrainToQueue(lane, trainName)
         end
     end
     if lane.queue:size() == 1 then
-        local _, route = EEPGetTrainRoute(lane.queue:firstElement())
-        lane.firstVehiclesRoute = route
+        lane.firstVehiclesRoute = routeForTrain(lane.queue:firstElement())
     end
 end
 
@@ -175,8 +187,7 @@ local function popTrainFromQueue(lane, trainName)
         end
     end
     if not lane.queue:isEmpty() then
-        local _, route = EEPGetTrainRoute(lane.queue:firstElement())
-        lane.firstVehiclesRoute = route
+        lane.firstVehiclesRoute = routeForTrain(lane.queue:firstElement())
     else
         lane.firstVehiclesRoute = "NO VEHICLE"
     end
@@ -251,8 +262,7 @@ local function load(lane)
     updateLaneSignal(lane, "Neu geladen")
 
     if not lane.queue:isEmpty() then
-        local _, route = EEPGetTrainRoute(lane.queue:firstElement())
-        lane.firstVehiclesRoute = route
+        lane.firstVehiclesRoute = routeForTrain(lane.queue:firstElement())
     end
 end
 
@@ -264,8 +274,8 @@ local function refreshRequests(lane)
         local hasDefaultRouteRequest = false
         local carsInQueue = not queue:isEmpty()
         for _, car in ipairs(queue:elements()) do
-            local _, route = EEPGetTrainRoute(car)
-            queuedRoutes[route] = true
+            local route = routeForTrain(car)
+            if route then queuedRoutes[route] = true end
             local routeRules = Lane.effectiveRouteDriveRules(lane, route)
             if not (routeRules and routeRules[RouteDriveMode.ONLY]) then hasDefaultRouteRequest = true end
         end
@@ -338,7 +348,7 @@ function Lane:getVehicleCountRoutes(routes)
         count = self.vehicleCount
     else
         for i, vehicleName in pairs(self.queue:elements()) do
-            local _, trainRoute = EEPGetTrainRoute(vehicleName)
+            local trainRoute = routeForTrain(vehicleName)
             local routeMatches = false
             for _, route in pairs(routes) do
                 if route == trainRoute then

@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.DepotSignalRegistry ...") end
 
-local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local Signal = require("ce.hub.data.signals.Signal")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")
@@ -8,7 +9,9 @@ local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegi
 local DepotSignalRegistry = {}
 local depotSignalIds = {}
 local releasePositionsBySignalId = {}
+local interestedTrainBySignalId = {}
 local defaultReleasePosition = 2
+local INTEREST_SOURCE_PREFIX = "ce.mods.transit.DepotSignalRegistry:"
 
 local function isReleaseFunction(signalFunction)
     local numericFunction = tonumber(signalFunction)
@@ -35,27 +38,6 @@ local function normalizeSignalId(signalId)
     return numericSignalId
 end
 
-local function ensureOptionPath(options, ...)
-    local current = options
-    for i = 1, select("#", ...) do
-        local key = select(i, ...)
-        current[key] = current[key] or {}
-        current = current[key]
-    end
-    return current
-end
-
-local function forceHubOptions()
-    local options = HubOptionsRegistry.getAllOptions()
-    local trainFieldUpdates = ensureOptionPath(options, "ceTypes", "trains", "fieldUpdates")
-    trainFieldUpdates.route = "always"
-
-    local waitingFieldUpdates = ensureOptionPath(options, "ceTypes", "waitingOnSignals", "fieldUpdates")
-    waitingFieldUpdates.vehicleName = "always"
-
-    HubOptionsRegistry.setOptions(options)
-end
-
 function DepotSignalRegistry.register(...)
     local signalIds = { ... }
     for i = 1, #signalIds do
@@ -65,7 +47,6 @@ function DepotSignalRegistry.register(...)
         WaitingOnSignalRegistry.watchSignal(signalId)
         if not SignalRegistry.has(signalId) then SignalRegistry.add(Signal:new(signalId)) end
     end
-    if #signalIds > 0 then forceHubOptions() end
 end
 
 function DepotSignalRegistry.getAll()
@@ -86,8 +67,35 @@ function DepotSignalRegistry.getReleasePosition(signalId)
     return releasePositionsBySignalId[signalId] or defaultReleasePosition
 end
 
-function DepotSignalRegistry.forceHubOptions()
-    if DepotSignalRegistry.hasAny() then forceHubOptions() end
+function DepotSignalRegistry.updateRouteInterests()
+    local waitingEntries = {}
+
+    for signalId in pairs(depotSignalIds) do
+        local waitingCount = EEPGetSignalTrainsCount(signalId) or 0
+        local trainName = waitingCount > 0 and EEPGetSignalTrainName(signalId, 1) or nil
+        local previousTrainName = interestedTrainBySignalId[signalId]
+        local interestSource = INTEREST_SOURCE_PREFIX .. tostring(signalId)
+
+        if previousTrainName and previousTrainName ~= trainName then
+            InterestSyncRegistry.stopSyncForSource(HubCeTypes.Train, previousTrainName, interestSource)
+        end
+
+        if trainName and trainName ~= "" then
+            InterestSyncRegistry.startSyncForSource(HubCeTypes.Train, trainName, interestSource)
+            interestedTrainBySignalId[signalId] = trainName
+            waitingEntries[#waitingEntries + 1] = {
+                id = tostring(signalId) .. "-1",
+                signalId = signalId,
+                waitingPosition = 1,
+                vehicleName = trainName,
+                waitingCount = waitingCount
+            }
+        else
+            interestedTrainBySignalId[signalId] = nil
+        end
+    end
+
+    WaitingOnSignalRegistry.setForSignals(waitingEntries, depotSignalIds)
 end
 
 return DepotSignalRegistry

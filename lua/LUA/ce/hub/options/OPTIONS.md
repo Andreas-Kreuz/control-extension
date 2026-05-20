@@ -53,9 +53,34 @@ Signalbezogene Wartedaten werden standardmäßig nur bei Interesse mit echten We
 - `ceTypes.waitingOnSignals.fieldPublish.waitingPosition = "oninterest"`
 - `ceTypes.waitingOnSignals.fieldPublish.vehicleName = "oninterest"`
 - `ceTypes.waitingOnSignals.fieldPublish.waitingCount = "oninterest"`
+- `ceTypes.trains.fieldUpdates.route = "always"`: `TrainUpdater` aktualisiert Routen gedrosselt alle 10
+  Durchläufe und zusätzlich in jedem Durchlauf für ausgewählte Züge.
 
 Nicht ausgewählte vollständige DTOs enthalten dafür Platzhalterwerte. Patch-DTOs für nicht ausgewählte
 `ce.hub.WaitingOnSignal`-Einträge lassen diese Felder weg, wenn nur On-Interest-Felder geändert wurden.
+
+Depot-Signale registrieren wartende Fahrzeuge zusätzlich selbst als Train-Interest, damit deren Route während des
+Wartens in jedem Durchlauf aktualisiert wird. `ceTypes.trains.fieldUpdates.route` sollte nicht auf `oninterest`
+gesetzt werden, weil mehrere Module eine zeitnah aktualisierte Route auch ohne explizite UI-Auswahl benötigen.
+
+## EEP-Call-Analyse
+
+Die EEP-Call-Analyse ist standardmäßig deaktiviert. Bei Bedarf kann sie für eine begrenzte Anzahl von
+`ControlExtension.runTasks(...)`-Aufrufen aktiviert werden:
+
+```lua
+ControlExtension.setOptions({
+    eepCallAnalysis = {
+        enabled = true,
+        runs = 100,
+    },
+})
+```
+
+Nach dem letzten Lauf schreibt Control Extension `eep-call-analysis.json` in das DataBridge-Austauschverzeichnis.
+Die Datei enthält Gesamtzahlen und Einzelzahlen für EEP-Methodenaufrufe, EEP-Callbacks und die Teilmenge der
+EEP-Methodenaufrufe während `Discovery...`- und `Discovery-init...`-Phasen. Zusätzlich enthält `stackTraces`
+aggregierte Aufrufstellen mit Zählern pro EEP-Funktion und Callback.
 
 ## Legacy
 

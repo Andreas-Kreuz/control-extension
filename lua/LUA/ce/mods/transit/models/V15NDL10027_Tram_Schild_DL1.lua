@@ -1,5 +1,6 @@
 local TransitSettings = require("ce.mods.transit.TransitSettings")
 local RoadStationTippHelper = require("ce.hub.util.RoadStationTippHelper")
+local StructureTextureTextCache = require("ce.mods.transit.models.StructureTextureTextCache")
 
 -- V15NDL10027 - Texturierbare Zielanzeigen für Haltestellen
 local Tram_Schild_DL1 = {}
@@ -12,8 +13,9 @@ Tram_Schild_DL1.initStation = function (displayStructure, stationName, platform)
     assert(type(stationName) == "string", "Need 'stationName' as string")
     assert(type(platform) == "string", "Need 'platform' as string")
 
-    EEPStructureSetTextureText(displayStructure, 21, stationName)
-    EEPStructureSetTextureText(displayStructure, 24, "Steig " .. platform)
+    StructureTextureTextCache.reset(displayStructure)
+    StructureTextureTextCache.set(displayStructure, 21, stationName)
+    StructureTextureTextCache.set(displayStructure, 24, "Steig " .. platform)
 end
 
 Tram_Schild_DL1.displayEntries = function (displayStructure, stationQueueEntries, stationName, platform)
@@ -29,11 +31,11 @@ Tram_Schild_DL1.displayEntries = function (displayStructure, stationQueueEntries
         local offset = (i - 1) * 4
         ---@type StationQueueEntry
         local entry = stationQueueEntries[i]
-        EEPStructureSetTextureText(displayStructure, offset + 1, entry and entry.line or "")
-        EEPStructureSetTextureText(displayStructure, offset + 2, entry and entry.destination or "")
-        EEPStructureSetTextureText(displayStructure, offset + 3,
-                                   (entry and entry.timeInMinutes > 0) and tostring(entry.timeInMinutes) or "")
-        EEPStructureSetTextureText(displayStructure, offset + 4, (entry and entry.timeInMinutes > 0) and "min" or "")
+        StructureTextureTextCache.set(displayStructure, offset + 1, entry and entry.line or "")
+        StructureTextureTextCache.set(displayStructure, offset + 2, entry and entry.destination or "")
+        StructureTextureTextCache.set(displayStructure, offset + 3,
+                                      (entry and entry.timeInMinutes > 0) and tostring(entry.timeInMinutes) or "")
+        StructureTextureTextCache.set(displayStructure, offset + 4, (entry and entry.timeInMinutes > 0) and "min" or "")
 
         table.insert(text, RoadStationTippHelper.getEntry(entry))
     end

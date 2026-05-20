@@ -30,7 +30,7 @@ local function createSignalGroupDto(signalGroup)
     return {
         name = signalGroup.name,
         scriptVariableName = optionalValueFromGetterOrField(signalGroup, "getScriptVariableName",
-                                                        "_scriptVariableName"),
+                                                            "_scriptVariableName"),
         approach = optionalValueFromGetterOrField(signalGroup, "getApproach", "approach"),
         turnDirections = optionalValueFromGetterOrField(signalGroup, "getTurnDirections", "turnDirections"),
         trafficType = trafficType,

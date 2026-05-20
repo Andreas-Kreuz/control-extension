@@ -32,15 +32,15 @@ insulate("ce.hub.data.scenario.ScenarioDiscovery", function ()
 
     it("discovers static and dynamic cameras from anl3", function ()
         local ScenarioDiscovery = discoverScenario(table.concat({
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            "<sutrackp>",
-            '<Kammerasammlung cnt="3">',
-            '<Kammera name="Bahnhof" Dynamic="0"/>',
-            '<Kammera name="Fahrtwind" Dynamic="1"/>',
-            '<Kammera name="Leer" Dynamic="0"/>',
-            "</Kammerasammlung>",
-            "</sutrackp>"
-        }, ""))
+                                                                    '<?xml version="1.0" encoding="UTF-8"?>',
+                                                                    "<sutrackp>",
+                                                                    '<Kammerasammlung cnt="3">',
+                                                                    '<Kammera name="Bahnhof" Dynamic="0"/>',
+                                                                    '<Kammera name="Fahrtwind" Dynamic="1"/>',
+                                                                    '<Kammera name="Leer" Dynamic="0"/>',
+                                                                    "</Kammerasammlung>",
+                                                                    "</sutrackp>"
+                                                                }, ""))
 
         assert.same({ "Bahnhof" }, ScenarioDiscovery.getStaticCameras())
         assert.same({ "Fahrtwind" }, ScenarioDiscovery.getDynamicCameras())

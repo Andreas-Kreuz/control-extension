@@ -157,7 +157,7 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
             local serverIsReadyOk, nextServerIsReady = runProtectedTimed("MainLoopRunner.runCycle-6-waitForServer",
                                                                          function ()
                                                                              return ServerExchangeCoordinator
-                                                                             .isServerReady()
+                                                                                 .isServerReady()
                                                                          end)
             serverIsReady = serverIsReadyOk and nextServerIsReady == true
         end

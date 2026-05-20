@@ -7,6 +7,15 @@ local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
 local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 local TrainUpdater = {}
 TrainUpdater.debug = CeStartWithDebug or false
+local routeUpdateRunCount = 0
+local routeUpdateInterval = 10
+
+local function shouldUpdateRoute(fieldPolicies, isSelected, SyncPolicy)
+    local policy = SyncPolicy.getFieldPolicy(fieldPolicies, "route")
+    if policy == "never" then return false end
+    if isSelected then return true end
+    return policy == "always" and routeUpdateRunCount % routeUpdateInterval == 0
+end
 
 function TrainUpdater.runUpdate()
     local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
@@ -22,7 +31,7 @@ function TrainUpdater.runUpdate()
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Train, tostring(train.id or train.name or ""))
         if TrainUpdater.debug then print(string.format("[#TrainUpdater] updating train %s", trainName)) end
 
-        if SyncPolicy.shouldUpdateField(fieldPolicies, "route", isSelected) then
+        if shouldUpdateRoute(fieldPolicies, isSelected, SyncPolicy) then
             local routeOk, routeName = EEPGetTrainRoute(train.name)
             if routeOk then train:updateRoute(routeName or "") end
         end
@@ -66,6 +75,8 @@ function TrainUpdater.runUpdate()
             train:setTrackType(info.trackType)
         end
     end
+
+    routeUpdateRunCount = routeUpdateRunCount + 1
 end
 
 return TrainUpdater

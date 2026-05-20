@@ -242,6 +242,9 @@ insulate("axis and texture metadata", function ()
         local lengthCalls = 0
         local motorCalls = 0
         local modelTypeCalls = 0
+        local tagCalls = 0
+        local hookCalls = 0
+        local hookGlueCalls = 0
         local orientationCalls = 0
         local smokeCalls = 0
         local lengthStub = stub(_G, "EEPRollingstockGetLength", function ()
@@ -256,6 +259,18 @@ insulate("axis and texture metadata", function ()
             modelTypeCalls = modelTypeCalls + 1
             return true, 8
         end)
+        local tagStub = stub(_G, "EEPRollingstockGetTagText", function ()
+            tagCalls = tagCalls + 1
+            return true, "p=DD CE 42,"
+        end)
+        local hookStub = stub(_G, "EEPRollingstockGetHook", function ()
+            hookCalls = hookCalls + 1
+            return true, 1
+        end)
+        local hookGlueStub = stub(_G, "EEPRollingstockGetHookGlue", function ()
+            hookGlueCalls = hookGlueCalls + 1
+            return true, 1
+        end)
         local orientationStub = stub(_G, "EEPRollingstockGetOrientation", function ()
             orientationCalls = orientationCalls + 1
             return true, not initialOrientationForward
@@ -268,6 +283,9 @@ insulate("axis and texture metadata", function ()
             lengthStub:revert()
             motorStub:revert()
             modelTypeStub:revert()
+            tagStub:revert()
+            hookStub:revert()
+            hookGlueStub:revert()
             orientationStub:revert()
             smokeStub:revert()
         end)
@@ -277,6 +295,9 @@ insulate("axis and texture metadata", function ()
         assert.equals(0, lengthCalls)
         assert.equals(0, motorCalls)
         assert.equals(0, modelTypeCalls)
+        assert.equals(0, tagCalls)
+        assert.equals(0, hookCalls)
+        assert.equals(0, hookGlueCalls)
         assert.equals(0, orientationCalls)
         assert.equals(0, smokeCalls)
         assert.equals(5, stock:getLength())
@@ -291,11 +312,17 @@ insulate("axis and texture metadata", function ()
         assert.equals(1, lengthCalls)
         assert.equals(1, motorCalls)
         assert.equals(1, modelTypeCalls)
+        assert.equals(1, tagCalls)
+        assert.equals(1, hookCalls)
+        assert.equals(1, hookGlueCalls)
         assert.equals(1, orientationCalls)
         assert.equals(1, smokeCalls)
         assert.equals(12, stock:getLength())
         assert.is_true(stock:getPropelled())
         assert.equals(8, stock:getModelType())
+        assert.equals("DD CE 42", stock:getLicencePlate())
+        assert.equals(1, stock:getHookStatus())
+        assert.equals(1, stock:getHookGlueMode())
         assert.equals(not initialOrientationForward, stock:getOrientationForward())
         assert.equals(1, stock:getSmoke())
 
@@ -305,6 +332,8 @@ insulate("axis and texture metadata", function ()
 
     it("updates only exposed rolling stock couplings in multi-stock trains", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
         local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
@@ -338,16 +367,30 @@ insulate("axis and texture metadata", function ()
 
         RollingStockUpdater.runUpdate()
 
+        assert.is_nil(frontCalls.CouplingFront)
+        assert.is_nil(frontCalls.CouplingMiddle)
+        assert.is_nil(frontCalls.CouplingRear)
+        assert.is_nil(rearCalls.CouplingFront)
+        assert.is_nil(rearCalls.CouplingMiddle)
+        assert.is_nil(rearCalls.CouplingRear)
+
+        InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "CouplingFront")
+        InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "CouplingRear")
+        RollingStockUpdater.runUpdate()
+
         assert.equals(1, frontCalls.CouplingFront)
         assert.is_nil(frontCalls.CouplingMiddle)
         assert.is_nil(frontCalls.CouplingRear)
         assert.is_nil(rearCalls.CouplingFront)
         assert.is_nil(rearCalls.CouplingMiddle)
         assert.equals(1, rearCalls.CouplingRear)
+        InterestSyncRegistry.clearAll()
     end)
 
     it("updates both couplings for single-stock trains", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
         local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
@@ -375,8 +418,15 @@ insulate("axis and texture metadata", function ()
 
         RollingStockUpdater.runUpdate()
 
+        assert.is_nil(frontCalls.SingleCouplingStock)
+        assert.is_nil(rearCalls.SingleCouplingStock)
+
+        InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "SingleCouplingStock")
+        RollingStockUpdater.runUpdate()
+
         assert.equals(1, frontCalls.SingleCouplingStock)
         assert.equals(1, rearCalls.SingleCouplingStock)
+        InterestSyncRegistry.clearAll()
     end)
 end)
 

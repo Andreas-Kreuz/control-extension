@@ -174,7 +174,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         currentPhase = "", -- oninterest, never selected
                         manualPhase = "",  -- oninterest, never selected
                         nextPhase = "",    -- oninterest, never selected
-                        ready = false,         -- oninterest, never selected
+                        ready = false,     -- oninterest, never selected
                         greenTimeSeconds = 15,
                         switchInStrictOrder = false,
                         staticCams = { "Cam 1" },
@@ -225,9 +225,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         ceType = "ce.mods.road.Intersection",
                         id = 1,
                         name = "A",
-            eepSaveId = 77,
-            scriptVariableName = "c1",
-            currentPhase = "P1",
+                        eepSaveId = 77,
+                        scriptVariableName = "c1",
+                        currentPhase = "P1",
                         manualPhase = "P2",
                         nextPhase = "P3",
                         ready = true,
@@ -446,9 +446,9 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                                                                         [1] = {
                                                                             id = 1,
                                                                             name = "A",
-            eepSaveId = 77,
-            scriptVariableName = "c1",
-            currentPhase = "P1",
+                                                                            eepSaveId = 77,
+                                                                            scriptVariableName = "c1",
+                                                                            currentPhase = "P1",
                                                                             manualPhase = "P2",
                                                                             nextPhase = "P3",
                                                                             ready = true,

@@ -186,7 +186,6 @@ function Intersection:withStorage(eepSaveId)
     return self
 end
 
-
 function Intersection:setScriptVariableName(scriptVariableName)
     self._scriptVariableName = scriptVariableName
     save(self)

@@ -22,7 +22,7 @@ function IntersectionSettings.loadSettingsFromSlot(eepSaveId)
     IntersectionSettings.showRequestsOnSignal = loadBoolean(data, "reqInfo", IntersectionSettings.showRequestsOnSignal)
     IntersectionSettings.showPhaseOnSignal = loadBoolean(data, "seqInfo", IntersectionSettings.showPhaseOnSignal)
     IntersectionSettings.showModelInfoOnSignal = loadBoolean(data, "modelInfo",
-        IntersectionSettings.showModelInfoOnSignal)
+                                                             IntersectionSettings.showModelInfoOnSignal)
     IntersectionSettings.showLaneNamesOnSignal = loadBoolean(data, "laneNameInfo",
                                                              IntersectionSettings.showLaneNamesOnSignal)
     IntersectionSettings.showNameAndPhaseOnSignal = loadBoolean(data, "nameSeqInfo",

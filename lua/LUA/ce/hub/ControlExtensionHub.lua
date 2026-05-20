@@ -6,6 +6,7 @@ local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
 local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 local ServerTransportRegistry = require("ce.databridge.ServerTransportRegistry")
+local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
 
 local ControlExtensionHub = {}
 ControlExtensionHub.debug = CeStartWithDebug or false
@@ -41,6 +42,9 @@ function ControlExtensionHub.setOptions(options)
     if options.pauseEepDuringInitialization ~= nil then
         ControlExtensionHub.setPauseEepDuringInitialization(options.pauseEepDuringInitialization)
     end
+    if options.eepCallAnalysis ~= nil then
+        EepCallAnalyzer.configure(options.eepCallAnalysis)
+    end
 
     local CeHubModule = require("ce.hub.CeHubModule")
     if options.anl3path ~= nil then
@@ -62,6 +66,7 @@ function ControlExtensionHub.runTasks(cycleCount)
     local effectiveCycleCount = type(cycleCount) == "number" and cycleCount or 5
     local resumeEEP = false
 
+    EepCallAnalyzer.beginRun()
     local ok, totalTime = ProtectedExecution.run("ControlExtensionHub.runTasks", function ()
         if not MainLoopRunner.areModulesInitialized() and ControlExtensionHub.pauseEepDuringInitialization then
             if ControlExtensionHub.debug then print("[ControlExtensionHub] Pause EEP during initialization") end
@@ -81,6 +86,7 @@ function ControlExtensionHub.runTasks(cycleCount)
         end
         ProtectedExecution.run("ControlExtensionHub.resumeEEP", EEPPause, 0)
     end
+    EepCallAnalyzer.endRun()
 
     if not ok then return nil end
 

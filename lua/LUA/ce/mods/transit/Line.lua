@@ -122,15 +122,7 @@ function Line.setTrainSection(trainName, section)
 end
 
 local function lineSegmentForTrainRoute(train)
-    -- A raw EEPSetTrainRoute() changes only EEP state. Contact points pull that route back into transit state.
-    local routeName = train:getRoute()
-    local routeOk, eepRouteName = EEPGetTrainRoute(train.name)
-    if routeOk and type(eepRouteName) == "string" then
-        routeName = eepRouteName
-        if routeName ~= train:getRoute() then train:updateRoute(routeName) end
-    end
-
-    return lineSegmentForRouteName(train, routeName)
+    return lineSegmentForRouteName(train, train:getRoute())
 end
 
 local function clearTransitDeparturesForTrain(train)

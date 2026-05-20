@@ -43,11 +43,11 @@ insulate("ce.mods.road.CeRoadModule", function ()
         local _, _, _, dto = RoadDtoFactory.createIntersectionDto(intersection)
 
         assert.equals("A", dto.name)             -- "always" by default -> populated
-        assert.equals("", dto.manualPhase)   -- "oninterest" by default, never selected -> empty
-        assert.equals("", dto.currentPhase)  -- "oninterest" by default, never selected -> empty
-        assert.equals("", dto.nextPhase)     -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.manualPhase)       -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.currentPhase)      -- "oninterest" by default, never selected -> empty
+        assert.equals("", dto.nextPhase)         -- "oninterest" by default, never selected -> empty
         assert.is_false(dto.ready)               -- "oninterest" by default, never selected -> false
-        assert.equals(15, dto.greenTimeSeconds)      -- "always" by default -> populated
+        assert.equals(15, dto.greenTimeSeconds)  -- "always" by default -> populated
         assert.same({ "Cam 1" }, dto.staticCams) -- "always" by default -> populated
         assert.same(intersection.phases, dto.phases)
     end)

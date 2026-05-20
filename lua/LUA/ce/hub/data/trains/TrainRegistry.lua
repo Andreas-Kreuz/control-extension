@@ -24,6 +24,11 @@ function TrainRegistry.rollingStockNameInTrain(name, index)
     return trainRollingStockNames[name] and trainRollingStockNames[name][tostring(index)] or nil
 end
 
+function TrainRegistry.find(name)
+    if type(name) ~= "string" then return nil end
+    return allTrains[name]
+end
+
 function TrainRegistry.forName(name)
     assert(name, "Provide a name for the train")
     assert(type(name) == "string", "Need 'trainName' as string")

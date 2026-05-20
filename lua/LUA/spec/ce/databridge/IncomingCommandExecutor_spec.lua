@@ -5,8 +5,11 @@ insulate("ce.databridge.IncomingCommandExecutor", function ()
     local originalEEPShowInfoTextBottom
     local originalEEPShowInfoTextTop
     local originalEEPTestSetBoolean
+    local originalEEPTestSetCommand
+    local printStub
 
     before_each(function ()
+        printStub = stub(_G, "print")
         clearModule("ce.databridge.IncomingCommandExecutor")
         require("ce.hub.eep.EepSimulator")
 
@@ -15,6 +18,7 @@ insulate("ce.databridge.IncomingCommandExecutor", function ()
         originalEEPShowInfoTextBottom = _G.EEPShowInfoTextBottom
         originalEEPShowInfoTextTop = _G.EEPShowInfoTextTop
         originalEEPTestSetBoolean = _G.EEPTestSetBoolean
+        originalEEPTestSetCommand = _G.EEPTestSetCommand
     end)
 
     after_each(function ()
@@ -23,6 +27,10 @@ insulate("ce.databridge.IncomingCommandExecutor", function ()
         rawset(_G, "EEPShowInfoTextBottom", originalEEPShowInfoTextBottom)
         rawset(_G, "EEPShowInfoTextTop", originalEEPShowInfoTextTop)
         rawset(_G, "EEPTestSetBoolean", originalEEPTestSetBoolean)
+        rawset(_G, "EEPTestSetCommand", originalEEPTestSetCommand)
+        local EepCallAnalyzer = package.loaded["ce.hub.eep.EepCallAnalyzer"]
+        if EepCallAnalyzer then EepCallAnalyzer.reset() end
+        printStub:revert()
     end)
 
     it("allows explicit EEP commands outside the EEP*Set naming pattern", function ()
@@ -78,5 +86,25 @@ insulate("ce.databridge.IncomingCommandExecutor", function ()
         IncomingCommandExecutor.executeIncomingCommands("EEPTestSetBoolean|true|false|keep")
 
         assert.same({ true, false, "keep" }, received)
+    end)
+
+    it("counts EEP commands when the analyzer is enabled after command registration", function ()
+        local received = {}
+
+        rawset(_G, "EEPTestSetCommand", function (value)
+            received = { value }
+            return true
+        end)
+
+        clearModule("ce.databridge.IncomingCommandExecutor")
+        local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
+        local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
+
+        EepCallAnalyzer.configure({ enabled = true, runs = 2 })
+        EepCallAnalyzer.beginRun()
+        IncomingCommandExecutor.executeIncomingCommands("EEPTestSetCommand|value")
+
+        assert.same({ "value" }, received)
+        assert.equals(1, EepCallAnalyzer.getResult().calls.EEPTestSetCommand)
     end)
 end)

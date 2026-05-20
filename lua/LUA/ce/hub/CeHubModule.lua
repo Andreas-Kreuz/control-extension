@@ -35,6 +35,7 @@ local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdate
 local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
 local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
 local TimedExecution = require("ce.hub.util.TimedExecution")
+local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
 
 local anl3Path = nil
 local activeAnl3Discovery = { success = false, coverage = {} }
@@ -43,11 +44,19 @@ local anl3ReloadPending = false
 local previousEEPOnSaveAnl = _G.EEPOnSaveAnl
 
 local function tk(group, func)
-    TimedExecution.runProtectedTimedAndKeep(group, func)
+    if string.find(group, "^Discovery") then
+        EepCallAnalyzer.runInDiscovery(function () TimedExecution.runProtectedTimedAndKeep(group, func) end)
+    else
+        TimedExecution.runProtectedTimedAndKeep(group, func)
+    end
 end
 
 local function tu(group, func)
-    TimedExecution.runProtectedTimed(group, func)
+    if string.find(group, "^Discovery") then
+        EepCallAnalyzer.runInDiscovery(function () TimedExecution.runProtectedTimed(group, func) end)
+    else
+        TimedExecution.runProtectedTimed(group, func)
+    end
 end
 
 local function hasAnl3Coverage(alias)

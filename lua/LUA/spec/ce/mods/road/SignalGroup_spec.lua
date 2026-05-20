@@ -54,8 +54,8 @@ insulate("ce.mods.road.SignalGroup", function ()
         SignalGroup:new("sgA"):addVehicleSignals(K1)
 
         assert.has_error(function ()
-            SignalGroup:new("sgB"):addVehicleSignals(K1)
-        end, "Signal logical use already belongs to signal group: K1")
+                             SignalGroup:new("sgB"):addVehicleSignals(K1)
+                         end, "Signal logical use already belongs to signal group: K1")
     end)
 
     it("asserts a vehicle and pedestrian release on the same physical signal in one phase", function ()
@@ -69,8 +69,10 @@ insulate("ce.mods.road.SignalGroup", function ()
         local sgPedestrian = SignalGroup:new("sgPedNorthSouth"):addPedestrianSignals(K1)
 
         assert.has_error(function ()
-            TrafficPhase:new("P1"):addSignalGroups(sgVehicle, sgPedestrian)
-        end, "Ein Signal darf in derselben Phase nicht gleichzeitig Fahrzeug- und Fu\223g\228ngerverkehr freigeben.")
+                             TrafficPhase:new("P1"):addSignalGroups(sgVehicle, sgPedestrian)
+                         end,
+                         "Ein Signal darf in derselben Phase nicht gleichzeitig Fahrzeug- und " ..
+                             "Fu\223g\228ngerverkehr freigeben.")
     end)
 
     it("asserts that multi-group lane control uses an independent lane signal", function ()
@@ -88,7 +90,7 @@ insulate("ce.mods.road.SignalGroup", function ()
         local expectedError = "Wenn eine Fahrspur durch mehrere Signalgruppen gesteuert wird, " ..
             "ben\246tigt sie eine unabh\228ngige Ampel - verwende eine eigene unsichtbare Ampel."
         assert.has_error(function ()
-            lane:driveOnDefaultSignalGroups(sgA, sgB)
-        end, expectedError)
+                             lane:driveOnDefaultSignalGroups(sgA, sgB)
+                         end, expectedError)
     end)
 end)

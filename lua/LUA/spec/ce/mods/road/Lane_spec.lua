@@ -50,6 +50,66 @@ describe("Lane ...", function ()
             printStub:revert()
         end)
     end)
+    insulate("Route lookup", function ()
+        local function clearModule(name)
+            package.loaded[name] = nil
+        end
+
+        local function setup()
+            clearModule("ce.hub.data.trains.Train")
+            clearModule("ce.hub.data.trains.TrainRegistry")
+            clearModule("ce.mods.road.Lane")
+
+            require("ce.hub.eep.EepSimulator")
+
+            local routeCalls = 0
+            local routeStub = stub(_G, "EEPGetTrainRoute", function ()
+                routeCalls = routeCalls + 1
+                return true, "EEP Route"
+            end)
+
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+            TrainRegistry.seedFromSnapshot({ name = "#CachedRouteCar", route = "Cached Route" })
+
+            return require("ce.mods.road.Lane"),
+                require("ce.mods.road.TrafficLight"),
+                require("ce.mods.road.TrafficLightModel"),
+                routeStub,
+                function () return routeCalls end
+        end
+
+        it("uses the hub train route when the train is known", function ()
+            local Lane, TrafficLight, TrafficLightModel, routeStub, routeCalls = setup()
+            local lane = Lane:new("Lane Cached Route", TrafficLight:new("K1", 71, TrafficLightModel.Unsichtbar_2er))
+
+            lane:vehicleEntered("#CachedRouteCar")
+            local firstVehiclesRoute = lane.firstVehiclesRoute
+            local calls = routeCalls()
+            routeStub:revert()
+            clearModule("ce.mods.road.Lane")
+            clearModule("ce.hub.data.trains.TrainRegistry")
+            clearModule("ce.hub.data.trains.Train")
+
+            assert.equals("Cached Route", firstVehiclesRoute)
+            assert.equals(0, calls)
+        end)
+
+        it("falls back to EEP when no hub train exists", function ()
+            local Lane, TrafficLight, TrafficLightModel, routeStub, routeCalls = setup()
+            local lane = Lane:new("Lane EEP Route", TrafficLight:new("K2", 72, TrafficLightModel.Unsichtbar_2er))
+
+            lane:vehicleEntered("#UnknownRouteCar")
+            local firstVehiclesRoute = lane.firstVehiclesRoute
+            local calls = routeCalls()
+            routeStub:revert()
+            clearModule("ce.mods.road.Lane")
+            clearModule("ce.hub.data.trains.TrainRegistry")
+            clearModule("ce.hub.data.trains.Train")
+
+            assert.equals("EEP Route", firstVehiclesRoute)
+            assert.equals(1, calls)
+        end)
+    end)
     insulate("Register signals", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")

@@ -19,6 +19,7 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         clearModule("ce.hub.data.signals.WaitingOnSignalRegistry")
         clearModule("ce.hub.data.signals.SignalUpdater")
         clearModule("ce.hub.data.trains.TrainRegistry")
+        clearModule("ce.hub.data.InterestSyncRegistry")
         clearModule("ce.hub.options.HubOptionsRegistry")
     end)
 
@@ -69,7 +70,7 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         assert.equals("true", data["depInfo"])
     end)
 
-    it("registers depot signals and forces required hub update policies", function ()
+    it("registers depot signals without changing train route polling policy", function ()
         local CeTransitModule = require("ce.mods.transit.CeTransitModule")
         local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
         local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
@@ -80,7 +81,47 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         assert.is_true(SignalRegistry.has(701))
         assert.is_true(WaitingOnSignalRegistry.getWatchedSignalIds()[701])
         assert.equals("always", HubOptionsRegistry.getFieldUpdatePolicies("trains").route)
-        assert.equals("always", HubOptionsRegistry.getFieldUpdatePolicies("waitingOnSignals").vehicleName)
+        assert.is_nil(HubOptionsRegistry.getFieldUpdatePolicies("waitingOnSignals").vehicleName)
+    end)
+
+    it("selects depot waiting trains for route updates while they wait", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")
+
+        EepSimulator.simulateQueueTrainOnSignal(705, "#DepotInterestTrain")
+        CeTransitModule:registerDepotSignals(705)
+
+        CeTransitModule.run()
+
+        local waiting = WaitingOnSignalRegistry.get("705-1")
+        assert.equals("#DepotInterestTrain", waiting.vehicleName)
+        assert.is_true(InterestSyncRegistry.isSelected(HubCeTypes.Train, "#DepotInterestTrain"))
+
+        EepSimulator.simulateRemoveAllTrainsFromSignal(705)
+        CeTransitModule.run()
+
+        assert.is_nil(WaitingOnSignalRegistry.get("705-1"))
+        assert.is_false(InterestSyncRegistry.isSelected(HubCeTypes.Train, "#DepotInterestTrain"))
+    end)
+
+    it("does not remove user interest when depot interest ends", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+
+        InterestSyncRegistry.startSyncFor(HubCeTypes.Train, "#DepotManualInterestTrain")
+        EepSimulator.simulateQueueTrainOnSignal(706, "#DepotManualInterestTrain")
+        CeTransitModule:registerDepotSignals(706)
+
+        CeTransitModule.run()
+        EepSimulator.simulateRemoveAllTrainsFromSignal(706)
+        CeTransitModule.run()
+
+        assert.is_true(InterestSyncRegistry.isSelected(HubCeTypes.Train, "#DepotManualInterestTrain"))
     end)
 
     it("wraps transit constructors and display model access", function ()

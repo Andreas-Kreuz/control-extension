@@ -11,19 +11,20 @@ insulate("CeHubModule", function ()
 
     local function writeTempAnl3(path, luaName, signalId)
         local xml = table.concat({
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            "<sutrackp>",
-            '<Gleissystem GleissystemID="3" TrackSystemNumber="3">',
-            '<Gleis GleisID="1"><Meldung name="S" Key_Id="' .. tostring(signalId) .. '"/></Gleis>',
-            "</Gleissystem>",
-            "<Gebaeudesammlung/>",
-            '<Fuhrpark FuhrparkID="1">',
-            '<Zugverband name="#Train A"><Gleisort gleissystemID="3" gleisID="1"/>',
-            '<Rollmaterial name="RS A" typ="STRASSE\\BUS\\A.3dm"/></Zugverband>',
-            "</Fuhrpark>",
-            '<EEPLua LUAPath="\\' .. luaName .. '.lua"/>',
-            "</sutrackp>"
-        }, "")
+                                     '<?xml version="1.0" encoding="UTF-8"?>',
+                                     "<sutrackp>",
+                                     '<Gleissystem GleissystemID="3" TrackSystemNumber="3">',
+                                     '<Gleis GleisID="1"><Meldung name="S" Key_Id="' ..
+                                     tostring(signalId) .. '"/></Gleis>',
+                                     "</Gleissystem>",
+                                     "<Gebaeudesammlung/>",
+                                     '<Fuhrpark FuhrparkID="1">',
+                                     '<Zugverband name="#Train A"><Gleisort gleissystemID="3" gleisID="1"/>',
+                                     '<Rollmaterial name="RS A" typ="STRASSE\\BUS\\A.3dm"/></Zugverband>',
+                                     "</Fuhrpark>",
+                                     '<EEPLua LUAPath="\\' .. luaName .. '.lua"/>',
+                                     "</sutrackp>"
+                                 }, "")
         local file = assert(io.open(path, "w"))
         file:write(xml)
         file:close()
@@ -43,6 +44,7 @@ insulate("CeHubModule", function ()
         clearModule("ce.hub.CeHubModule")
         clearModule("ce.hub.data.runtime.RuntimeMetrics")
         clearModule("ce.hub.util.TimedExecution")
+        clearModule("ce.hub.eep.EepCallAnalyzer")
         clearModule("ce.hub.data.tracks.TracksStatePublisher")
         clearModule("ce.hub.data.tracks.Track")
         clearModule("ce.hub.data.tracks.TrackRegistry")
@@ -80,6 +82,8 @@ insulate("CeHubModule", function ()
     after_each(function ()
         printStub:revert()
         ioInitInitializeStub:revert()
+        local EepCallAnalyzer = package.loaded["ce.hub.eep.EepCallAnalyzer"]
+        if EepCallAnalyzer then EepCallAnalyzer.reset() end
         rawset(_G, "EEPGetAnlName", originalEEPGetAnlName)
         rawset(_G, "EEPOnSaveAnl", originalEEPOnSaveAnl)
         os.remove(TEMP_ANL3)
@@ -164,6 +168,21 @@ insulate("CeHubModule", function ()
         assert.equals(1, RuntimeMetrics.get("Update/ce.hub.RollingStock").count)
         assert.equals(1, RuntimeMetrics.get("Discovery/ce.hub.Train").count)
         assert.is_true(RuntimeMetrics.get("Discovery/ce.hub.Train").lastTime >= 0)
+    end)
+
+    it("marks EEP calls inside hub discovery phases separately #eepAnalyzer", function ()
+        local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
+
+        EepCallAnalyzer.configure({ enabled = true, runs = 2 })
+        local CeHubModule = require("ce.hub.CeHubModule")
+        EepCallAnalyzer.beginRun()
+
+        CeHubModule.init()
+
+        local result = EepCallAnalyzer.getResult()
+        assert.is_true(result.totals.calls > 0)
+        assert.is_true(result.totals.discoveryCalls > 0)
+        assert.is_true(result.totals.discoveryCalls <= result.totals.calls)
     end)
 
     it("skips expensive initial discovery scans when anl3 discovery succeeds", function ()

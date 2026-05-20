@@ -98,6 +98,28 @@ ControlExtension.addModules(require("ce.mods.mymod.MyCeModule").setOptions({ deb
 Fertige Vorlagen findest Du in [`ce.template`](template/README.md).
 Bestehende Module wie `ce.mods.road.CeRoadModule` können als Referenz dienen — siehe [`ce.mods`](mods/README.md).
 
+## Lua-Tests
+
+Die normalen Lua-Checks laufen über:
+
+```powershell
+cmd /c yarn.cmd run check:lua
+```
+
+Dieser Befehl führt `luacheck` und die regulären Busted-Specs aus. Specs mit dem Tag
+`#eepAnalyzer` sind dabei bewusst ausgeschlossen, weil die EEP-Call-Analyser-Tests
+globale EEP-Funktionen wrappen und mit Stacktraces über viele simulierte Hub-Discovery-Aufrufe
+deutlich langsamer sind.
+
+Wenn Änderungen am EEP-Call-Analyser selbst geprüft werden sollen, läuft das separate Profil:
+
+```powershell
+busted --config-file lua/.busted --run eepAnalyzer --verbose
+```
+
+Neue langsame oder profilerartige Specs für den Analyser sollten ebenfalls mit
+`#eepAnalyzer` markiert werden, damit der Default-Testlauf schnell bleibt.
+
 ## Weiterführende Dokumentation
 
 - [Gesamtarchitektur der Control Extension](../../../../project-docs/ARCHITECTURE.md)

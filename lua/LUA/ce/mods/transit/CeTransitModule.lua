@@ -54,7 +54,6 @@ end
 
 function CeTransitModule.init()
     if not CeTransitModule.enabled or initialized then return end
-    DepotSignalRegistry.forceHubOptions()
 
     local TransitBridgeConnector = require("ce.mods.transit.bridge.TransitBridgeConnector")
     TransitBridgeConnector.registerStatePublishers()
@@ -65,6 +64,7 @@ end
 
 function CeTransitModule.run()
     if not CeTransitModule.enabled then return end
+    DepotSignalRegistry.updateRouteInterests()
     TransitTrainUpdater.runUpdate()
     DepotSignalReleaseUpdater.runUpdate()
 end

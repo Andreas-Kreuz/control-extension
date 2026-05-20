@@ -97,35 +97,36 @@ local function copyLaneRouteRules(routeRules)
 end
 
 local function toIntersectionDto(intersection, isSelected)
-    local fieldPolicies  = RoadOptionsRegistry.getFieldPublishPolicies("intersections")
-    local dto            = {
+    local fieldPolicies        = RoadOptionsRegistry.getFieldPublishPolicies("intersections")
+    local dto                  = {
         ceType = RoadCeTypes.Intersection,
         id = intersection.id,
     }
-    dto.name             = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and intersection.name or ""
-    dto.eepSaveId        = SyncPolicy.shouldPublishField(fieldPolicies, "eepSaveId", isSelected) and
+    dto.name                   = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and intersection.name or
+    ""
+    dto.eepSaveId              = SyncPolicy.shouldPublishField(fieldPolicies, "eepSaveId", isSelected) and
         intersection.eepSaveId or -1
-    dto.scriptVariableName = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
+    dto.scriptVariableName     = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
         intersection.scriptVariableName or nil
-    dto.currentPhase = SyncPolicy.shouldPublishField(fieldPolicies, "currentPhase", isSelected) and
+    dto.currentPhase           = SyncPolicy.shouldPublishField(fieldPolicies, "currentPhase", isSelected) and
         intersection.currentPhase or ""
-    dto.manualPhase  = SyncPolicy.shouldPublishField(fieldPolicies, "manualPhase", isSelected) and
+    dto.manualPhase            = SyncPolicy.shouldPublishField(fieldPolicies, "manualPhase", isSelected) and
         intersection.manualPhase or ""
-    dto.nextPhase    = SyncPolicy.shouldPublishField(fieldPolicies, "nextPhase", isSelected) and
+    dto.nextPhase              = SyncPolicy.shouldPublishField(fieldPolicies, "nextPhase", isSelected) and
         intersection.nextPhase or ""
-    dto.greenTimeSeconds     = SyncPolicy.shouldPublishField(fieldPolicies, "greenTimeSeconds", isSelected) and
+    dto.greenTimeSeconds       = SyncPolicy.shouldPublishField(fieldPolicies, "greenTimeSeconds", isSelected) and
         intersection.greenTimeSeconds or 0
-    dto.switchInStrictOrder = SyncPolicy.shouldPublishField(fieldPolicies, "switchInStrictOrder", isSelected) and
+    dto.switchInStrictOrder    = SyncPolicy.shouldPublishField(fieldPolicies, "switchInStrictOrder", isSelected) and
         intersection.switchInStrictOrder or false
-    dto.tippStructure    = SyncPolicy.shouldPublishField(fieldPolicies, "tippStructure", isSelected) and
+    dto.tippStructure          = SyncPolicy.shouldPublishField(fieldPolicies, "tippStructure", isSelected) and
         intersection.tippStructure or nil
-    dto.staticCams       = SyncPolicy.shouldPublishField(fieldPolicies, "staticCams", isSelected) and
+    dto.staticCams             = SyncPolicy.shouldPublishField(fieldPolicies, "staticCams", isSelected) and
         copyTable(intersection.staticCams) or {}
-    dto.phases           = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
+    dto.phases                 = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
         copyPhases(intersection.phases) or {}
     dto.signalGroupDefinitions = SyncPolicy.shouldPublishField(fieldPolicies, "signalGroupDefinitions", isSelected) and
         copySignalGroupDefinitions(intersection.signalGroupDefinitions) or {}
-    dto.pedestrianCrossings = SyncPolicy.shouldPublishField(fieldPolicies, "pedestrianCrossings", isSelected) and
+    dto.pedestrianCrossings    = SyncPolicy.shouldPublishField(fieldPolicies, "pedestrianCrossings", isSelected) and
         copyPedestrianCrossings(intersection.pedestrianCrossings) or {}
     if SyncPolicy.shouldPublishField(fieldPolicies, "ready", isSelected) then
         dto.ready = intersection.ready
@@ -147,7 +148,8 @@ local function toIntersectionLaneDto(lane, isSelected)
         lane.name or ""
     dto.scriptVariableName         = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
         lane.scriptVariableName or nil
-    dto.currentIndication          = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and lane.currentIndication or
+    dto.currentIndication          = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and
+        lane.currentIndication or
         ""
     dto.vehicleMultiplier          = SyncPolicy.shouldPublishField(fieldPolicies, "vehicleMultiplier", isSelected) and
         lane.vehicleMultiplier or 0
@@ -165,11 +167,11 @@ local function toIntersectionLaneDto(lane, isSelected)
         lane.approach or nil
     dto.directions                 = SyncPolicy.shouldPublishField(fieldPolicies, "directions", isSelected) and
         copyTable(lane.directions) or {}
-    dto.phases                 = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
+    dto.phases                     = SyncPolicy.shouldPublishField(fieldPolicies, "phases", isSelected) and
         copyTable(lane.phases) or {}
-    dto.defaultSignalGroups    = SyncPolicy.shouldPublishField(fieldPolicies, "defaultSignalGroups", isSelected) and
+    dto.defaultSignalGroups        = SyncPolicy.shouldPublishField(fieldPolicies, "defaultSignalGroups", isSelected) and
         copyTable(lane.defaultSignalGroups) or {}
-    dto.routeRules               = SyncPolicy.shouldPublishField(fieldPolicies, "routeRules", isSelected) and
+    dto.routeRules                 = SyncPolicy.shouldPublishField(fieldPolicies, "routeRules", isSelected) and
         copyLaneRouteRules(lane.routeRules) or {}
     dto.defaultRequestSignalGroups = SyncPolicy.shouldPublishField(fieldPolicies, "defaultRequestSignalGroups",
                                                                    isSelected) and

@@ -7,9 +7,13 @@ return {
     output = 'utfTerminal'
 },
 default = {
+    ["exclude-tags"] = "eepAnalyzer"
 },
 apiUnit = {
     coverage = true,
     tags = "api"
+  },
+eepAnalyzer = {
+    tags = "eepAnalyzer"
   }
 }

@@ -425,14 +425,14 @@ insulate("Check signal phase", function ()
         it("Lane3 Signal", function () assert.equals(13, lane3.laneSignal.signalId) end)
         it("Lane4 Signal", function () assert.equals(14, lane4.laneSignal.signalId) end)
 
-        local step0Line1WaitCount = lane1:getWaitCount()          --           step0
-        local step0Line2WaitCount = lane2:getWaitCount()          --           step0
-        local step0Line3WaitCount = lane3:getWaitCount()          --           step0
-        local step0Line4WaitCount = lane4:getWaitCount()          --           step0
-        local step0Lane1Prio = lane1:calculatePriority({})        --           step0
-        local step0Lane2Prio = lane2:calculatePriority({})        --         step0
-        local step0Lane3Prio = lane3:calculatePriority({})        --         step0
-        local step0Lane4Prio = lane4:calculatePriority({})        --         step0
+        local step0Line1WaitCount = lane1:getWaitCount()   --           step0
+        local step0Line2WaitCount = lane2:getWaitCount()   --           step0
+        local step0Line3WaitCount = lane3:getWaitCount()   --           step0
+        local step0Line4WaitCount = lane4:getWaitCount()   --           step0
+        local step0Lane1Prio = lane1:calculatePriority({}) --           step0
+        local step0Lane2Prio = lane2:calculatePriority({}) --         step0
+        local step0Lane3Prio = lane3:calculatePriority({}) --         step0
+        local step0Lane4Prio = lane4:calculatePriority({}) --         step0
         local step0PhaseAPrio = phaseA:calculatePriority() -- step0
         local step0PhaseBPrio = phaseB:calculatePriority() -- step0
         local step0PhaseCPrio = phaseC:calculatePriority() -- step0
@@ -448,14 +448,14 @@ insulate("Check signal phase", function ()
         it("# step0 - phaseB prio", function () assert.equals(000, step0PhaseBPrio) end)
         it("# step0 - phaseC prio", function () assert.equals(000, step0PhaseCPrio) end)
         local step0Ready = crossing:isGreenTimeFinished() --                     step0
-        local step0SignalAxisK1 = EEPGetSignal(23)         -- store signal    step0
-        local step0SignalAxisK2 = EEPGetSignal(24)         -- store signal    step0
-        local step0SignalAxisK3 = EEPGetSignal(25)         -- store signal    step0
-        local step0SignalAxisK5 = EEPGetSignal(27)         -- store signal    step0
-        local step0SignalAxisK6 = EEPGetSignal(28)         -- store signal    step0
-        local step0SignalAxisK7 = EEPGetSignal(29)         -- store signal    step0
-        local step0SignalAxisK8 = EEPGetSignal(30)         -- store signal    step0
-        local step0SignalAxisK9 = EEPGetSignal(31)         -- store signal    step0
+        local step0SignalAxisK1 = EEPGetSignal(23)        -- store signal    step0
+        local step0SignalAxisK2 = EEPGetSignal(24)        -- store signal    step0
+        local step0SignalAxisK3 = EEPGetSignal(25)        -- store signal    step0
+        local step0SignalAxisK5 = EEPGetSignal(27)        -- store signal    step0
+        local step0SignalAxisK6 = EEPGetSignal(28)        -- store signal    step0
+        local step0SignalAxisK7 = EEPGetSignal(29)        -- store signal    step0
+        local step0SignalAxisK8 = EEPGetSignal(30)        -- store signal    step0
+        local step0SignalAxisK9 = EEPGetSignal(31)        -- store signal    step0
         it("# step0 - Crossing ready     ", function () assert.is_true(step0Ready) end)
         it("# step0 - Signal K1 (23) ", function () assert.equals(GRE, step0SignalAxisK1) end)
         it("# step0 - Signal K2 (24) ", function () assert.equals(RED, step0SignalAxisK2) end)
@@ -471,14 +471,14 @@ insulate("Check signal phase", function ()
     ControlExtension.runTasks() -- First Plan crossing
 
     do
-        local step1Line1WaitCount = lane1:getWaitCount()          --           step1
-        local step1Line2WaitCount = lane2:getWaitCount()          --           step1
-        local step1Line3WaitCount = lane3:getWaitCount()          --           step1
-        local step1Line4WaitCount = lane4:getWaitCount()          --           step1
-        local step1Lane1Prio = lane1:calculatePriority({})        --         step1
-        local step1Lane2Prio = lane2:calculatePriority({})        --         step1
-        local step1Lane3Prio = lane3:calculatePriority({})        --         step1
-        local step1Lane4Prio = lane4:calculatePriority({})        --         step1
+        local step1Line1WaitCount = lane1:getWaitCount()   --           step1
+        local step1Line2WaitCount = lane2:getWaitCount()   --           step1
+        local step1Line3WaitCount = lane3:getWaitCount()   --           step1
+        local step1Line4WaitCount = lane4:getWaitCount()   --           step1
+        local step1Lane1Prio = lane1:calculatePriority({}) --         step1
+        local step1Lane2Prio = lane2:calculatePriority({}) --         step1
+        local step1Lane3Prio = lane3:calculatePriority({}) --         step1
+        local step1Lane4Prio = lane4:calculatePriority({}) --         step1
         local step1PhaseAPrio = phaseA:calculatePriority() -- step1
         local step1PhaseBPrio = phaseB:calculatePriority() -- step1
         local step1PhaseCPrio = phaseC:calculatePriority() -- step1
@@ -494,14 +494,14 @@ insulate("Check signal phase", function ()
         it("# step1 - phaseB prio", function () assert.equals(000, step1PhaseBPrio) end)
         it("# step1 - phaseC prio", function () assert.equals(000, step1PhaseCPrio) end)
         local step1Ready = crossing:isGreenTimeFinished() --                     step1
-        local step1SignalAxisK1 = EEPGetSignal(23)         -- store signal    step1
-        local step1SignalAxisK2 = EEPGetSignal(24)         -- store signal    step1
-        local step1SignalAxisK3 = EEPGetSignal(25)         -- store signal    step1
-        local step1SignalAxisK5 = EEPGetSignal(27)         -- store signal    step1
-        local step1SignalAxisK6 = EEPGetSignal(28)         -- store signal    step1
-        local step1SignalAxisK7 = EEPGetSignal(29)         -- store signal    step1
-        local step1SignalAxisK8 = EEPGetSignal(30)         -- store signal    step1
-        local step1SignalAxisK9 = EEPGetSignal(31)         -- store signal    step1
+        local step1SignalAxisK1 = EEPGetSignal(23)        -- store signal    step1
+        local step1SignalAxisK2 = EEPGetSignal(24)        -- store signal    step1
+        local step1SignalAxisK3 = EEPGetSignal(25)        -- store signal    step1
+        local step1SignalAxisK5 = EEPGetSignal(27)        -- store signal    step1
+        local step1SignalAxisK6 = EEPGetSignal(28)        -- store signal    step1
+        local step1SignalAxisK7 = EEPGetSignal(29)        -- store signal    step1
+        local step1SignalAxisK8 = EEPGetSignal(30)        -- store signal    step1
+        local step1SignalAxisK9 = EEPGetSignal(31)        -- store signal    step1
         it("# step1 - Crossing ready    ", function () assert.is_false(step1Ready) end)
         it("# step1 - Signal K1 (23) ", function () assert.equals(RED, step1SignalAxisK1) end)
         it("# step1 - Signal K2 (24) ", function () assert.equals(RED, step1SignalAxisK2) end)
@@ -517,14 +517,14 @@ insulate("Check signal phase", function ()
     ControlExtension.runTasks() -- First Turn old to yellow + Pedestrian Red
 
     do
-        local step2Line1WaitCount = lane1:getWaitCount()          --           step2
-        local step2Line2WaitCount = lane2:getWaitCount()          --           step2
-        local step2Line3WaitCount = lane3:getWaitCount()          --           step2
-        local step2Line4WaitCount = lane4:getWaitCount()          --           step2
-        local step2Lane1Prio = lane1:calculatePriority({})        --         step2
-        local step2Lane2Prio = lane2:calculatePriority({})        --         step2
-        local step2Lane3Prio = lane3:calculatePriority({})        --         step2
-        local step2Lane4Prio = lane4:calculatePriority({})        --         step2
+        local step2Line1WaitCount = lane1:getWaitCount()   --           step2
+        local step2Line2WaitCount = lane2:getWaitCount()   --           step2
+        local step2Line3WaitCount = lane3:getWaitCount()   --           step2
+        local step2Line4WaitCount = lane4:getWaitCount()   --           step2
+        local step2Lane1Prio = lane1:calculatePriority({}) --         step2
+        local step2Lane2Prio = lane2:calculatePriority({}) --         step2
+        local step2Lane3Prio = lane3:calculatePriority({}) --         step2
+        local step2Lane4Prio = lane4:calculatePriority({}) --         step2
         local step2PhaseAPrio = phaseA:calculatePriority() --  step2
         local step2PhaseBPrio = phaseB:calculatePriority() --  step2
         local step2PhaseCPrio = phaseC:calculatePriority() --  step2
@@ -540,14 +540,14 @@ insulate("Check signal phase", function ()
         it("# step2 - phaseB prio ", function () assert.equals(000, step2PhaseBPrio) end)
         it("# step2 - phaseC prio ", function () assert.equals(000, step2PhaseCPrio) end)
         local step3Ready = crossing:isGreenTimeFinished() --                     step3
-        local step3SignalAxisK1 = EEPGetSignal(23)         -- store signal    step3
-        local step3SignalAxisK2 = EEPGetSignal(24)         -- store signal    step3
-        local step3SignalAxisK3 = EEPGetSignal(25)         -- store signal    step3
-        local step3SignalAxisK5 = EEPGetSignal(27)         -- store signal    step3
-        local step3SignalAxisK6 = EEPGetSignal(28)         -- store signal    step3
-        local step3SignalAxisK7 = EEPGetSignal(29)         -- store signal    step3
-        local step3SignalAxisK8 = EEPGetSignal(30)         -- store signal    step3
-        local step3SignalAxisK9 = EEPGetSignal(31)         -- store signal    step3
+        local step3SignalAxisK1 = EEPGetSignal(23)        -- store signal    step3
+        local step3SignalAxisK2 = EEPGetSignal(24)        -- store signal    step3
+        local step3SignalAxisK3 = EEPGetSignal(25)        -- store signal    step3
+        local step3SignalAxisK5 = EEPGetSignal(27)        -- store signal    step3
+        local step3SignalAxisK6 = EEPGetSignal(28)        -- store signal    step3
+        local step3SignalAxisK7 = EEPGetSignal(29)        -- store signal    step3
+        local step3SignalAxisK8 = EEPGetSignal(30)        -- store signal    step3
+        local step3SignalAxisK9 = EEPGetSignal(31)        -- store signal    step3
         it("# step3 - Crossing ready    ", function () assert.is_false(step3Ready) end)
         it("# step3 - Signal K1 (23) ", function () assert.equals(RED, step3SignalAxisK1) end)
         it("# step3 - Signal K2 (24) ", function () assert.equals(RED, step3SignalAxisK2) end)
@@ -620,18 +620,18 @@ insulate("Check signal phase", function ()
 
     do
         local step6Ready = crossing:isGreenTimeFinished() --                     step6
-        local step6SignalAxisL1 = EEPGetSignal(11)         -- store signal    step6
-        local step6SignalAxisL2 = EEPGetSignal(12)         -- store signal    step6
-        local step6SignalAxisL3 = EEPGetSignal(13)         -- store signal    step6
-        local step6SignalAxisL4 = EEPGetSignal(14)         -- store signal    step6
-        local step6SignalAxisK1 = EEPGetSignal(23)         -- store signal    step6
-        local step6SignalAxisK2 = EEPGetSignal(24)         -- store signal    step6
-        local step6SignalAxisK3 = EEPGetSignal(25)         -- store signal    step6
-        local step6SignalAxisK5 = EEPGetSignal(27)         -- store signal    step6
-        local step6SignalAxisK6 = EEPGetSignal(28)         -- store signal    step6
-        local step6SignalAxisK7 = EEPGetSignal(29)         -- store signal    step6
-        local step6SignalAxisK8 = EEPGetSignal(30)         -- store signal    step6
-        local step6SignalAxisK9 = EEPGetSignal(31)         -- store signal    step6
+        local step6SignalAxisL1 = EEPGetSignal(11)        -- store signal    step6
+        local step6SignalAxisL2 = EEPGetSignal(12)        -- store signal    step6
+        local step6SignalAxisL3 = EEPGetSignal(13)        -- store signal    step6
+        local step6SignalAxisL4 = EEPGetSignal(14)        -- store signal    step6
+        local step6SignalAxisK1 = EEPGetSignal(23)        -- store signal    step6
+        local step6SignalAxisK2 = EEPGetSignal(24)        -- store signal    step6
+        local step6SignalAxisK3 = EEPGetSignal(25)        -- store signal    step6
+        local step6SignalAxisK5 = EEPGetSignal(27)        -- store signal    step6
+        local step6SignalAxisK6 = EEPGetSignal(28)        -- store signal    step6
+        local step6SignalAxisK7 = EEPGetSignal(29)        -- store signal    step6
+        local step6SignalAxisK8 = EEPGetSignal(30)        -- store signal    step6
+        local step6SignalAxisK9 = EEPGetSignal(31)        -- store signal    step6
         it("# step6 - Signal L1 (11) ", function () assert.equals(U_R, step6SignalAxisL1) end)
         it("# step6 - Signal L2 (12) ", function () assert.equals(U_R, step6SignalAxisL2) end)
         it("# step6 - Signal L3 (13) ", function () assert.equals(U_R, step6SignalAxisL3) end)
@@ -651,14 +651,14 @@ insulate("Check signal phase", function ()
     lane2:vehicleEntered("#Car2a")
 
     do
-        local step6Line1WaitCount = lane1:getWaitCount()          --           step6
-        local step6Line2WaitCount = lane2:getWaitCount()          --           step6
-        local step6Line3WaitCount = lane3:getWaitCount()          --           step6
-        local step6Line4WaitCount = lane4:getWaitCount()          --           step6
-        local step6Lane1Prio = lane1:calculatePriority({})        --         step6
-        local step6Lane2Prio = lane2:calculatePriority({})        --         step6
-        local step6Lane3Prio = lane3:calculatePriority({})        --         step6
-        local step6Lane4Prio = lane4:calculatePriority({})        --         step6
+        local step6Line1WaitCount = lane1:getWaitCount()   --           step6
+        local step6Line2WaitCount = lane2:getWaitCount()   --           step6
+        local step6Line3WaitCount = lane3:getWaitCount()   --           step6
+        local step6Line4WaitCount = lane4:getWaitCount()   --           step6
+        local step6Lane1Prio = lane1:calculatePriority({}) --         step6
+        local step6Lane2Prio = lane2:calculatePriority({}) --         step6
+        local step6Lane3Prio = lane3:calculatePriority({}) --         step6
+        local step6Lane4Prio = lane4:calculatePriority({}) --         step6
         local step6PhaseAPrio = phaseA:calculatePriority() --  step6
         local step6PhaseBPrio = phaseB:calculatePriority() --  step6
         local step6PhaseCPrio = phaseC:calculatePriority() --  step6
@@ -682,18 +682,18 @@ insulate("Check signal phase", function ()
 
     do
         local step7Ready = crossing:isGreenTimeFinished() --         step7
-        local step7SignalAxisL1 = EEPGetSignal(11)         -- store signal    step7
-        local step7SignalAxisL2 = EEPGetSignal(12)         -- store signal    step7
-        local step7SignalAxisL3 = EEPGetSignal(13)         -- store signal    step7
-        local step7SignalAxisL4 = EEPGetSignal(14)         -- store signal    step7
-        local step7SignalAxisK1 = EEPGetSignal(23)         -- store signal    step7
-        local step7SignalAxisK2 = EEPGetSignal(24)         -- store signal    step7
-        local step7SignalAxisK3 = EEPGetSignal(25)         -- store signal    step7
-        local step7SignalAxisK5 = EEPGetSignal(27)         -- store signal    step7
-        local step7SignalAxisK6 = EEPGetSignal(28)         -- store signal    step7
-        local step7SignalAxisK7 = EEPGetSignal(29)         -- store signal    step7
-        local step7SignalAxisK8 = EEPGetSignal(30)         -- store signal    step7
-        local step7SignalAxisK9 = EEPGetSignal(31)         -- store signal    step7
+        local step7SignalAxisL1 = EEPGetSignal(11)        -- store signal    step7
+        local step7SignalAxisL2 = EEPGetSignal(12)        -- store signal    step7
+        local step7SignalAxisL3 = EEPGetSignal(13)        -- store signal    step7
+        local step7SignalAxisL4 = EEPGetSignal(14)        -- store signal    step7
+        local step7SignalAxisK1 = EEPGetSignal(23)        -- store signal    step7
+        local step7SignalAxisK2 = EEPGetSignal(24)        -- store signal    step7
+        local step7SignalAxisK3 = EEPGetSignal(25)        -- store signal    step7
+        local step7SignalAxisK5 = EEPGetSignal(27)        -- store signal    step7
+        local step7SignalAxisK6 = EEPGetSignal(28)        -- store signal    step7
+        local step7SignalAxisK7 = EEPGetSignal(29)        -- store signal    step7
+        local step7SignalAxisK8 = EEPGetSignal(30)        -- store signal    step7
+        local step7SignalAxisK9 = EEPGetSignal(31)        -- store signal    step7
         it("# step7 - Signal L1 (11) ", function () assert.equals(U_G, step7SignalAxisL1) end)
         it("# step7 - Signal L2 (12) ", function () assert.equals(U_R, step7SignalAxisL2) end)
         it("# step7 - Signal L3 (13) ", function () assert.equals(U_R, step7SignalAxisL3) end)
@@ -713,14 +713,14 @@ insulate("Check signal phase", function ()
     lane4:vehicleEntered("#Car4a")
 
     do
-        local step7Line1WaitCount = lane1:getWaitCount()          --           step7
-        local step7Line2WaitCount = lane2:getWaitCount()          --           step7
-        local step7Line3WaitCount = lane3:getWaitCount()          --           step7
-        local step7Line4WaitCount = lane4:getWaitCount()          --           step7
-        local step7Lane1Prio = lane1:calculatePriority({})        --         step7
-        local step7Lane2Prio = lane2:calculatePriority({})        --         step7
-        local step7Lane3Prio = lane3:calculatePriority({})        --         step7
-        local step7Lane4Prio = lane4:calculatePriority({})        --         step7
+        local step7Line1WaitCount = lane1:getWaitCount()   --           step7
+        local step7Line2WaitCount = lane2:getWaitCount()   --           step7
+        local step7Line3WaitCount = lane3:getWaitCount()   --           step7
+        local step7Line4WaitCount = lane4:getWaitCount()   --           step7
+        local step7Lane1Prio = lane1:calculatePriority({}) --         step7
+        local step7Lane2Prio = lane2:calculatePriority({}) --         step7
+        local step7Lane3Prio = lane3:calculatePriority({}) --         step7
+        local step7Lane4Prio = lane4:calculatePriority({}) --         step7
         local step7PhaseAPrio = phaseA:calculatePriority() -- step7
         local step7PhaseBPrio = phaseB:calculatePriority() -- step7
         local step7PhaseCPrio = phaseC:calculatePriority() -- step7
@@ -742,18 +742,18 @@ insulate("Check signal phase", function ()
 
     do
         local step8Ready = crossing:isGreenTimeFinished() --                     step8
-        local step8SignalAxisL1 = EEPGetSignal(11)         -- store signal    step8
-        local step8SignalAxisL2 = EEPGetSignal(12)         -- store signal    step8
-        local step8SignalAxisL3 = EEPGetSignal(13)         -- store signal    step8
-        local step8SignalAxisL4 = EEPGetSignal(14)         -- store signal    step8
-        local step8SignalAxisK1 = EEPGetSignal(23)         -- store signal    step8
-        local step8SignalAxisK2 = EEPGetSignal(24)         -- store signal    step8
-        local step8SignalAxisK3 = EEPGetSignal(25)         -- store signal    step8
-        local step8SignalAxisK5 = EEPGetSignal(27)         -- store signal    step8
-        local step8SignalAxisK6 = EEPGetSignal(28)         -- store signal    step8
-        local step8SignalAxisK7 = EEPGetSignal(29)         -- store signal    step8
-        local step8SignalAxisK8 = EEPGetSignal(30)         -- store signal    step8
-        local step8SignalAxisK9 = EEPGetSignal(31)         -- store signal    step8
+        local step8SignalAxisL1 = EEPGetSignal(11)        -- store signal    step8
+        local step8SignalAxisL2 = EEPGetSignal(12)        -- store signal    step8
+        local step8SignalAxisL3 = EEPGetSignal(13)        -- store signal    step8
+        local step8SignalAxisL4 = EEPGetSignal(14)        -- store signal    step8
+        local step8SignalAxisK1 = EEPGetSignal(23)        -- store signal    step8
+        local step8SignalAxisK2 = EEPGetSignal(24)        -- store signal    step8
+        local step8SignalAxisK3 = EEPGetSignal(25)        -- store signal    step8
+        local step8SignalAxisK5 = EEPGetSignal(27)        -- store signal    step8
+        local step8SignalAxisK6 = EEPGetSignal(28)        -- store signal    step8
+        local step8SignalAxisK7 = EEPGetSignal(29)        -- store signal    step8
+        local step8SignalAxisK8 = EEPGetSignal(30)        -- store signal    step8
+        local step8SignalAxisK9 = EEPGetSignal(31)        -- store signal    step8
         it("# step8 - Crossing ready    ", function () assert.is_false(step8Ready) end)
         it("# step8 - Signal L1 (11) ", function () assert.equals(U_G, step8SignalAxisL1) end)
         it("# step8 - Signal L2 (12) ", function () assert.equals(U_R, step8SignalAxisL2) end)
@@ -774,18 +774,18 @@ insulate("Check signal phase", function ()
 
     do
         local step9Ready = crossing:isGreenTimeFinished() --                     step9
-        local step9SignalAxisL1 = EEPGetSignal(11)         -- store signal    step9
-        local step9SignalAxisL2 = EEPGetSignal(12)         -- store signal    step9
-        local step9SignalAxisL3 = EEPGetSignal(13)         -- store signal    step9
-        local step9SignalAxisL4 = EEPGetSignal(14)         -- store signal    step9
-        local step9SignalAxisK1 = EEPGetSignal(23)         -- store signal    step9
-        local step9SignalAxisK2 = EEPGetSignal(24)         -- store signal    step9
-        local step9SignalAxisK3 = EEPGetSignal(25)         -- store signal    step9
-        local step9SignalAxisK5 = EEPGetSignal(27)         -- store signal    step9
-        local step9SignalAxisK6 = EEPGetSignal(28)         -- store signal    step9
-        local step9SignalAxisK7 = EEPGetSignal(29)         -- store signal    step9
-        local step9SignalAxisK8 = EEPGetSignal(30)         -- store signal    step9
-        local step9SignalAxisK9 = EEPGetSignal(31)         -- store signal    step9
+        local step9SignalAxisL1 = EEPGetSignal(11)        -- store signal    step9
+        local step9SignalAxisL2 = EEPGetSignal(12)        -- store signal    step9
+        local step9SignalAxisL3 = EEPGetSignal(13)        -- store signal    step9
+        local step9SignalAxisL4 = EEPGetSignal(14)        -- store signal    step9
+        local step9SignalAxisK1 = EEPGetSignal(23)        -- store signal    step9
+        local step9SignalAxisK2 = EEPGetSignal(24)        -- store signal    step9
+        local step9SignalAxisK3 = EEPGetSignal(25)        -- store signal    step9
+        local step9SignalAxisK5 = EEPGetSignal(27)        -- store signal    step9
+        local step9SignalAxisK6 = EEPGetSignal(28)        -- store signal    step9
+        local step9SignalAxisK7 = EEPGetSignal(29)        -- store signal    step9
+        local step9SignalAxisK8 = EEPGetSignal(30)        -- store signal    step9
+        local step9SignalAxisK9 = EEPGetSignal(31)        -- store signal    step9
         it("# step9 - Crossing ready    ", function () assert.is_false(step9Ready) end)
         it("# step9 - Signal L1 (11) ", function () assert.equals(U_G, step9SignalAxisL1) end)
         it("# step9 - Signal L2 (12) ", function () assert.equals(U_R, step9SignalAxisL2) end)
@@ -806,18 +806,18 @@ insulate("Check signal phase", function ()
 
     do
         local step10Ready = crossing:isGreenTimeFinished() --                     step10
-        local step10SignalAxisL1 = EEPGetSignal(11)         -- store signal    step10
-        local step10SignalAxisL2 = EEPGetSignal(12)         -- store signal    step10
-        local step10SignalAxisL3 = EEPGetSignal(13)         -- store signal    step10
-        local step10SignalAxisL4 = EEPGetSignal(14)         -- store signal    step10
-        local step10SignalAxisK1 = EEPGetSignal(23)         -- store signal    step10
-        local step10SignalAxisK2 = EEPGetSignal(24)         -- store signal    step10
-        local step10SignalAxisK3 = EEPGetSignal(25)         -- store signal    step10
-        local step10SignalAxisK5 = EEPGetSignal(27)         -- store signal    step10
-        local step10SignalAxisK6 = EEPGetSignal(28)         -- store signal    step10
-        local step10SignalAxisK7 = EEPGetSignal(29)         -- store signal    step10
-        local step10SignalAxisK8 = EEPGetSignal(30)         -- store signal    step10
-        local step10SignalAxisK9 = EEPGetSignal(31)         -- store signal    step10
+        local step10SignalAxisL1 = EEPGetSignal(11)        -- store signal    step10
+        local step10SignalAxisL2 = EEPGetSignal(12)        -- store signal    step10
+        local step10SignalAxisL3 = EEPGetSignal(13)        -- store signal    step10
+        local step10SignalAxisL4 = EEPGetSignal(14)        -- store signal    step10
+        local step10SignalAxisK1 = EEPGetSignal(23)        -- store signal    step10
+        local step10SignalAxisK2 = EEPGetSignal(24)        -- store signal    step10
+        local step10SignalAxisK3 = EEPGetSignal(25)        -- store signal    step10
+        local step10SignalAxisK5 = EEPGetSignal(27)        -- store signal    step10
+        local step10SignalAxisK6 = EEPGetSignal(28)        -- store signal    step10
+        local step10SignalAxisK7 = EEPGetSignal(29)        -- store signal    step10
+        local step10SignalAxisK8 = EEPGetSignal(30)        -- store signal    step10
+        local step10SignalAxisK9 = EEPGetSignal(31)        -- store signal    step10
         it("# step10 - Crossing ready    ", function () assert.is_false(step10Ready) end)
         it("# step10 - Signal L1 (11) ", function () assert.equals(U_R, step10SignalAxisL1) end)
         it("# step10 - Signal L2 (12) ", function () assert.equals(U_R, step10SignalAxisL2) end)
@@ -838,18 +838,18 @@ insulate("Check signal phase", function ()
 
     do
         local step11Ready = crossing:isGreenTimeFinished() --                     step11
-        local step11SignalAxisL1 = EEPGetSignal(11)         -- store signal    step11
-        local step11SignalAxisL2 = EEPGetSignal(12)         -- store signal    step11
-        local step11SignalAxisL3 = EEPGetSignal(13)         -- store signal    step11
-        local step11SignalAxisL4 = EEPGetSignal(14)         -- store signal    step11
-        local step11SignalAxisK1 = EEPGetSignal(23)         -- store signal    step11
-        local step11SignalAxisK2 = EEPGetSignal(24)         -- store signal    step11
-        local step11SignalAxisK3 = EEPGetSignal(25)         -- store signal    step11
-        local step11SignalAxisK5 = EEPGetSignal(27)         -- store signal    step11
-        local step11SignalAxisK6 = EEPGetSignal(28)         -- store signal    step11
-        local step11SignalAxisK7 = EEPGetSignal(29)         -- store signal    step11
-        local step11SignalAxisK8 = EEPGetSignal(30)         -- store signal    step11
-        local step11SignalAxisK9 = EEPGetSignal(31)         -- store signal    step11
+        local step11SignalAxisL1 = EEPGetSignal(11)        -- store signal    step11
+        local step11SignalAxisL2 = EEPGetSignal(12)        -- store signal    step11
+        local step11SignalAxisL3 = EEPGetSignal(13)        -- store signal    step11
+        local step11SignalAxisL4 = EEPGetSignal(14)        -- store signal    step11
+        local step11SignalAxisK1 = EEPGetSignal(23)        -- store signal    step11
+        local step11SignalAxisK2 = EEPGetSignal(24)        -- store signal    step11
+        local step11SignalAxisK3 = EEPGetSignal(25)        -- store signal    step11
+        local step11SignalAxisK5 = EEPGetSignal(27)        -- store signal    step11
+        local step11SignalAxisK6 = EEPGetSignal(28)        -- store signal    step11
+        local step11SignalAxisK7 = EEPGetSignal(29)        -- store signal    step11
+        local step11SignalAxisK8 = EEPGetSignal(30)        -- store signal    step11
+        local step11SignalAxisK9 = EEPGetSignal(31)        -- store signal    step11
         it("# step11 - Crossing ready    ", function () assert.is_false(step11Ready) end)
         it("# step11 - Signal L1 (11) ", function () assert.equals(U_R, step11SignalAxisL1) end)
         it("# step11 - Signal L2 (12) ", function () assert.equals(U_R, step11SignalAxisL2) end)
@@ -870,18 +870,18 @@ insulate("Check signal phase", function ()
 
     do
         local step12Ready = crossing:isGreenTimeFinished() --                     step12
-        local step12SignalAxisL1 = EEPGetSignal(11)         -- store signal    step12
-        local step12SignalAxisL2 = EEPGetSignal(12)         -- store signal    step12
-        local step12SignalAxisL3 = EEPGetSignal(13)         -- store signal    step12
-        local step12SignalAxisL4 = EEPGetSignal(14)         -- store signal    step12
-        local step12SignalAxisK1 = EEPGetSignal(23)         -- store signal    step12
-        local step12SignalAxisK2 = EEPGetSignal(24)         -- store signal    step12
-        local step12SignalAxisK3 = EEPGetSignal(25)         -- store signal    step12
-        local step12SignalAxisK5 = EEPGetSignal(27)         -- store signal    step12
-        local step12SignalAxisK6 = EEPGetSignal(28)         -- store signal    step12
-        local step12SignalAxisK7 = EEPGetSignal(29)         -- store signal    step12
-        local step12SignalAxisK8 = EEPGetSignal(30)         -- store signal    step12
-        local step12SignalAxisK9 = EEPGetSignal(31)         -- store signal    step12
+        local step12SignalAxisL1 = EEPGetSignal(11)        -- store signal    step12
+        local step12SignalAxisL2 = EEPGetSignal(12)        -- store signal    step12
+        local step12SignalAxisL3 = EEPGetSignal(13)        -- store signal    step12
+        local step12SignalAxisL4 = EEPGetSignal(14)        -- store signal    step12
+        local step12SignalAxisK1 = EEPGetSignal(23)        -- store signal    step12
+        local step12SignalAxisK2 = EEPGetSignal(24)        -- store signal    step12
+        local step12SignalAxisK3 = EEPGetSignal(25)        -- store signal    step12
+        local step12SignalAxisK5 = EEPGetSignal(27)        -- store signal    step12
+        local step12SignalAxisK6 = EEPGetSignal(28)        -- store signal    step12
+        local step12SignalAxisK7 = EEPGetSignal(29)        -- store signal    step12
+        local step12SignalAxisK8 = EEPGetSignal(30)        -- store signal    step12
+        local step12SignalAxisK9 = EEPGetSignal(31)        -- store signal    step12
         it("# step12 - Crossing ready    ", function () assert.is_false(step12Ready) end)
         it("# step12 - Signal L1 (11) ", function () assert.equals(U_R, step12SignalAxisL1) end)
         it("# step12 - Signal L2 (12) ", function () assert.equals(U_R, step12SignalAxisL2) end)
@@ -902,18 +902,18 @@ insulate("Check signal phase", function ()
 
     do
         local step13Ready = crossing:isGreenTimeFinished() --                     step13
-        local step13SignalAxisL1 = EEPGetSignal(11)         -- store signal    step13
-        local step13SignalAxisL2 = EEPGetSignal(12)         -- store signal    step13
-        local step13SignalAxisL3 = EEPGetSignal(13)         -- store signal    step13
-        local step13SignalAxisL4 = EEPGetSignal(14)         -- store signal    step13
-        local step13SignalAxisK1 = EEPGetSignal(23)         -- store signal    step13
-        local step13SignalAxisK2 = EEPGetSignal(24)         -- store signal    step13
-        local step13SignalAxisK3 = EEPGetSignal(25)         -- store signal    step13
-        local step13SignalAxisK5 = EEPGetSignal(27)         -- store signal    step13
-        local step13SignalAxisK6 = EEPGetSignal(28)         -- store signal    step13
-        local step13SignalAxisK7 = EEPGetSignal(29)         -- store signal    step13
-        local step13SignalAxisK8 = EEPGetSignal(30)         -- store signal    step13
-        local step13SignalAxisK9 = EEPGetSignal(31)         -- store signal    step13
+        local step13SignalAxisL1 = EEPGetSignal(11)        -- store signal    step13
+        local step13SignalAxisL2 = EEPGetSignal(12)        -- store signal    step13
+        local step13SignalAxisL3 = EEPGetSignal(13)        -- store signal    step13
+        local step13SignalAxisL4 = EEPGetSignal(14)        -- store signal    step13
+        local step13SignalAxisK1 = EEPGetSignal(23)        -- store signal    step13
+        local step13SignalAxisK2 = EEPGetSignal(24)        -- store signal    step13
+        local step13SignalAxisK3 = EEPGetSignal(25)        -- store signal    step13
+        local step13SignalAxisK5 = EEPGetSignal(27)        -- store signal    step13
+        local step13SignalAxisK6 = EEPGetSignal(28)        -- store signal    step13
+        local step13SignalAxisK7 = EEPGetSignal(29)        -- store signal    step13
+        local step13SignalAxisK8 = EEPGetSignal(30)        -- store signal    step13
+        local step13SignalAxisK9 = EEPGetSignal(31)        -- store signal    step13
         it("# step13 - Crossing ready    ", function () assert.is_false(step13Ready) end)
         it("# step13 - Signal L1 (11) ", function () assert.equals(U_R, step13SignalAxisL1) end)
         it("# step13 - Signal L2 (12) ", function () assert.equals(U_R, step13SignalAxisL2) end)

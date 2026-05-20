@@ -70,6 +70,7 @@ __pycache__
 /lua/LUA/ce/databridge/exchange/ce-*
 /lua/LUA/ce/databridge/exchange/ce-version.txt
 /lua/LUA/ce/databridge/exchange/commands-to-ce
+/lua/LUA/ce/databridge/exchange/eep-call-analysis.json
 /lua/LUA/ce/databridge/exchange/events-from-ce
 /lua/LUA/ce/databridge/exchange/events-from-ce.pending
 /lua/LUA/ce/databridge/exchange/log-from-ce
