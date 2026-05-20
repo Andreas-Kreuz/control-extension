@@ -4,6 +4,7 @@ export interface TrafficLightModelAppDto {
   id: string;
   name: string;
   type: string;
+  luaConstant?: string;
   positionRed: number;
   positionGreen: number;
   positionYellow: number;

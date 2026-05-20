@@ -5,7 +5,7 @@ Ampeln regeln welche Fahrzeuge fahren und welche Fußgänger gehen dürfen.
 
 ## Begriffe
 
-- **Ampel** / **Traffic Light**:
+- **Ampel** / **Signal**:
 
   _Eine Ampel regelt, wer fahren darf und kann rot, gelb oder grün sein. Eine Kreuzungsschaltung legt fest, welche Ampeln gleichzeitig grün sein dürfen. Für eine bestimmte **Fahrspur** / **Lane** können mehrere unterschiedliche Ampeln gelten. Ampeln können auch für mehrere Fahrspuren gelten._
 
@@ -33,13 +33,13 @@ Ampeln regeln welche Fahrzeuge fahren und welche Fußgänger gehen dürfen.
 
 - **Kreuzung** / **Crossing**
 
-  _An einer Kreuzung treffen mindestens zwei Straßen aufeinander. An einer Ampelkreuzung werden verschiedene Schaltungen genutzt, um den Verkehr zu steuern. Die Schaltungen folgen entweder nach Zeit aufeinander oder anhand des Verkehrsaufkommens. Eine Nachtschaltung kann optional eingeschaltet werden._
+  _An einer Kreuzung treffen mindestens zwei Straßen aufeinander. An einer Ampelkreuzung werden verschiedene Phasen genutzt, um den Verkehr zu steuern. Die Phasen folgen entweder nach Zeit aufeinander oder anhand des Verkehrsaufkommens. Eine Nachtschaltung kann optional eingeschaltet werden._
 
-- **Schaltung** / **Circuit**
+- **Phase** / **Circuit**
 
-  _Eine Schaltung ermöglicht das gleichzeitige Schalten mehrerer Ampeln für Fahrspuren und Fußgänderfurten. Dabei müssen zusammengehörende Richtungsampeln gleichzeitig geschaltet werden._
+  _Eine Phase ermöglicht das gleichzeitige Schalten mehrerer Ampeln für Fahrspuren und Fußgänderfurten. Dabei müssen zusammengehörende Richtungsampeln gleichzeitig geschaltet werden._
 
-  _Eine Schaltung kann auch alle Ampeln einer Kreuzung für den Nachtbetrieb ausschalten oder gelb blinken lassen._
+  _Eine Phase kann auch alle Ampeln einer Kreuzung für den Nachtbetrieb ausschalten oder gelb blinken lassen._
 
 ## Ampelkreuzung in EEP
 
@@ -77,4 +77,4 @@ Eine Ampel kann geschaltet werden, wenn
 
 - aktiv (wenn Anforderungen vorliegen, oder nach Zeit)
 - nur nach Anforderung durch bestimmte Fahrzeuge
-- passiv (wenn sie in einer anderen Schaltung vorkommt)
+- passiv (wenn sie in einer anderen Phase vorkommt)

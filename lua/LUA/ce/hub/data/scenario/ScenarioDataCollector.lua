@@ -1,5 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioDataCollector ...") end
 
+local ScenarioDiscovery = require("ce.hub.data.scenario.ScenarioDiscovery")
+
 ---@class ScenarioDataCollector
 ---@field collectScenario fun():table
 local ScenarioDataCollector = {}
@@ -13,6 +15,12 @@ local function callOptional(fn, ...)
     return value
 end
 
+local function copyList(values)
+    local copy = {}
+    for _, value in ipairs(values or {}) do copy[#copy + 1] = value end
+    return copy
+end
+
 function ScenarioDataCollector.collectScenario()
     return {
         id = "scenario",
@@ -24,7 +32,9 @@ function ScenarioDataCollector.collectScenario()
         eepLanguage = EEPLng,
         activeTrain = callOptional(EEPGetTrainActive),
         activeRollingStock = callOptional(EEPRollingstockGetActive),
-        timeLapse = callOptional(EEPGetTimeLapse)
+        timeLapse = callOptional(EEPGetTimeLapse),
+        staticCameras = copyList(ScenarioDiscovery.getStaticCameras()),
+        dynamicCameras = copyList(ScenarioDiscovery.getDynamicCameras())
     }
 end
 

@@ -16,6 +16,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         clearModule("ce.hub.data.structures.StructureDtoFactory")
         clearModule("ce.hub.data.structures.StructureRegistry")
         clearModule("ce.hub.data.structures.StructureUpdater")
+        clearModule("ce.hub.data.InterestSyncRegistry")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -93,6 +94,8 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
         local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
         local DataStore = require("ce.hub.publish.InternalDataStore")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 
         StructureDiscovery.runInitialDiscovery()
         StructureUpdater.runInitialUpdate()
@@ -138,6 +141,14 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
         states["#2"].fire = true
         states["#3"].tag = "tree-north"
+        StructureUpdater.runUpdate()
+        StructureStatePublisher.syncState()
+
+        assert.is_false(DataStore.get("ce.hub.Structure", "#2").fire)
+        assert.equals("tree", DataStore.get("ce.hub.Structure", "#3").tag)
+
+        InterestSyncRegistry.startSyncFor(HubCeTypes.Structure, "#2")
+        InterestSyncRegistry.startSyncFor(HubCeTypes.Structure, "#3")
         StructureUpdater.runUpdate()
         StructureStatePublisher.syncState()
 

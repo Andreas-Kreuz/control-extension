@@ -4,6 +4,7 @@ import navItems from './hooks/navItems';
 import RootLayout from './components/RootLayout';
 
 const WebLayoutSelector = lazy(() => import('./old/WebLayoutSelector'));
+const CompanionRoute = lazy(() => import('../features/companion/CompanionRoute'));
 const DataRoute = lazy(() => import('../features/data/DataRoute'));
 const RoadRoute = lazy(() => import('../features/road/RoadRoute'));
 const HomeRoute = lazy(() => import('../features/home/HomeRoute'));
@@ -27,6 +28,7 @@ const homeRoutes = [
 ];
 
 export const appRouter = createBrowserRouter([
+  { path: '/companion', element: <CompanionRoute /> },
   {
     path: '/simple',
     element: <WebLayoutSelector simple />,

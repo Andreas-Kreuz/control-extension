@@ -31,6 +31,12 @@ local function coerceCommandArg(value)
     return value
 end
 
+local function resolveCommandFunction(fName, registeredFunction)
+    if not registeredFunction then return nil end
+    if string.find(fName, "^EEP") and type(_G[fName]) == "function" then return _G[fName] end
+    return registeredFunction
+end
+
 --- Adding an accepted function
 ---NOTE: acceptedFunctions are typically added via the Modules BridgeConnector
 ---@param fName string @using the name of the function as called from EEP-Web
@@ -64,7 +70,7 @@ function IncomingCommandExecutor.executeCommandSafely(functionAndArgs)
         return
     end
 
-    local f = allowedCommands[fName]
+    local f = resolveCommandFunction(fName, allowedCommands[fName])
 
     if not f then
         print(string.format("[#IncomingCommandExecutor] Command '%s' is not allowed", fName))

@@ -1,4 +1,4 @@
-# Architektur `ce.mods.road`
+﻿# Architektur `ce.mods.road`
 
 ## Zweck
 
@@ -8,7 +8,7 @@ Die Kernaufgaben sind aktuell:
 
 - Modellierung von Ampeltypen und konkreten Ampelinstanzen
 - Verwaltung von Fahrspuren, Warteschlangen und Anforderungen
-- Auswahl und zeitliche Ausführung der nächsten Kreuzungsschaltung
+- Auswahl und zeitliche Ausführung der nächsten Verkehrsphase
 - Pflege von Tipptexten an Signalen und optionalen Strukturen
 - Export des Zustands für Web-Server und Web-App
 - Bereitstellung kleiner EEP-naher Hilfen wie Straßenbahnweichen und Bus-Callbacks
@@ -24,14 +24,14 @@ Das Paket ist jetzt in drei Bereiche gegliedert:
   [Bus.lua](./Bus.lua),
   [Intersection.lua](./Intersection.lua),
   [CeRoadModule.lua](./CeRoadModule.lua),
-  [IntersectionSequence.lua](./IntersectionSequence.lua),
+  [TrafficPhase.lua](./TrafficPhase.lua),
   [IntersectionSettings.lua](./IntersectionSettings.lua),
   [Lane.lua](./Lane.lua),
   [LaneSettings.lua](./LaneSettings.lua),
   [LightStructureTrafficLight.lua](./LightStructureTrafficLight.lua),
   [TrafficLight.lua](./TrafficLight.lua),
   [TrafficLightModel.lua](./TrafficLightModel.lua),
-  [TrafficLightState.lua](./TrafficLightState.lua),
+  [SignalIndication.lua](./SignalIndication.lua),
   [TramSwitch.lua](./TramSwitch.lua)
 - [data/](./data/):
   [RoadDataCollector.lua](./data/RoadDataCollector.lua),
@@ -54,7 +54,7 @@ Wichtige Einordnung:
 
 Das Paket besteht aktuell aus fünf funktionalen Bereichen:
 
-1. Domänenmodell: `TrafficLightState`, `TrafficLightModel`, `TrafficLight`, `Lane`, `IntersectionSequence`, `Intersection`
+1. Domänenmodell: `SignalIndication`, `TrafficLightModel`, `TrafficLight`, `Lane`, `TrafficPhase`, `Intersection`
 2. Modul- und Laufzeitintegration: `CeRoadModule`, `IntersectionSettings`
 3. Datenexport: `RoadDataCollector`, `TrafficLightModelsDataCollector`, `RoadDtoFactory`, `TrafficLightModelDtoFactory`
 4. Web-Anbindung: `RoadStatePublisher`, `TrafficLightModelStatePublisher`, `RoadBridgeConnector`
@@ -62,14 +62,14 @@ Das Paket besteht aktuell aus fünf funktionalen Bereichen:
 
 Der reguläre Ablauf sieht fachlich so aus:
 
-1. Anwendercode erzeugt Modelle, Ampeln, Fahrspuren, Schaltungen und Kreuzungen.
-2. `CeRoadModule.init()` registriert State-Publisher und Remote-Funktionen und ruft `Intersection.initSequences()` auf.
-3. `CeRoadModule.run()` ruft zyklisch `Intersection.switchSequences()` auf.
-4. `Intersection` berechnet je Kreuzung die nächste Schaltung und plant deren Ablauf über `Task` und `Scheduler`.
+1. Anwendercode erzeugt Modelle, Ampeln, Fahrspuren, Phasen und Kreuzungen.
+2. `CeRoadModule.init()` registriert State-Publisher und Remote-Funktionen und ruft `Intersection.initPhases()` auf.
+3. `CeRoadModule.run()` ruft zyklisch `Intersection.switchPhases()` auf.
+4. `Intersection` berechnet je Kreuzung die nächste Phase und plant deren Ablauf über `Task` und `Scheduler`.
 5. `TrafficLight` setzt Signalstellungen, Lichtimmobilien, Achsen und Tipptexte in EEP um.
 6. Die Publisher senden Web-Zustände über `DataChangeBus`, die Datenbeschaffung dafür liegt in den Collectors unter `data/`.
 
-Wichtig: Die Web-Schicht liest den Zustand aus den Fachobjekten aus, steuert aber nicht den Kernablauf. Die Umschaltlogik liegt vollständig in `Intersection`, `IntersectionSequence`, `Lane` und `TrafficLight`.
+Wichtig: Die Web-Schicht liest den Zustand aus den Fachobjekten aus, steuert aber nicht den Kernablauf. Die Umschaltlogik liegt vollständig in `Intersection`, `TrafficPhase`, `Lane` und `TrafficLight`.
 
 ## Bausteine
 
@@ -81,8 +81,8 @@ Verantwortlichkeiten:
 
 - einmalige Initialisierung des Pakets
 - Registrierung der State-Publisher und Remote-Funktionen über `RoadBridgeConnector`
-- Aufruf von `Intersection.initSequences()` nach Abschluss der Konfiguration
-- zyklischer Aufruf von `Intersection.switchSequences()`
+- Aufruf von `Intersection.initPhases()` nach Abschluss der Konfiguration
+- zyklischer Aufruf von `Intersection.switchPhases()`
 - implizites Nachziehen der Scheduler-Abhängigkeit über das eingebaute Hub-Modul `ce.hub.CeHubModule`
 
 ### [Intersection.lua](./Intersection.lua)
@@ -92,57 +92,57 @@ Zentrales Fachobjekt für eine Kreuzung und Haupt-Orchestrator der Verkehrslogik
 Verantwortlichkeiten:
 
 - Verwaltung aller Kreuzungen in `Intersection.allIntersections`
-- Halten von Schaltungen, Fahrspuren, Ampeln, optionalen Kameras und einer optionalen Tipptext-Struktur
-- Umschalten zwischen Automatikmodus, manueller Schaltung und strikter Reihenfolge
-- Berechnung der nächsten Schaltung über manuelle Vorgabe, Rundlauf oder Prioritätsvergleich
+- Halten von Phasen, Fahrspuren, Signalen, Ampelgruppen, optionalen Kameras und einer optionalen Tipptext-Struktur
+- Umschalten zwischen Automatikmodus, manueller Phase und strikter Reihenfolge
+- Berechnung der nächsten Phase über manuelle Vorgabe, Rundlauf oder Prioritätsvergleich
 - Planung der zeitlichen Schaltfolge über `Task` und `Scheduler`
 - Aktualisierung von Signal- und Struktur-Tipptexten
 - Sammel-Reset aller Fahrspuren über `Intersection.resetVehicles()`
 
 Wichtige Zustandsfelder pro Kreuzung:
 
-- `currentSequence`
-- `manualSequence`
-- `nextSequence`
-- `greenPhaseReached`
-- `greenPhaseFinished`
-- `greenPhaseSeconds`
+- `currentPhase`
+- `manualPhase`
+- `nextPhase`
+- `greenReached`
+- `greenTimeFinished`
+- `greenTimeSeconds`
 - `switchInStrictOrder`
 - `lanes`
-- `trafficLights`
+- `signals`
 - `staticCams`
 - `tippStructure`
 
 Besonderheiten:
 
-- `Intersection.initSequences()` leitet die effektiven Fahrspuren einer Kreuzung aus den registrierten Sequenzen ab.
-- `Intersection.switchSequences()` aktualisiert zusätzlich die globalen Signal-ID-Tipptexte für die Signal-IDs `1..1000`, sobald sich `IntersectionSettings.showSignalIdOnSignal` ändert.
+- `Intersection.initPhases()` leitet die effektiven Fahrspuren einer Kreuzung aus den registrierten Phasen ab.
+- `Intersection.switchPhases()` aktualisiert zusätzlich die globalen Signal-ID-Tipptexte für die Signal-IDs `1..1000`, sobald sich `IntersectionSettings.showSignalIdOnSignal` ändert.
 - Neben `Intersection.allIntersections` existiert dateiintern noch eine zweite Tabelle `allIntersections`, die in einigen Schleifen ebenfalls verwendet wird.
 
-### [IntersectionSequence.lua](./IntersectionSequence.lua)
+### [TrafficPhase.lua](./TrafficPhase.lua)
 
-Fachobjekt für eine Schaltung innerhalb einer Kreuzung.
+Fachobjekt für eine Phase innerhalb einer Kreuzung.
 
 Verantwortlichkeiten:
 
-- Gruppierung von Ampeln nach Typ
+- Gruppierung von Ampelgruppen nach Typ
 - Ableitung der zugehörigen Fahrspuren aus den registrierten Ampeln
-- Vergleich alter und neuer Schaltung
+- Vergleich alter und neuer Phase
 - Erzeugung des zeitlichen Umschaltplans
 - Berechnung und Zwischenspeicherung der mittleren Priorität `prio`
 
 Wichtige Fachlogik:
 
-- `trafficLightsToTurnRedAndGreen(oldSequence)` bestimmt, welche Ampeln ihren Typ oder Zustand wechseln
-- `tasksForSwitchingFrom(oldSequence, afterRedTask)` erzeugt die Taskfolge für Rot, Gelb, Rot-Gelb, Grün und Fußgängerphasen
-- `lanesSortedByPriority()` berechnet die mittlere Priorität einer Schaltung aus den zugehörigen Fahrspuren
-- `sequencePriorityComparator(...)` vergleicht zwei Schaltungen für die automatische Auswahl
+- `signalHeadsToTurnRedAndGreen(oldPhase)` bestimmt, welche logischen Signal-Head-Verwendungen ihren Typ oder Zustand wechseln
+- `tasksForPhaseChangeFrom(oldPhase, afterRedTask)` erzeugt die Taskfolge für Rot, Gelb, Rot-Gelb, Grün und Fußgängerphasen
+- `lanesSortedByPriority()` berechnet die mittlere Priorität einer Phase aus den zugehörigen Fahrspuren
+- `phasePriorityComparator(...)` vergleicht zwei Phasen für die automatische Auswahl
 
 Aktueller Stand der Typen:
 
 - Definiert sind `BUS`, `CAR`, `TRAM`, `PEDESTRIAN` und `BICYCLE`
 - Im Kernpfad verwendet werden aktuell `CAR`, `TRAM` und `PEDESTRIAN`
-- Öffentliche Helfer zum Befüllen gibt es derzeit nur für `addCarLights(...)`, `addTramLights(...)` und `addPedestrianLights(...)`
+- Öffentlich befüllt wird eine Phase mit `TrafficPhase:addSignalGroup(...)`. Die Ampelgruppen selbst werden über `SignalGroup:addVehicleSignals(...)`, `SignalGroup:addTramSignals(...)` und `SignalGroup:addPedestrianSignals(...)` aufgebaut.
 
 ### [Lane.lua](./Lane.lua)
 
@@ -151,11 +151,11 @@ Zustandsbehaftetes Fachobjekt für eine Fahrspur.
 Verantwortlichkeiten:
 
 - Verwaltung von Fahrzeugwarteschlange, Fahrzeuganzahl, Wartezyklen und aktueller Fahrspurphase
-- Persistenz des Fahrspurzustands über `StorageUtility`
+- Persistenz des Fahrspurzustands im Tipptext des Fahrspur-Signals
 - Ermittlung von Anforderungen über Kontaktpunkte, Signale oder reservierte Straßentracks
-- Berechnung von Fahrspurprioritäten für die Schaltungswahl
-- Zuordnung zusätzlicher Anforderungsampeln abhängig von Routen
-- Spiegelung des Fahrzustands auf das sichtbare Fahrspursignal
+- Berechnung von Fahrspurprioritäten für die Phasenwahl
+- Zuordnung zusätzlicher Anforderungs-Ampelgruppen abhängig von Routen
+- Spiegelung des Fahrzustands auf das eine EEP-Fahrspur-Signal `laneSignal`
 
 Wichtige Betriebsarten für Anforderungen:
 
@@ -167,12 +167,15 @@ Wichtige Zustandsfelder:
 
 - `vehicleCount`
 - `waitCount`
-- `phase`
+- `currentIndication`
 - `queue`
 - `firstVehiclesRoute`
 - `requestType`
-- `trafficLightsToDriveOn`
-- `requestTrafficLights`
+- `laneSignal`: das einzelne EEP-Signal, das Fahrzeuge auf der Fahrspur anhält oder freigibt
+- `signalsToDriveOn`
+- `defaultDriveSignals`
+- `routeDriveRules`
+- `requestSignals`
 - `signalUsedForRequest`
 - `tracksUsedForRequest`
 
@@ -183,7 +186,7 @@ Persistierte Felder pro Fahrspur:
 - `p`: letzte Phase
 - `q`: Warteschlange als Pipe-getrennter String
 
-Wichtig: `StorageUtility.saveTable()` und `loadTable()` arbeiten nur mit String-Werten. `Lane` serialisiert Zahlen, Status und Warteschlangen deshalb explizit als Strings.
+Wichtig: Signal-Tipptexte speichern nur Strings. `Lane` serialisiert Zahlen, Status und Warteschlangen deshalb explizit als Strings.
 
 ### [TrafficLight.lua](./TrafficLight.lua)
 
@@ -192,7 +195,7 @@ Fachobjekt für eine konkrete Ampelinstanz.
 Verantwortlichkeiten:
 
 - Verknüpfung einer EEP-Signal-ID mit einem `TrafficLightModel`
-- Halten der aktuellen Phase
+- Halten der aktuellen Signalindikation
 - Schalten des EEP-Signals über `EEPSetSignal(...)`
 - Schalten zusätzlicher Lichtimmobilien über `EEPStructureSetLight(...)`
 - Schalten zusätzlicher Achsimmobilien über `EEPStructureSetAxis(...)`
@@ -203,7 +206,10 @@ Besonderheiten:
 
 - negative oder nicht nutzbare Signal-IDs werden intern auf eigene negative IDs abgebildet; diese Ampeln sind logisch verwaltet und schalten kein EEP-Signal
 - `lightStructures` und `axisStructures` ergänzen die eigentliche Signalsteuerung
-- `applyToLane(...)` koppelt eine Ampel an Fahrspuren und nutzt intern `lane:driveOn(...)`
+- `Lane:driveOnDefaultSignalGroups(...)`, `Lane:routes(...):driveOnlyOnSignalGroups(...)` und `Lane:routes(...):driveAlsoOnSignalGroups(...)` koppeln Fahrspuren an Freigabe-Ampelgruppen
+- `driveOnDefaultSignalGroups(...)` setzt Standard-Freigaben; `driveAlsoOnSignalGroups(...)` ergänzt sie für benannte Routen; `driveOnlyOnSignalGroups(...)` ersetzt sie für benannte Routen
+- `routes(...)` muss mindestens eine Route enthalten
+- ältere direkte TrafficLight-Lane-APIs bleiben zur Kompatibilität erhalten und delegieren auf die Lane-API
 - `showRequestOnSignal(...)` steuert optionale Anforderungslichter an Zusatz-Immobilien
 - das Feld `reason` ist zwar als Teil des Objekts vorgesehen und wird in `refreshInfo()` abgefragt, wird im aktuellen Codepfad aber nicht aktiv gesetzt
 
@@ -218,9 +224,9 @@ Verantwortlichkeiten:
 - Registrierung aller Modelle in `TrafficLightModel.allModels`
 - Bereitstellung vordefinierter Modelle für mehrere EEP-Ampelsets
 
-Das Modell ist statisch und leichtgewichtig. Laufzeit- und Kreuzungszustand liegen in `TrafficLight`, `Lane`, `IntersectionSequence` und `Intersection`.
+Das Modell ist statisch und leichtgewichtig. Laufzeit- und Kreuzungszustand liegen in `TrafficLight`, `Lane`, `TrafficPhase` und `Intersection`.
 
-### [TrafficLightState.lua](./TrafficLightState.lua)
+### [SignalIndication.lua](./SignalIndication.lua)
 
 Konstanten- und Hilfsschicht für Ampelphasen.
 
@@ -251,7 +257,7 @@ Verantwortlichkeiten:
 Aktuelle Settings:
 
 - `showRequestsOnSignal`
-- `showSequenceOnSignal`
+- `showPhaseOnSignal`
 - `showSignalIdOnSignal`
 - `showLanesOnStructure`
 
@@ -274,7 +280,7 @@ Verantwortlichkeiten:
 Registrierte Remote-Funktionen:
 
 - `IntersectionSettings.setShowRequestsOnSignal`
-- `IntersectionSettings.setShowSequenceOnSignal`
+- `IntersectionSettings.setShowPhaseOnSignal`
 - `IntersectionSettings.setShowSignalIdOnSignal`
 - `IntersectionSettings.setShowLanesOnStructure`
 - `AkKreuzungSchalteAutomatisch`
@@ -286,7 +292,7 @@ State-Publisher für den aktuellen Kreuzungszustand.
 
 Verantwortlichkeiten:
 
-- Export aller Kreuzungen, Schaltungen, Fahrspuren und Ampeln
+- Export aller Kreuzungen, Phasen, Fahrspuren und Ampeln
 - Export der moduleigenen Anzeigeeinstellungen
 - Normalisierung interner Werte für die Web-API
 - Sortierung der Kreuzungen und Fahrspuren für stabile Ausgaben
@@ -296,7 +302,7 @@ Exportierte CeTypes:
 
 - `ce.mods.road.Intersection`
 - `ce.mods.road.IntersectionLane`
-- `ce.mods.road.IntersectionSwitching`
+- `ce.mods.road.IntersectionPhase`
 - `ce.mods.road.IntersectionTrafficLight`
 - `ce.mods.road.ModuleSetting`
 
@@ -309,7 +315,7 @@ State-Publisher für statische Ampelmodelle.
 Verantwortlichkeiten:
 
 - Export aller registrierten `TrafficLightModel`-Definitionen
-- Emission des CeTypes `ce.mods.road.SignalTypeDefinition` über `DataChangeBus`
+- Emission des CeTypes `ce.mods.road.TrafficLightModel` über `DataChangeBus`
 
 Wie bei `RoadStatePublisher` erfolgt der eigentliche Transport aktuell über Events; `syncState()` liefert keine Nutzdaten zurück.
 
@@ -359,24 +365,24 @@ Kleiner Hilfstyp für Fahrspureinstellungen.
 Aktuelle Rolle:
 
 - bündelt `lane`, `directions`, `routes`, `requestType` und `vehicleMultiplier`
-- wird im aktuellen Kernlauf nicht von `Intersection`, `IntersectionSequence` oder dem Web-Export verwendet
+- wird im aktuellen Kernlauf nicht von `Intersection`, `TrafficPhase` oder dem Web-Export verwendet
 
 ## Laufzeitfluss
 
 Der reguläre Ablauf für eine automatisch geschaltete Kreuzung ist aktuell:
 
-1. Anwendercode erzeugt `TrafficLightModel`, `TrafficLight`, `Lane`, `IntersectionSequence` und `Intersection`.
-2. `Lane:new(...)` registriert den Save-Slot, koppelt die sichtbare Fahrspurampel an die Fahrspur und lädt gespeicherten Zustand.
-3. Zusätzliche Freigabeampeln werden optional über `Lane:driveOn(...)` oder `TrafficLight:applyToLane(...)` verdrahtet.
-4. Sequenzen registrieren ihre Ampeln über `addCarLights(...)`, `addTramLights(...)` und `addPedestrianLights(...)`.
-5. `CeRoadModule.init()` registriert Web-Anbindung und ruft `Intersection.initSequences()` auf.
-6. `Intersection.initSequences()` leitet aus allen Sequenzen die effektiven Fahrspuren und Ampeln je Kreuzung ab.
-7. `CeRoadModule.run()` ruft zyklisch `Intersection.switchSequences()` auf.
-8. `Intersection.switchSequences()` prüft pro Kreuzung, ob umgeschaltet werden darf, und ruft intern `switch(crossing)` auf.
-9. `Intersection:calculateNextSequence()` wählt die nächste Schaltung per manueller Vorgabe, strikter Reihenfolge oder Prioritätsvergleich.
-10. `IntersectionSequence:tasksForSwitchingFrom(...)` erzeugt die Taskfolge für Gelb-, Rot-, Rot-Gelb-, Grün- und Fußgängerphasen.
+1. Anwendercode erzeugt `TrafficLightModel`, `TrafficLight`, `Lane`, `TrafficPhase` und `Intersection`.
+2. `Lane:new(..., laneSignal, ...)` setzt das eine EEP-kontrollierende Fahrspur-Signal und lädt gespeicherten Zustand aus dessen Tipptext.
+3. Zusätzliche Freigabe-Ampelgruppen werden optional über `driveOnDefaultSignalGroups(...)`, `routes(...):driveAlsoOnSignalGroups(...)` oder `routes(...):driveOnlyOnSignalGroups(...)` verdrahtet.
+4. Phasen registrieren ihre Ampeln über `TrafficPhase:addSignalGroup(...)`.
+5. `CeRoadModule.init()` registriert Web-Anbindung und ruft `Intersection.initPhases()` auf.
+6. `Intersection.initPhases()` leitet aus allen Phasen die effektiven Fahrspuren und Ampeln je Kreuzung ab.
+7. `CeRoadModule.run()` ruft zyklisch `Intersection.switchPhases()` auf.
+8. `Intersection.switchPhases()` prüft pro Kreuzung, ob umgeschaltet werden darf, und ruft intern `switch(intersection)` auf.
+9. `Intersection:calculateNextPhase()` wählt die nächste Phase per manueller Vorgabe, strikter Reihenfolge oder Prioritätsvergleich.
+10. `TrafficPhase:tasksForPhaseChangeFrom(...)` erzeugt die Taskfolge für Gelb-, Rot-, Rot-Gelb-, Grün- und Fußgängerphasen.
 11. `Scheduler:scheduleTask(...)` plant die einzelnen Umschaltvorgänge.
-12. `TrafficLight.switchAll(...)` und `TrafficLight:switchTo(...)` setzen Signalstellungen, Lichtimmobilien und Achsen.
+12. `TrafficLight.switchAll(...)` und `Signal:switchTo(...)` setzen Signalstellungen, Lichtimmobilien und Achsen.
 13. Nach jedem Zyklus aktualisiert `Intersection` die Signal-Tipptexte und optional die Fahrspurübersicht an einer Struktur.
 14. In Exportzyklen senden die State-Publisher den Web-Zustand über `DataChangeBus`.
 
@@ -387,7 +393,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 3. `Lane:checkRequests()` baut den Anforderungstext neu auf.
 4. `refreshRequests(...)` informiert verknüpfte Anforderungsampeln.
 5. `updateLaneSignal(...)` prüft anhand der freigebenden Ampeln und optionaler Routen, ob die sichtbare Fahrspurampel Grün zeigen darf.
-6. Der Fahrspurzustand wird über `StorageUtility` gespeichert.
+6. Der Fahrspurzustand wird im Tipptext des Fahrspur-Signals gespeichert.
 
 ## Zustand
 
@@ -396,12 +402,12 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 `Intersection` hält:
 
 - alle bekannten Kreuzungen in `Intersection.allIntersections`
-- pro Kreuzung Sequenzen, Fahrspuren, Ampeln, Kameras und optionale Tipptext-Struktur
-- den Umschaltzustand über `currentSequence`, `nextSequence`, `manualSequence`, `greenPhaseReached` und `greenPhaseFinished`
+- pro Kreuzung Phasen, Fahrspuren, Ampeln, Kameras und optionale Tipptext-Struktur
+- den Umschaltzustand über `currentPhase`, `nextPhase`, `manualPhase`, `greenReached` und `greenTimeFinished`
 
-`IntersectionSequence` hält:
+`TrafficPhase` hält:
 
-- die zugeordneten Ampeln mit Typ
+- die zugeordneten Ampelgruppen und logischen Signal-Head-Verwendungen mit Typ
 - die daraus abgeleiteten Fahrspuren in `lanes`
 - die zuletzt berechnete mittlere Priorität `prio`
 
@@ -409,7 +415,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 
 - Fahrzeuganzahl und Warteschlange
 - verpasste Grünzyklen
-- aktuelle Phase
+- aktuelle Signalindikation
 - Anforderungsmodus
 - optionale Routen- und Freigaberegeln
 - Signal- und Trackkonfiguration
@@ -417,7 +423,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 `TrafficLight` hält:
 
 - Signal-ID und Modell
-- aktuelle Phase
+- aktuelle Signalindikation
 - registrierte Fahrspuren
 - Licht- und Achsimmobilien
 - vorbereitete Tooltip-Fragmente
@@ -436,7 +442,7 @@ Der reguläre Ablauf für Anforderungen in einer Fahrspur ist:
 
 Das Paket nutzt aktuell zwei Persistenzformen:
 
-- `Lane` speichert Laufzeitzustand pro Fahrspur über `StorageUtility`
+- `Lane` speichert Laufzeitzustand pro Fahrspur im Tipptext des Fahrspur-Signals
 - `IntersectionSettings` speichert die globalen Anzeigeeinstellungen über `StorageUtility`
 
 Persistiert werden nur String-Werte. Deshalb serialisieren die Module Zahlen, Booleans und Warteschlangen vor dem Speichern.
@@ -444,19 +450,19 @@ Persistiert werden nur String-Werte. Deshalb serialisieren die Module Zahlen, Bo
 Nicht persistent sind insbesondere:
 
 - die Menge aller Kreuzungen
-- die Zuordnung von Sequenzen zu Kreuzungen
+- die Zuordnung von Phasen zu Kreuzungen
 - die registrierten State-Publisher und Remote-Funktionen
 - statische Kameranamen und Strukturzuordnungen
 - aktuelle Scheduler-Tasks
 
 ## Wichtige Invarianten
 
-- Jede `Lane` hat genau eine sichtbare Fahrspurampel `trafficLight`.
-- Eine `IntersectionSequence` darf nur `TrafficLight`-Objekte enthalten.
-- `Intersection.initSequences()` muss nach Abschluss der Konfiguration laufen, bevor `switchSequences()` sinnvoll arbeitet.
-- `IntersectionSequence:initSequence()` erwartet, dass die Ampeln ihre Fahrspuren bereits kennen.
-- `Lane` und `IntersectionSettings` dürfen in `StorageUtility` nur String-Werte ablegen.
-- Negative interne Signal-IDs stehen für logisch verwaltete Ampeln; `TrafficLight:switchSignal(...)` setzt in diesem Fall kein EEP-Signal.
+- Jede `Lane` hat genau einen `laneSignal`, der den Verkehr in EEP anhält oder freigibt.
+- Eine `TrafficPhase` darf nur `TrafficLight`-Objekte enthalten.
+- `Intersection.initPhases()` muss nach Abschluss der Konfiguration laufen, bevor `switchPhases()` sinnvoll arbeitet.
+- `TrafficPhase:initPhase()` erwartet, dass die Ampeln ihre Fahrspuren bereits kennen.
+- `Lane` serialisiert in den Signal-Tipptext und `IntersectionSettings` in `StorageUtility` nur String-Werte.
+- Negative interne Signal-IDs stehen für logisch verwaltete Ampeln; `Signal:switchSignal(...)` setzt in diesem Fall kein EEP-Signal.
 - `lightStructures` und `axisStructures` müssen auf existierende EEP-Strukturen beziehungsweise Achsen verweisen; die Hilfsklassen validieren das sofort.
 - Die Web-Kommandos für Kreuzungen werden ausschließlich über `RoadBridgeConnector.registerFunctions()` freigegeben.
 - Die State-Publisher müssen stabile Schlüsselfelder (`id` oder `name`) je exportiertem Element setzen.
@@ -465,15 +471,15 @@ Nicht persistent sind insbesondere:
 
 ### Inkonsistenter Umschaltablauf
 
-Schon kleine Änderungen in `IntersectionSequence:tasksForSwitchingFrom(...)` können den zeitlichen Ablauf zwischen Rot, Gelb, Rot-Gelb, Grün und Fußgängerphasen fachlich brechen.
+Schon kleine Änderungen in `TrafficPhase:tasksForPhaseChangeFrom(...)` können den zeitlichen Ablauf zwischen Rot, Gelb, Rot-Gelb, Grün und Fußgängerphasen fachlich brechen.
 
 ### Verlorene oder fehlerhafte Persistenz
 
-Änderungen an `Lane`-Persistenz oder `IntersectionSettings.saveSettings()/loadSettingsFromSlot()` können bestehende Anlagenzustände unlesbar machen oder Bool-Werte falsch interpretieren.
+Änderungen an `Lane`-Tipptext-Persistenz oder `IntersectionSettings.saveSettings()/loadSettingsFromSlot()` können bestehende Anlagenzustände unlesbar machen oder Bool-Werte falsch interpretieren.
 
 ### Falsche Fahrspurzuteilung
 
-Wenn `Intersection.initSequences()`, `TrafficLight:applyToLane(...)` oder `Lane:driveOn(...)` geändert werden, kann die Prioritätsberechnung falsche Fahrspuren einer Schaltung zuordnen.
+Wenn `Intersection.initPhases()`, `TrafficLight:applyToLane(...)` oder `Lane:driveOn(...)` geändert werden, kann die Prioritätsberechnung falsche Fahrspuren einer Phase zuordnen.
 
 ### Sichtbare Nebenwirkungen in EEP
 
@@ -494,7 +500,7 @@ Wenn `Intersection.initSequences()`, `TrafficLight:applyToLane(...)` oder `Lane:
 - `ce.hub`: `ModuleRegistry`, `StatePublisherRegistry` und weitere Hub-Infrastruktur
 - `ce.hub.scheduler`: `Scheduler`, `Task` und `CeHubModule`
 - `ce.hub.publish`: `DataChangeBus` für Web-Zustandsänderungen
-- `ce.hub.util`: `StorageUtility` für Persistenz
+- `ce.hub.util`: `StorageUtility` für Persistenz-Helfer und Tipptext-Serialisierung
 - `ce.hub.util.Queue`: Warteschlangen der Fahrspuren
 - `ce.hub.eep.TippTextFormatter`: Aufbau der Tipptexte
 
@@ -506,4 +512,4 @@ Bei Änderungen in `ce/mods/road` zuerst diese Fragen beantworten:
 2. Verändert sie zustandsbehafteten Laufzeit- oder Persistenzcode?
 3. Muss die Web-Seite oder das Datenmodell in [DTO.md](./DTO.md) mit angepasst werden?
 4. Greift die Änderung in EEP-nahe Aufrufe, Tipptexte oder globale Callbacks ein?
-5. Bleibt der Umschaltablauf zwischen alter und neuer Sequenz fachlich korrekt und zeitlich vollständig?
+5. Bleibt der Umschaltablauf zwischen alter und neuer Phase fachlich korrekt und zeitlich vollständig?

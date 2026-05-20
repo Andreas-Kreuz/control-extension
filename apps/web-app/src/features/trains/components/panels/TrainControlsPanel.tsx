@@ -34,10 +34,22 @@ function TrainControlsPanel(props: {
           label="Kupplung hinten"
           onChange={(checked) => props.onCouplingChange('rear', checked)}
         />
-        <DrivingLightControl checked={props.lights?.['0'] === true} onChange={(checked) => props.onLightChange(0, checked)} />
-        <BrakeLightControl checked={props.lights?.['3'] === true} onChange={(checked) => props.onLightChange(3, checked)} />
-        <BlinkerLeftControl checked={props.lights?.['1'] === true} onChange={(checked) => props.onLightChange(1, checked)} />
-        <BlinkerRightControl checked={props.lights?.['2'] === true} onChange={(checked) => props.onLightChange(2, checked)} />
+        <DrivingLightControl
+          checked={props.lights?.['0'] === true}
+          onChange={(checked) => props.onLightChange(0, checked)}
+        />
+        <BrakeLightControl
+          checked={props.lights?.['3'] === true}
+          onChange={(checked) => props.onLightChange(3, checked)}
+        />
+        <BlinkerLeftControl
+          checked={props.lights?.['1'] === true}
+          onChange={(checked) => props.onLightChange(1, checked)}
+        />
+        <BlinkerRightControl
+          checked={props.lights?.['2'] === true}
+          onChange={(checked) => props.onLightChange(2, checked)}
+        />
       </ControlGrid>
       <TrainCamsPanel cameras={props.cameraSources} onCameraSelect={props.onCameraSelect} />
     </Stack>

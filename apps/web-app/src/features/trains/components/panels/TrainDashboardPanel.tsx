@@ -22,7 +22,7 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
   if (dashboard.status === 'empty') {
     return (
       <PageContainer>
-        <PageHeadline>Aktiver Zug</PageHeadline>
+        <PageHeadline icon={<DashboardIcon color="primary" />}>Aktiver Zug</PageHeadline>
         <IconHeaderCard title="Kein Zug in EEP ausgewählt" icon={<DashboardIcon color="primary" />}>
           <Typography variant="body2" color="textSecondary">
             Wähle in EEP einen RollingStock oder Zug aus, dann folgt dieses Dashboard automatisch.
@@ -35,7 +35,7 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
   if (dashboard.status === 'loading') {
     return (
       <PageContainer>
-        <PageHeadline>Aktiver Zug</PageHeadline>
+        <PageHeadline icon={<DashboardIcon color="primary" />}>Aktiver Zug</PageHeadline>
         <IconHeaderCard title="Zugdaten" icon={<DashboardIcon color="primary" />}>
           <Typography variant="body2" color="textSecondary">
             Zugdaten werden geladen.
@@ -47,7 +47,7 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
 
   return (
     <PageContainer>
-      <PageHeadline>Aktiver Zug</PageHeadline>
+      <PageHeadline icon={<DashboardIcon color="primary" />}>Aktiver Zug</PageHeadline>
       <Stack spacing={2}>
         <CardGridContainer>
           <Grid size={{ xs: 12 }}>
@@ -56,8 +56,10 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
           <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
             <IconHeaderCard title={trainSections.trainInfo.title} icon={trainSections.trainInfo.icon}>
               <TrainInfoPanel
+                licencePlates={dashboard.licencePlates}
                 train={dashboard.train}
                 {...(dashboard.transit !== undefined ? { transit: dashboard.transit } : {})}
+                vehicleNumbers={dashboard.vehicleNumbers}
                 onSpeedCommit={dashboard.onSpeedCommit}
               />
             </IconHeaderCard>

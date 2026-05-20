@@ -89,40 +89,40 @@ do
     --        |              |            +------------------------- Speicher ID - um die Anzahl der Fahrzeuge
     --        |              |            |                                        und die Wartezeit zu speichern
     --        |              |            |    +-------------------- Ampel (Variablenname von oben)
-    c2Lane1 = Lane:new("Fahrspur 1 - K2", 121, K1, { "RIGHT" })
-    c2Lane2 = Lane:new("Fahrspur 2 - K2", 122, K2, { "STRAIGHT" })
-    c2Lane3 = Lane:new("Fahrspur 3 - K2", 123, K3, { "STRAIGHT" })
-    c2Lane4 = Lane:new("Fahrspur 4 - K2", 124, K4, { "LEFT" })
-    c2Lane5 = Lane:new("Fahrspur 5 - K2", 125, K5, { "LEFT", "RIGHT" })
+    c2Lane1 = Lane:new("Fahrspur 1 - K2", K1, { "RIGHT" })
+    c2Lane2 = Lane:new("Fahrspur 2 - K2", K2, { "STRAIGHT" })
+    c2Lane3 = Lane:new("Fahrspur 3 - K2", K3, { "STRAIGHT" })
+    c2Lane4 = Lane:new("Fahrspur 4 - K2", K4, { "LEFT" })
+    c2Lane5 = Lane:new("Fahrspur 5 - K2", K5, { "LEFT", "RIGHT" })
 
-    -- region K2-Schaltungen
+    -- region K2-Phasen
     -------------------------------------------------------------------------------------------------------------------
-    -- Definiere alle Schaltungen fuer Kreuzung 2
+    -- Definiere alle Phasen fuer Kreuzung 2
     -------------------------------------------------------------------------------------------------------------------
-    -- Eine Schaltung bestimmt, welche Fahrspuren gleichzeitig auf grün geschaltet werden dürfen, alle anderen sind rot
+    -- Eine Phase bestimmt, welche Fahrspuren gleichzeitig auf grün geschaltet werden dürfen, alle anderen sind rot
 
     c2 = Intersection:new("Kreuzung 2")
+    local sgLane1Right = c2:newSignalGroup("sgLane1Right"):addVehicleSignals(K1)
+    local sgLane2Straight = c2:newSignalGroup("sgLane2Straight"):addVehicleSignals(K2)
+    local sgLane3Straight = c2:newSignalGroup("sgLane3Straight"):addVehicleSignals(K3)
+    local sgLane4Left = c2:newSignalGroup("sgLane4Left"):addVehicleSignals(K4)
+    local sgLane5LeftRight = c2:newSignalGroup("sgLane5LeftRight"):addVehicleSignals(K5)
 
-    --- Kreuzung 2: Schaltung 1
-    local c2Sequence1 = c2:newSequence("Schaltung 1")
-    c2Sequence1:addCarLights(K1)
-    c2Sequence1:addCarLights(K2)
-    c2Sequence1:addCarLights(K3)
+    --- Kreuzung 2: Phase 1
+    local c2Phase1 = c2:newPhase("P1")
+    c2Phase1:addSignalGroup(sgLane1Right, sgLane2Straight, sgLane3Straight)
 
-    --- Kreuzung 2: Schaltung 2
-    local c2Sequence2 = c2:newSequence("Schaltung 2")
-    c2Sequence2:addCarLights(K1)
-    c2Sequence2:addCarLights(K2)
+    --- Kreuzung 2: Phase 2
+    local c2Phase2 = c2:newPhase("P2")
+    c2Phase2:addSignalGroup(sgLane1Right, sgLane2Straight)
 
-    --- Kreuzung 2: Schaltung 3
-    local c2Sequence3 = c2:newSequence("Schaltung 3")
-    c2Sequence3:addCarLights(K3)
-    c2Sequence3:addCarLights(K4)
+    --- Kreuzung 2: Phase 3
+    local c2Phase3 = c2:newPhase("P3")
+    c2Phase3:addSignalGroup(sgLane3Straight, sgLane4Left)
 
-    --- Kreuzung 2: Schaltung 4
-    local c2Sequence4 = c2:newSequence("Schaltung 4")
-    c2Sequence4:addCarLights(K5)
-
+    --- Kreuzung 2: Phase 4
+    local c2Phase4 = c2:newPhase("P4")
+    c2Phase4:addSignalGroup(sgLane5LeftRight)
     c2:addStaticCam("Kreuzung 2")
     c2:setTippStructure("#18")
 end
@@ -151,14 +151,14 @@ do
     --        |        |                  +------------------------- Speicher ID - um die Anzahl der Fahrzeuge
     --        |        |                  |                                        und die Wartezeit zu speichern
     --        |        |                  |    +-------------------- Ampel (Variablenname von oben)
-    c1Lane1 = Lane:new("Fahrspur 1 - K1", 101, K1, { "STRAIGHT", "RIGHT" })
-    c1Lane2 = Lane:new("Fahrspur 2 - K1", 102, K2, { "LEFT" })
-    c1Lane3 = Lane:new("Fahrspur 3 - K1", 103, K3, { "STRAIGHT", "RIGHT" })
-    c1Lane4 = Lane:new("Fahrspur 4 - K1", 104, K4, { "LEFT" })
-    c1Lane5 = Lane:new("Fahrspur 5 - K1", 105, K5, { "STRAIGHT", "RIGHT" })
-    c1Lane6 = Lane:new("Fahrspur 6 - K1", 106, K6, { "LEFT" })
-    c1Lane7 = Lane:new("Fahrspur 7 - K1", 107, K7, { "STRAIGHT", "RIGHT" })
-    c1Lane8 = Lane:new("Fahrspur 8 - K1", 108, K8, { "LEFT" })
+    c1Lane1 = Lane:new("Fahrspur 1 - K1", K1, { "STRAIGHT", "RIGHT" })
+    c1Lane2 = Lane:new("Fahrspur 2 - K1", K2, { "LEFT" })
+    c1Lane3 = Lane:new("Fahrspur 3 - K1", K3, { "STRAIGHT", "RIGHT" })
+    c1Lane4 = Lane:new("Fahrspur 4 - K1", K4, { "LEFT" })
+    c1Lane5 = Lane:new("Fahrspur 5 - K1", K5, { "STRAIGHT", "RIGHT" })
+    c1Lane6 = Lane:new("Fahrspur 6 - K1", K6, { "LEFT" })
+    c1Lane7 = Lane:new("Fahrspur 7 - K1", K7, { "STRAIGHT", "RIGHT" })
+    c1Lane8 = Lane:new("Fahrspur 8 - K1", K8, { "LEFT" })
 
     local F1 = TrafficLight:newPedestrianOnly("F1", 40, Grundmodell_Ampel_3_FG)
     local F2 = TrafficLight:newPedestrianOnly("F2", 41, Grundmodell_Ampel_3_FG)
@@ -170,38 +170,38 @@ do
     local F8 = TrafficLight:newPedestrianOnly("F8", 43, Grundmodell_Ampel_3_FG)
 
     -- endregion
-    -- region K1-Schaltungen
+    -- region K1-Phasen
     -------------------------------------------------------------------------------------------------------------------
-    -- Definiere alle Schaltungen fuer Kreuzung 1
+    -- Definiere alle Phasen fuer Kreuzung 1
     -------------------------------------------------------------------------------------------------------------------
-    -- Eine Schaltung bestimmt, welche Fahrspuren gleichzeitig auf grün geschaltet werden dürfen, alle anderen sind rot
+    -- Eine Phase bestimmt, welche Fahrspuren gleichzeitig auf grün geschaltet werden dürfen, alle anderen sind rot
 
     c1 = Intersection:new("Kreuzung 1")
+    local sgLane1StraightRight = c1:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1)
+    local sgLane2Left = c1:newSignalGroup("sgLane2Left"):addVehicleSignals(K2)
+    local sgLane3StraightRight = c1:newSignalGroup("sgLane3StraightRight"):addVehicleSignals(K3)
+    local sgLane4Left = c1:newSignalGroup("sgLane4Left"):addVehicleSignals(K4)
+    local sgLane5StraightRight = c1:newSignalGroup("sgLane5StraightRight"):addVehicleSignals(K5)
+    local sgLane6Left = c1:newSignalGroup("sgLane6Left"):addVehicleSignals(K6)
+    local sgLane7StraightRight = c1:newSignalGroup("sgLane7StraightRight"):addVehicleSignals(K7)
+    local sgLane8Left = c1:newSignalGroup("sgLane8Left"):addVehicleSignals(K8)
+    local sgPedPhase1 = c1:newSignalGroup("sgPedPhase1"):addPedestrianSignals(F1, F2, F3, F4, F5, F6, F7, F8)
 
-    --- Kreuzung 1: Schaltung 1
-    local c1Sequence1 = c1:newSequence("Schaltung 1")
-    c1Sequence1:addCarLights(K1)
-    c1Sequence1:addCarLights(K5)
-    c1Sequence1:addPedestrianLights(F1, F2)
-    c1Sequence1:addPedestrianLights(F3, F4)
+    --- Kreuzung 1: Phase 1
+    local c1Phase1 = c1:newPhase("P1")
+    c1Phase1:addSignalGroup(sgLane1StraightRight, sgLane5StraightRight, sgPedPhase1)
 
-    --- Kreuzung 1: Schaltung 2
-    local c1Sequence2 = c1:newSequence("Schaltung 2")
-    c1Sequence2:addCarLights(K2)
-    c1Sequence2:addCarLights(K6)
+    --- Kreuzung 1: Phase 2
+    local c1Phase2 = c1:newPhase("P2")
+    c1Phase2:addSignalGroup(sgLane2Left, sgLane6Left)
 
-    --- Kreuzung 1: Schaltung 3
-    local c1Sequence3 = c1:newSequence("Schaltung 3")
-    c1Sequence3:addCarLights(K3)
-    c1Sequence3:addCarLights(K7)
-    c1Sequence1:addPedestrianLights(F5, F6)
-    c1Sequence1:addPedestrianLights(F7, F8)
+    --- Kreuzung 1: Phase 3
+    local c1Phase3 = c1:newPhase("P3")
+    c1Phase3:addSignalGroup(sgLane3StraightRight, sgLane7StraightRight)
 
-    --- Kreuzung 1: Schaltung 4
-    local c1Sequence4 = c1:newSequence("Schaltung 4")
-    c1Sequence4:addCarLights(K4)
-    c1Sequence4:addCarLights(K8)
-
+    --- Kreuzung 1: Phase 4
+    local c1Phase4 = c1:newPhase("P4")
+    c1Phase4:addSignalGroup(sgLane4Left, sgLane8Left)
     c1:addStaticCam("Kreuzung 1")
     c1:setTippStructure("#17")
 end

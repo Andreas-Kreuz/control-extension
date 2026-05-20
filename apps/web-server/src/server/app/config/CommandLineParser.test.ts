@@ -45,6 +45,13 @@ function testParsesPortAndConfigDirFlags(): void {
   });
 }
 
+function testParsesSkipServerStatePersistenceFlag(): void {
+  withArgv(['node', 'server', '--skip-server-state-persistence'], () => {
+    const options = new CommandLineParser().parseOptions();
+    assert.equal(options['skip-server-state-persistence'], true);
+  });
+}
+
 function testParsesTestmodePortConfigDirAndExchangeDirTogether(): void {
   withArgv(
     [
@@ -72,6 +79,10 @@ export async function run(): Promise<void> {
   await runTest('CommandLineParser parses the allow-dev-origins flag', testParsesAllowDevOriginsFlag);
   await runTest('CommandLineParser still parses testmode with exchange-dir', testParsesTestmodeAndExchangeDirTogether);
   await runTest('CommandLineParser parses the port and config-dir flags', testParsesPortAndConfigDirFlags);
+  await runTest(
+    'CommandLineParser parses the skip-server-state-persistence flag',
+    testParsesSkipServerStatePersistenceFlag,
+  );
   await runTest(
     'CommandLineParser parses testmode together with port, config-dir, and exchange-dir',
     testParsesTestmodePortConfigDirAndExchangeDirTogether,

@@ -60,6 +60,7 @@ function HubOptionDefaults.create()
                     functions = "always"
                 },
                 fieldPublish = {
+                    waitingVehiclesCount = "oninterest",
                     tag = "always",
                     stopDistance = "always",
                     itemName = "always",
@@ -71,7 +72,11 @@ function HubOptionDefaults.create()
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {},
-                fieldPublish = {}
+                fieldPublish = {
+                    waitingPosition = "oninterest",
+                    vehicleName = "oninterest",
+                    waitingCount = "oninterest"
+                }
             },
             switches = {
                 ceType = HubCeTypes.Switch,
@@ -85,10 +90,10 @@ function HubOptionDefaults.create()
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {
-                    tag = "always",
-                    light = "always",
-                    smoke = "always",
-                    fire = "always"
+                    tag = "oninterest",
+                    light = "oninterest",
+                    smoke = "oninterest",
+                    fire = "oninterest"
                 },
                 fieldPublish = {
                     tag = "always",
@@ -107,6 +112,13 @@ function HubOptionDefaults.create()
             },
             time = {
                 ceType = HubCeTypes.Time,
+                discoveryAndUpdate = true,
+                publish = true,
+                fieldUpdates = {},
+                fieldPublish = {}
+            },
+            routes = {
+                ceType = HubCeTypes.Route,
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {},
@@ -190,10 +202,10 @@ function HubOptionDefaults.create()
                     trackType = "always",
                     movesForward = "always",
                     speed = "always",
-                    targetSpeed = "always",
-                    couplingFront = "always",
-                    couplingRear = "always",
-                    lights = "always",
+                    targetSpeed = "oninterest",
+                    couplingFront = "oninterest",
+                    couplingRear = "oninterest",
+                    lights = "oninterest",
                     active = "always",
                     inTrainyard = "always",
                     trainyardId = "always"
@@ -221,18 +233,18 @@ function HubOptionDefaults.create()
                 fieldUpdates = {
                     trainName = "always",
                     positionInTrain = "always",
-                    couplingFront = "always",
-                    couplingRear = "always",
-                    length = "always",
-                    propelled = "always",
-                    modelType = "always",
-                    modelTypeText = "always",
-                    tag = "always",
-                    nr = "always",
+                    couplingFront = "oninterest",
+                    couplingRear = "oninterest",
+                    length = "oninterest",
+                    propelled = "oninterest",
+                    modelType = "oninterest",
+                    modelTypeText = "oninterest",
+                    tag = "oninterest",
+                    nr = "oninterest",
                     trackType = "always",
-                    hookStatus = "always",
-                    hookGlueMode = "always",
-                    axisValues = "always",
+                    hookStatus = "oninterest",
+                    hookGlueMode = "oninterest",
+                    axisValues = "oninterest",
                     surfaceTexts = "oninterest",
                     trackId = "oninterest",
                     trackDistance = "oninterest",
@@ -242,8 +254,8 @@ function HubOptionDefaults.create()
                     posY = "oninterest",
                     posZ = "oninterest",
                     mileage = "oninterest",
-                    orientationForward = "always",
-                    smoke = "always",
+                    orientationForward = "oninterest",
+                    smoke = "oninterest",
                     active = "always",
                     axisNamesKnown = "always",
                     rotX = "oninterest",

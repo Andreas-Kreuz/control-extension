@@ -5,12 +5,14 @@ import * as cors from 'cors';
 import { EventEmitter } from 'events';
 import * as express from 'express';
 import { createServer } from 'http';
+import type { Server as HttpServer } from 'http';
 import * as path from 'path';
 import { Server } from 'socket.io';
 
 interface ServerMainOptions {
   adminSessionValue?: string;
   allowOpenServerRoute?: boolean;
+  debug?: boolean;
 }
 
 function dirPage(title: string, items: string): string {
@@ -23,12 +25,14 @@ export class ServerMain {
   private adminCookieName = 'ce-admin-session';
   private app: express.Application;
   private allowOpenServerRoute: boolean;
-  private appEffects!: AppEffects;
-  private httpServer;
+  private appEffects: AppEffects | undefined;
+  private httpServer: HttpServer;
   private io: Server;
+  private isStopping = false;
   private router: express.Router;
   private socketService: SocketService;
   private trustedServerAddressPolicy: TrustedServerAddressPolicy;
+  private debug: boolean;
 
   constructor(
     private serverConfigPath: string,
@@ -42,13 +46,14 @@ export class ServerMain {
     this.configureProcessDefaults();
     this.configureApplication();
     this.allowOpenServerRoute = this.options.allowOpenServerRoute ?? false;
+    this.debug = this.options.debug ?? true;
     this.trustedServerAddressPolicy = this.createTrustedServerAddressPolicy();
     this.io = this.createSocketIoServer();
     this.socketService = this.createSocketService();
   }
 
   public start() {
-    console.log('Starting Server with ' + this.serverConfigPath);
+    if (this.debug) console.log('Starting Server with ' + this.serverConfigPath);
     const appDir = this.resolveAppDirectory();
 
     this.registerApiRoutes();
@@ -56,8 +61,21 @@ export class ServerMain {
     this.registerStaticRoutes(appDir);
     this.registerSpaFallback(appDir);
     this.startHttpServer();
-    this.appEffects = new AppEffects(this.app, this.router, this.io, this.socketService, this.serverConfigPath);
+    this.appEffects = new AppEffects(this.app, this.router, this.io, this.socketService, this.serverConfigPath, {
+      debug: this.debug,
+    });
     this.appEffects.changeEepDirectory(this.appEffects.getEepDirectory());
+  }
+
+  public async stop(): Promise<void> {
+    if (this.isStopping) {
+      return;
+    }
+
+    this.isStopping = true;
+    this.appEffects?.stop();
+    await this.closeSocketServer();
+    await this.closeHttpServer();
   }
 
   private configureProcessDefaults(): void {
@@ -67,6 +85,7 @@ export class ServerMain {
   private configureApplication(): void {
     this.app.set('port', this.port);
     this.app.use(cors(this.createCorsOptions()));
+    this.app.use(express.json({ limit: '1mb' }));
   }
 
   private createTrustedServerAddressPolicy(): TrustedServerAddressPolicy {
@@ -87,6 +106,7 @@ export class ServerMain {
     return new SocketService(this.io, {
       adminCookieName: this.adminCookieName,
       allowOpenServerRoute: this.allowOpenServerRoute,
+      debug: this.debug,
       ...(this.options.adminSessionValue !== undefined ? { adminSessionValue: this.options.adminSessionValue } : {}),
       trustedServerAddressPolicy: this.trustedServerAddressPolicy,
     });
@@ -165,7 +185,31 @@ export class ServerMain {
 
   private startHttpServer(): void {
     this.httpServer.listen(this.port, () => {
-      console.log('Express server listening on port ' + this.app.get('port') + ' ## ' + this.serverConfigPath);
+      if (this.debug)
+        console.log('Express server listening on port ' + this.app.get('port') + ' ## ' + this.serverConfigPath);
+    });
+  }
+
+  private closeSocketServer(): Promise<void> {
+    return new Promise((resolve) => {
+      this.io.close(() => resolve());
+    });
+  }
+
+  private closeHttpServer(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.httpServer.listening) {
+        resolve();
+        return;
+      }
+
+      this.httpServer.close((error?: Error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve();
+      });
     });
   }
 

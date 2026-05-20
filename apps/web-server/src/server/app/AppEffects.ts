@@ -13,6 +13,7 @@ import TrainUpdateService from '../mod/train/TrainUpdateService';
 import VersionService from '../mod/version/VersionService';
 import EepDataService from '../mod/eepdata/EepDataService';
 import RoadDataService from '../mod/road/RoadDataService';
+import IntersectionWizardService from '../mod/road/IntersectionWizardService';
 import ScenarioService from '../mod/scenario/ScenarioService';
 import AppConfig from './config/AppConfig';
 import AppReducer from './config/AppData';
@@ -26,6 +27,10 @@ import * as path from 'path';
 import { performance } from 'perf_hooks';
 import { Server, Socket } from 'socket.io';
 
+interface AppEffectsOptions {
+  debug?: boolean;
+}
+
 export default class AppEffects {
   private debug = true;
   private serverConfigFile: string;
@@ -34,6 +39,8 @@ export default class AppEffects {
   private interestSyncService: InterestSyncService | null = null;
   private store = new AppReducer();
   private TESTMODE = false;
+  private persistServerState = true;
+  private stopped = false;
   private updateCheckService: UpdateCheckService;
   private updateSearchStarted = false;
 
@@ -47,7 +54,9 @@ export default class AppEffects {
     private io: Server,
     private socketService: SocketService,
     private serverConfigPath: string,
+    options: AppEffectsOptions = {},
   ) {
+    this.debug = options.debug ?? true;
     this.serverConfigFile = path.resolve(this.serverConfigPath, 'settings.json');
     this.updateCheckService = new UpdateCheckService({ cacheDirectory: this.serverConfigPath });
     this.updateCheckService.onStatusChanged((status) => this.emitUpdateStatus(status));
@@ -146,6 +155,7 @@ export default class AppEffects {
       const options = new CommandLineParser().parseOptions();
       appConfig.eepDir = path.resolve(options['exchange-dir'] || '../web-app/cypress/io');
       this.TESTMODE = options.testmode || false;
+      this.persistServerState = options['skip-server-state-persistence'] !== true;
       if (!this.TESTMODE && fs.statSync(this.serverConfigFile).isFile()) {
         const data = fs.readFileSync(this.serverConfigFile, { encoding: 'utf8' });
         const config = JSON.parse(data);
@@ -234,6 +244,11 @@ export default class AppEffects {
   }
 
   public changeEepDirectory(eepDir: string) {
+    if (this.stopped) {
+      return;
+    }
+
+    this.eepDataEffects?.stop();
     this.eepService?.disconnect();
     this.eepService = null;
 
@@ -241,13 +256,18 @@ export default class AppEffects {
     const completeDir = path.resolve(eepDir, 'LUA/ce/databridge/exchange/');
 
     // Check the directory and register handlers on success
-    const eepService = new EepService(this.debug);
+    const eepService = new EepService(this.debug, { persistServerState: this.persistServerState });
     eepService.reInit(completeDir, (err: string | null, dir: string | null) => {
+      if (this.stopped) {
+        eepService.disconnect();
+        return;
+      }
+
       if (err) {
         console.error(err);
       }
       if (dir) {
-        console.log('Directory set to : ' + dir);
+        if (this.debug) console.log('Directory set to : ' + dir);
         this.eepService = eepService;
         this.initServices(eepService);
         this.store.setEepDirOk(true);
@@ -264,6 +284,17 @@ export default class AppEffects {
     });
   }
 
+  public stop(): void {
+    this.stopped = true;
+    this.updateCheckService.stop();
+    this.updateSearchStarted = false;
+    this.statistics.stop();
+    this.eepDataEffects?.stop();
+    this.eepService?.disconnect();
+    this.eepService = null;
+    this.interestSyncService = null;
+  }
+
   private initServices(eepService: EepService) {
     // Replacing the EEP service should also replace socket-connected handlers
     // so new clients do not accumulate duplicate room and command listeners.
@@ -277,6 +308,7 @@ export default class AppEffects {
       this.socketService,
       eepService as CacheService,
       this.interestSyncService,
+      { debug: this.debug },
     );
 
     // Init event handler
@@ -306,6 +338,7 @@ export default class AppEffects {
     eepDataEffects.registerDomainRoom(new ScenarioService(this.io));
     eepDataEffects.registerDomainRoom(new EepDataService(this.io));
     eepDataEffects.registerDomainRoom(new RoadDataService(this.io));
+    eepDataEffects.registerDomainRoom(new IntersectionWizardService(this.router, eepService));
 
     // register mods
     registerLogMod(this.io, this.socketService, eepService, this.debug);

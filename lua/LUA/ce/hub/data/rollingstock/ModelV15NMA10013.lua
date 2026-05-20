@@ -86,7 +86,7 @@ function GT_A:setStations(rollingStockName, stations)
     assert(type(stations) == "string", "Need 'stations' as string")
 end
 
-function GT_A:setWagonNr(rollingStockName, nr)
+function GT_A:setWagonNumber(rollingStockName, nr)
     assert(type(self) == "table", "Call this method with ':'")
     EEPRollingstockSetTextureText(rollingStockName, 5, nr)
     EEPRollingstockSetTextureText(rollingStockName, 6, nr)
@@ -143,7 +143,7 @@ function GT_B:setStations(rollingStockName, stations)
     EEPRollingstockSetTextureText(rollingStockName, 2, stations)
 end
 
-function GT_B:setWagonNr(rollingStockName, nr)
+function GT_B:setWagonNumber(rollingStockName, nr)
     assert(type(self) == "table", "Call this method with ':'")
     EEPRollingstockSetTextureText(rollingStockName, 3, nr)
     EEPRollingstockSetTextureText(rollingStockName, 4, nr)

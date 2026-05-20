@@ -51,4 +51,15 @@ function StatePublisherRegistry.getStatePublishers()
     return copy
 end
 
+function StatePublisherRegistry.requestFullSync()
+    require("ce.hub.FullSyncMarker").requestFullSync()
+
+    for _, statePublisherName in ipairs(statePublisherNames) do
+        local statePublisher = registeredStatePublishers[statePublisherName]
+        if statePublisher and type(statePublisher.requestFullSync) == "function" then
+            statePublisher.requestFullSync()
+        end
+    end
+end
+
 return StatePublisherRegistry

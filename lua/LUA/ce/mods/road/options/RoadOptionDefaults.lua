@@ -14,23 +14,35 @@ function RoadOptionDefaults.create()
                 publish = true,
                 fieldUpdates = {
                     name = "always",
-                    manualSwitching = "always",
-                    currentSwitching = "always",
-                    nextSwitching = "always",
+                    eepSaveId = "always",
+                    scriptVariableName = "always",
+                    switchInStrictOrder = "always",
+                    manualPhase = "always",
+                    currentPhase = "always",
+                    nextPhase = "always",
+                    pedestrianCrossings = "always",
                     phases = "always",
                     ready = "always",
+                    signalGroupDefinitions = "always",
                     staticCams = "always",
-                    timeForGreen = "always"
+                    tippStructure = "always",
+                    greenTimeSeconds = "always"
                 },
                 fieldPublish = {
                     name = "always",
-                    manualSwitching = "oninterest",
-                    currentSwitching = "oninterest",
-                    nextSwitching = "oninterest",
+                    eepSaveId = "always",
+                    scriptVariableName = "always",
+                    switchInStrictOrder = "always",
+                    manualPhase = "oninterest",
+                    currentPhase = "oninterest",
+                    nextPhase = "oninterest",
+                    pedestrianCrossings = "always",
                     phases = "always",
                     ready = "oninterest",
+                    signalGroupDefinitions = "always",
                     staticCams = "always",
-                    timeForGreen = "always"
+                    tippStructure = "always",
+                    greenTimeSeconds = "always"
                 }
             },
             intersectionLanes = {
@@ -38,12 +50,19 @@ function RoadOptionDefaults.create()
                 publish = true,
                 fieldUpdates = {
                     countType = "always",
+                    defaultRequestSignalGroups = "always",
+                    defaultSignalGroups = "always",
                     directions = "always",
-                    eepSaveId = "always",
+                    approach = "always",
+                    highlightTrackIds = "always",
+                    laneSignalId = "always",
                     intersectionId = "always",
                     name = "always",
-                    phase = "always",
-                    switchings = "always",
+                    scriptVariableName = "always",
+                    currentIndication = "always",
+                    phases = "always",
+                    requestTrackIds = "always",
+                    routeRules = "always",
                     tracks = "always",
                     type = "always",
                     vehicleMultiplier = "always",
@@ -53,20 +72,27 @@ function RoadOptionDefaults.create()
                 fieldPublish = {
                     name = "always",
                     countType = "always",
+                    defaultRequestSignalGroups = "always",
+                    defaultSignalGroups = "always",
                     directions = "always",
-                    eepSaveId = "always",
+                    approach = "always",
+                    highlightTrackIds = "always",
+                    laneSignalId = "always",
                     intersectionId = "always",
-                    switchings = "always",
+                    scriptVariableName = "always",
+                    phases = "always",
+                    requestTrackIds = "always",
+                    routeRules = "always",
                     tracks = "always",
                     type = "always",
                     vehicleMultiplier = "always",
-                    phase = "oninterest",
+                    currentIndication = "oninterest",
                     waitingForGreenCyclesCount = "oninterest",
                     waitingTrains = "oninterest"
                 }
             },
-            intersectionSwitchings = {
-                ceType = RoadCeTypes.IntersectionSwitching,
+            intersectionPhases = {
+                ceType = RoadCeTypes.IntersectionPhase,
                 publish = true,
                 fieldUpdates = {
                     intersectionId = "always",
@@ -84,13 +110,13 @@ function RoadOptionDefaults.create()
                 publish = true,
                 fieldUpdates = {
                     axisStructures = "always",
-                    currentPhase = "always",
+                    currentIndication = "always",
                     intersectionId = "always",
                     lightStructures = "always",
                     modelId = "always",
                     pedestrianSignalName = "always",
                     signalId = "always",
-                    trafficSignalName = "always",
+                    vehicleSignalName = "always",
                     use = "always"
                 },
                 fieldPublish = {
@@ -100,9 +126,9 @@ function RoadOptionDefaults.create()
                     modelId = "always",
                     pedestrianSignalName = "always",
                     signalId = "always",
-                    trafficSignalName = "always",
+                    vehicleSignalName = "always",
                     use = "always",
-                    currentPhase = "oninterest"
+                    currentIndication = "oninterest"
                 }
             },
             moduleSettings = {

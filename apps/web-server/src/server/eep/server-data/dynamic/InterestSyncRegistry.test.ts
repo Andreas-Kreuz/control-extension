@@ -78,6 +78,28 @@ function testRetainPerRoomOnlyStopsAfterLastRoomSubscription(): void {
   ]);
 }
 
+function testReplayRetainedInterestsRestartsCurrentSelections(): void {
+  const commands: string[] = [];
+  const registry = new InterestSyncRegistry((command) => {
+    commands.push(command);
+  });
+
+  registry.retainToken('socket:a|room:train-details|Train-A', 'ce.hub.Train', 'Train-A');
+  registry.retainToken('socket:b|room:train-details|Train-A', 'ce.hub.Train', 'Train-A');
+  registry.retainToken('socket:a|room:rolling-stock|RS-A', 'ce.hub.RollingStock', 'RS-A');
+  registry.replayRetainedInterests();
+  registry.releaseToken('socket:a|room:train-details|Train-A');
+  registry.releaseToken('socket:b|room:train-details|Train-A');
+
+  assert.deepEqual(commands, [
+    'HubInterestSync.startSyncFor|ce.hub.Train|Train-A',
+    'HubInterestSync.startSyncFor|ce.hub.RollingStock|RS-A',
+    'HubInterestSync.startSyncFor|ce.hub.Train|Train-A',
+    'HubInterestSync.startSyncFor|ce.hub.RollingStock|RS-A',
+    'HubInterestSync.stopSyncFor|ce.hub.Train|Train-A',
+  ]);
+}
+
 export async function run(): Promise<void> {
   await runTest(
     'retainToken starts updates once and stops after last release',
@@ -87,6 +109,10 @@ export async function run(): Promise<void> {
   await runTest(
     'retainToken keeps an entry selected until the last room subscription is released',
     testRetainPerRoomOnlyStopsAfterLastRoomSubscription,
+  );
+  await runTest(
+    'replayRetainedInterests restarts current selections',
+    testReplayRetainedInterestsRestartsCurrentSelections,
   );
 }
 

@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Ampelsteuerung 2
 type: Tutorial mit Anlage
@@ -16,7 +16,7 @@ published: false
 
 **Voraussetzungen:**
 
-- [Anleitung "Ampelkreuzung automatisch steuern"](ampelkreuzung) - fange hier an, um zu erfahren, was Kreuzung, Schaltung und Fahrspur bedeuten.
+- [Anleitung "Ampelkreuzung automatisch steuern"](ampelkreuzung) - fange hier an, um zu erfahren, was Kreuzung, Phase, Ampelgruppe und Fahrspur bedeuten.
 
 - Du benötigst folgende Modelle:
 
@@ -91,7 +91,7 @@ local S1 = TrafficLight:new("S1", 14, TrafficLightModel.Unsichtbar_2er,
         "#26_Straba Signal A") --    Anforderung schaltet das Licht dieser Immobilie ein
 
 -- Fahrspuren fuer Strassenbahnen:
-os = Lane:new("OS", 107, S1)
+os = Lane:new("OS", S1)
 ```
 
 ⭐ **Beachte bitte**: Die Anforderung wird nur aktiv, wenn Du Anforderungen an dieser Fahrspur erkennst. Wie das geht, steht in [Tutorial 3 - Priorisierung]({{ site.baseurl }}/anleitungen-ampelkreuzung/tutorial3-priorisierung).
@@ -108,5 +108,5 @@ local S1 = TrafficLight:new("S1", 14, TrafficLightModel.Unsichtbar_2er,
         "#27_Straba Signal anhalten") --   gelb  schaltet das Licht dieser Immobilie ein
 
 -- Fahrspuren fuer Strassenbahnen:
-os = Lane:new("OS", 107, S1)
+os = Lane:new("OS", S1)
 ```

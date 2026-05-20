@@ -37,9 +37,10 @@ async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
 async function withService(
   runCase: (ctx: { service: EepService; tempDir: string; seenEvents: string[] }) => Promise<void>,
   beforeInit?: (ctx: { tempDir: string }) => Promise<void>,
+  options?: ConstructorParameters<typeof EepService>[1],
 ): Promise<void> {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), 'eep-service-'));
-  const service = new EepService(false);
+  const service = new EepService(false, options);
   const seenEvents: string[] = [];
 
   try {
@@ -111,6 +112,91 @@ async function testWatcherReadsFuturePendingEventsFile(): Promise<void> {
   });
 }
 
+async function testCreatesAndReplacesPipeDescriptor(): Promise<void> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'eep-service-'));
+  const service = new EepService(false);
+
+  try {
+    await writeFile(path.join(tempDir, FileNames.logFromCe), '', { encoding: 'latin1' });
+    await new Promise<void>((resolve, reject) => {
+      service.reInit(tempDir, (err) => {
+        if (err) {
+          reject(new Error(err));
+          return;
+        }
+        resolve();
+      });
+    });
+
+    const firstDescriptor = JSON.parse(
+      await readFile(path.join(tempDir, FileNames.serverTransport), { encoding: 'latin1' }),
+    ) as { eventTransport: string; pipeName: string; sessionId: string };
+
+    assert.equal(firstDescriptor.eventTransport, 'pipe');
+    assert.match(firstDescriptor.pipeName, /^\\\\\.\\pipe\\control-extension-/);
+    assert.equal(typeof firstDescriptor.sessionId, 'string');
+
+    await new Promise<void>((resolve, reject) => {
+      service.reInit(tempDir, (err) => {
+        if (err) {
+          reject(new Error(err));
+          return;
+        }
+        resolve();
+      });
+    });
+
+    const secondDescriptor = JSON.parse(
+      await readFile(path.join(tempDir, FileNames.serverTransport), { encoding: 'latin1' }),
+    ) as { sessionId: string };
+
+    assert.notEqual(secondDescriptor.sessionId, firstDescriptor.sessionId);
+  } finally {
+    service.disconnect();
+    await rm(tempDir, { recursive: true, force: true });
+  }
+}
+
+async function testDisconnectRemovesPipeDescriptor(): Promise<void> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'eep-service-'));
+  const service = new EepService(false);
+
+  try {
+    await writeFile(path.join(tempDir, FileNames.logFromCe), '', { encoding: 'latin1' });
+    await new Promise<void>((resolve, reject) => {
+      service.reInit(tempDir, (err) => {
+        if (err) {
+          reject(new Error(err));
+          return;
+        }
+        resolve();
+      });
+    });
+
+    assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverTransport)), true);
+    assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverIsRunning)), true);
+    service.disconnect();
+    assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverTransport)), false);
+    assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverIsRunning)), false);
+  } finally {
+    service.disconnect();
+    await rm(tempDir, { recursive: true, force: true });
+  }
+}
+
+async function testWriteCacheCanSkipServerStatePersistence(): Promise<void> {
+  await withService(
+    async ({ service, tempDir }) => {
+      service.writeCache({ eventCounter: 7, ceTypes: { 'ce.test': { id: { id: 'id' } } } });
+
+      assert.equal(fs.existsSync(path.join(tempDir, FileNames.serverCache)), false);
+      assert.equal(await readFile(path.join(tempDir, FileNames.serverEventCounter), { encoding: 'utf8' }), '7');
+    },
+    undefined,
+    { persistServerState: false },
+  );
+}
+
 const staleEvent = JSON.stringify({
   eventCounter: 1,
   type: 'DataChanged',
@@ -134,6 +220,12 @@ export async function run(): Promise<void> {
   );
   await runTest('EepService startup reads events-from-ce with pending marker', testStartupReadsPendingEventsFile);
   await runTest('EepService watcher reads future pending events', testWatcherReadsFuturePendingEventsFile);
+  await runTest('EepService creates and replaces the pipe descriptor', testCreatesAndReplacesPipeDescriptor);
+  await runTest('EepService disconnect removes runtime marker files', testDisconnectRemovesPipeDescriptor);
+  await runTest(
+    'EepService can skip server-state.json persistence while writing the counter',
+    testWriteCacheCanSkipServerStatePersistence,
+  );
 }
 
 if (require.main === module) {

@@ -1,24 +1,32 @@
 import { CacheService } from '../server-data/CacheService';
+import { FileEventReceiver } from './FileEventReceiver';
 import { FileNames } from './FileNames';
 import { LogFileMonitor } from './LogFileMonitor';
+import { PipeEventReceiver } from './PipeEventReceiver';
+import { ServerPipeNameFactory } from './ServerPipeNameFactory';
 import { ServerStatisticsService } from './ServerStatisticsService';
+import { ServerTransportDescriptorWriter } from './ServerTransportDescriptorWriter';
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import { Tail } from 'tail';
 
 /**
  * This service is responsible for the communication with EEP.
  */
+interface EepServiceOptions {
+  persistServerState?: boolean;
+}
+
 export default class EepService implements CacheService {
   private static filesToDeleteOnExit = new Set<string>();
   private static processCleanupRegistered = false;
   private static signalCleanupInProgress = false;
 
   private dir: string | null = null;
-  private jsonFileWatcher?: fs.FSWatcher;
+  private fileEventReceiver: FileEventReceiver | undefined;
+  private pipeEventReceiver: PipeEventReceiver | undefined;
+  private descriptorWriter: ServerTransportDescriptorWriter | undefined;
   private readonly logFileMonitor: LogFileMonitor;
-  private eventTail?: Tail;
   private onJsonUpdate: (jsonText: string, lastUpdate: number) => void = (jsonText: string, lastUpdate: number) => {
     if (this.debug) console.log('Received: ' + jsonText.length + ' bytes of JSON ' + lastUpdate);
   };
@@ -30,7 +38,13 @@ export default class EepService implements CacheService {
     if (this.debug) console.log('Log was cleared');
   };
 
-  constructor(private debug = false) {
+  private readonly persistServerState: boolean;
+
+  constructor(
+    private debug = false,
+    options: EepServiceOptions = {},
+  ) {
+    this.persistServerState = options.persistServerState !== false;
     this.logFileMonitor = new LogFileMonitor(
       {
         onCleared: () => this.logWasCleared(),
@@ -61,23 +75,26 @@ export default class EepService implements CacheService {
 
   private connectToFiles(): void {
     this.attachEventsFromCeFile();
+    this.attachEventsFromCePipe();
     this.attachLogFromCeFile();
     this.createServerIsRunningFile();
     this.deleteFileOnExit(FileNames.serverEventCounter);
+    this.deleteFileOnExit(FileNames.serverTransport);
   }
 
   private disconnectFromFiles(): void {
     if (this.dir) {
       EepService.deleteFileIfExists(path.resolve(this.dir, FileNames.serverIsRunning));
+      EepService.deleteFileIfExists(path.resolve(this.dir, FileNames.serverTransport));
     }
 
+    this.fileEventReceiver?.detach();
+    this.fileEventReceiver = undefined;
+    this.pipeEventReceiver?.stop();
+    this.pipeEventReceiver = undefined;
+    this.descriptorWriter?.remove();
+    this.descriptorWriter = undefined;
     this.logFileMonitor.detach();
-    if (this.eventTail) {
-      this.eventTail.unwatch();
-    }
-    if (this.jsonFileWatcher) {
-      this.jsonFileWatcher.close();
-    }
     this.onJsonUpdate = (jsonText: string, lastUpdate: number) => {
       if (this.debug) console.log('Received: ' + jsonText.length + ' bytes of JSON ' + lastUpdate);
     };
@@ -103,14 +120,20 @@ export default class EepService implements CacheService {
     }
   }
 
+  public getExchangeDirectory(): string {
+    return this.requireDir();
+  }
+
   public writeCache(data: unknown): void {
     const d = data as { eventCounter?: number };
     performance.mark('eep:start-write-cache-file');
     try {
       if (data) {
-        const cacheFile = path.resolve(this.requireDir(), FileNames.serverCache);
-        const fileContents = JSON.stringify(data);
-        fs.writeFileSync(cacheFile, fileContents);
+        if (this.persistServerState) {
+          const cacheFile = path.resolve(this.requireDir(), FileNames.serverCache);
+          const fileContents = JSON.stringify(data);
+          fs.writeFileSync(cacheFile, fileContents);
+        }
 
         if (d.eventCounter) {
           const counterFile = path.resolve(this.requireDir(), FileNames.serverEventCounter);
@@ -137,52 +160,24 @@ export default class EepService implements CacheService {
   }
 
   private attachEventsFromCeFile(): void {
-    const dir = this.requireDir();
-    const jsonFile = path.resolve(dir, FileNames.eventsFromCe);
-    const jsonReadyFile = path.resolve(dir, FileNames.eventsFromCePending);
-
-    // First start: only read a payload that EEP explicitly marked as pending.
-    if (!this.jsonFileWatcher) {
-      performance.mark('eep:start-wait-for-json');
-      if (fs.existsSync(jsonReadyFile)) {
-        this.readJsonFile(jsonFile, jsonReadyFile);
-      }
-    }
-
-    // Watch in the directory, if the file is recreated
-    this.jsonFileWatcher = fs.watch(dir, (_eventType: string, filename: string | null) => {
-      // If events-from-ce.pending exists: read the payload and remove the marker.
-      if (filename === FileNames.eventsFromCePending && fs.existsSync(jsonReadyFile)) {
-        // console.log('Reading: ', jsonFile);
-        this.readJsonFile(jsonFile, jsonReadyFile);
-      }
-    });
+    this.fileEventReceiver = new FileEventReceiver(this.requireDir(), (line) => this.eventLineAppeared(line));
+    this.fileEventReceiver.attach();
   }
 
-  private readJsonFile(jsonFile: string, jsonReadyFile: string) {
-    try {
-      // EEP has written the JsonFile for us, so let's read it.
-      const data: string = fs.readFileSync(jsonFile, { encoding: 'latin1' });
-      const eventLines: string[] = data.split('\n');
-      for (const line of eventLines) {
-        if (line.length > 0) {
-          this.eventLineAppeared(line);
-        }
-      }
-
-      performance.mark('eep:stop-wait-for-json');
-      performance.measure(
-        ServerStatisticsService.TimeForEepJsonFile,
-        'eep:start-wait-for-json',
-        'eep:stop-wait-for-json',
-      );
-
-      // Delete events-from-ce.pending, so EEP knows the payload was consumed.
-      EepService.deleteFileIfExists(jsonReadyFile);
-      performance.mark('eep:start-wait-for-json');
-    } catch (err) {
-      console.log(err);
-    }
+  private attachEventsFromCePipe(): void {
+    const pipeIdentity = ServerPipeNameFactory.create();
+    this.pipeEventReceiver = new PipeEventReceiver(
+      pipeIdentity.pipeName,
+      (line) => this.eventLineAppeared(line),
+      this.debug,
+    );
+    this.pipeEventReceiver.start();
+    this.descriptorWriter = new ServerTransportDescriptorWriter(this.requireDir());
+    this.descriptorWriter.write({
+      eventTransport: 'pipe',
+      pipeName: pipeIdentity.pipeName,
+      sessionId: pipeIdentity.sessionId,
+    });
   }
 
   private attachLogFromCeFile(): void {

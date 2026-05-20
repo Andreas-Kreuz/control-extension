@@ -11,4 +11,6 @@ export interface ScenarioAppDto {
   activeTrain?: string;
   activeRollingStock?: string;
   timeLapse?: number;
+  staticCameras: string[];
+  dynamicCameras: string[];
 }

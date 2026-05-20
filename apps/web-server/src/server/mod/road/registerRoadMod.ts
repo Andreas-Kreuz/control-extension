@@ -23,11 +23,11 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
       const command = 'AkKreuzungSchalteAutomatisch|' + action.intersectionName;
       queueCommand(command);
     });
-    socket.on(RoadEvent.SwitchManually, (action: { intersectionName: string; switchingName: string }) => {
+    socket.on(RoadEvent.SwitchManually, (action: { intersectionName: string; phaseName: string }) => {
       if (!socketService.ensureApprovedSocket(socket, RoadEvent.SwitchManually)) {
         return;
       }
-      const command = 'AkKreuzungSchalteManuell|' + action.intersectionName + '|' + action.switchingName;
+      const command = 'AkKreuzungSchalteManuell|' + action.intersectionName + '|' + action.phaseName;
       queueCommand(command);
     });
   }

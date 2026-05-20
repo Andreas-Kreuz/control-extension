@@ -38,6 +38,8 @@ insulate("ce.hub.DtoFactories", function ()
                             id = "scenario",
                             name = "scenario",
                             scenarioName = "Sample",
+                            staticCameras = {},
+                            dynamicCameras = {},
                             timeLapse = 4
                         }
                     }, scenarioDtos)

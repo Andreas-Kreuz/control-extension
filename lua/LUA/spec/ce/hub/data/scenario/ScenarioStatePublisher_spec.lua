@@ -14,6 +14,7 @@ insulate("ce.hub.data.scenario.ScenarioStatePublisher", function ()
         clearModule("ce.hub.data.scenario.ScenarioDtoFactory")
         clearModule("ce.hub.data.scenario.ScenarioRegistry")
         clearModule("ce.hub.data.scenario.ScenarioUpdater")
+        clearModule("ce.hub.data.scenario.ScenarioDiscovery")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -26,6 +27,13 @@ insulate("ce.hub.data.scenario.ScenarioStatePublisher", function ()
         rawset(_G, "EEPGetTrainActive", function () return "#ICE" end)
         rawset(_G, "EEPRollingstockGetActive", function () return "BR 218" end)
         rawset(_G, "EEPGetTimeLapse", function () return 4 end)
+
+        require("ce.hub.data.scenario.ScenarioDiscovery").initFromAnl3({
+            cameras = {
+                static = { "Bahnhof" },
+                dynamic = { "Fahrtwind" }
+            }
+        })
     end)
 
     after_each(function ()
@@ -59,7 +67,9 @@ insulate("ce.hub.data.scenario.ScenarioStatePublisher", function ()
                             eepLanguage = "GER",
                             activeTrain = "#ICE",
                             activeRollingStock = "BR 218",
-                            timeLapse = 4
+                            timeLapse = 4,
+                            staticCameras = { "Bahnhof" },
+                            dynamicCameras = { "Fahrtwind" }
                         }
                     }, DataStore.getCeType("ce.hub.Scenario"))
     end)

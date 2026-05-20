@@ -3,6 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureRegi
 ---@class StructureRegistry
 ---@field has fun(structureId: string):boolean
 ---@field add fun(structure: Structure):nil
+---@field replaceAll fun(structures: Structure[]):nil
 ---@field remove fun(structureId: string):nil
 ---@field forId fun(structureId: string):Structure|nil
 ---@field getAll fun():table<string, Structure>
@@ -26,6 +27,32 @@ function StructureRegistry.add(structure)
     allStructures[structure.id] = structure
     addedStructureIds[structure.id] = true
     removedStructureIds[structure.id] = nil
+end
+
+function StructureRegistry.replaceAll(structures)
+    local nextStructures = {}
+    local nextIds = {}
+
+    for _, structure in ipairs(structures or {}) do
+        nextStructures[structure.id] = structure
+        nextIds[structure.id] = true
+        if allStructures[structure.id] == nil then
+            addedStructureIds[structure.id] = true
+        end
+        removedStructureIds[structure.id] = nil
+    end
+
+    for structureId in pairs(allStructures) do
+        if not nextIds[structureId] then
+            if addedStructureIds[structureId] then
+                addedStructureIds[structureId] = nil
+            else
+                removedStructureIds[structureId] = true
+            end
+        end
+    end
+
+    allStructures = nextStructures
 end
 
 function StructureRegistry.remove(structureId)

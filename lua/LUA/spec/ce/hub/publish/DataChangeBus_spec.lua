@@ -4,6 +4,7 @@ insulate("ce.hub.publish.DataChangeBus", function ()
     end
 
     before_each(function ()
+        clearModule("ce.hub.util.ProtectedExecution")
         clearModule("ce.hub.publish.InternalDataStore")
         clearModule("ce.databridge.ServerEventBuffer")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -42,5 +43,31 @@ insulate("ce.hub.publish.DataChangeBus", function ()
                                  id = "signal-b"
                              })
                          end, "the key must match element[keyId]")
+    end)
+
+    it("continues dispatching when one listener fails", function ()
+        local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+        local capturedEvents = {}
+        local printStub = stub(_G, "print", function () end)
+        finally(function () printStub:revert() end)
+
+        DataChangeBus.addListener({
+            fireEvent = function ()
+                error("listener failed")
+            end
+        })
+        DataChangeBus.addListener({
+            fireEvent = function (event)
+                table.insert(capturedEvents, event)
+            end
+        })
+
+        DataChangeBus.fireDataAdded("ce.hub.Signal", "id", {
+            ceType = "ce.hub.Signal",
+            id = "signal-a"
+        })
+
+        assert.equals(DataChangeBus.eventType.completeReset, capturedEvents[1].type)
+        assert.equals(DataChangeBus.eventType.dataAdded, capturedEvents[2].type)
     end)
 end)

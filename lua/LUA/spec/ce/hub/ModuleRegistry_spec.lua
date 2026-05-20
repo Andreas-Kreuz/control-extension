@@ -1,4 +1,4 @@
-insulate("Check traffic light sequence", function ()
+insulate("Check phase sequence", function ()
     require("ce.hub.eep.EepSimulator")
     local ModuleRegistry = require("ce.hub.ModuleRegistry")
     local crossingCeModule = require("ce.mods.road.CeRoadModule")

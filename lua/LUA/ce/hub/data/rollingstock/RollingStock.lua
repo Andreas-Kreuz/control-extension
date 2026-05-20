@@ -173,6 +173,10 @@ end
 ---@field setLine fun(self: RollingStock, line: string):nil
 ---@field setDestination fun(self: RollingStock, destination: string):nil
 ---@field setStations fun(self: RollingStock, stations: string):nil
+---@field setLicencePlate fun(self: RollingStock, licencePlate: string):nil
+---@field getLicencePlate fun(self: RollingStock):string
+---@field setWagonNumber fun(self: RollingStock, wagonNumber: string):nil
+---@field getWagonNumber fun(self: RollingStock):string
 ---@field setWagonNr fun(self: RollingStock, nr: string):nil
 ---@field getWagonNr fun(self: RollingStock):string
 ---@field setTrainName fun(self: RollingStock, trainName: string):nil
@@ -325,6 +329,58 @@ function RollingStock:new(o)
     return o
 end
 
+function RollingStock.fromSnapshot(snapshot)
+    assert(type(snapshot) == "table", "Need snapshot as table")
+    assert(type(snapshot.rollingStockName) == "string", "Need snapshot.rollingStockName as string")
+
+    local xmlModel = snapshot.xmlModel
+    local modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    local tag = snapshot.tag or ""
+    local o = {
+        id = snapshot.rollingStockName,
+        rollingStockName = snapshot.rollingStockName,
+        type = "RollingStock",
+        trainName = snapshot.trainName or "",
+        positionInTrain = tonumber(snapshot.positionInTrain) or -1,
+        couplingFront = tonumber(snapshot.couplingFront) or 1,
+        couplingRear = tonumber(snapshot.couplingRear) or 1,
+        length = tonumber(snapshot.length) or -1,
+        propelled = snapshot.propelled ~= false,
+        modelType = tonumber(snapshot.modelType) or -1,
+        modelTypeText = EEPRollingstockModelTypeText[snapshot.modelType] or "",
+        tag = tag,
+        values = StorageUtility.parseTableFromString(tag),
+        orientationForward = snapshot.orientationForward == true,
+        smoke = snapshot.smoke or 0,
+        hookStatus = tonumber(snapshot.hookStatus) or 0,
+        hookGlueMode = tonumber(snapshot.hookGlueMode) or 0,
+        active = snapshot.active == true,
+        textureTexts = snapshot.textureTexts or {},
+        modelInfo = modelInfo,
+        axisNamesKnown = axisNamesKnownForModelInfo(modelInfo),
+        axisValues = snapshot.axisValues or {},
+        trackId = tonumber(snapshot.trackId) or -1,
+        trackDistance = tonumber(string.format("%.2f", snapshot.trackDistance or -1)) or -1,
+        trackDirection = tonumber(snapshot.trackDirection) or -1,
+        trackSystem = tonumber(snapshot.trackSystem) or -1,
+        x = tonumber(snapshot.x) or -1,
+        y = tonumber(snapshot.y) or -1,
+        z = tonumber(snapshot.z) or -1,
+        mileage = tonumber(snapshot.mileage) or -1,
+        rotX = round2(snapshot.rotX),
+        rotY = round2(snapshot.rotY),
+        rotZ = round2(snapshot.rotZ),
+        xmlModel = xmlModel,
+        model = RollingStockModels.modelFor(snapshot.rollingStockName, xmlModel),
+        dirtyFields = {},
+        needsFullSend = true
+    }
+
+    RollingStock.__index = RollingStock
+    setmetatable(o, RollingStock)
+    return o
+end
+
 ---Adds or replaces a value in the rolling stock
 ---@param key string
 ---@param value string
@@ -371,16 +427,42 @@ end
 
 function RollingStock:setStations(stations) self.model:setStations(self.rollingStockName, stations) end
 
-function RollingStock:setWagonNr(nr)
-    local oldNr = self:getValue(TagKeys.RollingStock.wagonNumber)
-    self:setValue(TagKeys.RollingStock.wagonNumber, nr)
-    self.model:setWagonNr(self.rollingStockName, nr)
-    if oldNr ~= nr then
+function RollingStock:setLicencePlate(licencePlate)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
+    local oldLicencePlate = self:getLicencePlate()
+    self:setValue(TagKeys.RollingStock.licencePlate, licencePlate)
+    self.model:setLicencePlate(self.rollingStockName, licencePlate)
+    if oldLicencePlate ~= licencePlate then
+        markDirty(self, "licencePlate")
+    end
+end
+
+function RollingStock:getLicencePlate() return self:getValue(TagKeys.RollingStock.licencePlate) end
+
+function RollingStock:setWagonNumber(wagonNumber)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
+    local oldWagonNumber = self:getWagonNumber()
+    self:setValue(TagKeys.RollingStock.wagonNumber, wagonNumber)
+    if rawget(self.model, "setWagonNumber") then
+        self.model:setWagonNumber(self.rollingStockName, wagonNumber)
+    elseif rawget(self.model, "setWagonNr") then
+        self.model:setWagonNr(self.rollingStockName, wagonNumber)
+    else
+        self.model:setWagonNumber(self.rollingStockName, wagonNumber)
+    end
+    if oldWagonNumber ~= wagonNumber then
+        markDirty(self, "vehicleNumber")
         markDirty(self, "nr")
     end
 end
 
-function RollingStock:getWagonNr() return self:getValue(TagKeys.RollingStock.wagonNumber) end
+function RollingStock:getWagonNumber() return self:getValue(TagKeys.RollingStock.wagonNumber) end
+
+function RollingStock:setWagonNr(nr) self:setWagonNumber(nr) end
+
+function RollingStock:getWagonNr() return self:getWagonNumber() end
 
 --- Updates the trains trainName
 ---@param trainName string train trainName
@@ -472,11 +554,16 @@ function RollingStock:setTag(tag)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(tag) == "string", "Need 'tag' as string")
     local oldTag = self.tag
-    local oldNr = self:getWagonNr()
+    local oldLicencePlate = self:getLicencePlate()
+    local oldWagonNumber = self:getWagonNumber()
     self.tag = tag
     self.values = StorageUtility.parseTableFromString(tag)
     if oldTag ~= tag then markDirty(self, "tag") end
-    if oldNr ~= self:getWagonNr() then markDirty(self, "nr") end
+    if oldLicencePlate ~= self:getLicencePlate() then markDirty(self, "licencePlate") end
+    if oldWagonNumber ~= self:getWagonNumber() then
+        markDirty(self, "vehicleNumber")
+        markDirty(self, "nr")
+    end
 end
 
 --- Get the propelled value of this rolling stock
@@ -867,6 +954,22 @@ function RollingStock:setXmlModel(model)
     if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
+function RollingStock:setXmlModelFromSnapshot(model)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local oldXmlModel = self.xmlModel
+    local oldAxisNames = self:getAxisNames()
+    local oldAxisNamesKnown = self:getAxisNamesKnown()
+    local oldTextureNames = self:getTextureNames()
+    self.xmlModel = model
+    self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
+    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
+    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
+    if oldXmlModel ~= model then markDirty(self, "xmlModel") end
+    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
+    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
+    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
+end
+
 function RollingStock:resetDirty()
     self.dirtyFields = {}
 end
@@ -901,6 +1004,8 @@ function RollingStock:toJsonStatic()
         axisNames = self:getAxisNames(),
         axisValues = self:getAxisValues(),
         textureNames = self:getTextureNames(),
+        licencePlate = self:getLicencePlate(),
+        vehicleNumber = self:getWagonNumber(),
         nr = self:getWagonNr(),
         trackId = self:getTrackId(),
         trackDistance = self:getTrackDistance(),

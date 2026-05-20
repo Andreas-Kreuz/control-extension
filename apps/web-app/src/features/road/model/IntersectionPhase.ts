@@ -1,4 +1,4 @@
-export default interface IntersectionSwitching {
+export default interface IntersectionPhase {
   id: string;
   intersectionId: string;
   name: string;

@@ -34,6 +34,11 @@ export default class CommandLineParser {
         description: 'If true, this app will allow trusted dev and test origins.',
       },
       {
+        name: 'skip-server-state-persistence',
+        type: Boolean,
+        description: 'If true, server-state.json will not be persisted after state changes.',
+      },
+      {
         name: 'help',
         alias: 'h',
         type: Boolean,

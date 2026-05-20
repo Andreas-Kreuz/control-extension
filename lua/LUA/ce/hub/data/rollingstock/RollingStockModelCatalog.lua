@@ -4,5 +4,6 @@ local RollingStockModelRegistry = require("ce.hub.data.rollingstock.RollingStock
 
 require("ce.hub.data.rollingstock.ModelV15NMA10013").register(RollingStockModelRegistry)
 require("ce.hub.data.rollingstock.MODELV15NJS20220").register(RollingStockModelRegistry)
+require("ce.hub.data.rollingstock.ModelV15NCR10014").register(RollingStockModelRegistry)
 
 return RollingStockModelRegistry

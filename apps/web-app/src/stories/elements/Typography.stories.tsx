@@ -1,9 +1,12 @@
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import type { Meta, StoryObj } from '@storybook/react';
+import { trainSections } from '../../features/trains/components/trainSectionPresentation';
 import { Fragment } from 'react';
 import PlainCard from '../../shared/components/cards/PlainCard';
+import { IconHeadline } from '../../shared/components/headlines';
 
 type PlainCardTypographyCombination = {
   titleVariant: 'h5' | 'h6';
@@ -176,6 +179,22 @@ function PlainCardTypographyCombinations() {
   );
 }
 
+function IconHeadlineTypographyExamples() {
+  return (
+    <Box sx={{ display: 'grid', gap: 3, maxWidth: 720 }}>
+      <IconHeadline text="Aktiver Zug" icon={<DashboardIcon color="primary" />} variant="h4" color="textSecondary" />
+      <IconHeadline text="Aktiver Zug neutral" icon={<DashboardIcon />} variant="h4" color="textSecondary" />
+      <IconHeadline text={trainSections.trainAxes.title} icon={trainSections.trainAxes.icon} variant="h5" />
+      <IconHeadline text={`${trainSections.trainAxes.title} neutral`} icon={<DashboardIcon />} variant="h5" />
+      <IconHeadline
+        text="Sehr lange Überschrift mit Icon, die in engen Flächen gekürzt werden kann"
+        icon={<DashboardIcon color="primary" />}
+        variant="h6"
+      />
+    </Box>
+  );
+}
+
 const meta = {
   title: 'Elements/Typography',
   component: TypographyScale,
@@ -188,4 +207,8 @@ export const Default: Story = {};
 
 export const PlainCardTypography: Story = {
   render: () => <PlainCardTypographyCombinations />,
+};
+
+export const IconHeadlines: Story = {
+  render: () => <IconHeadlineTypographyExamples />,
 };

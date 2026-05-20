@@ -65,4 +65,8 @@ export default class InterestSyncService {
   touchLeasedToken(token: string, ceType: string, id: string, ttlMs: number): void {
     this.interestSyncRegistry.touchLeasedToken(token, ceType, id, ttlMs);
   }
+
+  replayRetainedInterests(): void {
+    this.interestSyncRegistry.replayRetainedInterests();
+  }
 }

@@ -53,6 +53,14 @@ local dtoFields = {
         getValue = function (scenario) return scenario.timeLapse end,
         placeholder = 0
     },
+    staticCameras = {
+        getValue = function (scenario) return scenario.staticCameras or {} end,
+        placeholder = {}
+    },
+    dynamicCameras = {
+        getValue = function (scenario) return scenario.dynamicCameras or {} end,
+        placeholder = {}
+    },
 }
 
 local function buildScenarioDto(scenario)

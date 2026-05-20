@@ -1,6 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLightModel ...") end
 
-local TrafficLightState = require("ce.mods.road.TrafficLightState")
+local SignalIndication = require("ce.mods.road.SignalIndication")
 ------------------------------------------------------------------------------------------
 -- Klasse TrafficLightModel
 -- Weiss, welche Signalstellung fuer rot, gelb und gruen geschaltet werden muessen.
@@ -43,49 +43,49 @@ end
 
 function TrafficLightModel:print() print(self.name) end
 
-function TrafficLightModel:signalIndexOf(phase)
-    assert(type(phase) == "string", "Need 'phase' as string")
-    if phase == TrafficLightState.RED then
+function TrafficLightModel:signalIndexOf(indication)
+    assert(type(indication) == "string", "Need 'indication' as string")
+    if indication == SignalIndication.RED then
         return self.signalIndexRed
-    elseif phase == TrafficLightState.GREEN then
+    elseif indication == SignalIndication.GREEN then
         return self.signalIndexGreen
-    elseif phase == TrafficLightState.YELLOW then
+    elseif indication == SignalIndication.YELLOW then
         return self.signalIndexYellow
-    elseif phase == TrafficLightState.REDYELLOW then
+    elseif indication == SignalIndication.REDYELLOW then
         return self.signalIndexRedYellow
-    elseif phase == TrafficLightState.GREENYELLOW then
+    elseif indication == SignalIndication.GREENYELLOW then
         return self.signalIndexGreenYellow
-    elseif phase == TrafficLightState.PEDESTRIAN then
+    elseif indication == SignalIndication.PEDESTRIAN then
         return self.signalIndexPedestrian
-    elseif phase == TrafficLightState.OFF then
+    elseif indication == SignalIndication.OFF then
         return self.signalIndexSwitchOff
-    elseif phase == TrafficLightState.OFF_BLINKING then
+    elseif indication == SignalIndication.OFF_BLINKING then
         return self.signalIndexBlinkYellow
     else
-        assert(false, "Unknown phase " .. phase)
+        assert(false, "Unknown indication " .. indication)
     end
 end
 
-function TrafficLightModel:phaseOf(signalIndex)
+function TrafficLightModel:indicationOf(signalIndex)
     assert(type(signalIndex) == "number", "Need 'signalIndex' as number")
     if signalIndex == self.signalIndexRed then
-        return TrafficLightState.RED
+        return SignalIndication.RED
     elseif signalIndex == self.signalIndexGreen then
-        return TrafficLightState.GREEN
+        return SignalIndication.GREEN
     elseif signalIndex == self.signalIndexGreenYellow then
-        return TrafficLightState.GREENYELLOW
+        return SignalIndication.GREENYELLOW
     elseif signalIndex == self.signalIndexYellow then
-        return TrafficLightState.YELLOW
+        return SignalIndication.YELLOW
     elseif signalIndex == self.signalIndexRedYellow then
-        return TrafficLightState.REDYELLOW
+        return SignalIndication.REDYELLOW
     elseif signalIndex == self.signalIndexPedestrian then
-        return TrafficLightState.PEDESTRIAN
+        return SignalIndication.PEDESTRIAN
     elseif signalIndex == self.signalIndexBlinkYellow then
-        return TrafficLightState.OFF_BLINKING
+        return SignalIndication.OFF_BLINKING
     elseif signalIndex == self.signalIndexSwitchOff then
-        return TrafficLightState.OFF
+        return SignalIndication.OFF
     else
-        return TrafficLightState.UNKNOWN
+        return SignalIndication.UNKNOWN
     end
 end
 
@@ -116,7 +116,7 @@ TrafficLightModel.JS2_3er_ohne_FG = TrafficLightModel:new("Ampel_3er_XXX_ohne_FG
 -- Unsichtbare Ampeln haben "nur" rot und gruen
 TrafficLightModel.Unsichtbar_2er = TrafficLightModel:new("Unsichtbares Signal", 2, 1, 2, 2, 2, 1, 1)
 
--- No traffic light
+-- No signal
 TrafficLightModel.NONE = TrafficLightModel:new("NO SIGNAL MODEL", 1, 2, 3, 4, 5, 6, 7)
 
 return TrafficLightModel

@@ -1,9 +1,15 @@
-import * as assert from 'node:assert/strict';
+﻿import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import RoadDataService from './road/RoadDataService';
 import TransitService from './transit/TransitService';
-import { CeTypes, CeTypeRoom, IntersectionListRoom, TransitLineListRoom } from '@ce/web-shared';
+import {
+  CeTypes,
+  CeTypeRoom,
+  IntersectionListRoom,
+  RoadTrafficLightModelsRoom,
+  TransitLineListRoom,
+} from '@ce/web-shared';
 
 async function runTest(name: string, fn: () => void | Promise<void>): Promise<void> {
   try {
@@ -130,13 +136,28 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
         I1: {
           id: 1,
           name: 'Crossing 1',
-          currentSwitching: 'S1',
-          manualSwitching: '',
-          nextSwitching: 'S2',
+          currentPhase: 'P1',
+          manualPhase: '',
+          nextPhase: 'P2',
           ready: true,
-          timeForGreen: 15,
+          greenTimeSeconds: 15,
           staticCams: [],
           phases: [],
+          signalGroupDefinitions: [],
+        },
+      },
+      [CeTypes.RoadTrafficLightModel]: {
+        M1: {
+          id: 'Ampel_3er_XXX_mit_FG',
+          name: 'Ampel_3er_XXX_mit_FG',
+          type: 'road',
+          positionRed: 1,
+          positionGreen: 3,
+          positionYellow: 5,
+          positionRedYellow: 2,
+          positionPedestrians: 6,
+          positionOff: 7,
+          positionOffBlinking: 8,
         },
       },
     },
@@ -152,24 +173,43 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
   } as never);
 
   const intersectionListProvider = providerById(roadService, 'IntersectionListRoom');
+  const trafficLightModelsProvider = providerById(roadService, 'RoadTrafficLightModelsRoom');
   const transitLineListProvider = providerById(transitService, 'TransitLineListRoom');
 
   assert.deepEqual(JSON.parse(intersectionListProvider.jsonCreator(IntersectionListRoom.roomId('All'))), {
     '1': {
       id: 1,
       name: 'Crossing 1',
-      currentSwitching: 'S1',
-      manualSwitching: '',
-      nextSwitching: 'S2',
+      eepSaveId: -1,
+      currentPhase: 'P1',
+      manualPhase: '',
+      nextPhase: 'P2',
       ready: true,
-      timeForGreen: 15,
+      greenTimeSeconds: 15,
+      switchInStrictOrder: false,
       staticCams: [],
       phases: [],
+      signalGroupDefinitions: [],
     },
   });
   assert.deepEqual(JSON.parse(transitLineListProvider.jsonCreator(TransitLineListRoom.roomId('All'))), [
     { id: 'L1', nr: '1', trafficType: 'BUS', lineSegments: [] },
   ]);
+  assert.deepEqual(JSON.parse(trafficLightModelsProvider.jsonCreator(RoadTrafficLightModelsRoom.roomId('All'))), {
+    Ampel_3er_XXX_mit_FG: {
+      id: 'Ampel_3er_XXX_mit_FG',
+      name: 'Ampel_3er_XXX_mit_FG',
+      type: 'road',
+      luaConstant: 'JS2_3er_mit_FG',
+      positionRed: 1,
+      positionGreen: 3,
+      positionYellow: 5,
+      positionRedYellow: 2,
+      positionPedestrians: 6,
+      positionOff: 7,
+      positionOffBlinking: 8,
+    },
+  });
 }
 
 export async function run(): Promise<void> {

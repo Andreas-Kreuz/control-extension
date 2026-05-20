@@ -2,6 +2,9 @@ insulate("ce.mods.transit.TransitSettings", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     before_each(function ()
+        clearModule("ce.hub.eep.EepSimulatorStore")
+        clearModule("ce.hub.eep.EepSimulatorRuntime")
+        clearModule("ce.hub.eep.EepSimulator")
         require("ce.hub.eep.EepSimulator")
         clearModule("ce.hub.util.StorageUtility")
         clearModule("ce.mods.transit.RoadStation")
@@ -45,5 +48,29 @@ insulate("ce.mods.transit.TransitSettings", function ()
         TransitSettings.setShowDepartureTippText(true)
 
         assert.equals(1, refreshCalls)
+    end)
+
+    it("persists setting changes across a Lua reload", function ()
+        local TransitSettings = require("ce.mods.transit.TransitSettings")
+
+        TransitSettings.loadSettingsFromSlot(25)
+        TransitSettings.setShowDepartureTippText(true)
+
+        clearModule("ce.hub.util.StorageUtility")
+        clearModule("ce.mods.transit.TransitSettings")
+        TransitSettings = require("ce.mods.transit.TransitSettings")
+        TransitSettings.loadSettingsFromSlot(25)
+
+        assert.is_true(TransitSettings.showDepartureTippText)
+    end)
+
+    it("loads saved false values over previous true values", function ()
+        local TransitSettings = require("ce.mods.transit.TransitSettings")
+
+        EEPSaveData(26, "depInfo=false,")
+        TransitSettings.showDepartureTippText = true
+        TransitSettings.loadSettingsFromSlot(26)
+
+        assert.is_false(TransitSettings.showDepartureTippText)
     end)
 end)

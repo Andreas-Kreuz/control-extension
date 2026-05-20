@@ -14,6 +14,7 @@ import { CameraControlSource } from '../../../shared/components/controls';
 import useDebug from '../../../shared/socket/useDebug';
 import useTransitSettings from '../../lines/hooks/useTransitSettings';
 import {
+  distinctRollingStockValues,
   groupAxisByName,
   isSelectedRollingStock,
   mergeRollingStockModelInfo,
@@ -74,8 +75,7 @@ function useTrainDashboard(): TrainDashboardPanelModel {
   const cameraRollingStockName = rollingStock?.[0]?.name ?? activeRollingStock?.name ?? train?.name ?? trainId;
   const cameraRollingStock = useRollingStock(cameraRollingStockName);
   const trainRollingStock = useMemo(
-    () =>
-      rollingStock?.map((item) => mergeRollingStockModelInfo(item, dynamicRollingStock[item.id])) ?? [],
+    () => rollingStock?.map((item) => mergeRollingStockModelInfo(item, dynamicRollingStock[item.id])) ?? [],
     [dynamicRollingStock, rollingStock],
   );
   const controls = useOptimisticTrainControls({
@@ -177,6 +177,7 @@ function useTrainDashboard(): TrainDashboardPanelModel {
     cameraSources: trainCameraSources,
     canShowTrainAxes,
     controls,
+    licencePlates: distinctRollingStockValues(trainRollingStock, 'licencePlate'),
     mergedAxisGroups,
     onCameraSelect: changeCamera,
     onMergedAxisCommit: commitMergedAxis,
@@ -187,6 +188,7 @@ function useTrainDashboard(): TrainDashboardPanelModel {
     status: 'ready',
     train,
     trainSelected: train.active || selectedTrainName === train.id || selectedTrainName === train.name,
+    vehicleNumbers: distinctRollingStockValues(trainRollingStock, 'vehicleNumber'),
     ...(transit !== undefined ? { transit } : {}),
   };
 }

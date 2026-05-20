@@ -21,12 +21,12 @@ local function isSelectedLane(lane)
     return InterestSyncRegistry.isSelected(RoadCeTypes.IntersectionLane, tostring(lane.id))
 end
 
-local function isSelectedSwitching(switching)
-    return InterestSyncRegistry.isSelected(RoadCeTypes.IntersectionSwitching, tostring(switching.id))
+local function isSelectedPhase(phase)
+    return InterestSyncRegistry.isSelected(RoadCeTypes.IntersectionPhase, tostring(phase.id))
 end
 
-local function isSelectedTrafficLight(trafficLight)
-    return InterestSyncRegistry.isSelected(RoadCeTypes.IntersectionTrafficLight, tostring(trafficLight.id))
+local function isSelectedSignal(signal)
+    return InterestSyncRegistry.isSelected(RoadCeTypes.IntersectionTrafficLight, tostring(signal.id))
 end
 
 local function isSelectedModuleSetting(setting)
@@ -53,13 +53,13 @@ function RoadStatePublisher.syncState()
         DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes,
                                                                                   isSelectedLane))
     end
-    if RoadOptionsRegistry.isPublishEnabled("intersectionSwitchings") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionSwitchingDtoList(
-            crossingData.intersectionSwitchings, isSelectedSwitching))
+    if RoadOptionsRegistry.isPublishEnabled("intersectionPhases") then
+        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionPhaseDtoList(
+            crossingData.intersectionPhases, isSelectedPhase))
     end
     if RoadOptionsRegistry.isPublishEnabled("intersectionTrafficLights") then
         DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionTrafficLightDtoList(
-            crossingData.intersectionTrafficLights, isSelectedTrafficLight))
+            crossingData.intersectionTrafficLights, isSelectedSignal))
     end
     if RoadOptionsRegistry.isPublishEnabled("moduleSettings") then
         DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionModuleSettingDtoList(moduleSettings,

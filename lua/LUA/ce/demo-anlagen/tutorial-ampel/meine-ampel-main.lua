@@ -5,11 +5,10 @@ local TrafficLight = require("ce.mods.road.TrafficLight")
 local Lane = require("ce.mods.road.Lane")
 local Intersection = require("ce.mods.road.Intersection")
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
-local IntersectionSequence = require("ce.mods.road.IntersectionSequence")
 
 -- Hier kommt der Code
 IntersectionSettings.showSignalIdOnSignal = false
-IntersectionSettings.showSequenceOnSignal = false
+IntersectionSettings.showPhaseOnSignal = false
 
 local K1 = TrafficLight:new("K1", 12, TrafficLightModel.JS2_3er_mit_FG)
 local K2 = TrafficLight:new("K2", 17, TrafficLightModel.JS2_3er_ohne_FG)
@@ -47,97 +46,58 @@ local F12 = K11:withPedestrian("F12")
 --   |        |     |      +------------------ Fahrspur-Ampel - da wartet der Verkehr
 --   |        |     |      |           +------ Signal-ID dieser Ampel
 --   |        |     |      |           |   +-- Modell kann rot, gelb, gruen und FG schalten
-n1 = Lane:new("N1", 100, K1, { "STRAIGHT", "RIGHT" })
-n2 = Lane:new("N2", 101, K3, { "LEFT" }) -- zusätzlich in der Schaltung K2
+n1 = Lane:new("N1", K1, { "STRAIGHT", "RIGHT" })
+n2 = Lane:new("N2", K3, { "LEFT" }) -- zusätzlich in der Phase K2
 
 -- Fahrspuren im Osten
-o1 = Lane:new("O1", 104, K4, { "STRAIGHT", "RIGHT" })
-o2 = Lane:new("O2", 105, K6, { "LEFT" }) -- zusätlich in der Schaltung K5
+o1 = Lane:new("O1", K4, { "STRAIGHT", "RIGHT" })
+o2 = Lane:new("O2", K6, { "LEFT" }) -- zusätzlich in der Phase K5
 
 -- Fahrspuren im Sueden
-s1 = Lane:new("S1", 107, K7, { "STRAIGHT", "RIGHT" })
-s2 = Lane:new("S2", 108, K8, { "LEFT" }) -- zusätlich in der Schaltung K9
+s1 = Lane:new("S1", K7, { "STRAIGHT", "RIGHT" })
+s2 = Lane:new("S2", K8, { "LEFT" }) -- zusätzlich in der Phase K9
 
 -- Fahrspuren im Westen
-w1 = Lane:new("W1", 111, K10, { "STRAIGHT", "RIGHT" })
-w2 = Lane:new("W2", 112, K12, { "LEFT" }) -- Zusätzlich in der Schaltung K11
+w1 = Lane:new("W1", K10, { "STRAIGHT", "RIGHT" })
+w2 = Lane:new("W2", K12, { "LEFT" }) -- Zusätzlich in der Phase K11
 
 --------------------------------------------------------------
--- Definiere die Schaltungen und die Kreuzung
+-- Definiere die Phasen und die Kreuzung
 --------------------------------------------------------------
--- Eine Schaltung bestimmt, welche Fahrspuren gleichzeitig auf
+-- Eine Phase bestimmt, welche Fahrspuren gleichzeitig auf
 -- grün geschaltet werden dürfen, alle anderen sind rot
 
---- Tutorial 1: Schaltung 1
-local sch1 = IntersectionSequence:new("Schaltung 1")
-sch1:addCarLights(K1)
-sch1:addCarLights(K7)
-sch1:addPedestrianLights(F5, F6)
-sch1:addPedestrianLights(F11, F12)
-
---- Tutorial 1: Schaltung 2
-local sch2 = IntersectionSequence:new("Schaltung 2")
-sch2:addCarLights(K2, K3)
-sch2:addCarLights(K8, K9)
-sch2:addPedestrianLights(F3, F4)
-sch2:addPedestrianLights(F5, F6)
-sch2:addPedestrianLights(F11, F12)
-sch2:addPedestrianLights(F9, F10)
-
---- Tutorial 1: Schaltung 3
-local sch3 = IntersectionSequence:new("Schaltung 3")
-sch3:addCarLights(K4)
-sch3:addCarLights(K10)
-sch3:addPedestrianLights(F1, F2)
-sch3:addPedestrianLights(F3, F4)
-sch3:addPedestrianLights(F7, F8)
-sch3:addPedestrianLights(F9, F10)
-
---- Tutorial 1: Schaltung 4
-local sch4 = IntersectionSequence:new("Schaltung 4")
-sch4:addCarLights(K5, K6)
-sch4:addCarLights(K11, K12)
-sch4:addPedestrianLights(F1, F2)
-sch4:addPedestrianLights(F7, F8)
-
--- --- Tutorial 1: Schaltung 5
--- local sch5 = IntersectionSequence:new("Schaltung 5")
--- sch5:addCarLights(K1)
--- sch5:addCarLights(K2, K3)
--- sch5:addPedestrianLights(F11, F12)
---
--- --- Tutorial 1: Schaltung 6
--- local sch6 = IntersectionSequence:new("Schaltung 6")
--- sch6:addCarLights(K4)
--- sch6:addCarLights(K5, K6)
--- sch6:addPedestrianLights(F1, F2)
--- sch6:addPedestrianLights(F3, F4)
--- sch6:addPedestrianLights(F7, F8)
---
--- --- Tutorial 1: Schaltung 7
--- local sch7 = IntersectionSequence:new("Schaltung 7")
--- sch7:addCarLights(K7)
--- sch7:addCarLights(K8, K9)
--- sch7:addPedestrianLights(F5, F6)
---
--- --- Tutorial 1: Schaltung 6
--- local sch8 = IntersectionSequence:new("Schaltung 8")
--- sch8:addCarLights(K4)
--- sch8:addCarLights(K5, K6)
--- sch8:addPedestrianLights(F1, F2)
--- sch8:addPedestrianLights(F7, F8)
--- sch8:addPedestrianLights(F9, F10)
-
 k1 = Intersection:new("Tutorial 1")
-k1:addSequence(sch1)
-k1:addSequence(sch2)
-k1:addSequence(sch3)
-k1:addSequence(sch4)
--- k1:addSequence(sch5)
--- k1:addSequence(sch6)
--- k1:addSequence(sch7)
--- k1:addSequence(sch8)
+local sgNorthStraightRight = k1:newSignalGroup("sgNorthStraightRight"):addVehicleSignals(K1)
+local sgNorthLeft = k1:newSignalGroup("sgNorthLeft"):addVehicleSignals(K2, K3)
+local sgEastStraightRight = k1:newSignalGroup("sgEastStraightRight"):addVehicleSignals(K4)
+local sgEastLeft = k1:newSignalGroup("sgEastLeft"):addVehicleSignals(K5, K6)
+local sgSouthStraightRight = k1:newSignalGroup("sgSouthStraightRight"):addVehicleSignals(K7)
+local sgSouthLeft = k1:newSignalGroup("sgSouthLeft"):addVehicleSignals(K8, K9)
+local sgWestStraightRight = k1:newSignalGroup("sgWestStraightRight"):addVehicleSignals(K10)
+local sgWestLeft = k1:newSignalGroup("sgWestLeft"):addVehicleSignals(K11, K12)
+local sgPedNorth = k1:newSignalGroup("sgPedNorth"):addPedestrianSignals(F1, F2)
+local sgPedEast = k1:newSignalGroup("sgPedEast"):addPedestrianSignals(F3, F4)
+local sgPedSouth = k1:newSignalGroup("sgPedSouth"):addPedestrianSignals(F7, F8)
+local sgPedWest = k1:newSignalGroup("sgPedWest"):addPedestrianSignals(F9, F10)
+local sgPedNorthSouth = k1:newSignalGroup("sgPedNorthSouth"):addPedestrianSignals(F5, F6)
+local sgPedEastWest = k1:newSignalGroup("sgPedEastWest"):addPedestrianSignals(F11, F12)
 
+--- Tutorial 1: Phase 1
+local phase1 = k1:newPhase("P1")
+phase1:addSignalGroup(sgNorthStraightRight, sgSouthStraightRight, sgPedNorthSouth, sgPedEastWest)
+
+--- Tutorial 1: Phase 2
+local phase2 = k1:newPhase("P2")
+phase2:addSignalGroup(sgNorthLeft, sgSouthLeft, sgPedEast, sgPedNorthSouth, sgPedEastWest, sgPedWest)
+
+--- Tutorial 1: Phase 3
+local phase3 = k1:newPhase("P3")
+phase3:addSignalGroup(sgEastStraightRight, sgWestStraightRight, sgPedNorth, sgPedEast, sgPedSouth, sgPedWest)
+
+--- Tutorial 1: Phase 4
+local phase4 = k1:newPhase("P4")
+phase4:addSignalGroup(sgEastLeft, sgWestLeft, sgPedNorth, sgPedSouth)
 k1:addStaticCam("Richtung Norden")
 k1:addStaticCam("Richtung Ost")
 k1:addStaticCam("Übersicht")

@@ -7,13 +7,13 @@ local ContactDiscovery = {}
 
 function ContactDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
+    if tableOfAnl3.coverage and not tableOfAnl3.coverage.contacts then return end
 
+    local contacts = {}
     for _, entry in ipairs(tableOfAnl3.contacts or {}) do
-        if entry.id and not ContactRegistry.has(entry.id) then
-            local contact = Contact:new(entry.id, entry.luaFn, entry.tipTxt)
-            ContactRegistry.add(contact)
-        end
+        if entry.id then contacts[#contacts + 1] = Contact:new(entry.id, entry.luaFn, entry.tipTxt) end
     end
+    ContactRegistry.replaceAll(contacts)
 end
 
 return ContactDiscovery

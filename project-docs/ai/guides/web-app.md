@@ -9,6 +9,7 @@
 
 - No local helper functions (e.g. `chooseDirectory()`) if they break top-to-bottom readability
 - Break chained `.` calls across lines instead of long single-line chains
+- Generated screenshot filenames include the route slug from `generatedScreenshotPath`. When changing router paths or links used by screenshot specs, update any matching `/assets/generated/...` references in `pages/` so GitHub Pages asset generation can still find the produced screenshot.
 
 ## Commands
 

@@ -1,5 +1,6 @@
 import { RouteObject, useParams } from 'react-router-dom';
 import IntersectionOverview from './components/IntersectionOverview';
+import IntersectionCreateWizard from './components/IntersectionCreateWizard';
 
 function RoadOverviewRoute() {
   const { selectedElement } = useParams<{ selectedElement: string }>();
@@ -7,6 +8,9 @@ function RoadOverviewRoute() {
   return <IntersectionOverview selectedElement={selectedElement} />;
 }
 
-const routes: RouteObject[] = [{ path: ':selectedElement?', element: <RoadOverviewRoute /> }];
+const routes: RouteObject[] = [
+  { path: 'createIntersection/:wizardStep?', element: <IntersectionCreateWizard /> },
+  { path: ':selectedElement?', element: <RoadOverviewRoute /> },
+];
 
 export default routes;

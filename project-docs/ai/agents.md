@@ -18,7 +18,7 @@ Lua guides:
 
 Web guides:
 
-- [guides/web-app.md](guides/web-app.md): React UI — stack, Cypress conventions, commands, testing
+- [guides/web-app.md](guides/web-app.md): React UI — stack, router links, Cypress screenshots, commands, testing
 - [guides/web-server-contract.md](guides/web-server-contract.md): server APIs and web-shared contract — server-generated data, Lua absorption, stability rules
 
 Documentation guides:

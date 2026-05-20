@@ -21,6 +21,37 @@ function RollingStockRegistry.forName(rollingStockName)
     return rollingStock
 end
 
+function RollingStockRegistry.seedFromSnapshot(snapshot)
+    assert(type(snapshot) == "table", "Need snapshot as table")
+    assert(type(snapshot.rollingStockName) == "string", "Need snapshot.rollingStockName as string")
+
+    if allRollingStock[snapshot.rollingStockName] then
+        local rollingStock = allRollingStock[snapshot.rollingStockName]
+        if snapshot.xmlModel then rollingStock:setXmlModelFromSnapshot(snapshot.xmlModel) end
+        if snapshot.trainName then rollingStock:setTrainName(snapshot.trainName) end
+        if snapshot.positionInTrain then rollingStock:setPositionInTrain(snapshot.positionInTrain) end
+        if snapshot.trackType then rollingStock:setTrackType(snapshot.trackType) end
+        if snapshot.trackId and snapshot.trackDistance and snapshot.trackDirection and snapshot.trackSystem then
+            rollingStock:setTrack(snapshot.trackId, snapshot.trackDistance, snapshot.trackDirection,
+                                  snapshot.trackSystem)
+        end
+        return rollingStock, false
+    end
+
+    local rollingStock = RollingStock.fromSnapshot(snapshot)
+    allRollingStock[rollingStock.rollingStockName] = rollingStock
+    addedRollingStockIds[rollingStock.rollingStockName] = true
+    removedRollingStockIds[rollingStock.rollingStockName] = nil
+    return rollingStock, true
+end
+
+function RollingStockRegistry.removeAbsentFromSnapshot(rollingStockNames)
+    rollingStockNames = rollingStockNames or {}
+    for rollingStockName in pairs(allRollingStock) do
+        if not rollingStockNames[rollingStockName] then RollingStockRegistry.remove(rollingStockName) end
+    end
+end
+
 function RollingStockRegistry.has(rollingStockName)
     return allRollingStock[rollingStockName] ~= nil
 end

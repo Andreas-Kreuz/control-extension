@@ -25,6 +25,7 @@ yarn test:lua               # Busted/Lua tests only
 yarn test:lua:coverage      # With coverage
 yarn test:server            # Server tests only
 yarn test:app               # Cypress E2E tests (requires build)
+yarn test:app -- --spec cypress/e2e/home/home.cy.ts  # Run one Cypress spec through test:app
 yarn check:lua              # lint:lua + test:lua
 yarn check:web              # lint:web + test:web
 ```
@@ -46,5 +47,6 @@ yarn format:lua             # Format Lua via sumneko.lua VSCode extension
 - Dev storybook on Windows/PowerShell: `cmd /c yarn dev:storybook`
 - Headless server: `yarn workspace @ce/web-server run run:headless`
 - On Windows/PowerShell, run yarn commands through `cmd /c`, e.g. `cmd /c yarn run check:lua`, instead of bare `yarn`.
+- For targeted app E2E runs on Windows, pass Cypress args through `test:app`, e.g. `cmd /c yarn.cmd test:app -- --spec cypress/e2e/home/home.cy.ts`.
 
 .luacheckrc and .busted are located in lua/

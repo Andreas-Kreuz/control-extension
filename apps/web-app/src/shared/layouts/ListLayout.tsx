@@ -21,6 +21,7 @@ export interface DetailSection {
   title: string;
   component: ReactNode;
   icon?: ReactElement;
+  sidePanelOnly?: boolean;
 }
 
 export interface ListLayoutProps<T> {
@@ -34,16 +35,22 @@ export interface ListLayoutProps<T> {
   emptyMessage?: ReactNode | ((filterText: string) => ReactNode);
   placeholder?: ReactNode;
   filterSlot?: ReactNode;
+  permanentDetailsOnTablet?: boolean;
   selectedElement: string | undefined;
   onSelectedElementChange: (selectedElement: string | null) => void;
 }
 
 function MobileTabs({ sections }: { sections: DetailSection[] }) {
   const [activeTab, setActiveTab] = useState(0);
-  const safeTab = Math.min(activeTab, sections.length - 1);
+  const visibleSections = sections.filter((section) => !section.sidePanelOnly);
+  const safeTab = Math.min(activeTab, visibleSections.length - 1);
 
-  if (sections.length === 1) {
-    return <DetailTabPanelBody>{sections[0]?.component}</DetailTabPanelBody>;
+  if (visibleSections.length === 0) {
+    return null;
+  }
+
+  if (visibleSections.length === 1) {
+    return <DetailTabPanelBody>{visibleSections[0]?.component}</DetailTabPanelBody>;
   }
 
   return (
@@ -55,12 +62,12 @@ function MobileTabs({ sections }: { sections: DetailSection[] }) {
         allowScrollButtonsMobile
         sx={{ minHeight: 44 }}
       >
-        {sections.map((s) => (
+        {visibleSections.map((s) => (
           <Tab key={s.title} label={s.title} />
         ))}
       </Tabs>
       <Divider />
-      <DetailTabPanelBody>{sections[safeTab]?.component}</DetailTabPanelBody>
+      <DetailTabPanelBody>{visibleSections[safeTab]?.component}</DetailTabPanelBody>
     </Stack>
   );
 }
@@ -106,6 +113,7 @@ function ListLayout<T>({
   emptyMessage,
   placeholder,
   filterSlot,
+  permanentDetailsOnTablet = false,
   selectedElement,
   onSelectedElementChange,
 }: ListLayoutProps<T>) {
@@ -149,18 +157,29 @@ function ListLayout<T>({
     if (selectedItem && selectedKey) {
       const sections = getDetails(selectedItem);
       setSheet(<SideSheetDetail sections={sections} onClose={handleClose} />, {
-        permanentOnTablet: false,
+        permanentOnTablet: permanentDetailsOnTablet,
         key: selectedKey,
       });
       return;
     }
 
     if (isDesktop) {
-      setSheet(placeholder ?? <SideSheetPlaceholder />, { permanentOnTablet: false });
+      setSheet(placeholder ?? <SideSheetPlaceholder />, { permanentOnTablet: permanentDetailsOnTablet });
     } else {
       closeSheet();
     }
-  }, [selectedItem, selectedKey, getDetails, isDesktop, isMobile, placeholder, handleClose, setSheet, closeSheet]);
+  }, [
+    selectedItem,
+    selectedKey,
+    getDetails,
+    isDesktop,
+    isMobile,
+    placeholder,
+    permanentDetailsOnTablet,
+    handleClose,
+    setSheet,
+    closeSheet,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {

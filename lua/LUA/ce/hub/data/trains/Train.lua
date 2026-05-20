@@ -39,6 +39,8 @@ local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 ---@field getValue fun(self: Train, key: string):string
 ---@field setRoute fun(self: Train, routeName: string):nil
 ---@field updateRoute fun(self: Train, routeName: string):nil
+---@field setLicencePlate fun(self: Train, licencePlate: string):nil
+---@field setWagonNumber fun(self: Train, wagonNumber: string):nil
 ---@field getRoute fun(self: Train):string
 ---@field setRollingStockCount fun(self: Train, count: integer):nil
 ---@field getRollingStockCount fun(self: Train):number
@@ -140,6 +142,40 @@ function Train:new(o)
     return o
 end
 
+function Train.fromSnapshot(snapshot)
+    assert(type(snapshot) == "table", "Need snapshot as table")
+    assert(type(snapshot.name) == "string", "Need snapshot.name as string")
+
+    local speed = tonumber(snapshot.speed) or 0
+    local o = {
+        id = snapshot.name,
+        name = snapshot.name,
+        type = "Train",
+        values = snapshot.values or {},
+        route = snapshot.route or "",
+        rollingStockCount = tonumber(snapshot.rollingStockCount) or 0,
+        speed = speed,
+        targetSpeed = tonumber(snapshot.targetSpeed) or speed,
+        length = tonumber(snapshot.length) or 0,
+        couplingFront = tonumber(snapshot.couplingFront) or 0,
+        couplingRear = tonumber(snapshot.couplingRear) or 0,
+        lights = snapshot.lights or {},
+        active = snapshot.active == true,
+        inTrainyard = snapshot.inTrainyard == true,
+        trainyardId = snapshot.trainyardId,
+        movesForward = snapshot.movesForward ~= nil and snapshot.movesForward == true or speed >= 0,
+        trackType = snapshot.trackType,
+        onTracks = snapshot.onTracks or {},
+        occupiedTracks = {},
+        dirtyFields = {},
+        needsFullSend = true
+    }
+
+    Train.__index = Train
+    setmetatable(o, Train)
+    return o
+end
+
 ---Loads a table with values from the first rollingstock of the train
 function Train:load()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
@@ -231,6 +267,26 @@ end
 function Train:getRoute()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     return self.route
+end
+
+function Train:setLicencePlate(licencePlate)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
+    local carCount = EEPGetRollingstockItemsCount(self.name)
+    for i = 0, carCount - 1 do
+        local rollingStockName = EEPGetRollingstockItemName(self.name, i)
+        RollingStockRegistry.forName(rollingStockName):setLicencePlate(licencePlate)
+    end
+end
+
+function Train:setWagonNumber(wagonNumber)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
+    local carCount = EEPGetRollingstockItemsCount(self.name)
+    for i = 0, carCount - 1 do
+        local rollingStockName = EEPGetRollingstockItemName(self.name, i)
+        RollingStockRegistry.forName(rollingStockName):setWagonNumber(wagonNumber)
+    end
 end
 
 --- Updates the trains rolling stock count

@@ -33,6 +33,7 @@ Wichtig:
 | `framedata`       | `FrameDataUpdater`, `FrameDataPublisher`, `FrameDataDtoFactory`                            | `ListChanged` für `ce.hub.FrameData`                           |
 | `version`         | `VersionUpdater`, `VersionPublisher`, `VersionDtoFactory`                                  | `ListChanged` für `ce.hub.EepVersion`                          |
 | `scenario`        | `ScenarioUpdater`, `ScenarioPublisher`, `ScenarioDtoFactory`                               | `ListChanged` für `ce.hub.Scenario`                            |
+| `routes`          | `RouteDiscovery`, `RoutePublisher`, `RouteDtoFactory`                                      | `ListChanged` für `ce.hub.Route`                               |
 | `signals`         | `SignalDiscovery`, `SignalUpdater`, `SignalPublisher`, `SignalDtoFactory`                  | `ListChanged` für `ce.hub.Signal` und `ce.hub.WaitingOnSignal` |
 | `switches`        | `SwitchDiscovery`, `SwitchUpdater`, `SwitchPublisher`, `SwitchDtoFactory`                  | `ListChanged` für `ce.hub.Switch`                              |
 | `time`            | `TimeUpdater`, `TimePublisher`, `TimeDtoFactory`                                           | `ListChanged` für `ce.hub.Time`                                |
@@ -57,6 +58,7 @@ Wichtig:
 | Wartende Fahrzeuge an Signalen      | `ce.hub.WaitingOnSignal`                | `id`      |
 | Weichen                             | `ce.hub.Switch`                         | `id`      |
 | Szenario                            | `ce.hub.Scenario`                       | `id`      |
+| Routen                              | `ce.hub.Route`                          | `id`      |
 | Zeit                                | `ce.hub.Time`                           | `id`      |
 | Wetter                              | `ce.hub.Weather`                        | `id`      |
 | Belegte Datenslots                  | `ce.hub.SaveSlot`                       | `id`      |
@@ -69,11 +71,11 @@ Wichtig:
 | Straßen                             | `ce.hub.RoadTrack`                      | `id`      |
 | Bahngleise                          | `ce.hub.RailTrack`                      | `id`      |
 | Straßenbahngleise                   | `ce.hub.TramTrack`                      | `id`      |
-| Ampelmodell-Definitionen            | `ce.mods.road.SignalTypeDefinition`     | `id`      |
+| Ampelmodell-Definitionen            | `ce.mods.road.TrafficLightModel`        | `id`      |
 | Kreuzungen                          | `ce.mods.road.Intersection`             | `id`      |
 | Kreuzungs-Fahrspuren                | `ce.mods.road.IntersectionLane`         | `id`      |
-| Kreuzungs-Schaltungen               | `ce.mods.road.IntersectionSwitching`    | `id`      |
-| Kreuzungs-Ampeln                    | `ce.mods.road.IntersectionTrafficLight` | `id`      |
+| Kreuzungsphasen                     | `ce.mods.road.IntersectionPhase`        | `id`      |
+| Kreuzungs-Signalgeber               | `ce.mods.road.IntersectionTrafficLight` | `id`      |
 | Kreuzungs-Moduleinstellungen        | `ce.mods.road.ModuleSetting`            | `name`    |
 | ÖPNV-Linien                         | `ce.mods.transit.Line`                  | `id`      |
 | ÖPNV-Stationen                      | `ce.mods.transit.Station`               | `id`      |
@@ -124,6 +126,21 @@ Elementtyp: Szenarioinfo
 | `activeTrain`        | `string` \| `nil` | Zugname         | aktiver Zug aus `EEPGetTrainActive()`                    |
 | `activeRollingStock` | `string` \| `nil` | Fahrzeugname    | aktives Rollmaterial aus `EEPRollingstockGetActive()`    |
 | `timeLapse`          | `number` \| `nil` | Zeitraffer      | aktueller Zeitrafferfaktor aus `EEPGetTimeLapse()`       |
+| `staticCameras`      | `string[]`        | Kameranamen     | statische Kameras aus `.anl3` `<Kammerasammlung>`        |
+| `dynamicCameras`     | `string[]`        | Kameranamen     | dynamische Kameras aus `.anl3` `<Kammerasammlung>`       |
+
+### `ce.hub.Route`
+
+Elementtyp: EEP-Route
+
+| Name   | Typ       | Wertebereich              | Beschreibung                                   |
+| ------ | --------- | ------------------------- | ---------------------------------------------- |
+| `id`   | `integer` | Routen-ID aus der Anlage  | technischer Schlüssel der gespeicherten Route  |
+| `name` | `string`  | Routenname aus der Anlage | Anzeigename aus den `.anl3`-Options-Attributen |
+
+Abgeleitet aus:
+
+- `.anl3` `<Options RouteItems="..." RouteId_n="..." RouteName_n="...">`
 
 ### `ce.hub.Runtime`
 
@@ -143,17 +160,17 @@ Elementtyp: Laufzeitmetrik
 
 Elementtyp: Signal
 
-| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                          |
-| ----------------------- | ------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                     |
-| `position`              | `integer`           | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal       |
-| `tag`                   | `string`            | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist |
-| `waitingVehiclesCount`  | `integer`           | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`                         |
-| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                             |
-| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                   |
-| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                  |
-| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                               |
-| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                      |
+| Name                    | Typ                 | Wertebereich                      | Beschreibung                                                                                                                                                         |
+| ----------------------- | ------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | `integer`           | `> 0`                             | Signal-ID aus EEP                                                                                                                                                    |
+| `position`              | `integer`           | `> 0`; `0` wäre "existiert nicht" | Signalstellung aus `EEPGetSignal`; laut Lua-Handbuch liefert `0` ein nicht existierendes Signal                                                                      |
+| `tag`                   | `string`            | freier Text bis 1024 Zeichen      | Tag-Text des Signals; aktuell aus `EEPSignalGetTagText`, leere Zeichenkette wenn kein Tag gesetzt ist                                                                |
+| `waitingVehiclesCount`  | `integer`           | `>= 0`                            | Anzahl der am Signal wartenden Fahrzeugverbände aus `EEPGetSignalTrainsCount`; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0` |
+| `stopDistance`          | `number` \| `nil`   | Meter                             | Halteabstand des Signals aus `EEPGetSignalStopDistance()`                                                                                                            |
+| `itemName`              | `string` \| `nil`   | freier Text                       | Name des Signalartikels aus `EEPGetSignalItemName(signalId, false)`                                                                                                  |
+| `itemNameWithModelPath` | `string` \| `nil`   | freier Text                       | Name inklusive Modellpfad aus `EEPGetSignalItemName(signalId, true)`                                                                                                 |
+| `signalFunctions`       | `string[]` \| `nil` | Liste von Zustandswerten          | alle auslesbaren Signalfunktionen; aktuell als Stringliste serialisiert                                                                                              |
+| `activeFunction`        | `string` \| `nil`   | Eintrag aus `signalFunctions`     | zur aktuellen `position` passende Signalfunktion                                                                                                                     |
 
 Abgeleitet aus:
 
@@ -168,13 +185,13 @@ Abgeleitet aus:
 
 Elementtyp: Wartender Fahrzeugverband an einem Signal
 
-| Name              | Typ       | Wertebereich                   | Beschreibung                                                        |
-| ----------------- | --------- | ------------------------------ | ------------------------------------------------------------------- |
-| `id`              | `string`  | `<signalId>-<position>`        | zusammengesetzter technischer Schlüssel                             |
-| `signalId`        | `integer` | `> 0`                          | referenziertes Signal                                               |
-| `waitingPosition` | `integer` | `>= 1`                         | Position innerhalb der Warteschlange am Signal                      |
-| `vehicleName`     | `string`  | Fahrzeugverbandsname oder `""` | Name aus `EEPGetSignalTrainName`; bei fehlendem Namen leerer String |
-| `waitingCount`    | `integer` | `>= 0`                         | Gesamtanzahl wartender Fahrzeugverbände an diesem Signal            |
+| Name              | Typ       | Wertebereich                   | Beschreibung                                                                                                                                                |
+| ----------------- | --------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`              | `string`  | `<signalId>-<position>`        | zusammengesetzter technischer Schlüssel                                                                                                                     |
+| `signalId`        | `integer` | `> 0`                          | referenziertes Signal                                                                                                                                       |
+| `waitingPosition` | `integer` | `>= 1`                         | Position innerhalb der Warteschlange am Signal; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0`                       |
+| `vehicleName`     | `string`  | Fahrzeugverbandsname oder `""` | Name aus `EEPGetSignalTrainName`; bei fehlendem Namen leerer String; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `""` |
+| `waitingCount`    | `integer` | `>= 0`                         | Gesamtanzahl wartender Fahrzeugverbände an diesem Signal; standardmäßig nur bei Interesse mit echtem Wert veröffentlicht, sonst Platzhalter `0`             |
 
 Abgeleitet aus:
 
@@ -362,7 +379,9 @@ Elementtyp: RollingStock-Daten
 | `modelType`          | `integer`              | `1` bis `15`                              | Modelltyp aus `EEPRollingstockGetModelType`                                                           |
 | `modelTypeText`      | `string`               | feste Textmenge                           | lesbarer Modelltyptext aus lokalem Mapping                                                            |
 | `tag`                | `string`               | freier Text bis 1024 Zeichen              | Tag-Text aus `EEPRollingstockGetTagText`                                                              |
-| `nr`                 | `string` \| `nil`      | freier Text                               | Wagennummer aus dem bibliotheksinternen Tag-Modell                                                    |
+| `licencePlate`       | `string` \| `nil`      | freier Text                               | Kennzeichen aus dem bibliotheksinternen Tag-Modell; Tag-Schlüssel `p`                                 |
+| `vehicleNumber`      | `string` \| `nil`      | freier Text                               | Fahrzeugnummer aus dem bibliotheksinternen Tag-Modell; Tag-Schlüssel `w`                              |
+| `nr`                 | `string` \| `nil`      | freier Text                               | Kompatibilitätsalias für `vehicleNumber`                                                              |
 | `trackType`          | `string` \| `nil`      | z. B. `rail`, `road`, `tram`, `auxiliary` | Bibliotheksklassifikation, nicht direkt EEP                                                           |
 | `hookStatus`         | `number`               | Statuscode                                | Hakenzustand aus `EEPRollingstockGetHook()`                                                           |
 | `hookGlueMode`       | `number`               | Statuscode                                | Haken-/Ladezustand aus `EEPRollingstockGetHookGlue()`                                                 |
@@ -394,6 +413,9 @@ Abgeleitet aus:
 Hinweis:
 
 - Das aktive DTO bündelt heute statische, dynamische, Text- und Rotationsfelder in `ce.hub.RollingStock`.
+- Kennzeichen und Fahrzeugnummern bleiben RollingStock-Felder. Zugweite Anzeigen im Web werden daraus als
+  eindeutige Wertelisten abgeleitet, damit Busse, Anhänger und gekuppelte Straßenbahnen unterschiedliche
+  Nummerierungslogiken nutzen können.
 - Die Werte werden vor Vergleich und Export an mehreren Stellen gerundet, um Event-Rauschen zu reduzieren.
 
 ### `ce.hub.*Track`
@@ -436,7 +458,7 @@ Vollständige Liste `modelType` für RollingStock laut `Lua_manual.pdf` und `EEP
 | `14` | LKW                  |
 | `15` | PKW                  |
 
-### `ce.mods.road.SignalTypeDefinition`
+### `ce.mods.road.TrafficLightModel`
 
 Elementtyp: Ampelmodell-Definition
 
@@ -457,16 +479,16 @@ Elementtyp: Ampelmodell-Definition
 
 Elementtyp: Kreuzung
 
-| Name               | Typ               | Wertebereich           | Beschreibung                                   |
-| ------------------ | ----------------- | ---------------------- | ---------------------------------------------- |
-| `id`               | `integer`         | laufende Nummer ab `1` | technischer Schlüssel der Erfassungsrunde      |
-| `name`             | `string`          | freier Text            | Kreuzungsname                                  |
-| `currentSwitching` | `string` \| `nil` | Sequenzname            | aktuell aktive Schaltung                       |
-| `manualSwitching`  | `string` \| `nil` | Sequenzname            | manuell gewählte Schaltung                     |
-| `nextSwitching`    | `string` \| `nil` | Sequenzname            | nächste geplante Schaltung                     |
-| `ready`            | `boolean`         | `true`, `false`        | Ergebnis von `crossing:isGreenPhaseFinished()` |
-| `timeForGreen`     | `number`          | Sekunden               | Grünphasenlänge                                |
-| `staticCams`       | `string[]`        | Kameranamen            | Liste statischer Kameras der Kreuzung          |
+| Name               | Typ               | Wertebereich           | Beschreibung                                      |
+| ------------------ | ----------------- | ---------------------- | ------------------------------------------------- |
+| `id`               | `integer`         | laufende Nummer ab `1` | technischer Schlüssel der Erfassungsrunde         |
+| `name`             | `string`          | freier Text            | Kreuzungsname                                     |
+| `currentPhase`     | `string` \| `nil` | Phasenname             | aktuell aktive Phase                              |
+| `manualPhase`      | `string` \| `nil` | Phasenname             | manuell gewählte Phase                            |
+| `nextPhase`        | `string` \| `nil` | Phasenname             | nächste geplante Phase                            |
+| `ready`            | `boolean`         | `true`, `false`        | Ergebnis von `intersection:isGreenTimeFinished()` |
+| `greenTimeSeconds` | `number`          | Sekunden               | Grünphasenlänge                                   |
+| `staticCams`       | `string[]`        | Kameranamen            | Liste statischer Kameras der Kreuzung             |
 
 ### `ce.mods.road.IntersectionLane`
 
@@ -477,7 +499,7 @@ Elementtyp: Fahrspur einer Kreuzung
 | `id`                         | `string`           | `<intersectionId>-<laneName>`                                | technischer Schlüssel                            |
 | `intersectionId`             | `integer`          | referenziert `ce.mods.road.Intersection.id`                  | zugehörige Kreuzung                              |
 | `name`                       | `string`           | freier Text                                                  | Fahrspurname                                     |
-| `phase`                      | `string`           | `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN` | aus der Ampelphasenlogik der Bibliothek          |
+| `currentIndication`          | `string`           | `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN` | aktuelle Signalindikation der Fahrspur           |
 | `vehicleMultiplier`          | `number`           | projektabhängig                                              | Gewichtungsfaktor für Zähler                     |
 | `eepSaveId`                  | `integer` \| `nil` | Datenslot-ID                                                 | zugehörige persistente ID                        |
 | `type`                       | `string`           | `NORMAL`, `TRAM`, `PEDESTRIAN`                               | Fahrspurtyp                                      |
@@ -485,33 +507,33 @@ Elementtyp: Fahrspur einer Kreuzung
 | `waitingTrains`              | `table`            | Queue-Inhalt                                                 | wartende Fahrzeuge/Züge in aktueller Reihenfolge |
 | `waitingForGreenCyclesCount` | `integer`          | `>= 0`                                                       | Anzahl Warteschleifen bis Grün                   |
 | `directions`                 | `table`            | projektabhängig                                              | Richtungsdefinition der Fahrspur                 |
-| `switchings`                 | `string[]`         | Sequenznamen                                                 | Schaltungen, die diese Fahrspur freigeben        |
+| `phases`                     | `string[]`         | Phasennamen                                                  | Phasen, die diese Fahrspur freigeben             |
 | `tracks`                     | `table`            | Track-IDs oder Highlight-Daten                               | für Hervorhebung genutzte Tracks                 |
 
-### `ce.mods.road.IntersectionSwitching`
+### `ce.mods.road.IntersectionPhase`
 
-Elementtyp: Kreuzungs-Schaltung
+Elementtyp: Kreuzungsphase
 
-| Name             | Typ             | Wertebereich                    | Beschreibung                                                                                 |
-| ---------------- | --------------- | ------------------------------- | -------------------------------------------------------------------------------------------- |
-| `id`             | `string`        | `<crossingName>-<sequenceName>` | technischer Schlüssel                                                                        |
-| `intersectionId` | `string`        | Kreuzungsname                   | aktueller Code verwendet hier den Namen, nicht die numerische `ce.mods.road.Intersection.id` |
-| `name`           | `string`        | Sequenzname                     | Name der Schaltung                                                                           |
-| `prio`           | `number \| nil` | projektabhängig                 | Priorität der Schaltung                                                                      |
+| Name             | Typ             | Wertebereich                 | Beschreibung                                                                                 |
+| ---------------- | --------------- | ---------------------------- | -------------------------------------------------------------------------------------------- |
+| `id`             | `string`        | `<crossingName>-<phaseName>` | technischer Schlüssel                                                                        |
+| `intersectionId` | `string`        | Kreuzungsname                | aktueller Code verwendet hier den Namen, nicht die numerische `ce.mods.road.Intersection.id` |
+| `name`           | `string`        | Phasenname                   | Name der Phase                                                                               |
+| `prio`           | `number \| nil` | projektabhängig              | Priorität der Phase                                                                          |
 
 ### `ce.mods.road.IntersectionTrafficLight`
 
-Elementtyp: Ampel innerhalb einer Kreuzung
+Elementtyp: Signalgeber innerhalb einer Kreuzung
 
-| Name              | Typ                           | Wertebereich                                | Beschreibung                |
-| ----------------- | ----------------------------- | ------------------------------------------- | --------------------------- |
-| `id`              | `integer \| string`           | Signal-ID                                   | technischer Schlüssel       |
-| `signalId`        | `integer`                     | Signal-ID                                   | referenziertes EEP-Signal   |
-| `modelId`         | `string`                      | Modellname                                  | referenziertes Ampelmodell  |
-| `currentPhase`    | `number` \| `string` \| `nil` | projektabhängig                             | aktuelle interne Ampelphase |
-| `intersectionId`  | `integer`                     | referenziert `ce.mods.road.Intersection.id` | zugehörige Kreuzung         |
-| `lightStructures` | `table<string, object>`       | indexierte Map                              | zugehörige Lichtstrukturen  |
-| `axisStructures`  | `object[]`                    | Liste                                       | zugehörige Achsstrukturen   |
+| Name                | Typ                           | Wertebereich                                | Beschreibung                      |
+| ------------------- | ----------------------------- | ------------------------------------------- | --------------------------------- |
+| `id`                | `integer \| string`           | Signal-ID                                   | technischer Schlüssel             |
+| `signalId`          | `integer`                     | Signal-ID                                   | referenziertes EEP-Signal         |
+| `modelId`           | `string`                      | Modellname                                  | referenziertes Ampelmodell        |
+| `currentIndication` | `number` \| `string` \| `nil` | projektabhängig                             | aktuelle interne Signalindikation |
+| `intersectionId`    | `integer`                     | referenziert `ce.mods.road.Intersection.id` | zugehörige Kreuzung               |
+| `lightStructures`   | `table<string, object>`       | indexierte Map                              | zugehörige Lichtstrukturen        |
+| `axisStructures`    | `object[]`                    | Liste                                       | zugehörige Achsstrukturen         |
 
 Unterobjekt `lightStructures[*]`:
 

@@ -47,9 +47,9 @@ local function removeMissingSlots(currentIds)
     end
 end
 
-function DataSlotsRegistry.set(filled, empty)
-    local nextFilledSlots = {}
-    local nextEmptySlots = {}
+local function updateSlots(filled, empty, removeMissing)
+    local nextFilledSlots = removeMissing and {} or filledSlots
+    local nextEmptySlots = removeMissing and {} or emptySlots
     local currentIds = {}
 
     for _, sourceSlot in pairs(filled or {}) do
@@ -62,9 +62,17 @@ function DataSlotsRegistry.set(filled, empty)
         updateSlot(nextEmptySlots, sourceSlot, "empty")
     end
 
-    removeMissingSlots(currentIds)
+    if removeMissing then removeMissingSlots(currentIds) end
     filledSlots = nextFilledSlots
     emptySlots = nextEmptySlots
+end
+
+function DataSlotsRegistry.set(filled, empty)
+    updateSlots(filled, empty, true)
+end
+
+function DataSlotsRegistry.update(filled, empty)
+    updateSlots(filled, empty, false)
 end
 
 function DataSlotsRegistry.getFilled()

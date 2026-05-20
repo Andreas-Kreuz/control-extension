@@ -134,4 +134,43 @@ insulate("ce.databridge.LogOutputFileWriter", function ()
         originalAssert.is_not_nil(string.find(err, "boom", 1, true))
         originalAssert.is_not_nil(string.find(err, "stack traceback", 1, true))
     end)
+
+    it("logs errors with Lua source context outside the log writer wrapper", function ()
+        local logWrites = {}
+
+        local simpleGlobalStubs = installSimpleGlobals()
+        local osDateStub = stub(os, "date", function () return "" end)
+        local ioOpenStub = stub(io, "open", function (name, mode)
+            if name ~= "./ce/databridge/exchange-test/ce-version.txt" and
+                name ~= "exchange-dir/ce-version.txt" and
+                name ~= "exchange-dir/log-from-ce" then
+                return originalIoOpen(name, mode)
+            end
+
+            return {
+                write = function (_, content)
+                    if name == "exchange-dir/log-from-ce" and mode == "a" then table.insert(logWrites, content) end
+                end,
+                flush = function () end,
+                close = function () end
+            }
+        end)
+        finally(function () revertStubs(simpleGlobalStubs) end)
+        finally(function () osDateStub:revert() end)
+        finally(function () ioOpenStub:revert() end)
+
+        local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
+        local LogOutputFileWriter = require("ce.databridge.LogOutputFileWriter")
+
+        ExchangeDirRegistry.setExchangeDirectory("exchange-dir")
+        LogOutputFileWriter.initialize()
+
+        local function fail() _G.error("boom") end
+        local ok, err = pcall(fail)
+
+        originalAssert.is_false(ok)
+        originalAssert.is_not_nil(string.find(logWrites[1], "boom", 1, true))
+        originalAssert.is_nil(string.find(logWrites[1], "LogOutputFileWriter.lua", 1, true))
+        originalAssert.is_nil(string.find(err, "LogOutputFileWriter.lua", 1, true))
+    end)
 end)

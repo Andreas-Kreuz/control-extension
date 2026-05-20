@@ -19,6 +19,7 @@ import IntersectionCamsSection from './IntersectionCamsSection';
 import IntersectionListItem from './IntersectionListItem';
 import IntersectionPhasesSection from './IntersectionPhasesSection';
 import type Intersection from '../model/Intersection';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface IntersectionOverviewProps {
   selectedElement: string | undefined;
@@ -29,6 +30,13 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
   const selectedIntersection = useSelectedIntersection(selectedElement);
   const settings = useIntersectionSettings();
   const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const roadPathPrefix = location.pathname.startsWith('/simple/road')
+    ? '/simple/road'
+    : location.pathname.startsWith('/old/road')
+      ? '/old/road'
+      : '/road';
 
   function detailsIntersection(i: Intersection): Intersection {
     if (selectedElement !== String(i.id) || selectedIntersection?.id !== i.id) return i;
@@ -38,7 +46,7 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
       ...selectedIntersection,
       staticCams: selectedIntersection.staticCams.length > 0 ? selectedIntersection.staticCams : i.staticCams,
       phases: selectedIntersection.phases.length > 0 ? selectedIntersection.phases : i.phases,
-      timeForGreen: selectedIntersection.timeForGreen || i.timeForGreen,
+      greenTimeSeconds: selectedIntersection.greenTimeSeconds || i.greenTimeSeconds,
     };
   }
 
@@ -54,6 +62,15 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
         keyExtractor={(i) => String(i.id)}
         getFilterText={(i) => `${i.id} ${i.name}`}
         filterLabel="Kreuzung filtern"
+        filterSlot={
+          <Button
+            variant="contained"
+            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+            onClick={() => navigate(`${roadPathPrefix}/createIntersection`)}
+          >
+            Neue Kreuzung
+          </Button>
+        }
         renderListItem={(i, selected, onSelect) => (
           <IntersectionListItem intersection={i} selected={selected} onSelect={onSelect} />
         )}
@@ -72,13 +89,26 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
         getDetails={(i) => {
           const details = detailsIntersection(i);
           return [
-            { title: 'Modus & Schaltung', component: <IntersectionControlSection intersection={details} /> },
+            { title: 'Modus & Phase', component: <IntersectionControlSection intersection={details} /> },
             // { title: 'Phasen', component: <IntersectionPhasesSection intersection={details} /> },
             { title: 'Kameras', component: <IntersectionCamsSection intersection={details} /> },
+            {
+              title: 'Setup-Code',
+              sidePanelOnly: true,
+              component: (
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate(`${roadPathPrefix}/createIntersection?intersectionId=${details.id}`)}
+                >
+                  Im Kreuzungs-Wizard öffnen
+                </Button>
+              ),
+            },
           ];
         }}
         selectedElement={selectedElement}
         onSelectedElementChange={handleSelectedElementChange}
+        permanentDetailsOnTablet
       />
 
       {/* <PageHeadline gutterTop>Hilfe</PageHeadline>

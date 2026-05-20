@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Lua in Kreuzungen
 type: Tipps & Tricks
@@ -20,7 +20,7 @@ Die Fehlerausgabe ist wertvoll. Nutze sie und lies den Fehler genau. Häufige Fe
 
 - **Doppelpunkt (`:`) statt eines Punktes (`.`) verwendet.**
   Prüfe, ob die Funktion einen Doppelpunkt verwendet.
-  Dann muss auch der Funktionsaufruf mit dem Doppelpunkt erfolgen, z.B. `TrafficLight:new(...)` statt `TrafficLight.new(...)`
+  Dann muss auch der Funktionsaufruf mit dem Doppelpunkt erfolgen, z.B. `TrafficLight:new(...)` statt `Signal.new(...)`
 
 - **Bei den Parametern vertan (zwischen Klammern einer Funktion) vertan.** Korrigiere die Anzahl / Reihenfolge der Parameter zwischen den Klammern des Funktionsaufrufs.
 
@@ -81,7 +81,7 @@ Um Deine Achsenampel zu verwenden, kannst Du sie einem der folgenden Signale zuw
    ```
 
 3. **Du willst die Ampel nicht an ein Signal auf der Anlage zu koppeln.**
-   Dazu legen wir nur in Lua eine Dummy-Ampel an. Die Dummy-Ampel bekommt eine -1 als signalID und wird wie eine normale Ampel in Schaltungen verwendet.
+   Dazu legen wir nur in Lua eine Dummy-Ampel an. Die Dummy-Ampel bekommt eine -1 als signalID und wird wie eine normale Ampel in Ampelgruppen verwendet.
 
    ```lua
    -- Schritt 1) Lege eine Dummy-Ampel an:
@@ -140,7 +140,7 @@ Um Deine Achsenampel zu verwenden, kannst Du sie einem der folgenden Signale zuw
    ```
 
 3. **Du willst die Ampel nicht an ein Signal auf der Anlage zu koppeln.**
-   Dazu legen wir nur in Lua eine Dummy-Ampel an. Die Dummy-Ampel bekommt eine -1 als signalID und wird wie eine normale Ampel in Schaltungen verwendet.
+   Dazu legen wir nur in Lua eine Dummy-Ampel an. Die Dummy-Ampel bekommt eine -1 als signalID und wird wie eine normale Ampel in Ampelgruppen verwendet.
 
    ```lua
    -- Schritt 1) Lege eine Dummy-Ampel an:
@@ -161,7 +161,7 @@ Es muss immer genau eine Fahrspur-Ampel geben, an der die Autos warten.
 
 Du möchtest mehrere Ampeln für eine Fahrspur nutzen und diese immer gleichzeitig schalten?
 
-Lösung: Lege weitere Ampeln an und verwende sie gemeinsam mit der Fahrspur-Ampel in der selben Schaltung.
+Lösung: Lege weitere Ampeln an und verwende sie gemeinsam mit der Fahrspur-Ampel in derselben Ampelgruppe.
 
 ```lua
 -- Schritt 1) Lege Deine Ampeln an.
@@ -171,12 +171,13 @@ local K2 = TrafficLight:new("K2", 91, TrafficLightModel.JS2_3er_ohne_FG)
 local K3 = TrafficLight:new("K3", 26, TrafficLightModel.JS2_3er_mit_FG)
 
 -- K1 wird als Fahrspur-Ampel verwendet
-c1Lane1 = Lane:new("K1 - Fahrspur 1", 110, K1, {Lane.Directions.STRAIGHT})
+c1Lane1 = Lane:new("K1 - Fahrspur 1", K1, {Lane.Directions.STRAIGHT})
 
--- In der Schaltung werden K1, K2 und K3 gleichzeitig angegeben
-c1 = Crossing:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
-c1Sequence1 = c1:newSequence("S1")           -- Schaltung anlegen
-c1Sequence1:addCarLights(K1, K2, K3)         -- Alle 3 Ampeln zur Schaltung hinzufügen
+-- In der Ampelgruppe werden K1, K2 und K3 gemeinsam geschaltet
+c1 = Intersection:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
+local sgLane1Straight = c1:newSignalGroup("sgLane1Straight"):addVehicleSignals(K1, K2, K3)
+local phase1 = c1:newPhase("P1")
+phase1:addSignalGroup(sgLane1Straight)
 ```
 
 ### ... für unterschiedliche Fahrzeuge
@@ -198,10 +199,10 @@ Für das Einrichten dieser Fahrspur müssen folgende Dinge beachtet werden:
 4. **Die Fahrzeuge müssen unterschiedliche Routen verwenden**
    Im Beispiel wird die Route "_Rechtsabbieger_" für die Abbiegerichtung verwendet.
 5. **Die Ampeln müssen die Routen unterschiedlich auswerten**
-   - Die Ampel K5 gilt für alle Routen, `K4:applyToLane(lane4)` (K4 wird in den selben Schaltungen verwendet. Die Fahrspur wird jedoch durch K4 gesteuert)
-   - Die Ampel K6 gilt nur für die Route "_Rechtsabbieger_". `K6:applyToLane(lane4, "Rechtsabbieger")`
+   - Die Ampelgruppe für K4 und K5 gilt für alle Routen: `lane4:driveOnDefaultSignalGroups(sgLane4Straight)`.
+   - Die Ampelgruppe für K6 gilt nur für die Route "_Rechtsabbieger_": `lane4:routes("Rechtsabbieger"):driveOnlyOnSignalGroups(sgLane4Right)`.
 
-Die Steuerung der Fahrspuren erfolgt in den Schaltungen anhand der Ampeln K5 und K6
+Die Steuerung der Fahrspuren erfolgt in den Phasen anhand der Ampelgruppen für K5 und K6.
 
 - Ist K5 grün dann fahren alle Fahrzeuge (K4 soll immer mit K5 geschaltet werden)
 - Ist K6 grün, dann fährt das erste Fahrzeug in der Fahrspur nur dann, wenn es die Route "Rechtsabbieger" hat.
@@ -218,20 +219,21 @@ local K5 = TrafficLight:new("K5", 143, TrafficLightModel.JS2_3er_mit_FG)
 local K6 = TrafficLight:new("K6", 140, TrafficLightModel.JS2_2er_OFF_YELLOW_GREEN)
 
 -- Fahrspur 4 führt geradeaus und rechts entlang.
-lane4 = Lane:new("K1 - Fahrspur 4", 4, lane4Sig, {Lane.Directions.STRAIGHT, Lane.Directions.RIGHT})
+lane4 = Lane:new("K1 - Fahrspur 4", lane4Sig, {Lane.Directions.STRAIGHT, Lane.Directions.RIGHT})
 
--- Hier wird eingestellt, dass das Signal der Fahrspur "lane4" durch K4 und K6 gesteuert wird
-K4:applyToLane(lane4)                         -- K4 gilt für Fahrspur 4 (alle)
-K6:applyToLane(lane4, "Rechtsabbieger")       -- K6 gilt für Fahrspur 4 (nur Route "Rechtsabbieger")
+-- Kreuzung mit zwei Phasen anlegen und die Ampeln K4, K5 und K6 verwenden
+c1 = Intersection:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
+local sgLane4Right = c1:newSignalGroup("sgLane4Right"):addVehicleSignals(K6)
+local sgLane4Straight = c1:newSignalGroup("sgLane4Straight"):addVehicleSignals(K4, K5)
 
--- Kreuzung mit zwei Schaltungen anlegen und die Ampeln K4 und K6 verwenden
-c1 = Crossing:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
+lane4:driveOnDefaultSignalGroups(sgLane4Straight)
+lane4:routes("Rechtsabbieger"):driveOnlyOnSignalGroups(sgLane4Right)
 
-c1Sequence2 = c1:newSequence("S2")           -- Schaltung 2 anlegen
-c1Sequence2:addCarLights(K6)                 -- Ampel K6 als Auto-Ampel hinzufügen
+local phase2 = c1:newPhase("P2")
+phase2:addSignalGroup(sgLane4Right)
 
-c1Sequence3 = c1:newSequence("S3")           -- Schaltung 3 anlegen
-c1Sequence3:addCarLights(K4, K5)             -- Ampel K4 und K5 als Auto-Ampel hinzufügen
+local phase3 = c1:newPhase("P3")
+phase3:addSignalGroup(sgLane4Straight)
 ```
 
 ## Tram, Bus, Fußgänger und Kfz unterscheiden
@@ -242,27 +244,29 @@ Tram-Ampeln verhalten sich anders, als Ampeln für den Kfz-Verkehr:
 - Schaltreihenfolge Kfz: Rot --> Rot-Gelb --> Grün --> Gelb --> Rot
 - Schaltreihenfolge Fußgänger: Rot --> Grün --> Rot
 
-Aus diesem Grund muss beim Hinzufügen zu Schaltungen unterschieden werden:
+Aus diesem Grund muss beim Hinzufügen zu Ampelgruppen unterschieden werden:
 
-- Kfz-Ampeln hinzufügen mit: `sequence:addCarLights(ampel1, ampel2, ...)`
-- Tram-Ampeln hinzufügen mit: `sequence:addTramLights(ampel1, ampel2, ...)`
-- Fußgänger-Ampeln hinzufügen mit: `sequence:addPedestrianLights(ampel1, ampel2, ...)`
+- Kfz-Ampeln hinzufügen mit: `signalGroup:addVehicleSignals(ampel1, ampel2, ...)`
+- Tram-Ampeln hinzufügen mit: `signalGroup:addTramSignals(ampel1, ampel2, ...)`
+- Fußgänger-Ampeln hinzufügen mit: `signalGroup:addPedestrianSignals(ampel1, ampel2, ...)`
 
 ```lua
 local K1 = TrafficLight:new("K1", 92, TrafficLightModel.JS2_3er_mit_FG)
-local F1 = K1 -- ist die selbe Ampel, wird aber anders geschaltet
+local F1 = K1:withPedestrian("F1") -- selbe physische Ampel, anderer logischer Signalgebrauch
 local S1 = TrafficLight:new("S1", 96, TrafficLightModel.Unsichtbar_2er,
                             "#5528_Straba Signal Halt",     -- Immobilie Halt
                           "#5531_Straba Signal geradeaus", -- Immobilie Fahrt
                             "#5529_Straba Signal anhalten", -- Immobilie Gelb
                             "#5530_Straba Signal A")        -- Immobilie Anforderung
 
--- Kreuzung mit zwei Schaltungen anlegen und die Ampeln K4 und K6 verwenden
-c1 = Crossing:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
-local c1Sequence1 = c1:newSequence("S1")
-c1Sequence1:addCarLights(K1)
-c1Sequence1:addTramLights(S1)
-c1Sequence1:addPedestrianLights(F1)
+-- Kreuzung mit einer Phase und passenden Ampelgruppen anlegen
+c1 = Intersection:new("Bahnhofstr. - Hauptstr.")  -- Kreuzung anlegen
+local sgLane1Straight = c1:newSignalGroup("sgLane1Straight"):addVehicleSignals(K1)
+local sgTramStraight = c1:newSignalGroup("sgTramStraight"):addTramSignals(S1)
+local sgPedNorth = c1:newSignalGroup("sgPedNorth"):addPedestrianSignals(F1)
+
+local phase1 = c1:newPhase("P1")
+phase1:addSignalGroup(sgLane1Straight, sgTramStraight, sgPedNorth)
 ```
 
 # Tram und Bus
@@ -290,21 +294,21 @@ c1Sequence1:addPedestrianLights(F1)
 
 2. Zeige die Anforderungen der einzelnen Fahrspuren an den Tram-Ampeln an
 
-   a. Sag der Fahrspur, an welchem Signal die Anforderungen angezeigt werden sollen `lane:showRequestsOn(trafficLight)`.
+   a. Sag der Fahrspur, an welcher Ampelgruppe die Anforderungen angezeigt werden sollen `lane:showRequestsOnSignalGroups(signalGroup)`.
 
    b. Wenn mehrere Tram-Ampeln je nach Route einer Fahrspur die Ampeln schalten sollen,
-   dann gib dahinter die Route an `lane:showRequestsOn(trafficLight, "Name der Route")`
+   dann verwende den Routen-Builder: `lane:routes("Name der Route"):showRequestsOnSignalGroups(signalGroup)`.
 
    ```lua
-   -- Zeige Anforderung an Ampel S1 bei jedem Fahrzeug in Fahrspur 1
-   c1Lane3:showRequestsOn(S1)
+   -- Zeige Anforderung an Ampelgruppe S1 bei jedem Fahrzeug in Fahrspur 1
+   c1Lane3:showRequestsOnSignalGroups(sgTramS1)
 
-   -- Zeige Anforderungen an Ampel S2 / S3 je nach Route in Fahrspur 8
-   c1Lane8:showRequestsOn(S2, "Strabalinie 10")
-   c1Lane8:showRequestsOn(S3, "Strabalinie 04")
+   -- Zeige Anforderungen an Ampelgruppe S2 / S3 je nach Route in Fahrspur 8
+   c1Lane8:routes("Strabalinie 10"):showRequestsOnSignalGroups(sgTramS2)
+   c1Lane8:routes("Strabalinie 04"):showRequestsOnSignalGroups(sgTramS3)
 
-   -- Zeige Anforderung an Ampel S4 bei jedem Fahrzeug in Fahrspur 11
-   c1Lane11:showRequestsOn(S4)
+   -- Zeige Anforderung an Ampelgruppe S4 bei jedem Fahrzeug in Fahrspur 11
+   c1Lane11:showRequestsOnSignalGroups(sgTramS4)
    ```
 
 # Fahrspuren
@@ -313,8 +317,8 @@ c1Sequence1:addPedestrianLights(F1)
 
 Die Fahrspur-Ampel wird genutzt, um die Fahrzeuge der Fahrspur zu steuern. Es gibt folgende Möglichkeiten, das Fahrspur-Signal zu benutzen.
 
-1. Sollen sich alle Fahrzeuge gleichzeitig fahren, dann kann die Fahrspur-Ampel direkt in Schaltungen verwendet werden.
+1. Sollen alle Fahrzeuge gleichzeitig fahren, dann kann die Fahrspur-Ampel direkt in genau einer Ampelgruppe verwendet werden.
 
-2. Sollen die Fahrzeuge einer Fahrspur durch unterschiedliche Ampeln je nach Route gesteuert werden, dann darf das Fahrspur-Signal nicht in Schaltungen verwendet werden.
+2. Sollen die Fahrzeuge einer Fahrspur durch unterschiedliche Ampelgruppen je nach Route gesteuert werden, dann braucht die Fahrspur ein eigenes unabhängiges, oft unsichtbares `laneSignal`.
 
 Siehe oben: _Mehrere Ampeln in einer Fahrspur verwenden_.

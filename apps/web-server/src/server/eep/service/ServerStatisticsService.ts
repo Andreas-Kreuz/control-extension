@@ -13,9 +13,11 @@ export class ServerStatisticsService {
   private lastTime: { [name: string]: { name: string; startTime: number; duration: number; diffToLast: number } } = {};
   private lastTimeOfStatistic = 0;
   private lastEepUpdate = 0;
+  private observer: PerformanceObserver;
+  private updateTimer: NodeJS.Timeout | undefined;
 
   constructor(private nrOfHistoryEntries = NR_OF_UPDATES) {
-    const obs = new PerformanceObserver((items) => {
+    this.observer = new PerformanceObserver((items) => {
       items.getEntries().forEach((item) => {
         const lastEntry = this.lastTime[item.name];
         const diff = lastEntry === undefined ? 0 : item.startTime - lastEntry.startTime;
@@ -27,11 +29,24 @@ export class ServerStatisticsService {
         };
       });
     });
-    obs.observe({ entryTypes: ['measure'] });
+    this.observer.observe({ entryTypes: ['measure'] });
   }
 
   start() {
-    setInterval(this.updateStatistics, INTERVALL_MS);
+    if (this.updateTimer) {
+      return;
+    }
+
+    this.updateTimer = setInterval(this.updateStatistics, INTERVALL_MS);
+    this.updateTimer.unref?.();
+  }
+
+  stop() {
+    if (this.updateTimer) {
+      clearInterval(this.updateTimer);
+      this.updateTimer = undefined;
+    }
+    this.observer.disconnect();
   }
 
   setLastEepTime(lastEepUpdate: number) {

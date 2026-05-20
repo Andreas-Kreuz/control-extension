@@ -59,7 +59,15 @@ function LogOutputFileWriter.initialize()
     end
 
     error = function (message, level)
-        printToFile(message)          -- print the output to the file
+        if level == nil then level = 1 end
+        if level > 0 then level = level + 1 end
+
+        if level > 0 then
+            local _, fullMessage = pcall(originalError, message, level + 1)
+            printToFile(fullMessage)
+        else
+            printToFile(message)
+        end
         originalError(message, level) -- call the original error function
     end
 

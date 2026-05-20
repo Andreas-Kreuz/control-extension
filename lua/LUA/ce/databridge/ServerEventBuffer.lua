@@ -20,4 +20,14 @@ function ServerEventBuffer.drainBufferedEvents()
     return lineSeparatedEvents
 end
 
+--- Return a list of all recordedEvents without clearing the list.
+function ServerEventBuffer.peekBufferedEvents()
+    return table.concat(recordedEvents, "\n")
+end
+
+--- Clear all recordedEvents after a successful transport write.
+function ServerEventBuffer.commitBufferedEvents()
+    recordedEvents = {}
+end
+
 return ServerEventBuffer

@@ -1,7 +1,7 @@
 {
   "name": "@ce/root",
   "private": true,
-  "version": "v0.0.7-alpha",
+  "version": "v0.0.8-alpha",
   "workspaces": [
     "apps/*",
     "packages/*",
@@ -39,7 +39,7 @@
     "run:app": "yarn run build && yarn workspace @ce/web-server run run",
     "sync-control-extension-version": "node ./scripts/sync-control-extension-version.mjs",
     "test": "yarn run test:lua && yarn run test:server && yarn run test:app && yarn run test:docs",
-    "test:app": "yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run build && yarn workspace @ce/web-server run build:app-assets && node ./scripts/run-parallel.mjs \"yarn workspace @ce/web-server run run:test\" \"yarn workspace @ce/web-app run test:e2e\"",
+    "test:app": "yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run build && yarn workspace @ce/web-server run build:app-assets && node ./scripts/run-app-e2e.mjs",
     "test:app:ui": "yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run build && yarn workspace @ce/web-server run build:app-assets && node ./scripts/run-parallel.mjs \"yarn workspace @ce/web-server run run:test\" \"yarn workspace @ce/web-app run test:e2e:ui\"",
     "test:docs": "node ./scripts/run-jekyll.mjs build",
     "test:lua": "node ./scripts/run-lua-tests.mjs",

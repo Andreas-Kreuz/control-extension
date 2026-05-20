@@ -23,6 +23,7 @@ export type TrainDashboardPanelModel =
       cameraSources: CameraControlSource[];
       canShowTrainAxes: boolean;
       controls: TrainDashboardControlsModel;
+      licencePlates: string[];
       mergedAxisGroups: MergedAxisGroup[];
       onCameraSelect: (key: number) => void;
       onMergedAxisCommit: (group: MergedAxisGroup, value: number) => void;
@@ -34,4 +35,5 @@ export type TrainDashboardPanelModel =
       train: TrainAppDto;
       trainSelected: boolean;
       transit?: TransitInfo;
+      vehicleNumbers: string[];
     };

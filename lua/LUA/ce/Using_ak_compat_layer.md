@@ -103,7 +103,7 @@ end
 
 ## Hinweis zu `Crossing` und `CrossingSequence`
 
-Die Compat-Datei für `ak.road.Crossing` liefert einen Wrapper, der alle Aufrufe an `ce.mods.road.Intersection` weiterleitet. Das bedeutet: Du kannst weiterhin `Crossing.new(...)` schreiben — es wird intern als `Intersection.new(...)` ausgeführt. Dasselbe gilt für `CrossingSequence`, das intern auf `IntersectionSequence` zeigt. Neue Skripte sollten direkt die `ce`-Namen verwenden.
+Die Compat-Datei für `ak.road.Crossing` liefert einen Wrapper, der alle Aufrufe an `ce.mods.road.Intersection` weiterleitet. Das bedeutet: Du kannst weiterhin `Crossing.new(...)` schreiben — es wird intern als `Intersection.new(...)` ausgeführt. Dasselbe gilt für `CrossingSequence`, das intern auf `TrafficPhase` zeigt. Neue Skripte sollten direkt die `ce`-Namen verwenden.
 
 ## Wichtig:
 

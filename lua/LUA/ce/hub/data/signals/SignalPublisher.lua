@@ -9,28 +9,6 @@ local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegi
 ---@field syncState fun(options: table|nil):nil
 local SignalPublisher = {}
 
-local EEPGetSignalTrainName = _G.EEPGetSignalTrainName or function () return nil end
-
-local function collectWaitingOnSignals()
-    local waitingOnSignals = {}
-    for _, signal in pairs(SignalRegistry.getAll()) do
-        local count = signal:getWaitingVehiclesCount()
-        if count and count > 0 then
-            for pos = 1, count do
-                local vehicleName = EEPGetSignalTrainName(signal.id, pos)
-                waitingOnSignals[#waitingOnSignals + 1] = {
-                    id = signal.id .. "-" .. pos,
-                    signalId = signal.id,
-                    waitingPosition = pos,
-                    vehicleName = vehicleName or "",
-                    waitingCount = count
-                }
-            end
-        end
-    end
-    return waitingOnSignals
-end
-
 local function hasPayloadFields(dto)
     for key in pairs(dto or {}) do
         if key ~= "ceType" and key ~= "id" then return true end
@@ -46,14 +24,24 @@ local function publishWaitingOnSignalRemovals()
 end
 
 local function publishWaitingOnSignals()
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+    local HubCeTypes = require("ce.hub.data.HubCeTypes")
+
     for _, waitingOnSignal in pairs(WaitingOnSignalRegistry.getAll()) do
-        if waitingOnSignal.needsFullSend then
-            DataChangeBus.fireDataChanged(SignalDtoFactory.createWaitingOnSignalDto(waitingOnSignal))
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
+        local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.WaitingOnSignal,
+                                                                       tostring(waitingOnSignal.id))
+        if waitingOnSignal.needsFullSend or needsInitialSend then
+            DataChangeBus.fireDataChanged(SignalDtoFactory.createWaitingOnSignalDto(waitingOnSignal, isSelected))
             waitingOnSignal.needsFullSend = false
+            if isSelected then
+                InterestSyncRegistry.markSent(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
+            end
             waitingOnSignal:resetDirty()
         elseif waitingOnSignal:hasDirtyFields() then
             local ceType, keyId, key, dto = SignalDtoFactory.createWaitingOnSignalPatchDto(waitingOnSignal,
-                                                                                           waitingOnSignal.dirtyFields)
+                                                                                           waitingOnSignal.dirtyFields,
+                                                                                           isSelected)
             if hasPayloadFields(dto) then DataChangeBus.fireDataChanged(ceType, keyId, key, dto) end
             waitingOnSignal:resetDirty()
         end
@@ -85,7 +73,6 @@ function SignalPublisher.syncState()
     end
 
     if HubOptionsRegistry.isPublishEnabled("waitingOnSignals") then
-        WaitingOnSignalRegistry.set(collectWaitingOnSignals())
         publishWaitingOnSignalRemovals()
         publishWaitingOnSignals()
     end

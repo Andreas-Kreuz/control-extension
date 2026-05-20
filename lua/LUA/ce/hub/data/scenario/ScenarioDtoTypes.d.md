@@ -12,3 +12,5 @@
 | `activeTrain`        | `string` \| `nil` | aktiver Zug              |
 | `activeRollingStock` | `string` \| `nil` | aktives Rollmaterial     |
 | `timeLapse`          | `number` \| `nil` | aktueller Zeitraffer     |
+| `staticCameras`      | `string[]`        | statische Kameras        |
+| `dynamicCameras`     | `string[]`        | dynamische Kameras       |

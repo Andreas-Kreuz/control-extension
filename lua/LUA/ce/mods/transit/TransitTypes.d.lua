@@ -53,8 +53,12 @@
 ---@field forName fun(name: string):Line
 ---@field new fun(self: Line, o: table):Line
 ---@field addSection fun(self: Line, routeName: string, destination: string):LineSegment
+---@field createDepotSection fun(self: Line, routeName: string):LineSegment
 ---@field scheduleDeparture fun(trainName: string, station: RoadStation, timeInMinutes: number):nil
+---@field trainArrived fun(trainName: string, station: RoadStation):nil
 ---@field trainDeparted fun(trainName: string, station: RoadStation):nil
+---@field setTrainSection fun(trainName: string, section: LineSegment):nil
+---@field applyCachedRouteForTrain fun(train: Train):LineSegment|nil,TransitTrain|nil
 ---@field toJsonStatic fun(self: Line):table
 ---@field getLines fun():table<string, Line>
 
@@ -63,21 +67,34 @@
 ---@field type string
 ---@field line Line
 ---@field destination string
+---@field depotDisplays DepotDisplay[]|nil
+---@field depotDisplayChooser fun(displayCount: number, segment: LineSegment):number|nil
+---@field autoReleaseDepotSignal boolean
 ---@field routeName string
 ---@field stationInfos table[]
 ---@field nextLineSegmentInfo table|nil
 ---@field debug boolean
 ---@field new fun(self: LineSegment, routeName: string, line: Line, destination: string):LineSegment
+---@field addDepotDisplay fun(self: LineSegment, line: string, destination: string):LineSegment
+---@field setDepotDisplayChooser fun(self: LineSegment, chooser: fun(displayCount: number, segment: LineSegment):number|nil):LineSegment
+---@field displayMatches fun(self: LineSegment, line: string|nil, destination: string|nil):boolean
+---@field chooseDisplay fun(self: LineSegment):DepotDisplay
 ---@field addStop fun(self: LineSegment, platform: Platform, timeToStation?: number):nil
 ---@field setNextSection fun(self: LineSegment, newLineSegment: LineSegment, timeInMinutes: number):nil
 ---@field getAllSegments fun(self: LineSegment):LineSegment[]
 ---@field hasStation fun(self: LineSegment, station: RoadStation):boolean
 ---@field nextStationList fun(self: LineSegment, routeName: string, nextStation?: RoadStation, currentStation?: RoadStation):table[]
+---@field plannedMinutesBetween function
+---@field skippedStationsBetween function
 ---@field getLastStation fun(self: LineSegment):RoadStation|nil
 ---@field getFirstStation fun(self: LineSegment):RoadStation|nil
 ---@field prepareDepartureAt fun(self: LineSegment, train: Train, nextStation: RoadStation, timeInMinutes: number):nil
 ---@field trainDeparted fun(self: LineSegment, train: Train, currentStation: RoadStation):nil
 ---@field toJsonStatic fun(self: LineSegment):table
+
+---@class DepotDisplay
+---@field line string
+---@field destination string
 
 ---@class StationQueueEntry
 ---@field trainName string

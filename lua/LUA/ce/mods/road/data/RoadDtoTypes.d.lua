@@ -4,49 +4,84 @@
 ---@field ceType string
 ---@field id number
 ---@field name string
----@field currentSwitching string|nil
----@field manualSwitching string|nil
----@field nextSwitching string|nil
+---@field eepSaveId number
+---@field scriptVariableName string|nil
+---@field currentPhase string|nil
+---@field manualPhase string|nil
+---@field nextPhase string|nil
 ---@field ready boolean
----@field timeForGreen number
+---@field greenTimeSeconds number
+---@field switchInStrictOrder boolean
+---@field tippStructure string|nil
 ---@field staticCams table
----@field phases IntersectionPhaseDto[]
+---@field phases IntersectionPhaseTimingDto[]
+---@field signalGroupDefinitions IntersectionSignalGroupDto[]
+---@field pedestrianCrossings IntersectionPedestrianCrossingDto[]
 
----@class IntersectionPhaseTrafficLightDto
+---@class IntersectionSignalGroupDto
+---@field name string
+---@field scriptVariableName string|nil
+---@field approach string|nil
+---@field turnDirections table
+---@field trafficType string
+---@field signalIds number[]
+---@field pedestrianCrossingNames string[]
+
+---@class IntersectionPedestrianCrossingDto
+---@field name string
+---@field scriptVariableName string|nil
+---@field approach string
+---@field signalGroups string[]
+
+---@class IntersectionPhaseSignalHeadDto
 ---@field signalId number
----@field signalKind string
----@field signalKey string
----@field signalName string|nil
+---@field signalHeadKind string
+---@field signalHeadKey string
+---@field signalHeadName string|nil
 ---@field type string
----@field trafficSignalName string|nil
----@field pedestrianSignalName string|nil
+---@field vehicleSignalHeadName string|nil
+---@field pedestrianSignalHeadName string|nil
 ---@field use string
 
----@class IntersectionPhaseDto
+---@class IntersectionPhaseTimingDto
 ---@field id string
 ---@field name string
 ---@field order number
 ---@field prio number
----@field greenPhaseSeconds number
----@field trafficLights IntersectionPhaseTrafficLightDto[]
+---@field greenTimeSeconds number
+---@field signalGroups string[]
+---@field signalHeads IntersectionPhaseSignalHeadDto[]
 
 ---@class IntersectionLaneDto
 ---@field ceType string
 ---@field id string
 ---@field intersectionId number
 ---@field name string
----@field phase string
+---@field scriptVariableName string|nil
+---@field currentIndication string
 ---@field vehicleMultiplier number
----@field eepSaveId number
+---@field laneSignalId number|nil
 ---@field type string
 ---@field countType string
 ---@field waitingTrains table
 ---@field waitingForGreenCyclesCount number
+---@field approach string|nil
 ---@field directions table
----@field switchings table
+---@field phases table
+---@field defaultSignalGroups table
+---@field routeRules IntersectionLaneRouteRuleDto[]
+---@field defaultRequestSignalGroups table
+---@field requestTrackIds table
+---@field highlightTrackIds table
 ---@field tracks table
 
----@class IntersectionSwitchingDto
+---@class IntersectionLaneRouteRuleDto
+---@field routeNames string[]
+---@field signalGroups string[]
+---@field mode string
+---@field showRequests boolean
+
+---@class IntersectionPhaseDto
 ---@field ceType string
 ---@field id string
 ---@field intersectionId string|number
@@ -73,11 +108,11 @@
 ---@field ceType string
 ---@field id number
 ---@field signalId number
----@field trafficSignalName string|nil
+---@field vehicleSignalName string|nil
 ---@field pedestrianSignalName string|nil
 ---@field use string
 ---@field modelId string
----@field currentPhase string
+---@field currentIndication string
 ---@field intersectionId number
 ---@field lightStructures table<string, IntersectionTrafficLightStructureDto>
 ---@field axisStructures IntersectionTrafficLightAxisStructureDto[]
@@ -91,7 +126,7 @@
 ---@field value boolean
 ---@field eepFunction string
 
----@class SignalTypeDefinitionPositionsDto
+---@class TrafficLightModelPositionsDto
 ---@field positionRed number
 ---@field positionGreen number
 ---@field positionYellow number
@@ -100,9 +135,9 @@
 ---@field positionOff number
 ---@field positionOffBlinking number
 
----@class SignalTypeDefinitionDto
+---@class TrafficLightModelDto
 ---@field ceType string
 ---@field id string
 ---@field name string
 ---@field type string
----@field positions SignalTypeDefinitionPositionsDto
+---@field positions TrafficLightModelPositionsDto

@@ -87,7 +87,7 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(stations) == "string", "Need 'stations' as string")
     end
 
-    function wagen:setWagonNr(rollingStockName, nr)
+    function wagen:setWagonNumber(rollingStockName, nr)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(nr) == "string", "Need 'nr' as string")

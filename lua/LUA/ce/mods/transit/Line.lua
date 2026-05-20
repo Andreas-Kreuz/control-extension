@@ -2,6 +2,7 @@ local LineSegment = require("ce.mods.transit.LineSegment")
 local RoadStation = require("ce.mods.transit.RoadStation")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+local TransitMeasurementRecorder = require("ce.mods.transit.measurement.TransitMeasurementRecorder")
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.Line ...") end
 
 local Line = {}
@@ -32,8 +33,8 @@ function Line:new(o)
     return o
 end
 
-function Line:addSection(routeName, destination)
-    assert(type(self) == "table" and self.type == "Line", "Call this method with ':'")
+local function createSection(line, routeName, destination)
+    assert(type(line) == "table" and line.type == "Line", "Call this method with ':'")
     assert(type(routeName) == "string", "Need 'routeName' as string")
     assert(type(destination) == "string", "Need 'destination' as string")
     local existingSegment = lineSegmentsByRouteName[routeName]
@@ -47,40 +48,81 @@ function Line:addSection(routeName, destination)
         return existingSegment
     end
 
-    local lineSegment = LineSegment:new(routeName, self, destination)
-    self.lineSegments[routeName] = lineSegment
+    local lineSegment = LineSegment:new(routeName, line, destination)
+    line.lineSegments[routeName] = lineSegment
     lineSegmentsByRouteName[routeName] = lineSegment
     return lineSegment
 end
 
-local function lineSegmentForTrainRoute(train)
-    -- A raw EEPSetTrainRoute() changes only EEP state. Contact points pull that route back into transit state.
-    local routeName = train:getRoute()
-    local routeOk, eepRouteName = EEPGetTrainRoute(train.name)
-    if routeOk and type(eepRouteName) == "string" then
-        routeName = eepRouteName
-        if routeName ~= train:getRoute() then train:updateRoute(routeName) end
-    end
+function Line:addSection(routeName, destination)
+    return createSection(self, routeName, destination)
+end
+
+function Line:createDepotSection(routeName)
+    local depotSection = createSection(self, routeName, "")
+    depotSection.autoReleaseDepotSignal = false
+    return depotSection
+end
+
+local function lineSegmentForRouteName(train, routeName, options)
     assert(type(routeName) == "string", "Need 'routeName' as string")
+    options = options or {}
 
     local lineSegment = lineSegmentsByRouteName[routeName]
     if not lineSegment then
-        print(string.format("[#Line] Could not find lineSegment for route: '%s' for train: %s", routeName, train.name))
+        if not options.suppressUnknownRouteLog then
+            print(string.format(
+                "[#Line] Could not find lineSegment for route: '%s' for train: %s",
+                routeName,
+                train.name
+            ))
+        end
         return nil
     end
 
+    if options.requireDepotSignalAutoRelease and not lineSegment.autoReleaseDepotSignal then return nil end
+
     local transitTrain = TransitTrainRegistry.forTrain(train)
-    local lineName = lineSegment.line.nr
-    local destination = lineSegment.destination
+    local display = lineSegment:displayMatches(transitTrain:getLine(), transitTrain:getDestination())
+        and {
+            line = transitTrain:getLine(),
+            destination = transitTrain:getDestination()
+        } or lineSegment:chooseDisplay()
+    local lineName = display.line
+    local destination = display.destination
 
     if transitTrain:getLine() ~= lineName or transitTrain:getDestination() ~= destination then
         transitTrain:changeDestination(destination, lineName)
     end
 
     local origin = lineSegment:getFirstStation()
-    if origin then transitTrain:setOrigin(origin.name) end
+    if origin and transitTrain:getOrigin() ~= origin.name then transitTrain:setOrigin(origin.name) end
 
     return lineSegment, transitTrain
+end
+
+function Line.applyCachedRouteForTrain(train, options)
+    assert(type(train) == "table" and train.type == "Train", "Need 'train' as Train")
+    return lineSegmentForRouteName(train, train:getRoute(), options)
+end
+
+function Line.setTrainSection(trainName, section)
+    assert(type(trainName) == "string", "Need 'trainName' as string")
+    assert(type(section) == "table" and section.type == "LineSegment", "Need 'section' as LineSegment")
+
+    local train = TrainRegistry.forName(trainName)
+    local transitTrain = TransitTrainRegistry.forTrain(train)
+    local display = section:chooseDisplay()
+
+    train:setRoute(section.routeName)
+    transitTrain:changeDestination(display.destination, display.line)
+    local origin = section:getFirstStation()
+    if origin then transitTrain:setOrigin(origin.name) end
+    transitTrain:setNextStations({})
+end
+
+local function lineSegmentForTrainRoute(train)
+    return lineSegmentForRouteName(train, train:getRoute())
 end
 
 local function clearTransitDeparturesForTrain(train)
@@ -131,7 +173,23 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
 
     local train = TrainRegistry.forName(trainName)
     local lineSegment = lineSegmentForTrainAtStation(train, station)
-    if lineSegment then lineSegment:prepareDepartureAt(train, station, timeInMinutes) end
+    if lineSegment then
+        lineSegment:prepareDepartureAt(train, station, timeInMinutes)
+        TransitMeasurementRecorder.recordScheduledDeparture(train, lineSegment, station, timeInMinutes)
+    end
+end
+
+function Line.trainArrived(trainName, station)
+    assert(type(trainName) == "string", "Need 'trainName' as string")
+    assert(type(station) == "table", "Need 'station' as table")
+    assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
+
+    local train = TrainRegistry.forName(trainName)
+    local lineSegment, transitTrain = lineSegmentForTrainAtStation(train, station)
+    if lineSegment then
+        lineSegment:prepareDepartureAt(train, station, 0)
+        TransitMeasurementRecorder.recordTrainArrived(train, lineSegment, station, transitTrain)
+    end
 end
 
 function Line.trainDeparted(trainName, station)
@@ -145,6 +203,7 @@ function Line.trainDeparted(trainName, station)
     ---@cast transitTrain TransitTrain
 
     station:trainLeft(trainName, transitTrain:getDestination(), transitTrain:getLine())
+    TransitMeasurementRecorder.recordTrainDeparted(train, lineSegment, station, transitTrain)
     lineSegment:trainDeparted(train, station)
 end
 

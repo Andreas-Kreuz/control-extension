@@ -11,6 +11,7 @@ insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.scenario.ScenarioDataCollector")
+        clearModule("ce.hub.data.scenario.ScenarioDiscovery")
 
         rawset(_G, "EEPLng", "GER")
         rawset(_G, "EEPGetAnlVer", function () return 18.2 end)
@@ -20,6 +21,13 @@ insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
         rawset(_G, "EEPGetTrainActive", function () return "#ICE" end)
         rawset(_G, "EEPRollingstockGetActive", function () return "BR 218" end)
         rawset(_G, "EEPGetTimeLapse", function () return 4 end)
+
+        require("ce.hub.data.scenario.ScenarioDiscovery").initFromAnl3({
+            cameras = {
+                static = { "Bahnhof", "Leer", "Kreuzung" },
+                dynamic = { "Fahrtwind" }
+            }
+        })
     end)
 
     after_each(function ()
@@ -46,7 +54,9 @@ insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
                         eepLanguage = "GER",
                         activeTrain = "#ICE",
                         activeRollingStock = "BR 218",
-                        timeLapse = 4
+                        timeLapse = 4,
+                        staticCameras = { "Bahnhof", "Kreuzung" },
+                        dynamicCameras = { "Fahrtwind" }
                     }, ScenarioDataCollector.collectScenario())
     end)
 end)

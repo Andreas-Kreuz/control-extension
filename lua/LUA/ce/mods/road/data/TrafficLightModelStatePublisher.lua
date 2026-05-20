@@ -19,7 +19,7 @@ function TrafficLightModelStatePublisher.syncState()
     if not initialized then TrafficLightModelStatePublisher.initialize() end
 
     local trafficLightModels = TrafficLightModelsDataCollector.collectTrafficLightModels()
-    DataChangeBus.fireListChange(TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList(trafficLightModels))
+    DataChangeBus.fireListChange(TrafficLightModelDtoFactory.createTrafficLightModelDtoList(trafficLightModels))
 end
 
 return TrafficLightModelStatePublisher

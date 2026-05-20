@@ -31,6 +31,8 @@ local movedTrainNames = {}
 local dirtyTrainNames = {}
 local hooksRegistered = false
 local tracksInitialized = false
+local trackRefreshRunIndex = 0
+local TRACK_REFRESH_INTERVAL = 50
 
 local function trackTypeFromSystemId(trackTypeId)
     if trackTypeId == 1 then return "rail" end
@@ -140,21 +142,23 @@ local function removeTrain(trainName)
     end
 end
 
-local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks)
+local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks, tracksRefreshed)
     local allKnownTrains = {}
 
     for trainName in pairs(detected) do
         local trainOnMap, speed = EEPGetTrainSpeed(trainName)
         if trainOnMap then
             local train, created = TrainRegistry.forName(trainName)
+            local previousInfo = TrainDiscoveryCache.get(trainName) or {}
             local dirty = created or (dirtyTrains[trainName] and true or false)
             local moved = created or dirty or train:getSpeed() ~= 0 or speed ~= 0 or
                 (movedTrains[trainName] and true or false)
 
             if created or dirty then syncRollingStockComposition(train) end
 
-            local trackType = nil
-            if trainTracks[trainName] and next(trainTracks[trainName]) ~= nil then
+            local tracks = tracksRefreshed and trainTracks[trainName] or previousInfo.tracks
+            local trackType = tracksRefreshed and nil or previousInfo.trackType
+            if tracksRefreshed and tracks and next(tracks) ~= nil then
                 local firstRollingStock = TrainRegistry.rollingStockNameInTrain(train.name, 0)
                 if firstRollingStock then
                     local ok, _, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
@@ -168,7 +172,7 @@ local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks)
                 created = created,
                 dirty = dirty,
                 moved = moved,
-                tracks = trainTracks[trainName],
+                tracks = tracks,
                 trackType = trackType
             }
         else
@@ -183,33 +187,73 @@ function TrainDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
     local trains = tableOfAnl3.trains or {}
     local rollingStocks = tableOfAnl3.rollingStocks or {}
+    local rollingStockNamesByTrain = {}
+    local knownTrainNames = {}
+    local knownRollingStockNames = {}
+    local cacheEntries = {}
 
+    if tableOfAnl3.coverage and tableOfAnl3.coverage.tracks then
+        for _, trackType in ipairs(trackTypes) do
+            TrackRegistry.replaceAll(trackType, (tableOfAnl3.tracks or {})[trackType] or {})
+        end
+    end
+
+    tracksInitialized = tableOfAnl3.coverage and tableOfAnl3.coverage.tracks == true or tracksInitialized
     for _, train in ipairs(trains) do
         if train.name then
-            local trainOnMap = EEPGetTrainSpeed and EEPGetTrainSpeed(train.name) or false
-            if trainOnMap then
-                local registeredTrain = TrainRegistry.forName(train.name)
-                syncRollingStockComposition(registeredTrain)
+            knownTrainNames[train.name] = true
+            TrainRegistry.seedFromSnapshot(train)
+            rollingStockNamesByTrain[train.name] = rollingStockNamesByTrain[train.name] or {}
+            if train.trackType and train.trackId then
+                local track = TrackRegistry.get(train.trackType, train.trackId)
+                if track then track:setReservation(true, train.name) end
+            end
+            cacheEntries[train.name] = {
+                name = train.name,
+                speed = train.speed or 0,
+                created = true,
+                dirty = true,
+                moved = true,
+                tracks = train.onTracks,
+                trackType = train.trackType
+            }
+        end
+    end
 
-                local firstRollingStock = TrainRegistry.rollingStockNameInTrain(registeredTrain.name, 0)
-                if firstRollingStock and EEPRollingstockGetTrack then
-                    local ok, _, _, _, trackTypeId = EEPRollingstockGetTrack(firstRollingStock)
-                    if ok then
-                        registeredTrain:setTrackType(trackTypeFromSystemId(trackTypeId))
-                    end
-                end
+    for _, rs in ipairs(rollingStocks) do
+        if rs.name then
+            knownRollingStockNames[rs.name] = true
+            RollingStockRegistry.seedFromSnapshot({
+                rollingStockName = rs.name,
+                xmlModel = rs.model,
+                trainName = rs.trainName,
+                positionInTrain = rs.positionInTrain,
+                trackType = rs.trackType,
+                trackId = rs.trackId,
+                trackDistance = rs.trackDistance,
+                trackDirection = rs.trackDirection,
+                trackSystem = rs.trackSystem
+            })
+            if rs.trainName and rs.positionInTrain then
+                rollingStockNamesByTrain[rs.trainName] = rollingStockNamesByTrain[rs.trainName] or {}
+                rollingStockNamesByTrain[rs.trainName][tostring(rs.positionInTrain)] = rs.name
             end
         end
     end
-    for _, rs in ipairs(rollingStocks) do
-        if rs.name then
-            local rollingStock = RollingStockRegistry.forName(rs.name)
-            rollingStock:setXmlModel(rs.model)
-        end
+
+    for trainName, rollingStockNames in pairs(rollingStockNamesByTrain) do
+        TrainRegistry.setRollingStockNames(trainName, rollingStockNames)
     end
+    if tableOfAnl3.coverage and tableOfAnl3.coverage.trains then
+        TrainRegistry.removeAbsentFromSnapshot(knownTrainNames)
+    end
+    if tableOfAnl3.coverage and tableOfAnl3.coverage.rollingStocks then
+        RollingStockRegistry.removeAbsentFromSnapshot(knownRollingStockNames)
+    end
+    if tableOfAnl3.coverage and tableOfAnl3.coverage.trains then TrainDiscoveryCache.replaceAll(cacheEntries) end
 end
 
-function TrainDiscovery.runInitialDiscovery()
+function TrainDiscovery.runInitialDiscovery(options)
     if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("trains",
                                                              "rollingStocks",
                                                              "auxiliaryTracks",
@@ -221,8 +265,10 @@ function TrainDiscovery.runInitialDiscovery()
     end
 
     registerHooks()
-    initializeTracks()
-    TrainDiscoveryCache.clear()
+    options = options or {}
+    if not options.skipTrackInitialization then initializeTracks() end
+    trackRefreshRunIndex = 0
+    if not options.keepCache then TrainDiscoveryCache.clear() end
 end
 
 function TrainDiscovery.runDiscovery()
@@ -242,19 +288,24 @@ function TrainDiscovery.runDiscovery()
     local dirty = dirtyTrainNames
     local moved = movedTrainNames
     local detected = {}
+    local tracksRefreshed = trackRefreshRunIndex % TRACK_REFRESH_INTERVAL == 0
     for trainName in pairs(TrainRegistry.getAllTrainNames()) do detected[trainName] = true end
     for trainName in pairs(dirty) do detected[trainName] = true end
     for trainName in pairs(moved) do detected[trainName] = true end
 
-    local trainTracks = updateTracks()
-    for trainName in pairs(trainTracks) do detected[trainName] = true end
+    local trainTracks = {}
+    if tracksRefreshed then
+        trainTracks = updateTracks()
+        for trainName in pairs(trainTracks) do detected[trainName] = true end
+    end
     RuntimeMetrics.storeRunTime("TrainDiscovery.findTrainsOnTrack", os.clock() - time)
 
     time = os.clock()
-    local allKnownTrains = buildSnapshot(detected, dirty, moved, trainTracks)
+    local allKnownTrains = buildSnapshot(detected, dirty, moved, trainTracks, tracksRefreshed)
     RuntimeMetrics.storeRunTime("TrainDiscovery.buildSnapshot", os.clock() - time)
     TrainDiscoveryCache.replaceAll(allKnownTrains)
 
+    trackRefreshRunIndex = trackRefreshRunIndex + 1
     dirtyTrainNames = {}
     movedTrainNames = {}
 end

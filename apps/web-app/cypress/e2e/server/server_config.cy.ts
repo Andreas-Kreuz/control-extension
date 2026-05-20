@@ -18,9 +18,9 @@ describe('Server Tests "/server"', () => {
 
   before(() => {
     cy.readFile(simulator.fileNames.serverIsRunning, { timeout: 20000 }).should('exist');
+    chooseDirectory(validDir);
     simulator.reset();
     simulator.eepEvent('eep-version-complete.json');
-    chooseDirectory(validDir);
     cy.get('input#pairing-required-switch')
       .invoke('prop', 'checked')
       .then((value) => {

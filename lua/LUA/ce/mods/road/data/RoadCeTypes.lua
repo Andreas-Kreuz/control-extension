@@ -3,10 +3,10 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadCeTypes ...") 
 local RoadCeTypes = {
     Intersection = "ce.mods.road.Intersection",
     IntersectionLane = "ce.mods.road.IntersectionLane",
-    IntersectionSwitching = "ce.mods.road.IntersectionSwitching",
+    IntersectionPhase = "ce.mods.road.IntersectionPhase",
     IntersectionTrafficLight = "ce.mods.road.IntersectionTrafficLight",
     ModuleSetting = "ce.mods.road.ModuleSetting",
-    SignalTypeDefinition = "ce.mods.road.SignalTypeDefinition"
+    TrafficLightModel = "ce.mods.road.TrafficLightModel"
 }
 
 return RoadCeTypes

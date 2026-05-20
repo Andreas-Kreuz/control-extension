@@ -47,6 +47,121 @@ insulate("GT4 XML models", function ()
     end)
 end)
 
+insulate("MAN Citybus CR1 display updates", function ()
+    local function clearModule(name) package.loaded[name] = nil end
+    local textureCalls = {}
+    local axisCalls = {}
+    local model
+
+    before_each(function ()
+        clearModule("ce.hub.data.rollingstock.ModelV15NCR10014")
+        textureCalls = {}
+        axisCalls = {}
+        rawset(_G, "EEPRollingstockSetTextureText", function (rollingStockName, surfaceNumber, text)
+            table.insert(textureCalls, {
+                rollingStockName = rollingStockName,
+                surfaceNumber = surfaceNumber,
+                text = text
+            })
+        end)
+        rawset(_G, "EEPRollingstockSetAxis", function (rollingStockName, axisName, axisPosition)
+            table.insert(axisCalls, {
+                rollingStockName = rollingStockName,
+                axisName = axisName,
+                axisPosition = axisPosition
+            })
+        end)
+        model = require("ce.hub.data.rollingstock.ModelV15NCR10014")
+    end)
+
+    it("sets line, destination, wagon number, and doors on the GL FL bus", function ()
+        local citybus = model["MAN Citybus 1 GL FL gelb CR1"]
+
+        citybus:setLine("Bus1", "12")
+        citybus:setDestination("Bus1", "Bahnhof")
+        citybus:setLicencePlate("Bus1", "DD-VB 2500")
+        citybus:setWagonNumber("Bus1", "1001")
+        citybus:setWagonNr("Bus1", "1002")
+        citybus:openDoors("Bus1")
+        citybus:closeDoors("Bus1")
+
+        assert.same({
+                        { rollingStockName = "Bus1", surfaceNumber = 4, text = "12" },
+                        { rollingStockName = "Bus1", surfaceNumber = 5, text = "Bahnhof" },
+                        { rollingStockName = "Bus1", surfaceNumber = 1, text = "  DD       VB 2500" },
+                        { rollingStockName = "Bus1", surfaceNumber = 2, text = "1001" },
+                        { rollingStockName = "Bus1", surfaceNumber = 2, text = "1002" },
+                    }, textureCalls)
+        assert.same({
+                        { rollingStockName = "Bus1", axisName = "Tuer1", axisPosition = 100 },
+                        { rollingStockName = "Bus1", axisName = "Tuer2", axisPosition = 100 },
+                        { rollingStockName = "Bus1", axisName = "Tuer1", axisPosition = 0 },
+                        { rollingStockName = "Bus1", axisName = "Tuer2", axisPosition = 0 },
+                    }, axisCalls)
+    end)
+
+    it("formats supported licence plate inputs for the texture", function ()
+        local citybus = model["MAN Citybus 1 GL FL gelb CR1"]
+        local examples = {
+            { input = "DD-VB2500",  expected = "  DD       VB 2500" },
+            { input = "DD-VB 2500", expected = "  DD       VB 2500" },
+            { input = "DD VB2500",  expected = "  DD       VB 2500" },
+            { input = "DD VB 2500", expected = "  DD       VB 2500" },
+            { input = "DD 20000",   expected = "  DD       20000" },
+            { input = "DD Q 1",     expected = "  DD       Q 1" },
+            { input = "DD Q 12",    expected = "  DD       Q 12" },
+            { input = "DD Q 123",   expected = "  DD       Q 123" },
+            { input = "DD Q 1234",  expected = "  DD       Q 1234" },
+        }
+
+        for _, example in ipairs(examples) do
+            citybus:setLicencePlate("Bus1", example.input)
+        end
+
+        local expectedCalls = {}
+        for _, example in ipairs(examples) do
+            table.insert(expectedCalls, {
+                rollingStockName = "Bus1",
+                surfaceNumber = 1,
+                text = example.expected
+            })
+        end
+        assert.same(expectedCalls, textureCalls)
+    end)
+
+    it("sets all listed doors on the FL bus", function ()
+        local citybus = model["MAN Citybus FL gelb CR1"]
+
+        citybus:openDoors("Bus2")
+
+        assert.same({
+                        { rollingStockName = "Bus2", axisName = "Tuer1", axisPosition = 100 },
+                        { rollingStockName = "Bus2", axisName = "Tuer2", axisPosition = 100 },
+                        { rollingStockName = "Bus2", axisName = "Tuer3", axisPosition = 100 },
+                    }, axisCalls)
+    end)
+end)
+
+insulate("MAN Citybus CR1 XML models", function ()
+    local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
+    local ModelV15NCR10014 = require("ce.hub.data.rollingstock.ModelV15NCR10014")
+
+    it("finds GLA by EEP-suffixed rolling stock name", function ()
+        assert.equals(ModelV15NCR10014["MAN Citybus 1 GLA gelb CR1"],
+                      RollingStockModels.modelFor("MAN Citybus 1 GLA gelb CR1;001"))
+    end)
+
+    it("finds GL FL by XML model", function ()
+        assert.equals(ModelV15NCR10014["MAN Citybus 1 GL FL gelb CR1"],
+                      RollingStockModels.modelFor("Unknown", "STRASSE\\BUS\\MAN_CITYBUS_1_GELB_GLFL_CR1.3dm"))
+    end)
+
+    it("finds GLA by XML model", function ()
+        assert.equals(ModelV15NCR10014["MAN Citybus 1 GLA gelb CR1"],
+                      RollingStockModels.modelFor("Unknown", "STRASSE\\BUS\\MAN_CITYBUS_1_GELB_GLA_CR1.3dm"))
+    end)
+end)
+
 insulate("GT6 8 7ND display updates", function ()
     local function clearModule(name) package.loaded[name] = nil end
     local textureCalls = {}
@@ -82,7 +197,8 @@ insulate("GT6 8 7ND display updates", function ()
         wagon:setDestination("Wagen1", "Central")
         wagon:setOrigin("Wagen1", "Depot")
         wagon:setNextStop("Wagen1", "Market")
-        wagon:setWagonNr("Wagen1", "201")
+        wagon:setWagonNumber("Wagen1", "201")
+        wagon:setWagonNr("Wagen1", "202")
 
         assert.same({
                         { rollingStockName = "Wagen1", surfaceNumber = 22, text = "  7  " },
@@ -95,6 +211,8 @@ insulate("GT6 8 7ND display updates", function ()
                         { rollingStockName = "Wagen1", surfaceNumber = 17, text = "Market" },
                         { rollingStockName = "Wagen1", surfaceNumber = 23, text = "201" },
                         { rollingStockName = "Wagen1", surfaceNumber = 24, text = "201" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 23, text = "202" },
+                        { rollingStockName = "Wagen1", surfaceNumber = 24, text = "202" },
                     }, textureCalls)
         assert.same({
                         { rollingStockName = "Wagen1", axisName = "Linie Fahrziel", axisPosition = 100 },

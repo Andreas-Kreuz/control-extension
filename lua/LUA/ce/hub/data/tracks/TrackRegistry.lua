@@ -4,6 +4,7 @@ local Track = require("ce.hub.data.tracks.Track")
 
 ---@class TrackRegistry
 ---@field add fun(trackType: string, track: table):nil
+---@field replaceAll fun(trackType: string, tracks: table[]):nil
 ---@field get fun(trackType: string, trackId: string|number):Track|nil
 ---@field getAll fun(trackType: string):table<string, Track>
 ---@field markChanged fun(trackType: string, trackId: string|number):nil
@@ -27,6 +28,15 @@ end
 
 function TrackRegistry.add(trackType, track)
     tracksByType[trackType][tostring(track.id)] = Track:new(track)
+end
+
+function TrackRegistry.replaceAll(trackType, tracks)
+    tracksByType[trackType] = {}
+    changedTrackIdsByType[trackType] = {}
+    for _, track in ipairs(tracks or {}) do
+        tracksByType[trackType][tostring(track.id)] = Track:new(track)
+    end
+    initialListPendingByType[trackType] = true
 end
 
 function TrackRegistry.get(trackType, trackId)

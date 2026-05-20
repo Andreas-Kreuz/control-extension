@@ -13,6 +13,7 @@ interface SocketServiceOptions {
   adminCookieName?: string | undefined;
   adminSessionValue?: string | undefined;
   allowOpenServerRoute?: boolean | undefined;
+  debug?: boolean | undefined;
   trustedServerAddressPolicy?: TrustedServerAddressPolicy | undefined;
 }
 
@@ -35,6 +36,7 @@ export default class SocketService {
     this.adminCookieName = options.adminCookieName ?? 'ce-admin-session';
     this.adminSessionValue = options.adminSessionValue;
     this.allowOpenServerRoute = options.allowOpenServerRoute ?? false;
+    this.debug = options.debug ?? true;
     this.trustedServerAddressPolicy = options.trustedServerAddressPolicy;
     this.allowRoomJoining();
   }

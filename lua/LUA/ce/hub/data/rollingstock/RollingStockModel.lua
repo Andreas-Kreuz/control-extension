@@ -1,6 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockModel ...") end
 
 -- Model metadata extraction: project-docs/ai/guides/lua-rollingstock-models.md
+-- Register model names without EEP instance suffixes like ";001".
+-- Wagon numbers are vehicle numbers and must not overwrite licence plates.
 ---@class RollingStockModel
 ---@field new fun(self: RollingStockModel, o?: table):RollingStockModel
 ---@field setLine fun(self: RollingStockModel, rollingStockName: string, line: string):nil
@@ -8,6 +10,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStoc
 ---@field setOrigin fun(self: RollingStockModel, rollingStockName: string, origin: string):nil
 ---@field setNextStop fun(self: RollingStockModel, rollingStockName: string, nextStop: string):nil
 ---@field setStations fun(self: RollingStockModel, rollingStockName: string, stations: string):nil
+---@field setLicencePlate fun(self: RollingStockModel, rollingStockName: string, licencePlate: string):nil
+---@field setWagonNumber fun(self: RollingStockModel, rollingStockName: string, wagonNumber: string):nil
 ---@field setWagonNr fun(self: RollingStockModel, rollingStockName: string, wagonNumber: string):nil
 ---@field openDoors fun(self: RollingStockModel, rollingStockName: string):nil
 ---@field closeDoors fun(self: RollingStockModel, rollingStockName: string):nil
@@ -55,11 +59,25 @@ function RollingStockModel:setStations(rollingStockName, stations)
     -- Overwrite me
 end
 
-function RollingStockModel:setWagonNr(rollingStockName, wagonNumber)
+function RollingStockModel:setLicencePlate(rollingStockName, licencePlate)
+    assert(type(self) == "table", "Call this method with ':'")
+    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+    assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
+    -- Overwrite me
+end
+
+function RollingStockModel:setWagonNumber(rollingStockName, wagonNumber)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
     assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
     -- Overwrite me
+end
+
+function RollingStockModel:setWagonNr(rollingStockName, wagonNumber)
+    assert(type(self) == "table", "Call this method with ':'")
+    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
+    assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
+    self:setWagonNumber(rollingStockName, wagonNumber)
 end
 
 function RollingStockModel:openDoors(rollingStockName)

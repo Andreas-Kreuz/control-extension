@@ -48,6 +48,10 @@ insulate("ControlExtension", function ()
                                       calls.setPause = pauseEepDuringInitialization
                                       return pauseEepDuringInitialization
                                   end)
+        local setTransportStub = stub(ControlExtensionHub, "setTransport", function (transport)
+            calls.setTransport = transport
+            return transport
+        end)
         local activateServerStub = stub(ControlExtensionHub, "activateServer", function ()
             calls.activateServer = true
             return "activated"
@@ -65,6 +69,7 @@ insulate("ControlExtension", function ()
         finally(function () runTasksStub:revert() end)
         finally(function () setDebugStub:revert() end)
         finally(function () setPauseStub:revert() end)
+        finally(function () setTransportStub:revert() end)
         finally(function () activateServerStub:revert() end)
         finally(function () deactivateServerStub:revert() end)
         finally(function () setOptionsStub:revert() end)
@@ -87,6 +92,8 @@ insulate("ControlExtension", function ()
         assert.is_true(calls.setDebug)
         assert.equals(ControlExtension, ControlExtension.setPauseEepDuringInitialization(true))
         assert.is_true(calls.setPause)
+        assert.equals(ControlExtension, ControlExtension.setTransport("file"))
+        assert.equals("file", calls.setTransport)
         assert.equals(ControlExtension, ControlExtension.setOptions({ sync = { publishers = {} } }))
         assert.same({ sync = { publishers = {} } }, calls.setOptions)
 

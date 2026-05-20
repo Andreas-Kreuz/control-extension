@@ -1,8 +1,9 @@
 import LineSegment from './LineSegment';
+import type { LineTrafficType } from '../../../shared/components/lines/LineAvatar';
 
 export default interface Line {
   id: number;
   nr: string;
-  trafficType: 'BUS' | 'SUBWAY' | 'TRAM' | 'TRAIN';
+  trafficType: LineTrafficType;
   lineSegments: LineSegment[];
 }

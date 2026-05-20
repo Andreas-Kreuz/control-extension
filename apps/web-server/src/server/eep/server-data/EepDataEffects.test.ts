@@ -104,10 +104,20 @@ async function testStaleCounterOneIsIgnored(): Promise<void> {
   assert.deepEqual(cache.writes, []);
 }
 
+async function testStopClearsRefreshTimer(): Promise<void> {
+  const { effects } = createEffects();
+  const timer = (effects as unknown as { refreshTimer: NodeJS.Timeout }).refreshTimer;
+
+  effects.stop();
+
+  assert.equal((timer as unknown as { _destroyed?: boolean })._destroyed, true);
+}
+
 export async function run(): Promise<void> {
   await runTest('EepDataEffects applies expected next event counter', testExpectedCounterApplies);
   await runTest('EepDataEffects applies CompleteReset even with reset counter', testCompleteResetApplies);
   await runTest('EepDataEffects ignores stale counter one events', testStaleCounterOneIsIgnored);
+  await runTest('EepDataEffects stop clears the refresh timer', testStopClearsRefreshTimer);
 }
 
 if (require.main === module) {

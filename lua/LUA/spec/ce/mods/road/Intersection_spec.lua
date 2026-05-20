@@ -28,7 +28,7 @@ insulate("Crossing", function ()
     require("ce.hub.eep.EepSimulator")
     local Lane = require("ce.mods.road.Lane")
     local Intersection = require("ce.mods.road.Intersection")
-    -- local IntersectionSequence = require("ce.mods.road.IntersectionSequence")
+    -- local TrafficPhase = require("ce.mods.road.TrafficPhase")
     -- local LaneSettings = require("ce.mods.road.LaneSettings")
     local TrafficLight = require("ce.mods.road.TrafficLight")
     local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
@@ -36,7 +36,7 @@ insulate("Crossing", function ()
     local L1, L2, L3, L4
     local lane1, lane2, lane3, lane4
     local K1, K2, K3, K5, K6, K7, K8, K9, S1, S2
-    local sequenceA, sequenceB, sequenceC
+    local phaseA, phaseB, phaseC
     local crossing
 
     local RIGHT_TURN_ROUTE = "TURN RIGHT"
@@ -87,10 +87,10 @@ insulate("Crossing", function ()
                               "#5521_Straba Signal geradeaus", "#5520_Straba Signal anhalten", "#5518_Straba Signal A")
 
         crossing = Intersection:new("My Crossing")
-        lane1 = Lane:new("Lane 1 N", 1, L1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
-        lane2 = Lane:new("Lane 2 E", 2, L2, { Lane.Directions.LEFT, Lane.Directions.RIGHT })
-        lane3 = Lane:new("Lane 3 S", 3, L3, { Lane.Directions.LEFT })
-        lane4 = Lane:new("Lane 4 S", 4, L4, { Lane.Directions.STRAIGHT })
+        lane1 = Lane:new("Lane 1 N", L1, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
+        lane2 = Lane:new("Lane 2 E", L2, { Lane.Directions.LEFT, Lane.Directions.RIGHT })
+        lane3 = Lane:new("Lane 3 S", L3, { Lane.Directions.LEFT })
+        lane4 = Lane:new("Lane 4 S", L4, { Lane.Directions.STRAIGHT })
 
         K1:applyToLane(lane1)
         K6:applyToLane(lane2)
@@ -98,35 +98,68 @@ insulate("Crossing", function ()
         K8:applyToLane(lane3)
         K9:applyToLane(lane4)
 
-        ---@type IntersectionSequence
-        sequenceA = crossing:newSequence("Sequence A - North South")
-        sequenceA:addCarLights(K1)
-        sequenceA:addCarLights(K2)
-        sequenceA:addTramLights(S1)
-        sequenceA:addCarLights(K9)
-        sequenceA:addTramLights(S2)
-        sequenceA:addPedestrianLights(K3)
-        sequenceA:addPedestrianLights(K6)
+        local sgLane1StraightRight = crossing:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1, K2)
+        local sgLane2Left = crossing:newSignalGroup("sgLane2Left"):addVehicleSignals(K6)
+        local sgLane2Right = crossing:newSignalGroup("sgLane2Right"):addVehicleSignals(K7)
+        local sgLane3Left = crossing:newSignalGroup("sgLane3Left"):addVehicleSignals(K8)
+        local sgLane4Straight = crossing:newSignalGroup("sgLane4Straight"):addVehicleSignals(K9)
+        local sgEastVehicle = crossing:newSignalGroup("sgEastVehicle"):addVehicleSignals(K3, K5)
+        local sgTramNorthSouth = crossing:newSignalGroup("sgTramNorthSouth"):addTramSignals(S1, S2)
+        local sgPedEast = crossing:newSignalGroup("sgPedEast"):addPedestrianSignals(K3, K6)
+        local sgPedNorthSouth = crossing:newSignalGroup("sgPedNorthSouth"):addPedestrianSignals(K1, K2, K8, K9)
 
-        sequenceB = crossing:newSequence("Sequence B - South + East Right")
-        sequenceB:addCarLights(K7)
-        sequenceB:addCarLights(K8)
-        sequenceB:addCarLights(K9)
+        ---@type TrafficPhase
+        phaseA = crossing:newPhase("P1")
+        phaseA:addSignalGroup(sgLane1StraightRight, sgLane4Straight, sgTramNorthSouth, sgPedEast)
 
-        sequenceC = crossing:newSequence("Sequence C - East only")
-        sequenceC:addCarLights(K3)
-        sequenceC:addCarLights(K5)
-        sequenceC:addCarLights(K6)
-        sequenceC:addPedestrianLights(K1)
-        sequenceC:addPedestrianLights(K2)
-        sequenceC:addPedestrianLights(K8)
-        sequenceC:addPedestrianLights(K9)
+        phaseB = crossing:newPhase("P2")
+        phaseB:addSignalGroup(sgLane2Right, sgLane3Left, sgLane4Straight)
+
+        phaseC = crossing:newPhase("P3")
+        phaseC:addSignalGroup(sgEastVehicle, sgLane2Left, sgPedNorthSouth)
 
         -- Not neccessary on ModuleRegistry Tasks
-        Intersection.initSequences()
+        Intersection.initPhases()
     end)
 
     after_each(function () StorageUtility.reset() end)
+    it("stores the script variable name in an optional storage slot", function ()
+        local stored = Intersection:new("Stored Crossing"):setTippStructure("#1_Box"):scriptVariableName("c1")
+            :withStorage(34)
+
+        assert.equals(34, stored:getEepSaveId())
+        assert.equals("c1", stored:getScriptVariableName())
+        assert.equals("#1_Box", stored.tippStructure)
+        assert.equals("Intersection Stored Crossing", StorageUtility.getName(34))
+        assert.matches("scriptVariableName=c1", StorageUtility.calcEepLuaData())
+    end)
+
+    it("creates lanes through the intersection", function ()
+        local intersection = Intersection:new("Owned Lane Crossing")
+        local signal = TrafficLight:new("LaneSignal", 120, TrafficLightModel.Unsichtbar_2er)
+
+        local lane = intersection:newLane("Lane A", signal):setScriptVariableName("c1LaneA")
+
+        assert.equals(lane, intersection.lanes[1])
+        assert.equals("c1LaneA", lane:getScriptVariableName())
+    end)
+
+    it("creates pedestrian crossings through the intersection", function ()
+        local intersection = Intersection:new("Owned Crossing")
+
+        local pedestrianCrossing = intersection:newPedestrianCrossing("Furt A"):setScriptVariableName("c1PedA")
+
+        assert.equals(pedestrianCrossing, intersection.pedestrianCrossings[1])
+        assert.equals("c1PedA", pedestrianCrossing:getScriptVariableName())
+    end)
+
+    it("keeps static camera methods chainable", function ()
+        local intersection = Intersection:new("Camera Crossing")
+
+        assert.equals(intersection, intersection:addStaticCam("Cam 1"))
+        assert.equals(intersection, intersection:addStaticCams("Cam 2", "Cam 3"))
+        assert.are.same({ "Cam 1", "Cam 2", "Cam 3" }, intersection:getStaticCams())
+    end)
 
     insulate("Check initial stuff", function ()
         it("Lanes are there", function ()
@@ -144,41 +177,41 @@ insulate("Crossing", function ()
         -- assert.equals(0, lane3:getWaitCount())
         -- assert.equals(0, lane4:getWaitCount())
 
-        it("Switchings are there", function ()
-            local sequenceMap = {}
-            for _, sequence in ipairs(crossing:getSequences()) do sequenceMap[sequence] = true end
+        it("Phases are there", function ()
+            local phaseMap = {}
+            for _, phase in ipairs(crossing:getPhases()) do phaseMap[phase] = true end
 
-            assert.is_same(true, sequenceMap[sequenceA])
-            assert.is_same(true, sequenceMap[sequenceB])
-            assert.is_same(true, sequenceMap[sequenceC])
+            assert.is_same(true, phaseMap[phaseA])
+            assert.is_same(true, phaseMap[phaseB])
+            assert.is_same(true, phaseMap[phaseC])
         end)
         it("Lanes are there", function ()
-            assert.is_truthy(sequenceA.lanes[lane1])
-            assert.is_falsy(sequenceA.lanes[lane2])
-            assert.is_falsy(sequenceA.lanes[lane3])
-            assert.is_truthy(sequenceA.lanes[lane4])
+            assert.is_truthy(phaseA.lanes[lane1])
+            assert.is_falsy(phaseA.lanes[lane2])
+            assert.is_falsy(phaseA.lanes[lane3])
+            assert.is_truthy(phaseA.lanes[lane4])
         end)
-        it("TrafficLights are there", function ()
-            assert.is_same(Lane.Type.CAR, sequenceA.trafficLights[K1])
-            assert.is_same(Lane.Type.CAR, sequenceA.trafficLights[K2])
-            assert.is_same(Lane.Type.CAR, sequenceA.trafficLights[K9])
+        it("SignalHeads are there", function ()
+            assert.is_same(Lane.Type.CAR, phaseA.signalHeads[K1])
+            assert.is_same(Lane.Type.CAR, phaseA.signalHeads[K2])
+            assert.is_same(Lane.Type.CAR, phaseA.signalHeads[K9])
         end)
-        it("Pedestrian TrafficLights are there", function ()
-            assert.is_same(Lane.Type.PEDESTRIAN, sequenceA.trafficLights[K3])
-            assert.is_same(Lane.Type.PEDESTRIAN, sequenceA.trafficLights[K6])
+        it("Pedestrian SignalHeads are there", function ()
+            assert.is_same(Lane.Type.PEDESTRIAN, phaseA.signalHeads[K3])
+            assert.is_same(Lane.Type.PEDESTRIAN, phaseA.signalHeads[K6])
         end)
-        it("Tra, TrafficLights are there", function ()
-            assert.is_same(Lane.Type.TRAM, sequenceA.trafficLights[S1])
-            assert.is_same(Lane.Type.TRAM, sequenceA.trafficLights[S2])
+        it("Tra, SignalHeads are there", function ()
+            assert.is_same(Lane.Type.TRAM, phaseA.signalHeads[S1])
+            assert.is_same(Lane.Type.TRAM, phaseA.signalHeads[S2])
         end)
     end)
 
     insulate("Calculate priorities", function ()
         describe("No priorities at the start", function ()
-            it("TrafficLights are there", function ()
-                assert.equals(0, sequenceA:calculatePriority())
-                assert.equals(0, sequenceB:calculatePriority())
-                assert.equals(0, sequenceC:calculatePriority())
+            it("SignalHeads are there", function ()
+                assert.equals(0, phaseA:calculatePriority())
+                assert.equals(0, phaseB:calculatePriority())
+                assert.equals(0, phaseC:calculatePriority())
             end)
         end)
         describe("Same priorities on same vehicles", function ()
@@ -200,9 +233,9 @@ insulate("Crossing", function ()
             it("Lane 2 first vehicle", function () assert.equals("#Car2a", lane2.queue:elements()[1]) end)
             it("Lane 2 vehicleRoute", function () assert.equals(RIGHT_TURN_ROUTE, lane2FirstRoute) end)
             it("Lane 2 routes", function ()
-                assert.equals(RIGHT_TURN_ROUTE, lane2.trafficLightsToDriveOn[K7][1])
+                assert.equals(RIGHT_TURN_ROUTE, lane2.signalsToDriveOn[K7][1])
             end)
-            it("Lane 2 routes", function () assert.equals(0, #lane2.trafficLightsToDriveOn[K6]) end)
+            it("Lane 2 routes", function () assert.equals(0, #lane2.signalsToDriveOn[K6]) end)
 
             it("Lane 1 canDrive", function () assert.equals(true, Lane.laneCanDrive(lane1, { K1 })) end)
             it("Lane 2 canDrive", function () assert.equals(true, Lane.laneCanDrive(lane2, { K6 })) end)
@@ -211,9 +244,9 @@ insulate("Crossing", function ()
             it("Lane 2 canDrive", function () assert.equals(true, Lane.laneCanDrive(lane2, { K7, K6 })) end)
 
             it("Car priorities for 1 car per lane", function ()
-                assert.equals(1.5, sequenceA:calculatePriority())
-                assert.equals(2.0, sequenceB:calculatePriority())
-                assert.equals(3.0, sequenceC:calculatePriority())
+                assert.equals(1.5, phaseA:calculatePriority())
+                assert.equals(2.0, phaseB:calculatePriority())
+                assert.equals(3.0, phaseC:calculatePriority())
             end)
         end)
         describe("Car priorities for 2 cars per lane", function ()
@@ -221,10 +254,10 @@ insulate("Crossing", function ()
             lane2:vehicleEntered("#Car2b")
             lane3:vehicleEntered("#Car3b")
 
-            it("TrafficLights are there", function ()
-                assert.equals(3.0, sequenceA:calculatePriority())
-                assert.equals(4.0, sequenceB:calculatePriority())
-                assert.equals(6.0, sequenceC:calculatePriority())
+            it("SignalHeads are there", function ()
+                assert.equals(3.0, phaseA:calculatePriority())
+                assert.equals(4.0, phaseB:calculatePriority())
+                assert.equals(6.0, phaseC:calculatePriority())
             end)
         end)
         describe("Car priorities for 1 car per lane (again)", function ()
@@ -232,10 +265,10 @@ insulate("Crossing", function ()
             lane2:vehicleLeft("#Car2a")
             lane3:vehicleLeft("#Car3a")
 
-            it("TrafficLights are there", function ()
-                assert.equals(1.5, sequenceA:calculatePriority())
-                assert.equals(2.0, sequenceB:calculatePriority())
-                assert.equals(3.0, sequenceC:calculatePriority())
+            it("SignalHeads are there", function ()
+                assert.equals(1.5, phaseA:calculatePriority())
+                assert.equals(1.0, phaseB:calculatePriority())
+                assert.equals(3.0, phaseC:calculatePriority())
             end)
         end)
         describe("Car priorities for 0 cars per lane after leaving", function ()
@@ -243,16 +276,16 @@ insulate("Crossing", function ()
             lane2:vehicleLeft("#Car2b")
             lane3:vehicleLeft("#Car3b")
 
-            it("TrafficLights are there", function ()
-                assert.equals(0, sequenceA:calculatePriority())
-                assert.equals(0, sequenceB:calculatePriority())
-                assert.equals(0, sequenceC:calculatePriority())
+            it("SignalHeads are there", function ()
+                assert.equals(0, phaseA:calculatePriority())
+                assert.equals(0, phaseB:calculatePriority())
+                assert.equals(0, phaseC:calculatePriority())
             end)
         end)
     end)
 end)
 
-insulate("Check traffic light sequence", function ()
+insulate("Check signal phase", function ()
     -- This is the setup
     --                                |    N   |        |        |
     --                                | lane 1 |        |        |
@@ -282,19 +315,19 @@ insulate("Check traffic light sequence", function ()
     require("ce.hub.eep.EepSimulator")
     local Lane = require("ce.mods.road.Lane")
     local Intersection = require("ce.mods.road.Intersection")
-    local IntersectionSequence = require("ce.mods.road.IntersectionSequence")
+    local TrafficPhase = require("ce.mods.road.TrafficPhase")
     -- local LaneSettings = require("ce.mods.road.LaneSettings")
     local TrafficLight = require("ce.mods.road.TrafficLight")
     local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
     ---@type Lane
     local lane1, lane2, lane3, lane4
-    ---@type TrafficLight
+    ---@type Signal
     local c1Lane1Signal, c1Lane2Signal, c1Lane3Signal, c1Lane4Signal
-    ---@type TrafficLight
+    ---@type Signal
     local K1, K2, K3, K5, K6, K7, K8, K9
-    ---@type IntersectionSequence
-    local sequenceA, sequenceB, sequenceC
+    ---@type TrafficPhase
+    local phaseA, phaseB, phaseC
     ---@type Intersection
     local crossing
 
@@ -315,10 +348,10 @@ insulate("Check traffic light sequence", function ()
     K9 = TrafficLight:new("K9", 31, TrafficLightModel.JS2_3er_mit_FG)           -- SOUTH STRAIGHT (right)
 
     crossing = Intersection:new("My Crossing")
-    lane1 = Lane:new("Lane 1 N", 1, c1Lane1Signal, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
-    lane2 = Lane:new("Lane 2 E", 2, c1Lane2Signal, { Lane.Directions.LEFT, Lane.Directions.RIGHT })
-    lane3 = Lane:new("Lane 3 S", 3, c1Lane3Signal, { Lane.Directions.LEFT })
-    lane4 = Lane:new("Lane 4 S", 4, c1Lane4Signal, { Lane.Directions.STRAIGHT })
+    lane1 = Lane:new("Lane 1 N", c1Lane1Signal, { Lane.Directions.STRAIGHT, Lane.Directions.RIGHT })
+    lane2 = Lane:new("Lane 2 E", c1Lane2Signal, { Lane.Directions.LEFT, Lane.Directions.RIGHT })
+    lane3 = Lane:new("Lane 3 S", c1Lane3Signal, { Lane.Directions.LEFT })
+    lane4 = Lane:new("Lane 4 S", c1Lane4Signal, { Lane.Directions.STRAIGHT })
 
     K1:applyToLane(lane1)
     K6:applyToLane(lane2)
@@ -326,32 +359,29 @@ insulate("Check traffic light sequence", function ()
     K8:applyToLane(lane3)
     K9:applyToLane(lane4)
 
-    ---@type IntersectionSequence
-    sequenceA = crossing:newSequence("Sequence A - North South")
-    sequenceA:addCarLights(K1)
-    sequenceA:addCarLights(K2)
-    sequenceA:addCarLights(K9)
-    sequenceA:addPedestrianLights(K3)
-    sequenceA:addPedestrianLights(K6)
+    local sgLane1StraightRight = crossing:newSignalGroup("sgLane1StraightRight"):addVehicleSignals(K1, K2)
+    local sgLane2Left = crossing:newSignalGroup("sgLane2Left"):addVehicleSignals(K6)
+    local sgLane2Right = crossing:newSignalGroup("sgLane2Right"):addVehicleSignals(K7)
+    local sgLane3Left = crossing:newSignalGroup("sgLane3Left"):addVehicleSignals(K8)
+    local sgLane4Straight = crossing:newSignalGroup("sgLane4Straight"):addVehicleSignals(K9)
+    local sgEastVehicle = crossing:newSignalGroup("sgEastVehicle"):addVehicleSignals(K3, K5)
+    local sgPedEast = crossing:newSignalGroup("sgPedEast"):addPedestrianSignals(K3, K6)
+    local sgPedNorthSouth = crossing:newSignalGroup("sgPedNorthSouth"):addPedestrianSignals(K1, K2, K8, K9)
 
-    ---@type IntersectionSequence
-    sequenceB = crossing:newSequence("Sequence B - South + East Right")
-    sequenceB:addCarLights(K7)
-    sequenceB:addCarLights(K8)
-    sequenceB:addCarLights(K9)
+    ---@type TrafficPhase
+    phaseA = crossing:newPhase("P1")
+    phaseA:addSignalGroup(sgLane1StraightRight, sgLane4Straight, sgPedEast)
 
-    ---@type IntersectionSequence
-    sequenceC = crossing:newSequence("Sequence C - East only")
-    sequenceC:addCarLights(K3)
-    sequenceC:addCarLights(K5)
-    sequenceC:addCarLights(K6)
-    sequenceC:addPedestrianLights(K1)
-    sequenceC:addPedestrianLights(K2)
-    sequenceC:addPedestrianLights(K8)
-    sequenceC:addPedestrianLights(K9)
+    ---@type TrafficPhase
+    phaseB = crossing:newPhase("P2")
+    phaseB:addSignalGroup(sgLane2Right, sgLane3Left, sgLane4Straight)
+
+    ---@type TrafficPhase
+    phaseC = crossing:newPhase("P3")
+    phaseC:addSignalGroup(sgEastVehicle, sgLane2Left, sgPedNorthSouth)
 
     -- Not neccessary on ModuleRegistry Tasks
-    Intersection.initSequences()
+    Intersection.initPhases()
 
     local ControlExtension = require("ce.ControlExtension")
     local Scheduler = require("ce.hub.scheduler.Scheduler")
@@ -362,7 +392,7 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.deactivateServer()
     Scheduler.debug = false
     Intersection.debug = false
-    IntersectionSequence.debug = false
+    TrafficPhase.debug = false
     local crossingCeModule = require("ce.mods.road.CeRoadModule")
     ControlExtension.addModules(crossingCeModule)
 
@@ -390,22 +420,22 @@ insulate("Check traffic light sequence", function ()
     lane1:vehicleEntered("#Car1a")
 
     do
-        it("Lane1 Traffic Light", function () assert.equals(11, lane1.trafficLight.signalId) end)
-        it("Lane2 Traffic Light", function () assert.equals(12, lane2.trafficLight.signalId) end)
-        it("Lane3 Traffic Light", function () assert.equals(13, lane3.trafficLight.signalId) end)
-        it("Lane4 Traffic Light", function () assert.equals(14, lane4.trafficLight.signalId) end)
+        it("Lane1 Signal", function () assert.equals(11, lane1.laneSignal.signalId) end)
+        it("Lane2 Signal", function () assert.equals(12, lane2.laneSignal.signalId) end)
+        it("Lane3 Signal", function () assert.equals(13, lane3.laneSignal.signalId) end)
+        it("Lane4 Signal", function () assert.equals(14, lane4.laneSignal.signalId) end)
 
-        local step0Line1WaitCount = lane1:getWaitCount()          --           step0
-        local step0Line2WaitCount = lane2:getWaitCount()          --           step0
-        local step0Line3WaitCount = lane3:getWaitCount()          --           step0
-        local step0Line4WaitCount = lane4:getWaitCount()          --           step0
-        local step0Lane1Prio = lane1:calculatePriority({})        --           step0
-        local step0Lane2Prio = lane2:calculatePriority({})        --         step0
-        local step0Lane3Prio = lane3:calculatePriority({})        --         step0
-        local step0Lane4Prio = lane4:calculatePriority({})        --         step0
-        local step0SwitchingAPrio = sequenceA:calculatePriority() -- step0
-        local step0SwitchingBPrio = sequenceB:calculatePriority() -- step0
-        local step0SwitchingCPrio = sequenceC:calculatePriority() -- step0
+        local step0Line1WaitCount = lane1:getWaitCount()   --           step0
+        local step0Line2WaitCount = lane2:getWaitCount()   --           step0
+        local step0Line3WaitCount = lane3:getWaitCount()   --           step0
+        local step0Line4WaitCount = lane4:getWaitCount()   --           step0
+        local step0Lane1Prio = lane1:calculatePriority({}) --           step0
+        local step0Lane2Prio = lane2:calculatePriority({}) --         step0
+        local step0Lane3Prio = lane3:calculatePriority({}) --         step0
+        local step0Lane4Prio = lane4:calculatePriority({}) --         step0
+        local step0PhaseAPrio = phaseA:calculatePriority() -- step0
+        local step0PhaseBPrio = phaseB:calculatePriority() -- step0
+        local step0PhaseCPrio = phaseC:calculatePriority() -- step0
         it("# step0 - lane1 WaitCount", function () assert.equals(000, step0Line1WaitCount) end)
         it("# step0 - lane2 WaitCount", function () assert.equals(000, step0Line2WaitCount) end)
         it("# step0 - lane3 WaitCount", function () assert.equals(000, step0Line3WaitCount) end)
@@ -414,18 +444,18 @@ insulate("Check traffic light sequence", function ()
         it("# step0 - lane2 prio     ", function () assert.equals(000, step0Lane2Prio) end)
         it("# step0 - lane3 prio     ", function () assert.equals(000, step0Lane3Prio) end)
         it("# step0 - lane4 prio     ", function () assert.equals(000, step0Lane4Prio) end)
-        it("# step0 - sequenceA prio", function () assert.equals(1.5, step0SwitchingAPrio) end)
-        it("# step0 - sequenceB prio", function () assert.equals(000, step0SwitchingBPrio) end)
-        it("# step0 - sequenceC prio", function () assert.equals(000, step0SwitchingCPrio) end)
-        local step0Ready = crossing:isGreenPhaseFinished() --                     step0
-        local step0SignalAxisK1 = EEPGetSignal(23)         -- store signal    step0
-        local step0SignalAxisK2 = EEPGetSignal(24)         -- store signal    step0
-        local step0SignalAxisK3 = EEPGetSignal(25)         -- store signal    step0
-        local step0SignalAxisK5 = EEPGetSignal(27)         -- store signal    step0
-        local step0SignalAxisK6 = EEPGetSignal(28)         -- store signal    step0
-        local step0SignalAxisK7 = EEPGetSignal(29)         -- store signal    step0
-        local step0SignalAxisK8 = EEPGetSignal(30)         -- store signal    step0
-        local step0SignalAxisK9 = EEPGetSignal(31)         -- store signal    step0
+        it("# step0 - phaseA prio", function () assert.equals(1.5, step0PhaseAPrio) end)
+        it("# step0 - phaseB prio", function () assert.equals(000, step0PhaseBPrio) end)
+        it("# step0 - phaseC prio", function () assert.equals(000, step0PhaseCPrio) end)
+        local step0Ready = crossing:isGreenTimeFinished() --                     step0
+        local step0SignalAxisK1 = EEPGetSignal(23)        -- store signal    step0
+        local step0SignalAxisK2 = EEPGetSignal(24)        -- store signal    step0
+        local step0SignalAxisK3 = EEPGetSignal(25)        -- store signal    step0
+        local step0SignalAxisK5 = EEPGetSignal(27)        -- store signal    step0
+        local step0SignalAxisK6 = EEPGetSignal(28)        -- store signal    step0
+        local step0SignalAxisK7 = EEPGetSignal(29)        -- store signal    step0
+        local step0SignalAxisK8 = EEPGetSignal(30)        -- store signal    step0
+        local step0SignalAxisK9 = EEPGetSignal(31)        -- store signal    step0
         it("# step0 - Crossing ready     ", function () assert.is_true(step0Ready) end)
         it("# step0 - Signal K1 (23) ", function () assert.equals(GRE, step0SignalAxisK1) end)
         it("# step0 - Signal K2 (24) ", function () assert.equals(RED, step0SignalAxisK2) end)
@@ -441,17 +471,17 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- First Plan crossing
 
     do
-        local step1Line1WaitCount = lane1:getWaitCount()          --           step1
-        local step1Line2WaitCount = lane2:getWaitCount()          --           step1
-        local step1Line3WaitCount = lane3:getWaitCount()          --           step1
-        local step1Line4WaitCount = lane4:getWaitCount()          --           step1
-        local step1Lane1Prio = lane1:calculatePriority({})        --         step1
-        local step1Lane2Prio = lane2:calculatePriority({})        --         step1
-        local step1Lane3Prio = lane3:calculatePriority({})        --         step1
-        local step1Lane4Prio = lane4:calculatePriority({})        --         step1
-        local step1SwitchingAPrio = sequenceA:calculatePriority() -- step1
-        local step1SwitchingBPrio = sequenceB:calculatePriority() -- step1
-        local step1SwitchingCPrio = sequenceC:calculatePriority() -- step1
+        local step1Line1WaitCount = lane1:getWaitCount()   --           step1
+        local step1Line2WaitCount = lane2:getWaitCount()   --           step1
+        local step1Line3WaitCount = lane3:getWaitCount()   --           step1
+        local step1Line4WaitCount = lane4:getWaitCount()   --           step1
+        local step1Lane1Prio = lane1:calculatePriority({}) --         step1
+        local step1Lane2Prio = lane2:calculatePriority({}) --         step1
+        local step1Lane3Prio = lane3:calculatePriority({}) --         step1
+        local step1Lane4Prio = lane4:calculatePriority({}) --         step1
+        local step1PhaseAPrio = phaseA:calculatePriority() -- step1
+        local step1PhaseBPrio = phaseB:calculatePriority() -- step1
+        local step1PhaseCPrio = phaseC:calculatePriority() -- step1
         it("# step1 - lane1 WaitCount", function () assert.equals(000, step1Line1WaitCount) end)
         it("# step1 - lane2 WaitCount", function () assert.equals(000, step1Line2WaitCount) end)
         it("# step1 - lane3 WaitCount", function () assert.equals(000, step1Line3WaitCount) end)
@@ -460,18 +490,18 @@ insulate("Check traffic light sequence", function ()
         it("# step1 - lane2 prio     ", function () assert.equals(000, step1Lane2Prio) end)
         it("# step1 - lane3 prio     ", function () assert.equals(000, step1Lane3Prio) end)
         it("# step1 - lane4 prio     ", function () assert.equals(000, step1Lane4Prio) end)
-        it("# step1 - sequenceA prio", function () assert.equals(1.5, step1SwitchingAPrio) end)
-        it("# step1 - sequenceB prio", function () assert.equals(000, step1SwitchingBPrio) end)
-        it("# step1 - sequenceC prio", function () assert.equals(000, step1SwitchingCPrio) end)
-        local step1Ready = crossing:isGreenPhaseFinished() --                     step1
-        local step1SignalAxisK1 = EEPGetSignal(23)         -- store signal    step1
-        local step1SignalAxisK2 = EEPGetSignal(24)         -- store signal    step1
-        local step1SignalAxisK3 = EEPGetSignal(25)         -- store signal    step1
-        local step1SignalAxisK5 = EEPGetSignal(27)         -- store signal    step1
-        local step1SignalAxisK6 = EEPGetSignal(28)         -- store signal    step1
-        local step1SignalAxisK7 = EEPGetSignal(29)         -- store signal    step1
-        local step1SignalAxisK8 = EEPGetSignal(30)         -- store signal    step1
-        local step1SignalAxisK9 = EEPGetSignal(31)         -- store signal    step1
+        it("# step1 - phaseA prio", function () assert.equals(1.5, step1PhaseAPrio) end)
+        it("# step1 - phaseB prio", function () assert.equals(000, step1PhaseBPrio) end)
+        it("# step1 - phaseC prio", function () assert.equals(000, step1PhaseCPrio) end)
+        local step1Ready = crossing:isGreenTimeFinished() --                     step1
+        local step1SignalAxisK1 = EEPGetSignal(23)        -- store signal    step1
+        local step1SignalAxisK2 = EEPGetSignal(24)        -- store signal    step1
+        local step1SignalAxisK3 = EEPGetSignal(25)        -- store signal    step1
+        local step1SignalAxisK5 = EEPGetSignal(27)        -- store signal    step1
+        local step1SignalAxisK6 = EEPGetSignal(28)        -- store signal    step1
+        local step1SignalAxisK7 = EEPGetSignal(29)        -- store signal    step1
+        local step1SignalAxisK8 = EEPGetSignal(30)        -- store signal    step1
+        local step1SignalAxisK9 = EEPGetSignal(31)        -- store signal    step1
         it("# step1 - Crossing ready    ", function () assert.is_false(step1Ready) end)
         it("# step1 - Signal K1 (23) ", function () assert.equals(RED, step1SignalAxisK1) end)
         it("# step1 - Signal K2 (24) ", function () assert.equals(RED, step1SignalAxisK2) end)
@@ -487,17 +517,17 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- First Turn old to yellow + Pedestrian Red
 
     do
-        local step2Line1WaitCount = lane1:getWaitCount()          --           step2
-        local step2Line2WaitCount = lane2:getWaitCount()          --           step2
-        local step2Line3WaitCount = lane3:getWaitCount()          --           step2
-        local step2Line4WaitCount = lane4:getWaitCount()          --           step2
-        local step2Lane1Prio = lane1:calculatePriority({})        --         step2
-        local step2Lane2Prio = lane2:calculatePriority({})        --         step2
-        local step2Lane3Prio = lane3:calculatePriority({})        --         step2
-        local step2Lane4Prio = lane4:calculatePriority({})        --         step2
-        local step2SwitchingAPrio = sequenceA:calculatePriority() --  step2
-        local step2SwitchingBPrio = sequenceB:calculatePriority() --  step2
-        local step2SwitchingCPrio = sequenceC:calculatePriority() --  step2
+        local step2Line1WaitCount = lane1:getWaitCount()   --           step2
+        local step2Line2WaitCount = lane2:getWaitCount()   --           step2
+        local step2Line3WaitCount = lane3:getWaitCount()   --           step2
+        local step2Line4WaitCount = lane4:getWaitCount()   --           step2
+        local step2Lane1Prio = lane1:calculatePriority({}) --         step2
+        local step2Lane2Prio = lane2:calculatePriority({}) --         step2
+        local step2Lane3Prio = lane3:calculatePriority({}) --         step2
+        local step2Lane4Prio = lane4:calculatePriority({}) --         step2
+        local step2PhaseAPrio = phaseA:calculatePriority() --  step2
+        local step2PhaseBPrio = phaseB:calculatePriority() --  step2
+        local step2PhaseCPrio = phaseC:calculatePriority() --  step2
         it("# step2 - lane1 WaitCount", function () assert.equals(000, step2Line1WaitCount) end)
         it("# step2 - lane2 WaitCount", function () assert.equals(000, step2Line2WaitCount) end)
         it("# step2 - lane3 WaitCount", function () assert.equals(000, step2Line3WaitCount) end)
@@ -506,18 +536,18 @@ insulate("Check traffic light sequence", function ()
         it("# step2 - lane2 prio     ", function () assert.equals(000, step2Lane2Prio) end)
         it("# step2 - lane3 prio     ", function () assert.equals(000, step2Lane3Prio) end)
         it("# step2 - lane4 prio     ", function () assert.equals(000, step2Lane4Prio) end)
-        it("# step2 - sequenceA prio ", function () assert.equals(1.5, step2SwitchingAPrio) end)
-        it("# step2 - sequenceB prio ", function () assert.equals(000, step2SwitchingBPrio) end)
-        it("# step2 - sequenceC prio ", function () assert.equals(000, step2SwitchingCPrio) end)
-        local step3Ready = crossing:isGreenPhaseFinished() --                     step3
-        local step3SignalAxisK1 = EEPGetSignal(23)         -- store signal    step3
-        local step3SignalAxisK2 = EEPGetSignal(24)         -- store signal    step3
-        local step3SignalAxisK3 = EEPGetSignal(25)         -- store signal    step3
-        local step3SignalAxisK5 = EEPGetSignal(27)         -- store signal    step3
-        local step3SignalAxisK6 = EEPGetSignal(28)         -- store signal    step3
-        local step3SignalAxisK7 = EEPGetSignal(29)         -- store signal    step3
-        local step3SignalAxisK8 = EEPGetSignal(30)         -- store signal    step3
-        local step3SignalAxisK9 = EEPGetSignal(31)         -- store signal    step3
+        it("# step2 - phaseA prio ", function () assert.equals(1.5, step2PhaseAPrio) end)
+        it("# step2 - phaseB prio ", function () assert.equals(000, step2PhaseBPrio) end)
+        it("# step2 - phaseC prio ", function () assert.equals(000, step2PhaseCPrio) end)
+        local step3Ready = crossing:isGreenTimeFinished() --                     step3
+        local step3SignalAxisK1 = EEPGetSignal(23)        -- store signal    step3
+        local step3SignalAxisK2 = EEPGetSignal(24)        -- store signal    step3
+        local step3SignalAxisK3 = EEPGetSignal(25)        -- store signal    step3
+        local step3SignalAxisK5 = EEPGetSignal(27)        -- store signal    step3
+        local step3SignalAxisK6 = EEPGetSignal(28)        -- store signal    step3
+        local step3SignalAxisK7 = EEPGetSignal(29)        -- store signal    step3
+        local step3SignalAxisK8 = EEPGetSignal(30)        -- store signal    step3
+        local step3SignalAxisK9 = EEPGetSignal(31)        -- store signal    step3
         it("# step3 - Crossing ready    ", function () assert.is_false(step3Ready) end)
         it("# step3 - Signal K1 (23) ", function () assert.equals(RED, step3SignalAxisK1) end)
         it("# step3 - Signal K2 (24) ", function () assert.equals(RED, step3SignalAxisK2) end)
@@ -533,7 +563,7 @@ insulate("Check traffic light sequence", function ()
     -- ControlExtension.runTasks() -- First Turn old to red
 
     -- do
-    --     local step4Ready = crossing:isGreenPhaseFinished() --                     step4
+    --     local step4Ready = crossing:isGreenTimeFinished() --                     step4
     --     local step4SignalAxisK1 = EEPGetSignal(23) -- store signal    step4
     --     local step4SignalAxisK2 = EEPGetSignal(24) -- store signal    step4
     --     local step4SignalAxisK3 = EEPGetSignal(25) -- store signal    step4
@@ -557,7 +587,7 @@ insulate("Check traffic light sequence", function ()
     -- ControlExtension.runTasks() -- First Turn new to red_yellow
 
     -- do
-    --     local step5Ready = crossing:isGreenPhaseFinished() --                     step5
+    --     local step5Ready = crossing:isGreenTimeFinished() --                     step5
     --     local step5SignalAxisL1 = EEPGetSignal(11) -- store signal    step5
     --     local step5SignalAxisL2 = EEPGetSignal(12) -- store signal    step5
     --     local step5SignalAxisL3 = EEPGetSignal(13) -- store signal    step5
@@ -589,19 +619,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- First Turn new to red_yellow
 
     do
-        local step6Ready = crossing:isGreenPhaseFinished() --                     step6
-        local step6SignalAxisL1 = EEPGetSignal(11)         -- store signal    step6
-        local step6SignalAxisL2 = EEPGetSignal(12)         -- store signal    step6
-        local step6SignalAxisL3 = EEPGetSignal(13)         -- store signal    step6
-        local step6SignalAxisL4 = EEPGetSignal(14)         -- store signal    step6
-        local step6SignalAxisK1 = EEPGetSignal(23)         -- store signal    step6
-        local step6SignalAxisK2 = EEPGetSignal(24)         -- store signal    step6
-        local step6SignalAxisK3 = EEPGetSignal(25)         -- store signal    step6
-        local step6SignalAxisK5 = EEPGetSignal(27)         -- store signal    step6
-        local step6SignalAxisK6 = EEPGetSignal(28)         -- store signal    step6
-        local step6SignalAxisK7 = EEPGetSignal(29)         -- store signal    step6
-        local step6SignalAxisK8 = EEPGetSignal(30)         -- store signal    step6
-        local step6SignalAxisK9 = EEPGetSignal(31)         -- store signal    step6
+        local step6Ready = crossing:isGreenTimeFinished() --                     step6
+        local step6SignalAxisL1 = EEPGetSignal(11)        -- store signal    step6
+        local step6SignalAxisL2 = EEPGetSignal(12)        -- store signal    step6
+        local step6SignalAxisL3 = EEPGetSignal(13)        -- store signal    step6
+        local step6SignalAxisL4 = EEPGetSignal(14)        -- store signal    step6
+        local step6SignalAxisK1 = EEPGetSignal(23)        -- store signal    step6
+        local step6SignalAxisK2 = EEPGetSignal(24)        -- store signal    step6
+        local step6SignalAxisK3 = EEPGetSignal(25)        -- store signal    step6
+        local step6SignalAxisK5 = EEPGetSignal(27)        -- store signal    step6
+        local step6SignalAxisK6 = EEPGetSignal(28)        -- store signal    step6
+        local step6SignalAxisK7 = EEPGetSignal(29)        -- store signal    step6
+        local step6SignalAxisK8 = EEPGetSignal(30)        -- store signal    step6
+        local step6SignalAxisK9 = EEPGetSignal(31)        -- store signal    step6
         it("# step6 - Signal L1 (11) ", function () assert.equals(U_R, step6SignalAxisL1) end)
         it("# step6 - Signal L2 (12) ", function () assert.equals(U_R, step6SignalAxisL2) end)
         it("# step6 - Signal L3 (13) ", function () assert.equals(U_R, step6SignalAxisL3) end)
@@ -621,17 +651,17 @@ insulate("Check traffic light sequence", function ()
     lane2:vehicleEntered("#Car2a")
 
     do
-        local step6Line1WaitCount = lane1:getWaitCount()          --           step6
-        local step6Line2WaitCount = lane2:getWaitCount()          --           step6
-        local step6Line3WaitCount = lane3:getWaitCount()          --           step6
-        local step6Line4WaitCount = lane4:getWaitCount()          --           step6
-        local step6Lane1Prio = lane1:calculatePriority({})        --         step6
-        local step6Lane2Prio = lane2:calculatePriority({})        --         step6
-        local step6Lane3Prio = lane3:calculatePriority({})        --         step6
-        local step6Lane4Prio = lane4:calculatePriority({})        --         step6
-        local step6SwitchingAPrio = sequenceA:calculatePriority() --  step6
-        local step6SwitchingBPrio = sequenceB:calculatePriority() --  step6
-        local step6SwitchingCPrio = sequenceC:calculatePriority() --  step6
+        local step6Line1WaitCount = lane1:getWaitCount()   --           step6
+        local step6Line2WaitCount = lane2:getWaitCount()   --           step6
+        local step6Line3WaitCount = lane3:getWaitCount()   --           step6
+        local step6Line4WaitCount = lane4:getWaitCount()   --           step6
+        local step6Lane1Prio = lane1:calculatePriority({}) --         step6
+        local step6Lane2Prio = lane2:calculatePriority({}) --         step6
+        local step6Lane3Prio = lane3:calculatePriority({}) --         step6
+        local step6Lane4Prio = lane4:calculatePriority({}) --         step6
+        local step6PhaseAPrio = phaseA:calculatePriority() --  step6
+        local step6PhaseBPrio = phaseB:calculatePriority() --  step6
+        local step6PhaseCPrio = phaseC:calculatePriority() --  step6
         it("# step6 - lane1 WaitCount", function () assert.equals(000, step6Line1WaitCount) end)
         it("# step6 - lane2 WaitCount", function () assert.equals(002, step6Line2WaitCount) end)
         it("# step6 - lane3 WaitCount", function () assert.equals(002, step6Line3WaitCount) end)
@@ -640,9 +670,9 @@ insulate("Check traffic light sequence", function ()
         it("# step6 - lane2 prio     ", function () assert.equals(002, step6Lane2Prio) end)
         it("# step6 - lane3 prio     ", function () assert.equals(002, step6Lane3Prio) end)
         it("# step6 - lane4 prio     ", function () assert.equals(000, step6Lane4Prio) end)
-        it("# step6 - sequenceA prio ", function () assert.equals(000, step6SwitchingAPrio) end)
-        it("# step6 - sequenceB prio ", function () assert.equals(5 / 3, step6SwitchingBPrio) end)
-        it("# step6 - sequenceC prio ", function () assert.equals(003, step6SwitchingCPrio) end)
+        it("# step6 - phaseA prio ", function () assert.equals(000, step6PhaseAPrio) end)
+        it("# step6 - phaseB prio ", function () assert.equals(5 / 3, step6PhaseBPrio) end)
+        it("# step6 - phaseC prio ", function () assert.equals(003, step6PhaseCPrio) end)
     end
 
     _G.EEPTime = _G.EEPTime + 200
@@ -651,19 +681,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- First Set ready -- Scheduler.debug = true
 
     do
-        local step7Ready = crossing:isGreenPhaseFinished() --         step7
-        local step7SignalAxisL1 = EEPGetSignal(11)         -- store signal    step7
-        local step7SignalAxisL2 = EEPGetSignal(12)         -- store signal    step7
-        local step7SignalAxisL3 = EEPGetSignal(13)         -- store signal    step7
-        local step7SignalAxisL4 = EEPGetSignal(14)         -- store signal    step7
-        local step7SignalAxisK1 = EEPGetSignal(23)         -- store signal    step7
-        local step7SignalAxisK2 = EEPGetSignal(24)         -- store signal    step7
-        local step7SignalAxisK3 = EEPGetSignal(25)         -- store signal    step7
-        local step7SignalAxisK5 = EEPGetSignal(27)         -- store signal    step7
-        local step7SignalAxisK6 = EEPGetSignal(28)         -- store signal    step7
-        local step7SignalAxisK7 = EEPGetSignal(29)         -- store signal    step7
-        local step7SignalAxisK8 = EEPGetSignal(30)         -- store signal    step7
-        local step7SignalAxisK9 = EEPGetSignal(31)         -- store signal    step7
+        local step7Ready = crossing:isGreenTimeFinished() --         step7
+        local step7SignalAxisL1 = EEPGetSignal(11)        -- store signal    step7
+        local step7SignalAxisL2 = EEPGetSignal(12)        -- store signal    step7
+        local step7SignalAxisL3 = EEPGetSignal(13)        -- store signal    step7
+        local step7SignalAxisL4 = EEPGetSignal(14)        -- store signal    step7
+        local step7SignalAxisK1 = EEPGetSignal(23)        -- store signal    step7
+        local step7SignalAxisK2 = EEPGetSignal(24)        -- store signal    step7
+        local step7SignalAxisK3 = EEPGetSignal(25)        -- store signal    step7
+        local step7SignalAxisK5 = EEPGetSignal(27)        -- store signal    step7
+        local step7SignalAxisK6 = EEPGetSignal(28)        -- store signal    step7
+        local step7SignalAxisK7 = EEPGetSignal(29)        -- store signal    step7
+        local step7SignalAxisK8 = EEPGetSignal(30)        -- store signal    step7
+        local step7SignalAxisK9 = EEPGetSignal(31)        -- store signal    step7
         it("# step7 - Signal L1 (11) ", function () assert.equals(U_G, step7SignalAxisL1) end)
         it("# step7 - Signal L2 (12) ", function () assert.equals(U_R, step7SignalAxisL2) end)
         it("# step7 - Signal L3 (13) ", function () assert.equals(U_R, step7SignalAxisL3) end)
@@ -683,17 +713,17 @@ insulate("Check traffic light sequence", function ()
     lane4:vehicleEntered("#Car4a")
 
     do
-        local step7Line1WaitCount = lane1:getWaitCount()          --           step7
-        local step7Line2WaitCount = lane2:getWaitCount()          --           step7
-        local step7Line3WaitCount = lane3:getWaitCount()          --           step7
-        local step7Line4WaitCount = lane4:getWaitCount()          --           step7
-        local step7Lane1Prio = lane1:calculatePriority({})        --         step7
-        local step7Lane2Prio = lane2:calculatePriority({})        --         step7
-        local step7Lane3Prio = lane3:calculatePriority({})        --         step7
-        local step7Lane4Prio = lane4:calculatePriority({})        --         step7
-        local step7SwitchingAPrio = sequenceA:calculatePriority() -- step7
-        local step7SwitchingBPrio = sequenceB:calculatePriority() -- step7
-        local step7SwitchingCPrio = sequenceC:calculatePriority() -- step7
+        local step7Line1WaitCount = lane1:getWaitCount()   --           step7
+        local step7Line2WaitCount = lane2:getWaitCount()   --           step7
+        local step7Line3WaitCount = lane3:getWaitCount()   --           step7
+        local step7Line4WaitCount = lane4:getWaitCount()   --           step7
+        local step7Lane1Prio = lane1:calculatePriority({}) --         step7
+        local step7Lane2Prio = lane2:calculatePriority({}) --         step7
+        local step7Lane3Prio = lane3:calculatePriority({}) --         step7
+        local step7Lane4Prio = lane4:calculatePriority({}) --         step7
+        local step7PhaseAPrio = phaseA:calculatePriority() -- step7
+        local step7PhaseBPrio = phaseB:calculatePriority() -- step7
+        local step7PhaseCPrio = phaseC:calculatePriority() -- step7
         it("# step7 - lane1 WaitCount", function () assert.equals(000, step7Line1WaitCount) end)
         it("# step7 - lane2 WaitCount", function () assert.equals(002, step7Line2WaitCount) end)
         it("# step7 - lane3 WaitCount", function () assert.equals(002, step7Line3WaitCount) end)
@@ -702,28 +732,28 @@ insulate("Check traffic light sequence", function ()
         it("# step7 - lane2 prio     ", function () assert.equals(002, step7Lane2Prio) end)
         it("# step7 - lane3 prio     ", function () assert.equals(002, step7Lane3Prio) end)
         it("# step7 - lane4 prio     ", function () assert.equals(000, step7Lane4Prio) end)
-        it("# step7 - sequenceA prio ", function () assert.equals(1.5, step7SwitchingAPrio) end)
-        it("# step7 - sequenceB prio ", function () assert.equals(7 / 3, step7SwitchingBPrio) end)
-        it("# step7 - sequenceC prio ", function () assert.equals(002, step7SwitchingCPrio) end)
+        it("# step7 - phaseA prio ", function () assert.equals(1.5, step7PhaseAPrio) end)
+        it("# step7 - phaseB prio ", function () assert.equals(7 / 3, step7PhaseBPrio) end)
+        it("# step7 - phaseC prio ", function () assert.equals(002, step7PhaseCPrio) end)
     end
 
     _G.EEPTime = _G.EEPTime + 200
     ControlExtension.runTasks() -- Second Plan switched
 
     do
-        local step8Ready = crossing:isGreenPhaseFinished() --                     step8
-        local step8SignalAxisL1 = EEPGetSignal(11)         -- store signal    step8
-        local step8SignalAxisL2 = EEPGetSignal(12)         -- store signal    step8
-        local step8SignalAxisL3 = EEPGetSignal(13)         -- store signal    step8
-        local step8SignalAxisL4 = EEPGetSignal(14)         -- store signal    step8
-        local step8SignalAxisK1 = EEPGetSignal(23)         -- store signal    step8
-        local step8SignalAxisK2 = EEPGetSignal(24)         -- store signal    step8
-        local step8SignalAxisK3 = EEPGetSignal(25)         -- store signal    step8
-        local step8SignalAxisK5 = EEPGetSignal(27)         -- store signal    step8
-        local step8SignalAxisK6 = EEPGetSignal(28)         -- store signal    step8
-        local step8SignalAxisK7 = EEPGetSignal(29)         -- store signal    step8
-        local step8SignalAxisK8 = EEPGetSignal(30)         -- store signal    step8
-        local step8SignalAxisK9 = EEPGetSignal(31)         -- store signal    step8
+        local step8Ready = crossing:isGreenTimeFinished() --                     step8
+        local step8SignalAxisL1 = EEPGetSignal(11)        -- store signal    step8
+        local step8SignalAxisL2 = EEPGetSignal(12)        -- store signal    step8
+        local step8SignalAxisL3 = EEPGetSignal(13)        -- store signal    step8
+        local step8SignalAxisL4 = EEPGetSignal(14)        -- store signal    step8
+        local step8SignalAxisK1 = EEPGetSignal(23)        -- store signal    step8
+        local step8SignalAxisK2 = EEPGetSignal(24)        -- store signal    step8
+        local step8SignalAxisK3 = EEPGetSignal(25)        -- store signal    step8
+        local step8SignalAxisK5 = EEPGetSignal(27)        -- store signal    step8
+        local step8SignalAxisK6 = EEPGetSignal(28)        -- store signal    step8
+        local step8SignalAxisK7 = EEPGetSignal(29)        -- store signal    step8
+        local step8SignalAxisK8 = EEPGetSignal(30)        -- store signal    step8
+        local step8SignalAxisK9 = EEPGetSignal(31)        -- store signal    step8
         it("# step8 - Crossing ready    ", function () assert.is_false(step8Ready) end)
         it("# step8 - Signal L1 (11) ", function () assert.equals(U_G, step8SignalAxisL1) end)
         it("# step8 - Signal L2 (12) ", function () assert.equals(U_R, step8SignalAxisL2) end)
@@ -743,19 +773,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- Second Old Pedestrians RED
 
     do
-        local step9Ready = crossing:isGreenPhaseFinished() --                     step9
-        local step9SignalAxisL1 = EEPGetSignal(11)         -- store signal    step9
-        local step9SignalAxisL2 = EEPGetSignal(12)         -- store signal    step9
-        local step9SignalAxisL3 = EEPGetSignal(13)         -- store signal    step9
-        local step9SignalAxisL4 = EEPGetSignal(14)         -- store signal    step9
-        local step9SignalAxisK1 = EEPGetSignal(23)         -- store signal    step9
-        local step9SignalAxisK2 = EEPGetSignal(24)         -- store signal    step9
-        local step9SignalAxisK3 = EEPGetSignal(25)         -- store signal    step9
-        local step9SignalAxisK5 = EEPGetSignal(27)         -- store signal    step9
-        local step9SignalAxisK6 = EEPGetSignal(28)         -- store signal    step9
-        local step9SignalAxisK7 = EEPGetSignal(29)         -- store signal    step9
-        local step9SignalAxisK8 = EEPGetSignal(30)         -- store signal    step9
-        local step9SignalAxisK9 = EEPGetSignal(31)         -- store signal    step9
+        local step9Ready = crossing:isGreenTimeFinished() --                     step9
+        local step9SignalAxisL1 = EEPGetSignal(11)        -- store signal    step9
+        local step9SignalAxisL2 = EEPGetSignal(12)        -- store signal    step9
+        local step9SignalAxisL3 = EEPGetSignal(13)        -- store signal    step9
+        local step9SignalAxisL4 = EEPGetSignal(14)        -- store signal    step9
+        local step9SignalAxisK1 = EEPGetSignal(23)        -- store signal    step9
+        local step9SignalAxisK2 = EEPGetSignal(24)        -- store signal    step9
+        local step9SignalAxisK3 = EEPGetSignal(25)        -- store signal    step9
+        local step9SignalAxisK5 = EEPGetSignal(27)        -- store signal    step9
+        local step9SignalAxisK6 = EEPGetSignal(28)        -- store signal    step9
+        local step9SignalAxisK7 = EEPGetSignal(29)        -- store signal    step9
+        local step9SignalAxisK8 = EEPGetSignal(30)        -- store signal    step9
+        local step9SignalAxisK9 = EEPGetSignal(31)        -- store signal    step9
         it("# step9 - Crossing ready    ", function () assert.is_false(step9Ready) end)
         it("# step9 - Signal L1 (11) ", function () assert.equals(U_G, step9SignalAxisL1) end)
         it("# step9 - Signal L2 (12) ", function () assert.equals(U_R, step9SignalAxisL2) end)
@@ -775,19 +805,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- Second Old Lanes YEL
 
     do
-        local step10Ready = crossing:isGreenPhaseFinished() --                     step10
-        local step10SignalAxisL1 = EEPGetSignal(11)         -- store signal    step10
-        local step10SignalAxisL2 = EEPGetSignal(12)         -- store signal    step10
-        local step10SignalAxisL3 = EEPGetSignal(13)         -- store signal    step10
-        local step10SignalAxisL4 = EEPGetSignal(14)         -- store signal    step10
-        local step10SignalAxisK1 = EEPGetSignal(23)         -- store signal    step10
-        local step10SignalAxisK2 = EEPGetSignal(24)         -- store signal    step10
-        local step10SignalAxisK3 = EEPGetSignal(25)         -- store signal    step10
-        local step10SignalAxisK5 = EEPGetSignal(27)         -- store signal    step10
-        local step10SignalAxisK6 = EEPGetSignal(28)         -- store signal    step10
-        local step10SignalAxisK7 = EEPGetSignal(29)         -- store signal    step10
-        local step10SignalAxisK8 = EEPGetSignal(30)         -- store signal    step10
-        local step10SignalAxisK9 = EEPGetSignal(31)         -- store signal    step10
+        local step10Ready = crossing:isGreenTimeFinished() --                     step10
+        local step10SignalAxisL1 = EEPGetSignal(11)        -- store signal    step10
+        local step10SignalAxisL2 = EEPGetSignal(12)        -- store signal    step10
+        local step10SignalAxisL3 = EEPGetSignal(13)        -- store signal    step10
+        local step10SignalAxisL4 = EEPGetSignal(14)        -- store signal    step10
+        local step10SignalAxisK1 = EEPGetSignal(23)        -- store signal    step10
+        local step10SignalAxisK2 = EEPGetSignal(24)        -- store signal    step10
+        local step10SignalAxisK3 = EEPGetSignal(25)        -- store signal    step10
+        local step10SignalAxisK5 = EEPGetSignal(27)        -- store signal    step10
+        local step10SignalAxisK6 = EEPGetSignal(28)        -- store signal    step10
+        local step10SignalAxisK7 = EEPGetSignal(29)        -- store signal    step10
+        local step10SignalAxisK8 = EEPGetSignal(30)        -- store signal    step10
+        local step10SignalAxisK9 = EEPGetSignal(31)        -- store signal    step10
         it("# step10 - Crossing ready    ", function () assert.is_false(step10Ready) end)
         it("# step10 - Signal L1 (11) ", function () assert.equals(U_R, step10SignalAxisL1) end)
         it("# step10 - Signal L2 (12) ", function () assert.equals(U_R, step10SignalAxisL2) end)
@@ -807,19 +837,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- Second Old Lanes RED
 
     do
-        local step11Ready = crossing:isGreenPhaseFinished() --                     step11
-        local step11SignalAxisL1 = EEPGetSignal(11)         -- store signal    step11
-        local step11SignalAxisL2 = EEPGetSignal(12)         -- store signal    step11
-        local step11SignalAxisL3 = EEPGetSignal(13)         -- store signal    step11
-        local step11SignalAxisL4 = EEPGetSignal(14)         -- store signal    step11
-        local step11SignalAxisK1 = EEPGetSignal(23)         -- store signal    step11
-        local step11SignalAxisK2 = EEPGetSignal(24)         -- store signal    step11
-        local step11SignalAxisK3 = EEPGetSignal(25)         -- store signal    step11
-        local step11SignalAxisK5 = EEPGetSignal(27)         -- store signal    step11
-        local step11SignalAxisK6 = EEPGetSignal(28)         -- store signal    step11
-        local step11SignalAxisK7 = EEPGetSignal(29)         -- store signal    step11
-        local step11SignalAxisK8 = EEPGetSignal(30)         -- store signal    step11
-        local step11SignalAxisK9 = EEPGetSignal(31)         -- store signal    step11
+        local step11Ready = crossing:isGreenTimeFinished() --                     step11
+        local step11SignalAxisL1 = EEPGetSignal(11)        -- store signal    step11
+        local step11SignalAxisL2 = EEPGetSignal(12)        -- store signal    step11
+        local step11SignalAxisL3 = EEPGetSignal(13)        -- store signal    step11
+        local step11SignalAxisL4 = EEPGetSignal(14)        -- store signal    step11
+        local step11SignalAxisK1 = EEPGetSignal(23)        -- store signal    step11
+        local step11SignalAxisK2 = EEPGetSignal(24)        -- store signal    step11
+        local step11SignalAxisK3 = EEPGetSignal(25)        -- store signal    step11
+        local step11SignalAxisK5 = EEPGetSignal(27)        -- store signal    step11
+        local step11SignalAxisK6 = EEPGetSignal(28)        -- store signal    step11
+        local step11SignalAxisK7 = EEPGetSignal(29)        -- store signal    step11
+        local step11SignalAxisK8 = EEPGetSignal(30)        -- store signal    step11
+        local step11SignalAxisK9 = EEPGetSignal(31)        -- store signal    step11
         it("# step11 - Crossing ready    ", function () assert.is_false(step11Ready) end)
         it("# step11 - Signal L1 (11) ", function () assert.equals(U_R, step11SignalAxisL1) end)
         it("# step11 - Signal L2 (12) ", function () assert.equals(U_R, step11SignalAxisL2) end)
@@ -839,19 +869,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- Second New Lanes YEL
 
     do
-        local step12Ready = crossing:isGreenPhaseFinished() --                     step12
-        local step12SignalAxisL1 = EEPGetSignal(11)         -- store signal    step12
-        local step12SignalAxisL2 = EEPGetSignal(12)         -- store signal    step12
-        local step12SignalAxisL3 = EEPGetSignal(13)         -- store signal    step12
-        local step12SignalAxisL4 = EEPGetSignal(14)         -- store signal    step12
-        local step12SignalAxisK1 = EEPGetSignal(23)         -- store signal    step12
-        local step12SignalAxisK2 = EEPGetSignal(24)         -- store signal    step12
-        local step12SignalAxisK3 = EEPGetSignal(25)         -- store signal    step12
-        local step12SignalAxisK5 = EEPGetSignal(27)         -- store signal    step12
-        local step12SignalAxisK6 = EEPGetSignal(28)         -- store signal    step12
-        local step12SignalAxisK7 = EEPGetSignal(29)         -- store signal    step12
-        local step12SignalAxisK8 = EEPGetSignal(30)         -- store signal    step12
-        local step12SignalAxisK9 = EEPGetSignal(31)         -- store signal    step12
+        local step12Ready = crossing:isGreenTimeFinished() --                     step12
+        local step12SignalAxisL1 = EEPGetSignal(11)        -- store signal    step12
+        local step12SignalAxisL2 = EEPGetSignal(12)        -- store signal    step12
+        local step12SignalAxisL3 = EEPGetSignal(13)        -- store signal    step12
+        local step12SignalAxisL4 = EEPGetSignal(14)        -- store signal    step12
+        local step12SignalAxisK1 = EEPGetSignal(23)        -- store signal    step12
+        local step12SignalAxisK2 = EEPGetSignal(24)        -- store signal    step12
+        local step12SignalAxisK3 = EEPGetSignal(25)        -- store signal    step12
+        local step12SignalAxisK5 = EEPGetSignal(27)        -- store signal    step12
+        local step12SignalAxisK6 = EEPGetSignal(28)        -- store signal    step12
+        local step12SignalAxisK7 = EEPGetSignal(29)        -- store signal    step12
+        local step12SignalAxisK8 = EEPGetSignal(30)        -- store signal    step12
+        local step12SignalAxisK9 = EEPGetSignal(31)        -- store signal    step12
         it("# step12 - Crossing ready    ", function () assert.is_false(step12Ready) end)
         it("# step12 - Signal L1 (11) ", function () assert.equals(U_R, step12SignalAxisL1) end)
         it("# step12 - Signal L2 (12) ", function () assert.equals(U_R, step12SignalAxisL2) end)
@@ -871,19 +901,19 @@ insulate("Check traffic light sequence", function ()
     ControlExtension.runTasks() -- Second New Lanes GRE
 
     do
-        local step13Ready = crossing:isGreenPhaseFinished() --                     step13
-        local step13SignalAxisL1 = EEPGetSignal(11)         -- store signal    step13
-        local step13SignalAxisL2 = EEPGetSignal(12)         -- store signal    step13
-        local step13SignalAxisL3 = EEPGetSignal(13)         -- store signal    step13
-        local step13SignalAxisL4 = EEPGetSignal(14)         -- store signal    step13
-        local step13SignalAxisK1 = EEPGetSignal(23)         -- store signal    step13
-        local step13SignalAxisK2 = EEPGetSignal(24)         -- store signal    step13
-        local step13SignalAxisK3 = EEPGetSignal(25)         -- store signal    step13
-        local step13SignalAxisK5 = EEPGetSignal(27)         -- store signal    step13
-        local step13SignalAxisK6 = EEPGetSignal(28)         -- store signal    step13
-        local step13SignalAxisK7 = EEPGetSignal(29)         -- store signal    step13
-        local step13SignalAxisK8 = EEPGetSignal(30)         -- store signal    step13
-        local step13SignalAxisK9 = EEPGetSignal(31)         -- store signal    step13
+        local step13Ready = crossing:isGreenTimeFinished() --                     step13
+        local step13SignalAxisL1 = EEPGetSignal(11)        -- store signal    step13
+        local step13SignalAxisL2 = EEPGetSignal(12)        -- store signal    step13
+        local step13SignalAxisL3 = EEPGetSignal(13)        -- store signal    step13
+        local step13SignalAxisL4 = EEPGetSignal(14)        -- store signal    step13
+        local step13SignalAxisK1 = EEPGetSignal(23)        -- store signal    step13
+        local step13SignalAxisK2 = EEPGetSignal(24)        -- store signal    step13
+        local step13SignalAxisK3 = EEPGetSignal(25)        -- store signal    step13
+        local step13SignalAxisK5 = EEPGetSignal(27)        -- store signal    step13
+        local step13SignalAxisK6 = EEPGetSignal(28)        -- store signal    step13
+        local step13SignalAxisK7 = EEPGetSignal(29)        -- store signal    step13
+        local step13SignalAxisK8 = EEPGetSignal(30)        -- store signal    step13
+        local step13SignalAxisK9 = EEPGetSignal(31)        -- store signal    step13
         it("# step13 - Crossing ready    ", function () assert.is_false(step13Ready) end)
         it("# step13 - Signal L1 (11) ", function () assert.equals(U_R, step13SignalAxisL1) end)
         it("# step13 - Signal L2 (12) ", function () assert.equals(U_R, step13SignalAxisL2) end)
@@ -902,7 +932,7 @@ insulate("Check traffic light sequence", function ()
         -- pending("Look that each lane turns their signal to green on route only")
         -- pending("Look that each lane turns their signal to red on route only")
 
-        -- Check the lane signal switching
+        -- Check the lane signal phase
         do
             lane2:vehicleEntered("#Car2a")
             local afterTurnCarEntered = EEPGetSignal(12) -- store signal    step13

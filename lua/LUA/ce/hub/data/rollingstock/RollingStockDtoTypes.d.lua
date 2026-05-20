@@ -13,6 +13,8 @@
 ---@field modelType number
 ---@field modelTypeText string
 ---@field tag string
+---@field licencePlate string|nil
+---@field vehicleNumber string|nil
 ---@field nr string|nil
 ---@field trackType string|nil
 ---@field hookStatus number

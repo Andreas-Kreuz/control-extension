@@ -73,4 +73,17 @@ export default class InterestSyncRegistry {
       }, ttlMs),
     );
   }
+
+  replayRetainedInterests(): void {
+    const replayedKeys = new Set<string>();
+    for (const interest of this.tokenToInterest.values()) {
+      const key = interestKeyOf(interest.ceType, interest.id);
+      if (replayedKeys.has(key)) {
+        continue;
+      }
+
+      replayedKeys.add(key);
+      this.queueCommand('HubInterestSync.startSyncFor|' + interest.ceType + '|' + interest.id);
+    }
+  }
 }

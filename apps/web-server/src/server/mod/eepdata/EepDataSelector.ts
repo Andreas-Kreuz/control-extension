@@ -1,4 +1,4 @@
-﻿import { RuntimeLuaDto } from '../../ce/dto/runtime/RuntimeLuaDto';
+import { RuntimeLuaDto } from '../../ce/dto/runtime/RuntimeLuaDto';
 import { ModuleLuaDto } from '../../ce/dto/modules/ModuleLuaDto';
 import { DataSlotLuaDto } from '../../ce/dto/data-slots/DataSlotLuaDto';
 import { SignalLuaDto } from '../../ce/dto/signals/SignalLuaDto';
@@ -7,6 +7,7 @@ import { SwitchLuaDto } from '../../ce/dto/switches/SwitchLuaDto';
 import { StructureLuaDto } from '../../ce/dto/structures/StructureLuaDto';
 import { ContactLuaDto } from '../../ce/dto/contacts/ContactLuaDto';
 import { TrackLuaDto } from '../../ce/dto/tracks/TrackLuaDto';
+import { RouteLuaDto } from '../../ce/dto/routes/RouteLuaDto';
 import * as fromEepData from '../../eep/server-data/EepDataStore';
 import { optionalProperty } from '../../utils/optionalProperty';
 import {
@@ -21,6 +22,7 @@ import {
   SwitchAppDto,
   StructureAppDto,
   ContactAppDto,
+  RouteAppDto,
   TrackAppDto,
   trackTypeForCeType,
 } from '@ce/web-shared';
@@ -58,6 +60,7 @@ const groupedPublisherCollectors: RuntimeStatisticsCollector[] = [
   { label: 'Update/ce.hub.Structure', runtimeKeys: ['Update/ce.hub.Structure'] },
   { label: 'Update/ce.hub.Switch', runtimeKeys: ['Update/ce.hub.Switch'] },
   { label: 'Update/ce.hub.Time', runtimeKeys: ['Update/ce.hub.Time'] },
+  { label: 'Update/ce.hub.Route', runtimeKeys: ['Update/ce.hub.Route'] },
   { label: 'Update/ce.hub.Train', runtimeKeys: ['Update/ce.hub.Train'] },
   { label: 'Update/ce.hub.Version', runtimeKeys: ['Update/ce.hub.Version'] },
   { label: 'Update/ce.hub.Weather', runtimeKeys: ['Update/ce.hub.Weather'] },
@@ -82,6 +85,7 @@ const groupedPublisherInitCollectors: RuntimeStatisticsCollector[] = [
   { label: 'Update-init/ce.hub.Structure', runtimeKeys: ['Update-init/ce.hub.Structure'] },
   { label: 'Update-init/ce.hub.Switch', runtimeKeys: ['Update-init/ce.hub.Switch'] },
   { label: 'Update-init/ce.hub.Time', runtimeKeys: ['Update-init/ce.hub.Time'] },
+  { label: 'Update-init/ce.hub.Route', runtimeKeys: ['Update-init/ce.hub.Route'] },
   { label: 'Update-init/ce.hub.Train', runtimeKeys: ['Update-init/ce.hub.Train'] },
   { label: 'Update-init/ce.hub.Version', runtimeKeys: ['Update-init/ce.hub.Version'] },
   { label: 'Update-init/ce.hub.Weather', runtimeKeys: ['Update-init/ce.hub.Weather'] },
@@ -104,7 +108,7 @@ interface RuntimeStatisticsSample {
 
 // Maps Lua hub DTOs into EEP data AppDtos and runtime statistics AppDtos.
 // Lua inputs: ce.hub.Runtime, Module, DataSlot, Signal, Switch, Structure.
-// Also maps Contact, track ceTypes, and waiting-on-signal DTOs.
+// Also maps Contact, Route, track ceTypes, and waiting-on-signal DTOs.
 export default class EepDataSelector {
   private lastState?: fromEepData.State;
   private runtime: Record<string, RuntimeAppDto> = {};
@@ -121,6 +125,7 @@ export default class EepDataSelector {
   private switches: Record<string, SwitchAppDto> = {};
   private structures: Record<string, StructureAppDto> = {};
   private contacts: Record<string, ContactAppDto> = {};
+  private routes: Record<string, RouteAppDto> = {};
   private tracks: Record<string, Record<string, TrackAppDto>> = {};
 
   updateFromState(state: fromEepData.State): void {
@@ -207,6 +212,11 @@ export default class EepDataSelector {
       id: dto.id,
       ...optionalProperty('luaFn', dto.luaFn),
       ...optionalProperty('tipTxt', dto.tipTxt),
+    }));
+
+    this.routes = this.mapCeType<RouteLuaDto, RouteAppDto>(state, CeTypes.HubRoute, (dto) => ({
+      id: dto.id,
+      name: dto.name,
     }));
 
     this.tracks = {};
@@ -380,6 +390,8 @@ export default class EepDataSelector {
   getStructure = (id: string): StructureAppDto | undefined => this.structures[id];
   getContacts = (): Record<string, ContactAppDto> => this.contacts;
   getContact = (id: string): ContactAppDto | undefined => this.contacts[id];
+  getRoutes = (): Record<string, RouteAppDto> => this.routes;
+  getRoute = (id: string): RouteAppDto | undefined => this.routes[id];
   getTracksForRoom = (trackType: string): Record<string, TrackAppDto> => this.tracks[trackType] ?? {};
   getTrack = (trackType: string, id: string): TrackAppDto | undefined => this.tracks[trackType]?.[id];
   getTrackRoomNames = (): string[] => Object.keys(this.tracks);

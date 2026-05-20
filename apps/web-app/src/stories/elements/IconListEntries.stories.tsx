@@ -4,6 +4,7 @@ import BreakableModelValue from '../../features/trains/components/panels/Breakab
 import {
   HookStatusEntry,
   LengthEntry,
+  LicencePlateEntry,
   ModelEntry,
   NameEntry,
   OrientationEntry,
@@ -12,6 +13,7 @@ import {
   SpeedEntry,
   TagEntry,
   TrainPositionEntry,
+  VehicleNumberEntry,
 } from '../../shared/components/iconlist';
 
 function IconListEntriesOverview() {
@@ -27,6 +29,8 @@ function IconListEntriesOverview() {
       <RouteEntry value="Anlage Stadtverkehr" />
       <SpeedEntry value="82 km/h" />
       <TagEntry value="Doppelstockwagen | Steuerwagen" />
+      <VehicleNumberEntry value="7142" />
+      <LicencePlateEntry value="DD CE 42" />
       <HookStatusEntry value="Haken bereit" />
       <TrainPositionEntry value="3" />
       <ModelEntry

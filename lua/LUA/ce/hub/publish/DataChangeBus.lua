@@ -1,4 +1,5 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.publish.DataChangeBus ...") end
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 local TableUtils = require("ce.hub.util.TableUtils")
 
 local DataChangeBus = {}
@@ -55,7 +56,11 @@ local function fire(eventType, payload)
     if not initialized then DataChangeBus.initialize() end
     eventCounter = eventCounter + 1
     local event = { eventCounter = eventCounter, type = eventType, payload = payload }
-    for listener in pairs(listeners) do listener.fireEvent(event) end
+    for listener in pairs(listeners) do
+        ProtectedExecution.run("DataChangeBus.listener." .. tostring(listener), function ()
+            listener.fireEvent(event)
+        end)
+    end
 end
 
 local function normalizeElementArgs(ceType, keyId, keyOrElement, element)

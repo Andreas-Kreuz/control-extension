@@ -97,10 +97,10 @@ insulate("Line Management 4 Line segments", function ()
     CeRoadModule.loadSettingsFromSlot(1)
     CeTransitModule.loadSettingsFromSlot(2)
 
-    function EEPMain()
+    rawset(_G, "EEPMain", function ()
         ControlExtension.runTasks(1)
         return 1
-    end
+    end)
 
     local linie10 = Line.forName("10")
     local linie12 = Line.forName("12")
@@ -251,16 +251,16 @@ insulate("Line route reconciliation", function ()
     l04Striesen:addStop(sRadebeul:platform(1), 0)
     l04Striesen:addStop(sStriesen:platform(3), 2)
 
-    insulate("raw EEP route change before trainDeparted", function ()
+    insulate("train route setter before trainDeparted", function ()
         local train = TrainRegistry.forName("#RouteTrain1")
         local transitTrain = TransitTrainRegistry.forTrain(train)
         train:setRoute(l10Messe.routeName)
         transitTrain:changeDestination(l10Messe.destination, l10Messe.line.nr)
 
-        EEPSetTrainRoute("#RouteTrain1", l04Striesen.routeName)
+        train:setRoute(l04Striesen.routeName)
         Line.trainDeparted("#RouteTrain1", sRadebeul)
 
-        it("updates cached train route from EEP", function ()
+        it("uses the cached train route", function ()
             assert.equals(l04Striesen.routeName, train:getRoute())
         end)
         it("updates internal line from route mapping", function () assert.equals("4", transitTrain:getLine()) end)
@@ -272,16 +272,16 @@ insulate("Line route reconciliation", function ()
         end)
     end)
 
-    insulate("raw EEP route change before scheduleDeparture", function ()
+    insulate("train route setter before scheduleDeparture", function ()
         local train = TrainRegistry.forName("#RouteTrain2")
         local transitTrain = TransitTrainRegistry.forTrain(train)
         train:setRoute(l10Messe.routeName)
         transitTrain:changeDestination(l10Messe.destination, l10Messe.line.nr)
 
-        EEPSetTrainRoute("#RouteTrain2", l04Striesen.routeName)
+        train:setRoute(l04Striesen.routeName)
         Line.scheduleDeparture("#RouteTrain2", sStriesen, 5)
 
-        it("updates cached train route from EEP", function ()
+        it("uses the cached train route", function ()
             assert.equals(l04Striesen.routeName, train:getRoute())
         end)
         it("updates internal line from route mapping", function () assert.equals("4", transitTrain:getLine()) end)
@@ -296,20 +296,20 @@ insulate("Line route reconciliation", function ()
         train:setRoute(l10Striesen.routeName)
         transitTrain:changeDestination(l10Striesen.destination, l10Striesen.line.nr)
 
-        EEPSetTrainRoute("#RouteTrain3", l10Messe.routeName)
+        train:setRoute(l10Messe.routeName)
         Line.scheduleDeparture("#RouteTrain3", sMesse, 3)
 
         it("keeps the line", function () assert.equals("10", transitTrain:getLine()) end)
         it("updates the destination", function () assert.equals("Messe Dresden", transitTrain:getDestination()) end)
     end)
 
-    insulate("unknown EEP route removes transit state", function ()
+    insulate("unknown cached route removes transit state", function ()
         local train = TrainRegistry.forName("#RouteTrain4")
         local transitTrain = TransitTrainRegistry.forTrain(train)
         train:setRoute(l10Striesen.routeName)
         transitTrain:changeDestination(l10Striesen.destination, l10Striesen.line.nr)
 
-        EEPSetTrainRoute("#RouteTrain4", "Route Test Unknown Route")
+        train:setRoute("Route Test Unknown Route")
         local ok = pcall(function () Line.scheduleDeparture("#RouteTrain4", sStriesen, 1) end)
 
         it("does not fail", function () assert.is_true(ok) end)
@@ -381,7 +381,7 @@ insulate("Line contact guards", function ()
         transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
         Line.scheduleDeparture("#GuardTrain1", sGuardEnd, 4)
 
-        EEPSetTrainRoute("#GuardTrain1", "Guard Route Unknown")
+        train:setRoute("Guard Route Unknown")
         Line.scheduleDeparture("#GuardTrain1", sGuardEnd, 1)
 
         it("removes stale station departures", function ()
@@ -415,10 +415,10 @@ insulate("Line contact guards", function ()
         transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
         Line.scheduleDeparture("#GuardTrain2", sGuardEnd, 4)
 
-        EEPSetTrainRoute("#GuardTrain2", guardOther.routeName)
+        train:setRoute(guardOther.routeName)
         Line.scheduleDeparture("#GuardTrain2", sGuardStart, 1)
 
-        it("updates the train line from the EEP route", function ()
+        it("updates the train line from the cached route", function ()
             assert.equals("Guard20", transitTrain:getLine())
         end)
         it("removes stale station departures", function ()
@@ -433,10 +433,10 @@ insulate("Line contact guards", function ()
         train:setRoute(guardOutbound.routeName)
         transitTrain:changeDestination(guardOutbound.destination, guardOutbound.line.nr)
 
-        EEPSetTrainRoute("#GuardTrain3", guardOther.routeName)
+        train:setRoute(guardOther.routeName)
         Line.scheduleDeparture("#GuardTrain3", sGuardOther, 3)
 
-        it("updates the train line from the EEP route", function ()
+        it("updates the train line from the cached route", function ()
             assert.equals("Guard20", transitTrain:getLine())
         end)
         it("adds station departures", function () assert.is_true(stationHasTrain(sGuardOther, "#GuardTrain3")) end)
@@ -454,6 +454,142 @@ insulate("Line contact guards", function ()
         it("changes to the next section route", function () assert.equals(guardInbound.routeName, train:getRoute()) end)
         it("keeps transit line state", function () assert.equals("Guard10", transitTrain:getLine()) end)
         it("stores next stations", function () assert.is_true(#transitTrain:getNextStations() > 0) end)
+    end)
+end)
+
+insulate("Line depot display sections", function ()
+    local EepSimulator = require("ce.hub.eep.EepSimulator")
+    local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+    local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+    local Line = require("ce.mods.transit.Line")
+    local RoadStation = require("ce.mods.transit.RoadStation")
+
+    EepSimulator.simulateAddTrain("#DepotDisplayTrain1", "DepotDisplayTrain1 RS")
+    EepSimulator.simulateAddTrain("#DepotDisplayTrain2", "DepotDisplayTrain2 RS")
+    EepSimulator.simulateAddTrain("#DepotDisplayTrain3", "DepotDisplayTrain3 RS")
+    EepSimulator.simulateAddTrain("#DepotDisplayTrain4", "DepotDisplayTrain4 RS")
+
+    local sDepotDisplayStart = RoadStation:new("Depot Display Start", -1)
+    local sDepotDisplayEnd = RoadStation:new("Depot Display End", -1)
+
+    local serviceLine = Line.forName("DepotDisplay10")
+    local service = serviceLine:addSection("Depot Display Service Route", "Depot Display End")
+    service:addStop(sDepotDisplayStart:platform(1), 0)
+    service:addStop(sDepotDisplayEnd:platform(1), 2)
+
+    local depot = Line.forName("zZ"):createDepotSection("Depot Display Route")
+        :addDepotDisplay("zZ", "Ich mach Pause")
+        :addDepotDisplay("zZ", "Feierabend")
+        :addDepotDisplay("zZ", "Schlaft gut")
+
+    service:setNextSection(depot, 2)
+
+    local function startOnService(trainName)
+        local train = TrainRegistry.forName(trainName)
+        local transitTrain = TransitTrainRegistry.forTrain(train)
+        train:setRoute(service.routeName)
+        transitTrain:changeDestination(service.destination, service.line.nr)
+        return train, transitTrain
+    end
+
+    it("returns the depot section from addDepotDisplay for fluent configuration", function ()
+        local fluentDepot = Line.forName("zZ"):createDepotSection("Depot Display Fluent Route")
+
+        assert.equals(fluentDepot, fluentDepot:addDepotDisplay("zZ", "Pause"))
+    end)
+
+    it("selects configured depot displays with an injected chooser", function ()
+        depot:setDepotDisplayChooser(function () return 1 end)
+        assert.same({ line = "zZ", destination = "Ich mach Pause" }, depot:chooseDisplay())
+
+        depot:setDepotDisplayChooser(function () return 2 end)
+        assert.same({ line = "zZ", destination = "Feierabend" }, depot:chooseDisplay())
+
+        depot:setDepotDisplayChooser(function () return 3 end)
+        assert.same({ line = "zZ", destination = "Schlaft gut" }, depot:chooseDisplay())
+    end)
+
+    it("uses the depot display line instead of the section line", function ()
+        local displayLineDepot = Line.forName("DepotDisplayInternal"):createDepotSection("Depot Display Line Route")
+            :addDepotDisplay("zZ", "Ich mach Pause")
+        displayLineDepot:setDepotDisplayChooser(function () return 1 end)
+
+        assert.same({ line = "zZ", destination = "Ich mach Pause" }, displayLineDepot:chooseDisplay())
+    end)
+
+    it("changes to depot route and selected depot display after the last station", function ()
+        depot:setDepotDisplayChooser(function () return 2 end)
+        local train, transitTrain = startOnService("#DepotDisplayTrain1")
+
+        Line.trainDeparted("#DepotDisplayTrain1", sDepotDisplayEnd)
+
+        assert.equals(depot.routeName, train:getRoute())
+        assert.equals("zZ", transitTrain:getLine())
+        assert.equals("Feierabend", transitTrain:getDestination())
+        assert.equals(0, #transitTrain:getNextStations())
+    end)
+
+    it("keeps an already selected depot display during later route reconciliation", function ()
+        depot:setDepotDisplayChooser(function () return 2 end)
+        local train, transitTrain = startOnService("#DepotDisplayTrain1")
+
+        Line.trainDeparted("#DepotDisplayTrain1", sDepotDisplayEnd)
+        depot:setDepotDisplayChooser(function () return 3 end)
+        Line.applyCachedRouteForTrain(train, { suppressUnknownRouteLog = true })
+
+        assert.equals("zZ", transitTrain:getLine())
+        assert.equals("Feierabend", transitTrain:getDestination())
+    end)
+
+    it("sets a train to a depot section manually", function ()
+        depot:setDepotDisplayChooser(function () return 3 end)
+        local trainName = "#DepotDisplayTrain1"
+        local train, transitTrain = startOnService(trainName)
+
+        Line.scheduleDeparture(trainName, sDepotDisplayEnd, 2)
+        Line.setTrainSection(trainName, depot)
+
+        assert.equals(depot.routeName, train:getRoute())
+        assert.equals("zZ", transitTrain:getLine())
+        assert.equals("Schlaft gut", transitTrain:getDestination())
+        assert.equals(0, #transitTrain:getNextStations())
+    end)
+
+    it("sets a train to a normal section manually", function ()
+        local _, transitTrain = startOnService("#DepotDisplayTrain2")
+
+        Line.setTrainSection("#DepotDisplayTrain2", service)
+
+        assert.equals(service.routeName, TrainRegistry.forName("#DepotDisplayTrain2"):getRoute())
+        assert.equals(service.line.nr, transitTrain:getLine())
+        assert.equals(service.destination, transitTrain:getDestination())
+        assert.equals("Depot Display Start", transitTrain:getOrigin())
+        assert.equals(0, #transitTrain:getNextStations())
+    end)
+
+    it("accepts each configured depot display during last-station route changes", function ()
+        local expectedDestinations = {
+            "Ich mach Pause",
+            "Feierabend",
+            "Schlaft gut"
+        }
+
+        for index, destination in ipairs(expectedDestinations) do
+            depot:setDepotDisplayChooser(function () return index end)
+            local trainName = "#DepotDisplayTrain" .. tostring(index + 1)
+            local _, transitTrain = startOnService(trainName)
+
+            Line.trainDeparted(trainName, sDepotDisplayEnd)
+
+            assert.equals("zZ", transitTrain:getLine())
+            assert.equals(destination, transitTrain:getDestination())
+        end
+    end)
+
+    it("falls back to fixed line and destination without depot displays", function ()
+        local emptyDepot = Line.forName("DepotFallback"):createDepotSection("Depot Display Empty Route")
+
+        assert.same({ line = "DepotFallback", destination = "" }, emptyDepot:chooseDisplay())
     end)
 end)
 

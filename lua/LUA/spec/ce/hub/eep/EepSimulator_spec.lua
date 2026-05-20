@@ -260,6 +260,18 @@ describe("EepFunktionen.lua", function ()
             assert.equals(0, missingPosition)
             assert.same({ AchseA = 30 }, structureAfterSet.axisPositions)
         end)
+
+        it("stores structure axis positions by number separately from named axes", function ()
+            EEPStructureSetAxisByNumber("#15", 2, 40)
+            local ok, position = EEPStructureGetAxisByNumber("#15", 2)
+            local _, namedPosition = EEPStructureGetAxis("#15", "2")
+            local structureAfterSet = EepSimulatorStore.state.structures["#15"]
+
+            assert.is_true(ok)
+            assert.equals(40, position)
+            assert.equals(0, namedPosition)
+            assert.same({ [2] = 40 }, structureAfterSet.axisPositionsByNumber)
+        end)
     end)
 
     insulate("EEPRollingstock userCamera", function ()

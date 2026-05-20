@@ -5,7 +5,7 @@
 ---@field id number
 ---@field position number
 ---@field tag string
----@field waitingVehiclesCount number
+---@field waitingVehiclesCount number -- oninterest: placeholder 0 when not selected
 ---@field stopDistance number|nil
 ---@field itemName string|nil
 ---@field itemNameWithModelPath string|nil
@@ -16,6 +16,6 @@
 ---@field ceType string
 ---@field id string
 ---@field signalId number
----@field waitingPosition number
----@field vehicleName string
----@field waitingCount number
+---@field waitingPosition number -- oninterest: placeholder 0 when not selected
+---@field vehicleName string -- oninterest: placeholder "" when not selected
+---@field waitingCount number -- oninterest: placeholder 0 when not selected

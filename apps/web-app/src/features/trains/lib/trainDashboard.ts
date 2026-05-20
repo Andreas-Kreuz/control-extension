@@ -12,10 +12,7 @@ export type MergedAxisGroup = {
   }[];
 };
 
-export function isSelectedRollingStock(
-  rollingStock: RollingStockAppDto,
-  selectedRollingStockName: string,
-): boolean {
+export function isSelectedRollingStock(rollingStock: RollingStockAppDto, selectedRollingStockName: string): boolean {
   return rollingStock.id === selectedRollingStockName || rollingStock.name === selectedRollingStockName;
 }
 
@@ -45,6 +42,21 @@ export function groupAxisByName(rollingStock: RollingStockAppDto[]): MergedAxisG
       };
     })
     .sort((left, right) => left.name.localeCompare(right.name, 'de'));
+}
+
+export function distinctRollingStockValues(
+  rollingStock: RollingStockAppDto[],
+  fieldName: 'licencePlate' | 'vehicleNumber',
+): string[] {
+  const values = new Set<string>();
+  rollingStock.forEach((item) => {
+    const value = item[fieldName]?.trim();
+    if (value) {
+      values.add(value);
+    }
+  });
+
+  return Array.from(values).sort((left, right) => left.localeCompare(right, 'de'));
 }
 
 export function mergeRollingStockModelInfo(

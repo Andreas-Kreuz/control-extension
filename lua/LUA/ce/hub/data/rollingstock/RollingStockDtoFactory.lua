@@ -18,6 +18,17 @@ local KEY_ID = "id"
 
 local XML_MODEL_PLACEHOLDER = ""
 
+local function getLicencePlate(stock)
+    if stock.getLicencePlate then return stock:getLicencePlate() end
+    return stock.licencePlate or ""
+end
+
+local function getWagonNumber(stock)
+    if stock.getWagonNumber then return stock:getWagonNumber() end
+    if stock.getWagonNr then return stock:getWagonNr() end
+    return stock.vehicleNumber or stock.nr or ""
+end
+
 local function getXmlModel(stock)
     if stock.getXmlModel then return stock:getXmlModel() end
     return stock.xmlModel or XML_MODEL_PLACEHOLDER
@@ -70,8 +81,16 @@ local dtoFields = {
         getValue = function (stock) return stock:getTag() end,
         placeholder = ""
     },
+    licencePlate = {
+        getValue = function (stock) return getLicencePlate(stock) end,
+        placeholder = ""
+    },
+    vehicleNumber = {
+        getValue = function (stock) return getWagonNumber(stock) end,
+        placeholder = ""
+    },
     nr = {
-        getValue = function (stock) return stock:getWagonNr() end,
+        getValue = function (stock) return getWagonNumber(stock) end,
         placeholder = ""
     },
     trackType = {

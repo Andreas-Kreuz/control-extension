@@ -18,11 +18,13 @@ function RollingStockUpdater.runUpdate()
 
     for trainName, train in pairs(TrainRegistry.getAll()) do
         local info = TrainDiscoveryCache.get(trainName) or {}
+        local rollingStockCount = train:getRollingStockCount()
+        local lastPositionInTrain = rollingStockCount - 1
         if RollingStockUpdater.debug then
             print(string.format("[#RollingStockUpdater] updating rolling stock of %s", trainName))
         end
 
-        for positionInTrain = 0, train:getRollingStockCount() - 1, 1 do
+        for positionInTrain = 0, lastPositionInTrain, 1 do
             local rsName = TrainRegistry.rollingStockNameInTrain(train.name, positionInTrain)
             if rsName then
                 local rs = RollingStockRegistry.forName(rsName)
@@ -37,14 +39,16 @@ function RollingStockUpdater.runUpdate()
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "trackType", isSelected) and info.trackType then
                     rs:setTrackType(info.trackType)
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) then
+                if positionInTrain == 0
+                    and SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) then
                     local ok, couplingFront = EEPRollingstockGetCouplingFront(rs.rollingStockName)
                     if ok then
                         ---@cast couplingFront number
                         rs:setCouplingFront(couplingFront)
                     end
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) then
+                if positionInTrain == lastPositionInTrain
+                    and SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) then
                     local ok, couplingRear = EEPRollingstockGetCouplingRear(rs.rollingStockName)
                     if ok then
                         ---@cast couplingRear number
@@ -97,7 +101,7 @@ function RollingStockUpdater.runUpdate()
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "surfaceTexts", isSelected) then
                     rs:updateTextureTexts()
                 end
-                if isSelected or SyncPolicy.shouldUpdateField(fieldPolicies, "axisValues", isSelected) then
+                if SyncPolicy.shouldUpdateField(fieldPolicies, "axisValues", isSelected) then
                     rs:updateAxisValues()
                 end
                 if (SyncPolicy.shouldUpdateField(fieldPolicies, "rotX", isSelected)

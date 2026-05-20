@@ -11,6 +11,7 @@ insulate("ce.hub.data.InterestSyncRegistry", function ()
         InterestSyncRegistry.startSyncFor("ce.hub.Train", "T1")
 
         assert.is_true(InterestSyncRegistry.isSelected("ce.hub.Train", "T1"))
+        assert.same({ T1 = true }, InterestSyncRegistry.getSelectedKeys("ce.hub.Train"))
         assert.is_true(InterestSyncRegistry.needsInitialSend("ce.hub.Train", "T1"))
 
         InterestSyncRegistry.markSent("ce.hub.Train", "T1")
@@ -18,5 +19,24 @@ insulate("ce.hub.data.InterestSyncRegistry", function ()
 
         InterestSyncRegistry.stopSyncFor("ce.hub.Train", "T1")
         assert.is_false(InterestSyncRegistry.isSelected("ce.hub.Train", "T1"))
+    end)
+
+    it("keeps manual and source-owned interest independent", function ()
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+
+        InterestSyncRegistry.startSyncFor("ce.hub.Train", "T1")
+        InterestSyncRegistry.startSyncForSource("ce.hub.Train", "T1", "depot:1")
+        InterestSyncRegistry.startSyncForSource("ce.hub.Train", "T2", "depot:2")
+
+        assert.same({ T1 = true, T2 = true }, InterestSyncRegistry.getSelectedKeys("ce.hub.Train"))
+        assert.is_true(InterestSyncRegistry.isSelected("ce.hub.Train", "T1"))
+        assert.is_true(InterestSyncRegistry.isSelected("ce.hub.Train", "T2"))
+
+        InterestSyncRegistry.stopSyncForSource("ce.hub.Train", "T1", "depot:1")
+        InterestSyncRegistry.stopSyncForSource("ce.hub.Train", "T2", "depot:2")
+
+        assert.is_true(InterestSyncRegistry.isSelected("ce.hub.Train", "T1"))
+        assert.is_false(InterestSyncRegistry.isSelected("ce.hub.Train", "T2"))
+        assert.same({ T1 = true }, InterestSyncRegistry.getSelectedKeys("ce.hub.Train"))
     end)
 end)

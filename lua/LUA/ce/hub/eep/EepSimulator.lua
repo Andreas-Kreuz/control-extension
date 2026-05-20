@@ -426,6 +426,18 @@ end
 --- Ab: EEP 11.1 - Plugin 1.
 function EEPStructureGetAxis(immoName, achse) return Runtime.callEEPStructureGetAxis(immoName, achse) end
 
+--- Setzt eine Achse einer Immobilie oder eines Gleisobjekts ueber ihre Achsnummer ohne Animation.
+--- Ab: EEP 18.0.
+function EEPStructureSetAxisByNumber(luaName, axisNumber, axisPosition)
+    return Runtime.callEEPStructureSetAxisByNumber(luaName, axisNumber, axisPosition)
+end
+
+--- Ermittelt die Stellung einer mittels Achsnummer definierten Achse der benannten Immobilie oder des Gleisobjekts.
+--- Ab: EEP 18.0.
+function EEPStructureGetAxisByNumber(luaName, axisNumber)
+    return Runtime.callEEPStructureGetAxisByNumber(luaName, axisNumber)
+end
+
 --- Versetzt die benannte Immobilie oder das Landschaftselement an eine neue Position.
 --- Ab: EEP 11.1 - Plugin 1.
 function EEPStructureSetPosition(luaName, posX, posY, posZ)

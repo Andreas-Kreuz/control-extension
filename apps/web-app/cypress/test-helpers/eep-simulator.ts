@@ -91,6 +91,10 @@ export default class EepSimulator {
     this.writeLogLine(resetMarker);
   }
 
+  restartLogFile(content = '') {
+    cy.writeFile(FileNames.logFromCe, content, 'latin1');
+  }
+
   private writeNewEepEventFile(eventLines: string) {
     cy.writeFile(FileNames.eventsFromCe, eventLines, 'latin1');
     cy.writeFile(FileNames.eventsFromCePending, '');

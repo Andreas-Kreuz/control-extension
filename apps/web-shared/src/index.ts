@@ -24,6 +24,7 @@ export type { VersionAppDto } from './dtos/app/version/VersionAppDto';
 export type { ScenarioAppDto } from './dtos/app/scenario/ScenarioAppDto';
 export type { WeatherAppDto } from './dtos/app/weather/WeatherAppDto';
 export type { TimeAppDto } from './dtos/app/time/TimeAppDto';
+export type { RouteAppDto } from './dtos/app/routes/RouteAppDto';
 export type { RuntimeAppDto } from './dtos/app/runtime/RuntimeAppDto';
 export type { FrameDataAppDto } from './dtos/app/framedata/FrameDataAppDto';
 export type { ServerStatsAppDto } from './dtos/app/server/ServerStatsAppDto';
@@ -46,12 +47,34 @@ export type { RollingStockTexturesAppDto } from './dtos/app/trains/RollingStockT
 export type { RollingStockRotationAppDto } from './dtos/app/trains/RollingStockRotationAppDto';
 export type {
   IntersectionAppDto,
-  IntersectionPhaseAppDto,
-  IntersectionPhaseTrafficLightAppDto,
+  IntersectionPhaseTimingAppDto,
+  IntersectionPhaseSignalHeadAppDto,
+  IntersectionSignalGroupAppDto,
+  IntersectionPedestrianCrossingAppDto,
 } from './dtos/app/roads/IntersectionAppDto';
 export type { IntersectionLaneAppDto } from './dtos/app/roads/IntersectionLaneAppDto';
-export type { IntersectionSwitchingAppDto } from './dtos/app/roads/IntersectionSwitchingAppDto';
+export type { IntersectionPhaseAppDto } from './dtos/app/roads/IntersectionPhaseAppDto';
 export type { IntersectionTrafficLightAppDto } from './dtos/app/roads/IntersectionTrafficLightAppDto';
+export type {
+  IntersectionWizardAmpelAppDto,
+  IntersectionWizardAmpelKind,
+  IntersectionWizardAmpelUse,
+  IntersectionWizardApproach,
+  IntersectionWizardTurnDirection,
+  IntersectionWizardDraftAppDto,
+  IntersectionWizardDraftSummaryAppDto,
+  IntersectionWizardGenerateResultAppDto,
+  IntersectionWizardLaneCountType,
+  IntersectionWizardLaneAppDto,
+  IntersectionWizardLaneSignalAppDto,
+  IntersectionWizardLaneSignalSource,
+  IntersectionWizardPhaseAppDto,
+  IntersectionWizardSignalGroupAssignmentAppDto,
+  IntersectionWizardSignalGroupAssignmentMode,
+  IntersectionWizardSignalGroupAppDto,
+  IntersectionWizardSignalLookupAppDto,
+  IntersectionWizardTrafficType,
+} from './dtos/app/roads/IntersectionWizardAppDto';
 export type { TrafficLightModelAppDto } from './dtos/app/traffic-light-models/TrafficLightModelAppDto';
 export type { TransitLineAppDto } from './dtos/app/transit/TransitLineAppDto';
 export type { TransitLineSegmentAppDto } from './dtos/app/transit/TransitLineSegmentAppDto';
@@ -71,8 +94,9 @@ export { UpdateStatusRoom } from './rooms/DomainRoomRegistry';
 export { ScenarioRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionListRoom } from './rooms/DomainRoomRegistry';
 export { IntersectionRoom } from './rooms/DomainRoomRegistry';
-export { IntersectionSwitchingListRoom } from './rooms/DomainRoomRegistry';
+export { IntersectionPhaseListRoom } from './rooms/DomainRoomRegistry';
 export { RoadSettingsRoom } from './rooms/DomainRoomRegistry';
+export { RoadTrafficLightModelsRoom } from './rooms/DomainRoomRegistry';
 export { TrainListRoom } from './rooms/DomainRoomRegistry';
 export { TrainRoom } from './rooms/DomainRoomRegistry';
 export { TransitLineDetailsRoom } from './rooms/DomainRoomRegistry';

@@ -7,8 +7,10 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 ---@class SignalDtoFactory
 ---@field createSignalDto fun(signal: table, isSelected: boolean|nil):string,string,string|number,SignalDto
----@field createWaitingOnSignalDto fun(waitingOnSignal: table):string,string,string|number,WaitingOnSignalDto
----@field createWaitingOnSignalPatchDto fun(waitingOnSignal: table, dirtyFields: table<string, boolean>):string,string,
+---@field createWaitingOnSignalDto fun(waitingOnSignal: table, isSelected: boolean|nil):string,string,
+---string|number,WaitingOnSignalDto
+---@field createWaitingOnSignalPatchDto fun(waitingOnSignal: table, dirtyFields: table<string, boolean>,
+---isSelected: boolean|nil):string,string,
 ---string|number,WaitingOnSignalDto
 ---@field createWaitingOnSignalRemovalDto fun(waitingOnSignalId: string):string,string,string,table
 ---@field createWaitingOnSignalDtoList fun(waitingOnSignals: table):string,string,table
@@ -77,6 +79,19 @@ local waitingOnSignalDtoFields = {
     },
 }
 
+local function createPatchDtoFields(dtoFields)
+    local patchDtoFields = {}
+    for fieldName, dtoField in pairs(dtoFields or {}) do
+        patchDtoFields[fieldName] = {
+            policyField = dtoField.policyField,
+            getValue = dtoField.getValue
+        }
+    end
+    return patchDtoFields
+end
+
+local waitingOnSignalPatchDtoFields = createPatchDtoFields(waitingOnSignalDtoFields)
+
 local function buildSignalDto(signal, isSelected)
     local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("signals")
     return DtoBuilder.buildFullDto({
@@ -90,27 +105,29 @@ function SignalDtoFactory.createSignalDto(signal, isSelected)
     return SIGNAL_CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-local function buildWaitingOnSignalDto(waiting)
+local function buildWaitingOnSignalDto(waiting, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("waitingOnSignals")
     return DtoBuilder.buildFullDto({
                                        ceType = WAITING_CE_TYPE,
                                        id = waiting.id
-                                   }, waiting, waitingOnSignalDtoFields)
+                                   }, waiting, waitingOnSignalDtoFields, fieldPolicies, isSelected)
 end
 
-local function buildWaitingOnSignalPatchDto(waiting, dirtyFields)
+local function buildWaitingOnSignalPatchDto(waiting, dirtyFields, isSelected)
+    local fieldPolicies = HubOptionsRegistry.getFieldPublishPolicies("waitingOnSignals")
     return DtoBuilder.buildPatchDto({
                                         ceType = WAITING_CE_TYPE,
                                         id = waiting.id
-                                    }, waiting, dirtyFields, waitingOnSignalDtoFields)
+                                    }, waiting, dirtyFields, waitingOnSignalPatchDtoFields, fieldPolicies, isSelected)
 end
 
-function SignalDtoFactory.createWaitingOnSignalDto(waiting)
-    local dto = buildWaitingOnSignalDto(waiting)
+function SignalDtoFactory.createWaitingOnSignalDto(waiting, isSelected)
+    local dto = buildWaitingOnSignalDto(waiting, isSelected == true)
     return WAITING_CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function SignalDtoFactory.createWaitingOnSignalPatchDto(waiting, dirtyFields)
-    local dto = buildWaitingOnSignalPatchDto(waiting, dirtyFields)
+function SignalDtoFactory.createWaitingOnSignalPatchDto(waiting, dirtyFields, isSelected)
+    local dto = buildWaitingOnSignalPatchDto(waiting, dirtyFields, isSelected == true)
     return WAITING_CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 

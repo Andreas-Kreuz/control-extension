@@ -73,7 +73,7 @@ ce/dto/
   traffic-light-models/ TrafficLightModelLuaDto  <- lua/LUA/ce/mods/road/data/TrafficLightModelDtoFactory.lua
   roads/            IntersectionLuaDto           <- lua/LUA/ce/mods/road/data/RoadDtoFactory.lua
                     IntersectionLaneLuaDto
-                    IntersectionSwitchingLuaDto
+                    IntersectionPhaseLuaDto
                     IntersectionTrafficLightLuaDto
   transit/          TransitStationLuaDto         <- lua/LUA/ce/mods/transit/data/TransitDtoFactory.lua
                     TransitLineLuaDto

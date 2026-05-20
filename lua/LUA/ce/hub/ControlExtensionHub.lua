@@ -4,6 +4,9 @@ require("ce.databridge.IoInit").initialize()
 
 local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
+local ServerTransportRegistry = require("ce.databridge.ServerTransportRegistry")
+local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
 
 local ControlExtensionHub = {}
 ControlExtensionHub.debug = CeStartWithDebug or false
@@ -26,6 +29,10 @@ function ControlExtensionHub.setPauseEepDuringInitialization(pauseEepDuringIniti
     return pauseEepDuringInitialization
 end
 
+function ControlExtensionHub.setTransport(transport)
+    return ServerTransportRegistry.setTransport(transport)
+end
+
 function ControlExtensionHub.setOptions(options)
     options = options or {}
 
@@ -34,6 +41,9 @@ function ControlExtensionHub.setOptions(options)
     end
     if options.pauseEepDuringInitialization ~= nil then
         ControlExtensionHub.setPauseEepDuringInitialization(options.pauseEepDuringInitialization)
+    end
+    if options.eepCallAnalysis ~= nil then
+        EepCallAnalyzer.configure(options.eepCallAnalysis)
     end
 
     local CeHubModule = require("ce.hub.CeHubModule")
@@ -54,23 +64,31 @@ end
 
 function ControlExtensionHub.runTasks(cycleCount)
     local effectiveCycleCount = type(cycleCount) == "number" and cycleCount or 5
-    local resumeEEP
-    if not MainLoopRunner.areModulesInitialized() and ControlExtensionHub.pauseEepDuringInitialization then
-        if ControlExtensionHub.debug then print("[ControlExtensionHub] Pause EEP during initialization") end
-        EEPPause(1)
-        resumeEEP = true
-    end
+    local resumeEEP = false
 
-    local totalTime = MainLoopRunner.runCycle(effectiveCycleCount, ModuleRegistry.getModuleNames(),
-                                              ModuleRegistry.getRegisteredCeModules(),
-                                              { debug = ControlExtensionHub.debug, enableServer = serverEnabled })
+    EepCallAnalyzer.beginRun()
+    local ok, totalTime = ProtectedExecution.run("ControlExtensionHub.runTasks", function ()
+        if not MainLoopRunner.areModulesInitialized() and ControlExtensionHub.pauseEepDuringInitialization then
+            if ControlExtensionHub.debug then print("[ControlExtensionHub] Pause EEP during initialization") end
+            local pauseOk = ProtectedExecution.run("ControlExtensionHub.pauseEEP", EEPPause, 1)
+            resumeEEP = pauseOk
+        end
+
+        return MainLoopRunner.runCycle(effectiveCycleCount, ModuleRegistry.getModuleNames(),
+                                       ModuleRegistry.getRegisteredCeModules(),
+                                       { debug = ControlExtensionHub.debug, enableServer = serverEnabled })
+    end)
 
     if resumeEEP then
         if ControlExtensionHub.debug then
-            print(string.format("[ControlExtensionHub] Resume EEP after initialization %3.0f ms", totalTime * 1000))
+            print(string.format("[ControlExtensionHub] Resume EEP after initialization %3.0f ms",
+                                (totalTime or 0) * 1000))
         end
-        EEPPause(0)
+        ProtectedExecution.run("ControlExtensionHub.resumeEEP", EEPPause, 0)
     end
+    EepCallAnalyzer.endRun()
+
+    if not ok then return nil end
 
     return totalTime
 end

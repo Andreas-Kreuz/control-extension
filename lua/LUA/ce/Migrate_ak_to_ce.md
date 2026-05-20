@@ -115,7 +115,7 @@ Typische Beispiele:
 | `require("ak.road.TrafficLight")`                        | `require("ce.mods.road.TrafficLight")`                      |
 | `require("ak.road.TrafficLightModel")`                   | `require("ce.mods.road.TrafficLightModel")`                 |
 | `require("ak.road.Crossing")`                            | `require("ce.mods.road.Intersection")`                      |
-| `require("ak.road.CrossingSequence")`                    | `require("ce.mods.road.IntersectionSequence")`              |
+| `require("ak.road.CrossingSequence")`                    | `require("ce.mods.road.TrafficPhase")`                      |
 | `require("ak.road.Lane")`                                | `require("ce.mods.road.Lane")`                              |
 | `require("ak.public-transport.Line")`                    | `require("ce.mods.transit.Line")`                           |
 | `require("ak.public-transport.LineRegistry")`            | `require("ce.mods.transit.LineRegistry")`                   |
@@ -161,7 +161,7 @@ local Scheduler = require("ce.hub.scheduler.Scheduler")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local Crossing = require("ce.mods.road.Intersection")
-local CrossingSequence = require("ce.mods.road.IntersectionSequence")
+local TrafficPhase = require("ce.mods.road.TrafficPhase")
 local Lane = require("ce.mods.road.Lane")
 
 local ControlExtension = require("ce.ControlExtension")
@@ -174,7 +174,7 @@ Wenn Du also aus einem alten Tutorial oder einer alten Anlage umsteigst, dann ac
 
 1. `ModuleRegistry` wird durch `ControlExtension` ersetzt.
 2. `CrossingLuaModul` wird durch `CeRoadModule` ersetzt.
-3. `Crossing` und `CrossingSequence` heißen heute `Intersection` und `IntersectionSequence`.
+3. `Crossing` und `CrossingSequence` heißen heute `Intersection` und `TrafficPhase`.
 
 ## Öffentlicher Verkehr: alte Namen, neue Namen
 

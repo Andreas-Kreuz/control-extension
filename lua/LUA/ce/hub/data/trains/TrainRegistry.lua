@@ -24,6 +24,11 @@ function TrainRegistry.rollingStockNameInTrain(name, index)
     return trainRollingStockNames[name] and trainRollingStockNames[name][tostring(index)] or nil
 end
 
+function TrainRegistry.find(name)
+    if type(name) ~= "string" then return nil end
+    return allTrains[name]
+end
+
 function TrainRegistry.forName(name)
     assert(name, "Provide a name for the train")
     assert(type(name) == "string", "Need 'trainName' as string")
@@ -36,6 +41,39 @@ function TrainRegistry.forName(name)
     addedTrainIds[train.name] = true
     removedTrainIds[train.name] = nil
     return train, true
+end
+
+function TrainRegistry.seedFromSnapshot(snapshot)
+    assert(type(snapshot) == "table", "Need snapshot as table")
+    assert(type(snapshot.name) == "string", "Need snapshot.name as string")
+
+    if allTrains[snapshot.name] then
+        local train = allTrains[snapshot.name]
+        if snapshot.route then train:updateRoute(snapshot.route) end
+        if snapshot.rollingStockCount then train:setRollingStockCount(snapshot.rollingStockCount) end
+        if snapshot.length then train:setLength(snapshot.length) end
+        if snapshot.speed then train:setSpeed(snapshot.speed) end
+        if snapshot.targetSpeed then train:setTargetSpeed(snapshot.targetSpeed) end
+        if snapshot.couplingFront then train:setCouplingFront(snapshot.couplingFront) end
+        if snapshot.couplingRear then train:setCouplingRear(snapshot.couplingRear) end
+        if snapshot.lights then train:setLights(snapshot.lights) end
+        if snapshot.trackType then train:setTrackType(snapshot.trackType) end
+        if snapshot.onTracks then train:setOnTrack(snapshot.onTracks) end
+        return train, false
+    end
+
+    local train = Train.fromSnapshot(snapshot)
+    allTrains[train.name] = train
+    addedTrainIds[train.name] = true
+    removedTrainIds[train.name] = nil
+    return train, true
+end
+
+function TrainRegistry.removeAbsentFromSnapshot(trainNames)
+    trainNames = trainNames or {}
+    for trainName in pairs(allTrains) do
+        if not trainNames[trainName] then TrainRegistry.remove(trainName) end
+    end
 end
 
 function TrainRegistry.remove(trainName)

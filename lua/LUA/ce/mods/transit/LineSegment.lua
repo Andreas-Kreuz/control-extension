@@ -21,6 +21,9 @@ function LineSegment:new(routeName, line, destination)
     o.routeName = routeName
     o.destination = destination
     o.line = line
+    o.depotDisplays = nil
+    o.depotDisplayChooser = nil
+    o.autoReleaseDepotSignal = true
     ---@class StationInfo
     ---@field station RoadStation
     ---@field timeToStation number
@@ -32,6 +35,54 @@ function LineSegment:new(routeName, line, destination)
     self.__index = self
     setmetatable(o, self)
     return o
+end
+
+function LineSegment:addDepotDisplay(line, destination)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(line) == "string", "Need 'line' as string")
+    assert(type(destination) == "string", "Need 'destination' as string")
+    self.depotDisplays = self.depotDisplays or {}
+    table.insert(self.depotDisplays, {
+        line = line,
+        destination = destination
+    })
+    return self
+end
+
+function LineSegment:setDepotDisplayChooser(chooser)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(chooser) == "nil" or type(chooser) == "function", "Need 'chooser' as function|nil")
+    self.depotDisplayChooser = chooser
+    return self
+end
+
+function LineSegment:displayMatches(line, destination)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    if not self.depotDisplays or #self.depotDisplays == 0 then
+        return line == self.line.nr and destination == self.destination
+    end
+
+    for _, display in ipairs(self.depotDisplays) do
+        if display.line == line and display.destination == destination then return true end
+    end
+    return false
+end
+
+function LineSegment:chooseDisplay()
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    if not self.depotDisplays or #self.depotDisplays == 0 then
+        return {
+            line = self.line.nr,
+            destination = self.destination
+        }
+    end
+
+    local index = self.depotDisplayChooser and self.depotDisplayChooser(#self.depotDisplays, self)
+        or math.random(1, #self.depotDisplays)
+    index = tonumber(index) or 1
+    if index < 1 then index = 1 end
+    if index > #self.depotDisplays then index = #self.depotDisplays end
+    return self.depotDisplays[index]
 end
 
 ---Adds a stop to this line. All stops must be given in the correct order
@@ -163,6 +214,72 @@ end
 ---@return RoadStation|nil
 function LineSegment:getFirstStation() if #self.stationInfos > 0 then return self.stationInfos[1].station end end
 
+local function orderedStationInfos(lineSegment, routeName)
+    local allSegments = lineSegment:getAllSegments()
+    local startIndex = 1
+    for index, segmentInfo in ipairs(allSegments) do
+        if segmentInfo.segment.routeName == routeName then
+            startIndex = index
+            break
+        end
+    end
+
+    local stationInfos = {}
+    for offset = 0, #allSegments - 1 do
+        local segmentInfo = allSegments[((startIndex + offset - 1) % #allSegments) + 1]
+        for _, stationInfo in ipairs(segmentInfo.segment.stationInfos) do
+            table.insert(stationInfos, stationInfo)
+        end
+    end
+    return stationInfos
+end
+
+local function stationMatches(left, right)
+    return left == right or left.name == right.name
+end
+
+function LineSegment:plannedMinutesBetween(routeName, fromStation, toStation)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(routeName) == "string", "Provide 'routeName' as 'string'")
+    assert(type(fromStation) == "table" and fromStation.type == "RoadStation", "Provide 'fromStation' as 'RoadStation'")
+    assert(type(toStation) == "table" and toStation.type == "RoadStation", "Provide 'toStation' as 'RoadStation'")
+
+    if fromStation == toStation then return 0 end
+
+    local stationInfos = orderedStationInfos(self, routeName)
+    for fromIndex, stationInfo in ipairs(stationInfos) do
+        if stationMatches(stationInfo.station, fromStation) then
+            local totalTime = 0
+            for offset = 1, #stationInfos - 1 do
+                local info = stationInfos[((fromIndex + offset - 1) % #stationInfos) + 1]
+                totalTime = totalTime + (info.timeToStation or 2)
+                if stationMatches(info.station, toStation) then return totalTime end
+            end
+        end
+    end
+    return nil
+end
+
+function LineSegment:skippedStationsBetween(routeName, fromStation, toStation)
+    assert(type(self) == "table" and self.type == "LineSegment", "Call this method with ':'")
+    assert(type(routeName) == "string", "Provide 'routeName' as 'string'")
+    assert(type(fromStation) == "table" and fromStation.type == "RoadStation", "Provide 'fromStation' as 'RoadStation'")
+    assert(type(toStation) == "table" and toStation.type == "RoadStation", "Provide 'toStation' as 'RoadStation'")
+
+    local stationInfos = orderedStationInfos(self, routeName)
+    local skippedStations = {}
+    for fromIndex, stationInfo in ipairs(stationInfos) do
+        if stationMatches(stationInfo.station, fromStation) then
+            for offset = 1, #stationInfos - 1 do
+                local info = stationInfos[((fromIndex + offset - 1) % #stationInfos) + 1]
+                if stationMatches(info.station, toStation) then return skippedStations end
+                if not stationMatches(info.station, fromStation) then table.insert(skippedStations, info.station) end
+            end
+        end
+    end
+    return {}
+end
+
 local function platformFor(info)
     local station = info.station
     local destKey = info.lineNr .. "->" .. info.destination
@@ -226,10 +343,12 @@ function LineSegment:trainDeparted(train, currentStation)
 
     if currentStation == self:getLastStation() and train:getRoute() == self.routeName and self.nextLineSegmentInfo then
         local nextSegment = self.nextLineSegmentInfo.followingSegment
+        local display = nextSegment:chooseDisplay()
         train:setRoute(nextSegment.routeName)
-        transitTrain:changeDestination(nextSegment.destination, nextSegment.line.nr)
+        transitTrain:changeDestination(display.destination, display.line)
         local origin = nextSegment:getFirstStation()
         if origin then transitTrain:setOrigin(origin.name) end
+        if not origin then transitTrain:setNextStations({}) end
     end
 
     for _, info in ipairs(infoList) do

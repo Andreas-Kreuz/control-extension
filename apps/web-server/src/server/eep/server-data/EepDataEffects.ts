@@ -10,6 +10,10 @@ import { RoomEvent, ServerStatusEvent } from '@ce/web-shared';
 import express from 'express';
 import { Server, Socket } from 'socket.io';
 
+interface EepDataEffectsOptions {
+  debug?: boolean;
+}
+
 export default class EepDataEffects {
   private debug = false;
   private store = new EepDataReducer();
@@ -23,10 +27,12 @@ export default class EepDataEffects {
     io: Server,
     private socketService: SocketService,
     private cacheService: CacheService,
-    interestSyncService?: InterestSyncService,
+    private interestSyncService?: InterestSyncService,
+    options: EepDataEffectsOptions = {},
   ) {
+    this.debug = options.debug ?? false;
     this.store.init(this.cacheService.readCache());
-    console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
+    if (this.debug) console.log('STORE INITIALIZED FROM ' + (this.store.currentState().eventCounter + 1) + ' events');
 
     this.socketService.addOnSocketConnectedCallback((socket: Socket) => this.socketConnected(socket));
     this.stateController = new DomainRoomManager(io, interestSyncService);
@@ -38,6 +44,10 @@ export default class EepDataEffects {
 
   registerDomainRoom(domainRoomService: DomainRoomService) {
     this.stateController.registerService(domainRoomService);
+  }
+
+  stop(): void {
+    clearInterval(this.refreshTimer);
   }
 
   private socketConnected(socket: Socket) {
@@ -89,6 +99,9 @@ export default class EepDataEffects {
       // Fire this event only if it is expected or a complete reset
       if (expectedEventNr === receivedEventNr || event.type === 'CompleteReset') {
         this.store.onNewEvent(event);
+        if (event.type === 'CompleteReset') {
+          this.interestSyncService?.replayRetainedInterests();
+        }
         this.refreshSettings.pending = true;
       } else if (receivedEventNr > expectedEventNr) {
         console.error(

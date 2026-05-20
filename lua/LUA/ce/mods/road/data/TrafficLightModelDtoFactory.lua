@@ -4,14 +4,14 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.TrafficLightModelD
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 
 ---@class TrafficLightModelDtoFactory
----@field createSignalTypeDefinitionDto fun(definition: table):string,string,string|number,SignalTypeDefinitionDto
----@field createSignalTypeDefinitionDtoList fun(definitions: table):string,string,table
+---@field createTrafficLightModelDto fun(definition: table):string,string,string|number,TrafficLightModelDto
+---@field createTrafficLightModelDtoList fun(definitions: table):string,string,table
 local TrafficLightModelDtoFactory = {}
 
-local CE_TYPE = RoadCeTypes.SignalTypeDefinition
+local CE_TYPE = RoadCeTypes.TrafficLightModel
 local KEY_ID = "id"
 
-local function toSignalTypeDefinitionPositionsDto(positions)
+local function toTrafficLightModelPositionsDto(positions)
     return {
         positionRed = positions.positionRed,
         positionGreen = positions.positionGreen,
@@ -23,8 +23,8 @@ local function toSignalTypeDefinitionPositionsDto(positions)
     }
 end
 
-local function toSignalTypeDefinitionDto(definition)
-    local positions = toSignalTypeDefinitionPositionsDto(definition.positions or {})
+local function toTrafficLightModelDto(definition)
+    local positions = toTrafficLightModelPositionsDto(definition.positions or {})
     return {
         ceType = CE_TYPE,
         id = definition.id,
@@ -41,15 +41,15 @@ local function toSignalTypeDefinitionDto(definition)
     }
 end
 
-function TrafficLightModelDtoFactory.createSignalTypeDefinitionDto(definition)
-    local dto = toSignalTypeDefinitionDto(definition)
+function TrafficLightModelDtoFactory.createTrafficLightModelDto(definition)
+    local dto = toTrafficLightModelDto(definition)
     return CE_TYPE, KEY_ID, dto.id, dto
 end
 
-function TrafficLightModelDtoFactory.createSignalTypeDefinitionDtoList(definitions)
+function TrafficLightModelDtoFactory.createTrafficLightModelDtoList(definitions)
     local dtos = {}
     for key, definition in pairs(definitions) do
-        local _, _, _, dto = TrafficLightModelDtoFactory.createSignalTypeDefinitionDto(definition)
+        local _, _, _, dto = TrafficLightModelDtoFactory.createTrafficLightModelDto(definition)
         dtos[key] = dto
     end
     return CE_TYPE, KEY_ID, dtos

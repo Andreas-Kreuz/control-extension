@@ -10,10 +10,14 @@ export default class ScenarioSelector {
   private scenarios: Record<string, ScenarioAppDto> = {};
 
   updateFromState(state: fromEepData.State): void {
-    if (state === this.lastState || !state.ceTypes[CeTypes.HubScenario]) {
+    if (state === this.lastState) {
       return;
     }
     this.lastState = state;
+    if (!state.ceTypes[CeTypes.HubScenario]) {
+      this.scenarios = {};
+      return;
+    }
     const dict = state.ceTypes[CeTypes.HubScenario] as unknown as Record<string, ScenarioLuaDto>;
     this.scenarios = {};
     Object.values(dict).forEach((dto: ScenarioLuaDto) => {
@@ -28,6 +32,8 @@ export default class ScenarioSelector {
         ...optionalProperty('activeTrain', dto.activeTrain),
         ...optionalProperty('activeRollingStock', dto.activeRollingStock),
         ...optionalProperty('timeLapse', dto.timeLapse),
+        staticCameras: dto.staticCameras ?? [],
+        dynamicCameras: dto.dynamicCameras ?? [],
       };
     });
   }
