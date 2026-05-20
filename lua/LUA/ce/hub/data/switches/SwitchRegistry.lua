@@ -3,6 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchRegistry 
 ---@class SwitchRegistry
 ---@field has fun(switchId: number):boolean
 ---@field add fun(switch: Switch):nil
+---@field replaceAll fun(switches: Switch[]):nil
 ---@field get fun(switchId: number):Switch|nil
 ---@field getAll fun():table<number, Switch>
 local SwitchRegistry = {}
@@ -16,6 +17,13 @@ end
 
 function SwitchRegistry.add(switch)
     allSwitches[switch.id] = switch
+end
+
+function SwitchRegistry.replaceAll(switches)
+    allSwitches = {}
+    for _, switch in ipairs(switches or {}) do
+        allSwitches[switch.id] = switch
+    end
 end
 
 function SwitchRegistry.get(switchId)

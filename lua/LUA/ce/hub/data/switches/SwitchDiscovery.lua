@@ -5,6 +5,7 @@ local SwitchRegistry = require("ce.hub.data.switches.SwitchRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 ---@class SwitchDiscovery
+---@field initFromAnl3 fun(tableOfAnl3: table|nil):nil
 ---@field runInitialDiscovery fun():nil
 ---@field runDiscovery fun():nil
 local SwitchDiscovery = {}
@@ -18,6 +19,21 @@ local function discoverSwitches()
             SwitchRegistry.add(Switch:new(i))
         end
     end
+end
+
+function SwitchDiscovery.initFromAnl3(tableOfAnl3)
+    if not tableOfAnl3 then return end
+    if tableOfAnl3.coverage and not tableOfAnl3.coverage.switches then return end
+
+    local switches = {}
+    for _, entry in ipairs(tableOfAnl3.switches or {}) do
+        if entry.keyId then
+            local switch = Switch:new(entry.keyId)
+            if entry.position then switch:setPosition(entry.position) end
+            switches[#switches + 1] = switch
+        end
+    end
+    SwitchRegistry.replaceAll(switches)
 end
 
 function SwitchDiscovery.runInitialDiscovery()

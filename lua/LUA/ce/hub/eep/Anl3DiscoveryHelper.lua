@@ -4,6 +4,7 @@ local ScenarioDiscovery = require("ce.hub.data.scenario.ScenarioDiscovery")
 local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
 local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
 local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
+local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
 local ContactDiscovery = require("ce.hub.data.contacts.ContactDiscovery")
 local RouteDiscovery = require("ce.hub.data.routes.RouteDiscovery")
 
@@ -31,14 +32,46 @@ local function findAll(node, tag)
     return result
 end
 
+local function trackTypeFromSystem(system)
+    local trackSystemNumber = tonumber(system.attrs.TrackSystemNumber or system.attrs.GleissystemID)
+    local typeName = tostring(system.attrs.type or "")
+    if typeName:find("Steuer", 1, true) or typeName:find("GBS", 1, true) then return "control" end
+    if trackSystemNumber == 1 then return "rail" end
+    if trackSystemNumber == 2 then return "tram" end
+    if trackSystemNumber == 3 then return "road" end
+    if trackSystemNumber == 4 then return "auxiliary" end
+    return "control"
+end
+
+local function trackTypeFromSystemId(trackSystemId, trackTypesBySystemId)
+    return trackTypesBySystemId[tostring(trackSystemId)] or "control"
+end
+
+local function valueAsNumber(value)
+    return value and tonumber(value) or nil
+end
+
 local function buildDiscoveryTable(root)
     local dt = {
+        coverage = {
+            scenario = true,
+            routes = false,
+            trains = false,
+            rollingStocks = false,
+            structures = false,
+            signals = false,
+            switches = false,
+            tracks = false,
+            contacts = false
+        },
         luaPath = nil,
         cameras = { static = {}, dynamic = {} },
         trains = {},
         rollingStocks = {},
         structures = {},
         signals = {},
+        switches = {},
+        tracks = { auxiliary = {}, control = {}, road = {}, rail = {}, tram = {} },
         routes = {},
         contacts = {}
     }
@@ -46,13 +79,16 @@ local function buildDiscoveryTable(root)
     local eepLua = findChild(root, "EEPLua")
     if eepLua then dt.luaPath = eepLua.attrs.LUAPath end
 
+    local routeNamesById = {}
     local options = findChild(root, "Options")
     if options then
+        dt.coverage.routes = true
         local routeItems = tonumber(options.attrs.RouteItems) or 0
         for index = 0, routeItems - 1 do
             local routeId = tonumber(options.attrs["RouteId_" .. index])
             local routeName = options.attrs["RouteName_" .. index]
             if routeId and routeName then
+                routeNamesById[routeId] = routeName
                 dt.routes[#dt.routes + 1] = {
                     id = routeId,
                     name = routeName
@@ -63,6 +99,7 @@ local function buildDiscoveryTable(root)
 
     local kammerasammlung = findChild(root, "Kammerasammlung")
     if kammerasammlung then
+        dt.coverage.scenario = true
         for _, cam in ipairs(kammerasammlung.children) do
             if cam.tag == "Kammera" and cam.attrs.name then
                 if cam.attrs.Dynamic == "1" then
@@ -74,28 +111,96 @@ local function buildDiscoveryTable(root)
         end
     end
 
-    local fuhrpark = findChild(root, "Fuhrpark")
-    if fuhrpark then
-        for _, zugverband in ipairs(fuhrpark.children) do
-            if zugverband.tag == "Zugverband" and zugverband.attrs.name then
-                dt.trains[#dt.trains + 1] = { name = zugverband.attrs.name }
-                for _, rollmaterial in ipairs(zugverband.children) do
-                    if rollmaterial.tag == "Rollmaterial" and rollmaterial.attrs.name then
-                        dt.rollingStocks[#dt.rollingStocks + 1] = {
-                            name = rollmaterial.attrs.name,
-                            model = rollmaterial.attrs.typ
-                        }
-                    end
+    local trackTypesBySystemId = {}
+    local gleissysteme = findAll(root, "Gleissystem")
+    if #gleissysteme > 0 then
+        dt.coverage.signals = true
+        dt.coverage.switches = true
+        dt.coverage.contacts = true
+    end
+    for _, gleissystem in ipairs(gleissysteme) do
+        local trackType = trackTypeFromSystem(gleissystem)
+        local systemId = gleissystem.attrs.GleissystemID or gleissystem.attrs.TrackSystemNumber
+        if systemId then trackTypesBySystemId[tostring(systemId)] = trackType end
+        for _, gleis in ipairs(gleissystem.children) do
+            if gleis.tag == "Gleis" then
+                local trackId = tonumber(gleis.attrs.GleisID)
+                if trackId then
+                    dt.coverage.tracks = true
+                    dt.tracks[trackType][#dt.tracks[trackType] + 1] = {
+                        id = trackId,
+                        reserved = false,
+                        reservedByTrainName = nil
+                    }
+                end
+                local switchId = tonumber(gleis.attrs.Key_Id)
+                if switchId and gleis.attrs.weichenstellung then
+                    dt.switches[#dt.switches + 1] = {
+                        keyId = switchId,
+                        position = tonumber(gleis.attrs.weichenstellung)
+                    }
                 end
             end
         end
     end
 
-    for _, gebaeude in ipairs(findAll(root, "Gebaeudesammlung")) do
+    local fuhrpark = findChild(root, "Fuhrpark")
+    if fuhrpark then
+        dt.coverage.trains = true
+        dt.coverage.rollingStocks = true
+        for _, zugverband in ipairs(fuhrpark.children) do
+            if zugverband.tag == "Zugverband" and zugverband.attrs.name then
+                local train = {
+                    name = zugverband.attrs.name,
+                    route = routeNamesById[tonumber(zugverband.attrs.Route)] or "",
+                    speed = valueAsNumber(zugverband.attrs.Geschwindigkeit) or 0,
+                    targetSpeed = valueAsNumber(zugverband.attrs.sollgeschwindigkeit),
+                    couplingFront = valueAsNumber(zugverband.attrs.kupplungvorn),
+                    couplingRear = valueAsNumber(zugverband.attrs.kupplunghinten),
+                    rollingStockCount = 0,
+                    trackType = nil,
+                    onTracks = {}
+                }
+                for _, rollmaterial in ipairs(zugverband.children) do
+                    if rollmaterial.tag == "Gleisort" then
+                        local trackId = tonumber(rollmaterial.attrs.gleisID)
+                        if trackId then
+                            train.onTracks[tostring(trackId)] = trackId
+                            train.trackType = trackTypeFromSystemId(rollmaterial.attrs.gleissystemID,
+                                                                    trackTypesBySystemId)
+                            train.trackId = trackId
+                            train.trackDistance = valueAsNumber(rollmaterial.attrs.parameter)
+                            train.trackDirection = valueAsNumber(rollmaterial.attrs.ausrichtung)
+                            train.trackSystem = valueAsNumber(rollmaterial.attrs.gleissystemID)
+                        end
+                    elseif rollmaterial.tag == "Rollmaterial" and rollmaterial.attrs.name then
+                        train.rollingStockCount = train.rollingStockCount + 1
+                        dt.rollingStocks[#dt.rollingStocks + 1] = {
+                            name = rollmaterial.attrs.name,
+                            model = rollmaterial.attrs.typ,
+                            trainName = train.name,
+                            positionInTrain = train.rollingStockCount - 1,
+                            trackType = train.trackType,
+                            trackId = train.trackId,
+                            trackDistance = train.trackDistance,
+                            trackDirection = train.trackDirection,
+                            trackSystem = train.trackSystem
+                        }
+                    end
+                end
+                dt.trains[#dt.trains + 1] = train
+            end
+        end
+    end
+
+    local gebaeudesammlungen = findAll(root, "Gebaeudesammlung")
+    if #gebaeudesammlungen > 0 then dt.coverage.structures = true end
+    for _, gebaeude in ipairs(gebaeudesammlungen) do
         for _, immobilie in ipairs(gebaeude.children) do
-            if immobilie.tag == "Immobilie" and immobilie.attrs.name then
+            if (immobilie.tag == "Immobilie" or immobilie.tag == "Immobile")
+                and (immobilie.attrs.name or immobilie.attrs.Name) then
                 dt.structures[#dt.structures + 1] = {
-                    name = immobilie.attrs.name,
+                    name = immobilie.attrs.name or immobilie.attrs.Name,
                     gsbname = immobilie.attrs.gsbname
                 }
             end
@@ -103,7 +208,7 @@ local function buildDiscoveryTable(root)
     end
 
     for _, meldung in ipairs(findAll(root, "Meldung")) do
-        if meldung.attrs.name then
+        if meldung.attrs.Key_Id then
             dt.signals[#dt.signals + 1] = {
                 name = meldung.attrs.name,
                 keyId = tonumber(meldung.attrs.Key_Id)
@@ -127,6 +232,8 @@ local function buildDiscoveryTable(root)
     return dt
 end
 
+Anl3DiscoveryHelper.buildDiscoveryTable = buildDiscoveryTable
+
 function Anl3DiscoveryHelper.getLuaPath(root)
     local eepLua = findChild(root, "EEPLua")
     return eepLua and eepLua.attrs.LUAPath or nil
@@ -139,7 +246,9 @@ function Anl3DiscoveryHelper.fillDiscoveries(root)
     TrainDiscovery.initFromAnl3(dt)
     StructureDiscovery.initFromAnl3(dt)
     SignalDiscovery.initFromAnl3(dt)
+    SwitchDiscovery.initFromAnl3(dt)
     ContactDiscovery.initFromAnl3(dt)
+    return dt.coverage, dt
 end
 
 return Anl3DiscoveryHelper

@@ -329,6 +329,58 @@ function RollingStock:new(o)
     return o
 end
 
+function RollingStock.fromSnapshot(snapshot)
+    assert(type(snapshot) == "table", "Need snapshot as table")
+    assert(type(snapshot.rollingStockName) == "string", "Need snapshot.rollingStockName as string")
+
+    local xmlModel = snapshot.xmlModel
+    local modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    local tag = snapshot.tag or ""
+    local o = {
+        id = snapshot.rollingStockName,
+        rollingStockName = snapshot.rollingStockName,
+        type = "RollingStock",
+        trainName = snapshot.trainName or "",
+        positionInTrain = tonumber(snapshot.positionInTrain) or -1,
+        couplingFront = tonumber(snapshot.couplingFront) or 1,
+        couplingRear = tonumber(snapshot.couplingRear) or 1,
+        length = tonumber(snapshot.length) or -1,
+        propelled = snapshot.propelled ~= false,
+        modelType = tonumber(snapshot.modelType) or -1,
+        modelTypeText = EEPRollingstockModelTypeText[snapshot.modelType] or "",
+        tag = tag,
+        values = StorageUtility.parseTableFromString(tag),
+        orientationForward = snapshot.orientationForward == true,
+        smoke = snapshot.smoke or 0,
+        hookStatus = tonumber(snapshot.hookStatus) or 0,
+        hookGlueMode = tonumber(snapshot.hookGlueMode) or 0,
+        active = snapshot.active == true,
+        textureTexts = snapshot.textureTexts or {},
+        modelInfo = modelInfo,
+        axisNamesKnown = axisNamesKnownForModelInfo(modelInfo),
+        axisValues = snapshot.axisValues or {},
+        trackId = tonumber(snapshot.trackId) or -1,
+        trackDistance = tonumber(string.format("%.2f", snapshot.trackDistance or -1)) or -1,
+        trackDirection = tonumber(snapshot.trackDirection) or -1,
+        trackSystem = tonumber(snapshot.trackSystem) or -1,
+        x = tonumber(snapshot.x) or -1,
+        y = tonumber(snapshot.y) or -1,
+        z = tonumber(snapshot.z) or -1,
+        mileage = tonumber(snapshot.mileage) or -1,
+        rotX = round2(snapshot.rotX),
+        rotY = round2(snapshot.rotY),
+        rotZ = round2(snapshot.rotZ),
+        xmlModel = xmlModel,
+        model = RollingStockModels.modelFor(snapshot.rollingStockName, xmlModel),
+        dirtyFields = {},
+        needsFullSend = true
+    }
+
+    RollingStock.__index = RollingStock
+    setmetatable(o, RollingStock)
+    return o
+end
+
 ---Adds or replaces a value in the rolling stock
 ---@param key string
 ---@param value string
@@ -896,6 +948,22 @@ function RollingStock:setXmlModel(model)
     self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
     self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
     self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+    if oldXmlModel ~= model then markDirty(self, "xmlModel") end
+    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
+    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
+    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
+end
+
+function RollingStock:setXmlModelFromSnapshot(model)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local oldXmlModel = self.xmlModel
+    local oldAxisNames = self:getAxisNames()
+    local oldAxisNamesKnown = self:getAxisNamesKnown()
+    local oldTextureNames = self:getTextureNames()
+    self.xmlModel = model
+    self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
+    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
+    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
     if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
     if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end

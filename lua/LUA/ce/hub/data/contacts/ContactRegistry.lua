@@ -15,6 +15,15 @@ function ContactRegistry.add(contact)
     addedIds[contact.id] = true
 end
 
+function ContactRegistry.replaceAll(contacts)
+    allContacts = {}
+    addedIds = {}
+    for _, contact in ipairs(contacts or {}) do
+        allContacts[contact.id] = contact
+        addedIds[contact.id] = true
+    end
+end
+
 function ContactRegistry.getAll()
     local copy = {}
     for id, contact in pairs(allContacts) do copy[id] = contact end

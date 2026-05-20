@@ -71,14 +71,17 @@ end
 
 function StructureDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
+    if tableOfAnl3.coverage and not tableOfAnl3.coverage.structures then return end
 
+    local structures = {}
     for _, entry in ipairs(tableOfAnl3.structures or {}) do
-        if entry.name and not StructureRegistry.forId(entry.name) then
+        if entry.name then
             local structure = Structure:new(entry.name)
             structure:setGsbname(entry.gsbname)
-            StructureRegistry.add(structure)
+            structures[#structures + 1] = structure
         end
     end
+    StructureRegistry.replaceAll(structures)
 end
 
 function StructureDiscovery.runInitialDiscovery()

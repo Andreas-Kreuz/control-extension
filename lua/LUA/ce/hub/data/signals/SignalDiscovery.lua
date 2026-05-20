@@ -23,12 +23,13 @@ end
 
 function SignalDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
+    if tableOfAnl3.coverage and not tableOfAnl3.coverage.signals then return end
 
+    local signals = {}
     for _, entry in ipairs(tableOfAnl3.signals or {}) do
-        if entry.keyId and not SignalRegistry.has(entry.keyId) then
-            SignalRegistry.add(Signal:new(entry.keyId))
-        end
+        if entry.keyId then signals[#signals + 1] = Signal:new(entry.keyId) end
     end
+    SignalRegistry.replaceAll(signals)
 end
 
 function SignalDiscovery.runInitialDiscovery()

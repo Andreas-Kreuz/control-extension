@@ -142,6 +142,40 @@ function Train:new(o)
     return o
 end
 
+function Train.fromSnapshot(snapshot)
+    assert(type(snapshot) == "table", "Need snapshot as table")
+    assert(type(snapshot.name) == "string", "Need snapshot.name as string")
+
+    local speed = tonumber(snapshot.speed) or 0
+    local o = {
+        id = snapshot.name,
+        name = snapshot.name,
+        type = "Train",
+        values = snapshot.values or {},
+        route = snapshot.route or "",
+        rollingStockCount = tonumber(snapshot.rollingStockCount) or 0,
+        speed = speed,
+        targetSpeed = tonumber(snapshot.targetSpeed) or speed,
+        length = tonumber(snapshot.length) or 0,
+        couplingFront = tonumber(snapshot.couplingFront) or 0,
+        couplingRear = tonumber(snapshot.couplingRear) or 0,
+        lights = snapshot.lights or {},
+        active = snapshot.active == true,
+        inTrainyard = snapshot.inTrainyard == true,
+        trainyardId = snapshot.trainyardId,
+        movesForward = snapshot.movesForward ~= nil and snapshot.movesForward == true or speed >= 0,
+        trackType = snapshot.trackType,
+        onTracks = snapshot.onTracks or {},
+        occupiedTracks = {},
+        dirtyFields = {},
+        needsFullSend = true
+    }
+
+    Train.__index = Train
+    setmetatable(o, Train)
+    return o
+end
+
 ---Loads a table with values from the first rollingstock of the train
 function Train:load()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")

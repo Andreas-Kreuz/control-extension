@@ -3,6 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalRegistry .
 ---@class SignalRegistry
 ---@field has fun(signalId: number):boolean
 ---@field add fun(signal: Signal):nil
+---@field replaceAll fun(signals: Signal[]):nil
 ---@field get fun(signalId: number):Signal|nil
 ---@field getAll fun():table<number, Signal>
 local SignalRegistry = {}
@@ -16,6 +17,13 @@ end
 
 function SignalRegistry.add(signal)
     allSignals[signal.id] = signal
+end
+
+function SignalRegistry.replaceAll(signals)
+    allSignals = {}
+    for _, signal in ipairs(signals or {}) do
+        allSignals[signal.id] = signal
+    end
 end
 
 function SignalRegistry.get(signalId)
