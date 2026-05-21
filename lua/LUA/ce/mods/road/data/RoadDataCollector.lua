@@ -298,7 +298,9 @@ function RoadDataCollector.collectCrossings(allIntersections)
                     structureRed = lightStructure.redStructure,
                     structureGreen = lightStructure.greenStructure,
                     structureYellow = lightStructure.yellowStructure or lightStructure.redStructure,
-                    structureRequest = lightStructure.requestStructure
+                    structureRequest = lightStructure.requestStructure,
+                    structureHousing = lightStructure.housingStructure,
+                    structureBlend = lightStructure.blendStructure
                 }
                 lightStructureId = lightStructureId + 1
             end

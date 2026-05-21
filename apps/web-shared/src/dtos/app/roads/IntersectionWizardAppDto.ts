@@ -83,8 +83,10 @@ export interface IntersectionWizardAmpelAppDto {
 }
 
 export interface IntersectionWizardLightStructureAppDto {
+  structureBlend?: string;
   structureRed?: string;
   structureGreen?: string;
+  structureHousing?: string;
   structureYellow?: string;
   structureRequest?: string;
 }

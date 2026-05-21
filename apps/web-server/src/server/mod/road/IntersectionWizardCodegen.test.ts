@@ -735,6 +735,8 @@ function testCodegenCreatesDedicatedPlainLightForAttachedLightStructure(): void 
         structureGreen: '#5538_Straba Signal links',
         structureYellow: '#5539_Straba Signal anhalten',
         structureRequest: '#5540_Straba Signal A',
+        structureHousing: '#5536_Straba Signal Gehäuse Mast 4',
+        structureBlend: '#5541_Straba Signal Gehäuse Blendschutz 4',
       },
     ],
   };
@@ -744,7 +746,7 @@ function testCodegenCreatesDedicatedPlainLightForAttachedLightStructure(): void 
   assert.match(lua, /local bahnhofHauptS1 = TrafficLight:newForSignal\("S1", 108, TrafficLightModel\.Unsichtbar_2er\)/);
   assert.match(
     lua,
-    /local bahnhofHauptS1Light1 = TrafficLight:newForLightStructure\("S1Light1",\n\s+"#5537_Straba Signal Halt",\n\s+"#5538_Straba Signal links",\n\s+"#5539_Straba Signal anhalten",\n\s+"#5540_Straba Signal A"\n\s+\)/,
+    /local bahnhofHauptS1Light1 = TrafficLight:newForLightStructure\("S1Light1",\n\s+"#5537_Straba Signal Halt",\n\s+"#5538_Straba Signal links",\n\s+"#5539_Straba Signal anhalten",\n\s+"#5540_Straba Signal A",\n\s+"#5536_Straba Signal Gehäuse Mast 4",\n\s+"#5541_Straba Signal Gehäuse Blendschutz 4"\n\s+\)/,
   );
   assert.doesNotMatch(lua, /:addLightStructure\(/);
   assert.match(

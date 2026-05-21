@@ -3,6 +3,7 @@ import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardActions from '@mui/material/CardActions';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import BackgroundImageCard from '../../../shared/components/cards/BackgroundImageCard';
 import ModuleSettingsButton from '../../../shared/components/ModuleSettingsButton';
@@ -63,13 +64,14 @@ function IntersectionOverview({ selectedElement }: IntersectionOverviewProps) {
         getFilterText={(i) => `${i.id} ${i.name}`}
         filterLabel="Kreuzung filtern"
         filterSlot={
-          <Button
-            variant="contained"
-            sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
-            onClick={() => navigate(`${roadPathPrefix}/createIntersection`)}
-          >
-            Neue Kreuzung
-          </Button>
+          <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', sm: 'flex' }, flexWrap: 'wrap' }}>
+            <Button variant="outlined" onClick={() => navigate(`${roadPathPrefix}/traffic-signal-installer`)}>
+              Ampelaufsteller
+            </Button>
+            <Button variant="contained" onClick={() => navigate(`${roadPathPrefix}/createIntersection`)}>
+              Neue Kreuzung
+            </Button>
+          </Stack>
         }
         renderListItem={(i, selected, onSelect) => (
           <IntersectionListItem intersection={i} selected={selected} onSelect={onSelect} />

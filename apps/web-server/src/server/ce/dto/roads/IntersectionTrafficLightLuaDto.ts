@@ -1,8 +1,10 @@
 // Lua DtoFactory: lua/LUA/ce/mods/road/data/RoadDtoFactory.lua
 // Room: intersection-signals
 export interface IntersectionTrafficLightStructureLuaDto {
+  structureBlend?: string;
   structureRed?: string;
   structureGreen?: string;
+  structureHousing?: string;
   structureYellow?: string;
   structureRequest?: string;
 }

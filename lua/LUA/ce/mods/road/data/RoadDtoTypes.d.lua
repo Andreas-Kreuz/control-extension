@@ -93,6 +93,8 @@
 ---@field structureGreen string|nil
 ---@field structureYellow string|nil
 ---@field structureRequest string|nil
+---@field structureHousing string|nil
+---@field structureBlend string|nil
 
 ---@class IntersectionTrafficLightAxisStructureDto
 ---@field structureName string

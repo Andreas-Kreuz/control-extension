@@ -18,6 +18,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
@@ -27,11 +28,13 @@ import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import TrafficIcon from '@mui/icons-material/Traffic';
 import TramIcon from '@mui/icons-material/Tram';
+import VerticalAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   CeTypes,
   CommandEvent,
   IntersectionListRoom,
+  RoadEvent,
   RoadTrafficLightModelsRoom,
   ScenarioRoom,
   TrackType,
@@ -54,6 +57,7 @@ import type {
   IntersectionWizardTurnDirection,
   RouteAppDto,
   ScenarioAppDto,
+  StructureAppDto,
   TrafficLightModelAppDto,
   TrainListAppDto,
 } from '@ce/web-shared';
@@ -85,6 +89,15 @@ import {
   IntersectionWizardStartStep,
   IntersectionWizardSummaryStep,
 } from './intersection-wizard';
+import {
+  buildAlignStructureSignalInstallerCommand,
+  inferHousingKind,
+  isBlendStructureName,
+  isHousingStructureName,
+  isSignalStructureName,
+  parseInstallerTag,
+  signalCountForHousingKind,
+} from './structure-signal-installer/structureSignalInstallerLogic';
 
 const steps = ['Vorbereitung', 'Kreuzung', 'Ampelgruppen & Ampeln', 'Fahrspuren', 'Ampelphasen', 'Zusammenfassung'];
 const stepKeys = ['start', 'kreuzung', 'signalgruppen', 'fahrspuren', 'verkehrsphasen', 'zusammenfassung'] as const;
@@ -359,6 +372,72 @@ function emptyLaneSignal(name: string): IntersectionWizardLaneSignalAppDto {
   return { name, modelName: 'Unsichtbar_2er', modelConstant: 'Unsichtbar_2er', lightStructures: [] };
 }
 
+type LightStructureKey =
+  | 'structureBlend'
+  | 'structureGreen'
+  | 'structureHousing'
+  | 'structureRed'
+  | 'structureRequest'
+  | 'structureYellow';
+
+type LightStructureField = {
+  key: LightStructureKey;
+  label: string;
+  optionKind: 'BLEND' | 'GREEN' | 'HOUSING' | 'RED' | 'REQUEST' | 'YELLOW';
+  required?: boolean;
+};
+
+const lightStructureFields: LightStructureField[] = [
+  { key: 'structureHousing', label: 'Gehäuse', optionKind: 'HOUSING' },
+  { key: 'structureBlend', label: 'Blendschutz (optional)', optionKind: 'BLEND' },
+  { key: 'structureRequest', label: 'Immobilie-Anforderung (optional)', optionKind: 'REQUEST' },
+  { key: 'structureRed', label: 'Immobilie-Rot', optionKind: 'RED', required: true },
+  { key: 'structureYellow', label: 'Immobilie-Gelb (optional)', optionKind: 'YELLOW' },
+  { key: 'structureGreen', label: 'Immobilie-Grün', optionKind: 'GREEN', required: true },
+];
+
+function normalizeStructureText(value: string | undefined): string {
+  return (value ?? '')
+    .toLocaleLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+function structureSearchText(structure: StructureAppDto): string {
+  return `${structure.name} ${structure.gsbname ?? ''}`;
+}
+
+function sortedStructureNames(structures: StructureAppDto[], predicate: (structure: StructureAppDto) => boolean) {
+  return Array.from(new Set(structures.filter(predicate).map((structure) => structure.name))).sort((a, b) =>
+    a.localeCompare(b, undefined, { numeric: true }),
+  );
+}
+
+function structureSignalTagPatch(
+  tag: string | undefined,
+): Partial<NonNullable<IntersectionWizardAmpelAppDto['lightStructures']>[number]> {
+  const values = parseInstallerTag(tag);
+  const green = values.g ?? values.F1 ?? values.F2 ?? values.F3 ?? values.F5;
+  return {
+    ...((values.F0 ?? values.r) ? { structureRed: values.F0 ?? values.r } : {}),
+    ...((values.F4 ?? values.y) ? { structureYellow: values.F4 ?? values.y } : {}),
+    ...(green ? { structureGreen: green } : {}),
+    ...(values.A ? { structureRequest: values.A } : {}),
+    ...(values.bl ? { structureBlend: values.bl } : {}),
+  };
+}
+
+function structureMatchesLightTag(structure: StructureAppDto, selectedName: string, selectedTag: string) {
+  if (selectedTag && structure.tag === selectedTag && isHousingStructureName(structureSearchText(structure)))
+    return true;
+  const values = parseInstallerTag(structure.tag);
+  return Object.values(values).some((value) => value === selectedName);
+}
+
 function effectiveLaneSignalGroupAssignments(
   lane: IntersectionWizardLaneAppDto,
   signalGroups: IntersectionWizardSignalGroupAppDto[],
@@ -442,7 +521,9 @@ type IntersectionWizardValidation = {
       | 'name'
       | 'signalId'
       | 'sourceAmpelId'
+      | 'structureBlend'
       | 'structureGreen'
+      | 'structureHousing'
       | 'structureRed'
       | 'structureRequest'
       | 'structureYellow'
@@ -670,6 +751,12 @@ function validateIntersectionWizardDraft(
         }
         if (structure?.structureRequest?.trim() && !eepStructureNamePattern.test(structure.structureRequest.trim())) {
           addValidationError(validation, 2, ampelErrors, 'structureRequest', eepStructureNameErrorText);
+        }
+        if (structure?.structureHousing?.trim() && !eepStructureNamePattern.test(structure.structureHousing.trim())) {
+          addValidationError(validation, 2, ampelErrors, 'structureHousing', eepStructureNameErrorText);
+        }
+        if (structure?.structureBlend?.trim() && !eepStructureNamePattern.test(structure.structureBlend.trim())) {
+          addValidationError(validation, 2, ampelErrors, 'structureBlend', eepStructureNameErrorText);
         }
         return;
       }
@@ -913,6 +1000,7 @@ function IntersectionCreateWizard() {
   const [routeOptions, setRouteOptions] = useState<string[]>([]);
   const [scenarioStaticCameras, setScenarioStaticCameras] = useState<string[]>([]);
   const [scenarioIntersectionNames, setScenarioIntersectionNames] = useState<string[]>([]);
+  const [structures, setStructures] = useState<StructureAppDto[]>([]);
   const [trafficLightModels, setTrafficLightModels] = useState<Record<string, TrafficLightModelAppDto>>({});
   const [showAdvancedIntersectionSettings, setShowAdvancedIntersectionSettings] = useState(false);
   const [sendPreparationSettings, setSendPreparationSettings] = useState(false);
@@ -934,6 +1022,57 @@ function IntersectionCreateWizard() {
         }))
         .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true })),
     [trafficLightModels],
+  );
+  const structureByName = useMemo(
+    () => new Map(structures.map((structure) => [structure.name, structure])),
+    [structures],
+  );
+  const housingStructureOptions = useMemo(
+    () => sortedStructureNames(structures, (structure) => isHousingStructureName(structureSearchText(structure))),
+    [structures],
+  );
+  const blendStructureOptions = useMemo(
+    () => sortedStructureNames(structures, (structure) => isBlendStructureName(structureSearchText(structure))),
+    [structures],
+  );
+  const requestStructureOptions = useMemo(
+    () =>
+      sortedStructureNames(structures, (structure) => {
+        const text = normalizeStructureText(structureSearchText(structure));
+        return isSignalStructureName(text) && (text.includes('signal a') || text.includes('anforderung'));
+      }),
+    [structures],
+  );
+  const redStructureOptions = useMemo(
+    () =>
+      sortedStructureNames(structures, (structure) => {
+        const text = normalizeStructureText(structureSearchText(structure));
+        return isSignalStructureName(text) && text.includes('halt') && !text.includes('anhalten');
+      }),
+    [structures],
+  );
+  const yellowStructureOptions = useMemo(
+    () =>
+      sortedStructureNames(structures, (structure) => {
+        const text = normalizeStructureText(structureSearchText(structure));
+        return isSignalStructureName(text) && (text.includes('anhalten') || text.includes('gelb'));
+      }),
+    [structures],
+  );
+  const greenStructureOptions = useMemo(
+    () =>
+      sortedStructureNames(structures, (structure) => {
+        const text = normalizeStructureText(structureSearchText(structure));
+        return (
+          isSignalStructureName(text) &&
+          (text.includes('geradeaus') ||
+            text.includes('rechts') ||
+            text.includes('links') ||
+            text.includes('vorfahrt beachten') ||
+            text.includes('gruen'))
+        );
+      }),
+    [structures],
   );
   const cameraOptions = useMemo(
     () =>
@@ -993,6 +1132,10 @@ function IntersectionCreateWizard() {
   useApiDataRoomHandler(CeTypes.HubFreeSlot, (payload: string) => {
     const data = JSON.parse(payload) as Record<string, DataSlotAppDto>;
     setFreeSlots(Object.values(data).sort((a, b) => Number(a.id) - Number(b.id)));
+  });
+  useApiDataRoomHandler(CeTypes.HubStructure, (payload: string) => {
+    const data = JSON.parse(payload) as Record<string, StructureAppDto>;
+    setStructures(Object.values(data).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })));
   });
   useDomainRoomHandler(IntersectionListRoom, 'All', (payload: string) => {
     const data = JSON.parse(payload) as Record<string, Partial<IntersectionAppDto>>;
@@ -1254,10 +1397,11 @@ function IntersectionCreateWizard() {
       signalGroups: nextSignalGroups,
       lanes: draft.lanes.map((lane) => ({
         ...lane,
-        signalGroupSignalId:
-          nextSignalGroups.some((group) => group.id === lane.signalGroupSignalId && group.approach === lane.approach)
-            ? lane.signalGroupSignalId
-            : undefined,
+        signalGroupSignalId: nextSignalGroups.some(
+          (group) => group.id === lane.signalGroupSignalId && group.approach === lane.approach,
+        )
+          ? lane.signalGroupSignalId
+          : undefined,
         signalGroupAssignments: effectiveLaneSignalGroupAssignments(lane, nextSignalGroups),
       })),
     });
@@ -1330,13 +1474,60 @@ function IntersectionCreateWizard() {
     });
   }
 
-  function updateAmpelLightStructure(
-    ampel: IntersectionWizardAmpelAppDto,
-    key: 'structureRed' | 'structureGreen' | 'structureYellow' | 'structureRequest',
-    value: string,
-  ) {
-    const structure = { ...(ampel.lightStructures?.[0] ?? {}), [key]: value };
+  function updateAmpelLightStructure(ampel: IntersectionWizardAmpelAppDto, key: LightStructureKey, value: string) {
+    const selectedStructure = structureByName.get(value);
+    const selectedTag = selectedStructure?.tag ?? '';
+    const housingFromSelection = key === 'structureHousing' && selectedStructure ? selectedStructure : undefined;
+    const relatedHousing =
+      housingFromSelection ?? structures.find((structure) => structureMatchesLightTag(structure, value, selectedTag));
+    const sourceTag = relatedHousing?.tag || selectedTag;
+    const tagPatch = structureSignalTagPatch(sourceTag);
+    const baseStructure =
+      key === 'structureHousing' && selectedStructure
+        ? {
+            structureBlend: '',
+            structureGreen: '',
+            structureRed: '',
+            structureRequest: '',
+            structureYellow: '',
+          }
+        : (ampel.lightStructures?.[0] ?? {});
+    const structure = {
+      ...baseStructure,
+      ...tagPatch,
+      ...(relatedHousing ? { structureHousing: relatedHousing.name } : {}),
+      [key]: value,
+    };
     patchAmpel(ampel.id, { lightStructures: [structure] });
+  }
+
+  function structureOptionsForField(optionKind: LightStructureField['optionKind']) {
+    if (optionKind === 'HOUSING') return housingStructureOptions;
+    if (optionKind === 'BLEND') return blendStructureOptions;
+    if (optionKind === 'REQUEST') return requestStructureOptions;
+    if (optionKind === 'RED') return redStructureOptions;
+    if (optionKind === 'YELLOW') return yellowStructureOptions;
+    return greenStructureOptions;
+  }
+
+  function alignStructureAmpelAtHousing(ampel: IntersectionWizardAmpelAppDto) {
+    const structure = ampel.lightStructures?.[0];
+    const housingName = structure?.structureHousing?.trim();
+    if (!structure || !housingName) return;
+    const housing = structureByName.get(housingName);
+    const housingKind = inferHousingKind(housingName);
+    if (!housing || !housingKind || signalCountForHousingKind(housingKind) === 0) return;
+    const signals = [
+      structure.structureRequest ?? '',
+      structure.structureRed ?? '',
+      structure.structureYellow ?? '',
+      structure.structureGreen ?? '',
+    ];
+    socket.emit(
+      RoadEvent.AlignStructureSignalInstaller,
+      buildAlignStructureSignalInstallerCommand(housing, housingKind, signals, structure.structureBlend ?? ''),
+    );
+    setStatus('Ausrichtungsbefehl wurde an EEP gesendet.');
   }
 
   function addLane() {
@@ -1576,9 +1767,7 @@ function IntersectionCreateWizard() {
     const errors = validation.ampelErrors[ampel.id] ?? {};
     const nameValue = ampelNameForSignalGroup(group, ampel);
     const namePatch =
-      group.trafficType === 'PEDESTRIAN'
-        ? (name: string) => ({ pedestrianName: name })
-        : (name: string) => ({ name });
+      group.trafficType === 'PEDESTRIAN' ? (name: string) => ({ pedestrianName: name }) : (name: string) => ({ name });
     return (
       <Stack spacing={1.25} sx={{ pt: 3, pb: 1.5, maxWidth: 720 }}>
         <FormTextfield
@@ -1661,6 +1850,14 @@ function IntersectionCreateWizard() {
 
   function renderStructureAmpelEditor(ampel: IntersectionWizardAmpelAppDto) {
     const errors = validation.ampelErrors[ampel.id] ?? {};
+    const structure = ampel.lightStructures?.[0] ?? {};
+    const housing = structure.structureHousing ? structureByName.get(structure.structureHousing) : undefined;
+    const housingKind = structure.structureHousing ? inferHousingKind(structure.structureHousing) : undefined;
+    const canAlignAtHousing = Boolean(
+      housing &&
+      housingKind &&
+      (structure.structureRed || structure.structureGreen || structure.structureYellow || structure.structureRequest),
+    );
     return (
       <Stack spacing={1.25} sx={{ mt: 1, py: 1.5, maxWidth: 720 }}>
         <FormTextfield
@@ -1672,33 +1869,46 @@ function IntersectionCreateWizard() {
           inputProps={{ maxLength: 16, 'aria-label': `Ampelname ${ampel.name}` }}
           onChange={(event) => patchAmpel(ampel.id, { name: event.target.value })}
         />
-        {(['structureRed', 'structureYellow', 'structureGreen', 'structureRequest'] as const).map((key) => (
-          <FormTextfield
-            key={key}
-            label={
-              key === 'structureRed'
-                ? 'Immobilie-Rot'
-                : key === 'structureYellow'
-                  ? 'Immobilie-Gelb (optional)'
-                  : key === 'structureGreen'
-                    ? 'Immobilie-Grün'
-                    : 'Immobilie-Anforderung (optional)'
-            }
-            value={ampel.lightStructures?.[0]?.[key] ?? ''}
-            size="small"
-            infoText="Vollständiger Immobilienname des gesteuerten Lichts."
-            errorTexts={
-              key === 'structureRed'
-                ? errors.structureRed
-                : key === 'structureGreen'
-                  ? errors.structureGreen
-                  : key === 'structureYellow'
-                    ? errors.structureYellow
-                    : errors.structureRequest
-            }
-            onChange={(event) => updateAmpelLightStructure(ampel, key, event.target.value)}
-          />
-        ))}
+        {lightStructureFields.map((field) => {
+          const errorTexts = errors[field.key];
+          return (
+            <CompactToggleField
+              key={field.key}
+              label={field.label}
+              infoText="Vollständiger Immobilienname aus EEP."
+              errorTexts={errorTexts}
+            >
+              <Autocomplete<string, false, false, true>
+                freeSolo
+                options={structureOptionsForField(field.optionKind)}
+                value={structure[field.key] ?? ''}
+                inputValue={structure[field.key] ?? ''}
+                onChange={(_event, value) => updateAmpelLightStructure(ampel, field.key, value ?? '')}
+                onInputChange={(_event, value) => updateAmpelLightStructure(ampel, field.key, value)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    error={Boolean(errorTexts?.length)}
+                    inputProps={{ ...params.inputProps, 'aria-label': `${field.label} ${ampel.name}` }}
+                  />
+                )}
+              />
+            </CompactToggleField>
+          );
+        })}
+        {canAlignAtHousing && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<VerticalAlignCenterIcon />}
+              onClick={() => alignStructureAmpelAtHousing(ampel)}
+            >
+              An Gehäuse ausrichten
+            </Button>
+          </Box>
+        )}
       </Stack>
     );
   }
@@ -1795,6 +2005,8 @@ function IntersectionCreateWizard() {
               <TableRow>
                 <TableCell sx={{ width: 56 }} />
                 <TableCell>Name</TableCell>
+                <TableCell>Gehäuse</TableCell>
+                <TableCell>Blende</TableCell>
                 <TableCell>Immo-Rot</TableCell>
                 <TableCell>Immo-Gelb</TableCell>
                 <TableCell>Immo-Grün</TableCell>
@@ -1805,7 +2017,7 @@ function IntersectionCreateWizard() {
             <TableBody>
               {ampeln.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} sx={{ color: 'text.secondary' }}>
+                  <TableCell colSpan={9} sx={{ color: 'text.secondary' }}>
                     Noch keine EEP-Immobilien-Ampel hinzugefügt.
                   </TableCell>
                 </TableRow>
@@ -1819,7 +2031,7 @@ function IntersectionCreateWizard() {
                       key={ampel.id}
                       ariaLabel={ampel.name}
                       expanded={isExpanded}
-                      dataCellCount={5}
+                      dataCellCount={7}
                       deletable={group.ampelIds.length > 1}
                       editor={renderStructureAmpelEditor(ampel)}
                       onDelete={() => removeAmpelFromGroup(group, ampel.id)}
@@ -1836,6 +2048,8 @@ function IntersectionCreateWizard() {
                           <Box component="span">{ampel.name || '-'}</Box>
                         </Badge>
                       </TableCell>
+                      <TableCell>{compactStructureName(structure?.structureHousing)}</TableCell>
+                      <TableCell>{compactStructureName(structure?.structureBlend)}</TableCell>
                       <TableCell>{compactStructureName(structure?.structureRed)}</TableCell>
                       <TableCell>{compactStructureName(structure?.structureYellow)}</TableCell>
                       <TableCell>{compactStructureName(structure?.structureGreen)}</TableCell>
@@ -2090,7 +2304,7 @@ function IntersectionCreateWizard() {
     const selectableSignalGroupOptions = effectiveAssignments
       .map((assignment) => draft.signalGroups.find((group) => group.id === assignment.signalGroupId))
       .flatMap((group) => signalGroupLaneSignalOptionsForLane(group, lane, draft.ampeln));
-      const selectedLaneSignalOption =
+    const selectedLaneSignalOption =
       selectableSignalGroupOptions.find(
         ({ group, ampel }) =>
           group.id === lane.signalGroupSignalId &&
@@ -2117,8 +2331,8 @@ function IntersectionCreateWizard() {
                 signalGroupSignalId: selectedOption.group.id,
                 signal: {
                   ...lane.signal,
-                name: ampelNameForSignalGroup(selectedOption.group, selectedOption.ampel),
-                signalId: selectedOption.ampel.signalId,
+                  name: ampelNameForSignalGroup(selectedOption.group, selectedOption.ampel),
+                  signalId: selectedOption.ampel.signalId,
                   modelName: selectedOption.ampel.modelName,
                   modelConstant: selectedOption.ampel.modelConstant,
                   lightStructures: selectedOption.ampel.lightStructures,
@@ -2319,9 +2533,7 @@ function IntersectionCreateWizard() {
           ),
         ),
     );
-    const validApproaches = Array.from(
-      new Set(nonPedestrianSignalGroups.map((group) => group.approach)),
-    );
+    const validApproaches = Array.from(new Set(nonPedestrianSignalGroups.map((group) => group.approach)));
     return (
       <Stack spacing={2}>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -2464,7 +2676,10 @@ function IntersectionCreateWizard() {
                             ? {
                                 signal: {
                                   ...lane.signal,
-                                  name: ampelNameForSignalGroup(defaultLaneSignalOption.group, defaultLaneSignalOption.ampel),
+                                  name: ampelNameForSignalGroup(
+                                    defaultLaneSignalOption.group,
+                                    defaultLaneSignalOption.ampel,
+                                  ),
                                   signalId: defaultLaneSignalOption.ampel.signalId,
                                   modelName: defaultLaneSignalOption.ampel.modelName,
                                   modelConstant: defaultLaneSignalOption.ampel.modelConstant,

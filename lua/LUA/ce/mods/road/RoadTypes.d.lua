@@ -85,10 +85,10 @@
 ---@field laneInfo any
 ---@field laneNameInfo any
 ---@field buildInfo string
----@field newForSignal fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field newPedestrianOnly fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
----@field newForLightStructure fun(self: TrafficLight, name: string, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string):TrafficLight
+---@field newForSignal fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string, housingStructure?: string, blendStructure?: string):TrafficLight
+---@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string, housingStructure?: string, blendStructure?: string):TrafficLight
+---@field newPedestrianOnly fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string, housingStructure?: string, blendStructure?: string):TrafficLight
+---@field newForLightStructure fun(self: TrafficLight, name: string, redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string, housingStructure?: string, blendStructure?: string):TrafficLight
 ---@field asPedestrianSignal fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
 ---@field withPedestrian fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
 ---@field asPedestrianOnly fun(self: TrafficLight):TrafficLight
@@ -97,7 +97,7 @@
 ---@field signalNamesTippText fun(self: TrafficLight):string
 ---@field signalNamesText fun(self: TrafficLight):string
 ---@field addLightStructure fun(self: TrafficLight, redStructure?: string, greenStructure?: string,
---- yellowStructure?: string, requestStructure?: string):TrafficLight
+--- yellowStructure?: string, requestStructure?: string, housingStructure?: string, blendStructure?: string):TrafficLight
 ---@field addAxisStructure fun(self: TrafficLight, structureName: string, axisName: string, positionDefault: number,
 --- positionRed?: number, positionGreen?: number, positionYellow?: number,
 --- positionRedYellow?: number, positionPedestrian?: number):TrafficLight

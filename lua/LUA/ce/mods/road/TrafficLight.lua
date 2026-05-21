@@ -30,9 +30,11 @@ local counter = -1
 ---@param greenStructure? string Immobilie fuer Signalbild gelb (Licht an / aus)
 ---@param yellowStructure? string Immobilie fuer Signalbild gelb (Licht an / aus)
 ---@param requestStructure? string Immobilie fuer Signalbild "A" (Licht an / aus)
+---@param housingStructure? string Gehaeuse fuer Ampelaufsteller-Tags
+---@param blendStructure? string Blendschutz fuer Ampelaufsteller-Tags
 --
 function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                                   requestStructure)
+                                   requestStructure, housingStructure, blendStructure)
     assert(signalId, "Specify a signalId")
     assert(trafficLightModel, "Specify a trafficLightModel")
     local error = string.format("TrafficLight ID already used: %s - %s", signalId, trafficLightModel.name)
@@ -64,7 +66,8 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
     o = setmetatable(o, self)
 
     if redStructure or greenStructure or yellowStructure or requestStructure then
-        o:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure)
+        o:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure, housingStructure,
+                            blendStructure)
     end
 
     registeredSignals[tostring(signalId)] = o
@@ -72,21 +75,22 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
 end
 
 function TrafficLight:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                          requestStructure)
+                          requestStructure, housingStructure, blendStructure)
     return self:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                             requestStructure)
+                             requestStructure, housingStructure, blendStructure)
 end
 
 function TrafficLight:newPedestrianOnly(name, signalId, trafficLightModel, redStructure, greenStructure,
-                                        yellowStructure, requestStructure)
+                                        yellowStructure, requestStructure, housingStructure, blendStructure)
     return self:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                             requestStructure):asPedestrianOnly()
+                             requestStructure, housingStructure, blendStructure):asPedestrianOnly()
 end
 
-function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure)
+function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure,
+                                      housingStructure, blendStructure)
     local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
     return self:newForSignal(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure,
-                             requestStructure)
+                             requestStructure, housingStructure, blendStructure)
 end
 
 function TrafficLight:asPedestrianSignal(pedestrianSignalName)
@@ -111,9 +115,10 @@ end
 -- @param yellowStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel gelb oder rot-gelb ist
 -- @param requestStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel eine Anforderung erkennt
 --
-function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure)
+function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure,
+                                       housingStructure, blendStructure)
     local lightStructure = LightStructureTrafficLight:new(redStructure, greenStructure, yellowStructure,
-                                                          requestStructure)
+                                                          requestStructure, housingStructure, blendStructure)
     self.lightStructures[lightStructure] = true
     return self
 end

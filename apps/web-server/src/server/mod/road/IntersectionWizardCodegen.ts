@@ -362,12 +362,16 @@ function plainLightStructureConstructor(
   name: string,
   structure: NonNullable<IntersectionWizardAmpelAppDto['lightStructures']>[number],
 ) {
-  return `TrafficLight:newForLightStructure(${luaString(name)},\n    ${[
+  const args = [
     luaValue(structure.structureRed),
     luaValue(structure.structureGreen),
     luaValue(structure.structureYellow),
     luaValue(structure.structureRequest),
-  ].join(',\n    ')}\n)`;
+  ];
+  if (structure.structureHousing || structure.structureBlend) {
+    args.push(luaValue(structure.structureHousing), luaValue(structure.structureBlend));
+  }
+  return `TrafficLight:newForLightStructure(${luaString(name)},\n    ${args.join(',\n    ')}\n)`;
 }
 
 function axisStructureCalls(ampel: IntersectionWizardAmpelAppDto | IntersectionWizardLaneSignalAppDto): string[] {

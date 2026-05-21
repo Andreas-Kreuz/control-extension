@@ -203,7 +203,9 @@ local function toIntersectionTrafficLightStructureDto(lightStructure)
         structureRed = lightStructure.structureRed,
         structureGreen = lightStructure.structureGreen,
         structureYellow = lightStructure.structureYellow,
-        structureRequest = lightStructure.structureRequest
+        structureRequest = lightStructure.structureRequest,
+        structureHousing = lightStructure.structureHousing,
+        structureBlend = lightStructure.structureBlend
     }
 end
 
