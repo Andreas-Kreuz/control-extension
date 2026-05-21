@@ -8,6 +8,7 @@ IntersectionSettings.showSequenceOnSignal = true
 IntersectionSettings.showRequestsOnSignal = true
 
 [EEPLuaData]
+DS_2 = "scriptVariableName=c1,"
 DS_100 = "f=2,p=Rot,q=#Opal Vitaro MEDIA MARKT|#Opal Vitaro MEDIA MARKT;001,w=0,"
 DS_102 = "f=0,p=Rot,q=,w=1,"
 DS_104 = "f=0,p=Rot,q=,w=1,"
