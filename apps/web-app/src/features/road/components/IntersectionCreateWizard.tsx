@@ -500,6 +500,21 @@ function ampelNameForSignalGroup(
   return group.trafficType === 'PEDESTRIAN' ? (ampel.pedestrianName ?? ampel.name) : ampel.name;
 }
 
+function isVehicleSourceAmpel(ampel: IntersectionWizardAmpelAppDto): boolean {
+  return ampel.trafficType !== 'PEDESTRIAN' && ampel.use !== 'PEDESTRIAN_ONLY';
+}
+
+function sourceSignalOptionLabel(ampel: IntersectionWizardAmpelAppDto): ReactNode {
+  return (
+    <>
+      {ampel.name} verwenden{' '}
+      <Box component="span" sx={{ color: 'text.secondary' }}>
+        (Signal-ID: {ampel.signalId || '-'}, {modelValue(ampel) || '-'})
+      </Box>
+    </>
+  );
+}
+
 function WizardSectionTitle(props: { children: ReactNode; helper: string }) {
   return (
     <Stack spacing={0.25}>
@@ -1322,11 +1337,21 @@ function IntersectionCreateWizard() {
 
   function nextAmpelName(type: IntersectionWizardTrafficType) {
     const prefix = type === 'TRAM' ? 'S' : type === 'PEDESTRIAN' ? 'F' : 'K';
-    const usedNumbers = draft.ampeln
-      .map((ampel) => new RegExp(`^${prefix}(\\d+)$`, 'i').exec(ampel.name.trim())?.[1])
+    return nextAmpelNameWithUsedNames(
+      prefix,
+      draft.ampeln.flatMap((ampel) => [ampel.name, ampel.pedestrianName ?? '']),
+    );
+  }
+
+  function nextAmpelNameWithUsedNames(prefix: string, usedNames: string[]) {
+    const usedNumbers = usedNames
+      .map((name) => new RegExp(`^${prefix}(\\d+)$`, 'i').exec(name.trim())?.[1])
       .filter((value): value is string => Boolean(value))
       .map(Number);
-    return `${prefix}${usedNumbers.length > 0 ? Math.max(...usedNumbers) + 1 : 1}`;
+    const used = new Set(usedNumbers);
+    let nextNumber = 1;
+    while (used.has(nextNumber)) nextNumber += 1;
+    return `${prefix}${nextNumber}`;
   }
 
   function createAmpel(
@@ -1379,13 +1404,40 @@ function IntersectionCreateWizard() {
     nextGroup.name = signalGroupName(nextGroup.approach, nextGroup.trafficType, nextGroup.turnDirections);
     let nextAmpeln = draft.ampeln;
     let ampelIds = nextGroup.ampelIds;
+    const changingToPedestrian = group.trafficType !== 'PEDESTRIAN' && nextGroup.trafficType === 'PEDESTRIAN';
+    if (changingToPedestrian) {
+      const usedNames = nextAmpeln.flatMap((ampel) => [ampel.name, ampel.pedestrianName ?? '']);
+      nextAmpeln = nextAmpeln.map((ampel) => {
+        if (!ampelIds.includes(ampel.id) || isStructureLightAmpel(ampel)) return ampel;
+        const name = nextAmpelNameWithUsedNames('F', usedNames);
+        usedNames.push(name);
+        return {
+          ...ampel,
+          name,
+          pedestrianName: undefined,
+          sourceAmpelId: undefined,
+          trafficType: 'PEDESTRIAN',
+          use: 'PEDESTRIAN_ONLY',
+          ...defaultModelForType('PEDESTRIAN'),
+        };
+      });
+    }
     if (group.trafficType !== nextGroup.trafficType && ampelIds.length === 0) {
       const first = createAmpel(nextGroup.trafficType);
       nextAmpeln = [...nextAmpeln, first];
       ampelIds = [first.id];
     }
-    if (nextGroup.trafficType === 'PEDESTRIAN' && ampelIds.length < 2) {
-      const missing = Array.from({ length: 2 - ampelIds.length }).map(() => createAmpel('PEDESTRIAN'));
+    const signalAmpelIds = ampelIds.filter((ampelId) => {
+      const ampel = nextAmpeln.find((entry) => entry.id === ampelId);
+      return Boolean(ampel && !isStructureLightAmpel(ampel));
+    });
+    if (nextGroup.trafficType === 'PEDESTRIAN' && signalAmpelIds.length < 2) {
+      const usedNames = nextAmpeln.flatMap((ampel) => [ampel.name, ampel.pedestrianName ?? '']);
+      const missing = Array.from({ length: 2 - signalAmpelIds.length }).map(() => {
+        const name = nextAmpelNameWithUsedNames('F', usedNames);
+        usedNames.push(name);
+        return createAmpel('PEDESTRIAN', name);
+      });
       nextAmpeln = [...nextAmpeln, ...missing];
       ampelIds = [...ampelIds, ...missing.map((ampel) => ampel.id)];
     }
@@ -1429,15 +1481,54 @@ function IntersectionCreateWizard() {
     updateDraft({ ampeln: draft.ampeln.map((ampel) => (ampel.id === id ? { ...ampel, ...patch } : ampel)) });
   }
 
+  function withAutomaticPedestrianSourceMatches(
+    ampeln: IntersectionWizardAmpelAppDto[],
+    changedAmpel: IntersectionWizardAmpelAppDto,
+    signalId: string,
+  ) {
+    const numericSignalId = positiveSignalId(signalId);
+    if (numericSignalId === undefined) return ampeln;
+    if (isVehicleSourceAmpel(changedAmpel)) {
+      return ampeln.map((ampel) =>
+        ampel.id !== changedAmpel.id &&
+        ampel.trafficType === 'PEDESTRIAN' &&
+        !ampel.sourceAmpelId &&
+        positiveSignalId(ampel.signalId) === numericSignalId
+          ? { ...ampel, sourceAmpelId: changedAmpel.id, signalId: undefined, modelName: '', modelConstant: '' }
+          : ampel,
+      );
+    }
+    if (changedAmpel.trafficType !== 'PEDESTRIAN' || changedAmpel.sourceAmpelId) return ampeln;
+    const sourceAmpel = ampeln.find(
+      (ampel) =>
+        ampel.id !== changedAmpel.id &&
+        !isStructureLightAmpel(ampel) &&
+        isVehicleSourceAmpel(ampel) &&
+        positiveSignalId(ampel.signalId) === numericSignalId,
+    );
+    if (!sourceAmpel) return ampeln;
+    return ampeln.map((ampel) =>
+      ampel.id === changedAmpel.id
+        ? { ...ampel, sourceAmpelId: sourceAmpel.id, signalId: undefined, modelName: '', modelConstant: '' }
+        : ampel,
+    );
+  }
+
   async function updateAmpelSignalId(ampel: IntersectionWizardAmpelAppDto, signalId: string) {
-    patchAmpel(ampel.id, { signalId });
     const lookup = await lookupSignal(signalId);
-    if (!lookup?.suggestedTrafficLightModel && !lookup?.suggestedTrafficLightModelConstant) return;
-    patchAmpel(ampel.id, {
+    const signalPatch = {
+      signalId,
       ...(lookup.suggestedTrafficLightModel ? { modelName: lookup.suggestedTrafficLightModel } : {}),
       ...(lookup.suggestedTrafficLightModelConstant
         ? { modelConstant: lookup.suggestedTrafficLightModelConstant }
         : {}),
+    };
+    updateDraft({
+      ampeln: withAutomaticPedestrianSourceMatches(
+        draft.ampeln.map((entry) => (entry.id === ampel.id ? { ...entry, ...signalPatch } : entry)),
+        { ...ampel, ...signalPatch },
+        signalId,
+      ),
     });
   }
 
@@ -1690,13 +1781,15 @@ function IntersectionCreateWizard() {
       .flatMap((entry) => entry.ampelIds)
       .map((ampelId) => draft.ampeln.find((entry) => entry.id === ampelId))
       .filter((entry): entry is IntersectionWizardAmpelAppDto =>
-        Boolean(entry && entry.id !== ampel.id && !isStructureLightAmpel(entry)),
+        Boolean(entry && entry.id !== ampel.id && !isStructureLightAmpel(entry) && isVehicleSourceAmpel(entry)),
       );
     if (!ampel.sourceAmpelId || sameApproachAmpeln.some((entry) => entry.id === ampel.sourceAmpelId)) {
       return sameApproachAmpeln;
     }
     const selected = draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId);
-    return selected && !isStructureLightAmpel(selected) ? [selected, ...sameApproachAmpeln] : sameApproachAmpeln;
+    return selected && !isStructureLightAmpel(selected) && isVehicleSourceAmpel(selected)
+      ? [selected, ...sameApproachAmpeln]
+      : sameApproachAmpeln;
   }
 
   function renderTurnDirectionToggle(
@@ -1767,7 +1860,12 @@ function IntersectionCreateWizard() {
     const errors = validation.ampelErrors[ampel.id] ?? {};
     const nameValue = ampelNameForSignalGroup(group, ampel);
     const namePatch =
-      group.trafficType === 'PEDESTRIAN' ? (name: string) => ({ pedestrianName: name }) : (name: string) => ({ name });
+      group.trafficType === 'PEDESTRIAN'
+        ? (name: string) => (isVehicleSourceAmpel(ampel) ? { pedestrianName: name } : { name, pedestrianName: name })
+        : (name: string) => ({ name });
+    const sourceAmpel = ampel.sourceAmpelId
+      ? draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId)
+      : undefined;
     return (
       <Stack spacing={1.25} sx={{ pt: 3, pb: 1.5, maxWidth: 720 }}>
         <FormTextfield
@@ -1789,61 +1887,68 @@ function IntersectionCreateWizard() {
               <Select
                 value={ampel.sourceAmpelId ?? '__OWN__'}
                 inputProps={{ 'aria-label': `Quelle ${ampel.name}` }}
-                onChange={(event) =>
+                onChange={(event) => {
+                  const sourceAmpelId = event.target.value === '__OWN__' ? undefined : event.target.value;
                   patchAmpel(ampel.id, {
-                    sourceAmpelId: event.target.value === '__OWN__' ? undefined : event.target.value,
-                  })
-                }
+                    sourceAmpelId,
+                    ...(sourceAmpelId ? { signalId: undefined, modelName: '', modelConstant: '' } : {}),
+                    ...(!sourceAmpelId && !modelSelectValue(ampel) ? defaultModelForType('PEDESTRIAN') : {}),
+                  });
+                }}
               >
                 <MenuItem value="__OWN__">Eigenes Signal</MenuItem>
                 {sourceOptions.map((option) => (
                   <MenuItem key={option.id} value={option.id}>
-                    {option.name}
+                    {sourceSignalOptionLabel(option)}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </CompactToggleField>
         )}
-        <FormTextfield
-          label="Signal-ID"
-          value={ampel.signalId ?? ''}
-          size="small"
-          infoText="Signal-ID aus den Objekteigenschaften in EEP."
-          errorTexts={errors.signalId}
-          inputProps={{ inputMode: 'numeric', 'aria-label': `Signal-ID ${ampel.name}` }}
-          onBlur={(event) => void updateAmpelSignalId(ampel, event.target.value)}
-          onChange={(event) => patchAmpel(ampel.id, { signalId: event.target.value })}
-        />
-        <CompactToggleField
-          label="Signal-Modell"
-          errorTexts={errors.model}
-          infoText="Notwendig für die Anzeige von rot, gelb, grün, usw."
-        >
-          <FormControl size="small" fullWidth error={Boolean(errors.model?.length)}>
-            <Select
-              value={selectedModelValue}
-              inputProps={{ 'aria-label': `Signal-Modell ${ampel.name}` }}
-              onChange={(event) => {
-                const value = event.target.value;
-                const option = options.find((entry) => (entry.model.luaConstant ?? entry.model.name) === value);
-                patchAmpel(ampel.id, {
-                  modelName: option?.model.name ?? value,
-                  modelConstant: option?.model.luaConstant ?? value,
-                });
-              }}
+        {!sourceAmpel && (
+          <>
+            <FormTextfield
+              label="Signal-ID"
+              value={ampel.signalId ?? ''}
+              size="small"
+              infoText="Signal-ID aus den Objekteigenschaften in EEP."
+              errorTexts={errors.signalId}
+              inputProps={{ inputMode: 'numeric', 'aria-label': `Signal-ID ${ampel.name}` }}
+              onBlur={(event) => void updateAmpelSignalId(ampel, event.target.value)}
+              onChange={(event) => patchAmpel(ampel.id, { signalId: event.target.value })}
+            />
+            <CompactToggleField
+              label="Signal-Modell"
+              errorTexts={errors.model}
+              infoText="Notwendig für die Anzeige von rot, gelb, grün, usw."
             >
-              {options.map((option) => {
-                const value = option.model.luaConstant ?? option.model.name;
-                return (
-                  <MenuItem key={value} value={value}>
-                    {compactTrafficLightModelLabel(option.model)}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-        </CompactToggleField>
+              <FormControl size="small" fullWidth error={Boolean(errors.model?.length)}>
+                <Select
+                  value={selectedModelValue}
+                  inputProps={{ 'aria-label': `Signal-Modell ${ampel.name}` }}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    const option = options.find((entry) => (entry.model.luaConstant ?? entry.model.name) === value);
+                    patchAmpel(ampel.id, {
+                      modelName: option?.model.name ?? value,
+                      modelConstant: option?.model.luaConstant ?? value,
+                    });
+                  }}
+                >
+                  {options.map((option) => {
+                    const value = option.model.luaConstant ?? option.model.name;
+                    return (
+                      <MenuItem key={value} value={value}>
+                        {compactTrafficLightModelLabel(option.model)}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            </CompactToggleField>
+          </>
+        )}
       </Stack>
     );
   }
@@ -1948,6 +2053,9 @@ function IntersectionCreateWizard() {
                   const isExpanded = expandedAmpelId === ampel.id;
                   const errorCount = validationErrorCount(validation.ampelErrors[ampel.id]);
                   const displayName = ampelNameForSignalGroup(group, ampel);
+                  const sourceAmpel = ampel.sourceAmpelId
+                    ? draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId)
+                    : undefined;
                   return (
                     <ExpandableEditorTableRow
                       key={ampel.id}
@@ -1970,8 +2078,10 @@ function IntersectionCreateWizard() {
                           <Box component="span">{displayName || '-'}</Box>
                         </Badge>
                       </TableCell>
-                      <TableCell>{ampel.signalId || '-'}</TableCell>
-                      <TableCell>{modelSelectValue(ampel) || '-'}</TableCell>
+                      <TableCell>{sourceAmpel?.signalId || ampel.signalId || '-'}</TableCell>
+                      <TableCell>
+                        {sourceAmpel ? `${sourceAmpel.name} als ${displayName}` : modelSelectValue(ampel) || '-'}
+                      </TableCell>
                     </ExpandableEditorTableRow>
                   );
                 })

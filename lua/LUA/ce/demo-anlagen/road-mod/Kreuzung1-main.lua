@@ -20,12 +20,12 @@ do
     local c1K1 = TrafficLight:newForSignal("K1", 16, TrafficLightModel.JS2_3er_mit_FG)
     local c1K2 = TrafficLight:newForSignal("K2", 18, TrafficLightModel.JS2_3er_ohne_FG)
     local c1K3 = TrafficLight:newForSignal("K3", 11, TrafficLightModel.JS2_3er_mit_FG)
-    local c1K5 = TrafficLight:newForSignal("K5", 16, TrafficLightModel.JS2_3er_mit_FG)
+    local c1K4 = TrafficLight:newForSignal("K4", 17, TrafficLightModel.JS2_3er_ohne_FG)
     local c1K6 = TrafficLight:newForSignal("K6", 20, TrafficLightModel.JS2_3er_mit_FG)
     local c1K7 = TrafficLight:newForSignal("K7", 8, TrafficLightModel.JS2_3er_mit_FG)
     local c1S1 = TrafficLight:newForLightStructure("S1",
                                                    "#29_Straba Signal Halt",
-                                                   "#27_Straba Signal anhalten",
+                                                   "#28_Straba Signal geradeaus",
                                                    "#27_Straba Signal anhalten",
                                                    "#26_Straba Signal A",
                                                    "#25_Straba Signal Gehäuse 4",
@@ -33,8 +33,8 @@ do
     )
 
     -- Fussg.-Ampeln
-    local c1F1 = TrafficLight:newForSignal("F1", 11, TrafficLightModel.JS2_3er_mit_FG)
-    local c1K4 = TrafficLight:newForSignal("K4", 17, TrafficLightModel.JS2_3er_ohne_FG)
+    local c1F1 = c1K1:withPedestrian("F1")
+    local c1F2 = c1K3:withPedestrian("F2")
 
     -- Fahrspur-Ampeln
     local c1Lane1Signal = TrafficLight:newForSignal("lane1Sig", 12, TrafficLightModel.Unsichtbar_2er)
@@ -70,13 +70,7 @@ do
         :setScriptVariableName("c1SgWestCarLeft")
         :setApproach(Lane.Approach.WEST)
         :setTurnDirections(Lane.Directions.LEFT)
-        :addVehicleSignals(c1K3)
-    local c1SgWestPed = c1
-        :newSignalGroup("sgWestPed")
-        :setScriptVariableName("c1SgWestPed")
-        :setApproach(Lane.Approach.WEST)
-        :addPedestrianCrossings(c1PedWest)
-        :addPedestrianSignals(c1F1)
+        :addVehicleSignals(c1K3, c1K4)
     local c1SgNorthCarLeftRight = c1
         :newSignalGroup("sgNorthCarLeftRight")
         :setScriptVariableName("c1SgNorthCarLeftRight")
@@ -89,6 +83,12 @@ do
         :setApproach(Lane.Approach.WEST)
         :setTurnDirections(Lane.Directions.STRAIGHT)
         :addTramSignals(c1S1)
+    local c1SgWestPed = c1
+        :newSignalGroup("sgWestPed")
+        :setScriptVariableName("c1SgWestPed")
+        :setApproach(Lane.Approach.WEST)
+        :addPedestrianCrossings(c1PedWest)
+        :addPedestrianSignals(c1F1, c1F2)
 
     -- Zuordnung der Ampelgruppen zu Fahrspuren
     c1Lane1:driveOnDefaultSignalGroups(c1SgWestCarStraight)
@@ -104,8 +104,8 @@ do
         )
     c1:newPhase("P2")
         :addSignalGroups(
-            c1SgWestPed,
-            c1SgNorthCarLeftRight
+            c1SgNorthCarLeftRight,
+            c1SgWestPed
         )
     c1:newPhase("P3")
         :addSignalGroups(

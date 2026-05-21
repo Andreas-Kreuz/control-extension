@@ -29,7 +29,7 @@ const displayDirections: DisplayDirection[] = ['LEFT', 'STRAIGHT', 'RIGHT'];
 const signalWidth = 32;
 const trafficLightWidth = 32;
 const signalColumnGap = 1;
-const signOverlap = 2;
+const signOverlap = 0;
 const maxSignalGroupWidth = signalWidth * 3;
 const maxSignalGroupGaps = 2;
 const sizeScale = {
@@ -90,21 +90,40 @@ function signalGroupDisplayItems(
 
   const directions = normalizedDisplayDirections(turnDirections);
 
-  if (trafficType === 'CAR' && directions.length === 2 && directions.includes('STRAIGHT')) {
-    const sideDirection = directions.find((direction) => direction !== 'STRAIGHT');
+  if (trafficType === 'CAR') {
+    const sideDirections = directions.filter((direction) => direction !== 'STRAIGHT');
+    const hasLeftAndRight = sideDirections.includes('LEFT') && sideDirections.includes('RIGHT');
 
-    if (sideDirection === 'LEFT' || sideDirection === 'RIGHT') {
+    if (directions.length === 2 && hasLeftAndRight) {
       return [
         {
-          key: `car-straight-${sideDirection.toLowerCase()}`,
-          signSrc: sideDirection === 'LEFT' ? '/assets/sign-straight-left.svg' : '/assets/sign-straight-right.svg',
-          signAlt: sideDirection === 'LEFT' ? 'Geradeaus und links' : 'Geradeaus und rechts',
+          key: 'car-left-right',
+          signSrc: '/assets/sign-left-right.svg',
+          signAlt: 'Links und rechts',
           trafficLightSrc: '/assets/traffic-lights/tl-car-all.png',
           trafficLightAlt: 'Auto-Ampel',
           trafficLightWidth,
           trafficLightHeight: 64,
         },
       ];
+    }
+
+    if (directions.length === 2 && directions.includes('STRAIGHT')) {
+      const sideDirection = sideDirections[0];
+
+      if (sideDirection === 'LEFT' || sideDirection === 'RIGHT') {
+        return [
+          {
+            key: `car-straight-${sideDirection.toLowerCase()}`,
+            signSrc: sideDirection === 'LEFT' ? '/assets/sign-straight-left.svg' : '/assets/sign-straight-right.svg',
+            signAlt: sideDirection === 'LEFT' ? 'Geradeaus und links' : 'Geradeaus und rechts',
+            trafficLightSrc: '/assets/traffic-lights/tl-car-all.png',
+            trafficLightAlt: 'Auto-Ampel',
+            trafficLightWidth,
+            trafficLightHeight: 64,
+          },
+        ];
+      }
     }
   }
 

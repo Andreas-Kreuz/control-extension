@@ -124,7 +124,7 @@ function ampelVariableName(
   intersectionPrefix: string,
   used: Set<string>,
 ): string {
-  const suffix = upperFirst(sanitizeIdentifier(ampel.name, `K${index + 1}`));
+  const suffix = upperFirst(sanitizeIdentifier(trafficLightName(ampel), `K${index + 1}`));
   return uniqueIdentifier(`${intersectionPrefix}${suffix}`, `${intersectionPrefix}K${index + 1}`, used);
 }
 
@@ -326,6 +326,12 @@ function ampelKind(ampel: IntersectionWizardAmpelAppDto): NonNullable<Intersecti
     : 'SIGNAL';
 }
 
+function trafficLightName(ampel: IntersectionWizardAmpelAppDto): string {
+  return ampel.trafficType === 'PEDESTRIAN' || ampel.use === 'PEDESTRIAN_ONLY'
+    ? (ampel.pedestrianName ?? ampel.name)
+    : ampel.name;
+}
+
 function lightStructures(ampel: IntersectionWizardAmpelAppDto | IntersectionWizardLaneSignalAppDto) {
   return ampel.lightStructures ?? [];
 }
@@ -345,7 +351,7 @@ function trafficLightBaseConstructor(ampel: IntersectionWizardAmpelAppDto): stri
     return plainLightStructureConstructor(ampel.name, structure);
   }
   const signalId = positiveSignalId(ampel.signalId) ?? 0;
-  return `TrafficLight:newForSignal(${luaString(ampel.name)}, ${signalId}, ${modelExpression(ampel)})`;
+  return `TrafficLight:newForSignal(${luaString(trafficLightName(ampel))}, ${signalId}, ${modelExpression(ampel)})`;
 }
 
 function laneSignalBaseConstructor(signal: IntersectionWizardLaneSignalAppDto): string {
@@ -573,24 +579,8 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
   const pedestrianAmpelLines: { variable: string; line: string }[] = [];
 
   draft.ampeln.forEach((ampel, index) => {
+    if (ampel.use === 'PEDESTRIAN_ONLY' || ampel.trafficType === 'PEDESTRIAN') return;
     const variable = ampelVariableName(ampel, index, prefix, usedAmpelVars);
-    const sourceVariable = ampel.sourceAmpelId ? vehicleAmpelVars.get(ampel.sourceAmpelId) : undefined;
-    if (ampel.sourceAmpelId && sourceVariable && ampel.trafficType === 'PEDESTRIAN') {
-      pedestrianAmpelLines.push({
-        variable,
-        line: `local ${variable} = ${sourceVariable}:asPedestrianSignal(${luaString(ampel.name)})`,
-      });
-      pedestrianAmpelVars.set(ampel.id, variable);
-      return;
-    }
-    if (ampel.use === 'PEDESTRIAN_ONLY' || ampel.trafficType === 'PEDESTRIAN') {
-      pedestrianAmpelLines.push({
-        variable,
-        line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
-      });
-      pedestrianAmpelVars.set(ampel.id, variable);
-      return;
-    }
     ampelLines.push({
       variable,
       line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
@@ -605,7 +595,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       pedestrianAmpelVars.set(ampel.id, pedestrianVariable);
       pedestrianAmpelLines.push({
         variable: pedestrianVariable,
-        line: `local ${pedestrianVariable} = ${variable}:asPedestrianSignal(${luaString(ampel.pedestrianName || pedestrianVariable)})`,
+        line: `local ${pedestrianVariable} = ${variable}:withPedestrian(${luaString(ampel.pedestrianName || pedestrianVariable)})`,
       });
     }
     const extraLightStructures = lightStructures(ampel).slice(isPlainLightStructure(ampel) ? 1 : 0);
@@ -622,6 +612,25 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       return lightVariable;
     });
     if (extraLightVars.length > 0) lightStructureAmpelVars.set(ampel.id, extraLightVars);
+  });
+  draft.ampeln.forEach((ampel, index) => {
+    if (ampel.use !== 'PEDESTRIAN_ONLY' && ampel.trafficType !== 'PEDESTRIAN') return;
+    const variable = ampelVariableName(ampel, index, prefix, usedAmpelVars);
+    const sourceVariable = ampel.sourceAmpelId ? vehicleAmpelVars.get(ampel.sourceAmpelId) : undefined;
+    if (ampel.sourceAmpelId && sourceVariable) {
+      const name = trafficLightName(ampel);
+      pedestrianAmpelLines.push({
+        variable,
+        line: `local ${variable} = ${sourceVariable}:withPedestrian(${luaString(name)})`,
+      });
+      pedestrianAmpelVars.set(ampel.id, variable);
+      return;
+    }
+    pedestrianAmpelLines.push({
+      variable,
+      line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
+    });
+    pedestrianAmpelVars.set(ampel.id, variable);
   });
   bodyLines.push(...sortedDeclarationLines(ampelLines));
   if (pedestrianAmpelLines.length > 0) {

@@ -1450,7 +1450,7 @@ function testCurrentIntersectionDraftRecreatesHohenfurtC1ControlModel(): void {
     assert.match(lua, new RegExp(`TrafficLight:newForLightStructure\\("${name}"`)),
   );
   ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7'].forEach((name) =>
-    assert.match(lua, new RegExp(`:asPedestrianSignal\\("${name}"\\)`)),
+    assert.match(lua, new RegExp(`:withPedestrian\\("${name}"\\)`)),
   );
   assert.match(lua, /TrafficLight:newForSignal\("F8", 94, TrafficLightModel\.JS2_2er_nur_FG\)/);
   assert.match(lua, /newLane\("Spur 4", c1Lane\d+Signal\)/);
@@ -1493,6 +1493,67 @@ function laneTrafficTypeForTest(
       .map((assignment) => draft.signalGroups.find((group) => group.id === assignment.signalGroupId)?.trafficType)
       .find((trafficType) => trafficType === 'TRAM') ?? 'CAR'
   );
+}
+
+function testCodegenReusesVehicleSignalForPedestrianSource(): void {
+  const draft = makeDraft();
+  draft.manualLuaVariableNames = false;
+  draft.lanes = [];
+  draft.ampeln = [
+    {
+      id: 'ampel-ped-1',
+      name: 'F5',
+      pedestrianName: 'F6',
+      sourceAmpelId: 'ampel-k4',
+      use: 'PEDESTRIAN_ONLY',
+      trafficType: 'PEDESTRIAN',
+      modelName: '',
+      modelConstant: '',
+    },
+    {
+      id: 'ampel-k4',
+      name: 'K4',
+      signalId: '17',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'CAR',
+      modelName: 'Ampel_3er_XXX_ohne_FG',
+      modelConstant: 'JS2_3er_ohne_FG',
+    },
+  ];
+  draft.signalGroups = [
+    {
+      id: 'sg-1',
+      name: 'sgSouthCarStraight',
+      approach: 'SOUTH',
+      turnDirections: ['STRAIGHT'],
+      trafficType: 'CAR',
+      showRequests: false,
+      ampelIds: ['ampel-k4'],
+    },
+    {
+      id: 'sg-2',
+      name: 'sgSouthPed',
+      approach: 'SOUTH',
+      turnDirections: [],
+      trafficType: 'PEDESTRIAN',
+      showRequests: false,
+      pedestrianCrossingName: 'Furt Süd',
+      ampelIds: ['ampel-ped-1'],
+    },
+  ];
+  draft.phases = [];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+  const trafficLightBlock = lua.slice(lua.indexOf('-- Ampeln'), lua.indexOf('-- Fussg.-Ampeln'));
+  const pedestrianBlock = lua.slice(lua.indexOf('-- Fussg.-Ampeln'), lua.indexOf('-- Fussgaengerfurten'));
+
+  assert.match(
+    trafficLightBlock,
+    /local c1K4 = TrafficLight:newForSignal\("K4", 17, TrafficLightModel\.JS2_3er_ohne_FG\)/,
+  );
+  assert.match(pedestrianBlock, /local c1F6 = c1K4:withPedestrian\("F6"\)/);
+  assert.doesNotMatch(pedestrianBlock, /TrafficLight:newForSignal\("K4"/);
+  assert.doesNotMatch(pedestrianBlock, /TrafficLight:newForSignal\("F6"/);
 }
 
 async function testPersistentServerStatePreservesOtherKeys(): Promise<void> {
@@ -1553,6 +1614,10 @@ export async function run(): Promise<void> {
     testCodegenWarnsForMultipleGroupsWithoutDefault,
   );
   await runTest('intersection wizard codegen creates pedestrian crossings', testCodegenCreatesPedestrianCrossings);
+  await runTest(
+    'intersection wizard codegen reuses vehicle signals for pedestrian sources',
+    testCodegenReusesVehicleSignalForPedestrianSource,
+  );
   await runTest(
     'current intersection import uses signal group metadata and reuses lane signal',
     testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal,
