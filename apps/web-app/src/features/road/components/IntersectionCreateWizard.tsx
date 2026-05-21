@@ -515,6 +515,16 @@ function sourceSignalOptionLabel(ampel: IntersectionWizardAmpelAppDto): ReactNod
   );
 }
 
+function pedestrianSourceAmpel(
+  group: IntersectionWizardSignalGroupAppDto,
+  ampel: IntersectionWizardAmpelAppDto,
+  ampeln: IntersectionWizardAmpelAppDto[],
+): IntersectionWizardAmpelAppDto | undefined {
+  if (group.trafficType !== 'PEDESTRIAN') return undefined;
+  if (ampel.sourceAmpelId) return ampeln.find((entry) => entry.id === ampel.sourceAmpelId);
+  return isVehicleSourceAmpel(ampel) && ampel.use === 'VEHICLE_AND_PEDESTRIAN' ? ampel : undefined;
+}
+
 function WizardSectionTitle(props: { children: ReactNode; helper: string }) {
   return (
     <Stack spacing={0.25}>
@@ -1781,15 +1791,23 @@ function IntersectionCreateWizard() {
       .flatMap((entry) => entry.ampelIds)
       .map((ampelId) => draft.ampeln.find((entry) => entry.id === ampelId))
       .filter((entry): entry is IntersectionWizardAmpelAppDto =>
-        Boolean(entry && entry.id !== ampel.id && !isStructureLightAmpel(entry) && isVehicleSourceAmpel(entry)),
+        Boolean(
+          entry &&
+          !isStructureLightAmpel(entry) &&
+          isVehicleSourceAmpel(entry) &&
+          (entry.id !== ampel.id || pedestrianSourceAmpel(group, ampel, draft.ampeln)?.id === entry.id),
+        ),
       );
-    if (!ampel.sourceAmpelId || sameApproachAmpeln.some((entry) => entry.id === ampel.sourceAmpelId)) {
-      return sameApproachAmpeln;
+    const uniqueSameApproachAmpeln = sameApproachAmpeln.filter(
+      (entry, index, entries) => entries.findIndex((candidate) => candidate.id === entry.id) === index,
+    );
+    if (!ampel.sourceAmpelId || uniqueSameApproachAmpeln.some((entry) => entry.id === ampel.sourceAmpelId)) {
+      return uniqueSameApproachAmpeln;
     }
     const selected = draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId);
     return selected && !isStructureLightAmpel(selected) && isVehicleSourceAmpel(selected)
-      ? [selected, ...sameApproachAmpeln]
-      : sameApproachAmpeln;
+      ? [selected, ...uniqueSameApproachAmpeln]
+      : uniqueSameApproachAmpeln;
   }
 
   function renderTurnDirectionToggle(
@@ -1863,9 +1881,7 @@ function IntersectionCreateWizard() {
       group.trafficType === 'PEDESTRIAN'
         ? (name: string) => (isVehicleSourceAmpel(ampel) ? { pedestrianName: name } : { name, pedestrianName: name })
         : (name: string) => ({ name });
-    const sourceAmpel = ampel.sourceAmpelId
-      ? draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId)
-      : undefined;
+    const sourceAmpel = pedestrianSourceAmpel(group, ampel, draft.ampeln);
     return (
       <Stack spacing={1.25} sx={{ pt: 3, pb: 1.5, maxWidth: 720 }}>
         <FormTextfield
@@ -1885,10 +1901,11 @@ function IntersectionCreateWizard() {
           >
             <FormControl size="small" fullWidth error={Boolean(errors.sourceAmpelId?.length)}>
               <Select
-                value={ampel.sourceAmpelId ?? '__OWN__'}
+                value={sourceAmpel?.id ?? '__OWN__'}
                 inputProps={{ 'aria-label': `Quelle ${ampel.name}` }}
                 onChange={(event) => {
                   const sourceAmpelId = event.target.value === '__OWN__' ? undefined : event.target.value;
+                  if (sourceAmpelId === ampel.id) return;
                   patchAmpel(ampel.id, {
                     sourceAmpelId,
                     ...(sourceAmpelId ? { signalId: undefined, modelName: '', modelConstant: '' } : {}),
@@ -2053,9 +2070,7 @@ function IntersectionCreateWizard() {
                   const isExpanded = expandedAmpelId === ampel.id;
                   const errorCount = validationErrorCount(validation.ampelErrors[ampel.id]);
                   const displayName = ampelNameForSignalGroup(group, ampel);
-                  const sourceAmpel = ampel.sourceAmpelId
-                    ? draft.ampeln.find((entry) => entry.id === ampel.sourceAmpelId)
-                    : undefined;
+                  const sourceAmpel = pedestrianSourceAmpel(group, ampel, draft.ampeln);
                   return (
                     <ExpandableEditorTableRow
                       key={ampel.id}
