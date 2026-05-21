@@ -100,7 +100,7 @@ function HubOptionDefaults.create()
                     light = "always",
                     smoke = "always",
                     fire = "always",
-                    gsbname = "oninterest"
+                    gsbname = "always"
                 }
             },
             scenario = {

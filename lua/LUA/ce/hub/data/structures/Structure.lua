@@ -54,12 +54,13 @@ function Structure:setGsbname(name)
     self.gsbname = name
 end
 
----@param name string
+---@param id string
+---@param name string|nil
 ---@return Structure
-function Structure:new(name)
+function Structure:new(id, name)
     local o = {
-        id = name,
-        name = name,
+        id = id,
+        name = name or id,
         pos_x = 0,
         pos_y = 0,
         pos_z = 0,

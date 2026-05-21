@@ -3,6 +3,11 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
 
     local TEMP_FILE = "spec/ce/hub/eep/_anl3_discovery_helper_tmp.xml"
     local originalEEPLoadData
+    local originalEEPLng
+
+    before_each(function ()
+        originalEEPLng = _G.EEPLng
+    end)
 
     local function writeTempXml(content)
         local f = assert(io.open(TEMP_FILE, "w"))
@@ -25,6 +30,8 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
 
     after_each(function ()
         rawset(_G, "EEPLoadData", originalEEPLoadData)
+        rawset(_G, "EEPLng", originalEEPLng)
+        clearModule("ce.hub.eep.StructureResourceParser")
         os.remove(TEMP_FILE)
     end)
 
@@ -61,7 +68,8 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
                                                         "</Zugverband>",
                                                         "</Fuhrpark>",
                                                         '<Gebaeudesammlung><Immobile name="#12" gsbname="Haus.3dm"/>',
-                                                        '</Gebaeudesammlung>',
+                                                        '<Immobile ImmoIdx="13" gsbname="Baum.3dm"/>',
+                                                        "</Gebaeudesammlung>",
                                                         '<EEPLua LUAPath="\\Topology.lua"/>',
                                                         "</sutrackp>"
                                                     }, ""))
@@ -86,6 +94,9 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
         assert.equals(31, dt.signals[1].keyId)
         assert.equals(44, dt.switches[1].keyId)
         assert.equals("#12", dt.structures[1].name)
+        assert.equals("#13", dt.structures[2].id)
+        assert.equals("#13", dt.structures[2].name)
+        assert.equals("Baum.3dm", dt.structures[2].gsbname)
         assert.equals("#Train A", dt.trains[1].name)
         assert.equals("road", dt.trains[1].trackType)
         assert.same({ ["33"] = 33 }, dt.trains[1].onTracks)
@@ -93,5 +104,71 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
         assert.equals("STRASSE\\BUS\\A.3dm", dt.rollingStocks[1].model)
         assert.equals(0, dt.rollingStocks[1].positionInTrain)
         assert.equals("enter", dt.contacts[1].luaFn)
+    end)
+
+    it("builds Lua structure names from ImmoIdx and localized model ini names", function ()
+        local calls = 0
+        rawset(_G, "EEPLng", "ENG")
+        package.loaded["ce.hub.eep.StructureResourceParser"] = {
+            infoForGsbname = function (gsbname)
+                calls = calls + 1
+                assert.equals("\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm", gsbname)
+                return {
+                    modelNamesByLanguage = {
+                        ENG = "Tram Signal casing Mast 4",
+                        GER = "Straba Signal Geh\228use Mast 4"
+                    }
+                }
+            end,
+            modelNameForLanguage = function (info, language)
+                return info.modelNamesByLanguage[language] or info.modelNamesByLanguage.GER
+            end
+        }
+
+        local dt = buildDiscoveryTable(table.concat({
+                                                        '<?xml version="1.0" encoding="UTF-8"?>',
+                                                        "<sutrackp><Gebaeudesammlung>",
+                                                        '<Immobile ImmoIdx="3026"',
+                                                        ' gsbname="\\Immobilien\\Verkehr\\Signale\\' ..
+                                                        'StrabaSigGM_4_MA1.3dm"/>',
+                                                        '<Immobile ImmoIdx="3027"',
+                                                        ' gsbname="\\Immobilien\\Verkehr\\Signale\\' ..
+                                                        'StrabaSigGM_4_MA1.3dm"/>',
+                                                        "</Gebaeudesammlung></sutrackp>"
+                                                    }, ""))
+
+        assert.equals("#3026", dt.structures[1].id)
+        assert.equals("#3026_Tram Signal casing Mast 4", dt.structures[1].name)
+        assert.equals("#3027", dt.structures[2].id)
+        assert.equals("#3027_Tram Signal casing Mast 4", dt.structures[2].name)
+        assert.equals(1, calls)
+    end)
+
+    it("falls back to German model names for unknown EEP languages", function ()
+        local requestedLanguage
+        rawset(_G, "EEPLng", "ITA")
+        package.loaded["ce.hub.eep.StructureResourceParser"] = {
+            infoForGsbname = function ()
+                return {
+                    modelNamesByLanguage = {
+                        GER = "Straba Signal Geh\228use Mast 4"
+                    }
+                }
+            end,
+            modelNameForLanguage = function (info, language)
+                requestedLanguage = language
+                return info.modelNamesByLanguage[language] or info.modelNamesByLanguage.GER
+            end
+        }
+
+        local dt = buildDiscoveryTable(table.concat({
+                                                        '<?xml version="1.0" encoding="UTF-8"?>',
+                                                        "<sutrackp><Gebaeudesammlung>",
+                                                        '<Immobile ImmoIdx="3026" gsbname="Signal.3dm"/>',
+                                                        "</Gebaeudesammlung></sutrackp>"
+                                                    }, ""))
+
+        assert.equals("GER", requestedLanguage)
+        assert.equals("#3026_Straba Signal Geh\228use Mast 4", dt.structures[1].name)
     end)
 end)

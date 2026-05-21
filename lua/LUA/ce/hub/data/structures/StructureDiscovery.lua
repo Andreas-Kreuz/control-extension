@@ -75,9 +75,10 @@ function StructureDiscovery.initFromAnl3(tableOfAnl3)
 
     local structures = {}
     for _, entry in ipairs(tableOfAnl3.structures or {}) do
-        if entry.name then
-            local structure = Structure:new(entry.name)
+        if entry.id or entry.name then
+            local structure = Structure:new(entry.id or entry.name, entry.name)
             structure:setGsbname(entry.gsbname)
+            applyStaticUpdate(structure)
             structures[#structures + 1] = structure
         end
     end

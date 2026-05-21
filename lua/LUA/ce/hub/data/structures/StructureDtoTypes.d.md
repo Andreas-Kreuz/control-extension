@@ -21,6 +21,7 @@
 | `light`         | `boolean` |
 | `smoke`         | `boolean` |
 | `fire`          | `boolean` |
+| `gsbname`       | `string?` |
 
 Hinweis:
 

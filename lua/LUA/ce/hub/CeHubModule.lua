@@ -149,14 +149,19 @@ local function pathsEqual(pathA, pathB)
 end
 
 local function runAnl3Discovery(path)
+    local startTime = os.clock()
+    print(string.format("[CeHubModule] Anlage laden: %s", path))
+    EEPShowInfoTextTop(0.8, 1, 0.8, 1, 10, 1, string.format(
+        "Lade Anlage ..."
+    ))
     local result = buildAnl3Result(path)
     if not path then return result end
 
     local tableOfAnl3, err = Anl3ToTable.loadAnlage(path)
     if tableOfAnl3 then
-        print(string.format("[CeHubModule] Successfully loaded Anl3 from %s", path))
+        print(string.format("[CeHubModule] Anlage laden erfolgreich: %s", path))
     else
-        print(string.format("[CeHubModule] Anl3 load failed: %s", tostring(err)))
+        print(string.format("[CeHubModule] Laden der Anlage fehlgeschlagen: %s", tostring(err)))
         result.error = err
         return result
     end
@@ -181,6 +186,14 @@ local function runAnl3Discovery(path)
     local coverage = Anl3DiscoveryHelper.fillDiscoveries(tableOfAnl3)
     result.success = true
     result.coverage = coverage or {}
+    EEPShowInfoTextTop(0.8, 1, 0.8, 1, 10, 1, string.format(
+        "Anlage geladen in %.2f Sekunden.",
+        os.clock() - startTime
+    ))
+    print(string.format(
+        "[CeHubModule] Anlage geladen in %.2f Sekunden.",
+        os.clock() - startTime
+    ))
     return result
 end
 

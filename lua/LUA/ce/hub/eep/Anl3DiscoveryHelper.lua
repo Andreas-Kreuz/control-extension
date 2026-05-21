@@ -7,6 +7,7 @@ local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
 local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
 local ContactDiscovery = require("ce.hub.data.contacts.ContactDiscovery")
 local RouteDiscovery = require("ce.hub.data.routes.RouteDiscovery")
+local StructureResourceParser = require("ce.hub.eep.StructureResourceParser")
 
 local Anl3DiscoveryHelper = {}
 
@@ -49,6 +50,47 @@ end
 
 local function valueAsNumber(value)
     return value and tonumber(value) or nil
+end
+
+local function currentEepLanguage()
+    local language = type(EEPLng) == "string" and string.upper(EEPLng) or ""
+    if language == "ENG" or language == "GER" or language == "POL" or language == "FRA" then return language end
+    return "GER"
+end
+
+local function structureIdFromImmobileAttrs(attrs)
+    if attrs.ImmoIdx then return "#" .. tostring(attrs.ImmoIdx) end
+    return attrs.name or attrs.Name
+end
+
+local function modelNameFromGsbname(gsbname, modelNameCache)
+    if type(gsbname) ~= "string" or gsbname == "" then return nil end
+
+    if modelNameCache[gsbname] == nil then
+        local info = StructureResourceParser.infoForGsbname(gsbname)
+        modelNameCache[gsbname] =
+            StructureResourceParser.modelNameForLanguage(info, currentEepLanguage()) or false
+    end
+
+    return modelNameCache[gsbname] or nil
+end
+
+local function structureInfoFromImmobileAttrs(attrs, modelNameCache)
+    local id = structureIdFromImmobileAttrs(attrs)
+    if not id then return nil end
+
+    local modelName = modelNameFromGsbname(attrs.gsbname, modelNameCache)
+    if modelName and modelName ~= "" then
+        return {
+            id = id,
+            name = id .. "_" .. modelName
+        }
+    end
+
+    return {
+        id = id,
+        name = attrs.name or attrs.Name or id
+    }
 end
 
 local function buildDiscoveryTable(root)
@@ -195,14 +237,18 @@ local function buildDiscoveryTable(root)
 
     local gebaeudesammlungen = findAll(root, "Gebaeudesammlung")
     if #gebaeudesammlungen > 0 then dt.coverage.structures = true end
+    local structureModelNameCache = {}
     for _, gebaeude in ipairs(gebaeudesammlungen) do
         for _, immobilie in ipairs(gebaeude.children) do
-            if (immobilie.tag == "Immobilie" or immobilie.tag == "Immobile")
-                and (immobilie.attrs.name or immobilie.attrs.Name) then
-                dt.structures[#dt.structures + 1] = {
-                    name = immobilie.attrs.name or immobilie.attrs.Name,
-                    gsbname = immobilie.attrs.gsbname
-                }
+            if immobilie.tag == "Immobilie" or immobilie.tag == "Immobile" then
+                local structureInfo = structureInfoFromImmobileAttrs(immobilie.attrs, structureModelNameCache)
+                if structureInfo then
+                    dt.structures[#dt.structures + 1] = {
+                        id = structureInfo.id,
+                        name = structureInfo.name,
+                        gsbname = immobilie.attrs.gsbname
+                    }
+                end
             end
         end
     end
