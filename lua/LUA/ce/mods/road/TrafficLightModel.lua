@@ -109,7 +109,13 @@ TrafficLightModel.NP1_3er_ohne_FG = TrafficLightModel:new("Ampel_NP1_ohne_FG", 1
 -- Fuer die Ampeln von JS2 - http://eepshopping.de - Ampel-Baukasten (V80NJS20039)
 -- Diese Signale sind teilweise mit und ohne Fussgaenger
 TrafficLightModel.JS2_2er_nur_FG = TrafficLightModel:new("Ak_Ampel_2er_nur_FG", 1, 1, 1, 1, 2, 3, 3, 4)
-TrafficLightModel.JS2_2er_OFF_YELLOW_GREEN = TrafficLightModel:new("Ampel_2er_Aus_Gelb-Grün", 1, 3, 5, 1, 1, 2, 6, 4)
+TrafficLightModel.JS2_2er_gelb_gruen_aus = TrafficLightModel:new("Ampel_2er_Aus_Gelb-Grün", 1, 3, 5, 1, 1, 2, 6,
+                                                                  4)
+TrafficLightModel.JS2_2er_OFF_YELLOW_GREEN = TrafficLightModel.JS2_2er_gelb_gruen_aus
+TrafficLightModel.JS2_2er_rot_gelb_aus = TrafficLightModel:new("Ampel_2er_Rot_Gelb_Aus", 1, 3, 2, 4, 1, 3,
+                                                                5, 3)
+TrafficLightModel.JS2_2er_rot_gruen = TrafficLightModel:new("Ampel_2er_Rot_Gruen", 1, 2, 1, 1, 1, 3, 3, 2)
+TrafficLightModel.JS2_1er_gruen = TrafficLightModel:new("Ampel_1er_Gruen", 1, 2, 1, 1, 1, 1, 1, 2)
 TrafficLightModel.JS2_3er_mit_FG = TrafficLightModel:new("Ampel_3er_XXX_mit_FG", 1, 3, 5, 2, 6, 7, 8, 4)
 TrafficLightModel.JS2_3er_ohne_FG = TrafficLightModel:new("Ampel_3er_XXX_ohne_FG", 1, 3, 5, 2, 1, 6, 7, 4)
 

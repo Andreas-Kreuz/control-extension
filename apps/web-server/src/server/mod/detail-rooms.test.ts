@@ -159,6 +159,18 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
           positionOff: 7,
           positionOffBlinking: 8,
         },
+        M2: {
+          id: 'Ampel_2er_Aus_Gelb-Grün',
+          name: 'Ampel_2er_Aus_Gelb-Grün',
+          type: 'road',
+          positionRed: 1,
+          positionGreen: 3,
+          positionYellow: 5,
+          positionRedYellow: 1,
+          positionPedestrians: 1,
+          positionOff: 2,
+          positionOffBlinking: 6,
+        },
       },
     },
   } as never);
@@ -208,6 +220,19 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
       positionPedestrians: 6,
       positionOff: 7,
       positionOffBlinking: 8,
+    },
+    'Ampel_2er_Aus_Gelb-Grün': {
+      id: 'Ampel_2er_Aus_Gelb-Grün',
+      name: 'Ampel_2er_Aus_Gelb-Grün',
+      type: 'road',
+      luaConstant: 'JS2_2er_gelb_gruen_aus',
+      positionRed: 1,
+      positionGreen: 3,
+      positionYellow: 5,
+      positionRedYellow: 1,
+      positionPedestrians: 1,
+      positionOff: 2,
+      positionOffBlinking: 6,
     },
   });
 }

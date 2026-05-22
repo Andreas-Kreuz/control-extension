@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import Badge from '@mui/material/Badge';
@@ -1030,6 +1030,8 @@ function IntersectionCreateWizard() {
   const [showAdvancedIntersectionSettings, setShowAdvancedIntersectionSettings] = useState(false);
   const [sendPreparationSettings, setSendPreparationSettings] = useState(false);
   const [expandedAmpelId, setExpandedAmpelId] = useState('');
+  const signalLookupTimers = useRef<Record<string, number>>({});
+  const latestSignalLookupValues = useRef<Record<string, string>>({});
   const draftIdFromUrl = searchParams.get('draftId') ?? '';
   const intersectionIdFromUrl = searchParams.get('intersectionId') ?? '';
   const roadPathPrefix = location.pathname.startsWith('/simple/road')
@@ -1325,11 +1327,26 @@ function IntersectionCreateWizard() {
     updateDraft({ phases: defaultPhases() });
   }, [activeStep, draft.phases.length, updateDraft]);
 
+  useEffect(
+    () => () => {
+      Object.values(signalLookupTimers.current).forEach((timer) => window.clearTimeout(timer));
+    },
+    [],
+  );
+
   async function lookupSignal(signalId: string): Promise<IntersectionWizardSignalLookupAppDto | undefined> {
     if (!signalId.trim()) return undefined;
     const response = await fetch(route(`/signals/${encodeURIComponent(signalId.trim())}`, socketUrl));
     if (!response.ok) return undefined;
     return (await response.json()) as IntersectionWizardSignalLookupAppDto;
+  }
+
+  function scheduleSignalLookup(key: string, signalId: string, lookup: () => void) {
+    latestSignalLookupValues.current[key] = signalId.trim();
+    const existingTimer = signalLookupTimers.current[key];
+    if (existingTimer !== undefined) window.clearTimeout(existingTimer);
+    if (positiveSignalId(signalId) === undefined) return;
+    signalLookupTimers.current[key] = window.setTimeout(lookup, 300);
   }
 
   function sendRoadModulePreparationSettings() {
@@ -1524,22 +1541,59 @@ function IntersectionCreateWizard() {
     );
   }
 
-  async function updateAmpelSignalId(ampel: IntersectionWizardAmpelAppDto, signalId: string) {
-    const lookup = await lookupSignal(signalId);
+  async function updateAmpelSignalId(ampelId: string, signalId: string) {
+    const lookupKey = `ampel:${ampelId}`;
+    const lookupSignalId = signalId.trim();
+    latestSignalLookupValues.current[lookupKey] = lookupSignalId;
+    const lookup = await lookupSignal(lookupSignalId);
+    if (latestSignalLookupValues.current[lookupKey] !== lookupSignalId) return;
     const signalPatch = {
       signalId,
-      ...(lookup.suggestedTrafficLightModel ? { modelName: lookup.suggestedTrafficLightModel } : {}),
-      ...(lookup.suggestedTrafficLightModelConstant
+      ...(lookup?.suggestedTrafficLightModel ? { modelName: lookup.suggestedTrafficLightModel } : {}),
+      ...(lookup?.suggestedTrafficLightModelConstant
         ? { modelConstant: lookup.suggestedTrafficLightModelConstant }
         : {}),
     };
-    updateDraft({
-      ampeln: withAutomaticPedestrianSourceMatches(
-        draft.ampeln.map((entry) => (entry.id === ampel.id ? { ...entry, ...signalPatch } : entry)),
-        { ...ampel, ...signalPatch },
-        signalId,
-      ),
+    setDraft((current) => {
+      const currentAmpel = current.ampeln.find((entry) => entry.id === ampelId);
+      if (!currentAmpel) return current;
+      return {
+        ...current,
+        ampeln: withAutomaticPedestrianSourceMatches(
+          current.ampeln.map((entry) => (entry.id === ampelId ? { ...entry, ...signalPatch } : entry)),
+          { ...currentAmpel, ...signalPatch },
+          signalId,
+        ),
+        updatedAt: new Date().toISOString(),
+      };
     });
+  }
+
+  async function updateLaneSignalId(laneId: string, signalId: string) {
+    const lookupKey = `lane:${laneId}`;
+    const lookupSignalId = signalId.trim();
+    latestSignalLookupValues.current[lookupKey] = lookupSignalId;
+    const lookup = await lookupSignal(lookupSignalId);
+    if (latestSignalLookupValues.current[lookupKey] !== lookupSignalId) return;
+    setDraft((current) => ({
+      ...current,
+      lanes: current.lanes.map((lane) =>
+        lane.id === laneId
+          ? {
+              ...lane,
+              signal: {
+                ...lane.signal,
+                signalId,
+                ...(lookup?.suggestedTrafficLightModel ? { modelName: lookup.suggestedTrafficLightModel } : {}),
+                ...(lookup?.suggestedTrafficLightModelConstant
+                  ? { modelConstant: lookup.suggestedTrafficLightModelConstant }
+                  : {}),
+              },
+            }
+          : lane,
+      ),
+      updatedAt: new Date().toISOString(),
+    }));
   }
 
   function addAmpelToGroup(group: IntersectionWizardSignalGroupAppDto) {
@@ -1932,8 +1986,12 @@ function IntersectionCreateWizard() {
               infoText="Signal-ID aus den Objekteigenschaften in EEP."
               errorTexts={errors.signalId}
               inputProps={{ inputMode: 'numeric', 'aria-label': `Signal-ID ${ampel.name}` }}
-              onBlur={(event) => void updateAmpelSignalId(ampel, event.target.value)}
-              onChange={(event) => patchAmpel(ampel.id, { signalId: event.target.value })}
+              onBlur={(event) => void updateAmpelSignalId(ampel.id, event.target.value)}
+              onChange={(event) => {
+                const signalId = event.target.value;
+                patchAmpel(ampel.id, { signalId });
+                scheduleSignalLookup(`ampel:${ampel.id}`, signalId, () => void updateAmpelSignalId(ampel.id, signalId));
+              }}
             />
             <CompactToggleField
               label="Signal-Modell"
@@ -2499,7 +2557,12 @@ function IntersectionCreateWizard() {
           infoText="Signal-ID aus den Objekteigenschaften in EEP."
           errorTexts={errors.signalId}
           inputProps={{ inputMode: 'numeric' }}
-          onChange={(event) => patchLane(lane.id, { signal: { ...lane.signal, signalId: event.target.value } })}
+          onBlur={(event) => void updateLaneSignalId(lane.id, event.target.value)}
+          onChange={(event) => {
+            const signalId = event.target.value;
+            patchLane(lane.id, { signal: { ...lane.signal, signalId } });
+            scheduleSignalLookup(`lane:${lane.id}`, signalId, () => void updateLaneSignalId(lane.id, signalId));
+          }}
         />
         <FormControl size="small" fullWidth error={Boolean(errors.signalModel?.length)}>
           <Select

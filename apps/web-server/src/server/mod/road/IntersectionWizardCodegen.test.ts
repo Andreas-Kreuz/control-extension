@@ -755,6 +755,51 @@ function testCodegenCreatesDedicatedPlainLightForAttachedLightStructure(): void 
   );
 }
 
+function testCodegenUsesNilForEmptyOptionalPlainLightStructures(): void {
+  const draft = makeDraft();
+  draft.ampeln = [
+    {
+      id: 'ampel-s1',
+      name: 'S1',
+      kind: 'STRUCTURE_LIGHT',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'TRAM',
+      modelName: 'NONE',
+      modelConstant: 'NONE',
+      lightStructures: [
+        {
+          structureRed: '#3058_Straba Signal Halt',
+          structureGreen: '#3060_Straba Signal rechts',
+          structureYellow: '#3059_Straba Signal anhalten',
+          structureRequest: '',
+          structureHousing: '#3057_Straba Signal Gehäuse 4',
+          structureBlend: '',
+        },
+      ],
+      axisStructures: [],
+    },
+  ];
+  draft.signalGroups = [
+    {
+      id: 'sg-1',
+      name: 'sgEastTramHalfRight',
+      approach: 'EAST',
+      turnDirections: ['HALF_RIGHT'],
+      trafficType: 'TRAM',
+      showRequests: false,
+      ampelIds: ['ampel-s1'],
+    },
+  ];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.match(
+    lua,
+    /TrafficLight:newForLightStructure\("S1",\n\s+"#3058_Straba Signal Halt",\n\s+"#3060_Straba Signal rechts",\n\s+"#3059_Straba Signal anhalten",\n\s+nil,\n\s+"#3057_Straba Signal Gehäuse 4",\n\s+nil\n\s+\)/,
+  );
+  assert.doesNotMatch(lua, /""/);
+}
+
 function testCodegenWarnsForMultipleGroupsWithoutDefault(): void {
   const draft = makeDraft();
   draft.lanes[1]!.signalGroupAssignments = [
@@ -1608,6 +1653,10 @@ export async function run(): Promise<void> {
   await runTest(
     'intersection wizard codegen creates dedicated plain light for attached light structure',
     testCodegenCreatesDedicatedPlainLightForAttachedLightStructure,
+  );
+  await runTest(
+    'intersection wizard codegen uses nil for empty optional plain light structures',
+    testCodegenUsesNilForEmptyOptionalPlainLightStructures,
   );
   await runTest(
     'intersection wizard codegen warns for multi-group lanes without default',

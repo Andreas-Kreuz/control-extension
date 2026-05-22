@@ -314,6 +314,10 @@ function luaValue(value: string | number | undefined): string {
   return luaString(value);
 }
 
+function luaOptionalString(value: string | undefined): string {
+  return value?.trim() ? luaString(value) : 'nil';
+}
+
 function positiveSignalId(signalId: string | undefined): number | undefined {
   const numeric = Number(signalId);
   return Number.isInteger(numeric) && numeric > 0 ? numeric : undefined;
@@ -371,11 +375,11 @@ function plainLightStructureConstructor(
   const args = [
     luaValue(structure.structureRed),
     luaValue(structure.structureGreen),
-    luaValue(structure.structureYellow),
-    luaValue(structure.structureRequest),
+    luaOptionalString(structure.structureYellow),
+    luaOptionalString(structure.structureRequest),
   ];
   if (structure.structureHousing || structure.structureBlend) {
-    args.push(luaValue(structure.structureHousing), luaValue(structure.structureBlend));
+    args.push(luaOptionalString(structure.structureHousing), luaOptionalString(structure.structureBlend));
   }
   return `TrafficLight:newForLightStructure(${luaString(name)},\n    ${args.join(',\n    ')}\n)`;
 }
