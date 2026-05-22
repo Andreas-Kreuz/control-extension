@@ -6,6 +6,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureRegi
 ---@field replaceAll fun(structures: Structure[]):nil
 ---@field remove fun(structureId: string):nil
 ---@field forId fun(structureId: string):Structure|nil
+---@field forName fun(structureName: string):Structure|nil
 ---@field getAll fun():table<string, Structure>
 ---@field getAddedIds fun():table<string, boolean>
 ---@field getRemovedIds fun():table<string, boolean>
@@ -67,6 +68,13 @@ end
 
 function StructureRegistry.forId(structureId)
     return allStructures[structureId]
+end
+
+function StructureRegistry.forName(structureName)
+    for _, structure in pairs(allStructures) do
+        if structure.name == structureName then return structure end
+    end
+    return nil
 end
 
 function StructureRegistry.getAll()

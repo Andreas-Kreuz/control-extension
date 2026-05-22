@@ -24,6 +24,15 @@ local function markDirty(structure, fieldName)
     structure.dirtyFields[fieldName] = true
 end
 
+local function registryStructure(structureName)
+    local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+    return StructureRegistry.forId(structureName) or StructureRegistry.forName(structureName)
+end
+
+local function toNumber(value)
+    return tonumber(value)
+end
+
 function Structure:getPosX() return self.pos_x end
 
 function Structure:getPosY() return self.pos_y end
@@ -162,6 +171,58 @@ end
 
 function Structure:hasDirtyFields()
     return next(self.dirtyFields) ~= nil
+end
+
+function Structure.setPositionByName(structureName, posX, posY, posZ)
+    local x = toNumber(posX)
+    local y = toNumber(posY)
+    local z = toNumber(posZ)
+    if not structureName or not x or not y or not z then return false end
+
+    local ok = true
+    if _G.EEPStructureSetPosition then ok = _G.EEPStructureSetPosition(structureName, x, y, z) ~= false end
+
+    local structure = registryStructure(structureName)
+    if ok and structure then structure:setPosition(x, y, z) end
+    return ok
+end
+
+function Structure.setRotationByName(structureName, rotX, rotY, rotZ)
+    local x = toNumber(rotX)
+    local y = toNumber(rotY)
+    local z = toNumber(rotZ)
+    if not structureName or not x or not y or not z then return false end
+
+    local ok = true
+    if _G.EEPStructureSetRotation then ok = _G.EEPStructureSetRotation(structureName, x, y, z) ~= false end
+
+    local structure = registryStructure(structureName)
+    if ok and structure then structure:setRotation(x, y, z) end
+    return ok
+end
+
+function Structure.setLightByName(structureName, light)
+    if not structureName then return false end
+    local value = light == true
+
+    local ok = true
+    if _G.EEPStructureSetLight then ok = _G.EEPStructureSetLight(structureName, value) ~= false end
+
+    local structure = registryStructure(structureName)
+    if ok and structure then structure:setLight(value) end
+    return ok
+end
+
+function Structure.setTagTextByName(structureName, tagText)
+    if not structureName then return false end
+    local value = tagText or ""
+
+    local ok = true
+    if _G.EEPStructureSetTagText then ok = _G.EEPStructureSetTagText(structureName, value) ~= false end
+
+    local structure = registryStructure(structureName)
+    if ok and structure then structure:setTag(value) end
+    return ok
 end
 
 return Structure

@@ -103,7 +103,7 @@ local function toIntersectionDto(intersection, isSelected)
         id = intersection.id,
     }
     dto.name                   = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and intersection.name or
-    ""
+        ""
     dto.eepSaveId              = SyncPolicy.shouldPublishField(fieldPolicies, "eepSaveId", isSelected) and
         intersection.eepSaveId or -1
     dto.scriptVariableName     = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and

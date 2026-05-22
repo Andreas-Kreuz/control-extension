@@ -72,7 +72,7 @@ insulate("ce.mods.road.SignalGroup", function ()
                              TrafficPhase:new("P1"):addSignalGroups(sgVehicle, sgPedestrian)
                          end,
                          "Ein Signal darf in derselben Phase nicht gleichzeitig Fahrzeug- und " ..
-                             "Fu\223g\228ngerverkehr freigeben.")
+                         "Fu\223g\228ngerverkehr freigeben.")
     end)
 
     it("asserts that multi-group lane control uses an independent lane signal", function ()

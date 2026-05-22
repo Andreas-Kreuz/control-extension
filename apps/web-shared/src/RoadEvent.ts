@@ -4,4 +4,5 @@ export class RoadEvent {
   static readonly SwitchManually = '[Road Event] Switch Manually';
   static readonly SwitchAutomatically = '[Road Event] Switch Automatically';
   static readonly AlignStructureSignalInstaller = '[Road Event] Align Structure Signal Installer';
+  static readonly FocusStructureSignalInstallerCamera = '[Road Event] Focus Structure Signal Installer Camera';
 }

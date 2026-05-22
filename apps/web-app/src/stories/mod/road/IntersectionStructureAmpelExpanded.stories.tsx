@@ -107,6 +107,7 @@ const meta = {
   args: {
     structures,
     onAlign: () => undefined,
+    onFocusCamera: () => undefined,
   },
 } satisfies Meta<typeof StructureSignalInstaller>;
 

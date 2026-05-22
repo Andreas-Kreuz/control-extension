@@ -87,7 +87,7 @@ function TrafficLight:newPedestrianOnly(name, signalId, trafficLightModel, redSt
 end
 
 function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure,
-                                      housingStructure, blendStructure)
+                                           housingStructure, blendStructure)
     local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
     return self:newForSignal(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure,
                              requestStructure, housingStructure, blendStructure)
@@ -116,7 +116,7 @@ end
 -- @param requestStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel eine Anforderung erkennt
 --
 function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure,
-                                       housingStructure, blendStructure)
+                                        housingStructure, blendStructure)
     local lightStructure = LightStructureTrafficLight:new(redStructure, greenStructure, yellowStructure,
                                                           requestStructure, housingStructure, blendStructure)
     self.lightStructures[lightStructure] = true

@@ -81,13 +81,13 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
                     }, dto)
     end)
 
-    it("publishes gsbname even without structure interest", function ()
+    it("publishes tag and gsbname even without structure interest", function ()
         local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
         local structure = {
             id = "#7",
             name = "#7_Ampel",
             gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm",
-            tag = "",
+            tag = "p1=#4,",
             light = false,
             smoke = false,
             fire = false,
@@ -100,6 +100,7 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
 
         local _, _, _, dto = StructureDtoFactory.createFullDto(structure, false)
 
+        assert.equals("p1=#4,", dto.tag)
         assert.equals("\\Immobilien\\Verkehr\\Signale\\Ampel.3dm", dto.gsbname)
     end)
 end)

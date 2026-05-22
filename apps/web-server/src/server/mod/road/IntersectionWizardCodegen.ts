@@ -881,7 +881,9 @@ export function createDraftFromCurrentIntersection(
     return {
       id: `lane-${index + 1}`,
       name: lane.name || `FS${index + 1}`,
-      ...((lane.kpId ?? lane.scriptVariableName)?.trim() ? { luaVariableName: lane.kpId ?? lane.scriptVariableName } : {}),
+      ...((lane.kpId ?? lane.scriptVariableName)?.trim()
+        ? { luaVariableName: lane.kpId ?? lane.scriptVariableName }
+        : {}),
       vehicleMultiplier: lane.vehicleMultiplier,
       ...(lane.countType === 'SIGNALS' || lane.countType === 'TRACKS' || lane.countType === 'CONTACTS'
         ? { countType: lane.countType }

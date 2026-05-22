@@ -49,6 +49,7 @@ function HubBridgeConnector.registerStatePublishers()
 end
 
 function HubBridgeConnector.registerFunctions()
+    local Structure = require("ce.hub.data.structures.Structure")
     ServerExchangeCoordinator.registerAllowedCommand(
         "HubInterestSync.startSyncFor",
         InterestSyncRegistry.startSyncFor
@@ -56,6 +57,22 @@ function HubBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand(
         "HubInterestSync.stopSyncFor",
         InterestSyncRegistry.stopSyncFor
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setPositionByName",
+        Structure.setPositionByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setRotationByName",
+        Structure.setRotationByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setLightByName",
+        Structure.setLightByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setTagTextByName",
+        Structure.setTagTextByName
     )
 end
 

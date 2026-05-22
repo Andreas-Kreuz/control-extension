@@ -64,11 +64,15 @@ function testAlignStructureSignalInstallerQueuesPositionRotationAndTagCommands()
   });
 
   assert.deepEqual(commands, [
-    'EEPStructureSetPosition|#1_Straba Signal Halt|10|20|5.15',
-    'EEPStructureSetRotation|#1_Straba Signal Halt|0|0|90',
-    'EEPStructureSetPosition|#2_Straba Signal geradeaus|10|20|4.88',
-    'EEPStructureSetRotation|#2_Straba Signal geradeaus|0|0|90',
-    'EEPStructureSetTagText|#3026_Straba Signal Gehäuse Mast 2|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
+    'Structure.setPositionByName|#1_Straba Signal Halt|10|20|5.15',
+    'Structure.setRotationByName|#1_Straba Signal Halt|0|0|90',
+    'Structure.setPositionByName|#2_Straba Signal geradeaus|10|20|4.88',
+    'Structure.setRotationByName|#2_Straba Signal geradeaus|0|0|90',
+    'Structure.setLightByName|#1_Straba Signal Halt|true',
+    'Structure.setLightByName|#2_Straba Signal geradeaus|true',
+    'Structure.setTagTextByName|#1_Straba Signal Halt|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
+    'Structure.setTagTextByName|#2_Straba Signal geradeaus|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
+    'Structure.setTagTextByName|#3026_Straba Signal Gehäuse Mast 2|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
   ]);
 }
 
@@ -137,6 +141,36 @@ function testAlignStructureSignalInstallerRejectsUnsafePayloads(): void {
   assert.deepEqual(commands, []);
 }
 
+function testFocusStructureSignalInstallerCameraQueuesCameraCommands(): void {
+  const { commands, handlers } = setupRoadHandlers();
+
+  handlers.get(RoadEvent.FocusStructureSignalInstallerCamera)?.({
+    posX: 10,
+    posY: 20,
+    posZ: 3,
+    rotX: -5.711,
+    rotY: 0,
+    rotZ: 90,
+  });
+
+  assert.deepEqual(commands, ['EEPSetCameraPosition|10|20|3', 'EEPSetCameraRotation|-5.711|0|90']);
+}
+
+function testFocusStructureSignalInstallerCameraRejectsUnsafePayloads(): void {
+  const { commands, handlers } = setupRoadHandlers();
+
+  handlers.get(RoadEvent.FocusStructureSignalInstallerCamera)?.({
+    posX: 10,
+    posY: 20,
+    posZ: Number.NaN,
+    rotX: -5.711,
+    rotY: 0,
+    rotZ: 90,
+  });
+
+  assert.deepEqual(commands, []);
+}
+
 export async function run(): Promise<void> {
   await runTest(
     'align structure signal installer queues position rotation and tag commands',
@@ -145,6 +179,14 @@ export async function run(): Promise<void> {
   await runTest(
     'align structure signal installer rejects unsafe payloads',
     testAlignStructureSignalInstallerRejectsUnsafePayloads,
+  );
+  await runTest(
+    'focus structure signal installer camera queues camera commands',
+    testFocusStructureSignalInstallerCameraQueuesCameraCommands,
+  );
+  await runTest(
+    'focus structure signal installer camera rejects unsafe payloads',
+    testFocusStructureSignalInstallerCameraRejectsUnsafePayloads,
   );
 }
 

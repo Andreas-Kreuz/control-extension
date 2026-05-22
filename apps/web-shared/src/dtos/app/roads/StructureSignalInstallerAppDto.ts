@@ -40,3 +40,12 @@ export interface AlignStructureSignalInstallerCommandAppDto {
   signals: string[];
   targets: StructureSignalInstallerTargetAppDto[];
 }
+
+export interface FocusStructureSignalInstallerCameraCommandAppDto {
+  posX: number;
+  posY: number;
+  posZ: number;
+  rotX: number;
+  rotY: number;
+  rotZ: number;
+}

@@ -61,7 +61,7 @@ local function registerSignal(signalId)
     if not allSignals[signalId] then
         allSignals[signalId] = true
         _G["EEPOnSignal_" .. signalId] = function (x)
-            ProtectedExecution.run("EEPOnSignal_" .. signalId, function()
+            ProtectedExecution.run("EEPOnSignal_" .. signalId, function ()
                 pdbg(dbg.signal_aenderung, "****** Signalstellung (" .. signalId .. ") geaendert auf: " .. x)
                 EEPChangeInfoSignal(signalId, "Signal: " .. signalId .. "\nStellung: " .. x)
                 EEPShowInfoSignal(signalId, true)
@@ -76,7 +76,7 @@ local function registerSwitch(switchId)
     if not allSwitches[switchId] then
         allSwitches[switchId] = true
         _G["EEPOnSwitch_" .. switchId] = function (x)
-            ProtectedExecution.run("EEPOnSwitch_" .. switchId, function()
+            ProtectedExecution.run("EEPOnSwitch_" .. switchId, function ()
                 pdbg(dbg.weiche_aenderung, "****** Weichenstellung (" .. switchId .. ") geaendert auf: " .. x)
                 EEPChangeInfoSwitch(switchId, "Weiche: " .. switchId .. "\nStellung: " .. x)
                 EEPShowInfoSwitch(switchId, true)

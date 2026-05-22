@@ -1,5 +1,6 @@
 import type {
   AlignStructureSignalInstallerCommandAppDto,
+  FocusStructureSignalInstallerCameraCommandAppDto,
   StructureAppDto,
   StructureSignalInstallerHousingKind,
   StructureSignalInstallerTargetAppDto,
@@ -15,8 +16,12 @@ type TagValues = Record<string, string>;
 
 const signalSpacingMeters = 0.27;
 const mastBaseOffsetMeters = 2.88;
+const cameraDistanceMeters = 20;
+const cameraMastHeightOffsetMeters = 5;
+const cameraHousingHeightOffsetMeters = cameraMastHeightOffsetMeters - mastBaseOffsetMeters;
+const cameraTiltYDegrees = 9;
 const signalAVerticalOffsetMeters = -0.03;
-const mastTopOffsets = [0.27, 0, -0.27, -0.54, -0.81] as const;
+const mastBottomOffsets = [2.88, 2.61, 2.61, 2.34, 2.07] as const;
 const greenKeys = new Set(['F1', 'F2', 'F3']);
 const knownSignalKeys = ['F0', 'F1', 'F2', 'F3', 'F4', 'F5', 'A', 'H', 'M', 'T', 'V', 'abf', 's20', 's30'];
 
@@ -77,7 +82,7 @@ export function signalCountForHousingKind(kind: StructureSignalInstallerHousingK
 }
 
 export function isBuiltInMastHousing(kind: StructureSignalInstallerHousingKind): boolean {
-  return /^MAST_[1-5]$/.test(kind);
+  return /^MAST(?:_LEFT|_RIGHT)?_[1-5]$/.test(kind);
 }
 
 export function isHousingStructureName(name: string): boolean {
@@ -127,7 +132,7 @@ export function installedSignalsFromTag(tag: string | undefined, signalCount: nu
     .slice(0, signalCount);
 }
 
-export function buildInstallerTag(existingTag: string, signals: string[], blendName: string): string {
+export function buildInstallerTag(existingTag: string, signals: string[], blendName: string, housingName = ''): string {
   const values = parseInstallerTag(existingTag);
   Object.keys(values).forEach((key) => {
     if (
@@ -136,6 +141,7 @@ export function buildInstallerTag(existingTag: string, signals: string[], blendN
       key === 'r' ||
       key === 'y' ||
       key === 'g' ||
+      key === 'geh' ||
       /^p[1-5]$/.test(key) ||
       /^W\d+a?$/.test(key)
     ) {
@@ -158,6 +164,7 @@ export function buildInstallerTag(existingTag: string, signals: string[], blendN
   if (values.F0) values.r = values.F0;
   if (values.F4) values.y = values.F4;
   if (firstGreenSignal) values.g = firstGreenSignal;
+  if (housingName.trim()) values.geh = housingName.trim();
   return encodeInstallerTag(values);
 }
 
@@ -180,9 +187,33 @@ export function buildAlignStructureSignalInstallerCommand(
     ...(trimmedBlendName ? { blendName: trimmedBlendName } : {}),
     housingKind,
     housingName: housing.name,
-    housingTag: buildInstallerTag(housing.tag, signals, blendName),
+    housingTag: buildInstallerTag(housing.tag, signals, blendName, housing.name),
     signals: trimmedSignals,
     targets,
+  };
+}
+
+export function buildFocusStructureSignalInstallerCameraCommand(
+  housing: StructureAppDto,
+): FocusStructureSignalInstallerCameraCommandAppDto {
+  const yawRadians = degreesToRadians(housing.rot_z);
+  const forwardX = Math.cos(yawRadians);
+  const forwardY = Math.sin(yawRadians);
+  const posX = housing.pos_x - forwardX * cameraDistanceMeters;
+  const posY = housing.pos_y - forwardY * cameraDistanceMeters;
+  const housingKind = inferHousingKind(housing.name);
+  const heightOffset =
+    housingKind && isBuiltInMastHousing(housingKind) ? cameraMastHeightOffsetMeters : cameraHousingHeightOffsetMeters;
+  const posZ = housing.pos_z + heightOffset;
+  const targetDeltaX = housing.pos_x - posX;
+  const targetDeltaY = housing.pos_y - posY;
+  return {
+    posX: round3(posX),
+    posY: round3(posY),
+    posZ: round3(posZ),
+    rotX: 0,
+    rotY: cameraTiltYDegrees,
+    rotZ: round3(radiansToDegrees(Math.atan2(targetDeltaY, targetDeltaX))),
   };
 }
 
@@ -195,6 +226,18 @@ function normalizeText(value: string): string {
     .replace(/ß/g, 'ss')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
+}
+
+function degreesToRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180;
+}
+
+function radiansToDegrees(radians: number): number {
+  return (radians * 180) / Math.PI;
+}
+
+function round3(value: number): number {
+  return Number(value.toFixed(3));
 }
 
 function tagKeyForSignalName(name: string): string | undefined {
@@ -219,8 +262,16 @@ function tagKeyForSignalName(name: string): string | undefined {
 }
 
 function signalOffset(kind: StructureSignalInstallerHousingKind, signalIndex: number, signalCount: number): number {
-  if (isBuiltInMastHousing(kind)) return mastBaseOffsetMeters + (mastTopOffsets[signalIndex] ?? 0);
-  return Math.max(0, signalCount - signalIndex - 1) * signalSpacingMeters;
+  const stackOffset = Math.max(0, signalCount - signalIndex - 1) * signalSpacingMeters;
+  if (isVerticalMastHousing(kind)) {
+    const bottomOffset = mastBottomOffsets[signalCount - 1] ?? mastBaseOffsetMeters;
+    return bottomOffset + stackOffset;
+  }
+  return stackOffset;
+}
+
+function isVerticalMastHousing(kind: StructureSignalInstallerHousingKind): boolean {
+  return /^MAST_[1-5]$/.test(kind);
 }
 
 function blendOffset(kind: StructureSignalInstallerHousingKind): number {

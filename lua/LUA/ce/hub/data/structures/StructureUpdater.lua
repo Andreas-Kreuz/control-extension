@@ -12,6 +12,12 @@ local EEPStructureGetLight = _G.EEPStructureGetLight or function () end
 local EEPStructureGetSmoke = _G.EEPStructureGetSmoke or function () end
 local EEPStructureGetFire = _G.EEPStructureGetFire or function () end
 local EEPStructureGetTagText = _G.EEPStructureGetTagText or function () end
+local EEPStructureGetPosition = _G.EEPStructureGetPosition or function () end
+local EEPStructureGetRotation = _G.EEPStructureGetRotation or function () end
+
+local function round2(value)
+    return value and tonumber(string.format("%.2f", value)) or 0
+end
 
 local function updateStructureFields(structure, fields, isSelected)
     if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
@@ -29,6 +35,18 @@ local function updateStructureFields(structure, fields, isSelected)
     if SyncPolicy.shouldUpdateField(fields, "fire", isSelected) then
         local _, fire = EEPStructureGetFire(structure.name)
         structure:setFire(fire == true)
+    end
+    if SyncPolicy.shouldUpdateField(fields, "pos_x", isSelected) or
+        SyncPolicy.shouldUpdateField(fields, "pos_y", isSelected) or
+        SyncPolicy.shouldUpdateField(fields, "pos_z", isSelected) then
+        local hasPosition, posX, posY, posZ = EEPStructureGetPosition(structure.name)
+        if hasPosition then structure:setPosition(round2(posX), round2(posY), round2(posZ)) end
+    end
+    if SyncPolicy.shouldUpdateField(fields, "rot_x", isSelected) or
+        SyncPolicy.shouldUpdateField(fields, "rot_y", isSelected) or
+        SyncPolicy.shouldUpdateField(fields, "rot_z", isSelected) then
+        local hasRotation, rotX, rotY, rotZ = EEPStructureGetRotation(structure.name)
+        if hasRotation then structure:setRotation(round2(rotX), round2(rotY), round2(rotZ)) end
     end
 end
 

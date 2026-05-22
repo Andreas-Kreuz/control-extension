@@ -1,7 +1,10 @@
 import SocketService from '../../clientio/SocketService';
 import EepService from '../../eep/service/EepService';
 import { RoadEvent, RoomEvent } from '@ce/web-shared';
-import type { AlignStructureSignalInstallerCommandAppDto } from '@ce/web-shared';
+import type {
+  AlignStructureSignalInstallerCommandAppDto,
+  FocusStructureSignalInstallerCameraCommandAppDto,
+} from '@ce/web-shared';
 import { Socket, Server } from 'socket.io';
 
 const validHousingKinds = new Set([
@@ -67,6 +70,21 @@ function isAlignStructureSignalInstallerCommand(action: unknown): action is Alig
   );
 }
 
+function isFocusStructureSignalInstallerCameraCommand(
+  action: unknown,
+): action is FocusStructureSignalInstallerCameraCommandAppDto {
+  if (!action || typeof action !== 'object') return false;
+  const candidate = action as Partial<FocusStructureSignalInstallerCameraCommandAppDto>;
+  return (
+    isFiniteNumber(candidate.posX) &&
+    isFiniteNumber(candidate.posY) &&
+    isFiniteNumber(candidate.posZ) &&
+    isFiniteNumber(candidate.rotX) &&
+    isFiniteNumber(candidate.rotY) &&
+    isFiniteNumber(candidate.rotZ)
+  );
+}
+
 export const registerRoadMod = (_io: Server, socketService: SocketService, eepService: EepService, _debug: boolean) => {
   const queueCommand = eepService.queueCommand;
 
@@ -104,10 +122,27 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
       }
 
       action.targets.forEach((target) => {
-        queueCommand(`EEPStructureSetPosition|${target.name}|${target.posX}|${target.posY}|${target.posZ}`);
-        queueCommand(`EEPStructureSetRotation|${target.name}|${target.rotX}|${target.rotY}|${target.rotZ}`);
+        queueCommand(`Structure.setPositionByName|${target.name}|${target.posX}|${target.posY}|${target.posZ}`);
+        queueCommand(`Structure.setRotationByName|${target.name}|${target.rotX}|${target.rotY}|${target.rotZ}`);
       });
-      queueCommand(`EEPStructureSetTagText|${action.housingName}|${action.housingTag}`);
+      action.signals.forEach((signalName) => {
+        queueCommand(`Structure.setLightByName|${signalName}|true`);
+      });
+      action.targets.forEach((target) => {
+        queueCommand(`Structure.setTagTextByName|${target.name}|${action.housingTag}`);
+      });
+      queueCommand(`Structure.setTagTextByName|${action.housingName}|${action.housingTag}`);
+    });
+
+    socket.on(RoadEvent.FocusStructureSignalInstallerCamera, (action: unknown) => {
+      if (!socketService.ensureApprovedSocket(socket, RoadEvent.FocusStructureSignalInstallerCamera)) {
+        return;
+      }
+      if (!isFocusStructureSignalInstallerCameraCommand(action)) {
+        return;
+      }
+      queueCommand(`EEPSetCameraPosition|${action.posX}|${action.posY}|${action.posZ}`);
+      queueCommand(`EEPSetCameraRotation|${action.rotX}|${action.rotY}|${action.rotZ}`);
     });
   }
 

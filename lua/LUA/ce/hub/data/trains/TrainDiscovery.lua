@@ -48,7 +48,7 @@ local function registerHooks()
 
     local _EEPOnTrainCoupling = EEPOnTrainCoupling or function (_, _, _) end
     _G.EEPOnTrainCoupling = function (trainA, trainB, trainNew)
-        ProtectedExecution.run("EEPOnTrainCoupling", function()
+        ProtectedExecution.run("EEPOnTrainCoupling", function ()
             dirtyTrainNames[trainA] = true
             dirtyTrainNames[trainB] = true
             dirtyTrainNames[trainNew] = true
@@ -58,7 +58,7 @@ local function registerHooks()
 
     local _EEPOnTrainLooseCoupling = EEPOnTrainLooseCoupling or function (_, _, _) end
     _G.EEPOnTrainLooseCoupling = function (trainA, trainB, trainOld)
-        ProtectedExecution.run("EEPOnTrainLooseCoupling", function()
+        ProtectedExecution.run("EEPOnTrainLooseCoupling", function ()
             dirtyTrainNames[trainA] = true
             dirtyTrainNames[trainB] = true
             dirtyTrainNames[trainOld] = true
@@ -68,7 +68,7 @@ local function registerHooks()
 
     local _EEPOnTrainExitTrainyard = EEPOnTrainExitTrainyard or function (_, _) end
     _G.EEPOnTrainExitTrainyard = function (depotId, trainName)
-        ProtectedExecution.run("EEPOnTrainExitTrainyard", function()
+        ProtectedExecution.run("EEPOnTrainExitTrainyard", function ()
             local _ = depotId
             movedTrainNames[trainName] = true
             _EEPOnTrainExitTrainyard(depotId, trainName)

@@ -79,7 +79,7 @@ end
 ---@param blendStructure string|nil Blendschutz, der im Gehaeuse-Tag hinterlegt wird
 --
 function LightStructureTrafficLight:new(redStructure, greenStructure, yellowStructure, requestStructure,
-                                       housingStructure, blendStructure)
+                                        housingStructure, blendStructure)
     assert(type(redStructure) == "string", "Need 'redStructure' as string")
     assert(EEPStructureGetLight(redStructure), redStructure)
     assert(type(greenStructure) == "string", "Need 'greenStructure' as string")

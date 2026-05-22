@@ -11,7 +11,7 @@ local TramSwitch = {}
 function TramSwitch.new(switchId, structure1, structure2, structure3)
     EEPRegisterSwitch(switchId)
     _G["EEPOnSwitch_" .. switchId] = function (_)
-        ProtectedExecution.run("EEPOnSwitch_" .. switchId, function()
+        ProtectedExecution.run("EEPOnSwitch_" .. switchId, function ()
             local currentPosition = EEPGetSwitch(switchId)
             if structure1 then EEPStructureSetLight(structure1, currentPosition == 1) end
             if structure2 then EEPStructureSetLight(structure2, currentPosition == 2) end

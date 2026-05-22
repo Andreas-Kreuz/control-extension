@@ -2006,7 +2006,9 @@ function IntersectionCreateWizard() {
                 value={structure[field.key] ?? ''}
                 inputValue={structure[field.key] ?? ''}
                 onChange={(_event, value) => updateAmpelLightStructure(ampel, field.key, value ?? '')}
-                onInputChange={(_event, value) => updateAmpelLightStructure(ampel, field.key, value)}
+                onInputChange={(_event, value, reason) => {
+                  if (reason === 'input' || reason === 'clear') updateAmpelLightStructure(ampel, field.key, value);
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}

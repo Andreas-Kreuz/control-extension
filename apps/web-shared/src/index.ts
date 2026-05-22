@@ -77,6 +77,7 @@ export type {
 } from './dtos/app/roads/IntersectionWizardAppDto';
 export type {
   AlignStructureSignalInstallerCommandAppDto,
+  FocusStructureSignalInstallerCameraCommandAppDto,
   StructureSignalInstallerHousingKind,
   StructureSignalInstallerTargetAppDto,
 } from './dtos/app/roads/StructureSignalInstallerAppDto';

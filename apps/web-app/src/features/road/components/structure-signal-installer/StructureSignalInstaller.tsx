@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { HTMLAttributes } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -9,15 +10,18 @@ import Paper from '@mui/material/Paper';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import VerticalAlignCenterIcon from '@mui/icons-material/VerticalAlignCenter';
 import type {
   AlignStructureSignalInstallerCommandAppDto,
+  FocusStructureSignalInstallerCameraCommandAppDto,
   StructureAppDto,
   StructureSignalInstallerHousingKind,
 } from '@ce/web-shared';
 import { FeedbackMessage } from '../../../../shared/components/feedback';
 import {
   buildAlignStructureSignalInstallerCommand,
+  buildFocusStructureSignalInstallerCameraCommand,
   housingKindOptions,
   inferHousingKind,
   installedSignalsFromTag,
@@ -29,7 +33,9 @@ import {
 } from './structureSignalInstallerLogic';
 
 export interface StructureSignalInstallerProps {
+  onFocusCamera: (command: FocusStructureSignalInstallerCameraCommandAppDto) => void;
   onAlign: (command: AlignStructureSignalInstallerCommandAppDto) => void;
+  onHousingSelectionChange?: (housingId: string) => void;
   structures: StructureAppDto[];
 }
 
@@ -59,7 +65,43 @@ function resizeSignals(signals: string[], signalCount: number): string[] {
   return Array.from({ length: signalCount }, (_entry, index) => signals[index] ?? '');
 }
 
-function StructureSignalInstaller({ onAlign, structures }: StructureSignalInstallerProps) {
+function structureDistanceLabel(
+  structureName: string,
+  housing: StructureAppDto | undefined,
+  structureByName: Map<string, StructureAppDto>,
+): string {
+  const structure = structureByName.get(structureName);
+  if (!housing || !structure) return structureName;
+  const distance = Math.hypot(structure.pos_x - housing.pos_x, structure.pos_y - housing.pos_y);
+  if (!Number.isFinite(distance)) return structureName;
+  return `${structureName} (${distance.toFixed(1)} m)`;
+}
+
+function sortStructureNamesByDistance(
+  structureNames: string[],
+  housing: StructureAppDto | undefined,
+  structureByName: Map<string, StructureAppDto>,
+): string[] {
+  if (!housing) return structureNames;
+  return [...structureNames].sort((leftName, rightName) => {
+    const left = structureByName.get(leftName);
+    const right = structureByName.get(rightName);
+    if (!left && !right) return leftName.localeCompare(rightName, undefined, { numeric: true });
+    if (!left) return 1;
+    if (!right) return -1;
+    const leftDistance = Math.hypot(left.pos_x - housing.pos_x, left.pos_y - housing.pos_y);
+    const rightDistance = Math.hypot(right.pos_x - housing.pos_x, right.pos_y - housing.pos_y);
+    if (leftDistance !== rightDistance) return leftDistance - rightDistance;
+    return leftName.localeCompare(rightName, undefined, { numeric: true });
+  });
+}
+
+function StructureSignalInstaller({
+  onAlign,
+  onFocusCamera,
+  onHousingSelectionChange,
+  structures,
+}: StructureSignalInstallerProps) {
   const [housingName, setHousingName] = useState('');
   const [housingKind, setHousingKind] = useState<HousingKindValue>('');
   const [blendName, setBlendName] = useState('');
@@ -85,6 +127,22 @@ function StructureSignalInstaller({ onAlign, structures }: StructureSignalInstal
   const selectedHousing = structureByName.get(housingName);
   const signalCount = signalCountForHousingKind(housingKind);
   const canAlign = Boolean(selectedHousing && housingKind && signalCount > 0);
+
+  useEffect(() => {
+    onHousingSelectionChange?.(selectedHousing?.id ?? '');
+  }, [onHousingSelectionChange, selectedHousing?.id]);
+
+  const sortedSignalOptions = useMemo(
+    () => sortStructureNamesByDistance(signalOptions, selectedHousing, structureByName),
+    [selectedHousing, signalOptions, structureByName],
+  );
+  const sortedBlendOptions = useMemo(
+    () => sortStructureNamesByDistance(blendOptions, selectedHousing, structureByName),
+    [blendOptions, selectedHousing, structureByName],
+  );
+  const renderStructureOption = (props: HTMLAttributes<HTMLLIElement>, option: string) => (
+    <li {...props}>{structureDistanceLabel(option, selectedHousing, structureByName)}</li>
+  );
 
   function applyHousingName(nextHousingName: string) {
     setHousingName(nextHousingName);
@@ -121,6 +179,15 @@ function StructureSignalInstaller({ onAlign, structures }: StructureSignalInstal
     setStatus('Ausrichtungsbefehl wurde an EEP gesendet.');
   }
 
+  function focusCameraOnHousing() {
+    if (!selectedHousing) {
+      setStatus('Wähle ein bekanntes Gehäuse aus der EEP-Liste.');
+      return;
+    }
+    onFocusCamera(buildFocusStructureSignalInstallerCameraCommand(selectedHousing));
+    setStatus('Kamerabefehl wurde an EEP gesendet.');
+  }
+
   return (
     <Paper variant="outlined" sx={{ p: 2, maxWidth: 1120 }}>
       <Stack spacing={2}>
@@ -132,7 +199,9 @@ function StructureSignalInstaller({ onAlign, structures }: StructureSignalInstal
               value={housingName}
               inputValue={housingName}
               onChange={(_event, value) => applyHousingName(value ?? '')}
-              onInputChange={(_event, value) => applyHousingName(value)}
+              onInputChange={(_event, value, reason) => {
+                if (reason === 'input' || reason === 'clear') applyHousingName(value);
+              }}
               renderInput={(params) => <TextField {...params} label="Gehäuse" size="small" />}
             />
             <FormControl size="small" fullWidth>
@@ -155,27 +224,33 @@ function StructureSignalInstaller({ onAlign, structures }: StructureSignalInstal
             </FormControl>
             <Autocomplete<string, false, false, true>
               freeSolo
-              options={blendOptions}
+              options={sortedBlendOptions}
               value={blendName}
               inputValue={blendName}
               onChange={(_event, value) => setBlendName(value ?? '')}
-              onInputChange={(_event, value) => setBlendName(value)}
+              onInputChange={(_event, value, reason) => {
+                if (reason === 'input' || reason === 'clear') setBlendName(value);
+              }}
+              renderOption={renderStructureOption}
               renderInput={(params) => <TextField {...params} label="Blendschutz" size="small" />}
             />
           </Stack>
           <Stack spacing={1.5}>
             {signalCount === 0 ? (
-              <FeedbackMessage severity="info">Wähle eine Gehäuseart aus.</FeedbackMessage>
+              <FeedbackMessage severity="info">Wähle ein Gehäuse aus.</FeedbackMessage>
             ) : (
               signals.map((signalName, index) => (
                 <Autocomplete<string, false, false, true>
                   freeSolo
                   key={index}
-                  options={signalOptions}
+                  options={sortedSignalOptions}
                   value={signalName}
                   inputValue={signalName}
                   onChange={(_event, value) => applySignal(index, value ?? '')}
-                  onInputChange={(_event, value) => applySignal(index, value)}
+                  onInputChange={(_event, value, reason) => {
+                    if (reason === 'input' || reason === 'clear') applySignal(index, value);
+                  }}
+                  renderOption={renderStructureOption}
                   renderInput={(params) => <TextField {...params} label={`Signal ${index + 1}`} size="small" />}
                 />
               ))
@@ -183,7 +258,15 @@ function StructureSignalInstaller({ onAlign, structures }: StructureSignalInstal
           </Stack>
         </Box>
         {status && <FeedbackMessage severity={canAlign ? 'success' : 'warning'}>{status}</FeedbackMessage>}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, flexWrap: 'wrap' }}>
+          <Button
+            variant="outlined"
+            startIcon={<PhotoCameraIcon />}
+            disabled={!selectedHousing}
+            onClick={focusCameraOnHousing}
+          >
+            Kamera auf Gehäuse
+          </Button>
           <Button
             variant="contained"
             startIcon={<VerticalAlignCenterIcon />}
