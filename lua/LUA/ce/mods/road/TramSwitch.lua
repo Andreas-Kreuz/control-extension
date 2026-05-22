@@ -1,5 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TramSwitch ...") end
 
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 local TramSwitch = {}
 --- Registriert eine neue Strassenbahnweiche und schaltet das Licht der angegeben Immobilien anhand der Weichenstellung
 -- @param switchId ID der Weiche
@@ -10,10 +11,12 @@ local TramSwitch = {}
 function TramSwitch.new(switchId, structure1, structure2, structure3)
     EEPRegisterSwitch(switchId)
     _G["EEPOnSwitch_" .. switchId] = function (_)
-        local currentPosition = EEPGetSwitch(switchId)
-        if structure1 then EEPStructureSetLight(structure1, currentPosition == 1) end
-        if structure2 then EEPStructureSetLight(structure2, currentPosition == 2) end
-        if structure3 then EEPStructureSetLight(structure3, currentPosition == 3) end
+        ProtectedExecution.run("EEPOnSwitch_" .. switchId, function()
+            local currentPosition = EEPGetSwitch(switchId)
+            if structure1 then EEPStructureSetLight(structure1, currentPosition == 1) end
+            if structure2 then EEPStructureSetLight(structure2, currentPosition == 2) end
+            if structure3 then EEPStructureSetLight(structure3, currentPosition == 3) end
+        end)
     end
     _G["EEPOnSwitch_" .. switchId]()
 end

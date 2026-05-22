@@ -6,6 +6,7 @@ local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
 local TrainDiscovery = {}
 TrainDiscovery.debug = CeStartWithDebug or false
@@ -47,25 +48,31 @@ local function registerHooks()
 
     local _EEPOnTrainCoupling = EEPOnTrainCoupling or function (_, _, _) end
     _G.EEPOnTrainCoupling = function (trainA, trainB, trainNew)
-        dirtyTrainNames[trainA] = true
-        dirtyTrainNames[trainB] = true
-        dirtyTrainNames[trainNew] = true
-        return _EEPOnTrainCoupling(trainA, trainB, trainNew)
+        ProtectedExecution.run("EEPOnTrainCoupling", function()
+            dirtyTrainNames[trainA] = true
+            dirtyTrainNames[trainB] = true
+            dirtyTrainNames[trainNew] = true
+            _EEPOnTrainCoupling(trainA, trainB, trainNew)
+        end)
     end
 
     local _EEPOnTrainLooseCoupling = EEPOnTrainLooseCoupling or function (_, _, _) end
     _G.EEPOnTrainLooseCoupling = function (trainA, trainB, trainOld)
-        dirtyTrainNames[trainA] = true
-        dirtyTrainNames[trainB] = true
-        dirtyTrainNames[trainOld] = true
-        return _EEPOnTrainLooseCoupling(trainA, trainB, trainOld)
+        ProtectedExecution.run("EEPOnTrainLooseCoupling", function()
+            dirtyTrainNames[trainA] = true
+            dirtyTrainNames[trainB] = true
+            dirtyTrainNames[trainOld] = true
+            _EEPOnTrainLooseCoupling(trainA, trainB, trainOld)
+        end)
     end
 
     local _EEPOnTrainExitTrainyard = EEPOnTrainExitTrainyard or function (_, _) end
     _G.EEPOnTrainExitTrainyard = function (depotId, trainName)
-        local _ = depotId
-        movedTrainNames[trainName] = true
-        return _EEPOnTrainExitTrainyard(depotId, trainName)
+        ProtectedExecution.run("EEPOnTrainExitTrainyard", function()
+            local _ = depotId
+            movedTrainNames[trainName] = true
+            _EEPOnTrainExitTrainyard(depotId, trainName)
+        end)
     end
 
     hooksRegistered = true

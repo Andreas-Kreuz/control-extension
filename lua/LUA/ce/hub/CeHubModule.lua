@@ -36,11 +36,13 @@ local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
 local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
 local TimedExecution = require("ce.hub.util.TimedExecution")
 local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
 local anl3Path = nil
 local activeAnl3Discovery = { success = false, coverage = {} }
 local pendingAnl3Path = nil
 local anl3ReloadPending = false
+local anl3ReloadDelayCycles = 0
 
 local function tk(group, func)
     if string.find(group, "^Discovery") then
@@ -150,11 +152,9 @@ end
 local function runAnl3Discovery(path)
     local startTime = os.clock()
     print(string.format("[CeHubModule] Anlage laden: %s", path))
-    EEPShowInfoTextTop(0.8, 1, 0.8, 1, 10, 1, string.format(
-        "Lade Anlage ..."
-    ))
     local result = buildAnl3Result(path)
     if not path then return result end
+    EEPShowInfoTextTop(0.8, 1, 0.8, 1, 10, 1, string.format("Lade Anlage ..."))
 
     local tableOfAnl3, err = Anl3ToTable.loadAnlage(path)
     if tableOfAnl3 then
@@ -198,6 +198,10 @@ end
 
 local function reloadAnl3IfNeeded()
     if not anl3ReloadPending then return end
+    if anl3ReloadDelayCycles > 0 then
+        anl3ReloadDelayCycles = anl3ReloadDelayCycles - 1
+        return
+    end
 
     activeAnl3Discovery = runAnl3Discovery(pendingAnl3Path or anl3Path)
     pendingAnl3Path = nil
@@ -216,6 +220,9 @@ function CeHubModule.init()
 end
 
 function CeHubModule.run()
+    if not initialized then
+        print("[CeHubModule] Warning: run called before module was initialized!")
+    end
     if not CeHubModule.enabled then
         return
     end
@@ -243,20 +250,23 @@ function CeHubModule.setOptions(options)
 end
 
 function EEPOnSaveAnl(Anlagenname)
-    print("Anlage gespeichert unter: " .. tostring(Anlagenname))
+    ProtectedExecution.run("EEPOnSaveAnl", function ()
+        print("Anlage gespeichert unter: " .. tostring(Anlagenname))
 
-    pendingAnl3Path = Anlagenname
-    anl3ReloadPending = true
+        pendingAnl3Path = Anlagenname
+        anl3ReloadPending = true
+        anl3ReloadDelayCycles = 3
 
-    if anl3Path and Anlagenname and not pathsEqual(anl3Path, Anlagenname) then
-        print(
-            string.format(
-                "[CeHubModule] Saved anl3 path differs from ControlExtension option. Please update " ..
-                "ControlExtension.setOptions({ anl3path = \"%s\" }).",
-                tostring(Anlagenname)
+        if anl3Path and Anlagenname and not pathsEqual(anl3Path, Anlagenname) then
+            print(
+                string.format(
+                    "[CeHubModule] Saved anl3 path differs from ControlExtension option. Please update " ..
+                    "ControlExtension.setOptions({ anl3path = \"%s\" }).",
+                    tostring(Anlagenname)
+                )
             )
-        )
-    end
+        end
+    end)
 end
 
 return CeHubModule
