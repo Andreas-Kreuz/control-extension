@@ -8,6 +8,8 @@ local RoadStation = {}
 RoadStation.debug = false
 ---@type table<string, RoadStation>
 local allStations = {}
+---@type table<string, RoadStation>
+local scriptVarRegistry = {}
 
 function RoadStation.queueToText(queue)
     if (queue) then
@@ -208,5 +210,27 @@ function RoadStation.forName(name) return allStations[name] or RoadStation:new(n
 function RoadStation.showTippText() for _, station in pairs(allStations) do station:updateDisplays() end end
 
 function RoadStation.getAll() return allStations end
+
+function RoadStation:setKpId(kpId)
+    assert(type(kpId) == "string", "Need 'kpId' as string")
+    if scriptVarRegistry[kpId] and scriptVarRegistry[kpId] ~= self then
+        print("[WARNING] RoadStation.setKpId: duplicate key '" .. kpId .. "'\n" .. debug.traceback())
+    end
+    self._kpId = kpId
+    self.kpId = kpId
+    scriptVarRegistry[kpId] = self
+    return self
+end
+
+function RoadStation:getKpId() return self._kpId end
+
+function RoadStation:setScriptVariableName(name) return self:setKpId(name) end
+
+function RoadStation.resolve(kpId)
+    assert(type(kpId) == "string", "Need kpId as string, got " .. type(kpId))
+    local station = scriptVarRegistry[kpId]
+    assert(station, "No station registered for: " .. kpId)
+    return station
+end
 
 return RoadStation

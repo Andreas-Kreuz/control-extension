@@ -146,8 +146,9 @@ local function toIntersectionLaneDto(lane, isSelected)
         lane.intersectionId or 0
     dto.name                       = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and
         lane.name or ""
+    dto.kpId                       = lane.kpId or nil
     dto.scriptVariableName         = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
-        lane.scriptVariableName or nil
+        lane.kpId or nil
     dto.currentIndication          = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and
         lane.currentIndication or
         ""

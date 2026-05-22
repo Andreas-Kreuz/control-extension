@@ -41,7 +41,6 @@ local anl3Path = nil
 local activeAnl3Discovery = { success = false, coverage = {} }
 local pendingAnl3Path = nil
 local anl3ReloadPending = false
-local previousEEPOnSaveAnl = _G.EEPOnSaveAnl
 
 local function tk(group, func)
     if string.find(group, "^Discovery") then
@@ -243,12 +242,8 @@ function CeHubModule.setOptions(options)
     return CeHubModule
 end
 
-function _G.EEPOnSaveAnl(Anlagenname)
-    if previousEEPOnSaveAnl then
-        previousEEPOnSaveAnl(Anlagenname)
-    else
-        print("Anlage gespeichert unter: " .. tostring(Anlagenname))
-    end
+function EEPOnSaveAnl(Anlagenname)
+    print("Anlage gespeichert unter: " .. tostring(Anlagenname))
 
     pendingAnl3Path = Anlagenname
     anl3ReloadPending = true

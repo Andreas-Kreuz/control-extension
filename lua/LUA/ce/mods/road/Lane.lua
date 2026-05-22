@@ -9,6 +9,7 @@ local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 -- Lane starts here
 local Lane = {}
 Lane.debug = CeStartWithDebug or false
+local laneRegistry = {}
 local RouteDriveMode = { ONLY = "ONLY", ALSO = "ALSO" }
 local ROUTE_WILDCARD = "!ALL!"
 local DEFAULT_ROUTE = "Alle"
@@ -716,15 +717,22 @@ function Lane:setTrafficType(signalType)
     return self
 end
 
-function Lane:getScriptVariableName() return self._scriptVariableName end
+function Lane:getKpId() return self._kpId end
 
-function Lane:setScriptVariableName(scriptVariableName)
-    assert(type(scriptVariableName) == "string", "Need 'scriptVariableName' as string")
-    self._scriptVariableName = scriptVariableName
+function Lane:setKpId(kpId)
+    assert(type(kpId) == "string", "Need 'kpId' as string")
+    if laneRegistry[kpId] and laneRegistry[kpId] ~= self then
+        print("[WARNING] Lane.setKpId: duplicate key '" .. kpId .. "'\n" .. debug.traceback())
+    end
+    self._kpId = kpId
+    self.kpId = kpId
+    laneRegistry[kpId] = self
     return self
 end
 
-function Lane:scriptVariableName(scriptVariableName) return self:setScriptVariableName(scriptVariableName) end
+function Lane:setScriptVariableName(scriptVariableName) return self:setKpId(scriptVariableName) end
+
+function Lane:scriptVariableName(scriptVariableName) return self:setKpId(scriptVariableName) end
 
 --- Erzeugt eine Fahrspur, welche durch genau ein EEP-Fahrspur-Signal gesteuert wird.
 ---@param name string @Name der Fahrspur einer Kreuzung
@@ -839,6 +847,13 @@ function Lane:signalChanged(signal)
     end
     self.currentIndication = signal.currentIndication
     updateLaneSignal(self, "Signal update: " .. signal.signalId)
+end
+
+function Lane.resolve(kpId)
+    assert(type(kpId) == "string", "Need kpId as string, got " .. type(kpId))
+    local lane = laneRegistry[kpId]
+    assert(lane, "No lane registered for: " .. kpId)
+    return lane
 end
 
 return Lane

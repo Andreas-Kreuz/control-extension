@@ -13,6 +13,7 @@ export interface IntersectionLaneLuaDto {
   id: string;
   intersectionId: number;
   name: string;
+  kpId?: string;
   scriptVariableName?: string;
   currentIndication: string;
   vehicleMultiplier: number;

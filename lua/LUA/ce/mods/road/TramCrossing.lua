@@ -24,6 +24,7 @@ local Task = require("ce.hub.scheduler.Task")
 local TramCrossing = {}
 TramCrossing.__index = TramCrossing
 TramCrossing.defaultYellowPhaseSeconds = 2
+local registry = {}
 
 local countTagKey = "c"
 
@@ -264,6 +265,28 @@ function TramCrossing:switchToYellowThenOccupied()
                               end
                           end, "TramCrossing " .. self.name .. " occupied")
     Scheduler:scheduleTask(self.yellowPhaseSeconds, task)
+end
+
+function TramCrossing:setKpId(kpId)
+    assert(type(kpId) == "string", "Need 'kpId' as string")
+    if registry[kpId] and registry[kpId] ~= self then
+        print("[WARNING] TramCrossing.setKpId: duplicate key '" .. kpId .. "'\n" .. debug.traceback())
+    end
+    self._kpId = kpId
+    self.kpId = kpId
+    registry[kpId] = self
+    return self
+end
+
+function TramCrossing:getKpId() return self._kpId end
+
+function TramCrossing:setScriptVariableName(name) return self:setKpId(name) end
+
+function TramCrossing.resolve(kpId)
+    assert(type(kpId) == "string", "Need kpId as string, got " .. type(kpId))
+    local crossing = registry[kpId]
+    assert(crossing, "No crossing registered for: " .. kpId)
+    return crossing
 end
 
 return TramCrossing
