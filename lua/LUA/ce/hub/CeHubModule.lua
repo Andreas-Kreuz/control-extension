@@ -43,6 +43,9 @@ local activeAnl3Discovery = { success = false, coverage = {} }
 local pendingAnl3Path = nil
 local anl3ReloadPending = false
 local anl3ReloadDelayCycles = 0
+local savingInProgress = false
+local savingGuardCycles = 0
+local MAX_SAVING_GUARD_CYCLES = 300
 
 local function tk(group, func)
     if string.find(group, "^Discovery") then
@@ -226,6 +229,16 @@ function CeHubModule.run()
     if not CeHubModule.enabled then
         return
     end
+    if savingInProgress then
+        savingGuardCycles = savingGuardCycles + 1
+        if savingGuardCycles >= MAX_SAVING_GUARD_CYCLES then
+            print("[CeHubModule] Warning: save guard timed out, resuming updates")
+            savingInProgress = false
+            savingGuardCycles = 0
+        else
+            return
+        end
+    end
     reloadAnl3IfNeeded()
     runDataUpdates()
     Scheduler:runTasks()
@@ -249,8 +262,18 @@ function CeHubModule.setOptions(options)
     return CeHubModule
 end
 
+function EEPOnBeforeSaveAnl()
+    ProtectedExecution.run("EEPOnBeforeSaveAnl", function ()
+        savingInProgress = true
+        savingGuardCycles = 0
+        print("[CeHubModule] EEP speichert Anlage ...")
+    end)
+end
+
 function EEPOnSaveAnl(Anlagenname)
     ProtectedExecution.run("EEPOnSaveAnl", function ()
+        savingInProgress = false
+        savingGuardCycles = 0
         print("Anlage gespeichert unter: " .. tostring(Anlagenname))
 
         pendingAnl3Path = Anlagenname
