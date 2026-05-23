@@ -1,11 +1,14 @@
 import { TrainAppDto } from '@ce/web-shared';
+import CommuteIcon from '@mui/icons-material/Commute';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import IconHeaderCard from '../../../../shared/components/cards/IconHeaderCard';
 import CardGridContainer from '../../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../../shared/layouts/PageContainer';
@@ -15,6 +18,12 @@ import { trainSections } from '../trainSectionPresentation';
 import MergedAxisPanel from './MergedAxisPanel';
 import TrainControlsPanel from './TrainControlsPanel';
 import TrainInfoPanel from './TrainInfoPanel';
+
+const fuhrparkButton = (
+  <Button variant="contained" startIcon={<CommuteIcon />} component={RouterLink} to="/train/list">
+    Fuhrpark
+  </Button>
+);
 
 function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rollingStockContent?: ReactNode }) {
   const { dashboard } = props;
@@ -47,7 +56,7 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
 
   return (
     <PageContainer>
-      <PageHeadline icon={<DashboardIcon color="primary" />}>Aktiver Zug</PageHeadline>
+      <PageHeadline icon={<DashboardIcon color="primary" />} rightSettings={fuhrparkButton}>Aktiver Zug</PageHeadline>
       <Stack spacing={2}>
         <CardGridContainer>
           <Grid size={{ xs: 12 }}>
