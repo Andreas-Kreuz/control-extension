@@ -82,6 +82,7 @@
 ---@field signalGroupsByUse table<string, SignalGroup>|nil
 ---@field debug boolean
 ---@field phaseInfo any
+---@field isLaneSignal boolean
 ---@field laneInfo any
 ---@field laneNameInfo any
 ---@field buildInfo string

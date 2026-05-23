@@ -4,6 +4,7 @@ local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local AxisStructureTrafficLight = require("ce.mods.road.AxisStructureTrafficLight")
 local LightStructureTrafficLight = require("ce.mods.road.LightStructureTrafficLight")
 local SignalIndication = require("ce.mods.road.SignalIndication")
+local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local fmt = require("ce.hub.eep.TippTextFormatter")
 
 ------------------------------------------------------------------------------------------
@@ -54,6 +55,7 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
         laneInfo = "",
         laneNameInfo = "",
         phaseInfo = nil,
+        isLaneSignal = false,
         buildInfo = "" .. tostring(signalId),
         lanes = {},
         ---@type table<LightStructureTrafficLight,boolean>
@@ -88,7 +90,6 @@ end
 
 function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure,
                                            housingStructure, blendStructure)
-    local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
     return self:newForSignal(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure,
                              requestStructure, housingStructure, blendStructure)
 end
@@ -157,13 +158,18 @@ function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
 --
 function TrafficLight:setLaneNameInfo(laneNameInfo) self.laneNameInfo = laneNameInfo end
 
+local function tippTextStructure(lightStructure)
+    return lightStructure.housingStructure or lightStructure.redStructure
+end
+
 function TrafficLight:showInfoText(showInfo)
     if self.signalId > 0 then
         EEPShowInfoSignal(self.signalId, showInfo)
     else
         for l in pairs(self.lightStructures) do
-            if l.redStructure then
-                EEPShowInfoStructure(l.redStructure, showInfo)
+            local structureName = tippTextStructure(l)
+            if structureName then
+                EEPShowInfoStructure(structureName, showInfo)
                 break
             end
         end
@@ -175,20 +181,63 @@ function TrafficLight:changeInfoText(infoText)
         EEPChangeInfoSignal(self.signalId, infoText)
     else
         for l in pairs(self.lightStructures) do
-            if l.redStructure then
-                EEPChangeInfoStructure(l.redStructure, infoText)
+            local structureName = tippTextStructure(l)
+            if structureName then
+                EEPChangeInfoStructure(structureName, infoText)
                 break
             end
         end
     end
 end
 
+local function basename(value)
+    return string.match(value:gsub("\\", "/"), "([^/]+)$") or value
+end
+
+local function withoutExtension(value)
+    return string.gsub(value, "%.[^.]+$", "")
+end
+
+local function inferTrafficLightModelFromItemName(itemNameWithModelPath)
+    if not itemNameWithModelPath then return nil end
+    local normalizedPath = itemNameWithModelPath:gsub("\\", "/")
+    local normalizedPathLower = string.lower(normalizedPath)
+    if normalizedPathLower == "signale/signale/signal_unsichtbar.3dm" then
+        return TrafficLightModel.Unsichtbar_2er
+    end
+
+    local fileName = basename(normalizedPath)
+    local normalizedFileName = string.lower(fileName)
+    local normalizedFileNameWithoutExtension = string.lower(withoutExtension(fileName))
+    if string.match(normalizedFileName, "^3er") and string.match(normalizedFileName, "_js2%.3dm$") then
+        return string.find(normalizedFileName, "fg") and TrafficLightModel.JS2_3er_mit_FG or
+            TrafficLightModel.JS2_3er_ohne_FG
+    end
+    if string.match(normalizedFileName, "^2er") and string.match(normalizedFileName, "_js2%.3dm$") then
+        if string.find(normalizedFileName, "fg") then return TrafficLightModel.JS2_2er_nur_FG end
+        if string.find(normalizedFileName, "gruengelb") then return TrafficLightModel.JS2_2er_gelb_gruen_aus end
+        if string.find(normalizedFileName, "rotgelb") then return TrafficLightModel.JS2_2er_rot_gelb_aus end
+        if string.find(normalizedFileName, "rotgruen") then return TrafficLightModel.JS2_2er_rot_gruen end
+    end
+    if normalizedFileNameWithoutExtension == "1erlinksmast_js2" then return TrafficLightModel.JS2_1er_gruen end
+    if string.match(normalizedFileNameWithoutExtension, "_np1$") then
+        if string.find(normalizedFileNameWithoutExtension, "fd") or
+            string.find(normalizedFileNameWithoutExtension, "fe") then
+            return TrafficLightModel.NP1_3er_mit_FG
+        end
+        if string.find(normalizedFileNameWithoutExtension, "of") then return TrafficLightModel.NP1_3er_ohne_FG end
+    end
+    return nil
+end
+
 local function getSignalFunctionsTippText(signalId, trafficLightModel)
-    if EEPGetSignalFunctions then
+    if signalId > 0 and EEPGetSignalFunctions then
         local text = {}
         local found, trafficLightModelName = EEPGetSignalItemName(signalId, true)
-        if not found then return trafficLightModel.name end
-        table.insert(text, trafficLightModel.name)
+        local effectiveTrafficLightModel = inferTrafficLightModelFromItemName(trafficLightModelName) or
+            trafficLightModel
+        if not found then return effectiveTrafficLightModel.name end
+        table.insert(text, effectiveTrafficLightModel.name)
         table.insert(text, "<br>")
         table.insert(text, trafficLightModelName)
         local _, count = EEPGetSignalFunctions(signalId)
@@ -198,7 +247,7 @@ local function getSignalFunctionsTippText(signalId, trafficLightModel)
             table.insert(text, EEPGetSignal(signalId) == i and "<b>" or "")
             table.insert(text, i)
             table.insert(text, ": ")
-            table.insert(text, trafficLightModel:indicationOf(i) or action)
+            table.insert(text, effectiveTrafficLightModel:indicationOf(i) or action)
             table.insert(text, EEPGetSignal(signalId) == i and "</b>." or ".")
         end
         return table.concat(text, "")
@@ -256,12 +305,17 @@ end
 
 --- Stellt die vorher gesetzten Tipp-Texte dar.
 --
+local function isPartOfSignalGroup(signal)
+    return next(signal.signalGroupsByUse or {}) ~= nil
+end
+
 function TrafficLight:refreshInfo()
-    local showPhase = IntersectionSettings.showPhaseOnSignal
+    local showPhase = IntersectionSettings.showPhaseOnSignal and self.phaseInfo and self.phaseInfo:len() > 0
     local showAllSignals = IntersectionSettings.showSignalIdOnSignal
     local showModelInfo = IntersectionSettings.showModelInfoOnSignal
     local showLaneName = IntersectionSettings.showLaneNamesOnSignal and self.laneNameInfo:len() > 0
-    local showNameAndColor = IntersectionSettings.showNameAndPhaseOnSignal
+    local showNameAndColor = IntersectionSettings.showNameAndPhaseOnSignal and
+        (not self.isLaneSignal or isPartOfSignalGroup(self))
     local showRequests = IntersectionSettings.showRequestsOnSignal and self.laneInfo:len() > 0
     local showInfo = showAllSignals or showModelInfo or showLaneName or showNameAndColor or showRequests or showPhase
 

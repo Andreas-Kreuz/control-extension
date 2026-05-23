@@ -56,6 +56,7 @@ function Intersection:onSwitchedToPhase(currentPhase)
         end
     end
     self.currentPhase = currentPhase
+    self.currentPhaseStartedAt = EEPTime or 0
 end
 
 function Intersection:calculateNextPhase()
@@ -153,6 +154,7 @@ function Intersection:new(name, greenTimeSeconds)
     local o = {
         name = name,
         currentPhase = nil,
+        currentPhaseStartedAt = 0,
         phases = {},
         signalGroups = {},
         pedestrianCrossings = {},
@@ -331,7 +333,8 @@ local function recalculateSignalInfo(intersection)
     for _, lane in pairs(intersection.lanes) do
         local signalHead = lane.laneSignal
         signalHeadsToRefresh[signalHead.signalId] = signalHead
-        signalHead:setLaneNameInfo(fmt.bgLightBlue(lane.name) .. ".")
+        signalHead.isLaneSignal = true
+        signalHead:setLaneNameInfo(signalHead:signalNamesTippText() .. " " .. fmt.bgLightBlue(lane.name) .. ".")
         signalHead:setLaneInfo(lane:getRequestInfo())
     end
 
@@ -367,34 +370,42 @@ local function recalculateSignalInfo(intersection)
     for _, signalHead in pairs(signalHeadsToRefresh) do signalHead:refreshInfo() end
 end
 
-local function getLaneRequestInfoBar(lane)
-    local text = ""
-    local max = 5
-    if lane.tracksUsedForRequest or lane.signalUsedForRequest then
-        text = text .. (lane.queue:isEmpty() and "#####" or "_____")
-    else
-        local requests = "X"
-        local vehicles = math.min(lane.vehicleCount * lane.fahrzeugMultiplikator, max - 1)
-        for _ = 1, vehicles do requests = requests .. "_" end
-        if lane.currentIndication == SignalIndication.RED then
-            text = text .. fmt.bgRed(requests)
-        elseif lane.currentIndication == SignalIndication.YELLOW then
-            text = text .. fmt.bgYellow(requests)
-        else
-            text = text .. fmt.bgGreen(requests)
-        end
+local function secondsSincePhaseStarted(intersection)
+    local now = EEPTime or intersection.currentPhaseStartedAt or 0
+    local startedAt = intersection.currentPhaseStartedAt or now
+    if now < startedAt then return now + 24 * 60 * 60 - startedAt end
+    return now - startedAt
+end
 
-        local grey = ""
-        for _ = vehicles + 1, max - 1 do grey = grey .. "_" end
-        text = text .. grey
+local function repeatText(text, count)
+    local result = ""
+    for _ = 1, count do result = result .. text end
+    return result
+end
+
+local function currentPhaseBar(intersection, phase)
+    local max = 5
+    if phase ~= intersection:getCurrentPhase() then return fmt.grey("X" .. repeatText("_", max)) end
+
+    local remainingSeconds = phase.greenTimeSeconds - secondsSincePhaseStarted(intersection)
+    local coloredUnderscores = max
+    if remainingSeconds <= 10 then
+        coloredUnderscores = math.max(0, math.min(max, math.ceil(remainingSeconds / 2)))
     end
-    return text .. "  " .. lane.name
+    local colored = "X" .. repeatText("_", coloredUnderscores)
+    local grey = repeatText("_", max - coloredUnderscores)
+    return fmt.bgGreen(colored) .. grey
+end
+
+local function phaseOverviewLine(intersection, phase)
+    local phaseName = phase == intersection:getCurrentPhase() and fmt.bold(phase.name) or phase.name
+    return currentPhaseBar(intersection, phase) .. "  " .. phaseName
 end
 
 function Intersection:updateLaneTipText()
-    local text = fmt.bold(self.name) .. "<br>" .. "_____"
-    for _, lane in pairs(self.lanes) do
-        text = TippTextFormatter.appendUpTo1023(text, "<br></j>" .. getLaneRequestInfoBar(lane))
+    local text = fmt.bold(self.name)
+    for _, phase in ipairs(self.phases) do
+        text = TippTextFormatter.appendUpTo1023(text, "<br></j>" .. phaseOverviewLine(self, phase))
     end
 
     if self.tippStructure then

@@ -166,4 +166,122 @@ insulate("ce.mods.road.TrafficLight", function ()
             "<br><br><b>Phase: </b><br><j>P1 <bgrgb=0,192,0>(Gruen)<bgrgb=255,255,255>",
             infoText)
     end)
+    it("uses the EEP signal model path for model info when it is known", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        local signal = TrafficLight:newForSignal("K1", 40, TrafficLightModel.NONE)
+        IntersectionSettings.showModelInfoOnSignal = true
+
+        local getSignalItemNameStub = stub(_G, "EEPGetSignalItemName", function ()
+            return true, "Resourcen/Signale/3erAmpel_FG_JS2.3dm"
+        end)
+        local getSignalFunctionsStub = stub(_G, "EEPGetSignalFunctions", function () return true, 6 end)
+        local getSignalFunctionStub = stub(_G, "EEPGetSignalFunction", function (_, index)
+            return true, "F" .. index
+        end)
+        local getSignalStub = stub(_G, "EEPGetSignal", function () return 3 end)
+        finally(function ()
+            getSignalItemNameStub:revert()
+            getSignalFunctionsStub:revert()
+            getSignalFunctionStub:revert()
+            getSignalStub:revert()
+        end)
+
+        local infoText
+        stub(signal, "showInfoText", function () end)
+        stub(signal, "changeInfoText", function (_, text) infoText = text end)
+
+        signal:refreshInfo()
+
+        assert.is_truthy(string.find(infoText, TrafficLightModel.JS2_3er_mit_FG.name, 1, true))
+        assert.is_truthy(string.find(infoText, "<b>3: Gruen</b>.", 1, true))
+    end)
+
+    it("does not show lane signals for short name and color alone", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        local signal = TrafficLight:newForSignal("L1", -1, TrafficLightModel.NONE)
+        signal.isLaneSignal = true
+        IntersectionSettings.showNameAndPhaseOnSignal = true
+
+        local visible
+        stub(signal, "showInfoText", function (_, showInfo) visible = showInfo end)
+        stub(signal, "changeInfoText", function () error("no tooltip text expected") end)
+
+        signal:refreshInfo()
+
+        assert.is_false(visible)
+    end)
+
+    it("shows short name and color for lane signals that are part of a signal group", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local SignalGroup = require("ce.mods.road.SignalGroup")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        local signal = TrafficLight:newForSignal("L1", -1, TrafficLightModel.NONE)
+        signal.isLaneSignal = true
+        SignalGroup:new("sgLane1"):addVehicleSignals(signal)
+        IntersectionSettings.showNameAndPhaseOnSignal = true
+
+        local infoText
+        stub(signal, "showInfoText", function () end)
+        stub(signal, "changeInfoText", function (_, text) infoText = text end)
+
+        signal:refreshInfo()
+
+        assert.is_truthy(string.find(infoText, "<b>L1</b>", 1, true))
+    end)
+    it("shows lane signal name and lane name only for lane signal setting", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local fmt = require("ce.hub.eep.TippTextFormatter")
+
+        local signal = TrafficLight:newForSignal("L1", -1, TrafficLightModel.NONE)
+        signal.isLaneSignal = true
+        signal:setLaneNameInfo(signal:signalNamesTippText() .. " " .. fmt.bgLightBlue("Lane 1"))
+        IntersectionSettings.showLaneNamesOnSignal = true
+
+        local infoText
+        stub(signal, "showInfoText", function () end)
+        stub(signal, "changeInfoText", function (_, text) infoText = text end)
+
+        signal:refreshInfo()
+
+        assert.is_truthy(string.find(infoText, "<b>L1</b>", 1, true))
+        assert.is_truthy(string.find(infoText, "Lane 1", 1, true))
+    end)
+
+    it("uses the housing structure for structure light tooltip text", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        EEPStructureSetLight("#1_Rot", false)
+        EEPStructureSetLight("#1_Gruen", false)
+        local signal = TrafficLight:newForLightStructure("S1", "#1_Rot", "#1_Gruen", nil, nil, "#1_Gehaeuse")
+        IntersectionSettings.showNameAndPhaseOnSignal = true
+
+        local shownStructure
+        local changedStructure
+        local showInfoStructureStub = stub(_G, "EEPShowInfoStructure", function (structureName)
+            shownStructure = structureName
+        end)
+        local changeInfoStructureStub = stub(_G, "EEPChangeInfoStructure", function (structureName)
+            changedStructure = structureName
+        end)
+        finally(function ()
+            showInfoStructureStub:revert()
+            changeInfoStructureStub:revert()
+        end)
+
+        signal:refreshInfo()
+
+        assert.equals("#1_Gehaeuse", shownStructure)
+        assert.equals("#1_Gehaeuse", changedStructure)
+    end)
 end)

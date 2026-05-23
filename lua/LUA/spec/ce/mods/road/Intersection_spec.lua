@@ -161,6 +161,34 @@ insulate("Crossing", function ()
         assert.are.same({ "Cam 1", "Cam 2", "Cam 3" }, intersection:getStaticCams())
     end)
 
+    it("shows phases in the crossing overview and shrinks the current phase bar", function ()
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        crossing:setTippStructure("#Overview")
+        crossing.currentPhase = phaseA
+        crossing.currentPhaseStartedAt = 100
+        _G.EEPTime = 109
+        IntersectionSettings.showLanesOnStructure = true
+
+        local infoText
+        local showInfoStructureStub = stub(_G, "EEPShowInfoStructure", function () end)
+        local changeInfoStructureStub = stub(_G, "EEPChangeInfoStructure", function (_, text) infoText = text end)
+        finally(function ()
+            showInfoStructureStub:revert()
+            changeInfoStructureStub:revert()
+        end)
+
+        crossing:updateLaneTipText()
+
+        assert.is_truthy(string.find(infoText, "<b>My Crossing</b>", 1, true))
+        assert.is_truthy(string.find(infoText, "<bgrgb=0,192,0>X___<bgrgb=255,255,255>__  <b>P1</b>", 1, true))
+        assert.is_truthy(string.find(
+                            infoText,
+                            "<bgrgb=201,201,201><fgrgb=0,0,0>X_____<bgrgb=255,255,255><fgrgb=0,0,0>  P2",
+                            1,
+                            true))
+        assert.is_nil(string.find(infoText, "Lane 1 N", 1, true))
+    end)
     insulate("Check initial stuff", function ()
         it("Lanes are there", function ()
             assert.is_same(lane1, crossing.lanes[1])

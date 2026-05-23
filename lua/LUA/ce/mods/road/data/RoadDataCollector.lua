@@ -398,8 +398,8 @@ function RoadDataCollector.collectModuleSettings()
         },
         {
             category = "Tipp-Texte für Ampeln",
-            name = "Fahrspurnamen einblenden",
-            description = "Zeigt an Fahrspur-Signalen den Namen der Fahrspur",
+            name = "Fahrspursignale einblenden",
+            description = "Zeigt an Fahrspur-Signalen Kurzname, Farbe und Fahrspurname",
             type = "boolean",
             value = IntersectionSettings.showLaneNamesOnSignal,
             eepFunction = "IntersectionSettings.setShowLaneNamesOnSignal"
@@ -407,7 +407,7 @@ function RoadDataCollector.collectModuleSettings()
         {
             category = "Tipp-Texte für Ampeln",
             name = "Kurzname und Farbe",
-            description = "Zeigt den farbigen Signalnamen und das aktuelle Signalbild",
+            description = "Zeigt den farbigen Signalnamen an Ampeln und Immobilienampel-Gehaeusen",
             type = "boolean",
             value = IntersectionSettings.showNameAndPhaseOnSignal,
             eepFunction = "IntersectionSettings.setShowNameAndPhaseOnSignal"
@@ -431,7 +431,7 @@ function RoadDataCollector.collectModuleSettings()
         {
             category = "Tipp-Texte für Kreuzungen",
             name = "Kreuzungsübersicht einblenden",
-            description = "Zeigt Fahrspuren und deren Phase",
+            description = "Zeigt Phasen und markiert die aktuelle Phase",
             type = "boolean",
             value = IntersectionSettings.showLanesOnStructure,
             eepFunction = "IntersectionSettings.setShowLanesOnStructure"
