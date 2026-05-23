@@ -147,7 +147,7 @@
 ---@field laneCanDrive fun(lane: Lane, signals: table):boolean
 ---@field laneSignal TrafficLight
 ---@field name string
----@field _scriptVariableName string|nil
+---@field _kpId string|nil
 ---@field new fun(self: Lane, name: string, laneSignal: TrafficLight, turnDirections?: string[], signalType?: string):Lane
 ---@field queue Queue
 ---@field activeLaneSettings any
@@ -169,8 +169,9 @@
 --- Starts route-bound drive signal registration. At least one route is required.
 ---@field routes fun(self: Lane, ...: string):LaneRouteDriveBuilder
 ---@field routesToCount table
----@field getScriptVariableName fun(self: Lane):string|nil
+---@field getKpId fun(self: Lane):string|nil
 ---@field scriptVariableName fun(self: Lane, scriptVariableName: string):Lane
+---@field setKpId fun(self: Lane, kpId: string):Lane
 ---@field setScriptVariableName fun(self: Lane, scriptVariableName: string):Lane
 ---@field setDirections fun(self: Lane, ...: LaneDirection):Lane
 ---@field setApproach fun(self: Lane, approach: LaneApproach):Lane

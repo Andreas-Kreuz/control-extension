@@ -58,7 +58,7 @@ end
 EepSimulator.simulateQueueTrainOnSignal(14, "#Zug1")
 EEPSetTrainRoute("#Zug1", "Meine Route 1")
 
-local signalLane = os
+local signalLane = oTram
 ---@cast signalLane Lane
 assert(true == signalLane.signalUsedForRequest)
 signalLane:resetQueueFromSignal()

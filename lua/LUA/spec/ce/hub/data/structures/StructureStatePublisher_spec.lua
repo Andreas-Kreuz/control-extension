@@ -146,7 +146,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         StructureStatePublisher.syncState()
 
         assert.is_false(DataStore.get("ce.hub.Structure", "#2").fire)
-        assert.equals("tree", DataStore.get("ce.hub.Structure", "#3").tag)
+        assert.equals("tree-north", DataStore.get("ce.hub.Structure", "#3").tag)
 
         InterestSyncRegistry.startSyncFor(HubCeTypes.Structure, "#2")
         InterestSyncRegistry.startSyncFor(HubCeTypes.Structure, "#3")

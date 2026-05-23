@@ -4,15 +4,13 @@ import type {
   FocusStructureSignalInstallerCameraCommandAppDto,
   StructureAppDto,
 } from '@ce/web-shared';
-import { CeTypeRoom, CeTypes, DomainRoom, RoadEvent } from '@ce/web-shared';
+import { CeTypes, RoadEvent } from '@ce/web-shared';
 import { useSocket } from '../../../app/hooks/useSocket';
+import useDomainDataEntryHandler from '../../data/hooks/useDomainDataEntryHandler';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
-import { useApiDataRoomHandler, useDomainRoomHandler } from '../../../shared/socket/useRoomHandler';
+import { useApiDataRoomHandler } from '../../../shared/socket/useRoomHandler';
 import StructureSignalInstaller from './structure-signal-installer/StructureSignalInstaller';
-
-const structureRoom = new CeTypeRoom(CeTypes.HubStructure);
-const noopRoom = new DomainRoom('__noop__');
 
 function StructureSignalInstallerRoute() {
   const socket = useSocket();
@@ -27,11 +25,15 @@ function StructureSignalInstallerRoute() {
     setStructuresById(JSON.parse(payload) as Record<string, StructureAppDto>);
   });
 
-  useDomainRoomHandler(selectedHousingId ? structureRoom : noopRoom, selectedHousingId || 'none', (payload: string) => {
-    const structure = JSON.parse(payload) as StructureAppDto | null;
-    if (!structure?.id) return;
-    setStructuresById((current) => ({ ...current, [structure.id]: structure }));
-  });
+  useDomainDataEntryHandler(
+    selectedHousingId ? CeTypes.HubStructure : undefined,
+    selectedHousingId || 'none',
+    (payload) => {
+      const structure = JSON.parse(payload) as StructureAppDto | null;
+      if (!structure?.id) return;
+      setStructuresById((current) => ({ ...current, [structure.id]: structure }));
+    },
+  );
 
   const changeSelectedHousing = useCallback((housingId: string) => {
     setSelectedHousingId(housingId);

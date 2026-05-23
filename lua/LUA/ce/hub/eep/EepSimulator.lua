@@ -631,6 +631,12 @@ function EEPShowInfoSwitch(switchId, visible) return Runtime.callEEPShowInfoSwit
 --- Ab: EEP 13.
 function EEPChangeInfoSwitch(switchId, text) return Runtime.callEEPChangeInfoSwitch(switchId, text) end
 
+--- Blendet einen Text am oberen Bildschirmrand ein.
+--- Ab: EEP 15.1.
+function EEPShowInfoTextTop(red, green, blue, textSize, seconds, alignment, text)
+    return Runtime.callEEPShowInfoTextTop(red, green, blue, textSize, seconds, alignment, text)
+end
+
 -------------------------------
 -- Neu ab EEP 13 - Plugin 2  --
 -------------------------------

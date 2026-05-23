@@ -141,7 +141,7 @@ insulate("Crossing", function ()
         local lane = intersection:newLane("Lane A", signal):setScriptVariableName("c1LaneA")
 
         assert.equals(lane, intersection.lanes[1])
-        assert.equals("c1LaneA", lane:getScriptVariableName())
+        assert.equals("c1LaneA", lane:getKpId())
     end)
 
     it("creates pedestrian crossings through the intersection", function ()

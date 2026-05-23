@@ -343,7 +343,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
             id = intersectionId .. "-" .. lane.name,
             intersectionId = intersectionId,
             name = lane.name,
-            scriptVariableName = optionalValueFromGetterOrField(lane, "getScriptVariableName", "_scriptVariableName"),
+            kpId = optionalValueFromGetterOrField(lane, "getKpId", "_kpId"),
             currentIndication = currentIndication,
             vehicleMultiplier = lane.fahrzeugMultiplikator,
             laneSignalId = lane.laneSignal and lane.laneSignal.signalId or nil,

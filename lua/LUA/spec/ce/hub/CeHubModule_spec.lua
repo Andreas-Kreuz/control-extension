@@ -219,6 +219,9 @@ insulate("CeHubModule", function ()
 
         _G.EEPOnSaveAnl(TEMP_SAVED_ANL3)
         CeHubModule.run()
+        CeHubModule.run()
+        CeHubModule.run()
+        CeHubModule.run()
 
         assert.is_false(SignalRegistry.has(5))
         assert.is_true(SignalRegistry.has(9))

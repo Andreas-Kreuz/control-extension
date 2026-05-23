@@ -68,7 +68,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             id = "1-L1",
             intersectionId = 1,
             name = "L1",
-            scriptVariableName = "c1Lane1",
+            kpId = "c1Lane1",
+                        scriptVariableName = "c1Lane1",
             currentIndication = "GREEN",
             vehicleMultiplier = 2,
             type = "NORMAL",
@@ -285,6 +286,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
+                        kpId = "c1Lane1",
                         scriptVariableName = "c1Lane1",
                         currentIndication = "", -- oninterest, never selected
                         vehicleMultiplier = 2,
@@ -307,6 +309,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                         id = "1-L1",
                         intersectionId = 1,
                         name = "L1",
+                        kpId = "c1Lane1",
                         scriptVariableName = "c1Lane1",
                         currentIndication = "GREEN",
                         vehicleMultiplier = 2,
@@ -567,8 +570,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local queue = { elements = function () return {} end }
         local lane1 = {
             name = "Spur 1",
-            _scriptVariableName = "c1Lane1",
-            getScriptVariableName = function (self) return self._scriptVariableName end,
+            _kpId = "c1Lane1",
+            getKpId = function (self) return self._kpId end,
             laneSignal = signalHead1,
             defaultDriveSignals = { [signalHead1] = true },
             fahrzeugMultiplikator = 1,
@@ -630,7 +633,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         assert.equals("sgCombinedScript", data.intersections[1].signalGroupDefinitions[1].scriptVariableName)
         assert.equals("WEST", data.intersections[1].signalGroupDefinitions[1].approach)
         assert.same({ "LEFT" }, data.intersections[1].signalGroupDefinitions[1].turnDirections)
-        assert.equals("c1Lane1", data.intersectionLanes[1].scriptVariableName)
+        assert.equals("c1Lane1", data.intersectionLanes[1].kpId)
     end)
 
     it("collects implicit lane signal group links from the lane signal", function ()

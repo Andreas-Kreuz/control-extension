@@ -310,9 +310,16 @@ insulate("Line route reconciliation", function ()
         transitTrain:changeDestination(l10Striesen.destination, l10Striesen.line.nr)
 
         train:setRoute("Route Test Unknown Route")
+        local printStub = stub(_G, "print")
         local ok = pcall(function () Line.scheduleDeparture("#RouteTrain4", sStriesen, 1) end)
+        printStub:revert()
 
         it("does not fail", function () assert.is_true(ok) end)
+        it("logs the unknown route", function ()
+            assert.stub(printStub).was_called_with(
+                "[#Line] Could not find lineSegment for route: 'Route Test Unknown Route' for train: #RouteTrain4"
+            )
+        end)
         it("clears the previous line", function () assert.equals("", transitTrain:getLine()) end)
         it("clears the previous destination", function ()
             assert.equals("", transitTrain:getDestination())
@@ -324,9 +331,16 @@ insulate("Line route reconciliation", function ()
 
     insulate("duplicate EEP routes keep the first mapping", function ()
         local duplicateLine = Line.forName("Duplicate Route Test")
+        local printStub = stub(_G, "print")
         local duplicateSegment = duplicateLine:addSection(l10Striesen.routeName, "Duplicate")
+        printStub:revert()
 
         it("returns the existing route mapping", function () assert.equals(l10Striesen, duplicateSegment) end)
+        it("logs the duplicate route", function ()
+            assert.stub(printStub).was_called_with(
+                "[#Line] EEP route 'Route Test Tram 10 Striesen' is already assigned to line '10' and destination 'Striesen'"
+            )
+        end)
     end)
 end)
 
@@ -382,8 +396,14 @@ insulate("Line contact guards", function ()
         Line.scheduleDeparture("#GuardTrain1", sGuardEnd, 4)
 
         train:setRoute("Guard Route Unknown")
+        local printStub = stub(_G, "print")
         Line.scheduleDeparture("#GuardTrain1", sGuardEnd, 1)
 
+        it("logs the unknown route", function ()
+            assert.stub(printStub).was_called_with(
+                "[#Line] Could not find lineSegment for route: 'Guard Route Unknown' for train: #GuardTrain1"
+            )
+        end)
         it("removes stale station departures", function ()
             assert.is_false(transitStationsHaveTrain("#GuardTrain1"))
         end)
@@ -397,9 +417,16 @@ insulate("Line contact guards", function ()
     insulate("unknown route does not create transit train state", function ()
         local train = TrainRegistry.forName("#GuardTrain5")
         train:setRoute("Guard Route Unknown Without Transit Train")
+        local printStub = stub(_G, "print")
 
         Line.scheduleDeparture("#GuardTrain5", sGuardEnd, 1)
+        printStub:revert()
 
+        it("logs the unknown route", function ()
+            assert.stub(printStub).was_called_with(
+                "[#Line] Could not find lineSegment for route: 'Guard Route Unknown Without Transit Train' for train: #GuardTrain5"
+            )
+        end)
         it("does not add station departures", function ()
             assert.is_false(transitStationsHaveTrain("#GuardTrain5"))
         end)
