@@ -614,11 +614,11 @@ function testCodegenCreatesIntersectionSetup(): void {
   );
   assert.match(
     lua,
-    /bahnhofHauptLane1 = bahnhofHaupt:newLane\("FS1", bahnhofHauptLane1Signal\)\n\s+:setScriptVariableName\("bahnhofHauptLane1"\)/,
+    /bahnhofHauptLane1 = bahnhofHaupt:newLane\("FS1", bahnhofHauptLane1Signal\)\n\s+:setKpId\("bahnhofHauptLane1"\)/,
   );
   assert.match(
     lua,
-    /bahnhofHauptLane2 = bahnhofHaupt:newLane\("FS2", bahnhofHauptLane2Signal\)\n\s+:setScriptVariableName\("bahnhofHauptLane2"\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)/,
+    /bahnhofHauptLane2 = bahnhofHaupt:newLane\("FS2", bahnhofHauptLane2Signal\)\n\s+:setKpId\("bahnhofHauptLane2"\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)/,
   );
   const laneBlock = lua.slice(lanesIndex, signalGroupsIndex);
   assert.doesNotMatch(laneBlock, /:setApproach\(Lane\.Approach/);

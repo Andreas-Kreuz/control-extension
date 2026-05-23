@@ -682,7 +682,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     const requestTrackIds = lane.requestTrackIds ?? [];
     const highlightTrackIds = lane.highlightTrackIds ?? [];
     const chainCalls = [
-      `setScriptVariableName(${luaString(variable)})`,
+      `setKpId(${luaString(variable)})`,
       ...(type === 'CAR' ? [] : [`setTrafficType(${trafficTypeLuaType[type]})`]),
       ...(lane.vehicleMultiplier && lane.vehicleMultiplier !== 1
         ? [`setVehicleMultiplier(${lane.vehicleMultiplier})`]

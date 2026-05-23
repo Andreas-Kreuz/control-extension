@@ -325,7 +325,8 @@ function defaultPhases(): IntersectionWizardPhaseAppDto[] {
 }
 
 function defaultModelForType(type: IntersectionWizardTrafficType) {
-  if (type === 'TRAM') return { modelName: 'MA1 STRAB 3er-Ampel (Stellung 2=grün)', modelConstant: 'MA1_STRAB_3er_2_gruen' };
+  if (type === 'TRAM')
+    return { modelName: 'MA1 STRAB 3er-Ampel (Stellung 2=grün)', modelConstant: 'MA1_STRAB_3er_2_gruen' };
   if (type === 'PEDESTRIAN') return { modelName: 'JS2 2er-Ampel (nur Fußgänger)', modelConstant: 'JS2_2er_nur_FG' };
   return { modelName: 'JS2 3er-Ampel mit Fußgängern', modelConstant: 'JS2_3er_mit_FG' };
 }
@@ -469,7 +470,13 @@ function normalizeDraftLaneAssignments(draft: IntersectionWizardDraftAppDto): In
 }
 
 function compactTrafficLightModelLabel(model: TrafficLightModelAppDto): string {
-  return model.luaConstant ?? model.name;
+  return model.name;
+}
+
+function trafficLightModelDisplayName(
+  model: Pick<IntersectionWizardAmpelAppDto, 'modelConstant' | 'modelName'>,
+): string {
+  return model.modelName || model.modelConstant || '-';
 }
 
 function compactStructureName(name: string | undefined): string {
@@ -509,7 +516,7 @@ function sourceSignalOptionLabel(ampel: IntersectionWizardAmpelAppDto): ReactNod
     <>
       {ampel.name} verwenden{' '}
       <Box component="span" sx={{ color: 'text.secondary' }}>
-        (Signal-ID: {ampel.signalId || '-'}, {modelValue(ampel) || '-'})
+        (Signal-ID: {ampel.signalId || '-'}, {trafficLightModelDisplayName(ampel)})
       </Box>
     </>
   );
@@ -1045,7 +1052,7 @@ function IntersectionCreateWizard() {
       Object.values(trafficLightModels)
         .map((model) => ({
           model,
-          label: model.luaConstant ? `${model.luaConstant} (${model.name})` : model.name,
+          label: model.name,
         }))
         .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true })),
     [trafficLightModels],
@@ -1819,15 +1826,20 @@ function IntersectionCreateWizard() {
     return model.modelConstant || model.modelName;
   }
 
-  function modelOptionsWithSelected(selectedModelValue: string) {
+  function modelOptionsWithSelected(model: Pick<IntersectionWizardAmpelAppDto, 'modelConstant' | 'modelName'>) {
+    const selectedModelValue = modelSelectValue(model);
     if (
       selectedModelValue &&
       !trafficLightModelOptions.some((option) => (option.model.luaConstant ?? option.model.name) === selectedModelValue)
     ) {
       return [
         {
-          model: { id: selectedModelValue, name: selectedModelValue, luaConstant: selectedModelValue },
-          label: selectedModelValue,
+          model: {
+            id: selectedModelValue,
+            name: model.modelName || selectedModelValue,
+            luaConstant: selectedModelValue,
+          },
+          label: model.modelName || selectedModelValue,
         } as TrafficLightModelOption,
         ...trafficLightModelOptions,
       ];
@@ -1927,7 +1939,7 @@ function IntersectionCreateWizard() {
 
   function renderSignalAmpelEditor(group: IntersectionWizardSignalGroupAppDto, ampel: IntersectionWizardAmpelAppDto) {
     const selectedModelValue = modelSelectValue(ampel);
-    const options = modelOptionsWithSelected(selectedModelValue);
+    const options = modelOptionsWithSelected(ampel);
     const sourceOptions = sourceSignalOptions(group, ampel);
     const errors = validation.ampelErrors[ampel.id] ?? {};
     const nameValue = ampelNameForSignalGroup(group, ampel);
@@ -2155,7 +2167,7 @@ function IntersectionCreateWizard() {
                       </TableCell>
                       <TableCell>{sourceAmpel?.signalId || ampel.signalId || '-'}</TableCell>
                       <TableCell>
-                        {sourceAmpel ? `${sourceAmpel.name} als ${displayName}` : modelSelectValue(ampel) || '-'}
+                        {sourceAmpel ? `${sourceAmpel.name} als ${displayName}` : trafficLightModelDisplayName(ampel)}
                       </TableCell>
                     </ExpandableEditorTableRow>
                   );
@@ -2483,7 +2495,7 @@ function IntersectionCreateWizard() {
 
   function renderLaneSignalFields(lane: IntersectionWizardLaneAppDto) {
     const selectedModelValue = modelSelectValue(lane.signal);
-    const options = modelOptionsWithSelected(selectedModelValue);
+    const options = modelOptionsWithSelected(lane.signal);
     const errors = validation.laneErrors[lane.id] ?? {};
     const effectiveAssignments = effectiveLaneSignalGroupAssignments(lane, draft.signalGroups);
     const selectableSignalGroupOptions = effectiveAssignments

@@ -184,3 +184,49 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 - 📖 Ampel- und Kreuzungstutorials wurden auf Ampelgruppen, Phasen und den neuen Kreuzungsassistenten angepasst
 - 📖 Road-, Hub-, Data-Bridge- und DTO-Dokumentation wurde für neue Routen-, Kreuzungs-, Signal- und Rollmaterialfelder aktualisiert
 - 📖 Entwicklerhinweise für Windows-Kommandos, Lua-Formatierung und Projektprüfungen wurden ergänzt
+
+## **Control Extension v0.0.9-alpha** Vorschauversion
+
+### Neu in v0.0.9-alpha
+
+- ⭐ Neuer Ampelaufsteller ermöglicht das Aufstellen von MA1 Straba Immobilien-Ampeln.
+
+- ⭐ Der Kreuzungsassistent wählt alle bekannten Ampeltypen automatisch.
+
+- ⭐ Die Ampelphasentabelle im Kreuzungsassistenten wurde kompakter und übersichtlicher.
+  Ampelgruppen können nach Zufahrt sortiert oder mit Fußgängersignalen separat gruppiert werden.
+
+- ⭐ Die Fuhrpark-Navigation wurde ausgebaut, der aktive Zug ist schneller erreichbar.
+
+- ⭐ Neue Demo-Anlage `Kreuzung1` für das Road-Modul.
+
+### Lua Änderungen in v0.0.9-alpha
+
+- ⭐ Strukturen melden nun auch den internen EEP-Modellpfad `gsbname`.
+  Der Hub liest dazu Strukturdaten aus der `.anl3` und ergänzt Modellnamen aus den passenden `.ini`-Dateien.
+
+- ⭐ Der Hub schützt EEP-API-Aufrufe während des Speicherns der Anlage.
+  Nach `EEPOnSaveAnl` wird die `.anl3` verzögert neu gelesen, damit EEP die Datei zuerst vollständig freigibt.
+
+- ⭐ Strukturen können per eingehendem Kommando über Namen positioniert, rotiert, beleuchtet und mit Tag-Text beschrieben werden.
+  Das nutzt der Ampelaufsteller zum Platzieren der Signalbilder.
+
+- ⭐ `TrafficLightModel` besitzt jetzt eine stabile `id` und kann mit `TrafficLightModel.resolve(id)` aufgelöst werden.
+  Dadurch kann generierter Lua-Code auch eigene Ampelmodelle zuverlässiger referenzieren.
+
+- ⭐ ÖPNV-Linienabschnitte unterstützen mehrere Depotanzeigen und eine eigene Auswahlfunktion für diese Anzeigen.
+
+### Behobene Fehler in v0.0.9-alpha
+
+- 🐞 Der Lua Hub führt nicht mehr zum Einfrieren beim Speichern der Anlage.
+- 🐞 Fußgängersignale werden im Kreuzungsassistenten und bei der Code-Erzeugung zuverlässiger erkannt.
+- 🐞 Der Ampelaufsteller kann Befehle zum Ausrichten von Strukturen mehrfach senden, ohne dass gespeicherte Tags die weitere Nutzung blockieren.
+- 🐞 Kamerabefehle des Ampelaufstellers werden korrekt an EEP weitergegeben.
+- 🐞 Kontaktpunkte im Kreuzungsassistenten verwenden stabile `kpId`-Zeichenketten.
+- 🐞 Demo-Anlagen überschreiben `os` nicht mehr.
+
+### Dokumentation in v0.0.9-alpha
+
+- 📖 Lua-Architektur um Speicherschutz, `.anl3`-Reload und Struktur-Metadaten ergänzt
+- 📖 Tutorial zur Ampelkreuzung mit Immobilien aktualisiert
+- 📖 Lua-Server-Vertragsnotizen für DTO-Änderungen ergänzt

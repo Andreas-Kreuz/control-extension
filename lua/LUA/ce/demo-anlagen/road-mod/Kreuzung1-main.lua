@@ -127,16 +127,14 @@ BetterContacts.setOptions({
 --------------------------------------------
 -- Definiere Funktionen fuer Kontaktpunkte
 --------------------------------------------
-function enterLane(Zugname, lane)
-    if not lane then return end
-    assert(lane, "lane darf nicht nil sein. Richtige Lua-Funktion im Kontaktpunkt?")
-    lane:vehicleEntered(Zugname)
+function onLaneEntered(trainName, laneKpId)
+    local lane = Lane.resolve(laneKpId)
+    lane:vehicleEntered(trainName)
 end
 
-function leaveLane(Zugname, lane)
-    if not lane then return end
-    assert(lane, "lane darf nicht nil sein. Richtige Lua-Funktion im Kontaktpunkt?")
-    lane:vehicleLeft(Zugname)
+function onLaneLeft(trainName, laneKpId)
+    local lane = Lane.resolve(laneKpId)
+    lane:vehicleLeft(trainName)
 end
 
 local ControlExtension = require("ce.ControlExtension")
