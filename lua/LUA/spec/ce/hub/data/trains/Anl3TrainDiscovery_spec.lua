@@ -65,6 +65,7 @@ insulate("ce.hub.data.trains.TrainDiscovery anl3 seed", function ()
         addStub("EEPIsControlTrackReserved", function () return false, false, nil end)
         addStub("EEPGetTrainSpeed", function () return true, 0 end)
         addStub("EEPRollingstockGetTrack", function () return true, 101, 12, 1, 1 end)
+        addStub("print", function () end)
 
         local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")

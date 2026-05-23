@@ -393,6 +393,7 @@ insulate("Check signal phase", function ()
     Scheduler.debug = false
     Intersection.debug = false
     TrafficPhase.debug = false
+    local printStub = stub(_G, "print")
     local crossingCeModule = require("ce.mods.road.CeRoadModule")
     ControlExtension.addModules(crossingCeModule)
 
@@ -949,4 +950,5 @@ insulate("Check signal phase", function ()
             it("# step13 - Signal L2 (12) ", function () assert.equals(U_R, afterTurnCarLeft) end)
         end
     end
+    printStub:revert()
 end)

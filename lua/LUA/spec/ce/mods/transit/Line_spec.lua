@@ -338,7 +338,8 @@ insulate("Line route reconciliation", function ()
         it("returns the existing route mapping", function () assert.equals(l10Striesen, duplicateSegment) end)
         it("logs the duplicate route", function ()
             assert.stub(printStub).was_called_with(
-                "[#Line] EEP route 'Route Test Tram 10 Striesen' is already assigned to line '10' and destination 'Striesen'"
+                "[#Line] EEP route 'Route Test Tram 10 Striesen' is already assigned to line '10' "
+                    .. "and destination 'Striesen'"
             )
         end)
     end)
@@ -424,7 +425,8 @@ insulate("Line contact guards", function ()
 
         it("logs the unknown route", function ()
             assert.stub(printStub).was_called_with(
-                "[#Line] Could not find lineSegment for route: 'Guard Route Unknown Without Transit Train' for train: #GuardTrain5"
+                "[#Line] Could not find lineSegment for route: 'Guard Route Unknown Without Transit Train' "
+                    .. "for train: #GuardTrain5"
             )
         end)
         it("does not add station departures", function ()
