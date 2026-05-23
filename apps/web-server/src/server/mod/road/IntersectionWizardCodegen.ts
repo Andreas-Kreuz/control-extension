@@ -11,6 +11,7 @@ import {
   IntersectionWizardTrafficType,
   IntersectionWizardTurnDirection,
 } from '@ce/web-shared';
+import { trafficLightModelConstantForName } from './RoadSelector';
 
 const turnDirectionSuffix: Record<IntersectionWizardTurnDirection, string> = {
   LEFT: 'Left',
@@ -303,7 +304,9 @@ function automaticIntersectionVariableName(draft: IntersectionWizardDraftAppDto)
 }
 
 function modelExpression(model: { modelConstant?: string; modelName?: string }): string {
-  if (model.modelConstant) return `TrafficLightModel.${model.modelConstant}`;
+  if (model.modelConstant) {
+    return `TrafficLightModel.${trafficLightModelConstantForName(model.modelConstant) ?? model.modelConstant}`;
+  }
   if (model.modelName === 'NO SIGNAL MODEL') return 'TrafficLightModel.NONE';
   return `TrafficLightModel.${sanitizeIdentifier(model.modelName ?? 'JS2_3er_mit_FG', 'JS2_3er_mit_FG')}`;
 }
@@ -846,7 +849,7 @@ export function createDraftFromCurrentIntersection(
             ? 'TRAM'
             : 'CAR',
       modelName: ampel.modelId,
-      modelConstant: sanitizeIdentifier(ampel.modelId, ''),
+      modelConstant: trafficLightModelConstantForName(ampel.modelId) ?? sanitizeIdentifier(ampel.modelId, ''),
       lightStructures: signalId === undefined ? importedLightStructures : [],
       axisStructures: ampel.axisStructures,
     });

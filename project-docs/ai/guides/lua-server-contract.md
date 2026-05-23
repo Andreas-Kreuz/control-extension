@@ -39,3 +39,4 @@ to stable app API/room names from `apps/web-shared`; the server mapping absorbs 
 
 - Lua-side contract changes must be absorbed by the server (via selectors) before reaching the stable `*AppDto` client contract in `apps/web-shared`
 - The server is the transformation layer — Lua stays close to raw EEP data
+- Lua, server, and web app are always deployed together as one bundle — do not add server-side backwards-compat fallbacks for old Lua DTO formats

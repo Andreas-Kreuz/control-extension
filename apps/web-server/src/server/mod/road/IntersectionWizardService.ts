@@ -380,7 +380,7 @@ export default class IntersectionWizardService implements DomainRoomService {
       signalId,
       use: 'VEHICLE_ONLY',
       trafficType: 'CAR',
-      modelName: 'Ampel_3er_XXX_mit_FG',
+      modelName: 'JS2 3er-Ampel mit Fußgängern',
       modelConstant: 'JS2_3er_mit_FG',
     };
   }

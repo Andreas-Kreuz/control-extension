@@ -148,8 +148,8 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
       },
       [CeTypes.RoadTrafficLightModel]: {
         M1: {
-          id: 'Ampel_3er_XXX_mit_FG',
-          name: 'Ampel_3er_XXX_mit_FG',
+          id: 'JS2_3er_mit_FG',
+          name: 'JS2 3er-Ampel mit Fußgängern',
           type: 'road',
           positionRed: 1,
           positionGreen: 3,
@@ -160,8 +160,8 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
           positionOffBlinking: 8,
         },
         M2: {
-          id: 'Ampel_2er_Aus_Gelb-Grün',
-          name: 'Ampel_2er_Aus_Gelb-Grün',
+          id: 'JS2_2er_gelb_gruen_aus',
+          name: 'JS2 2er-Ampel (gelb/grün)',
           type: 'road',
           positionRed: 1,
           positionGreen: 3,
@@ -208,9 +208,9 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
     { id: 'L1', nr: '1', trafficType: 'BUS', lineSegments: [] },
   ]);
   assert.deepEqual(JSON.parse(trafficLightModelsProvider.jsonCreator(RoadTrafficLightModelsRoom.roomId('All'))), {
-    Ampel_3er_XXX_mit_FG: {
-      id: 'Ampel_3er_XXX_mit_FG',
-      name: 'Ampel_3er_XXX_mit_FG',
+    JS2_3er_mit_FG: {
+      id: 'JS2_3er_mit_FG',
+      name: 'JS2 3er-Ampel mit Fußgängern',
       type: 'road',
       luaConstant: 'JS2_3er_mit_FG',
       positionRed: 1,
@@ -221,9 +221,9 @@ function testRoadAndTransitFeatureRoomsReturnAppDtoCollections(): void {
       positionOff: 7,
       positionOffBlinking: 8,
     },
-    'Ampel_2er_Aus_Gelb-Grün': {
-      id: 'Ampel_2er_Aus_Gelb-Grün',
-      name: 'Ampel_2er_Aus_Gelb-Grün',
+    JS2_2er_gelb_gruen_aus: {
+      id: 'JS2_2er_gelb_gruen_aus',
+      name: 'JS2 2er-Ampel (gelb/grün)',
       type: 'road',
       luaConstant: 'JS2_2er_gelb_gruen_aus',
       positionRed: 1,

@@ -962,6 +962,93 @@ function testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal(
   assert.equal(draft.lanes[0]?.signalGroupSignalId, 'sg-1');
 }
 
+function testCurrentIntersectionDraftUsesModelConstantsNotDisplayNames(): void {
+  const intersection: IntersectionAppDto = {
+    id: 10,
+    name: 'Model Name Crossing',
+    currentPhase: '',
+    manualPhase: '',
+    nextPhase: '',
+    ready: true,
+    greenTimeSeconds: 0,
+    staticCams: [],
+    signalGroupDefinitions: [
+      {
+        name: 'sgWestCarStraight',
+        approach: 'WEST',
+        turnDirections: ['STRAIGHT'],
+        trafficType: 'CAR',
+        signalIds: [10],
+      },
+    ],
+    phases: [],
+  };
+  const lanes: IntersectionLaneAppDto[] = [];
+  const ampeln: IntersectionTrafficLightAppDto[] = [
+    {
+      id: 10,
+      signalId: 10,
+      vehicleSignalName: 'K1',
+      use: 'VEHICLE_ONLY',
+      modelId: 'JS2_3er_mit_FG',
+      currentIndication: 'RED',
+      intersectionId: 10,
+      lightStructures: {},
+      axisStructures: [],
+    },
+  ];
+
+  const draft = createDraftFromCurrentIntersection(intersection, lanes, ampeln);
+
+  assert.equal(draft.ampeln[0]?.modelConstant, 'JS2_3er_mit_FG');
+  assert.equal(draft.ampeln[0]?.modelName, 'JS2_3er_mit_FG');
+  assert.match(draft.generatedLua, /TrafficLightModel\.JS2_3er_mit_FG/);
+  assert.doesNotMatch(draft.generatedLua, /TrafficLightModel\.Ampel_3er_XXX_mit_FG/);
+}
+
+function testStoredDraftWithDisplayNameModelConstantsGeneratesCorrectConstants(): void {
+  const draft = makeDraft();
+  draft.ampeln = [
+    {
+      id: 'ampel-1',
+      name: 'K1',
+      signalId: '364',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'CAR',
+      modelName: 'Ampel_3er_XXX_mit_FG',
+      modelConstant: 'Ampel_3er_XXX_mit_FG',
+    },
+    {
+      id: 'ampel-2',
+      name: 'K2',
+      signalId: '365',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'CAR',
+      modelName: 'Ampel_2er_Aus_Gelb-Grün',
+      modelConstant: 'Ampel_2er_Aus_Gelb_Grun',
+    },
+  ];
+  draft.signalGroups = [
+    {
+      id: 'sg-1',
+      name: 'sgSouthCarStraight',
+      approach: 'SOUTH',
+      turnDirections: ['STRAIGHT'],
+      trafficType: 'CAR',
+      showRequests: false,
+      ampelIds: ['ampel-1', 'ampel-2'],
+    },
+  ];
+  draft.lanes = [];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.match(lua, /TrafficLightModel\.JS2_3er_mit_FG/);
+  assert.doesNotMatch(lua, /TrafficLightModel\.Ampel_3er_XXX_mit_FG/);
+  assert.match(lua, /TrafficLightModel\.JS2_2er_gelb_gruen_aus/);
+  assert.doesNotMatch(lua, /TrafficLightModel\.Ampel_2er_Aus_Gelb_Grun/);
+}
+
 function testCurrentIntersectionDraftKeepsImportedLanesWithoutFallbackDefaults(): void {
   const intersection: IntersectionAppDto = {
     id: 3,
@@ -1670,6 +1757,14 @@ export async function run(): Promise<void> {
   await runTest(
     'current intersection import uses signal group metadata and reuses lane signal',
     testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal,
+  );
+  await runTest(
+    'current intersection import uses model constants not display names',
+    testCurrentIntersectionDraftUsesModelConstantsNotDisplayNames,
+  );
+  await runTest(
+    'stored draft with display-name modelConstants generates correct Lua constants',
+    testStoredDraftWithDisplayNameModelConstantsGeneratesCorrectConstants,
   );
   await runTest(
     'current intersection import keeps imported lanes without fallback defaults',

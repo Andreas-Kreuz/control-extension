@@ -325,9 +325,9 @@ function defaultPhases(): IntersectionWizardPhaseAppDto[] {
 }
 
 function defaultModelForType(type: IntersectionWizardTrafficType) {
-  if (type === 'TRAM') return { modelName: 'MA1_STRAB_3er_2_gruen', modelConstant: 'MA1_STRAB_3er_2_gruen' };
-  if (type === 'PEDESTRIAN') return { modelName: 'JS2_2er_nur_FG', modelConstant: 'JS2_2er_nur_FG' };
-  return { modelName: 'Ampel_3er_XXX_mit_FG', modelConstant: 'JS2_3er_mit_FG' };
+  if (type === 'TRAM') return { modelName: 'MA1 STRAB 3er-Ampel (Stellung 2=grün)', modelConstant: 'MA1_STRAB_3er_2_gruen' };
+  if (type === 'PEDESTRIAN') return { modelName: 'JS2 2er-Ampel (nur Fußgänger)', modelConstant: 'JS2_2er_nur_FG' };
+  return { modelName: 'JS2 3er-Ampel mit Fußgängern', modelConstant: 'JS2_3er_mit_FG' };
 }
 
 function isStructureLightAmpel(ampel: IntersectionWizardAmpelAppDto) {

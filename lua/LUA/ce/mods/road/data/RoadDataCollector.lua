@@ -272,7 +272,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
                 vehicleSignalName = signalHead.vehicleSignalName,
                 pedestrianSignalName = signalHead.pedestrianSignalName,
                 use = signalHead.use,
-                modelId = signalHead.trafficLightModel.name,
+                modelId = signalHead.trafficLightModel.id,
                 currentIndication = signalHead.currentIndication,
                 intersectionId = intersectionIdCounter,
                 lightStructures = {},
