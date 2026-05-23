@@ -128,3 +128,65 @@ Jede DtoFactory enthält einen Querverweis auf die zugehörige TypeScript-Defini
 ```
 
 Umgekehrt verweist jede TypeScript-LuaDto-Datei auf ihre Lua-DtoFactory.
+
+---
+
+## EEP-Threading und Speicherschutz
+
+### EEP ist nicht vollständig single-threaded
+
+EEP ruft `EEPMain()` im Hauptthread auf. Das Speichern der Anlage (`.anl3`) erfolgt jedoch
+auf einem **Hintergrundthread**, der intern einen Schreib-Mutex hält.
+
+EEP-API-Aufrufe aus `EEPMain` (z.B. `EEPStructureGetModelType`, `EEPGetSignal`,
+`EEPLoadData`) versuchen, denselben Mutex zu belegen — klassischer Deadlock.
+
+**Folge:** EEP friert dauerhaft ein ("Programm reagiert nicht"), sobald während eines
+laufenden Speichervorgangs ein EEP-API-Aufruf aus `EEPMain` erfolgt.
+
+### Warum der erste Speichervorgang funktioniert, der zweite aber nicht
+
+Beim ersten Speichern sind die Registries leer, sodass kaum EEP-API-Aufrufe im kritischen
+Fenster stattfinden. Nach dem ersten Speichern wird die `anl3`-Datei erneut eingelesen
+(`initFromAnl3`). Früher rief dieser Reload für jede Struktur `applyStaticUpdate` auf —
+3 EEP-API-Aufrufe pro Struktur. Bei großen Szenarien bedeutet das zehntausende Aufrufe
+in einem einzigen `EEPMain`-Zyklus, genug um den Deadlock beim zweiten Speichern
+zuverlässig zu provozieren.
+
+### Lösung 1: Speicherschutz mit `EEPOnBeforeSaveAnl`
+
+Ab EEP 17 steht `EEPOnBeforeSaveAnl()` zur Verfügung. EEP ruft diese Funktion auf,
+**bevor** der Hintergrundthread mit dem Schreiben beginnt. Der Hub sperrt damit alle
+EEP-API-Aufrufe für die gesamte Dauer des Speichervorgangs:
+
+```text
+EEPOnBeforeSaveAnl()  →  savingInProgress = true
+                                |
+                    CeHubModule.run() kehrt sofort zurück
+                    (keine EEP-API-Aufrufe)
+                                |
+EEPOnSaveAnl(path)    →  savingInProgress = false
+                          Anl3-Reload nach 3 Zyklen einplanen
+```
+
+Ein Sicherheitstimeout von 300 Zyklen verhindert dauerhaftes Einfrieren, falls
+`EEPOnSaveAnl` unerwartet ausbleibt.
+
+Implementiert in `ce/hub/CeHubModule.lua` (`EEPOnBeforeSaveAnl`, `EEPOnSaveAnl`,
+`CeHubModule.run`).
+
+### Lösung 2: EEP-API-Aufrufsturm in `initFromAnl3` vermeiden
+
+`StructureDiscovery.initFromAnl3` rief früher für jede Struktur aus der `anl3`-Datei
+`applyStaticUpdate` auf — 3 EEP-API-Aufrufe pro Struktur. Da die Registries nach der
+initialen Discovery bereits vollständig befüllt sind, wird jetzt der vorhandene Eintrag
+aus dem `StructureRegistry` wiederverwendet. `applyStaticUpdate` wird nur noch für
+Strukturen aufgerufen, die dort noch nicht vorhanden sind.
+
+Implementiert in `ce/hub/data/structures/StructureDiscovery.lua` (`initFromAnl3`).
+
+### Faustregel für EEP-API-Aufrufe
+
+EEP-API-Aufrufe in Batches (Discovery, Reload) so minimal wie möglich halten.
+Vorhandene Registry-Einträge besitzen bereits alle EEP-seitig abgefragten Daten
+und müssen nicht erneut abgefragt werden.
