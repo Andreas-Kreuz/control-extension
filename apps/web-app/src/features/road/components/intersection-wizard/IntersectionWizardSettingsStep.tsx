@@ -50,6 +50,9 @@ function IntersectionWizardSettingsStep({
   const supportPedestrianSignals = (draft.supportPedestrianSignals ?? false) || hasPedestrianSignalGroups;
   const supportMultipleLaneSignals = (draft.supportMultipleLaneSignals ?? false) || hasMultipleSignalGroupLanes;
   const supportStructureLightSignals = (draft.supportStructureLightSignals ?? false) || hasStructureLightSignals;
+  const forceIndividualLanePhaseSettings = draft.phases.some(
+    (p) => p.greenTimeSeconds !== undefined && p.greenTimeSeconds !== 15,
+  );
   const hasSelectedAdvancedSettings = Boolean(
     draft.greenTimeSeconds !== undefined ||
     draft.manualLuaVariableNames ||
@@ -68,9 +71,11 @@ function IntersectionWizardSettingsStep({
         onChange={(event) => onIntersectionNameChange(event.target.value)}
         error={Boolean(errorTexts.name?.length)}
         helperText={
-          errorTexts.name?.length
-            ? <strong>{errorTexts.name.join(' ')}</strong>
-            : 'Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße.'
+          errorTexts.name?.length ? (
+            <strong>{errorTexts.name.join(' ')}</strong>
+          ) : (
+            'Wie soll diese Kreuzung heißen, z.B. Bahnhofsstraße - Hauptstraße.'
+          )
         }
         fullWidth
       />
@@ -94,9 +99,11 @@ function IntersectionWizardSettingsStep({
           color={errorTexts.intersectionEepSaveId?.length ? 'error' : 'text.secondary'}
           sx={{ mt: 0.5, ml: 1.75 }}
         >
-          {errorTexts.intersectionEepSaveId?.length
-            ? <strong>{errorTexts.intersectionEepSaveId.join(' ')}</strong>
-            : 'Optional: Speichert die Einstellungen der Kreuzung in EEP.'}
+          {errorTexts.intersectionEepSaveId?.length ? (
+            <strong>{errorTexts.intersectionEepSaveId.join(' ')}</strong>
+          ) : (
+            'Optional: Speichert die Einstellungen der Kreuzung in EEP.'
+          )}
         </Typography>
       </FormControl>
       <Autocomplete
@@ -116,9 +123,11 @@ function IntersectionWizardSettingsStep({
             label="Kameras der Kreuzung"
             error={Boolean(errorTexts.staticCams?.length)}
             helperText={
-              errorTexts.staticCams?.length
-                ? <strong>{errorTexts.staticCams.join(' ')}</strong>
-                : 'Optional: Gib hier alle EEP-Kameras mit denen du schnell zur Kreuzung springen kannst.'
+              errorTexts.staticCams?.length ? (
+                <strong>{errorTexts.staticCams.join(' ')}</strong>
+              ) : (
+                'Optional: Gib hier alle EEP-Kameras mit denen du schnell zur Kreuzung springen kannst.'
+              )
             }
           />
         )}
@@ -130,9 +139,11 @@ function IntersectionWizardSettingsStep({
         placeholder="#5573_Schaltschrank-Ampel2_SK2"
         error={Boolean(errorTexts.tippStructure?.length)}
         helperText={
-          errorTexts.tippStructure?.length
-            ? <strong>{errorTexts.tippStructure.join(' ')}</strong>
-            : 'Optional: Immobilie, an der die aktuelle Phase als Immobilie angezeigt wird.'
+          errorTexts.tippStructure?.length ? (
+            <strong>{errorTexts.tippStructure.join(' ')}</strong>
+          ) : (
+            'Optional: Immobilie, an der die aktuelle Phase als Immobilie angezeigt wird.'
+          )
         }
         fullWidth
       />
@@ -173,7 +184,8 @@ function IntersectionWizardSettingsStep({
               onChange={(_event, checked) => onDraftPatch({ supportStructureLightSignals: checked })}
             />
             <ExplainedCheckbox
-              checked={draft.individualLanePhaseSettings ?? false}
+              checked={(draft.individualLanePhaseSettings ?? false) || forceIndividualLanePhaseSettings}
+              disabled={forceIndividualLanePhaseSettings}
               label="Individuelle Einstellungen für Fahrspuren und Phasen"
               explanation="Optional: Multiplikator für erkannte Fahrzeuge, Länge einzelner Phasen."
               onChange={(_event, checked) => onDraftPatch({ individualLanePhaseSettings: checked })}
@@ -185,9 +197,11 @@ function IntersectionWizardSettingsStep({
               onChange={(event) => onDraftPatch({ greenTimeSeconds: onOptionalPositiveNumber(event.target.value) })}
               error={Boolean(errorTexts.greenTimeSeconds?.length)}
               helperText={
-                errorTexts.greenTimeSeconds?.length
-                  ? <strong>{errorTexts.greenTimeSeconds.join(' ')}</strong>
-                  : 'Optional: Leeres Feld nutzt die Standardzeit der Runtime.'
+                errorTexts.greenTimeSeconds?.length ? (
+                  <strong>{errorTexts.greenTimeSeconds.join(' ')}</strong>
+                ) : (
+                  'Optional: Leeres Feld nutzt die Standardzeit der Runtime.'
+                )
               }
               size="small"
               inputProps={{ min: 1, 'aria-label': 'Standard-Grünzeit' }}
@@ -220,9 +234,11 @@ function IntersectionWizardSettingsStep({
                 onChange={(event) => onLuaVariableNameChange(event.target.value)}
                 error={Boolean(errorTexts.luaVariableName?.length)}
                 helperText={
-                  errorTexts.luaVariableName?.length
-                    ? <strong>{errorTexts.luaVariableName.join(' ')}</strong>
-                    : 'Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw.'
+                  errorTexts.luaVariableName?.length ? (
+                    <strong>{errorTexts.luaVariableName.join(' ')}</strong>
+                  ) : (
+                    'Diese Variable wird im Lua-Code verwendet, empfohlen: c1 oder c2 usw.'
+                  )
                 }
                 size="small"
                 fullWidth
