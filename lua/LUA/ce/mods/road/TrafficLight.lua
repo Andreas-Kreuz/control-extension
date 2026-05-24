@@ -112,9 +112,9 @@ function TrafficLight:asPedestrianOnly()
     return self
 end
 
---- Schaltet das Licht der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grï¿½n oder Anforderung
+--- Schaltet das Licht der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grün oder Anforderung
 -- @param redStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel rot oder rot-gelb ist
--- @param greenStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel grï¿½n ist
+-- @param greenStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel grün ist
 -- @param yellowStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel gelb oder rot-gelb ist
 -- @param requestStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel eine Anforderung erkennt
 --
@@ -126,12 +126,12 @@ function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStru
     return self
 end
 
---- ï¿½ndert die Achsstellung der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grï¿½n oder Fuï¿½gï¿½nger
+--- Ändert die Achsstellung der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grün oder Fußgänger
 -- @param structureName Name der Immobilie, deren Achse gesteuert werden soll
 -- @param axisName Name der Achse in der Immobilie, die gesteuert werden soll
 -- @param positionDefault Grundstellung der Achse (wird eingestellt, wenn eine Stellung nicht angegeben wurde
 -- @param positionRed Achsstellung bei rot
--- @param positionGreen Achsstellung bei grï¿½n
+-- @param positionGreen Achsstellung bei grün
 -- @param positionYellow Achsstellung bei gelb
 -- @param positionRedYellow Achsstellung bei gelbrot
 -- @param positionPedestrian Achsstellung bei FG
@@ -145,13 +145,13 @@ function TrafficLight:addAxisStructure(structureName, axisName, positionDefault,
     return self
 end
 
---- Aktualisiert den Text fï¿½r die aktuelle Phase dieses Signalgebers
--- @param phaseInfo TippText fï¿½r die Phase
+--- Aktualisiert den Text für die aktuelle Phase dieses Signalgebers
+-- @param phaseInfo TippText für die Phase
 --
 function TrafficLight:setPhaseInfo(phaseInfo) self.phaseInfo = phaseInfo end
 
---- Aktualsisiert den Text fï¿½r die Fahrspuren dieser Ampel
--- @param laneInfo TippText fï¿½r die Fahrspur
+--- Aktualsisiert den Text für die Fahrspuren dieser Ampel
+-- @param laneInfo TippText für die Fahrspur
 --
 function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
 
@@ -490,7 +490,7 @@ end
 
 function TrafficLight:switchSignal(sigIndex) if self.signalId > 0 then EEPSetSignal(self.signalId, sigIndex, 1) end end
 
---- Setzt die Anforderung fuer eine Ampel (damit sie weiï¿½, ob eine Anforderung vorliegt)
+--- Setzt die Anforderung fuer eine Ampel (damit sie weiß, ob eine Anforderung vorliegt)
 --- @param hasRequest boolean wo liegt die Anforderung an
 function TrafficLight:showRequestOnSignal(hasRequest)
     local lightDbg = ""
