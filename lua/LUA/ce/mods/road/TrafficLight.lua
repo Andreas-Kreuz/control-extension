@@ -158,8 +158,31 @@ function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
 --
 function TrafficLight:setLaneNameInfo(laneNameInfo) self.laneNameInfo = laneNameInfo end
 
+local function shortTippName(name)
+    return name and string.match(name, "^([^_]+)") or nil
+end
+
 local function tippTextStructure(lightStructure)
     return lightStructure.housingStructure or lightStructure.redStructure
+end
+
+local function addStructureName(structures, knownStructures, structureName)
+    if structureName and not knownStructures[structureName] then
+        table.insert(structures, structureName)
+        knownStructures[structureName] = true
+    end
+end
+
+local function allTippTextStructures(lightStructure)
+    local structures = {}
+    local knownStructures = {}
+    addStructureName(structures, knownStructures, lightStructure.housingStructure)
+    addStructureName(structures, knownStructures, lightStructure.redStructure)
+    addStructureName(structures, knownStructures, lightStructure.greenStructure)
+    addStructureName(structures, knownStructures, lightStructure.yellowStructure)
+    addStructureName(structures, knownStructures, lightStructure.requestStructure)
+    addStructureName(structures, knownStructures, lightStructure.blendStructure)
+    return structures
 end
 
 function TrafficLight:showInfoText(showInfo)
@@ -167,10 +190,13 @@ function TrafficLight:showInfoText(showInfo)
         EEPShowInfoSignal(self.signalId, showInfo)
     else
         for l in pairs(self.lightStructures) do
-            local structureName = tippTextStructure(l)
-            if structureName then
-                EEPShowInfoStructure(structureName, showInfo)
-                break
+            if showInfo then
+                local structureName = tippTextStructure(l)
+                if structureName then EEPShowInfoStructure(structureName, true) end
+            else
+                for _, structureName in ipairs(allTippTextStructures(l)) do
+                    EEPShowInfoStructure(structureName, false)
+                end
             end
         end
     end
@@ -181,13 +207,25 @@ function TrafficLight:changeInfoText(infoText)
         EEPChangeInfoSignal(self.signalId, infoText)
     else
         for l in pairs(self.lightStructures) do
-            local structureName = tippTextStructure(l)
-            if structureName then
-                EEPChangeInfoStructure(structureName, infoText)
-                break
+            if infoText == "" then
+                for _, structureName in ipairs(allTippTextStructures(l)) do
+                    EEPChangeInfoStructure(structureName, "")
+                end
+            else
+                local structureName = tippTextStructure(l)
+                if structureName then EEPChangeInfoStructure(structureName, infoText) end
             end
         end
     end
+end
+
+function TrafficLight:signalIdTippText()
+    if self.signalId > 0 then return "Signal: " .. self.signalId end
+    for l in pairs(self.lightStructures) do
+        local structureName = tippTextStructure(l)
+        if structureName then return "Immo: " .. shortTippName(structureName) end
+    end
+    return "Signal: " .. self.signalId
 end
 
 local function basename(value)
@@ -257,7 +295,7 @@ local function getSignalFunctionsTippText(signalId, trafficLightModel)
 end
 
 function TrafficLight:vehicleSignalNameTippText()
-    local name = self.vehicleSignalName and "<b>" .. self.vehicleSignalName .. "</b>" or ""
+    local name = self.vehicleSignalName and "<b>" .. shortTippName(self.vehicleSignalName) .. "</b>" or ""
     local indication = self.currentIndication
     if indication == SignalIndication.GREEN then
         return fmt.green(name)
@@ -272,7 +310,7 @@ function TrafficLight:vehicleSignalNameTippText()
 end
 
 function TrafficLight:pedestrianSignalNameTippText()
-    local name = self.pedestrianSignalName and "<b>" .. self.pedestrianSignalName .. "</b>" or ""
+    local name = self.pedestrianSignalName and "<b>" .. shortTippName(self.pedestrianSignalName) .. "</b>" or ""
     local indication = self.currentIndication
     if indication == SignalIndication.PEDESTRIAN then
         return fmt.green(name)
@@ -324,7 +362,7 @@ function TrafficLight:refreshInfo()
         local infoText = "<j>"
 
         if showAllSignals then
-            infoText = fmt.appendUpTo1023(infoText, "Signal: " .. self.signalId)
+            infoText = fmt.appendUpTo1023(infoText, self:signalIdTippText())
         end
 
         if showModelInfo then
@@ -359,6 +397,8 @@ function TrafficLight:refreshInfo()
         end
 
         self:changeInfoText(infoText)
+    elseif self.signalId < 0 and next(self.lightStructures) ~= nil then
+        self:changeInfoText("")
     end
 end
 
