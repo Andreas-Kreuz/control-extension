@@ -111,7 +111,7 @@ insulate("ce.mods.road.TrafficLight", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local SignalIndication = require("ce.mods.road.SignalIndication")
 
-        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE):asPedestrianSignal("F1")
+        local signal = TrafficLight:newForSignal("K1_main", -1, TrafficLightModel.NONE):asPedestrianSignal("F1_walk")
         signal.currentIndication = SignalIndication.PEDESTRIAN
 
         assert.equals(
@@ -125,7 +125,7 @@ insulate("ce.mods.road.TrafficLight", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local SignalIndication = require("ce.mods.road.SignalIndication")
 
-        local signal = TrafficLight:newForSignal("K1", -1, TrafficLightModel.NONE):asPedestrianSignal("F1")
+        local signal = TrafficLight:newForSignal("K1_main", -1, TrafficLightModel.NONE):asPedestrianSignal("F1_walk")
         signal.currentIndication = SignalIndication.OFF
 
         assert.equals("<fgrgb=128,128,128><b>K1</b><fgrgb=0,0,0>", signal:vehicleSignalNameTippText())
@@ -257,6 +257,60 @@ insulate("ce.mods.road.TrafficLight", function ()
         assert.is_truthy(string.find(infoText, "Lane 1", 1, true))
     end)
 
+    it("shows the housing structure id as signal id for structure lights", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        EEPStructureSetLight("#2201_Rot", false)
+        EEPStructureSetLight("#2202_Gruen", false)
+        local signal = TrafficLight:newForLightStructure("S3", "#2201_Rot", "#2202_Gruen", nil, nil, "#2200_Gehaeuse")
+        IntersectionSettings.showSignalIdOnSignal = true
+
+        local infoText
+        stub(signal, "showInfoText", function () end)
+        stub(signal, "changeInfoText", function (_, text) infoText = text end)
+
+        signal:refreshInfo()
+
+        assert.is_truthy(string.find(infoText, "Immo: #2200", 1, true))
+        assert.is_nil(string.find(infoText, "#2200_Gehaeuse", 1, true))
+        assert.is_nil(string.find(infoText, "Signal: ", 1, true))
+    end)
+    it("hides and clears all structure tooltip targets when disabled", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        EEPStructureSetLight("#2_Rot", false)
+        EEPStructureSetLight("#2_Gruen", false)
+        local signal = TrafficLight:newForLightStructure("S2", "#2_Rot", "#2_Gruen", nil, nil, "#2_Gehaeuse")
+        IntersectionSettings.showSignalIdOnSignal = true
+        IntersectionSettings.showNameAndPhaseOnSignal = true
+
+        local shown = {}
+        local changed = {}
+        local showInfoStructureStub = stub(_G, "EEPShowInfoStructure", function (structureName, visible)
+            shown[structureName] = visible
+        end)
+        local changeInfoStructureStub = stub(_G, "EEPChangeInfoStructure", function (structureName, text)
+            changed[structureName] = text
+        end)
+        finally(function ()
+            showInfoStructureStub:revert()
+            changeInfoStructureStub:revert()
+        end)
+
+        signal:refreshInfo()
+        IntersectionSettings.showSignalIdOnSignal = false
+        IntersectionSettings.showNameAndPhaseOnSignal = false
+        signal:refreshInfo()
+
+        assert.is_false(shown["#2_Gehaeuse"])
+        assert.is_false(shown["#2_Rot"])
+        assert.is_false(shown["#2_Gruen"])
+        assert.equals("", changed["#2_Gehaeuse"])
+        assert.equals("", changed["#2_Rot"])
+        assert.equals("", changed["#2_Gruen"])
+    end)
     it("uses the housing structure for structure light tooltip text", function ()
         local TrafficLight = require("ce.mods.road.TrafficLight")
         local IntersectionSettings = require("ce.mods.road.IntersectionSettings")

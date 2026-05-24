@@ -28,6 +28,8 @@ function RollingStockRegistry.seedFromSnapshot(snapshot)
     if allRollingStock[snapshot.rollingStockName] then
         local rollingStock = allRollingStock[snapshot.rollingStockName]
         if snapshot.xmlModel then rollingStock:setXmlModelFromSnapshot(snapshot.xmlModel) end
+        if snapshot.tag ~= nil then rollingStock:setTag(snapshot.tag) end
+        if snapshot.smoke ~= nil then rollingStock:setSmoke(snapshot.smoke) end
         if snapshot.trainName then rollingStock:setTrainName(snapshot.trainName) end
         if snapshot.positionInTrain then rollingStock:setPositionInTrain(snapshot.positionInTrain) end
         if snapshot.trackType then rollingStock:setTrackType(snapshot.trackType) end

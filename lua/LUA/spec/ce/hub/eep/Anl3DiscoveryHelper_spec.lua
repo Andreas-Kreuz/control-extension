@@ -64,11 +64,20 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
                                                         ' kupplungvorn="1" kupplunghinten="2">',
                                                         '<Gleisort gleissystemID="3" gleisID="33" parameter="456.7"',
                                                         ' ausrichtung="1"/>',
-                                                        '<Rollmaterial name="RS A" typ="STRASSE\\BUS\\A.3dm"/>',
+                                                        '<Rollmaterial name="RS A" typ="STRASSE\\BUS\\A.3dm" LuaTag="line=7," Smoke="0"/>',
                                                         "</Zugverband>",
                                                         "</Fuhrpark>",
-                                                        '<Gebaeudesammlung><Immobile name="#12" gsbname="Haus.3dm"/>',
-                                                        '<Immobile ImmoIdx="13" gsbname="Baum.3dm"/>',
+                                                        '<Gebaeudesammlung>',
+                                                        '<Immobile name="#12" gsbname="Haus.3dm"',
+                                                        ' LuaTag="p1=#4," Light="1" Smoke="100" Fire="0">',
+                                                        '<Dreibein>',
+                                                        '<Vektor x="10000" y="20000" z="300"/>',
+                                                        '<Vektor x="0" y="1" z="0"/>',
+                                                        '<Vektor x="-1" y="0" z="0"/>',
+                                                        '<Vektor x="0" y="0" z="1"/>',
+                                                        '</Dreibein>',
+                                                        '</Immobile>',
+                                                        '<Immobile ImmoIdx="13" gsbname="Baum.3dm" Light="0" Smoke="0" Fire="0"/>',
                                                         "</Gebaeudesammlung>",
                                                         '<EEPLua LUAPath="\\Topology.lua"/>',
                                                         "</sutrackp>"
@@ -94,15 +103,31 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
         assert.equals(31, dt.signals[1].keyId)
         assert.equals(44, dt.switches[1].keyId)
         assert.equals("#12", dt.structures[1].name)
+        assert.equals("p1=#4,", dt.structures[1].tag)
+        assert.is_true(dt.structures[1].light)
+        assert.is_true(dt.structures[1].smoke)
+        assert.is_false(dt.structures[1].fire)
+        assert.same(100.0, dt.structures[1].pos_x)
+        assert.same(200.0, dt.structures[1].pos_y)
+        assert.same(3.0, dt.structures[1].pos_z)
+        assert.same(0.0, dt.structures[1].rot_x)
+        assert.same(0.0, dt.structures[1].rot_y)
+        assert.same(90.0, dt.structures[1].rot_z)
         assert.equals("#13", dt.structures[2].id)
         assert.equals("#13", dt.structures[2].name)
         assert.equals("Baum.3dm", dt.structures[2].gsbname)
+        assert.is_false(dt.structures[2].light)
+        assert.is_false(dt.structures[2].smoke)
+        assert.is_false(dt.structures[2].fire)
+        assert.is_nil(dt.structures[2].pos_x)
         assert.equals("#Train A", dt.trains[1].name)
         assert.equals("road", dt.trains[1].trackType)
         assert.same({ ["33"] = 33 }, dt.trains[1].onTracks)
         assert.equals("RS A", dt.rollingStocks[1].name)
         assert.equals("STRASSE\\BUS\\A.3dm", dt.rollingStocks[1].model)
         assert.equals(0, dt.rollingStocks[1].positionInTrain)
+        assert.equals("line=7,", dt.rollingStocks[1].tag)
+        assert.same(0, dt.rollingStocks[1].smoke)
         assert.equals("enter", dt.contacts[1].luaFn)
     end)
 

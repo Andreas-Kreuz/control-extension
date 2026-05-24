@@ -12,6 +12,7 @@ insulate("ce.hub.data.structures.StructureUpdater", function ()
         clearModule("ce.hub.data.HubCeTypes")
         clearModule("ce.hub.data.InterestSyncRegistry")
         clearModule("ce.hub.data.structures.Structure")
+        clearModule("ce.hub.data.structures.StructureDiscovery")
         clearModule("ce.hub.data.structures.StructureRegistry")
         clearModule("ce.hub.data.structures.StructureUpdater")
         clearModule("ce.hub.options.HubOptionDefaults")
@@ -39,21 +40,47 @@ insulate("ce.hub.data.structures.StructureUpdater", function ()
         structureGetRotationStub:revert()
     end)
 
-    local function addStructure()
+    local function addStructure(gsbname)
         local Structure = require("ce.hub.data.structures.Structure")
         local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
         local structure = Structure:new("#3", "#3_Ampelmast")
+        structure:setGsbname(gsbname)
         StructureRegistry.add(structure)
         structure:resetDirty()
         return structure
     end
 
-    it("does not update position and rotation without structure interest", function ()
-        addStructure()
+    it("updates oninterest fields for unselected structures every tenth cycle", function ()
+        local structure = addStructure()
+        local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
+
+        for _ = 1, 9 do
+            StructureUpdater.runUpdate()
+        end
+
+        assert.stub(structureGetTagTextStub).was_not_called()
+        assert.stub(structureGetPositionStub).was_not_called()
+        assert.stub(structureGetRotationStub).was_not_called()
+
+        StructureUpdater.runUpdate()
+
+        assert.stub(structureGetTagTextStub).was_called_with("#3_Ampelmast")
+        assert.stub(structureGetPositionStub).was_called_with("#3_Ampelmast")
+        assert.stub(structureGetRotationStub).was_called_with("#3_Ampelmast")
+        assert.same("tag=value,", structure:getTag())
+        assert.same(1.11, structure:getPosX())
+        assert.same(4.44, structure:getRotX())
+    end)
+
+    it("updates tags for structure signal housings without structure interest", function ()
+        local structure = addStructure("\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
         local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
 
         StructureUpdater.runUpdate()
 
+        assert.stub(structureGetTagTextStub).was_called_with("#3_Ampelmast")
+        assert.same("tag=value,", structure:getTag())
+        assert.is_true(structure.dirtyFields.tag)
         assert.stub(structureGetPositionStub).was_not_called()
         assert.stub(structureGetRotationStub).was_not_called()
     end)
@@ -81,6 +108,30 @@ insulate("ce.hub.data.structures.StructureUpdater", function ()
         assert.is_true(structure.dirtyFields.rot_x)
         assert.is_true(structure.dirtyFields.rot_y)
         assert.is_true(structure.dirtyFields.rot_z)
+    end)
+
+    it("skips all EEP calls in initial update when structures are seeded from anl3", function ()
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
+
+        StructureDiscovery.initFromAnl3({
+            coverage = { structures = true },
+            structures = {
+                { id = "#3", name = "#3_Ampelmast", gsbname = "Mast.3dm",
+                  light = false, smoke = false, fire = false,
+                  pos_x = 1.0, pos_y = 2.0, pos_z = 0.0,
+                  rot_x = 0.0, rot_y = 0.0, rot_z = 0.0 }
+            }
+        })
+
+        StructureUpdater.runInitialUpdate()
+
+        assert.stub(structureGetLightStub).was_not_called()
+        assert.stub(structureGetSmokeStub).was_not_called()
+        assert.stub(structureGetFireStub).was_not_called()
+        assert.stub(structureGetTagTextStub).was_not_called()
+        assert.stub(structureGetPositionStub).was_not_called()
+        assert.stub(structureGetRotationStub).was_not_called()
     end)
 
     it("keeps cached position and rotation when EEP does not return values", function ()

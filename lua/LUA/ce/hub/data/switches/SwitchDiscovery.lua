@@ -42,8 +42,7 @@ function SwitchDiscovery.runInitialDiscovery()
 end
 
 function SwitchDiscovery.runDiscovery()
-    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("switches") then return end
-    discoverSwitches()
+    -- do nothing
 end
 
 return SwitchDiscovery

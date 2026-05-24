@@ -233,6 +233,8 @@ function TrainDiscovery.initFromAnl3(tableOfAnl3)
             RollingStockRegistry.seedFromSnapshot({
                 rollingStockName = rs.name,
                 xmlModel = rs.model,
+                tag = rs.tag,
+                smoke = rs.smoke,
                 trainName = rs.trainName,
                 positionInTrain = rs.positionInTrain,
                 trackType = rs.trackType,

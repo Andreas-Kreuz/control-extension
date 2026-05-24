@@ -93,6 +93,42 @@ local function structureInfoFromImmobileAttrs(attrs, modelNameCache)
     }
 end
 
+local function boolFromAttr(val)
+    if val == nil then return nil end
+    return val ~= "0"
+end
+
+local function posAndRotFromDreibein(immobile)
+    for _, child in ipairs(immobile.children) do
+        if child.tag == "Dreibein" then
+            local v = child.children
+            if #v < 4 then return end
+            local px = tonumber(v[1].attrs.x)
+            if not px then return end
+            local py, pz = tonumber(v[1].attrs.y) or 0, tonumber(v[1].attrs.z) or 0
+            -- Columns of the rotation matrix
+            local v1x = tonumber(v[2].attrs.x) or 0
+            local v1y = tonumber(v[2].attrs.y) or 0
+            local v1z = tonumber(v[2].attrs.z) or 0
+            local v2z = tonumber(v[3].attrs.z) or 0
+            local v3z = tonumber(v[4].attrs.z) or 0
+            local ry = math.asin(math.max(-1, math.min(1, -v1z))) * 180 / math.pi
+            local rz, rx
+            if math.abs(math.cos(ry * math.pi / 180)) > 1e-6 then
+                rz = math.atan(v1y, v1x) * 180 / math.pi
+                rx = math.atan(v2z, v3z) * 180 / math.pi
+            else
+                -- Gimbal lock (rot_y = ±90°): encode all rotation into rot_z
+                local v2x = tonumber(v[3].attrs.x) or 0
+                local v2y = tonumber(v[3].attrs.y) or 0
+                rz = math.atan(-v2x, v2y) * 180 / math.pi
+                rx = 0
+            end
+            return px / 100, py / 100, pz / 100, rx, ry, rz
+        end
+    end
+end
+
 local function buildDiscoveryTable(root)
     local dt = {
         coverage = {
@@ -220,6 +256,8 @@ local function buildDiscoveryTable(root)
                         dt.rollingStocks[#dt.rollingStocks + 1] = {
                             name = rollmaterial.attrs.name,
                             model = rollmaterial.attrs.typ,
+                            tag = rollmaterial.attrs.LuaTag,
+                            smoke = tonumber(rollmaterial.attrs.Smoke),
                             trainName = train.name,
                             positionInTrain = train.rollingStockCount - 1,
                             trackType = train.trackType,
@@ -243,10 +281,23 @@ local function buildDiscoveryTable(root)
             if immobilie.tag == "Immobilie" or immobilie.tag == "Immobile" then
                 local structureInfo = structureInfoFromImmobileAttrs(immobilie.attrs, structureModelNameCache)
                 if structureInfo then
+                    local attrs = immobilie.attrs
+                    local pos_x, pos_y, pos_z, rot_x, rot_y, rot_z =
+                        posAndRotFromDreibein(immobilie)
                     dt.structures[#dt.structures + 1] = {
                         id = structureInfo.id,
                         name = structureInfo.name,
-                        gsbname = immobilie.attrs.gsbname
+                        gsbname = attrs.gsbname,
+                        tag = attrs.LuaTag,
+                        light = boolFromAttr(attrs.Light),
+                        smoke = boolFromAttr(attrs.Smoke),
+                        fire = boolFromAttr(attrs.Fire),
+                        pos_x = pos_x,
+                        pos_y = pos_y,
+                        pos_z = pos_z,
+                        rot_x = rot_x,
+                        rot_y = rot_y,
+                        rot_z = rot_z
                     }
                 end
             end

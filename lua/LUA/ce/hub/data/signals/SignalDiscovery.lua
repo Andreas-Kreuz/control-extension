@@ -38,8 +38,7 @@ function SignalDiscovery.runInitialDiscovery()
 end
 
 function SignalDiscovery.runDiscovery()
-    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
-    discoverSignals()
+    -- do nothing
 end
 
 return SignalDiscovery

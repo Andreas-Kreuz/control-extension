@@ -90,7 +90,7 @@ function HubOptionDefaults.create()
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {
-                    tag = "always",
+                    tag = "oninterest",
                     light = "oninterest",
                     smoke = "oninterest",
                     fire = "oninterest",

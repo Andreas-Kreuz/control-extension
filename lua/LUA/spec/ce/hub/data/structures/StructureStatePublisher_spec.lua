@@ -146,7 +146,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         StructureStatePublisher.syncState()
 
         assert.is_false(DataStore.get("ce.hub.Structure", "#2").fire)
-        assert.equals("tree-north", DataStore.get("ce.hub.Structure", "#3").tag)
+        assert.equals("tree", DataStore.get("ce.hub.Structure", "#3").tag)
 
         InterestSyncRegistry.startSyncFor(HubCeTypes.Structure, "#2")
         InterestSyncRegistry.startSyncFor(HubCeTypes.Structure, "#3")
@@ -191,8 +191,6 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
     end)
 
     it("fills static fields for structures loaded from anl3", function ()
-        states["#2_Ampelmast"] = states["#2"]
-
         local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
         local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
         local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
@@ -204,7 +202,13 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                 {
                     id = "#2",
                     name = "#2_Ampelmast",
-                    gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm"
+                    gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm",
+                    tag = "shed",
+                    light = true,
+                    smoke = false,
+                    fire = false,
+                    pos_x = 1.0, pos_y = 2.0, pos_z = 3.0,
+                    rot_x = 4.0, rot_y = 5.0, rot_z = 6.0
                 }
             }
         })
