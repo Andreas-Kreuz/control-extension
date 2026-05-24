@@ -45,7 +45,8 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
                                                         '<Kammera name="Fahrtwind" Dynamic="1"/>',
                                                         "</Kammerasammlung>",
                                                         '<Gleissystem GleissystemID="1" TrackSystemNumber="1">',
-                                                        '<Gleis GleisID="11"><Meldung name="S1" Key_Id="31"/></Gleis>',
+                                                        '<Gleis GleisID="11"><Meldung name="S1" Key_Id="31"' ..
+                                                        ' LuaTag="s1tag," TipTxt="Signal 1" TipShow="1"/></Gleis>',
                                                         "</Gleissystem>",
                                                         '<Gleissystem GleissystemID="2" TrackSystemNumber="2">',
                                                         '<Gleis GleisID="22"/></Gleissystem>',
@@ -69,7 +70,8 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
                                                         "</Fuhrpark>",
                                                         '<Gebaeudesammlung>',
                                                         '<Immobile name="#12" gsbname="Haus.3dm"',
-                                                        ' LuaTag="p1=#4," Light="1" Smoke="100" Fire="0">',
+                                                        ' LuaTag="p1=#4," Light="1" Smoke="100" Fire="0"' ..
+                                                        ' TipTxt="Info #12" TipShow="1">',
                                                         '<Dreibein>',
                                                         '<Vektor x="10000" y="20000" z="300"/>',
                                                         '<Vektor x="0" y="1" z="0"/>',
@@ -101,9 +103,14 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
         assert.equals(55, dt.tracks.auxiliary[1].id)
         assert.equals(66, dt.tracks.control[1].id)
         assert.equals(31, dt.signals[1].keyId)
+        assert.equals("s1tag,", dt.signals[1].tag)
+        assert.equals("Signal 1", dt.signals[1].tipTxt)
+        assert.is_true(dt.signals[1].tipShow)
         assert.equals(44, dt.switches[1].keyId)
         assert.equals("#12", dt.structures[1].name)
         assert.equals("p1=#4,", dt.structures[1].tag)
+        assert.equals("Info #12", dt.structures[1].tipTxt)
+        assert.is_true(dt.structures[1].tipShow)
         assert.is_true(dt.structures[1].light)
         assert.is_true(dt.structures[1].smoke)
         assert.is_false(dt.structures[1].fire)

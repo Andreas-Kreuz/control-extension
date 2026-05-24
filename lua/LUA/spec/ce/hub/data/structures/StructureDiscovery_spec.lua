@@ -128,6 +128,32 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
         assert.is_false(StructureDiscovery.wasSeededFromAnl3())
     end)
 
+    it("seeds tippText and tipShow from anl3 without calling EEP", function ()
+        local eepChangeCalls = 0
+        local eepShowCalls = 0
+        local changeStub = stub(_G, "EEPChangeInfoStructure", function () eepChangeCalls = eepChangeCalls + 1 end)
+        local showStub = stub(_G, "EEPShowInfoStructure", function () eepShowCalls = eepShowCalls + 1 end)
+
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+
+        StructureDiscovery.initFromAnl3({
+            coverage = { structures = true },
+            structures = {
+                { id = "#2", name = "#2_Haus", gsbname = "Haus.3dm",
+                  tipTxt = "Info text", tipShow = true }
+            }
+        })
+
+        local structure = StructureRegistry.forId("#2")
+        assert.equals("Info text", structure:getTippText())
+        assert.is_true(structure:getTippTextVisible())
+        assert.equals(0, eepChangeCalls)
+        assert.equals(0, eepShowCalls)
+        changeStub:revert()
+        showStub:revert()
+    end)
+
     it("loads tags during normal discovery for known structure signal housings", function ()
         local Structure = require("ce.hub.data.structures.Structure")
         local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")

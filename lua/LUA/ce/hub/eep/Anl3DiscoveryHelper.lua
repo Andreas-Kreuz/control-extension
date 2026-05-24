@@ -289,6 +289,8 @@ local function buildDiscoveryTable(root)
                         name = structureInfo.name,
                         gsbname = attrs.gsbname,
                         tag = attrs.LuaTag,
+                        tipTxt = attrs.TipTxt,
+                        tipShow = boolFromAttr(attrs.TipShow),
                         light = boolFromAttr(attrs.Light),
                         smoke = boolFromAttr(attrs.Smoke),
                         fire = boolFromAttr(attrs.Fire),
@@ -308,7 +310,10 @@ local function buildDiscoveryTable(root)
         if meldung.attrs.Key_Id then
             dt.signals[#dt.signals + 1] = {
                 name = meldung.attrs.name,
-                keyId = tonumber(meldung.attrs.Key_Id)
+                keyId = tonumber(meldung.attrs.Key_Id),
+                tag = meldung.attrs.LuaTag,
+                tipTxt = meldung.attrs.TipTxt,
+                tipShow = boolFromAttr(meldung.attrs.TipShow)
             }
         end
     end

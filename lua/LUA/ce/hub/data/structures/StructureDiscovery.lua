@@ -114,6 +114,8 @@ function StructureDiscovery.initFromAnl3(tableOfAnl3)
             if existing then
                 existing:setGsbname(entry.gsbname)
                 if entry.tag ~= nil then existing:setTag(entry.tag) end
+                if entry.tipTxt ~= nil then existing.tippText = entry.tipTxt end
+                if entry.tipShow ~= nil then existing.tippTextVisible = entry.tipShow end
                 if entry.light ~= nil then existing:setLight(entry.light) end
                 if entry.smoke ~= nil then existing:setSmoke(entry.smoke) end
                 if entry.fire ~= nil then existing:setFire(entry.fire) end
@@ -127,6 +129,8 @@ function StructureDiscovery.initFromAnl3(tableOfAnl3)
                 structure:setGsbname(entry.gsbname)
                 structure:setModelType(22, "Immobilie")
                 if entry.tag ~= nil then structure:setTag(entry.tag) end
+                if entry.tipTxt ~= nil then structure.tippText = entry.tipTxt end
+                if entry.tipShow ~= nil then structure.tippTextVisible = entry.tipShow end
                 if entry.light ~= nil then structure:setLight(entry.light) end
                 if entry.smoke ~= nil then structure:setSmoke(entry.smoke) end
                 if entry.fire ~= nil then structure:setFire(entry.fire) end

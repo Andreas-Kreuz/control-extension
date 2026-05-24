@@ -12,6 +12,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.Structure ...
 ---@field modelType number
 ---@field modelTypeText string
 ---@field tag string
+---@field tippText string
+---@field tippTextVisible boolean
 ---@field light boolean|nil
 ---@field smoke boolean|nil
 ---@field fire boolean|nil
@@ -83,6 +85,8 @@ function Structure:new(id, name)
         fire = false,
         gsbname = nil,
         tag = "",
+        tippText = "",
+        tippTextVisible = false,
         dirtyFields = {},
         needsFullSend = true
     }
@@ -165,6 +169,26 @@ function Structure:setFire(fire)
     end
 end
 
+function Structure:getTippText() return self.tippText end
+
+function Structure:getTippTextVisible() return self.tippTextVisible end
+
+function Structure:setTippText(text)
+    local value = text or ""
+    if self.tippText ~= value then
+        self.tippText = value
+        EEPChangeInfoStructure(self.name, value)
+    end
+end
+
+function Structure:showTippText(visible)
+    local value = visible == true
+    if self.tippTextVisible ~= value then
+        self.tippTextVisible = value
+        EEPShowInfoStructure(self.name, value)
+    end
+end
+
 function Structure:resetDirty()
     self.dirtyFields = {}
 end
@@ -223,6 +247,26 @@ function Structure.setTagTextByName(structureName, tagText)
     local structure = registryStructure(structureName)
     if ok and structure then structure:setTag(value) end
     return ok
+end
+
+function Structure.setTippTextByName(structureName, text)
+    if not structureName then return end
+    local structure = registryStructure(structureName)
+    if structure then
+        structure:setTippText(text)
+    else
+        EEPChangeInfoStructure(structureName, text or "")
+    end
+end
+
+function Structure.showTippTextByName(structureName, visible)
+    if not structureName then return end
+    local structure = registryStructure(structureName)
+    if structure then
+        structure:showTippText(visible)
+    else
+        EEPShowInfoStructure(structureName, visible == true)
+    end
 end
 
 return Structure

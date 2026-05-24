@@ -338,4 +338,34 @@ insulate("ce.mods.road.TrafficLight", function ()
         assert.equals("#1_Gehaeuse", shownStructure)
         assert.equals("#1_Gehaeuse", changedStructure)
     end)
+
+    it("calls EEP show and change only once when refreshInfo produces the same state", function ()
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local Signal = require("ce.hub.data.signals.Signal")
+        local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+
+        local tl = TrafficLight:newForSignal("K1", 50, TrafficLightModel.NONE)
+        local s = Signal:new(50)
+        SignalRegistry.add(s)
+
+        IntersectionSettings.showSignalIdOnSignal = true
+
+        local showCalls = 0
+        local changeCalls = 0
+        local showStub = stub(_G, "EEPShowInfoSignal", function () showCalls = showCalls + 1 end)
+        local changeStub = stub(_G, "EEPChangeInfoSignal", function () changeCalls = changeCalls + 1 end)
+        finally(function ()
+            showStub:revert()
+            changeStub:revert()
+            SignalRegistry.replaceAll({})
+        end)
+
+        tl:refreshInfo()
+        tl:refreshInfo()
+
+        assert.equals(1, showCalls)
+        assert.equals(1, changeCalls)
+    end)
 end)

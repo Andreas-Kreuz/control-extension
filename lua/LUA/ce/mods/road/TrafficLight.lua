@@ -6,6 +6,8 @@ local LightStructureTrafficLight = require("ce.mods.road.LightStructureTrafficLi
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local fmt = require("ce.hub.eep.TippTextFormatter")
+local Signal = require("ce.hub.data.signals.Signal")
+local Structure = require("ce.hub.data.structures.Structure")
 
 ------------------------------------------------------------------------------------------
 -- Klasse TrafficLight
@@ -41,7 +43,7 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
     local error = string.format("TrafficLight ID already used: %s - %s", signalId, trafficLightModel.name)
     assert(not registeredSignals[tostring(signalId)] or registeredSignals[tostring(signalId)].trafficLightModel ==
            trafficLightModel, error)
-    EEPShowInfoSignal(signalId, false)
+    Signal.showTippTextById(signalId, false)
     if signalId < 0 then counter = counter - 1 end
     local o = {
         vehicleSignalName = name,
@@ -110,9 +112,9 @@ function TrafficLight:asPedestrianOnly()
     return self
 end
 
---- Schaltet das Licht der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grün oder Anforderung
+--- Schaltet das Licht der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grï¿½n oder Anforderung
 -- @param redStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel rot oder rot-gelb ist
--- @param greenStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel grün ist
+-- @param greenStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel grï¿½n ist
 -- @param yellowStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel gelb oder rot-gelb ist
 -- @param requestStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel eine Anforderung erkennt
 --
@@ -124,12 +126,12 @@ function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStru
     return self
 end
 
---- Ändert die Achsstellung der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grün oder Fußgänger
+--- ï¿½ndert die Achsstellung der angegebenen Immobilien beim Schalten der Ampel auf rot, gelb, grï¿½n oder Fuï¿½gï¿½nger
 -- @param structureName Name der Immobilie, deren Achse gesteuert werden soll
 -- @param axisName Name der Achse in der Immobilie, die gesteuert werden soll
 -- @param positionDefault Grundstellung der Achse (wird eingestellt, wenn eine Stellung nicht angegeben wurde
 -- @param positionRed Achsstellung bei rot
--- @param positionGreen Achsstellung bei grün
+-- @param positionGreen Achsstellung bei grï¿½n
 -- @param positionYellow Achsstellung bei gelb
 -- @param positionRedYellow Achsstellung bei gelbrot
 -- @param positionPedestrian Achsstellung bei FG
@@ -143,13 +145,13 @@ function TrafficLight:addAxisStructure(structureName, axisName, positionDefault,
     return self
 end
 
---- Aktualisiert den Text für die aktuelle Phase dieses Signalgebers
--- @param phaseInfo TippText für die Phase
+--- Aktualisiert den Text fï¿½r die aktuelle Phase dieses Signalgebers
+-- @param phaseInfo TippText fï¿½r die Phase
 --
 function TrafficLight:setPhaseInfo(phaseInfo) self.phaseInfo = phaseInfo end
 
---- Aktualsisiert den Text für die Fahrspuren dieser Ampel
--- @param laneInfo TippText für die Fahrspur
+--- Aktualsisiert den Text fï¿½r die Fahrspuren dieser Ampel
+-- @param laneInfo TippText fï¿½r die Fahrspur
 --
 function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
 
@@ -187,15 +189,15 @@ end
 
 function TrafficLight:showInfoText(showInfo)
     if self.signalId > 0 then
-        EEPShowInfoSignal(self.signalId, showInfo)
+        Signal.showTippTextById(self.signalId, showInfo)
     else
         for l in pairs(self.lightStructures) do
             if showInfo then
                 local structureName = tippTextStructure(l)
-                if structureName then EEPShowInfoStructure(structureName, true) end
+                if structureName then Structure.showTippTextByName(structureName, true) end
             else
                 for _, structureName in ipairs(allTippTextStructures(l)) do
-                    EEPShowInfoStructure(structureName, false)
+                    Structure.showTippTextByName(structureName, false)
                 end
             end
         end
@@ -204,16 +206,16 @@ end
 
 function TrafficLight:changeInfoText(infoText)
     if self.signalId > 0 then
-        EEPChangeInfoSignal(self.signalId, infoText)
+        Signal.setTippTextById(self.signalId, infoText)
     else
         for l in pairs(self.lightStructures) do
             if infoText == "" then
                 for _, structureName in ipairs(allTippTextStructures(l)) do
-                    EEPChangeInfoStructure(structureName, "")
+                    Structure.setTippTextByName(structureName, "")
                 end
             else
                 local structureName = tippTextStructure(l)
-                if structureName then EEPChangeInfoStructure(structureName, infoText) end
+                if structureName then Structure.setTippTextByName(structureName, infoText) end
             end
         end
     end
@@ -488,7 +490,7 @@ end
 
 function TrafficLight:switchSignal(sigIndex) if self.signalId > 0 then EEPSetSignal(self.signalId, sigIndex, 1) end end
 
---- Setzt die Anforderung fuer eine Ampel (damit sie weiß, ob eine Anforderung vorliegt)
+--- Setzt die Anforderung fuer eine Ampel (damit sie weiï¿½, ob eine Anforderung vorliegt)
 --- @param hasRequest boolean wo liegt die Anforderung an
 function TrafficLight:showRequestOnSignal(hasRequest)
     local lightDbg = ""

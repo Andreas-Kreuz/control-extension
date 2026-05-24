@@ -27,7 +27,13 @@ function SignalDiscovery.initFromAnl3(tableOfAnl3)
 
     local signals = {}
     for _, entry in ipairs(tableOfAnl3.signals or {}) do
-        if entry.keyId then signals[#signals + 1] = Signal:new(entry.keyId) end
+        if entry.keyId then
+            local signal = Signal:new(entry.keyId)
+            if entry.tag ~= nil then signal:setTag(entry.tag) end
+            if entry.tipTxt ~= nil then signal.tippText = entry.tipTxt end
+            if entry.tipShow ~= nil then signal.tippTextVisible = entry.tipShow end
+            signals[#signals + 1] = signal
+        end
     end
     SignalRegistry.replaceAll(signals)
 end

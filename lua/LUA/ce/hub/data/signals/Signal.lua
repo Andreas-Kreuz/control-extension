@@ -4,6 +4,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.Signal ...") end
 ---@field id number
 ---@field position number
 ---@field tag string
+---@field tippText string
+---@field tippTextVisible boolean
 ---@field waitingVehiclesCount number
 ---@field stopDistance number|nil
 ---@field itemName string|nil
@@ -23,6 +25,8 @@ function Signal:new(id)
         id = id,
         position = 0,
         tag = "",
+        tippText = "",
+        tippTextVisible = false,
         waitingVehiclesCount = 0,
         stopDistance = nil,
         itemName = nil,
@@ -112,6 +116,46 @@ function Signal:setFunctions(signalFunctions, activeFunction)
     if self.activeFunction ~= activeFunction then
         self.activeFunction = activeFunction
         markDirty(self, "activeFunction")
+    end
+end
+
+function Signal:getTippText() return self.tippText end
+
+function Signal:getTippTextVisible() return self.tippTextVisible end
+
+function Signal:setTippText(text)
+    local value = text or ""
+    if self.tippText ~= value then
+        self.tippText = value
+        EEPChangeInfoSignal(self.id, value)
+    end
+end
+
+function Signal:showTippText(visible)
+    local value = visible == true
+    if self.tippTextVisible ~= value then
+        self.tippTextVisible = value
+        EEPShowInfoSignal(self.id, value)
+    end
+end
+
+function Signal.setTippTextById(signalId, text)
+    local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+    local signal = SignalRegistry.get(signalId)
+    if signal then
+        signal:setTippText(text)
+    else
+        EEPChangeInfoSignal(signalId, text or "")
+    end
+end
+
+function Signal.showTippTextById(signalId, visible)
+    local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+    local signal = SignalRegistry.get(signalId)
+    if signal then
+        signal:showTippText(visible)
+    else
+        EEPShowInfoSignal(signalId, visible == true)
     end
 end
 
