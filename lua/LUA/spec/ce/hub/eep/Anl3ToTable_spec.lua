@@ -58,12 +58,17 @@ local MINIMAL_ANL3 = table.concat({
 
 insulate("Anl3ToTable", function ()
     local path
+    local ioOpenStub
 
     before_each(function ()
         path = writeTempXml(MINIMAL_ANL3)
     end)
 
     after_each(function ()
+        if ioOpenStub then
+            ioOpenStub:revert()
+            ioOpenStub = nil
+        end
         os.remove(path)
     end)
 
@@ -71,6 +76,54 @@ insulate("Anl3ToTable", function ()
         local result, err = Anl3ToTable.loadAnlage("/nonexistent/file.anl3")
         assert.is_nil(result)
         assert.is_not_nil(err)
+    end)
+
+    it("closes the file before converting and parsing content", function ()
+        local fakeFile = {
+            closed = false,
+            read = function (self, mode)
+                assert.equals("*a", mode)
+                return {
+                    gsub = function ()
+                        assert.is_true(self.closed)
+                        return MINIMAL_ANL3
+                    end
+                }
+            end,
+            close = function (self)
+                self.closed = true
+            end
+        }
+        ioOpenStub = stub(io, "open", function ()
+            return fakeFile
+        end)
+
+        local root, err = Anl3ToTable.loadAnlage("locked.anl3")
+
+        assert.is_nil(err)
+        assert.equals("sutrackp", root.tag)
+        assert.is_true(fakeFile.closed)
+    end)
+
+    it("closes the file and returns a read error when file read fails", function ()
+        local fakeFile = {
+            closed = false,
+            read = function ()
+                return nil, "read failed"
+            end,
+            close = function (self)
+                self.closed = true
+            end
+        }
+        ioOpenStub = stub(io, "open", function ()
+            return fakeFile
+        end)
+
+        local result, err = Anl3ToTable.loadAnlage("locked.anl3")
+
+        assert.is_nil(result)
+        assert.equals("Anl3ToTable: cannot read file: read failed", err)
+        assert.is_true(fakeFile.closed)
     end)
 
     it("returns the root element as the document root", function ()

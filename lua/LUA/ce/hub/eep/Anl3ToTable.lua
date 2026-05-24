@@ -39,8 +39,16 @@ local function readAnlageContent(filename)
         return nil, "Anl3ToTable: cannot open file: " .. tostring(err)
     end
 
-    local content = utf8ToLatin1(file:read("*a"))
+    local ok, rawContent, readErr = pcall(file.read, file, "*a")
     file:close()
+    if not ok then
+        return nil, "Anl3ToTable: cannot read file: " .. tostring(rawContent)
+    end
+    if rawContent == nil then
+        return nil, "Anl3ToTable: cannot read file: " .. tostring(readErr)
+    end
+
+    local content = utf8ToLatin1(rawContent)
     return content
 end
 
