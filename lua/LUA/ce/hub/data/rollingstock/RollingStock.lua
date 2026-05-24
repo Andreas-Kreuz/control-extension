@@ -296,6 +296,18 @@ local function markLoaded(rollingStock, fieldName)
     DataClass.markLoaded(rollingStock, fieldName)
 end
 
+local function setCachedAxisValue(rollingStock, axisKey, axisValue)
+    local value = tonumber(axisValue)
+    if not axisKey or not value then return false end
+    local key = tostring(axisKey)
+    rollingStock.axisValues = rollingStock.axisValues or {}
+    local oldValue = rollingStock.axisValues[key]
+    rollingStock.axisValues[key] = value
+    markLoaded(rollingStock, "axisValues")
+    if oldValue ~= value then markDirty(rollingStock, "axisValues") end
+    return true
+end
+
 ---Create a new RollingStock and init it
 ---@param o table
 ---@return RollingStock
@@ -897,12 +909,7 @@ function RollingStock:setAxis(axisName, axisValue)
     if not DataClass.isCallable(EEPRollingstockSetAxis) then return false end
 
     local ok = EEPRollingstockSetAxis(self.rollingStockName, axisName, value) == true
-    if ok then
-        self.axisValues = self.axisValues or {}
-        self.axisValues[tostring(axisName)] = value
-        markLoaded(self, "axisValues")
-        markDirty(self, "axisValues")
-    end
+    if ok then setCachedAxisValue(self, axisName, value) end
     return ok
 end
 
@@ -914,15 +921,21 @@ function RollingStock:setAxisByNumber(axisNumber, axisValue)
 
     if axisNameForNumber(self.modelInfo, axisNumber)
         and self:setAxisByNameFallback(axisNumber, axisValue) then
+        setCachedAxisValue(self, axisNumber, axisValue)
         return true
     end
 
     if DataClass.isCallable(EEPRollingstockSetAxisByNumber) then
         local ok = EEPRollingstockSetAxisByNumber(self.rollingStockName, axisNumber, axisValue)
-        if ok then return true end
+        if ok then
+            setCachedAxisValue(self, axisNumber, axisValue)
+            return true
+        end
     end
 
-    return self:setAxisByNameFallback(axisNumber, axisValue)
+    local ok = self:setAxisByNameFallback(axisNumber, axisValue)
+    if ok then setCachedAxisValue(self, axisNumber, axisValue) end
+    return ok
 end
 
 function RollingStock:setAxisByNameFallback(axisNumber, axisValue)
@@ -1340,6 +1353,74 @@ end
 
 function RollingStock:hasDirtyFields()
     return next(self.dirtyFields) ~= nil
+end
+
+local function rollingStockFromRegistry(rollingStockName)
+    return require("ce.hub.data.rollingstock.RollingStockRegistry").get(rollingStockName)
+end
+
+local function printMissingRollingStock(rollingStockName)
+    print(string.format(
+        "[#RollingStock] Command ignored, rolling stock is not registered: %s",
+        tostring(rollingStockName)
+    ))
+end
+
+function RollingStock.setActiveByName(rollingStockName)
+    local rollingStockToActivate = rollingStockFromRegistry(rollingStockName)
+    if not rollingStockToActivate then
+        printMissingRollingStock(rollingStockName)
+        return false
+    end
+    if not DataClass.isCallable(EEPRollingstockSetActive) then return false end
+
+    local ok = EEPRollingstockSetActive(rollingStockName) ~= false
+    if ok then
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
+        for _, rollingStock in pairs(RollingStockRegistry.getAll()) do
+            rollingStock:setActive(rollingStock.rollingStockName == rollingStockName)
+        end
+        ScenarioRegistry.getOrCreate():setActiveRollingStock(rollingStockName)
+    end
+    return ok
+end
+
+function RollingStock.setUserCameraByName(rollingStockName, posX, posY, posZ, rotH, rotV, setDirectly)
+    local rollingStock = rollingStockFromRegistry(rollingStockName)
+    local x = tonumber(posX)
+    local y = tonumber(posY)
+    local z = tonumber(posZ)
+    local horizontal = tonumber(rotH)
+    local vertical = tonumber(rotV)
+    local activate = tonumber(setDirectly)
+    if not rollingStock or not x or not y or not z or not horizontal or not vertical then
+        if not rollingStock then printMissingRollingStock(rollingStockName) end
+        return false
+    end
+    if not DataClass.isCallable(EEPRollingstockSetUserCamera) then return false end
+    return EEPRollingstockSetUserCamera(rollingStockName, x, y, z, horizontal, vertical, activate) ~= false
+end
+
+function RollingStock.setAxisByName(rollingStockName, axisName, axisValue, axisNumber)
+    local rollingStock = rollingStockFromRegistry(rollingStockName)
+    if not rollingStock then
+        printMissingRollingStock(rollingStockName)
+        return false
+    end
+
+    local ok = rollingStock:setAxis(axisName, axisValue)
+    if ok and axisNumber then setCachedAxisValue(rollingStock, axisNumber, axisValue) end
+    return ok
+end
+
+function RollingStock.setAxisByNumberByName(rollingStockName, axisNumber, axisValue)
+    local rollingStock = rollingStockFromRegistry(rollingStockName)
+    if not rollingStock then
+        printMissingRollingStock(rollingStockName)
+        return false
+    end
+    return rollingStock:setAxisByNumber(axisNumber, axisValue)
 end
 
 function RollingStock:openDoors() self.model:openDoors(self.rollingStockName) end

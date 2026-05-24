@@ -129,9 +129,9 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
         queueCommand(`Structure.setLightByName|${signalName}|true`);
       });
       action.targets.forEach((target) => {
-        queueCommand(`Structure.setTagTextByName|${target.name}|${action.housingTag}`);
+        queueCommand(`Structure.setTagByName|${target.name}|${action.housingTag}`);
       });
-      queueCommand(`Structure.setTagTextByName|${action.housingName}|${action.housingTag}`);
+      queueCommand(`Structure.setTagByName|${action.housingName}|${action.housingTag}`);
     });
 
     socket.on(RoadEvent.FocusStructureSignalInstallerCamera, (action: unknown) => {
@@ -141,8 +141,8 @@ export const registerRoadMod = (_io: Server, socketService: SocketService, eepSe
       if (!isFocusStructureSignalInstallerCameraCommand(action)) {
         return;
       }
-      queueCommand(`EEPSetCameraPosition|${action.posX}|${action.posY}|${action.posZ}`);
-      queueCommand(`EEPSetCameraRotation|${action.rotX}|${action.rotY}|${action.rotZ}`);
+      queueCommand(`Scenario.setCameraPosition|${action.posX}|${action.posY}|${action.posZ}`);
+      queueCommand(`Scenario.setCameraRotation|${action.rotX}|${action.rotY}|${action.rotZ}`);
     });
   }
 

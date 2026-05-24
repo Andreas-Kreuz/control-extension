@@ -66,7 +66,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `nextPhase`        | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der als nächstes vorgesehenen Phase aus `crossing:getNextPhase().name`.                                                                                       |
 | `ready`            | `boolean`; Beispiel: `false`                      | Status aus `intersection:isGreenTimeFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                 |
 | `greenTimeSeconds` | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `TrafficPhase:new(...)`.                                                                           |
-| `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `EEPSetCamera \| 0 \| <staticCam>` umgesetzt. |
+| `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `Scenario.setCamera \| 0 \| <staticCam>` umgesetzt. |
 | `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `TrafficPhase`-Einträgen der Kreuzung.                                                                                         |
 
 #### `IntersectionPhaseDto`
@@ -242,5 +242,5 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 
 | Event                          | Zweck                                                            | Tatsächliche Auswertung                                                                                       |
 | ------------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `[Command Event] Change Cam`   | Umschalten auf statische Kamera aus `intersections[].staticCams` | Nicht in `ce/mods/road`, sondern im Web-Server-Command-Modul; daraus wird `EEPSetCamera \| 0 \| <staticCam>`. |
+| `[Command Event] Change Cam`   | Umschalten auf statische Kamera aus `intersections[].staticCams` | Nicht in `ce/mods/road`, sondern im Web-Server-Command-Modul; daraus wird `Scenario.setCamera \| 0 \| <staticCam>`. |
 | `[Room] Join` / `[Room] Leave` | Beitritt und Verlassen von Socket-Räumen                         | Infrastruktur der Web-App/Web-Server-Schicht, nicht `ce/mods/road`.                                           |

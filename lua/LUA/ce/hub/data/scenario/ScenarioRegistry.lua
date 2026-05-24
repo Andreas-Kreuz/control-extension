@@ -26,4 +26,14 @@ function ScenarioRegistry.get()
     return scenario
 end
 
+function ScenarioRegistry.getOrCreate()
+    if not scenario then
+        scenario = Scenario:new({
+            id = "scenario",
+            name = "scenario"
+        })
+    end
+    return scenario
+end
+
 return ScenarioRegistry

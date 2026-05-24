@@ -493,6 +493,30 @@ function Train:setLights(lights)
     markLoaded(self, "lights")
 end
 
+function Train:peekLight(source)
+    return self.lights and self.lights[tostring(source)] or nil
+end
+
+function Train:setLight(enabled, source)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    local lightSource = tonumber(source) or 0
+    if lightSource < 0 or lightSource > 3 then return false end
+    local value = enabled == true
+    local key = tostring(lightSource)
+    if DataClass.isLoaded(self, "lights") and self:peekLight(key) == value then return true end
+    if not DataClass.isCallable(EEPSetTrainLight) then return false end
+
+    local ok = EEPSetTrainLight(self.name, value, lightSource) ~= false
+    if ok then
+        self.lights = self.lights or {}
+        local oldValue = self.lights[key]
+        self.lights[key] = value
+        markLoaded(self, "lights")
+        if oldValue ~= value then markDirty(self, "lights") end
+    end
+    return ok
+end
+
 function Train:updateLights()
     self:setLights(getTrainLights(self.name))
 end
@@ -676,6 +700,100 @@ end
 
 function Train:hasDirtyFields()
     return next(self.dirtyFields) ~= nil
+end
+
+local function trainFromRegistry(trainName)
+    return require("ce.hub.data.trains.TrainRegistry").get(trainName)
+end
+
+local function printMissingTrain(trainName)
+    print(string.format("[#Train] Command ignored, train is not registered: %s", tostring(trainName)))
+end
+
+function Train.setActiveByName(trainName)
+    local trainToActivate = trainFromRegistry(trainName)
+    if not trainToActivate then
+        printMissingTrain(trainName)
+        return false
+    end
+    if not DataClass.isCallable(EEPSetTrainActive) then return false end
+
+    local ok = EEPSetTrainActive(trainName) ~= false
+    if ok then
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
+        for _, train in pairs(TrainRegistry.getAll()) do train:setActive(train.name == trainName) end
+        ScenarioRegistry.getOrCreate():setActiveTrain(trainName)
+    end
+    return ok
+end
+
+function Train.setSpeedByName(trainName, speed, useTargetSpeed)
+    local train = trainFromRegistry(trainName)
+    local value = tonumber(speed)
+    if not train or not value then
+        if not train then printMissingTrain(trainName) end
+        return false
+    end
+    local isTargetSpeed = useTargetSpeed == true
+    if isTargetSpeed
+        and DataClass.isLoaded(train, "targetSpeed")
+        and train:peekTargetSpeed() == value then
+        return true
+    end
+    if not isTargetSpeed and DataClass.isLoaded(train, "speed") and train:peekSpeed() == value then return true end
+    if not DataClass.isCallable(EEPSetTrainSpeed) then return false end
+
+    local ok = EEPSetTrainSpeed(trainName, value, isTargetSpeed) ~= false
+    if ok then
+        if isTargetSpeed then
+            train:setTargetSpeed(value)
+        else
+            train:setSpeed(value)
+        end
+    end
+    return ok
+end
+
+function Train.setCouplingFrontByName(trainName, enabled)
+    local train = trainFromRegistry(trainName)
+    if not train then
+        printMissingTrain(trainName)
+        return false
+    end
+    local value = enabled == true
+    local cachedValue = value and 1 or 0
+    if DataClass.isLoaded(train, "couplingFront") and train:peekCouplingFront() == cachedValue then return true end
+    if not DataClass.isCallable(EEPSetTrainCouplingFront) then return false end
+
+    local ok = EEPSetTrainCouplingFront(trainName, value) ~= false
+    if ok then train:setCouplingFront(cachedValue) end
+    return ok
+end
+
+function Train.setCouplingRearByName(trainName, enabled)
+    local train = trainFromRegistry(trainName)
+    if not train then
+        printMissingTrain(trainName)
+        return false
+    end
+    local value = enabled == true
+    local cachedValue = value and 1 or 0
+    if DataClass.isLoaded(train, "couplingRear") and train:peekCouplingRear() == cachedValue then return true end
+    if not DataClass.isCallable(EEPSetTrainCouplingRear) then return false end
+
+    local ok = EEPSetTrainCouplingRear(trainName, value) ~= false
+    if ok then train:setCouplingRear(cachedValue) end
+    return ok
+end
+
+function Train.setLightByName(trainName, enabled, source)
+    local train = trainFromRegistry(trainName)
+    if not train then
+        printMissingTrain(trainName)
+        return false
+    end
+    return train:setLight(enabled, source)
 end
 
 function Train:toJsonStatic()

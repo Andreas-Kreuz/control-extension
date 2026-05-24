@@ -70,9 +70,9 @@ function testAlignStructureSignalInstallerQueuesPositionRotationAndTagCommands()
     'Structure.setRotationByName|#2_Straba Signal geradeaus|0|0|90',
     'Structure.setLightByName|#1_Straba Signal Halt|true',
     'Structure.setLightByName|#2_Straba Signal geradeaus|true',
-    'Structure.setTagTextByName|#1_Straba Signal Halt|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
-    'Structure.setTagTextByName|#2_Straba Signal geradeaus|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
-    'Structure.setTagTextByName|#3026_Straba Signal Gehäuse Mast 2|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
+    'Structure.setTagByName|#1_Straba Signal Halt|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
+    'Structure.setTagByName|#2_Straba Signal geradeaus|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
+    'Structure.setTagByName|#3026_Straba Signal Gehäuse Mast 2|F0=#1_Straba Signal Halt,F1=#2_Straba Signal geradeaus,g=#2_Straba Signal geradeaus,',
   ]);
 }
 
@@ -153,7 +153,7 @@ function testFocusStructureSignalInstallerCameraQueuesCameraCommands(): void {
     rotZ: 90,
   });
 
-  assert.deepEqual(commands, ['EEPSetCameraPosition|10|20|3', 'EEPSetCameraRotation|-5.711|0|90']);
+  assert.deepEqual(commands, ['Scenario.setCameraPosition|10|20|3', 'Scenario.setCameraRotation|-5.711|0|90']);
 }
 
 function testFocusStructureSignalInstallerCameraRejectsUnsafePayloads(): void {

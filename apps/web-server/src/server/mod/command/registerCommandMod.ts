@@ -24,7 +24,7 @@ export const registerCommandMod = (
       if (!socketService.ensureApprovedSocket(socket, CommandEvent.ChangeCamToStatic)) {
         return;
       }
-      const command = 'EEPSetCamera|0|' + action.staticCam;
+      const command = 'Scenario.setCamera|0|' + action.staticCam;
       queueCommand(command);
     });
 
@@ -33,11 +33,11 @@ export const registerCommandMod = (
         return;
       }
       if (action.id === 8 || action.id === 9 || action.id === 10) {
-        queueCommand('EEPSetTrainActive|' + action.trainName);
-        queueCommand('EEPRollingstockSetActive|' + action.rollingStockName);
+        queueCommand('Train.setActiveByName|' + action.trainName);
+        queueCommand('RollingStock.setActiveByName|' + action.rollingStockName);
       }
       const camId = action.id ? action.id : 9;
-      const command = 'EEPSetPerspectiveCamera|' + camId + '|' + action.trainName;
+      const command = 'Scenario.setPerspectiveCamera|' + camId + '|' + action.trainName;
       queueCommand(command);
     });
 
@@ -55,9 +55,9 @@ export const registerCommandMod = (
         if (!socketService.ensureApprovedSocket(socket, CommandEvent.ChangeCamToRollingStock)) {
           return;
         }
-        queueCommand('EEPRollingstockSetActive|' + action.rollingStock);
+        queueCommand('RollingStock.setActiveByName|' + action.rollingStock);
         const command =
-          'EEPRollingstockSetUserCamera|' +
+          'RollingStock.setUserCameraByName|' +
           action.rollingStock +
           '|' +
           action.posX +
@@ -105,8 +105,15 @@ export const registerCommandMod = (
 
         const command =
           action.axisNamesKnown === true && axisName
-            ? 'EEPRollingstockSetAxis|' + action.rollingStockName + '|' + axisName + '|' + value
-            : 'EEPRollingstockSetAxisByNumber|' + action.rollingStockName + '|' + axisNumber + '|' + value;
+            ? 'RollingStock.setAxisByName|' +
+              action.rollingStockName +
+              '|' +
+              axisName +
+              '|' +
+              value +
+              '|' +
+              axisNumber
+            : 'RollingStock.setAxisByNumberByName|' + action.rollingStockName + '|' + axisNumber + '|' + value;
         queueCommand(command);
       },
     );
@@ -121,7 +128,7 @@ export const registerCommandMod = (
         return;
       }
 
-      queueCommand('EEPSetTrainSpeed|' + action.trainName + '|' + speed + '|true');
+      queueCommand('Train.setSpeedByName|' + action.trainName + '|' + speed + '|true');
     });
 
     socket.on(
@@ -134,7 +141,8 @@ export const registerCommandMod = (
           return;
         }
 
-        const commandName = action.position === 'front' ? 'EEPSetTrainCouplingFront' : 'EEPSetTrainCouplingRear';
+        const commandName =
+          action.position === 'front' ? 'Train.setCouplingFrontByName' : 'Train.setCouplingRearByName';
         queueCommand(commandName + '|' + action.trainName + '|' + (action.enabled === true));
       },
     );
@@ -149,7 +157,7 @@ export const registerCommandMod = (
         return;
       }
 
-      queueCommand('EEPSetTrainLight|' + action.trainName + '|' + (action.enabled === true) + '|' + source);
+      queueCommand('Train.setLightByName|' + action.trainName + '|' + (action.enabled === true) + '|' + source);
     });
   };
 
