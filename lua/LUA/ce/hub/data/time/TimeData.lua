@@ -33,6 +33,17 @@ function TimeData:new(o)
     return o
 end
 
+function TimeData.pullCurrent()
+    return {
+        id = "times",
+        name = "times",
+        timeComplete = EEPTime,
+        timeH = EEPTimeH,
+        timeM = EEPTimeM,
+        timeS = EEPTimeS
+    }
+end
+
 function TimeData:update(values)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(values) == "table", "Need 'values' as table")

@@ -2,20 +2,25 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchUpdater .
 
 local SwitchRegistry = require("ce.hub.data.switches.SwitchRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 ---@class SwitchUpdater
 ---@field runUpdate fun():nil
 local SwitchUpdater = {}
 
-local EEPGetSwitch = _G.EEPGetSwitch or function () return 0 end
-local EEPSwitchGetTagText = _G.EEPSwitchGetTagText or function () return false, nil end
-
 function SwitchUpdater.runUpdate()
+    local HubCeTypes = require("ce.hub.data.HubCeTypes")
+    local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("switches") then return end
+    local fieldPolicies = HubOptionsRegistry.getFieldUpdatePolicies("switches")
     for _, switch in pairs(SwitchRegistry.getAll()) do
-        switch:setPosition(EEPGetSwitch(switch.id))
-        local _, tag = EEPSwitchGetTagText(switch.id)
-        switch:setTag(tag or "")
+        local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Switch, tostring(switch.id))
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "position", isSelected) then
+            switch:pullPosition()
+        end
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "tag", isSelected) then
+            switch:pullTag()
+        end
     end
 end
 

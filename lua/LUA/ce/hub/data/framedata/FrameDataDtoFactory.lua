@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class FrameDataDtoFactory
@@ -16,15 +18,15 @@ local KEY_ID = "id"
 -- DtoFields: class definition in FrameDataDtoTypes.d.lua
 local dtoFields = {
     framesPerSecond = {
-        getValue = function (entry) return entry.framesPerSecond end,
+        getValue = peek(function (source) return source:peekFramesPerSecond() end, "framesPerSecond"),
         placeholder = 0
     },
     currentFrame = {
-        getValue = function (entry) return entry.currentFrame end,
+        getValue = peek(function (source) return source:peekCurrentFrame() end, "currentFrame"),
         placeholder = 0
     },
     currentRenderFrame = {
-        getValue = function (entry) return entry.currentRenderFrame end,
+        getValue = peek(function (source) return source:peekCurrentRenderFrame() end, "currentRenderFrame"),
         placeholder = 0
     },
 }

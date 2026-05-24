@@ -34,7 +34,8 @@ function ModulesRegistry.set(entries)
     end
 end
 
-function ModulesRegistry.get()
+function ModulesRegistry.get(moduleId)
+    if moduleId ~= nil then return modules[moduleId] end
     return modules
 end
 

@@ -4,7 +4,7 @@ local RuntimeEntry = require("ce.hub.data.runtime.RuntimeEntry")
 
 ---@class RuntimeRegistry
 ---@field set fun(entries: table<string, RuntimeMetricEntry>|nil):nil
----@field get fun():table<string, RuntimeEntry>|nil
+---@field get fun(runtimeId: string|nil):RuntimeEntry|table<string, RuntimeEntry>|nil
 ---@field getRemovedIds fun():table<string, boolean>
 ---@field clearRemoved fun():nil
 local RuntimeRegistry = {}
@@ -35,7 +35,8 @@ function RuntimeRegistry.set(entries)
     end
 end
 
-function RuntimeRegistry.get()
+function RuntimeRegistry.get(runtimeId)
+    if runtimeId ~= nil then return runtimeEntries[runtimeId] end
     return runtimeEntries
 end
 

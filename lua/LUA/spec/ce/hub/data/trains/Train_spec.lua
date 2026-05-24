@@ -5,7 +5,7 @@ describe("ce.hub.data.trains.Train", function ()
     insulate("new Train keeps generic tag values", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
-        local tram = TrainRegistry.forName("#EepTrain1");
+        local tram = TrainRegistry.getOrCreate("#EepTrain1");
 
         it("Train has right name", function () assert.equals("#EepTrain1", tram.name) end)
         it("Values table exists", function () assert.same({}, tram.values) end)
@@ -23,7 +23,7 @@ describe("ce.hub.data.trains.Train lights", function ()
     insulate("new Train collects light sources", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
-        local train = TrainRegistry.forName("#LightTrain")
+        local train = TrainRegistry.getOrCreate("#LightTrain")
 
         it("stores all train light statuses", function ()
             assert.same({ ["0"] = true, ["1"] = false, ["2"] = true, ["3"] = false }, train:getLights())
@@ -38,7 +38,7 @@ describe("ce.hub.data.trains.Train", function ()
     insulate("Generic train tag values can be set", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
-        local tram = TrainRegistry.forName("#EepTrain1");
+        local tram = TrainRegistry.getOrCreate("#EepTrain1");
         tram:setValue("x", "DEST")
 
         it("Stored generic value is readable", function () assert.equals("DEST", tram:getValue("x")) end)
@@ -52,19 +52,19 @@ describe("ce.hub.data.trains.Train rolling stock identifiers", function ()
     insulate("Train setters apply identifiers to all rolling stocks", function ()
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-        local train = TrainRegistry.forName("#IdentifierTrain")
+        local train = TrainRegistry.getOrCreate("#IdentifierTrain")
 
         train:setLicencePlate("DD CE 42")
         train:setWagonNumber("1001")
 
         it("sets first rolling stock identifiers", function ()
-            local stock = RollingStockRegistry.forName("Identifier RS 1")
+            local stock = RollingStockRegistry.getOrCreate("Identifier RS 1")
             assert.equals("DD CE 42", stock:getLicencePlate())
             assert.equals("1001", stock:getWagonNumber())
         end)
 
         it("sets second rolling stock identifiers", function ()
-            local stock = RollingStockRegistry.forName("Identifier RS 2")
+            local stock = RollingStockRegistry.getOrCreate("Identifier RS 2")
             assert.equals("DD CE 42", stock:getLicencePlate())
             assert.equals("1001", stock:getWagonNumber())
         end)

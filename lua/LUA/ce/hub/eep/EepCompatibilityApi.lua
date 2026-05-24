@@ -7,7 +7,7 @@ EEPSwitchGetTagText = EEPSwitchGetTagText or function () end
 if not _G.EEPRollingstockSetAxisByNumber then
     rawset(_G, "EEPRollingstockSetAxisByNumber", function (rollingStockName, axisNumber, axisValue)
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
-        return RollingStockRegistry.forName(rollingStockName):setAxisByNameFallback(axisNumber, axisValue)
+        return RollingStockRegistry.getOrCreate(rollingStockName):setAxisByNameFallback(axisNumber, axisValue)
     end)
 end
 

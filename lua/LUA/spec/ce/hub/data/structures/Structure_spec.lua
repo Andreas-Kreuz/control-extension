@@ -60,7 +60,7 @@ insulate("ce.hub.data.structures.Structure", function ()
         assert.is_true(Structure.setPositionByName("#3", "10.5", "20.25", "3.75"))
         assert.is_true(Structure.setRotationByName("#3", "1", "2", "90"))
         assert.is_true(Structure.setLightByName("#3", true))
-        assert.is_true(Structure.setTagTextByName("#3", "F1=#4,"))
+        assert.is_true(Structure.setTagByName("#3", "F1=#4,"))
 
         assert.stub(setPositionStub).was_called_with("#3", 10.5, 20.25, 3.75)
         assert.stub(setRotationStub).was_called_with("#3", 1, 2, 90)
@@ -91,7 +91,7 @@ insulate("ce.hub.data.structures.Structure", function ()
         StructureRegistry.add(structure)
         structure:resetDirty()
 
-        assert.is_true(Structure.setTagTextByName("#3_Ampelmast", "p1=#4,"))
+        assert.is_true(Structure.setTagByName("#3_Ampelmast", "p1=#4,"))
 
         assert.stub(setTagTextStub).was_called_with("#3_Ampelmast", "p1=#4,")
         assert.same("p1=#4,", structure:getTag())

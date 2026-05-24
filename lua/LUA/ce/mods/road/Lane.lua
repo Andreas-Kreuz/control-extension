@@ -4,6 +4,9 @@ local Queue = require("ce.hub.util.Queue")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local fmt = require("ce.hub.eep.TippTextFormatter")
+local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+local Track = require("ce.hub.data.tracks.Track")
+local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
 -- Lane starts here
@@ -91,21 +94,13 @@ local function updateLaneSignal(lane, reason)
     end
 end
 
--- Might bring some performance
-local EEPGetTrainRoute = EEPGetTrainRoute
-local EEPRegisterRoadTrack = EEPRegisterRoadTrack
-local EEPIsRoadTrackReserved = EEPIsRoadTrackReserved
-local EEPGetSignalTrainsCount = EEPGetSignalTrainsCount
-local EEPGetSignalTrainName = EEPGetSignalTrainName
 local function routeForTrain(trainName)
-    local train = TrainRegistry.find(trainName)
+    local train = TrainRegistry.get(trainName)
     if train then
         local route = train:getRoute()
         if route and route ~= "" then return route end
     end
 
-    local ok, route = EEPGetTrainRoute(trainName)
-    if ok then return route end
     return DEFAULT_ROUTE
 end
 
@@ -225,26 +220,19 @@ local function getLaneSignalId(lane)
 end
 
 local function loadLaneSignalTagData(lane)
-    if type(EEPSignalGetTagText) ~= "function" then return {} end
-
     local signalId = getLaneSignalId(lane)
     if not signalId then return {} end
 
-    local ok, tagText = EEPSignalGetTagText(signalId)
-    if not ok then return {} end
-
-    return StorageUtility.parseTableFromString(tagText)
+    return StorageUtility.parseTableFromString(SignalRegistry.getOrCreate(signalId):getTag())
 end
 
 local function saveLaneSignalTagData(lane, laneData)
-    if type(EEPSignalSetTagText) ~= "function" then return end
-
     local signalId = getLaneSignalId(lane)
     if not signalId then return end
 
     local tagData = loadLaneSignalTagData(lane)
     for key, value in pairs(laneData) do tagData[key] = value end
-    EEPSignalSetTagText(signalId, StorageUtility.encodeTable(tagData))
+    SignalRegistry.getOrCreate(signalId):setTag(StorageUtility.encodeTable(tagData))
 end
 
 local function save(lane)
@@ -416,7 +404,7 @@ function Lane:getRequestInfo() return self.requestInfoText or "KEINE ANFORDERUNG
 function Lane:useTrackForQueue(roadId)
     assert(not self.signalUsedForRequest, "CANNOT COUNT ON SIGNALS AND TRACKS")
     self.tracksUsedForRequest = true
-    EEPRegisterRoadTrack(roadId)
+    Track.registerRoadTrack(roadId)
     if not self.tracksForRequests[roadId] then self.tracksForRequests[roadId] = true end
     return self
 end
@@ -424,8 +412,8 @@ end
 function Lane:resetQueueFromRoadTracks()
     for _ = 1, self.queue:size(), 1 do self.queue:pop() end
     for strassenId in pairs(self.tracksForRequests) do
-        local ok, waiting, trainName = EEPIsRoadTrackReserved(strassenId, true)
-        assert(ok)
+        local track = TrackRegistry.getOrCreate("road", strassenId)
+        local waiting, trainName = track:pullReservation()
 
         if waiting then
             if not trainName then print(string.format("[#Lane] Kein Zug auf Strasse: %s", strassenId)) end
@@ -568,9 +556,8 @@ end
 function Lane:resetQueueFromSignal()
     for _ = 1, self.queue:size(), 1 do self.queue:pop() end
 
-    local wartend = EEPGetSignalTrainsCount(self.laneSignal.signalId)
-    for i = 1, wartend, 1 do
-        local trainName = EEPGetSignalTrainName(self.laneSignal.signalId, i)
+    local signal = SignalRegistry.getOrCreate(self.laneSignal.signalId)
+    for _, trainName in ipairs(signal:pullTrainNames()) do
         self.queue:push(trainName)
     end
     save(self)

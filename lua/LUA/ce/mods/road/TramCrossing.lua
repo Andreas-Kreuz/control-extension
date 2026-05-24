@@ -1,7 +1,9 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TramCrossing ...") end
 
 local Scheduler = require("ce.hub.scheduler.Scheduler")
+local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local StorageUtility = require("ce.hub.util.StorageUtility")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local Task = require("ce.hub.scheduler.Task")
 
 ---@class TramCrossingSignal
@@ -34,8 +36,7 @@ local countTagKey = "c"
 ---@param signal number EEP signal ID
 ---@return number count persisted count, or 0 when the tag cannot be parsed
 local function parseCount(signal)
-    local ok, tag = EEPSignalGetTagText(signal)
-    if not ok then return 0 end
+    local tag = SignalRegistry.getOrCreate(signal):pullTag()
 
     local values = StorageUtility.parseTableFromString(tag)
     local count = tonumber(values[countTagKey])
@@ -85,12 +86,11 @@ local function createSecuredIndicator(structureId, axis, axisValueUnsecured, axi
     assert(type(axisValueSecured) == "number", "Need 'axisValueSecured' as number")
 
     local ok
+    local structure = StructureRegistry.getOrCreate(structureId)
     if type(axis) == "number" then
-        assert(type(EEPStructureGetAxisByNumber) == "function", "EEPStructureGetAxisByNumber is not available")
-        ok = EEPStructureGetAxisByNumber(structureId, axis)
+        ok = structure:pullAxisByNumber(axis) ~= nil
     else
-        assert(type(EEPStructureGetAxis) == "function", "EEPStructureGetAxis is not available")
-        ok = EEPStructureGetAxis(structureId, axis)
+        ok = structure:pullAxis(axis) ~= nil
     end
     assert(ok, "Secured indicator structure axis not found: " .. structureId .. " axis " .. axis)
 
@@ -203,7 +203,8 @@ end
 ---Persists the current count to the primary signal tag.
 ---This is used after every count change because EEP signal tags survive Lua reloads with the layout.
 function TramCrossing:saveCount()
-    EEPSignalSetTagText(self.primarySignal, StorageUtility.encodeTable({ [countTagKey] = tostring(self.count) }))
+    local tag = StorageUtility.encodeTable({ [countTagKey] = tostring(self.count) })
+    SignalRegistry.getOrCreate(self.primarySignal):setTag(tag)
 end
 
 ---Switches all signals according to the current count without a yellow phase.
@@ -220,21 +221,27 @@ end
 ---This is used when no tram is inside the crossing so road traffic may proceed again.
 function TramCrossing:switchToClear()
     self:switchSecuredIndicators(false)
-    for _, signal in ipairs(self.signals) do EEPSetSignal(signal.signal, signal.signalPositionIfClear, 1) end
+    for _, signal in ipairs(self.signals) do
+        SignalRegistry.getOrCreate(signal.signal):setPosition(signal.signalPositionIfClear)
+    end
 end
 
 ---Switches all signals to their configured yellow position.
 ---This is used as the warning phase before road traffic is stopped for an entering tram.
 function TramCrossing:switchToYellow()
     self:switchSecuredIndicators(false)
-    for _, signal in ipairs(self.signals) do EEPSetSignal(signal.signal, signal.signalPositionYellow, 1) end
+    for _, signal in ipairs(self.signals) do
+        SignalRegistry.getOrCreate(signal.signal):setPosition(signal.signalPositionYellow)
+    end
 end
 
 ---Switches all signals to their configured occupied/red position.
 ---This is used while at least one tram is inside the crossing so conflicting traffic stays stopped.
 function TramCrossing:switchToOccupied()
     self:switchSecuredIndicators(true)
-    for _, signal in ipairs(self.signals) do EEPSetSignal(signal.signal, signal.signalPositionIfOccupied, 1) end
+    for _, signal in ipairs(self.signals) do
+        SignalRegistry.getOrCreate(signal.signal):setPosition(signal.signalPositionIfOccupied)
+    end
 end
 
 ---Switches all configured secured indicators to the requested secured state.
@@ -243,10 +250,11 @@ function TramCrossing:switchSecuredIndicators(isSecured)
     self.secured = isSecured
     for _, indicator in ipairs(self.securedIndicators) do
         local axisValue = isSecured and indicator.axisValueSecured or indicator.axisValueUnsecured
+        local structure = StructureRegistry.getOrCreate(indicator.structureId)
         if type(indicator.axis) == "number" then
-            EEPStructureSetAxisByNumber(indicator.structureId, indicator.axis, axisValue)
+            structure:setAxisByNumber(indicator.axis, axisValue)
         else
-            EEPStructureSetAxis(indicator.structureId, indicator.axis, axisValue)
+            structure:setAxis(indicator.axis, axisValue)
         end
     end
 end

@@ -31,6 +31,15 @@ function FrameData:new(o)
     return o
 end
 
+function FrameData.pullCurrent()
+    return {
+        id = "frameData",
+        framesPerSecond = EEPGetFramesPerSecond and EEPGetFramesPerSecond() or nil,
+        currentFrame = EEPGetCurrentFrame and EEPGetCurrentFrame() or nil,
+        currentRenderFrame = EEPGetCurrentRenderFrame and EEPGetCurrentRenderFrame() or nil,
+    }
+end
+
 function FrameData:update(values)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(values) == "table", "Need 'values' as table")

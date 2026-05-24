@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.routes.RouteDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class RouteDtoFactory
@@ -15,7 +17,7 @@ local KEY_ID = "id"
 -- DtoFields: class definition in RouteDtoTypes.d.lua
 local dtoFields = {
     name = {
-        getValue = function (route) return route:getName() end,
+        getValue = peek(function (source) return source:peekName() end, "name"),
         placeholder = ""
     },
 }

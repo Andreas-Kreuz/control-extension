@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.SignalDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
@@ -23,38 +25,38 @@ local KEY_ID = "id"
 -- DtoFields: class definition in SignalDtoTypes.d.lua
 local signalDtoFields = {
     position = {
-        getValue = function (signal) return signal.position end,
+        getValue = peek(function (source) return source:peekPosition() end, "position"),
         placeholder = 0
     },
     waitingVehiclesCount = {
-        getValue = function (signal) return signal.waitingVehiclesCount end,
+        getValue = peek(function (source) return source:peekWaitingVehiclesCount() end, "waitingVehiclesCount"),
         placeholder = 0
     },
     tag = {
-        getValue = function (signal) return signal:getTag() end,
+        getValue = peek(function (source) return source:peekTag() end, "tag"),
         placeholder = ""
     },
     stopDistance = {
-        getValue = function (signal) return signal:getStopDistance() end,
+        getValue = peek(function (source) return source:peekStopDistance() end, "stopDistance"),
         placeholder = 0
     },
     itemName = {
-        getValue = function (signal) return signal:getItemName() end,
+        getValue = peek(function (source) return source:peekItemName() end, "itemName"),
         placeholder = ""
     },
     itemNameWithModelPath = {
         policyField = "itemName",
-        getValue = function (signal) return signal:getItemNameWithModelPath() end,
+        getValue = peek(function (source) return source:peekItemNameWithModelPath() end, "itemNameWithModelPath"),
         placeholder = ""
     },
     signalFunctions = {
         policyField = "functions",
-        getValue = function (signal) return signal:getSignalFunctions() end,
+        getValue = peek(function (source) return source:peekSignalFunctions() end, "signalFunctions"),
         placeholder = {}
     },
     activeFunction = {
         policyField = "functions",
-        getValue = function (signal) return signal:getActiveFunction() end,
+        getValue = peek(function (source) return source:peekActiveFunction() end, "activeFunction"),
         placeholder = ""
     },
 }
@@ -62,19 +64,19 @@ local signalDtoFields = {
 -- DtoFields: class definition in SignalDtoTypes.d.lua
 local waitingOnSignalDtoFields = {
     signalId = {
-        getValue = function (waiting) return waiting.signalId end,
+        getValue = peek(function (source) return source:peekSignalId() end, "signalId"),
         placeholder = 0
     },
     waitingPosition = {
-        getValue = function (waiting) return waiting.waitingPosition end,
+        getValue = peek(function (source) return source:peekWaitingPosition() end, "waitingPosition"),
         placeholder = 0
     },
     vehicleName = {
-        getValue = function (waiting) return waiting.vehicleName end,
+        getValue = peek(function (source) return source:peekVehicleName() end, "vehicleName"),
         placeholder = ""
     },
     waitingCount = {
-        getValue = function (waiting) return waiting.waitingCount end,
+        getValue = peek(function (source) return source:peekWaitingCount() end, "waitingCount"),
         placeholder = 0
     },
 }

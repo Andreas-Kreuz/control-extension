@@ -7,10 +7,14 @@ local TransitOptionsRegistry = require("ce.mods.transit.options.TransitOptionsRe
 local LineRegistry = {}
 local allLines = {}
 
+function LineRegistry.get(id)
+    return allLines[id]
+end
+
 ---Creates a line object for the given line name, the line must exist
 ---@param id string name of the line in EEP, e.g. "10" or "A1"
 ---@return Line,boolean returns the line and the status if the line was newly created
-function LineRegistry.forId(id)
+function LineRegistry.getOrCreate(id)
     assert(id, "Provide a name for the line")
     assert(type(id) == "string", "Need 'lineName' as string")
     if allLines[id] then

@@ -24,12 +24,12 @@ function TransitTrainRegistry.forTrain(hubTrain)
     return transitTrain, true
 end
 
-function TransitTrainRegistry.forName(trainId)
+function TransitTrainRegistry.getOrCreate(trainId)
     local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-    return TransitTrainRegistry.forTrain(TrainRegistry.forName(trainId))
+    return TransitTrainRegistry.forTrain(TrainRegistry.getOrCreate(trainId))
 end
 
-function TransitTrainRegistry.find(trainId)
+function TransitTrainRegistry.get(trainId)
     assert(type(trainId) == "string", "Need 'trainId' as string")
     return allTransitTrains[trainId]
 end

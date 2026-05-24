@@ -127,7 +127,7 @@ local function syncRollingStockComposition(train)
         local rollingStockName = EEPGetRollingstockItemName(train.name, i)
         currentNamesByIndex[tostring(i)] = rollingStockName
         currentNames[rollingStockName] = true
-        RollingStockRegistry.forName(rollingStockName)
+        RollingStockRegistry.getOrCreate(rollingStockName)
     end
 
     for _, rollingStockName in pairs(TrainRegistry.allRollingStockNamesOf(train.name)) do
@@ -155,7 +155,7 @@ local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks, tr
     for trainName in pairs(detected) do
         local trainOnMap, speed = EEPGetTrainSpeed(trainName)
         if trainOnMap then
-            local train, created = TrainRegistry.forName(trainName)
+            local train, created = TrainRegistry.getOrCreate(trainName)
             local previousInfo = TrainDiscoveryCache.get(trainName) or {}
             local dirty = created or (dirtyTrains[trainName] and true or false)
             local moved = created or dirty or train:getSpeed() ~= 0 or speed ~= 0 or
@@ -241,7 +241,8 @@ function TrainDiscovery.initFromAnl3(tableOfAnl3)
                 trackId = rs.trackId,
                 trackDistance = rs.trackDistance,
                 trackDirection = rs.trackDirection,
-                trackSystem = rs.trackSystem
+                trackSystem = rs.trackSystem,
+                textureTexts = rs.textureTexts
             })
             if rs.trainName and rs.positionInTrain then
                 rollingStockNamesByTrain[rs.trainName] = rollingStockNamesByTrain[rs.trainName] or {}

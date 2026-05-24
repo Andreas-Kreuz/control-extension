@@ -1,115 +1,62 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainRegistry ...") end
 
 local Train = require("ce.hub.data.trains.Train")
+local TrainRollingStockStore = require("ce.hub.data.trains.TrainRollingStockStore")
+
+if _G.CeTestingMode then TrainRollingStockStore.reset() end
 
 local TrainRegistry = {}
 TrainRegistry.debug = CeStartWithDebug or false
 
----@type table<string, Train>
-local allTrains = {}
----@type table<string,table<string,string>>
-local trainRollingStockNames = {}
-local addedTrainIds = {}
-local removedTrainIds = {}
-
 function TrainRegistry.setRollingStockNames(trainName, rollingStockNamesByIndex)
-    trainRollingStockNames[trainName] = rollingStockNamesByIndex or {}
+    TrainRollingStockStore.setRollingStockNames(trainName, rollingStockNamesByIndex)
 end
 
 function TrainRegistry.allRollingStockNamesOf(trainName)
-    return trainRollingStockNames[trainName] and trainRollingStockNames[trainName] or {}
+    return TrainRollingStockStore.allRollingStockNamesOf(trainName)
 end
 
 function TrainRegistry.rollingStockNameInTrain(name, index)
-    return trainRollingStockNames[name] and trainRollingStockNames[name][tostring(index)] or nil
+    return TrainRollingStockStore.rollingStockNameInTrain(name, index)
 end
 
-function TrainRegistry.find(name)
-    if type(name) ~= "string" then return nil end
-    return allTrains[name]
+function TrainRegistry.get(name)
+    return TrainRollingStockStore.getTrain(name)
 end
 
-function TrainRegistry.forName(name)
-    assert(name, "Provide a name for the train")
-    assert(type(name) == "string", "Need 'trainName' as string")
-    if allTrains[name] then
-        return allTrains[name], false
-    end
-
-    local train = Train:new({ name = name })
-    allTrains[train.name] = train
-    addedTrainIds[train.name] = true
-    removedTrainIds[train.name] = nil
-    return train, true
+function TrainRegistry.getOrCreate(name)
+    return TrainRollingStockStore.getOrCreateTrain(name, function (trainName)
+        return Train:new({ name = trainName }):pullInitial()
+    end)
 end
 
 function TrainRegistry.seedFromSnapshot(snapshot)
-    assert(type(snapshot) == "table", "Need snapshot as table")
-    assert(type(snapshot.name) == "string", "Need snapshot.name as string")
-
-    if allTrains[snapshot.name] then
-        local train = allTrains[snapshot.name]
-        if snapshot.route then train:updateRoute(snapshot.route) end
-        if snapshot.rollingStockCount then train:setRollingStockCount(snapshot.rollingStockCount) end
-        if snapshot.length then train:setLength(snapshot.length) end
-        if snapshot.speed then train:setSpeed(snapshot.speed) end
-        if snapshot.targetSpeed then train:setTargetSpeed(snapshot.targetSpeed) end
-        if snapshot.couplingFront then train:setCouplingFront(snapshot.couplingFront) end
-        if snapshot.couplingRear then train:setCouplingRear(snapshot.couplingRear) end
-        if snapshot.lights then train:setLights(snapshot.lights) end
-        if snapshot.trackType then train:setTrackType(snapshot.trackType) end
-        if snapshot.onTracks then train:setOnTrack(snapshot.onTracks) end
-        return train, false
-    end
-
-    local train = Train.fromSnapshot(snapshot)
-    allTrains[train.name] = train
-    addedTrainIds[train.name] = true
-    removedTrainIds[train.name] = nil
-    return train, true
+    return TrainRollingStockStore.seedTrainFromSnapshot(snapshot, Train.fromSnapshot)
 end
 
 function TrainRegistry.removeAbsentFromSnapshot(trainNames)
-    trainNames = trainNames or {}
-    for trainName in pairs(allTrains) do
-        if not trainNames[trainName] then TrainRegistry.remove(trainName) end
-    end
+    TrainRollingStockStore.removeAbsentTrains(trainNames)
 end
 
 function TrainRegistry.remove(trainName)
     if TrainRegistry.debug then print(string.format("[#TrainRegistry] train removed: %s", trainName)) end
-    if allTrains[trainName] == nil then return end
-
-    allTrains[trainName] = nil
-    trainRollingStockNames[trainName] = nil
-    if addedTrainIds[trainName] then
-        addedTrainIds[trainName] = nil
-    else
-        removedTrainIds[trainName] = true
-    end
+    TrainRollingStockStore.removeTrain(trainName)
 end
 
 function TrainRegistry.getAllTrainNames()
-    local names = {}
-    for trainName in pairs(allTrains) do names[trainName] = true end
-    return names
+    return TrainRollingStockStore.getAllTrainNames()
 end
 
 function TrainRegistry.getAll()
-    local copy = {}
-    for trainName, train in pairs(allTrains) do copy[trainName] = train end
-    return copy
+    return TrainRollingStockStore.getAllTrains()
 end
 
 function TrainRegistry.getRemovedIds()
-    local copy = {}
-    for trainId in pairs(removedTrainIds) do copy[trainId] = true end
-    return copy
+    return TrainRollingStockStore.getRemovedTrainIds()
 end
 
 function TrainRegistry.clearPendingChanges()
-    addedTrainIds = {}
-    removedTrainIds = {}
+    TrainRollingStockStore.clearPendingTrainChanges()
 end
 
 return TrainRegistry

@@ -26,15 +26,15 @@ describe("TrainDiscovery", function ()
 
             assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1"])
             assert.is_falsy(TrainRegistry.getAllTrainNames()["#EepTrain1;001"])
-            assert.equals(2, TrainRegistry.forName("#EepTrain1"):getRollingStockCount())
+            assert.equals(2, TrainRegistry.getOrCreate("#EepTrain1"):getRollingStockCount())
 
             EepSimulator.simulateSplitTrain("#EepTrain1", 1)
             runCycle()
 
             assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1"])
             assert.is_true(TrainRegistry.getAllTrainNames()["#EepTrain1;001"])
-            assert.equals(1, TrainRegistry.forName("#EepTrain1"):getRollingStockCount())
-            assert.equals(1, TrainRegistry.forName("#EepTrain1;001"):getRollingStockCount())
+            assert.equals(1, TrainRegistry.getOrCreate("#EepTrain1"):getRollingStockCount())
+            assert.equals(1, TrainRegistry.getOrCreate("#EepTrain1;001"):getRollingStockCount())
         end)
 
         it("refreshes track occupancy on the first runtime pass and then every 50 discovery calls", function ()
@@ -91,8 +91,8 @@ describe("TrainDiscovery", function ()
 
             assert.has_no.errors(function () runCycle() end)
 
-            local train = TrainRegistry.forName("#EepTrainMultiReturn")
-            local rollingStock = RollingStockRegistry.forName(rollingStockName)
+            local train = TrainRegistry.getOrCreate("#EepTrainMultiReturn")
+            local rollingStock = RollingStockRegistry.getOrCreate(rollingStockName)
 
             assert.equals(1, train:getCouplingFront())
             assert.equals(2, train:getCouplingRear())
@@ -136,7 +136,7 @@ describe("TrainDiscovery", function ()
 
             HubOptionsRegistry.reset()
             EepSimulator.simulateAddTrain("#TargetSpeedTrain", "TargetSpeedStock")
-            local train = TrainRegistry.forName("#TargetSpeedTrain")
+            local train = TrainRegistry.getOrCreate("#TargetSpeedTrain")
             train:resetDirty()
 
             local targetSpeedCalls = 0
@@ -191,6 +191,41 @@ describe("TrainDiscovery", function ()
         end)
     end)
 
+    insulate("updates active train from scenario", function ()
+        it("uses cached scenario active train without polling EEP", function ()
+            package.loaded["ce.hub.data.trains.TrainUpdater"] = nil
+            require("ce.hub.eep.EepSimulator")
+            local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+            local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
+            local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+            local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
+
+            HubOptionsRegistry.reset()
+            TrainRegistry.seedFromSnapshot({ name = "#InactiveTrain", active = true })
+            TrainRegistry.seedFromSnapshot({ name = "#ActiveTrain", active = false })
+            ScenarioRegistry.set({
+                id = "scenario",
+                name = "scenario",
+                activeTrain = "#ActiveTrain"
+            })
+
+            local getTrainActiveCalls = 0
+            local getTrainActiveStub = stub(_G, "EEPGetTrainActive", function ()
+                getTrainActiveCalls = getTrainActiveCalls + 1
+                return "#InactiveTrain"
+            end)
+            finally(function () getTrainActiveStub:revert() end)
+
+            TrainUpdater.runUpdate()
+
+            assert.equals(0, getTrainActiveCalls)
+            assert.is_false(TrainRegistry.get("#InactiveTrain"):peekActive())
+            assert.is_true(TrainRegistry.get("#ActiveTrain"):peekActive())
+
+            HubOptionsRegistry.reset()
+        end)
+    end)
+
     insulate("updates routes throttled and on interest", function ()
         it("polls unselected routes every ten updater runs and selected routes every run", function ()
             package.loaded["ce.hub.data.trains.TrainUpdater"] = nil
@@ -204,7 +239,7 @@ describe("TrainDiscovery", function ()
             HubOptionsRegistry.reset()
             EepSimulator.simulateAddTrain("#RouteThrottleTrain", "RouteThrottleStock")
             EEPSetTrainRoute("#RouteThrottleTrain", "Initial Route")
-            local train = TrainRegistry.forName("#RouteThrottleTrain")
+            local train = TrainRegistry.getOrCreate("#RouteThrottleTrain")
 
             local routeCalls = 0
             local routeName = "Polled Route 1"

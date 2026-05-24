@@ -5,18 +5,28 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureRegi
 ---@field add fun(structure: Structure):nil
 ---@field replaceAll fun(structures: Structure[]):nil
 ---@field remove fun(structureId: string):nil
----@field forId fun(structureId: string):Structure|nil
----@field forName fun(structureName: string):Structure|nil
+---@field get fun(structureId: string):Structure|nil
+---@field getOrCreate fun(structureId: string, nameOrSeed?: string|table, seedValues?: table):Structure
+---@field getByName fun(structureName: string):Structure|nil
+---@field forEach fun(callback: fun(structure: Structure, structureId: string):nil):nil
+---@field getRevision fun():number
 ---@field getAll fun():table<string, Structure>
 ---@field getAddedIds fun():table<string, boolean>
 ---@field getRemovedIds fun():table<string, boolean>
 ---@field clearPendingChanges fun():nil
 local StructureRegistry = {}
 
+local Structure = require("ce.hub.data.structures.Structure")
+
 ---@type table<string, Structure>
 local allStructures = {}
 local addedStructureIds = {}
 local removedStructureIds = {}
+local revision = 0
+
+local function markChanged()
+    revision = revision + 1
+end
 
 function StructureRegistry.has(structureId)
     return allStructures[structureId] ~= nil
@@ -28,6 +38,7 @@ function StructureRegistry.add(structure)
     allStructures[structure.id] = structure
     addedStructureIds[structure.id] = true
     removedStructureIds[structure.id] = nil
+    markChanged()
 end
 
 function StructureRegistry.replaceAll(structures)
@@ -54,11 +65,13 @@ function StructureRegistry.replaceAll(structures)
     end
 
     allStructures = nextStructures
+    markChanged()
 end
 
 function StructureRegistry.remove(structureId)
     if allStructures[structureId] == nil then return end
     allStructures[structureId] = nil
+    markChanged()
     if addedStructureIds[structureId] then
         addedStructureIds[structureId] = nil
         return
@@ -66,15 +79,35 @@ function StructureRegistry.remove(structureId)
     removedStructureIds[structureId] = true
 end
 
-function StructureRegistry.forId(structureId)
+function StructureRegistry.get(structureId)
     return allStructures[structureId]
 end
 
-function StructureRegistry.forName(structureName)
+function StructureRegistry.getOrCreate(structureId, nameOrSeed, seedValues)
+    local structure = StructureRegistry.get(structureId) or StructureRegistry.getByName(structureId)
+    if structure then return structure end
+
+    structure = Structure:new(structureId, nameOrSeed, seedValues)
+    StructureRegistry.add(structure)
+    return structure
+end
+
+function StructureRegistry.getByName(structureName)
     for _, structure in pairs(allStructures) do
         if structure.name == structureName then return structure end
     end
     return nil
+end
+
+function StructureRegistry.forEach(callback)
+    assert(type(callback) == "function", "Need callback as function")
+    for structureId, structure in pairs(allStructures) do
+        callback(structure, structureId)
+    end
+end
+
+function StructureRegistry.getRevision()
+    return revision
 end
 
 function StructureRegistry.getAll()

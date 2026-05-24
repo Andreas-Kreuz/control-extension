@@ -29,8 +29,8 @@ insulate("ce.hub.data.trains.TrainRegistry", function ()
         EepSimulator.simulateAddTrain("T1", "RS1")
         EepSimulator.simulateAddTrain("T2", "RS2")
 
-        local train1 = TrainRegistry.forName("T1")
-        TrainRegistry.forName("T2")
+        local train1 = TrainRegistry.getOrCreate("T1")
+        TrainRegistry.getOrCreate("T2")
 
         TrainPublisher.syncState({
             ceTypes = {
@@ -63,8 +63,8 @@ insulate("ce.hub.data.trains.TrainRegistry", function ()
         EepSimulator.simulateAddTrain("T1", "RS1")
         EepSimulator.simulateAddTrain("T2", "RS2")
 
-        local train1 = TrainRegistry.forName("T1")
-        TrainRegistry.forName("T2")
+        local train1 = TrainRegistry.getOrCreate("T1")
+        TrainRegistry.getOrCreate("T2")
 
         InterestSyncRegistry.startSyncFor(HubCeTypes.Train, "T1")
         TrainPublisher.syncState({
@@ -96,8 +96,8 @@ insulate("ce.hub.data.trains.TrainRegistry", function ()
         EepSimulator.simulateAddTrain("T1", "RS1")
         EepSimulator.simulateAddTrain("T2", "RS2")
 
-        TrainRegistry.forName("T1")
-        TrainRegistry.forName("T2")
+        TrainRegistry.getOrCreate("T1")
+        TrainRegistry.getOrCreate("T2")
 
         TrainPublisher.syncState({
             ceTypes = {

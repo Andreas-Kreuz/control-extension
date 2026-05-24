@@ -1,5 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.Train ...") end
 -- local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+local DataClass = require("ce.hub.data.DataClass")
 local TableUtils = require("ce.hub.util.TableUtils")
 
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
@@ -20,6 +21,7 @@ local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 ---@field couplingFront number
 ---@field couplingRear number
 ---@field lights table<string, boolean>
+---@field axisValues table<string, number>
 ---@field active boolean
 ---@field trainyardId number|nil
 ---@field inTrainyard boolean
@@ -84,6 +86,10 @@ local function markDirty(train, fieldName)
     train.dirtyFields[fieldName] = true
 end
 
+local function markLoaded(train, fieldName)
+    DataClass.markLoaded(train, fieldName)
+end
+
 local function getTrainLights(trainName)
     local lights = {}
     for _, source in ipairs(TRAIN_LIGHT_SOURCES) do
@@ -94,6 +100,14 @@ local function getTrainLights(trainName)
     return lights
 end
 
+local function snapshotNumber(snapshot, fieldName)
+    if snapshot[fieldName] == nil then return nil end
+    return tonumber(snapshot[fieldName])
+end
+
+local function markLoadedFromSnapshot(instance, snapshot, snapshotFieldName, fieldName)
+    if snapshot[snapshotFieldName] ~= nil then DataClass.markLoaded(instance, fieldName or snapshotFieldName) end
+end
 
 ---Create a new train with the given object
 ---@param o table must contain a string o.name
@@ -103,63 +117,32 @@ function Train:new(o)
     assert(type(o) == "table", "Need 'o' as table")
     assert(o.name, "Provide a name for the train")
     assert(type(o.name) == "string", "Need 'o.name' as string")
-    local haveTrain, trainRoute = EEPGetTrainRoute(o.name)
-    local rollingStockCount = EEPGetRollingstockItemsCount(o.name)
-    local _, length = EEPGetTrainLength(o.name)
-    local _, speed = EEPGetTrainSpeed(o.name)
-    local _, targetSpeed = EEPGetTrainSpeed(o.name, true)
-    local _, couplingFront = false, nil
-    if EEPGetTrainCouplingFront then _, couplingFront = EEPGetTrainCouplingFront(o.name) end
-    local _, couplingRear = false, nil
-    if EEPGetTrainCouplingRear then _, couplingRear = EEPGetTrainCouplingRear(o.name) end
-    local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
-    local lights = getTrainLights(o.name)
-    local inTrainyard, trainyardId = false, nil
-    if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(o.name) end
-    assert(haveTrain, o.name)
-    self.__index = self
-    setmetatable(o, self)
-    o.id = o.name
-    o.type = "Train"
-    o.values = o:load()
-    o.route = trainRoute
-    o.rollingStockCount = rollingStockCount
-    o.length = tonumber(string.format("%.2f", length or 0)) or 0
-    o.speed = speed
-    o.targetSpeed = targetSpeed or speed
-    o.couplingFront = couplingFront or 0
-    o.couplingRear = couplingRear or 0
-    o.lights = lights
-    o.active = activeTrain == o.name
-    o.inTrainyard = inTrainyard == true
-    o.trainyardId = inTrainyard and trainyardId or nil
-    o.movesForward = speed >= 0
-    o.trackType = nil
-    o.onTracks = {}
-    o.occupiedTracks = {}
-    o.dirtyFields = {}
-    o.needsFullSend = true
-    return o
+    return Train.fromSnapshot(o)
+end
+
+function Train.forName(trainName)
+    return require("ce.hub.data.trains.TrainRegistry").getOrCreate(trainName)
 end
 
 function Train.fromSnapshot(snapshot)
     assert(type(snapshot) == "table", "Need snapshot as table")
     assert(type(snapshot.name) == "string", "Need snapshot.name as string")
 
-    local speed = tonumber(snapshot.speed) or 0
+    local speed = snapshotNumber(snapshot, "speed") or 0
     local o = {
         id = snapshot.name,
         name = snapshot.name,
         type = "Train",
         values = snapshot.values or {},
         route = snapshot.route or "",
-        rollingStockCount = tonumber(snapshot.rollingStockCount) or 0,
+        rollingStockCount = snapshotNumber(snapshot, "rollingStockCount") or 0,
         speed = speed,
-        targetSpeed = tonumber(snapshot.targetSpeed) or speed,
-        length = tonumber(snapshot.length) or 0,
-        couplingFront = tonumber(snapshot.couplingFront) or 0,
-        couplingRear = tonumber(snapshot.couplingRear) or 0,
+        targetSpeed = snapshotNumber(snapshot, "targetSpeed") or speed,
+        length = snapshotNumber(snapshot, "length") or 0,
+        couplingFront = snapshotNumber(snapshot, "couplingFront") or 0,
+        couplingRear = snapshotNumber(snapshot, "couplingRear") or 0,
         lights = snapshot.lights or {},
+        axisValues = snapshot.axisValues or {},
         active = snapshot.active == true,
         inTrainyard = snapshot.inTrainyard == true,
         trainyardId = snapshot.trainyardId,
@@ -173,7 +156,44 @@ function Train.fromSnapshot(snapshot)
 
     Train.__index = Train
     setmetatable(o, Train)
+    DataClass.init(o)
+    markLoadedFromSnapshot(o, snapshot, "route")
+    markLoadedFromSnapshot(o, snapshot, "rollingStockCount")
+    markLoadedFromSnapshot(o, snapshot, "speed")
+    markLoadedFromSnapshot(o, snapshot, "targetSpeed")
+    markLoadedFromSnapshot(o, snapshot, "length")
+    markLoadedFromSnapshot(o, snapshot, "couplingFront")
+    markLoadedFromSnapshot(o, snapshot, "couplingRear")
+    markLoadedFromSnapshot(o, snapshot, "lights")
+    markLoadedFromSnapshot(o, snapshot, "active")
+    markLoadedFromSnapshot(o, snapshot, "inTrainyard")
+    markLoadedFromSnapshot(o, snapshot, "trainyardId")
+    markLoadedFromSnapshot(o, snapshot, "movesForward")
+    markLoadedFromSnapshot(o, snapshot, "trackType")
+    markLoadedFromSnapshot(o, snapshot, "onTracks")
     return o
+end
+
+function Train:pullInitial()
+    local haveTrain = EEPGetTrainRoute and EEPGetTrainRoute(self.name)
+    assert(haveTrain, self.name)
+
+    self.values = self:load()
+    self:pullRoute()
+    if EEPGetRollingstockItemsCount then self:setRollingStockCount(EEPGetRollingstockItemsCount(self.name)) end
+    self:pullLength()
+    if EEPGetTrainSpeed then
+        local _, speed = EEPGetTrainSpeed(self.name)
+        self:setSpeed(speed or 0)
+    end
+    self:pullTargetSpeed(self.speed)
+    self:pullCouplingFront()
+    self:pullCouplingRear()
+    self:pullLights()
+    self:pullActive()
+    self:pullTrainyard()
+    self:resetDirty()
+    return self
 end
 
 ---Loads a table with values from the first rollingstock of the train
@@ -189,7 +209,7 @@ function Train:save(clearCurrentInfo)
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        RollingStockRegistry.forName(rollingStockName):save(clearCurrentInfo)
+        RollingStockRegistry.getOrCreate(rollingStockName):save(clearCurrentInfo)
     end
 end
 
@@ -200,12 +220,17 @@ function Train:getName()
     return self.name
 end
 
+function Train:peekName() return self.name end
+
 --- Gets the length of the train in meters
 ---@return number length of the train in meters
 function Train:getLength()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "length") then self:pullLength() end
     return self.length
 end
+
+function Train:peekLength() return self.length end
 
 function Train:setLength(length)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
@@ -213,7 +238,15 @@ function Train:setLength(length)
     length = tonumber(string.format("%.2f", length)) or 0
     local oldLength = self.length
     self.length = length
+    markLoaded(self, "length")
     if oldLength ~= length then markDirty(self, "length") end
+end
+
+function Train:pullLength()
+    if not DataClass.isCallable(EEPGetTrainLength) then return nil end
+    local _, length = EEPGetTrainLength(self.name)
+    if length then self:setLength(length) end
+    return self.length
 end
 
 ---Adds or replaces a value to ALL rolling stock of the train
@@ -227,7 +260,7 @@ function Train:setValue(key, value)
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        local rs = RollingStockRegistry.forName(rollingStockName)
+        local rs = RollingStockRegistry.getOrCreate(rollingStockName)
         rs:setValue(key, value)
     end
 end
@@ -238,6 +271,7 @@ end
 function Train:getValue(key)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(key) == "string", "Need 'key' as string")
+    if self.values == nil then self.values = self:load() end
     return self.values[key]
 end
 
@@ -246,28 +280,46 @@ end
 function Train:setRoute(routeName)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(routeName) == "string", "Need 'route' as string")
+    if self.route == routeName then return true end
+    local ok = true
+    if EEPSetTrainRoute then ok = EEPSetTrainRoute(self.name, routeName) ~= false end
+    if not ok then return false end
+    self:replaceRoute(routeName)
+    return true
+end
+
+function Train:replaceRoute(routeName)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(routeName) == "string", "Need 'route' as string")
     local oldRoute = self.route
     self.route = routeName
-    EEPSetTrainRoute(self.name, self.route)
-    if oldRoute ~= routeName then
-        markDirty(self, "route")
-    end
+    markLoaded(self, "route")
+    if oldRoute ~= routeName then markDirty(self, "route") end
 end
 
 function Train:updateRoute(routeName)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(routeName) == "string", "Need 'route' as string")
-    local oldRoute = self.route
-    self.route = routeName
-    if oldRoute ~= routeName then markDirty(self, "route") end
+    self:replaceRoute(routeName)
+end
+
+function Train:pullRoute()
+    if not DataClass.isCallable(EEPGetTrainRoute) then return nil end
+    local routeOk, routeName = EEPGetTrainRoute(self.name)
+    if not routeOk then return nil end
+    self:replaceRoute(routeName or "")
+    return self.route
 end
 
 --- Gets the trains route like used in EEP
 ---@return string route name like in EEP
 function Train:getRoute()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "route") then self:pullRoute() end
     return self.route
 end
+
+function Train:peekRoute() return self.route end
 
 function Train:setLicencePlate(licencePlate)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
@@ -275,7 +327,7 @@ function Train:setLicencePlate(licencePlate)
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        RollingStockRegistry.forName(rollingStockName):setLicencePlate(licencePlate)
+        RollingStockRegistry.getOrCreate(rollingStockName):setLicencePlate(licencePlate)
     end
 end
 
@@ -285,7 +337,7 @@ function Train:setWagonNumber(wagonNumber)
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        RollingStockRegistry.forName(rollingStockName):setWagonNumber(wagonNumber)
+        RollingStockRegistry.getOrCreate(rollingStockName):setWagonNumber(wagonNumber)
     end
 end
 
@@ -296,6 +348,7 @@ function Train:setRollingStockCount(count)
     assert(type(count) == "number", "Need 'count' as number")
     local oldCount = self.rollingStockCount
     self.rollingStockCount = count
+    markLoaded(self, "rollingStockCount")
     if oldCount ~= count then
         markDirty(self, "rollingStockCount")
     end
@@ -305,6 +358,15 @@ end
 ---@return number number of cars
 function Train:getRollingStockCount()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "rollingStockCount") then self:pullRollingStockCount() end
+    return self.rollingStockCount
+end
+
+function Train:peekRollingStockCount() return self.rollingStockCount end
+
+function Train:pullRollingStockCount()
+    if not DataClass.isCallable(EEPGetRollingstockItemsCount) then return nil end
+    self:setRollingStockCount(EEPGetRollingstockItemsCount(self.name) or 0)
     return self.rollingStockCount
 end
 
@@ -316,19 +378,30 @@ function Train:setSpeed(speed)
     speed = tonumber(string.format("%1.1f", speed)) or 0
     local oldSpeed = self.speed
     self.speed = speed
+    markLoaded(self, "speed")
     if oldSpeed ~= speed then
         markDirty(self, "speed")
-        if (oldSpeed < 0 and speed > 0) then self:setMovesForward(true) end
-        if (oldSpeed > 0 and speed < 0) then self:setMovesForward(false) end
+        if type(oldSpeed) == "number" and oldSpeed < 0 and speed > 0 then self:setMovesForward(true) end
+        if type(oldSpeed) == "number" and oldSpeed > 0 and speed < 0 then self:setMovesForward(false) end
     end
+end
+
+function Train:pullSpeed()
+    if not DataClass.isCallable(EEPGetTrainSpeed) then return nil end
+    local _, speed = EEPGetTrainSpeed(self.name)
+    self:setSpeed(speed or 0)
+    return self.speed
 end
 
 --- Gets the trains speed in km/h
 ---@return number train speed in km/h
 function Train:getSpeed()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "speed") then self:pullSpeed() end
     return self.speed
 end
+
+function Train:peekSpeed() return self.speed end
 
 function Train:setTargetSpeed(targetSpeed)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
@@ -336,44 +409,78 @@ function Train:setTargetSpeed(targetSpeed)
     targetSpeed = tonumber(string.format("%1.1f", targetSpeed)) or 0
     local oldTargetSpeed = self.targetSpeed
     self.targetSpeed = targetSpeed
+    markLoaded(self, "targetSpeed")
     if oldTargetSpeed ~= targetSpeed then markDirty(self, "targetSpeed") end
+end
+
+function Train:pullTargetSpeed(fallbackSpeed)
+    if not DataClass.isCallable(EEPGetTrainSpeed) then return nil end
+    local _, targetSpeed = EEPGetTrainSpeed(self.name, true)
+    self:setTargetSpeed(targetSpeed or fallbackSpeed or self.speed or 0)
+    return self.targetSpeed
 end
 
 function Train:getTargetSpeed()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "targetSpeed") then self:pullTargetSpeed() end
     return self.targetSpeed
 end
+
+function Train:peekTargetSpeed() return self.targetSpeed end
 
 function Train:setCouplingFront(couplingFront)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(couplingFront) == "number", "Need 'couplingFront' as number")
     local oldCouplingFront = self.couplingFront
     self.couplingFront = couplingFront
+    markLoaded(self, "couplingFront")
     if oldCouplingFront ~= couplingFront then markDirty(self, "couplingFront") end
+end
+
+function Train:pullCouplingFront()
+    if not DataClass.isCallable(EEPGetTrainCouplingFront) then return nil end
+    local ok, trainCouplingFront = EEPGetTrainCouplingFront(self.name)
+    if ok then self:setCouplingFront(trainCouplingFront) end
+    return self.couplingFront
 end
 
 function Train:getCouplingFront()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "couplingFront") then self:pullCouplingFront() end
     return self.couplingFront
 end
+
+function Train:peekCouplingFront() return self.couplingFront end
 
 function Train:setCouplingRear(couplingRear)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(couplingRear) == "number", "Need 'couplingRear' as number")
     local oldCouplingRear = self.couplingRear
     self.couplingRear = couplingRear
+    markLoaded(self, "couplingRear")
     if oldCouplingRear ~= couplingRear then markDirty(self, "couplingRear") end
+end
+
+function Train:pullCouplingRear()
+    if not DataClass.isCallable(EEPGetTrainCouplingRear) then return nil end
+    local ok, trainCouplingRear = EEPGetTrainCouplingRear(self.name)
+    if ok then self:setCouplingRear(trainCouplingRear) end
+    return self.couplingRear
 end
 
 function Train:getCouplingRear()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "couplingRear") then self:pullCouplingRear() end
     return self.couplingRear
 end
+
+function Train:peekCouplingRear() return self.couplingRear end
 
 function Train:setLights(lights)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
     assert(type(lights) == "table", "Need 'lights' as table")
     local changed = false
+    self.lights = self.lights or {}
     for _, source in ipairs(TRAIN_LIGHT_SOURCES) do
         local key = tostring(source)
         local value = lights[key] == true
@@ -383,15 +490,46 @@ function Train:setLights(lights)
         end
     end
     if changed then markDirty(self, "lights") end
+    markLoaded(self, "lights")
 end
 
 function Train:updateLights()
     self:setLights(getTrainLights(self.name))
 end
 
+function Train:pullLights()
+    self:updateLights()
+    return self.lights
+end
+
 function Train:getLights()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "lights") then self:pullLights() end
     return self.lights
+end
+
+function Train:peekLights() return self.lights end
+
+function Train:peekAxis(axisName)
+    return self.axisValues and self.axisValues[tostring(axisName)] or nil
+end
+
+function Train:setAxis(axisName, axisValue)
+    assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    assert(type(axisName) == "string", "Need 'axisName' as string")
+    local value = tonumber(axisValue)
+    if not value then return false end
+    if self:peekAxis(axisName) == value then return true end
+
+    local ok = true
+    if EEPSetTrainAxis then ok = EEPSetTrainAxis(self.name, axisName, value) ~= false end
+    if ok then
+        self.axisValues = self.axisValues or {}
+        self.axisValues[tostring(axisName)] = value
+        markLoaded(self, "axisValues")
+        markDirty(self, "axisValues")
+    end
+    return ok
 end
 
 function Train:setActive(active)
@@ -399,13 +537,23 @@ function Train:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
+    markLoaded(self, "active")
     if oldActive ~= active then markDirty(self, "active") end
+end
+
+function Train:pullActive()
+    local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
+    self:setActive(activeTrain == self.name)
+    return self.active
 end
 
 function Train:getActive()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "active") then self:pullActive() end
     return self.active
 end
+
+function Train:peekActive() return self.active end
 
 function Train:setTrainyard(inTrainyard, trainyardId)
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
@@ -414,21 +562,36 @@ function Train:setTrainyard(inTrainyard, trainyardId)
     local oldTrainyardId = self.trainyardId
     self.inTrainyard = inTrainyard
     self.trainyardId = inTrainyard and trainyardId or nil
+    markLoaded(self, "inTrainyard")
+    markLoaded(self, "trainyardId")
     if oldInTrainyard ~= self.inTrainyard or oldTrainyardId ~= self.trainyardId then
         markDirty(self, "inTrainyard")
         markDirty(self, "trainyardId")
     end
 end
 
+function Train:pullTrainyard()
+    local inTrainyard, trainyardId = false, nil
+    if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(self.name) end
+    self:setTrainyard(inTrainyard == true, trainyardId)
+    return self.inTrainyard, self.trainyardId
+end
+
 function Train:getTrainyardId()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "inTrainyard") then self:pullTrainyard() end
     return self.trainyardId
 end
 
+function Train:peekTrainyardId() return self.trainyardId end
+
 function Train:getInTrainyard()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "inTrainyard") then self:pullTrainyard() end
     return self.inTrainyard
 end
+
+function Train:peekInTrainyard() return self.inTrainyard end
 
 --- Updates the trains speed in km/h
 ---@param movesForward boolean indicates if the train moves forward or backward
@@ -437,6 +600,7 @@ function Train:setMovesForward(movesForward)
     assert(type(movesForward) == "boolean", "Need 'movesForward' as boolean")
     local oldMovesForward = self.movesForward
     self.movesForward = movesForward
+    markLoaded(self, "movesForward")
     if oldMovesForward ~= movesForward then
         markDirty(self, "movesForward")
     end
@@ -446,8 +610,14 @@ end
 ---@return boolean train speed in km/h
 function Train:getMovesForward()
     assert(type(self) == "table" and self.type == "Train", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "movesForward") then
+        local speed = self:getSpeed()
+        if speed ~= nil then self:setMovesForward(speed >= 0) end
+    end
     return self.movesForward
 end
+
+function Train:peekMovesForward() return self.movesForward end
 
 --- Updates tracks of the current train
 ---@param onTracks table<string, number>
@@ -456,6 +626,7 @@ function Train:setOnTrack(onTracks)
     assert(type(onTracks) == "table", "Need 'onTracks' as table")
     local oldOnTracks = self.onTracks
     self.onTracks = onTracks
+    markLoaded(self, "onTracks")
     if not TableUtils.sameDictEntries(oldOnTracks, onTracks) then
         markDirty(self, "onTracks")
     end
@@ -473,6 +644,7 @@ function Train:setTrackType(trackType)
     assert(type(trackType) == "string", "Need 'trackType' as string")
     local oldTrackType = self.trackType
     self.trackType = trackType
+    markLoaded(self, "trackType")
     if oldTrackType ~= trackType then
         markDirty(self, "trackType")
     end
@@ -480,11 +652,13 @@ end
 
 function Train:getTrackType() return self.trackType end
 
+function Train:peekTrackType() return self.trackType end
+
 function Train:openDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        RollingStockRegistry.forName(rollingStockName):openDoors()
+        RollingStockRegistry.getOrCreate(rollingStockName):openDoors()
     end
 end
 
@@ -492,7 +666,7 @@ function Train:closeDoors()
     local carCount = EEPGetRollingstockItemsCount(self.name)
     for i = 0, carCount - 1 do
         local rollingStockName = EEPGetRollingstockItemName(self.name, i)
-        RollingStockRegistry.forName(rollingStockName):closeDoors()
+        RollingStockRegistry.getOrCreate(rollingStockName):closeDoors()
     end
 end
 

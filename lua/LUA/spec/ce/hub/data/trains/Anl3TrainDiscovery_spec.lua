@@ -113,6 +113,8 @@ insulate("ce.hub.data.trains.TrainDiscovery anl3 seed", function ()
     it("seeds tag and smoke from anl3 rolling stock entries", function ()
         local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local getTextureStub = stub(_G, "EEPRollingstockGetTextureText", function () return true, "" end)
+        local setTextureStub = stub(_G, "EEPRollingstockSetTextureText", function () return true end)
 
         TrainDiscovery.initFromAnl3({
             coverage = { trains = true, rollingStocks = true },
@@ -124,7 +126,8 @@ insulate("ce.hub.data.trains.TrainDiscovery anl3 seed", function ()
                     tag = "line=7,",
                     smoke = 100,
                     trainName = "#Train A",
-                    positionInTrain = 0
+                    positionInTrain = 0,
+                    textureTexts = { ["1"] = "7", ["5"] = "Zentrum" }
                 }
             }
         })
@@ -132,5 +135,12 @@ insulate("ce.hub.data.trains.TrainDiscovery anl3 seed", function ()
         local rs = RollingStockRegistry.getAll()["RS A"]
         assert.equals("line=7,", rs:getTag())
         assert.same(100, rs:getSmoke())
+        assert.equals("7", rs:getTextureText(1))
+        assert.equals("Zentrum", rs:getTextureText(5))
+        assert.stub(getTextureStub).was_not_called()
+        assert.stub(setTextureStub).was_not_called()
+
+        getTextureStub:revert()
+        setTextureStub:revert()
     end)
 end)

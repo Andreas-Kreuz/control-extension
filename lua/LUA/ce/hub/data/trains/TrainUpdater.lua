@@ -1,10 +1,9 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainUpdater ...") end
 
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
+local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
-local EepCompatibilityApi = require("ce.hub.eep.EepCompatibilityApi")
 
-local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 local TrainUpdater = {}
 TrainUpdater.debug = CeStartWithDebug or false
 local routeUpdateRunCount = 0
@@ -24,7 +23,8 @@ function TrainUpdater.runUpdate()
     local SyncPolicy = require("ce.hub.sync.SyncPolicy")
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("trains") then return end
     local fieldPolicies = HubOptionsRegistry.getFieldUpdatePolicies("trains")
-    local activeTrain = EEPGetTrainActive and EEPGetTrainActive() or ""
+    local scenario = ScenarioRegistry.get()
+    local activeTrain = scenario and scenario:peekActiveTrain() or nil
 
     for trainName, train in pairs(TrainRegistry.getAll()) do
         local info = TrainDiscoveryCache.get(trainName) or {}
@@ -32,12 +32,10 @@ function TrainUpdater.runUpdate()
         if TrainUpdater.debug then print(string.format("[#TrainUpdater] updating train %s", trainName)) end
 
         if shouldUpdateRoute(fieldPolicies, isSelected, SyncPolicy) then
-            local routeOk, routeName = EEPGetTrainRoute(train.name)
-            if routeOk then train:updateRoute(routeName or "") end
+            train:pullRoute()
         end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "length", isSelected) then
-            local _, length = EEPGetTrainLength(train.name)
-            if length then train:setLength(length) end
+            train:pullLength()
         end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "speed", isSelected) then
             train:setSpeed(info.speed or 0)
@@ -47,28 +45,23 @@ function TrainUpdater.runUpdate()
             train:setMovesForward((info.speed or 0) >= 0)
         end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "targetSpeed", isSelected) then
-            local _, targetSpeed = EEPGetTrainSpeed(train.name, true)
-            train:setTargetSpeed(targetSpeed or info.speed or 0)
+            train:pullTargetSpeed(info.speed)
         end
-        if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) and EEPGetTrainCouplingFront then
-            local ok, trainCouplingFront = EEPGetTrainCouplingFront(train.name)
-            if ok then train:setCouplingFront(trainCouplingFront) end
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) then
+            train:pullCouplingFront()
         end
-        if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) and EEPGetTrainCouplingRear then
-            local ok, trainCouplingRear = EEPGetTrainCouplingRear(train.name)
-            if ok then train:setCouplingRear(trainCouplingRear) end
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) then
+            train:pullCouplingRear()
         end
-        if SyncPolicy.shouldUpdateField(fieldPolicies, "lights", isSelected) and EEPGetTrainLight then
-            train:updateLights()
+        if SyncPolicy.shouldUpdateField(fieldPolicies, "lights", isSelected) then
+            train:pullLights()
         end
-        if SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
+        if activeTrain ~= nil and SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
             train:setActive(activeTrain == train.name)
         end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "inTrainyard", isSelected)
             or SyncPolicy.shouldUpdateField(fieldPolicies, "trainyardId", isSelected) then
-            local inTrainyard, trainyardId = false, nil
-            if EEPIsTrainInTrainyard then inTrainyard, trainyardId = EEPIsTrainInTrainyard(train.name) end
-            train:setTrainyard(inTrainyard == true, trainyardId)
+            train:pullTrainyard()
         end
         if info.tracks then train:setOnTrack(info.tracks) end
         if SyncPolicy.shouldUpdateField(fieldPolicies, "trackType", isSelected) and info.trackType then

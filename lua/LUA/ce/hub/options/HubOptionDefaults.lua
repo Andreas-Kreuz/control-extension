@@ -54,10 +54,12 @@ function HubOptionDefaults.create()
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {
-                    tag = "always",
-                    stopDistance = "always",
-                    itemName = "always",
-                    functions = "always"
+                    position = "oninterest",
+                    waitingVehiclesCount = "oninterest",
+                    tag = "oninterest",
+                    stopDistance = "oninterest",
+                    itemName = "oninterest",
+                    functions = "oninterest"
                 },
                 fieldPublish = {
                     waitingVehiclesCount = "oninterest",
@@ -82,7 +84,10 @@ function HubOptionDefaults.create()
                 ceType = HubCeTypes.Switch,
                 discoveryAndUpdate = true,
                 publish = true,
-                fieldUpdates = {},
+                fieldUpdates = {
+                    position = "oninterest",
+                    tag = "oninterest"
+                },
                 fieldPublish = {}
             },
             structures = {

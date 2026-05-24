@@ -207,8 +207,12 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
                     light = true,
                     smoke = false,
                     fire = false,
-                    pos_x = 1.0, pos_y = 2.0, pos_z = 3.0,
-                    rot_x = 4.0, rot_y = 5.0, rot_z = 6.0
+                    pos_x = 1.0,
+                    pos_y = 2.0,
+                    pos_z = 3.0,
+                    rot_x = 4.0,
+                    rot_y = 5.0,
+                    rot_z = 6.0
                 }
             }
         })

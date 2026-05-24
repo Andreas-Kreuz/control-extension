@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitTrain ..
 
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
+local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
 local TransitTrain = {}
 
@@ -48,6 +49,7 @@ function TransitTrain:new(hubTrain)
         origin = nil,
         direction = nil,
         nextStations = {},
+        nextStop = nil,
         dirtyFields = {},
         needsFullSend = true
     }
@@ -63,11 +65,15 @@ function TransitTrain:setHubTrain(hubTrain)
 end
 
 local function updateRollingStockModels(trainName, updateModel)
-    local carCount = EEPGetRollingstockItemsCount(trainName)
-    for i = 0, carCount - 1 do
-        local rollingStockName = EEPGetRollingstockItemName(trainName, i)
-        local model = RollingStockRegistry.forName(rollingStockName).model
-        updateModel(model, rollingStockName)
+    local rollingStockNamesByIndex = TrainRegistry.allRollingStockNamesOf(trainName)
+    local indexes = {}
+    for index in pairs(rollingStockNamesByIndex) do table.insert(indexes, index) end
+    table.sort(indexes, function (a, b) return (tonumber(a) or a) < (tonumber(b) or b) end)
+
+    for _, index in ipairs(indexes) do
+        local rollingStockName = rollingStockNamesByIndex[index]
+        local rollingStock = RollingStockRegistry.get(rollingStockName)
+        if rollingStock then updateModel(rollingStock.model, rollingStockName) end
     end
 end
 
@@ -184,15 +190,18 @@ function TransitTrain:setNextStations(nextStations)
         assert(type(entry.departureInMinutes) == "number", "Need 'departureInMinutes' as number")
     end
 
+    local firstNextStation = normalized[1]
+    local nextStop = firstNextStation and firstNextStation.station.name or ""
     if not nextStationsEqual(self.nextStations, normalized) then
         self.nextStations = normalized
         markDirty(self, "nextStations")
     end
-    local firstNextStation = normalized[1]
-    local nextStop = firstNextStation and firstNextStation.station.name or ""
-    updateRollingStockModels(self.id, function (model, rollingStockName)
-        model:setNextStop(rollingStockName, nextStop)
-    end)
+    if self.nextStop ~= nextStop then
+        self.nextStop = nextStop
+        updateRollingStockModels(self.id, function (model, rollingStockName)
+            model:setNextStop(rollingStockName, nextStop)
+        end)
+    end
 end
 
 function TransitTrain:getNextStations()

@@ -18,26 +18,9 @@ function StructureDiscovery.wasSeededFromAnl3()
 end
 
 local MAX_STRUCTURES = 50000
-local EEPStructureGetModelType = _G.EEPStructureGetModelType or function () return false end
-local EEPStructureGetPosition = _G.EEPStructureGetPosition or function () end
-local EEPStructureGetRotation = _G.EEPStructureGetRotation or function () end
-local EEPStructureGetTagText = _G.EEPStructureGetTagText or function () end
-
-local EEPStructureModelTypeText = {
-    [16] = "Gleis/Gleisobjekt",
-    [17] = "Schiene/Gleisobjekt",
-    [18] = "Strasse/Gleisobjekt",
-    [19] = "Sonstiges/Gleisobjekt",
-    [22] = "Immobilie",
-    [23] = "Landschaftselement/Fauna",
-    [24] = "Landschaftselement/Flora",
-    [25] = "Landschaftselement/Terra",
-    [38] = "Landschaftselement/Instancing"
-}
 
 local function structureExists(name)
-    local exists = EEPStructureGetModelType(name)
-    return exists == true
+    return Structure.exists(name)
 end
 
 local function round2(value)
@@ -57,25 +40,18 @@ end
 local function applyTagUpdateForHousing(structure)
     if not isStructureSignalHousing(structure) then return end
 
-    local _, tag = EEPStructureGetTagText(structure.name)
-    structure:setTag(tag or "")
+    structure:pullTag()
 end
 
 local function applyStaticUpdate(structure)
-    local _, modelType = EEPStructureGetModelType(structure.name)
-    local _, posX, posY, posZ = EEPStructureGetPosition(structure.name)
-    local _, rotX, rotY, rotZ = EEPStructureGetRotation(structure.name)
-
-    structure:setModelType(modelType or 0, EEPStructureModelTypeText[modelType] or "")
-    structure:setPosition(round2(posX), round2(posY), round2(posZ))
-    structure:setRotation(round2(rotX), round2(rotY), round2(rotZ))
+    structure:pullModelType()
+    structure:pullPosition()
+    structure:pullRotation()
 end
 
 local function applyPositionAndRotation(structure)
-    local _, posX, posY, posZ = EEPStructureGetPosition(structure.name)
-    local _, rotX, rotY, rotZ = EEPStructureGetRotation(structure.name)
-    structure:setPosition(round2(posX), round2(posY), round2(posZ))
-    structure:setRotation(round2(rotX), round2(rotY), round2(rotZ))
+    structure:pullPosition()
+    structure:pullRotation()
 end
 
 local function discoverStructures()
@@ -84,7 +60,7 @@ local function discoverStructures()
     for i = 0, MAX_STRUCTURES do
         local name = "#" .. tostring(i)
         if structureExists(name) then
-            local structure = StructureRegistry.forId(name)
+            local structure = StructureRegistry.get(name)
             discoveredIds[name] = true
             if not structure then
                 structure = Structure:new(name)
@@ -110,33 +86,35 @@ function StructureDiscovery.initFromAnl3(tableOfAnl3)
     for _, entry in ipairs(tableOfAnl3.structures or {}) do
         local id = entry.id or entry.name
         if id then
-            local existing = StructureRegistry.forId(id)
+            local existing = StructureRegistry.get(id)
             if existing then
-                existing:setGsbname(entry.gsbname)
-                if entry.tag ~= nil then existing:setTag(entry.tag) end
-                if entry.tipTxt ~= nil then existing.tippText = entry.tipTxt end
-                if entry.tipShow ~= nil then existing.tippTextVisible = entry.tipShow end
-                if entry.light ~= nil then existing:setLight(entry.light) end
-                if entry.smoke ~= nil then existing:setSmoke(entry.smoke) end
-                if entry.fire ~= nil then existing:setFire(entry.fire) end
+                existing:seedGsbname(entry.gsbname)
+                if entry.tag ~= nil then existing:seedTag(entry.tag) end
+                if entry.tipTxt ~= nil then existing:seedTippText(entry.tipTxt) end
+                if entry.tipShow ~= nil then existing:seedTippTextVisible(entry.tipShow) end
+                if entry.textureTexts ~= nil then existing:seedTextureTexts(entry.textureTexts) end
+                if entry.light ~= nil then existing:seedLight(entry.light) end
+                if entry.smoke ~= nil then existing:seedSmoke(entry.smoke) end
+                if entry.fire ~= nil then existing:seedFire(entry.fire) end
                 if entry.pos_x ~= nil then
-                    existing:setPosition(round2(entry.pos_x), round2(entry.pos_y), round2(entry.pos_z))
-                    existing:setRotation(round2(entry.rot_x), round2(entry.rot_y), round2(entry.rot_z))
+                    existing:seedPosition(round2(entry.pos_x), round2(entry.pos_y), round2(entry.pos_z))
+                    existing:seedRotation(round2(entry.rot_x), round2(entry.rot_y), round2(entry.rot_z))
                 end
                 structures[#structures + 1] = existing
             else
                 local structure = Structure:new(id, entry.name)
-                structure:setGsbname(entry.gsbname)
-                structure:setModelType(22, "Immobilie")
-                if entry.tag ~= nil then structure:setTag(entry.tag) end
-                if entry.tipTxt ~= nil then structure.tippText = entry.tipTxt end
-                if entry.tipShow ~= nil then structure.tippTextVisible = entry.tipShow end
-                if entry.light ~= nil then structure:setLight(entry.light) end
-                if entry.smoke ~= nil then structure:setSmoke(entry.smoke) end
-                if entry.fire ~= nil then structure:setFire(entry.fire) end
+                structure:seedGsbname(entry.gsbname)
+                structure:seedModelType(22, "Immobilie")
+                if entry.tag ~= nil then structure:seedTag(entry.tag) end
+                if entry.tipTxt ~= nil then structure:seedTippText(entry.tipTxt) end
+                if entry.tipShow ~= nil then structure:seedTippTextVisible(entry.tipShow) end
+                if entry.textureTexts ~= nil then structure:seedTextureTexts(entry.textureTexts) end
+                if entry.light ~= nil then structure:seedLight(entry.light) end
+                if entry.smoke ~= nil then structure:seedSmoke(entry.smoke) end
+                if entry.fire ~= nil then structure:seedFire(entry.fire) end
                 if entry.pos_x ~= nil then
-                    structure:setPosition(round2(entry.pos_x), round2(entry.pos_y), round2(entry.pos_z))
-                    structure:setRotation(round2(entry.rot_x), round2(entry.rot_y), round2(entry.rot_z))
+                    structure:seedPosition(round2(entry.pos_x), round2(entry.pos_y), round2(entry.pos_z))
+                    structure:seedRotation(round2(entry.rot_x), round2(entry.rot_y), round2(entry.rot_z))
                 else
                     applyPositionAndRotation(structure)
                 end

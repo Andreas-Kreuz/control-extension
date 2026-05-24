@@ -69,7 +69,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             intersectionId = 1,
             name = "L1",
             kpId = "c1Lane1",
-                        scriptVariableName = "c1Lane1",
+            scriptVariableName = "c1Lane1",
             currentIndication = "GREEN",
             vehicleMultiplier = 2,
             type = "NORMAL",

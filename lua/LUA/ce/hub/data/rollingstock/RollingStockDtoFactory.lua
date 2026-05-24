@@ -2,6 +2,9 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStockDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local cached = DtoFieldAccess.cached
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 local TableUtils = require("ce.hub.util.TableUtils")
@@ -19,66 +22,66 @@ local KEY_ID = "id"
 local XML_MODEL_PLACEHOLDER = ""
 
 local function getLicencePlate(stock)
-    if stock.getLicencePlate then return stock:getLicencePlate() end
-    return stock.licencePlate or ""
+    return cached(stock, function (source) return source:peekLicencePlate() end, "licencePlate") or ""
 end
 
 local function getWagonNumber(stock)
-    if stock.getWagonNumber then return stock:getWagonNumber() end
-    if stock.getWagonNr then return stock:getWagonNr() end
-    return stock.vehicleNumber or stock.nr or ""
+    return cached(stock, function (source) return source:peekWagonNumber() end, "vehicleNumber") or
+        cached(stock, function (source) return source:peekWagonNr() end, "nr") or ""
 end
 
 local function getXmlModel(stock)
-    if stock.getXmlModel then return stock:getXmlModel() end
-    return stock.xmlModel or XML_MODEL_PLACEHOLDER
+    return cached(stock, function (source) return source:peekXmlModel() end, "xmlModel") or XML_MODEL_PLACEHOLDER
 end
 
 local function getAxisNamesKnown(stock)
-    if stock.getAxisNamesKnown then return stock:getAxisNamesKnown() end
-    return stock.axisNamesKnown == true
+    return cached(stock, function (source) return source:peekAxisNamesKnown() end, "axisNamesKnown") == true
+end
+
+local function copiedCachedTable(stock, readCachedValue, fieldName)
+    return TableUtils.shallowcopy(cached(stock, readCachedValue, fieldName) or {})
 end
 
 -- DtoFields: class definition in RollingStockDtoTypes.d.lua
 local dtoFields = {
     name = {
-        getValue = function (stock) return stock.rollingStockName end,
+        getValue = peek(function (source) return source:peekRollingStockName() end, "rollingStockName"),
         placeholder = ""
     },
     trainName = {
-        getValue = function (stock) return stock:getTrainName() end,
+        getValue = peek(function (source) return source:peekTrainName() end, "trainName"),
         placeholder = ""
     },
     positionInTrain = {
-        getValue = function (stock) return stock:getPositionInTrain() end,
+        getValue = peek(function (source) return source:peekPositionInTrain() end, "positionInTrain"),
         placeholder = 0
     },
     couplingFront = {
-        getValue = function (stock) return stock:getCouplingFront() end,
+        getValue = peek(function (source) return source:peekCouplingFront() end, "couplingFront"),
         placeholder = 0
     },
     couplingRear = {
-        getValue = function (stock) return stock:getCouplingRear() end,
+        getValue = peek(function (source) return source:peekCouplingRear() end, "couplingRear"),
         placeholder = 0
     },
     length = {
-        getValue = function (stock) return stock:getLength() end,
+        getValue = peek(function (source) return source:peekLength() end, "length"),
         placeholder = 0
     },
     propelled = {
-        getValue = function (stock) return stock:getPropelled() end,
+        getValue = peek(function (source) return source:peekPropelled() end, "propelled"),
         placeholder = false
     },
     modelType = {
-        getValue = function (stock) return stock:getModelType() end,
+        getValue = peek(function (source) return source:peekModelType() end, "modelType"),
         placeholder = 0
     },
     modelTypeText = {
-        getValue = function (stock) return stock:getModelTypeText() end,
+        getValue = peek(function (source) return source:peekModelTypeText() end, "modelTypeText"),
         placeholder = ""
     },
     tag = {
-        getValue = function (stock) return stock:getTag() end,
+        getValue = peek(function (source) return source:peekTag() end, "tag"),
         placeholder = ""
     },
     licencePlate = {
@@ -94,63 +97,65 @@ local dtoFields = {
         placeholder = ""
     },
     trackType = {
-        getValue = function (stock) return stock:getTrackType() end,
+        getValue = peek(function (source) return source:peekTrackType() end, "trackType"),
         placeholder = ""
     },
     hookStatus = {
-        getValue = function (stock) return stock:getHookStatus() end,
+        getValue = peek(function (source) return source:peekHookStatus() end, "hookStatus"),
         placeholder = 0
     },
     hookGlueMode = {
-        getValue = function (stock) return stock:getHookGlueMode() end,
+        getValue = peek(function (source) return source:peekHookGlueMode() end, "hookGlueMode"),
         placeholder = 0
     },
     surfaceTexts = {
-        getValue = function (stock) return TableUtils.shallowcopy(stock:getTextureTexts() or {}) end,
+        getValue = function (stock)
+            return copiedCachedTable(stock, function (source) return source:peekTextureTexts() end, "textureTexts")
+        end,
         placeholder = {}
     },
     trackId = {
-        getValue = function (stock) return stock:getTrackId() end,
+        getValue = peek(function (source) return source:peekTrackId() end, "trackId"),
         placeholder = 0
     },
     trackDistance = {
-        getValue = function (stock) return stock:getTrackDistance() end,
+        getValue = peek(function (source) return source:peekTrackDistance() end, "trackDistance"),
         placeholder = 0
     },
     trackDirection = {
-        getValue = function (stock) return stock:getTrackDirection() end,
+        getValue = peek(function (source) return source:peekTrackDirection() end, "trackDirection"),
         placeholder = 0
     },
     trackSystem = {
-        getValue = function (stock) return stock:getTrackSystem() end,
+        getValue = peek(function (source) return source:peekTrackSystem() end, "trackSystem"),
         placeholder = 0
     },
     posX = {
-        getValue = function (stock) return stock:getX() end,
+        getValue = peek(function (source) return source:peekX() end, "x"),
         placeholder = 0
     },
     posY = {
-        getValue = function (stock) return stock:getY() end,
+        getValue = peek(function (source) return source:peekY() end, "y"),
         placeholder = 0
     },
     posZ = {
-        getValue = function (stock) return stock:getZ() end,
+        getValue = peek(function (source) return source:peekZ() end, "z"),
         placeholder = 0
     },
     mileage = {
-        getValue = function (stock) return stock:getMileage() end,
+        getValue = peek(function (source) return source:peekMileage() end, "mileage"),
         placeholder = 0
     },
     orientationForward = {
-        getValue = function (stock) return stock:getOrientationForward() end,
+        getValue = peek(function (source) return source:peekOrientationForward() end, "orientationForward"),
         placeholder = false
     },
     smoke = {
-        getValue = function (stock) return stock:getSmoke() end,
+        getValue = peek(function (source) return source:peekSmoke() end, "smoke"),
         placeholder = 0
     },
     active = {
-        getValue = function (stock) return stock:getActive() end,
+        getValue = peek(function (source) return source:peekActive() end, "active"),
         placeholder = false
     },
     axisNamesKnown = {
@@ -158,27 +163,33 @@ local dtoFields = {
         placeholder = false
     },
     axisNames = {
-        getValue = function (stock) return TableUtils.shallowcopy(stock:getAxisNames() or {}) end,
+        getValue = function (stock)
+            return copiedCachedTable(stock, function (source) return source:peekAxisNames() end, "axisNames")
+        end,
         placeholder = {}
     },
     axisValues = {
-        getValue = function (stock) return TableUtils.shallowcopy(stock:getAxisValues() or {}) end,
+        getValue = function (stock)
+            return copiedCachedTable(stock, function (source) return source:peekAxisValues() end, "axisValues")
+        end,
         placeholder = {}
     },
     textureNames = {
-        getValue = function (stock) return TableUtils.shallowcopy(stock:getTextureNames() or {}) end,
+        getValue = function (stock)
+            return copiedCachedTable(stock, function (source) return source:peekTextureNames() end, "textureNames")
+        end,
         placeholder = {}
     },
     rotX = {
-        getValue = function (stock) return stock:getRotX() end,
+        getValue = peek(function (source) return source:peekRotX() end, "rotX"),
         placeholder = 0
     },
     rotY = {
-        getValue = function (stock) return stock:getRotY() end,
+        getValue = peek(function (source) return source:peekRotY() end, "rotY"),
         placeholder = 0
     },
     rotZ = {
-        getValue = function (stock) return stock:getRotZ() end,
+        getValue = peek(function (source) return source:peekRotZ() end, "rotZ"),
         placeholder = 0
     },
     xmlModel = {
@@ -190,7 +201,7 @@ local dtoFields = {
 local function baseDto(stock)
     return {
         ceType = CE_TYPE,
-        id = stock.rollingStockName
+        id = cached(stock, function (source) return source:peekRollingStockName() end, "rollingStockName")
     }
 end
 

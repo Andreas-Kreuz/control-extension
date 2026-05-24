@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.LightStructureTrafficLight ...") end
 
 local StorageUtility = require("ce.hub.util.StorageUtility")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 
 ---@class LightStructureTrafficLight
 local LightStructureTrafficLight = {}
@@ -43,14 +44,14 @@ end
 
 local function setStructureTag(structureName, tagText)
     if type(structureName) == "string" and structureName ~= "" then
-        EEPStructureSetTagText(structureName, tagText)
+        StructureRegistry.getOrCreate(structureName):setTag(tagText)
     end
 end
 
 local function updateStructureTags(redStructure, greenStructure, yellowStructure, requestStructure, housingStructure,
                                    blendStructure)
     if type(housingStructure) ~= "string" or housingStructure == "" then return end
-    local _, currentTag = EEPStructureGetTagText(housingStructure)
+    local currentTag = StructureRegistry.getOrCreate(housingStructure):getTag()
     local values = StorageUtility.parseTableFromString(currentTag)
     clearInstallerTags(values)
     setTagValue(values, "F0", redStructure)
@@ -81,17 +82,17 @@ end
 function LightStructureTrafficLight:new(redStructure, greenStructure, yellowStructure, requestStructure,
                                         housingStructure, blendStructure)
     assert(type(redStructure) == "string", "Need 'redStructure' as string")
-    assert(EEPStructureGetLight(redStructure), redStructure)
+    assert(StructureRegistry.getOrCreate(redStructure):getLight() ~= nil, redStructure)
     assert(type(greenStructure) == "string", "Need 'greenStructure' as string")
-    assert(EEPStructureGetLight(greenStructure), greenStructure)
+    assert(StructureRegistry.getOrCreate(greenStructure):getLight() ~= nil, greenStructure)
     if yellowStructure then
         assert(type(yellowStructure) == "string", "Need 'yellowStructure' as string")
-        assert(EEPStructureGetLight(yellowStructure), yellowStructure)
+        assert(StructureRegistry.getOrCreate(yellowStructure):getLight() ~= nil, yellowStructure)
     end
     if requestStructure then
         assert(type(requestStructure) == "string",
                "Need 'requestStructure' as string not as " .. type(requestStructure))
-        assert(EEPStructureGetLight(requestStructure), requestStructure)
+        assert(StructureRegistry.getOrCreate(requestStructure):getLight() ~= nil, requestStructure)
     end
     if housingStructure then assert(type(housingStructure) == "string", "Need 'housingStructure' as string") end
     if blendStructure then assert(type(blendStructure) == "string", "Need 'blendStructure' as string") end

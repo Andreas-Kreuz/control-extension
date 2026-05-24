@@ -98,6 +98,24 @@ local function boolFromAttr(val)
     return val ~= "0"
 end
 
+local function textureTextsFromNode(node)
+    local textureTexts = {}
+    for _, child in ipairs(node.children) do
+        if child.tag == "Text3DM" then
+            for _, textureText in ipairs(child.children) do
+                if textureText.tag == "TexText" then
+                    local anl3SurfaceIndex = tonumber(textureText.attrs.Idx)
+                    if anl3SurfaceIndex then
+                        textureTexts[tostring(anl3SurfaceIndex + 1)] = textureText.attrs.Text or ""
+                    end
+                end
+            end
+        end
+    end
+    if next(textureTexts) == nil then return nil end
+    return textureTexts
+end
+
 local function posAndRotFromDreibein(immobile)
     for _, child in ipairs(immobile.children) do
         if child.tag == "Dreibein" then
@@ -264,7 +282,8 @@ local function buildDiscoveryTable(root)
                             trackId = train.trackId,
                             trackDistance = train.trackDistance,
                             trackDirection = train.trackDirection,
-                            trackSystem = train.trackSystem
+                            trackSystem = train.trackSystem,
+                            textureTexts = textureTextsFromNode(rollmaterial)
                         }
                     end
                 end
@@ -299,7 +318,8 @@ local function buildDiscoveryTable(root)
                         pos_z = pos_z,
                         rot_x = rot_x,
                         rot_y = rot_y,
-                        rot_z = rot_z
+                        rot_z = rot_z,
+                        textureTexts = textureTextsFromNode(immobilie)
                     }
                 end
             end

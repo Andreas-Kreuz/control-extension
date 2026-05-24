@@ -71,8 +71,8 @@ function HubBridgeConnector.registerFunctions()
         Structure.setLightByName
     )
     ServerExchangeCoordinator.registerAllowedCommand(
-        "Structure.setTagTextByName",
-        Structure.setTagTextByName
+        "Structure.setTagByName",
+        Structure.setTagByName
     )
 end
 

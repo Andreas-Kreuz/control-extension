@@ -1,89 +1,44 @@
 local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+local TrainRollingStockStore = require("ce.hub.data.trains.TrainRollingStockStore")
 
 local RollingStockRegistry = {}
 
----@type table<string,RollingStock>
-local allRollingStock = {}
-local addedRollingStockIds = {}
-local removedRollingStockIds = {}
+function RollingStockRegistry.get(rollingStockName)
+    return TrainRollingStockStore.getRollingStock(rollingStockName)
+end
 
-function RollingStockRegistry.forName(rollingStockName)
-    assert(rollingStockName, "Provide a rollingStockName")
-    assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
-    if allRollingStock[rollingStockName] then
-        return allRollingStock[rollingStockName]
-    end
-
-    local rollingStock = RollingStock:new({ rollingStockName = rollingStockName })
-    allRollingStock[rollingStock.rollingStockName] = rollingStock
-    addedRollingStockIds[rollingStock.rollingStockName] = true
-    removedRollingStockIds[rollingStock.rollingStockName] = nil
-    return rollingStock
+function RollingStockRegistry.getOrCreate(rollingStockName)
+    return TrainRollingStockStore.getOrCreateRollingStock(rollingStockName, function (name)
+        return RollingStock:new({ rollingStockName = name }):pullInitial()
+    end)
 end
 
 function RollingStockRegistry.seedFromSnapshot(snapshot)
-    assert(type(snapshot) == "table", "Need snapshot as table")
-    assert(type(snapshot.rollingStockName) == "string", "Need snapshot.rollingStockName as string")
-
-    if allRollingStock[snapshot.rollingStockName] then
-        local rollingStock = allRollingStock[snapshot.rollingStockName]
-        if snapshot.xmlModel then rollingStock:setXmlModelFromSnapshot(snapshot.xmlModel) end
-        if snapshot.tag ~= nil then rollingStock:setTag(snapshot.tag) end
-        if snapshot.smoke ~= nil then rollingStock:setSmoke(snapshot.smoke) end
-        if snapshot.trainName then rollingStock:setTrainName(snapshot.trainName) end
-        if snapshot.positionInTrain then rollingStock:setPositionInTrain(snapshot.positionInTrain) end
-        if snapshot.trackType then rollingStock:setTrackType(snapshot.trackType) end
-        if snapshot.trackId and snapshot.trackDistance and snapshot.trackDirection and snapshot.trackSystem then
-            rollingStock:setTrack(snapshot.trackId, snapshot.trackDistance, snapshot.trackDirection,
-                                  snapshot.trackSystem)
-        end
-        return rollingStock, false
-    end
-
-    local rollingStock = RollingStock.fromSnapshot(snapshot)
-    allRollingStock[rollingStock.rollingStockName] = rollingStock
-    addedRollingStockIds[rollingStock.rollingStockName] = true
-    removedRollingStockIds[rollingStock.rollingStockName] = nil
-    return rollingStock, true
+    return TrainRollingStockStore.seedRollingStockFromSnapshot(snapshot, RollingStock.fromSnapshot)
 end
 
 function RollingStockRegistry.removeAbsentFromSnapshot(rollingStockNames)
-    rollingStockNames = rollingStockNames or {}
-    for rollingStockName in pairs(allRollingStock) do
-        if not rollingStockNames[rollingStockName] then RollingStockRegistry.remove(rollingStockName) end
-    end
+    TrainRollingStockStore.removeAbsentRollingStock(rollingStockNames)
 end
 
 function RollingStockRegistry.has(rollingStockName)
-    return allRollingStock[rollingStockName] ~= nil
+    return TrainRollingStockStore.hasRollingStock(rollingStockName)
 end
 
 function RollingStockRegistry.remove(rollingStockName)
-    if allRollingStock[rollingStockName] == nil then return end
-
-    allRollingStock[rollingStockName] = nil
-    if addedRollingStockIds[rollingStockName] then
-        addedRollingStockIds[rollingStockName] = nil
-    else
-        removedRollingStockIds[rollingStockName] = true
-    end
+    TrainRollingStockStore.removeRollingStock(rollingStockName)
 end
 
 function RollingStockRegistry.getAll()
-    local copy = {}
-    for rollingStockName, rollingStock in pairs(allRollingStock) do copy[rollingStockName] = rollingStock end
-    return copy
+    return TrainRollingStockStore.getAllRollingStock()
 end
 
 function RollingStockRegistry.getRemovedIds()
-    local copy = {}
-    for rollingStockId in pairs(removedRollingStockIds) do copy[rollingStockId] = true end
-    return copy
+    return TrainRollingStockStore.getRemovedRollingStockIds()
 end
 
 function RollingStockRegistry.clearPendingChanges()
-    addedRollingStockIds = {}
-    removedRollingStockIds = {}
+    TrainRollingStockStore.clearPendingRollingStockChanges()
 end
 
 return RollingStockRegistry

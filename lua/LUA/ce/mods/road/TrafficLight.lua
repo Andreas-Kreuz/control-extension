@@ -7,7 +7,9 @@ local SignalIndication = require("ce.mods.road.SignalIndication")
 local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 local fmt = require("ce.hub.eep.TippTextFormatter")
 local Signal = require("ce.hub.data.signals.Signal")
+local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local Structure = require("ce.hub.data.structures.Structure")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 
 ------------------------------------------------------------------------------------------
 -- Klasse TrafficLight
@@ -51,7 +53,8 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
         use = TrafficLight.Use.VEHICLE_ONLY,
         signalId = signalId > 0 and signalId or counter,
         trafficLightModel = trafficLightModel,
-        currentIndication = signalId > 0 and trafficLightModel:indicationOf(EEPGetSignal(signalId)) or
+        currentIndication = signalId > 0 and
+            trafficLightModel:indicationOf(SignalRegistry.getOrCreate(signalId):pullPosition()) or
             SignalIndication.RED,
         debug = false,
         laneInfo = "",
@@ -271,24 +274,26 @@ local function inferTrafficLightModelFromItemName(itemNameWithModelPath)
 end
 
 local function getSignalFunctionsTippText(signalId, trafficLightModel)
-    if signalId > 0 and EEPGetSignalFunctions then
+    if signalId > 0 then
+        local signal = SignalRegistry.getOrCreate(signalId)
         local text = {}
-        local found, trafficLightModelName = EEPGetSignalItemName(signalId, true)
+        signal:getItemName()
+        local trafficLightModelName = signal:getItemNameWithModelPath()
         local effectiveTrafficLightModel = inferTrafficLightModelFromItemName(trafficLightModelName) or
             trafficLightModel
-        if not found then return effectiveTrafficLightModel.name end
+        if not trafficLightModelName then return effectiveTrafficLightModel.name end
         table.insert(text, effectiveTrafficLightModel.name)
         table.insert(text, "<br>")
         table.insert(text, trafficLightModelName)
-        local _, count = EEPGetSignalFunctions(signalId)
-        for i = 1, count do
-            local _, action = EEPGetSignalFunction(signalId, i)
+        local currentPosition = signal:pullPosition()
+        local signalFunctions = signal:getFunctions() or {}
+        for i, action in ipairs(signalFunctions) do
             table.insert(text, "<br>")
-            table.insert(text, EEPGetSignal(signalId) == i and "<b>" or "")
+            table.insert(text, currentPosition == i and "<b>" or "")
             table.insert(text, i)
             table.insert(text, ": ")
             table.insert(text, effectiveTrafficLightModel:indicationOf(i) or action)
-            table.insert(text, EEPGetSignal(signalId) == i and "</b>." or ".")
+            table.insert(text, currentPosition == i and "</b>." or ".")
         end
         return table.concat(text, "")
     else
@@ -443,20 +448,20 @@ function TrafficLight:switchStructureLight()
             local onOff = self.currentIndication == SignalIndication.RED or
                 self.currentIndication == SignalIndication.REDYELLOW
             lightDbg = lightDbg .. string.format(", Licht in %s: %s", lightTL.redStructure, onOff and "an" or "aus")
-            EEPStructureSetLight(lightTL.redStructure, onOff)
+            StructureRegistry.getOrCreate(lightTL.redStructure):setLight(onOff)
         end
         if lightTL.yellowStructure then
             local onOff = self.currentIndication == SignalIndication.YELLOW or
                 self.currentIndication == SignalIndication.REDYELLOW
             lightDbg = lightDbg ..
                 string.format(", Licht in %s: %s", lightTL.yellowStructure, onOff and "an" or "aus")
-            EEPStructureSetLight(lightTL.yellowStructure, onOff)
+            StructureRegistry.getOrCreate(lightTL.yellowStructure):setLight(onOff)
         end
         if lightTL.greenStructure then
             local onOff = self.currentIndication == SignalIndication.GREEN
             lightDbg = lightDbg ..
                 string.format(", Licht in %s: %s", lightTL.greenStructure, onOff and "an" or "aus")
-            EEPStructureSetLight(lightTL.greenStructure, onOff)
+            StructureRegistry.getOrCreate(lightTL.greenStructure):setLight(onOff)
         end
     end
     return lightDbg
@@ -483,12 +488,14 @@ function TrafficLight:switchStructureAxis()
 
         axisDbg = axisDbg ..
             string.format(", Achse %s in %s auf: %d", axisTL.axisName, axisTL.structureName, position)
-        EEPStructureSetAxis(axisTL.structureName, axisTL.axisName, position)
+        StructureRegistry.getOrCreate(axisTL.structureName):setAxis(axisTL.axisName, position)
     end
     return axisDbg
 end
 
-function TrafficLight:switchSignal(sigIndex) if self.signalId > 0 then EEPSetSignal(self.signalId, sigIndex, 1) end end
+function TrafficLight:switchSignal(sigIndex)
+    if self.signalId > 0 then SignalRegistry.getOrCreate(self.signalId):setPosition(sigIndex) end
+end
 
 --- Setzt die Anforderung fuer eine Ampel (damit sie weiﬂ, ob eine Anforderung vorliegt)
 --- @param hasRequest boolean wo liegt die Anforderung an
@@ -499,7 +506,7 @@ function TrafficLight:showRequestOnSignal(hasRequest)
         if lightTL.requestStructure then
             lightDbg = lightDbg ..
                 string.format(", Licht in %s: %s", lightTL.requestStructure, (hasRequest) and "an" or "aus")
-            EEPStructureSetLight(lightTL.requestStructure, hasRequest)
+            StructureRegistry.getOrCreate(lightTL.requestStructure):setLight(hasRequest)
         end
     end
 

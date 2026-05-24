@@ -84,6 +84,10 @@ insulate("EepCallAnalyzer #eepAnalyzer", function ()
         assert.equals(1, result.calls.EEPSetSignal)
         assert.equals(1, result.callbacks.EEPOnSaveAnl)
         assert.equals(1, result.callbacks.EEPOnSignal_7)
+        assert.equals(1, result.timings.EEPGetSignal.count)
+        assert.equals(1, result.timings.EEPSetSignal.count)
+        assert.is_true(result.timings.EEPGetSignal.time >= 0)
+        assert.is_true(result.timings.EEPSetSignal.time >= 0)
         assert.equals(1, result.stackTraces.calls.EEPGetSignal[next(result.stackTraces.calls.EEPGetSignal)])
         assert.equals(1, result.stackTraces.calls.EEPSetSignal[next(result.stackTraces.calls.EEPSetSignal)])
         assert.equals(1, result.stackTraces.callbacks.EEPOnSaveAnl[next(
@@ -95,6 +99,7 @@ insulate("EepCallAnalyzer #eepAnalyzer", function ()
         assert.stub(printStub).was_called_with(
             "[#EepCallAnalyzer] Wrote EEP call analysis to exchange-dir/eep-call-analysis.json"
         )
+        assert.stub(printStub).was_called_with("[#EepCallAnalyzer] EEP call timing summary:")
     end)
 
     it("counts discovery calls separately from total calls", function ()
@@ -142,6 +147,8 @@ insulate("EepCallAnalyzer #eepAnalyzer", function ()
         local result = EepCallAnalyzer.getResult()
         assert.equals(1, result.calls.EEPTestMulti)
         assert.equals(1, result.calls.EEPTestError)
+        assert.equals(1, result.timings.EEPTestMulti.count)
+        assert.equals(1, result.timings.EEPTestError.count)
     end)
 
     it("restores wrappers after the configured run count", function ()

@@ -41,6 +41,7 @@ insulate("Crossing", function ()
 
     local RIGHT_TURN_ROUTE = "TURN RIGHT"
     EEPSetTrainRoute("#Car2a", RIGHT_TURN_ROUTE)
+    require("ce.hub.data.trains.TrainRegistry").seedFromSnapshot({ name = "#Car2a", route = RIGHT_TURN_ROUTE })
 
     before_each(function ()
         EEPStructureSetLight("#5433_Straba Signal A", false)
@@ -183,10 +184,10 @@ insulate("Crossing", function ()
         assert.is_truthy(string.find(infoText, "<b>My Crossing</b>", 1, true))
         assert.is_truthy(string.find(infoText, "<bgrgb=0,192,0>X___<bgrgb=255,255,255>__  <b>P1</b>", 1, true))
         assert.is_truthy(string.find(
-                            infoText,
-                            "<bgrgb=201,201,201><fgrgb=0,0,0>X_____<bgrgb=255,255,255><fgrgb=0,0,0>  P2",
-                            1,
-                            true))
+            infoText,
+            "<bgrgb=201,201,201><fgrgb=0,0,0>X_____<bgrgb=255,255,255><fgrgb=0,0,0>  P2",
+            1,
+            true))
         assert.is_nil(string.find(infoText, "Lane 1 N", 1, true))
     end)
     insulate("Check initial stuff", function ()
@@ -361,6 +362,7 @@ insulate("Check signal phase", function ()
 
     local RIGHT_TURN_ROUTE = "TURN RIGHT"
     EEPSetTrainRoute("#Car2a", RIGHT_TURN_ROUTE)
+    require("ce.hub.data.trains.TrainRegistry").seedFromSnapshot({ name = "#Car2a", route = RIGHT_TURN_ROUTE })
 
     c1Lane1Signal = TrafficLight:new("c1Lane1Signal", 11, TrafficLightModel.Unsichtbar_2er)
     c1Lane2Signal = TrafficLight:new("c1Lane2Signal", 12, TrafficLightModel.Unsichtbar_2er)

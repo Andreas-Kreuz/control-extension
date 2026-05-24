@@ -86,8 +86,7 @@ function RoadStation:trainArrivesIn(trainName, destination, lineNr, timeInMinute
 end
 
 function RoadStation:trainLeft(trainName, destination, lineNr)
-    self.queue:pop(trainName, destination, lineNr)
-    self:updateDisplays()
+    if self.queue:pop(trainName, destination, lineNr) then self:updateDisplays() end
 end
 
 function RoadStation:removeTrain(trainName)

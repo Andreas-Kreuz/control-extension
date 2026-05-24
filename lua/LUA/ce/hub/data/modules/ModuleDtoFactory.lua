@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.modules.ModuleDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class ModuleDtoFactory
@@ -18,11 +20,11 @@ local KEY_ID = "id"
 -- DtoFields: class definition in ModuleDtoTypes.d.lua
 local dtoFields = {
     name = {
-        getValue = function (module) return module.name end,
+        getValue = peek(function (source) return source:peekName() end, "name"),
         placeholder = ""
     },
     enabled = {
-        getValue = function (module) return module.enabled end,
+        getValue = peek(function (source) return source:peekEnabled() end, "enabled"),
         placeholder = false
     },
 }

@@ -25,8 +25,8 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 
         EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
-        local rollingStock1 = RollingStockRegistry.forName("RS1")
-        RollingStockRegistry.forName("RS2")
+        local rollingStock1 = RollingStockRegistry.getOrCreate("RS1")
+        RollingStockRegistry.getOrCreate("RS2")
 
         RollingStockPublisher.syncState({
             ceTypes = {
@@ -57,8 +57,8 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 
         EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
-        local rollingStock1 = RollingStockRegistry.forName("RS1")
-        RollingStockRegistry.forName("RS2")
+        local rollingStock1 = RollingStockRegistry.getOrCreate("RS1")
+        RollingStockRegistry.getOrCreate("RS2")
 
         InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "RS1")
         RollingStockPublisher.syncState({
@@ -93,7 +93,7 @@ insulate("ce.hub.data.rollingstock.RollingStockRegistry", function ()
         finally(function () fireDataRemovedStub:revert() end)
 
         EepSimulator.simulateAddTrain("T1", "RS1")
-        RollingStockRegistry.forName("RS1")
+        RollingStockRegistry.getOrCreate("RS1")
         RollingStockPublisher.syncState({
             ceTypes = {
                 rollingStock = { ceType = HubCeTypes.RollingStock, mode = "all" }

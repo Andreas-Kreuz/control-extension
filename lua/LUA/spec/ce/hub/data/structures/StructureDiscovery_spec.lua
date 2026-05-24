@@ -51,7 +51,7 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
             }
         })
 
-        assert.equals("p1=#4,", StructureRegistry.forId("#2"):getTag())
+        assert.equals("p1=#4,", StructureRegistry.get("#2"):getTag())
         assert.stub(structureGetTagTextStub).was_not_called()
     end)
 
@@ -62,12 +62,18 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
         StructureDiscovery.initFromAnl3({
             coverage = { structures = true },
             structures = {
-                { id = "#2", name = "#2_Haus", gsbname = "Haus.3dm",
-                  light = true, smoke = true, fire = false }
+                {
+                    id = "#2",
+                    name = "#2_Haus",
+                    gsbname = "Haus.3dm",
+                    light = true,
+                    smoke = true,
+                    fire = false
+                }
             }
         })
 
-        local structure = StructureRegistry.forId("#2")
+        local structure = StructureRegistry.get("#2")
         assert.is_true(structure:getLight())
         assert.is_true(structure:getSmoke())
         assert.is_false(structure:getFire())
@@ -85,7 +91,7 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
             }
         })
 
-        local structure = StructureRegistry.forId("#2")
+        local structure = StructureRegistry.get("#2")
         assert.equals(22, structure:getModelType())
         assert.equals("Immobilie", structure:getModelTypeText())
         assert.stub(structureGetModelTypeStub).was_not_called()
@@ -98,13 +104,21 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
         StructureDiscovery.initFromAnl3({
             coverage = { structures = true },
             structures = {
-                { id = "#2", name = "#2_Haus", gsbname = "Haus.3dm",
-                  pos_x = 142.65, pos_y = -413.43, pos_z = 2.53,
-                  rot_x = 0.0, rot_y = 0.0, rot_z = 124.12 }
+                {
+                    id = "#2",
+                    name = "#2_Haus",
+                    gsbname = "Haus.3dm",
+                    pos_x = 142.65,
+                    pos_y = -413.43,
+                    pos_z = 2.53,
+                    rot_x = 0.0,
+                    rot_y = 0.0,
+                    rot_z = 124.12
+                }
             }
         })
 
-        local structure = StructureRegistry.forId("#2")
+        local structure = StructureRegistry.get("#2")
         assert.same(142.65, structure:getPosX())
         assert.same(-413.43, structure:getPosY())
         assert.same(2.53, structure:getPosZ())
@@ -140,18 +154,51 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
         StructureDiscovery.initFromAnl3({
             coverage = { structures = true },
             structures = {
-                { id = "#2", name = "#2_Haus", gsbname = "Haus.3dm",
-                  tipTxt = "Info text", tipShow = true }
+                {
+                    id = "#2",
+                    name = "#2_Haus",
+                    gsbname = "Haus.3dm",
+                    tipTxt = "Info text",
+                    tipShow = true
+                }
             }
         })
 
-        local structure = StructureRegistry.forId("#2")
+        local structure = StructureRegistry.get("#2")
         assert.equals("Info text", structure:getTippText())
         assert.is_true(structure:getTippTextVisible())
         assert.equals(0, eepChangeCalls)
         assert.equals(0, eepShowCalls)
         changeStub:revert()
         showStub:revert()
+    end)
+
+    it("seeds texture texts from anl3 without calling EEP", function ()
+        local getTextureStub = stub(_G, "EEPStructureGetTextureText", function () return true, "" end)
+        local setTextureStub = stub(_G, "EEPStructureSetTextureText", function () return true end)
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+
+        StructureDiscovery.initFromAnl3({
+            coverage = { structures = true },
+            structures = {
+                {
+                    id = "#2",
+                    name = "#2_Display",
+                    gsbname = "Display.3dm",
+                    textureTexts = { ["1"] = "Line A", ["2"] = "Zentrum" }
+                }
+            }
+        })
+
+        local structure = StructureRegistry.get("#2")
+        assert.equals("Line A", structure:getTextureText(1))
+        assert.equals("Zentrum", structure:getTextureText(2))
+        assert.stub(getTextureStub).was_not_called()
+        assert.stub(setTextureStub).was_not_called()
+
+        getTextureStub:revert()
+        setTextureStub:revert()
     end)
 
     it("loads tags during normal discovery for known structure signal housings", function ()
@@ -165,6 +212,6 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
         StructureDiscovery.runInitialDiscovery()
 
         assert.stub(structureGetTagTextStub).was_called_with("#2_Straba Signal Gehaeuse Mast 4")
-        assert.equals("p1=#4,", StructureRegistry.forId("#2"):getTag())
+        assert.equals("p1=#4,", StructureRegistry.get("#2"):getTag())
     end)
 end)

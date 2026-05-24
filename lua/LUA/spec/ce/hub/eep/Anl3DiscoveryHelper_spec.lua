@@ -65,21 +65,32 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
                                                         ' kupplungvorn="1" kupplunghinten="2">',
                                                         '<Gleisort gleissystemID="3" gleisID="33" parameter="456.7"',
                                                         ' ausrichtung="1"/>',
-                                                        '<Rollmaterial name="RS A" typ="STRASSE\\BUS\\A.3dm" LuaTag="line=7," Smoke="0"/>',
+                                                        '<Rollmaterial name="RS A" typ="STRASSE\\BUS\\A.3dm"' ..
+                                                        ' LuaTag="line=7," Smoke="0">',
+                                                        "<Text3DM>",
+                                                        '<TexText Idx="0" Text="7"/>',
+                                                        '<TexText Idx="4" Text="Zentrum"/>',
+                                                        "</Text3DM>",
+                                                        "</Rollmaterial>",
                                                         "</Zugverband>",
                                                         "</Fuhrpark>",
-                                                        '<Gebaeudesammlung>',
+                                                        "<Gebaeudesammlung>",
                                                         '<Immobile name="#12" gsbname="Haus.3dm"',
                                                         ' LuaTag="p1=#4," Light="1" Smoke="100" Fire="0"' ..
                                                         ' TipTxt="Info #12" TipShow="1">',
-                                                        '<Dreibein>',
+                                                        "<Dreibein>",
                                                         '<Vektor x="10000" y="20000" z="300"/>',
                                                         '<Vektor x="0" y="1" z="0"/>',
                                                         '<Vektor x="-1" y="0" z="0"/>',
                                                         '<Vektor x="0" y="0" z="1"/>',
-                                                        '</Dreibein>',
-                                                        '</Immobile>',
-                                                        '<Immobile ImmoIdx="13" gsbname="Baum.3dm" Light="0" Smoke="0" Fire="0"/>',
+                                                        "</Dreibein>",
+                                                        "<Text3DM>",
+                                                        '<TexText Idx="20" Text="Hauptbahnhof"/>',
+                                                        '<TexText Idx="23" Text="Steig 1"/>',
+                                                        "</Text3DM>",
+                                                        "</Immobile>",
+                                                        '<Immobile ImmoIdx="13" gsbname="Baum.3dm"' ..
+                                                        ' Light="0" Smoke="0" Fire="0"/>',
                                                         "</Gebaeudesammlung>",
                                                         '<EEPLua LUAPath="\\Topology.lua"/>',
                                                         "</sutrackp>"
@@ -114,6 +125,8 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
         assert.is_true(dt.structures[1].light)
         assert.is_true(dt.structures[1].smoke)
         assert.is_false(dt.structures[1].fire)
+        assert.equals("Hauptbahnhof", dt.structures[1].textureTexts["21"])
+        assert.equals("Steig 1", dt.structures[1].textureTexts["24"])
         assert.same(100.0, dt.structures[1].pos_x)
         assert.same(200.0, dt.structures[1].pos_y)
         assert.same(3.0, dt.structures[1].pos_z)
@@ -135,6 +148,8 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
         assert.equals(0, dt.rollingStocks[1].positionInTrain)
         assert.equals("line=7,", dt.rollingStocks[1].tag)
         assert.same(0, dt.rollingStocks[1].smoke)
+        assert.equals("7", dt.rollingStocks[1].textureTexts["1"])
+        assert.equals("Zentrum", dt.rollingStocks[1].textureTexts["5"])
         assert.equals("enter", dt.contacts[1].luaFn)
     end)
 
