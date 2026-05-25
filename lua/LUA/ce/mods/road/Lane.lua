@@ -168,7 +168,9 @@ local function popTrainFromQueue(lane, trainName)
 
             if trainFromQueue == lane.firstGoodTrain then firstGoodTrainIndex = i end
         end
-        if numberOfPops == nil then numberOfPops = firstGoodTrainIndex and firstGoodTrainIndex - 1 or lane.queue:size() end
+        if numberOfPops == nil then
+            numberOfPops = firstGoodTrainIndex and firstGoodTrainIndex - 1 or lane.queue:size()
+        end
     end
 
     -- Remove train and fix queue
