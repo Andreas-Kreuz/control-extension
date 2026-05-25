@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 const luaDir = path.join(repoRoot, 'lua');
+const ignoredSourceDirs = [path.join(luaDir, 'modell-pakete')];
 const rootPackageJson = JSON.parse(readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
 const version = rootPackageJson.version;
 
@@ -155,6 +156,12 @@ function normalizeInstallPath(filePath) {
   return filePath.split('\\').join('/').toLowerCase();
 }
 
+function isInIgnoredSourceDir(filePath) {
+  const relativePaths = ignoredSourceDirs.map((ignoredDir) => path.relative(ignoredDir, filePath));
+
+  return relativePaths.some((relativePath) => relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+}
+
 function hasGlobChars(pattern) {
   return pattern.includes('*') || pattern.includes('?');
 }
@@ -261,6 +268,12 @@ function searchFiles(baseDir, subdirectory, includePatterns) {
 
     const entryDir = entry.parentPath ?? entry.path;
     const absolutePath = path.join(entryDir, entry.name);
+
+    if (isInIgnoredSourceDir(absolutePath)) {
+      console.log(`[create-installer] skip: ${absolutePath} (ignored source directory)`);
+      continue;
+    }
+
     const relFromSubdir = path.relative(absSubdir, absolutePath);
     const installKey = subdirectory + '\\' + relFromSubdir.split(path.sep).join('\\');
     const decision = getInstallPatternDecision(installKey, includePatterns);
