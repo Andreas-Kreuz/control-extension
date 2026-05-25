@@ -43,9 +43,9 @@ Die Grundregeln sind:
 Für Felder einer Datenklasse gilt dieses Namensschema:
 
 ```lua
-peekX()          -- nur Cache: ruft nie EEP
+peekX()          -- Schaut nur im Cache nach und ruft keine EEP-Funktion auf
 getX()           -- read-through: nutzt Cache, ruft pullX() nur bei fehlendem Wert
-replaceX(...)    -- Cache überschreiben, kein EEPSet, dirty nur bei Änderung
+replaceX(...)    -- überschreibt Cache, kein EEPSet-Aufruf, dirty nur bei Änderung
 seedX(...)       -- Discovery-Seed, kein EEPSet, dirty nur bei Änderung
 pullX()          -- EEPGet -> replaceX -> dirty nur bei Änderung -> Rückgabewerte ohne ok-Flag
 setX(...)        -- idempotentes EEPSet -> replaceX nur bei akzeptiertem Set
