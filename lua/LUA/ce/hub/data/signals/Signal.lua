@@ -241,6 +241,7 @@ function Signal:replaceFunctions(signalFunctions, activeFunction)
             end
         end
     end
+    DataClass.markLoaded(self, "signalFunctions")
     if changed then
         self.signalFunctions = signalFunctions
         DataClass.markDirty(self, "signalFunctions")

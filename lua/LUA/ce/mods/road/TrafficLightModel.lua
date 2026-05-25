@@ -48,6 +48,46 @@ function TrafficLightModel.resolve(id)
     return TrafficLightModel.allModels[id]
 end
 
+local function basename(value)
+    return string.match(value:gsub("\\", "/"), "([^/]+)$") or value
+end
+
+local function withoutExtension(value)
+    return string.gsub(value, "%.[^.]+$", "")
+end
+
+function TrafficLightModel.inferFromItemName(itemNameWithModelPath)
+    if not itemNameWithModelPath then return nil end
+    local normalizedPath = itemNameWithModelPath:gsub("\\", "/")
+    local normalizedPathLower = string.lower(normalizedPath)
+    if normalizedPathLower == "signale/signale/signal_unsichtbar.3dm" then
+        return TrafficLightModel.Unsichtbar_2er
+    end
+
+    local fileName = basename(normalizedPath)
+    local normalizedFileName = string.lower(fileName)
+    local normalizedFileNameWithoutExtension = string.lower(withoutExtension(fileName))
+    if string.match(normalizedFileName, "^3er") and string.match(normalizedFileName, "_js2%.3dm$") then
+        return string.find(normalizedFileName, "fg") and TrafficLightModel.JS2_3er_mit_FG or
+            TrafficLightModel.JS2_3er_ohne_FG
+    end
+    if string.match(normalizedFileName, "^2er") and string.match(normalizedFileName, "_js2%.3dm$") then
+        if string.find(normalizedFileName, "fg") then return TrafficLightModel.JS2_2er_nur_FG end
+        if string.find(normalizedFileName, "gruengelb") then return TrafficLightModel.JS2_2er_gelb_gruen_aus end
+        if string.find(normalizedFileName, "rotgelb") then return TrafficLightModel.JS2_2er_rot_gelb_aus end
+        if string.find(normalizedFileName, "rotgruen") then return TrafficLightModel.JS2_2er_rot_gruen end
+    end
+    if normalizedFileNameWithoutExtension == "1erlinksmast_js2" then return TrafficLightModel.JS2_1er_gruen end
+    if string.match(normalizedFileNameWithoutExtension, "_np1$") then
+        if string.find(normalizedFileNameWithoutExtension, "fd") or
+            string.find(normalizedFileNameWithoutExtension, "fe") then
+            return TrafficLightModel.NP1_3er_mit_FG
+        end
+        if string.find(normalizedFileNameWithoutExtension, "of") then return TrafficLightModel.NP1_3er_ohne_FG end
+    end
+    return nil
+end
+
 function TrafficLightModel:print() print(self.name) end
 
 function TrafficLightModel:signalIndexOf(indication)

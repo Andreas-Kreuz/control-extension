@@ -1,14 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLight ...") end
 
-local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local AxisStructureTrafficLight = require("ce.mods.road.AxisStructureTrafficLight")
 local LightStructureTrafficLight = require("ce.mods.road.LightStructureTrafficLight")
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-local fmt = require("ce.hub.eep.TippTextFormatter")
-local Signal = require("ce.hub.data.signals.Signal")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
-local Structure = require("ce.hub.data.structures.Structure")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 
 ------------------------------------------------------------------------------------------
@@ -24,7 +20,13 @@ TrafficLight.Use = {
     VEHICLE_AND_PEDESTRIAN = "VEHICLE_AND_PEDESTRIAN"
 }
 local registeredSignals = {}
+local allTrafficLights = {}
 local counter = -1
+function TrafficLight.getAll()
+    local copy = {}
+    for i, signal in ipairs(allTrafficLights) do copy[i] = signal end
+    return copy
+end
 
 
 ---
@@ -45,7 +47,6 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
     local error = string.format("TrafficLight ID already used: %s - %s", signalId, trafficLightModel.name)
     assert(not registeredSignals[tostring(signalId)] or registeredSignals[tostring(signalId)].trafficLightModel ==
            trafficLightModel, error)
-    Signal.showTippTextById(signalId, false)
     if signalId < 0 then counter = counter - 1 end
     local o = {
         vehicleSignalName = name,
@@ -57,10 +58,6 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
             trafficLightModel:indicationOf(SignalRegistry.getOrCreate(signalId):pullPosition()) or
             SignalIndication.RED,
         debug = false,
-        laneInfo = "",
-        laneNameInfo = "",
-        phaseInfo = nil,
-        isLaneSignal = false,
         buildInfo = "" .. tostring(signalId),
         lanes = {},
         ---@type table<LightStructureTrafficLight,boolean>
@@ -78,6 +75,7 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
     end
 
     registeredSignals[tostring(signalId)] = o
+    table.insert(allTrafficLights, o)
     return o
 end
 
@@ -101,6 +99,9 @@ end
 
 function TrafficLight:asPedestrianSignal(pedestrianSignalName)
     assert(type(pedestrianSignalName) == "string", "Need 'pedestrianSignalName' as string")
+    if self.pedestrianSignalName == pedestrianSignalName and self.use == TrafficLight.Use.VEHICLE_AND_PEDESTRIAN then
+        return self
+    end
     self.pedestrianSignalName = pedestrianSignalName
     self.use = TrafficLight.Use.VEHICLE_AND_PEDESTRIAN
     return self
@@ -109,6 +110,7 @@ end
 function TrafficLight:withPedestrian(pedestrianSignalName) return self:asPedestrianSignal(pedestrianSignalName) end
 
 function TrafficLight:asPedestrianOnly()
+    if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then return self end
     self.pedestrianSignalName = self.pedestrianSignalName or self.vehicleSignalName
     self.vehicleSignalName = nil
     self.use = TrafficLight.Use.PEDESTRIAN_ONLY
@@ -148,25 +150,6 @@ function TrafficLight:addAxisStructure(structureName, axisName, positionDefault,
     return self
 end
 
---- Aktualisiert den Text für die aktuelle Phase dieses Signalgebers
--- @param phaseInfo TippText für die Phase
---
-function TrafficLight:setPhaseInfo(phaseInfo) self.phaseInfo = phaseInfo end
-
---- Aktualsisiert den Text für die Fahrspuren dieser Ampel
--- @param laneInfo TippText für die Fahrspur
---
-function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
-
---- Aktualsisiert den Namen fuer die Fahrspur dieser Ampel
--- @param laneNameInfo TippText fuer den Fahrspurnamen
---
-function TrafficLight:setLaneNameInfo(laneNameInfo) self.laneNameInfo = laneNameInfo end
-
-local function shortTippName(name)
-    return name and string.match(name, "^([^_]+)") or nil
-end
-
 local function tippTextStructure(lightStructure)
     return lightStructure.housingStructure or lightStructure.redStructure
 end
@@ -190,153 +173,21 @@ local function allTippTextStructures(lightStructure)
     return structures
 end
 
-function TrafficLight:showInfoText(showInfo)
-    if self.signalId > 0 then
-        Signal.showTippTextById(self.signalId, showInfo)
-    else
-        for l in pairs(self.lightStructures) do
-            if showInfo then
-                local structureName = tippTextStructure(l)
-                if structureName then Structure.showTippTextByName(structureName, true) end
-            else
-                for _, structureName in ipairs(allTippTextStructures(l)) do
-                    Structure.showTippTextByName(structureName, false)
-                end
-            end
-        end
-    end
-end
+function TrafficLight:getSignalId() return self.signalId end
 
-function TrafficLight:changeInfoText(infoText)
-    if self.signalId > 0 then
-        Signal.setTippTextById(self.signalId, infoText)
-    else
-        for l in pairs(self.lightStructures) do
-            if infoText == "" then
-                for _, structureName in ipairs(allTippTextStructures(l)) do
-                    Structure.setTippTextByName(structureName, "")
-                end
-            else
-                local structureName = tippTextStructure(l)
-                if structureName then Structure.setTippTextByName(structureName, infoText) end
-            end
-        end
-    end
-end
+function TrafficLight:getVehicleSignalName() return self.vehicleSignalName end
 
-function TrafficLight:signalIdTippText()
-    if self.signalId > 0 then return "Signal: " .. self.signalId end
-    for l in pairs(self.lightStructures) do
-        local structureName = tippTextStructure(l)
-        if structureName then return "Immo: " .. shortTippName(structureName) end
-    end
-    return "Signal: " .. self.signalId
-end
+function TrafficLight:getPedestrianSignalName() return self.pedestrianSignalName end
 
-local function basename(value)
-    return string.match(value:gsub("\\", "/"), "([^/]+)$") or value
-end
+function TrafficLight:getUse() return self.use end
 
-local function withoutExtension(value)
-    return string.gsub(value, "%.[^.]+$", "")
-end
+function TrafficLight:getTrafficLightModel() return self.trafficLightModel end
 
-local function inferTrafficLightModelFromItemName(itemNameWithModelPath)
-    if not itemNameWithModelPath then return nil end
-    local normalizedPath = itemNameWithModelPath:gsub("\\", "/")
-    local normalizedPathLower = string.lower(normalizedPath)
-    if normalizedPathLower == "signale/signale/signal_unsichtbar.3dm" then
-        return TrafficLightModel.Unsichtbar_2er
-    end
+function TrafficLight:getCurrentIndication() return self.currentIndication end
 
-    local fileName = basename(normalizedPath)
-    local normalizedFileName = string.lower(fileName)
-    local normalizedFileNameWithoutExtension = string.lower(withoutExtension(fileName))
-    if string.match(normalizedFileName, "^3er") and string.match(normalizedFileName, "_js2%.3dm$") then
-        return string.find(normalizedFileName, "fg") and TrafficLightModel.JS2_3er_mit_FG or
-            TrafficLightModel.JS2_3er_ohne_FG
-    end
-    if string.match(normalizedFileName, "^2er") and string.match(normalizedFileName, "_js2%.3dm$") then
-        if string.find(normalizedFileName, "fg") then return TrafficLightModel.JS2_2er_nur_FG end
-        if string.find(normalizedFileName, "gruengelb") then return TrafficLightModel.JS2_2er_gelb_gruen_aus end
-        if string.find(normalizedFileName, "rotgelb") then return TrafficLightModel.JS2_2er_rot_gelb_aus end
-        if string.find(normalizedFileName, "rotgruen") then return TrafficLightModel.JS2_2er_rot_gruen end
-    end
-    if normalizedFileNameWithoutExtension == "1erlinksmast_js2" then return TrafficLightModel.JS2_1er_gruen end
-    if string.match(normalizedFileNameWithoutExtension, "_np1$") then
-        if string.find(normalizedFileNameWithoutExtension, "fd") or
-            string.find(normalizedFileNameWithoutExtension, "fe") then
-            return TrafficLightModel.NP1_3er_mit_FG
-        end
-        if string.find(normalizedFileNameWithoutExtension, "of") then return TrafficLightModel.NP1_3er_ohne_FG end
-    end
-    return nil
-end
+function TrafficLight:getReason() return self.reason end
 
-local function getSignalFunctionsTippText(signalId, trafficLightModel)
-    if signalId > 0 then
-        local signal = SignalRegistry.getOrCreate(signalId)
-        local text = {}
-        signal:getItemName()
-        local trafficLightModelName = signal:getItemNameWithModelPath()
-        local effectiveTrafficLightModel = inferTrafficLightModelFromItemName(trafficLightModelName) or
-            trafficLightModel
-        if not trafficLightModelName then return effectiveTrafficLightModel.name end
-        table.insert(text, effectiveTrafficLightModel.name)
-        table.insert(text, "<br>")
-        table.insert(text, trafficLightModelName)
-        local currentPosition = signal:pullPosition()
-        local signalFunctions = signal:getFunctions() or {}
-        for i, action in ipairs(signalFunctions) do
-            table.insert(text, "<br>")
-            table.insert(text, currentPosition == i and "<b>" or "")
-            table.insert(text, i)
-            table.insert(text, ": ")
-            table.insert(text, effectiveTrafficLightModel:indicationOf(i) or action)
-            table.insert(text, currentPosition == i and "</b>." or ".")
-        end
-        return table.concat(text, "")
-    else
-        return trafficLightModel.name
-    end
-end
-
-function TrafficLight:vehicleSignalNameTippText()
-    local name = self.vehicleSignalName and "<b>" .. shortTippName(self.vehicleSignalName) .. "</b>" or ""
-    local indication = self.currentIndication
-    if indication == SignalIndication.GREEN then
-        return fmt.green(name)
-    elseif indication == SignalIndication.OFF then
-        return fmt.greyText(name)
-    elseif indication == SignalIndication.YELLOW or indication == SignalIndication.REDYELLOW or
-        indication == SignalIndication.GREENYELLOW or indication == SignalIndication.OFF_BLINKING then
-        return fmt.bgYellow(name)
-    else
-        return fmt.bgRed(name)
-    end
-end
-
-function TrafficLight:pedestrianSignalNameTippText()
-    local name = self.pedestrianSignalName and "<b>" .. shortTippName(self.pedestrianSignalName) .. "</b>" or ""
-    local indication = self.currentIndication
-    if indication == SignalIndication.PEDESTRIAN then
-        return fmt.green(name)
-    elseif indication == SignalIndication.OFF or indication == SignalIndication.OFF_BLINKING then
-        return fmt.greyText(name)
-    else
-        return fmt.bgRed(name)
-    end
-end
-
-function TrafficLight:signalNamesTippText()
-    if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then
-        return self:pedestrianSignalNameTippText()
-    elseif self.use == TrafficLight.Use.VEHICLE_AND_PEDESTRIAN then
-        return self:vehicleSignalNameTippText() .. "<br>" .. self:pedestrianSignalNameTippText()
-    else
-        return self:vehicleSignalNameTippText()
-    end
-end
+function TrafficLight:getSignalGroupsByUse() return self.signalGroupsByUse or {} end
 
 function TrafficLight:signalNamesText()
     if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then
@@ -348,65 +199,32 @@ function TrafficLight:signalNamesText()
     end
 end
 
---- Stellt die vorher gesetzten Tipp-Texte dar.
---
-local function isPartOfSignalGroup(signal)
-    return next(signal.signalGroupsByUse or {}) ~= nil
+function TrafficLight:getPrimaryTippTextStructure()
+    for lightStructure in pairs(self.lightStructures) do
+        local structureName = tippTextStructure(lightStructure)
+        if structureName then return structureName end
+    end
+    return nil
 end
 
-function TrafficLight:refreshInfo()
-    local showPhase = IntersectionSettings.showPhaseOnSignal and self.phaseInfo and self.phaseInfo:len() > 0
-    local showAllSignals = IntersectionSettings.showSignalIdOnSignal
-    local showModelInfo = IntersectionSettings.showModelInfoOnSignal
-    local showLaneName = IntersectionSettings.showLaneNamesOnSignal and self.laneNameInfo:len() > 0
-    local showNameAndColor = IntersectionSettings.showNameAndPhaseOnSignal and
-        (not self.isLaneSignal or isPartOfSignalGroup(self))
-    local showRequests = IntersectionSettings.showRequestsOnSignal and self.laneInfo:len() > 0
-    local showInfo = showAllSignals or showModelInfo or showLaneName or showNameAndColor or showRequests or showPhase
-
-    self:showInfoText(showInfo)
-    if showInfo then
-        local infoText = "<j>"
-
-        if showAllSignals then
-            infoText = fmt.appendUpTo1023(infoText, self:signalIdTippText())
-        end
-
-        if showModelInfo then
-            local signalFunctionsTippText = getSignalFunctionsTippText(self.signalId, self.trafficLightModel)
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, signalFunctionsTippText)
-        end
-
-        if showLaneName then
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, self.laneNameInfo)
-        end
-
-        if showNameAndColor and self.currentIndication then
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, self:signalNamesTippText())
-        end
-
-        if showRequests then
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, self.laneInfo)
-        end
-
-        if showPhase and self.phaseInfo then
-            infoText = fmt.appendUpTo1023(infoText, "<br><br><b>" .. "Phase: " .. "</b>")
-            infoText = fmt.appendUpTo1023(infoText, self.phaseInfo)
-        end
-
-        if showPhase and not showNameAndColor and self.currentIndication and self.reason then
-            infoText = fmt.appendUpTo1023(infoText, "<br><br>")
-            infoText = fmt.appendUpTo1023(infoText, string.format(" %s (%s) ", self.currentIndication, self.reason))
-        end
-
-        self:changeInfoText(infoText)
-    elseif self.signalId < 0 and next(self.lightStructures) ~= nil then
-        self:changeInfoText("")
+function TrafficLight:getPrimaryTippTextStructures()
+    local structures = {}
+    local knownStructures = {}
+    for lightStructure in pairs(self.lightStructures) do
+        addStructureName(structures, knownStructures, tippTextStructure(lightStructure))
     end
+    return structures
+end
+
+function TrafficLight:getAllTippTextStructures()
+    local structures = {}
+    local knownStructures = {}
+    for lightStructure in pairs(self.lightStructures) do
+        for _, structureName in ipairs(allTippTextStructures(lightStructure)) do
+            addStructureName(structures, knownStructures, structureName)
+        end
+    end
+    return structures
 end
 
 function TrafficLight.switchAll(signals, indication, reason)
@@ -513,7 +331,6 @@ function TrafficLight:showRequestOnSignal(hasRequest)
     if (self.debug or TrafficLight.debug) and lightDbg ~= "" then
         print(string.format("[TrafficLight    ] Schalte Ampel %04d%s", self.signalId, lightDbg))
     end
-    self:refreshInfo()
 end
 
 function TrafficLight:print()

@@ -164,6 +164,7 @@ insulate("Crossing", function ()
 
     it("shows phases in the crossing overview and shrinks the current phase bar", function ()
         local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local RoadTippTextGenerator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
 
         crossing:setTippStructure("#Overview")
         crossing.currentPhase = phaseA
@@ -171,16 +172,10 @@ insulate("Crossing", function ()
         _G.EEPTime = 109
         IntersectionSettings.showLanesOnStructure = true
 
-        local infoText
-        local showInfoStructureStub = stub(_G, "EEPShowInfoStructure", function () end)
-        local changeInfoStructureStub = stub(_G, "EEPChangeInfoStructure", function (_, text) infoText = text end)
-        finally(function ()
-            showInfoStructureStub:revert()
-            changeInfoStructureStub:revert()
-        end)
+        local target = RoadTippTextGenerator.generate().structures["#Overview"]
+        local infoText = target.text
 
-        crossing:updateLaneTipText()
-
+        assert.is_true(target.visible)
         assert.is_truthy(string.find(infoText, "<b>My Crossing</b>", 1, true))
         assert.is_truthy(string.find(infoText, "<bgrgb=0,192,0>X___<bgrgb=255,255,255>__  <b>P1</b>", 1, true))
         assert.is_truthy(string.find(

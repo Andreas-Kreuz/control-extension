@@ -1,4 +1,3 @@
-local TippTextFormatter = require("ce.hub.eep.TippTextFormatter")
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.Intersection ...") end
 
 local Task = require("ce.hub.scheduler.Task")
@@ -7,15 +6,19 @@ local TrafficPhase = require("ce.mods.road.TrafficPhase")
 local SignalGroup = require("ce.mods.road.SignalGroup")
 local Lane = require("ce.mods.road.Lane")
 local PedestrianCrossing = require("ce.mods.road.PedestrianCrossing")
-local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local SignalIndication = require("ce.mods.road.SignalIndication")
-local fmt = require("ce.hub.eep.TippTextFormatter")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 
 local allIntersections = {}
 local Intersection = {}
 Intersection.debug = CeStartWithDebug or false
 Intersection.allIntersections = {}
+
+function Intersection.getAll()
+    local copy = {}
+    for name, intersection in pairs(allIntersections) do copy[name] = intersection end
+    return copy
+end
 
 function Intersection.switchManuallyTo(intersectionName, phaseName)
     if Intersection.debug then
@@ -42,6 +45,12 @@ function Intersection:getScriptVariableName() return self._scriptVariableName en
 function Intersection:getPhases() return self.phases end
 
 function Intersection:getCurrentPhase() return self.currentPhase end
+
+function Intersection:getCurrentPhaseStartedAt() return self.currentPhaseStartedAt end
+
+function Intersection:getLanes() return self.lanes end
+
+function Intersection:getTippStructure() return self.tippStructure end
 
 function Intersection:getNextPhase() return self.nextPhase end
 
@@ -111,6 +120,7 @@ function Intersection:setGreenReached(greenReached) self.greenReached = greenRea
 function Intersection:isGreenReached() return self.greenReached end
 
 function Intersection:setTippStructure(tippStructure)
+    if self.tippStructure == tippStructure then return self end
     self.tippStructure = tippStructure
     return self
 end
@@ -317,105 +327,6 @@ local function switch(intersection)
     Scheduler:scheduleTask(greenTimeSeconds, intersectionFinishedTask, greenReachedTask)
 end
 
-local function recalculateSignalInfo(intersection)
-    for _, lane in pairs(intersection.lanes) do lane:checkRequests() end
-
-    local signalHeads = {}
-    local sortedPhases = {}
-    for _, phase in ipairs(intersection:getPhases()) do table.insert(sortedPhases, phase) end
-    table.sort(sortedPhases, function (s1, s2) return s1.name < s2.name end)
-
-    for _, phase in ipairs(sortedPhases) do
-        for signalHead, signalType in pairs(phase.signalHeads) do signalHeads[signalHead] = signalType end
-    end
-
-    local signalHeadsToRefresh = {}
-    for _, lane in pairs(intersection.lanes) do
-        local signalHead = lane.laneSignal
-        signalHeadsToRefresh[signalHead.signalId] = signalHead
-        signalHead.isLaneSignal = true
-        signalHead:setLaneNameInfo(signalHead:signalNamesTippText() .. " " .. fmt.bgLightBlue(lane.name) .. ".")
-        signalHead:setLaneInfo(lane:getRequestInfo())
-    end
-
-    for signalHead in pairs(signalHeads) do
-        signalHeadsToRefresh[signalHead.signalId] = signalHead
-        local text = {}
-        for _, phase in ipairs(sortedPhases) do
-            local highlighted = phase == intersection:getCurrentPhase()
-            local signalType = phase.signalHeads[signalHead]
-            if not signalType then
-                table.insert(text, "<br><j>" ..
-                    (highlighted and fmt.bgRed(phase.name .. " (Rot)") or (phase.name .. " " .. fmt.bgRed("(Rot)"))))
-            elseif signalType == TrafficPhase.Type.CAR then
-                table.insert(text, "<br><j>" ..
-                    (highlighted and fmt.bgGreen(phase.name .. " (Gruen)") or
-                        (phase.name .. " " .. fmt.bgGreen("(Gruen)"))))
-            elseif signalType == TrafficPhase.Type.PEDESTRIAN then
-                table.insert(text, "<br><j>" ..
-                    (highlighted and fmt.bgYellow(phase.name .. " (FG)") or
-                        (phase.name .. " " .. fmt.bgYellow("(FG)"))))
-            elseif signalType == TrafficPhase.Type.TRAM then
-                table.insert(text, "<br><j>" ..
-                    (highlighted and fmt.bgBlue(phase.name .. " (Tram)") or
-                        (phase.name .. " " .. fmt.bgBlue("(Tram)"))))
-            else
-                assert(false, signalType)
-            end
-        end
-        table.insert(text, "<br>")
-        signalHead:setPhaseInfo(table.concat(text, ""))
-    end
-
-    for _, signalHead in pairs(signalHeadsToRefresh) do signalHead:refreshInfo() end
-end
-
-local function secondsSincePhaseStarted(intersection)
-    local now = EEPTime or intersection.currentPhaseStartedAt or 0
-    local startedAt = intersection.currentPhaseStartedAt or now
-    if now < startedAt then return now + 24 * 60 * 60 - startedAt end
-    return now - startedAt
-end
-
-local function repeatText(text, count)
-    local result = ""
-    for _ = 1, count do result = result .. text end
-    return result
-end
-
-local function currentPhaseBar(intersection, phase)
-    local max = 5
-    if phase ~= intersection:getCurrentPhase() then return fmt.grey("X" .. repeatText("_", max)) end
-
-    local remainingSeconds = phase.greenTimeSeconds - secondsSincePhaseStarted(intersection)
-    local coloredUnderscores = max
-    if remainingSeconds <= 10 then
-        coloredUnderscores = math.max(0, math.min(max, math.ceil(remainingSeconds / 2)))
-    end
-    local colored = "X" .. repeatText("_", coloredUnderscores)
-    local grey = repeatText("_", max - coloredUnderscores)
-    return fmt.bgGreen(colored) .. grey
-end
-
-local function phaseOverviewLine(intersection, phase)
-    local phaseName = phase == intersection:getCurrentPhase() and fmt.bold(phase.name) or phase.name
-    return currentPhaseBar(intersection, phase) .. "  " .. phaseName
-end
-
-function Intersection:updateLaneTipText()
-    local text = fmt.bold(self.name)
-    for _, phase in ipairs(self.phases) do
-        text = TippTextFormatter.appendUpTo1023(text, "<br></j>" .. phaseOverviewLine(self, phase))
-    end
-
-    if self.tippStructure then
-        EEPShowInfoStructure(self.tippStructure, IntersectionSettings.showLanesOnStructure)
-        EEPChangeInfoStructure(self.tippStructure, text)
-    end
-end
-
-local setupHelpCreated = IntersectionSettings.showSignalIdOnSignal
-
 function Intersection.initPhases()
     for _, intersection in pairs(allIntersections) do
         local myLanes = {}
@@ -453,22 +364,14 @@ function Intersection.initPhases()
     end
 end
 
-function Intersection.switchPhases()
-    if setupHelpCreated ~= IntersectionSettings.showSignalIdOnSignal then
-        setupHelpCreated = IntersectionSettings.showSignalIdOnSignal
-        for signalId = 1, 1000 do
-            EEPShowInfoSignal(signalId, IntersectionSettings.showSignalIdOnSignal)
-            if IntersectionSettings.showSignalIdOnSignal then
-                EEPChangeInfoSignal(signalId, "<j>Signal: " .. signalId)
-            end
-        end
-    end
-
+function Intersection.refreshRoadState()
     for _, intersection in pairs(allIntersections) do
-        switch(intersection)
-        recalculateSignalInfo(intersection)
-        intersection:updateLaneTipText()
+        for _, lane in pairs(intersection.lanes) do lane:checkRequests() end
     end
+end
+
+function Intersection.switchPhases()
+    for _, intersection in pairs(allIntersections) do switch(intersection) end
 end
 
 return Intersection

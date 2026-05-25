@@ -12,6 +12,7 @@ local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 -- Lane starts here
 local Lane = {}
 Lane.debug = CeStartWithDebug or false
+
 local laneRegistry = {}
 local RouteDriveMode = { ONLY = "ONLY", ALSO = "ALSO" }
 local ROUTE_WILDCARD = "!ALL!"
@@ -320,6 +321,26 @@ function Lane.getType() return "Lane" end
 
 function Lane:getName() return self.name end
 
+function Lane:getLaneSignal() return self.laneSignal end
+
+function Lane:getRequestState()
+    local source = "counter"
+    if self.tracksUsedForRequest then
+        source = "track"
+    elseif self.signalUsedForRequest then
+        source = "signal"
+    end
+
+    return {
+        occupied = not self.queue:isEmpty(),
+        vehicleCount = self.vehicleCount,
+        waitCount = self.waitCount,
+        requestType = self.requestType,
+        source = source,
+        queuedVehicleNames = self.queue:elements()
+    }
+end
+
 function Lane:getLaneType() return self.requestType end
 
 function Lane:setLaneType(requestType)
@@ -384,7 +405,9 @@ function Lane:checkRequests()
 
     for _, vehicle in ipairs(self.queue:elements()) do text = text .. "<br>" .. vehicle end
 
-    self.requestInfoText = text
+    if self.requestInfoText ~= text then
+        self.requestInfoText = text
+    end
     refreshRequests(self)
 end
 
