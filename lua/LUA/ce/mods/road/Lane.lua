@@ -191,6 +191,12 @@ local function popTrainFromQueue(lane, trainName)
 end
 local function queueToText(queue) return table.concat(queue:elements(), "|") end
 
+local function shrinkQueueText(pipeSeparatedText)
+    if not pipeSeparatedText then return nil end
+    return string.match(pipeSeparatedText, "^(.*)|[^|]*$")
+end
+
+
 local function queueFromText(pipeSeparatedText, count)
     local queue = Queue:new()
     if pipeSeparatedText then
@@ -198,10 +204,9 @@ local function queueFromText(pipeSeparatedText, count)
             -- print("[#Lane] " .. trainName)
             queue:push(trainName)
         end
-    else
-        -- For compatibility with old versions, we fill with generic names
-        for i = 1, count, 1 do queue:push("train " .. i) end
     end
+    -- For compatibility and shortened tag storage, missing queue names are filled generically.
+    for i = queue:size() + 1, count, 1 do queue:push("train " .. i) end
     return queue
 end
 
@@ -233,7 +238,8 @@ local function saveLaneSignalTagData(lane, laneData)
 
     local tagData = loadLaneSignalTagData(lane)
     for key, value in pairs(laneData) do tagData[key] = value end
-    SignalRegistry.getOrCreate(signalId):setTag(StorageUtility.encodeTable(tagData))
+    local tagText = StorageUtility.encodeTableWithShrinkingValue(tagData, "q", shrinkQueueText)
+    SignalRegistry.getOrCreate(signalId):setTag(tagText)
 end
 
 local function save(lane)
