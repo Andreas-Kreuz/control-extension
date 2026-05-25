@@ -203,7 +203,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
         local laneSignal = TrafficLight:new("L1_main", 102, TrafficLightModel.Unsichtbar_2er)
-        Intersection:new("C1"):newLane("Lane 1", laneSignal)
+        Intersection:new("C1"):newLane("Lane 1", laneSignal):scriptVariableName("c1Lane1")
         IntersectionSettings.showLaneNamesOnSignal = true
 
         local state = desiredForSignal(102)
@@ -211,6 +211,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         assert.is_true(state.visible)
         assert.is_truthy(string.find(state.text, "<b>L1</b>", 1, true))
         assert.is_truthy(string.find(state.text, "Lane 1", 1, true))
+        assert.is_truthy(string.find(state.text, "c1Lane1", 1, true))
     end)
 
     it("shows short name and color for regular signals and grouped lane signals only", function ()
