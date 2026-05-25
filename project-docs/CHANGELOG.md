@@ -246,3 +246,10 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 - 📖 Lua-Architektur um Speicherschutz, `.anl3`-Reload und Struktur-Metadaten ergänzt
 - 📖 Tutorial zur Ampelkreuzung mit Immobilien aktualisiert
 - 📖 Lua-Server-Vertragsnotizen für DTO-Änderungen ergänzt
+
+## **Control Extension v0.0.10-alpha** Vorschauversion
+
+### Behobene Fehler in v0.0.10-alpha
+
+- 🐞 Fehler behoben, dass zu lange Schlangen an Kreuzungen den Signalen zu Fehlermeldungen führen
+- 🐞 Fussgängersignale kombinierter Ampeln werden korrekt beim Neuladen der Kreuzung erkannt
