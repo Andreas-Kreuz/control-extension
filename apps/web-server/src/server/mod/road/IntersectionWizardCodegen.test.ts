@@ -962,6 +962,185 @@ function testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal(
   assert.equal(draft.lanes[0]?.signalGroupSignalId, 'sg-1');
 }
 
+function testCurrentIntersectionDraftUsesScriptVariableSignalGroupReferences(): void {
+  const intersection: IntersectionAppDto = {
+    id: 15,
+    name: 'Zollhafen',
+    scriptVariableName: 'c3',
+    currentPhase: '',
+    manualPhase: '',
+    nextPhase: '',
+    ready: true,
+    greenTimeSeconds: 15,
+    staticCams: [],
+    signalGroupDefinitions: [
+      {
+        name: 'sgNorthPed',
+        scriptVariableName: 'c3SgNorthPed',
+        approach: 'NORTH',
+        trafficType: 'PEDESTRIAN',
+        signalIds: [379, 378],
+        pedestrianCrossingNames: ['sgNorthPed'],
+      },
+      {
+        name: 'sgNorthPed',
+        scriptVariableName: 'c3SgNorthPed_2',
+        approach: 'NORTH',
+        trafficType: 'PEDESTRIAN',
+        signalIds: [373, 375],
+        pedestrianCrossingNames: ['sgNorthPed2'],
+      },
+      {
+        name: 'sgNorthWestPed',
+        scriptVariableName: 'c3SgNorthWestPed',
+        approach: 'NORTH_WEST',
+        trafficType: 'PEDESTRIAN',
+        signalIds: [376, 377],
+        pedestrianCrossingNames: ['sgNorthWestPed'],
+      },
+    ],
+    pedestrianCrossings: [
+      {
+        name: 'sgNorthPed',
+        scriptVariableName: 'c3PedNorth',
+        approach: 'NORTH',
+        signalGroups: ['c3SgNorthPed'],
+      },
+      {
+        name: 'sgNorthPed2',
+        scriptVariableName: 'c3PedNorth2',
+        approach: 'NORTH',
+        signalGroups: ['c3SgNorthPed_2'],
+      },
+      {
+        name: 'sgNorthWestPed',
+        scriptVariableName: 'c3PedNorthWest',
+        approach: 'NORTH_WEST',
+        signalGroups: ['c3SgNorthWestPed'],
+      },
+    ],
+    phases: [
+      {
+        id: '15-P1',
+        name: 'P1',
+        order: 1,
+        prio: 0,
+        greenTimeSeconds: 10,
+        signalGroups: ['c3SgNorthPed', 'c3SgNorthPed_2', 'c3SgNorthWestPed'],
+        signalHeads: [],
+      },
+    ],
+  };
+  const lanes: IntersectionLaneAppDto[] = [];
+  const ampeln: IntersectionTrafficLightAppDto[] = [
+    {
+      id: 379,
+      signalId: 379,
+      vehicleSignalName: 'F3',
+      use: 'VEHICLE_ONLY',
+      modelId: 'JS2_2er_nur_FG',
+      currentIndication: 'RED',
+      intersectionId: 15,
+      lightStructures: {},
+      axisStructures: [],
+    },
+    {
+      id: 378,
+      signalId: 378,
+      vehicleSignalName: 'F4',
+      use: 'VEHICLE_ONLY',
+      modelId: 'JS2_2er_nur_FG',
+      currentIndication: 'RED',
+      intersectionId: 15,
+      lightStructures: {},
+      axisStructures: [],
+    },
+    {
+      id: 373,
+      signalId: 373,
+      vehicleSignalName: 'K5',
+      pedestrianSignalName: 'F5',
+      use: 'VEHICLE_AND_PEDESTRIAN',
+      modelId: 'JS2_3er_mit_FG',
+      currentIndication: 'RED',
+      intersectionId: 15,
+      lightStructures: {},
+      axisStructures: [],
+    },
+    {
+      id: 375,
+      signalId: 375,
+      vehicleSignalName: 'K8',
+      pedestrianSignalName: 'F6',
+      use: 'VEHICLE_AND_PEDESTRIAN',
+      modelId: 'JS2_3er_mit_FG',
+      currentIndication: 'RED',
+      intersectionId: 15,
+      lightStructures: {},
+      axisStructures: [],
+    },
+    {
+      id: 376,
+      signalId: 376,
+      vehicleSignalName: 'F7',
+      use: 'VEHICLE_ONLY',
+      modelId: 'JS2_2er_nur_FG',
+      currentIndication: 'RED',
+      intersectionId: 15,
+      lightStructures: {},
+      axisStructures: [],
+    },
+    {
+      id: 377,
+      signalId: 377,
+      vehicleSignalName: 'F8',
+      use: 'VEHICLE_ONLY',
+      modelId: 'JS2_2er_nur_FG',
+      currentIndication: 'RED',
+      intersectionId: 15,
+      lightStructures: {},
+      axisStructures: [],
+    },
+  ];
+
+  const draft = createDraftFromCurrentIntersection(intersection, lanes, ampeln);
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.deepEqual(
+    draft.signalGroups.map((group) => ({
+      name: group.name,
+      luaVariableName: group.luaVariableName,
+      crossing: group.pedestrianCrossingLuaVariableName,
+      ampelIds: group.ampelIds,
+    })),
+    [
+      {
+        name: 'sgNorthPed',
+        luaVariableName: 'c3SgNorthPed',
+        crossing: 'c3PedNorth',
+        ampelIds: ['ampel-379', 'ampel-378'],
+      },
+      {
+        name: 'sgNorthPed2',
+        luaVariableName: 'c3SgNorthPed_2',
+        crossing: 'c3PedNorth2',
+        ampelIds: ['ampel-373', 'ampel-375'],
+      },
+      {
+        name: 'sgNorthWestPed',
+        luaVariableName: 'c3SgNorthWestPed',
+        crossing: 'c3PedNorthWest',
+        ampelIds: ['ampel-376', 'ampel-377'],
+      },
+    ],
+  );
+  assert.deepEqual(draft.phases[0]?.signalGroupIds, ['sg-1', 'sg-2', 'sg-3']);
+  assert.match(lua, /newSignalGroup\("sgNorthPed"\)[\s\S]*:addPedestrianSignals\(c3F3, c3F4\)/);
+  assert.match(lua, /newSignalGroup\("sgNorthPed2"\)[\s\S]*:addPedestrianSignals\(c3F5, c3F6\)/);
+  assert.match(lua, /newSignalGroup\("sgNorthWestPed"\)[\s\S]*:addPedestrianSignals\(c3F7, c3F8\)/);
+  assert.doesNotMatch(lua, /:addPedestrianSignals\(\)/);
+}
+
 function testCurrentIntersectionDraftUsesModelConstantsNotDisplayNames(): void {
   const intersection: IntersectionAppDto = {
     id: 10,
@@ -1757,6 +1936,10 @@ export async function run(): Promise<void> {
   await runTest(
     'current intersection import uses signal group metadata and reuses lane signal',
     testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal,
+  );
+  await runTest(
+    'current intersection import uses script-variable signal group references',
+    testCurrentIntersectionDraftUsesScriptVariableSignalGroupReferences,
   );
   await runTest(
     'current intersection import uses model constants not display names',

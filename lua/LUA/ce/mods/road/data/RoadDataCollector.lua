@@ -14,6 +14,38 @@ local function optionalValueFromGetterOrField(value, getterName, fieldName)
     if value and type(value[getterName]) == "function" then return value[getterName](value) end
     return value and value[fieldName] or nil
 end
+
+local function signalGroupReference(signalGroup)
+    return optionalValueFromGetterOrField(signalGroup, "getScriptVariableName", "_scriptVariableName") or
+        signalGroup.name
+end
+
+local function signalHeadLogicalUses(signalHead)
+    local groupsByUse = signalHead.getSignalGroupsByUse and signalHead:getSignalGroupsByUse() or
+        signalHead.signalGroupsByUse or {}
+    return {
+        VEHICLE = groupsByUse.VEHICLE ~= nil,
+        PEDESTRIAN = groupsByUse.PEDESTRIAN ~= nil
+    }
+end
+
+local function signalHeadUse(signalHead)
+    local logicalUses = signalHeadLogicalUses(signalHead)
+    if logicalUses.VEHICLE and logicalUses.PEDESTRIAN then return "VEHICLE_AND_PEDESTRIAN" end
+    if logicalUses.PEDESTRIAN then return "PEDESTRIAN_ONLY" end
+    return signalHead.use
+end
+
+local function signalHeadVehicleSignalName(signalHead, use)
+    if use == "PEDESTRIAN_ONLY" then return nil end
+    return signalHead.vehicleSignalName
+end
+
+local function signalHeadPedestrianSignalName(signalHead, use)
+    if use == "PEDESTRIAN_ONLY" then return signalHead.pedestrianSignalName or signalHead.vehicleSignalName end
+    return signalHead.pedestrianSignalName
+end
+
 local function createSignalGroupDto(signalGroup)
     local signalIds = {}
     local trafficType = "CAR"
@@ -58,7 +90,7 @@ local function defaultSignalGroupsForLane(intersection, lane)
                 hasMatchingSignal = true
             end
         end
-        if hasMatchingSignal then table.insert(signalGroupNames, signalGroup.name) end
+        if hasMatchingSignal then table.insert(signalGroupNames, signalGroupReference(signalGroup)) end
     end
     return signalGroupNames
 end
@@ -70,7 +102,7 @@ local function signalGroupsForSignals(intersection, signals)
         for signalHead, signalType in pairs(signalGroup:getSignalHeads()) do
             if signalType ~= "PEDESTRIAN" and signals[signalHead] then hasMatchingSignal = true end
         end
-        if hasMatchingSignal then table.insert(signalGroupNames, signalGroup.name) end
+        if hasMatchingSignal then table.insert(signalGroupNames, signalGroupReference(signalGroup)) end
     end
     table.sort(signalGroupNames)
     return signalGroupNames
@@ -144,7 +176,7 @@ local function createPhaseDto(intersection, phase, order)
     local signalHeads = {}
     local signalGroups = {}
     for _, signalGroup in ipairs(phase.signalGroups or {}) do
-        table.insert(signalGroups, signalGroup.name)
+        table.insert(signalGroups, signalGroupReference(signalGroup))
     end
     for signalHead, signalType in pairs(phase.signalHeads) do
         local signalHeadKind = signalType == "PEDESTRIAN" and "PEDESTRIAN" or "VEHICLE"
@@ -234,7 +266,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
                     }
                     pedestrianCrossingsByName[crossing:getName()] = crossingEntry
                 end
-                table.insert(crossingEntry.signalGroups, signalGroup.name)
+                table.insert(crossingEntry.signalGroups, signalGroupReference(signalGroup))
             end
         end
         for _, crossingEntry in pairs(pedestrianCrossingsByName) do
@@ -266,12 +298,13 @@ function RoadDataCollector.collectCrossings(allIntersections)
         end
 
         for signalHead in pairs(signalHeads) do
+            local use = signalHeadUse(signalHead)
             local signalHeadDto = {
                 id = signalHead.signalId,
                 signalId = signalHead.signalId,
-                vehicleSignalName = signalHead.vehicleSignalName,
-                pedestrianSignalName = signalHead.pedestrianSignalName,
-                use = signalHead.use,
+                vehicleSignalName = signalHeadVehicleSignalName(signalHead, use),
+                pedestrianSignalName = signalHeadPedestrianSignalName(signalHead, use),
+                use = use,
                 modelId = signalHead.trafficLightModel.id,
                 currentIndication = signalHead.currentIndication,
                 intersectionId = intersectionIdCounter,
