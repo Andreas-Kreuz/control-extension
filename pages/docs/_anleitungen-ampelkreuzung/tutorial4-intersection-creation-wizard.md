@@ -1,14 +1,14 @@
 ---
 layout: page_with_toc
-title: Ampelsteuerung 4
+title: Kreuzungs-Wizard
 type: Tutorial mit Web-App
 subtitle: Erfahre, wie Du eine Kreuzung mit dem Assistenten in der Web-App anlegst und den erzeugten Lua-Code in EEP verwendest.
-img: '/assets/tutorial/tutorial4/road-wizard-tutorial-01-kreuzung.png'
+img: '/assets/tutorial/tutorial4/vorbereitung-begriffe.webp'
 permalink: docs/anleitungen-ampelkreuzung/tutorial4-intersection-creation-wizard
 hide: false
 date: 2026-05-21
 tags: [Verwendung, Anleitung]
-published: false
+published: true
 ---
 
 # Kreuzung per Assistent erstellen
