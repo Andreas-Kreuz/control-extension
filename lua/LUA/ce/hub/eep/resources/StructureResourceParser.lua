@@ -1,4 +1,4 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.eep.StructureResourceParser ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.resources.StructureResourceParser ...") end
 
 local StructureResourceParser = {}
 

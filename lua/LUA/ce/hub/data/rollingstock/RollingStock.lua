@@ -83,7 +83,8 @@ local function textureSurfaceNumbersForPull(rollingStock)
     for _, surfaceNumber in ipairs(sortedNumberKeys(rollingStock.textureTexts or {})) do
         surfaceNumbers[#surfaceNumbers + 1] = surfaceNumber
     end
-    local modelTextureNames = rollingStock.modelInfo and rollingStock.modelInfo.textureNames or {}
+    local modelInfo = RollingStockModelInfoRegistry.get(rollingStock.xmlModel)
+    local modelTextureNames = modelInfo and modelInfo.textureNames or {}
     for _, surfaceNumber in ipairs(sortedNumberKeys(modelTextureNames)) do
         if rollingStock.textureTexts == nil or rollingStock.textureTexts[tostring(surfaceNumber)] == nil then
             surfaceNumbers[#surfaceNumbers + 1] = surfaceNumber
@@ -114,6 +115,13 @@ local function axisNamesKnownForModelInfo(modelInfo)
     if not modelInfo then return false end
     if type(modelInfo.getAxisNamesKnown) == "function" then return modelInfo:getAxisNamesKnown() end
     return modelInfo.axisNamesKnown == true
+end
+
+local function modelInfoForXmlModel(xmlModel, deferModelInfo)
+    if deferModelInfo then
+        return RollingStockModelInfoRegistry.peek(xmlModel)
+    end
+    return RollingStockModelInfoRegistry.get(xmlModel)
 end
 
 local function sortedAxisNumbers(modelInfo)
@@ -184,8 +192,6 @@ end
 ---@field y number
 ---@field z number
 ---@field model RollingStockModel
----@field modelInfo table|nil
----@field axisNamesKnown boolean
 ---@field axisValues table<string, number>
 ---@field tag string
 ---@field orientationForward boolean
@@ -323,7 +329,7 @@ function RollingStock.fromSnapshot(snapshot)
     assert(type(snapshot.rollingStockName) == "string", "Need snapshot.rollingStockName as string")
 
     local xmlModel = snapshot.xmlModel
-    local modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    modelInfoForXmlModel(xmlModel, snapshot.deferModelInfo == true)
     local tag = snapshot.tag or ""
     local o = {
         id = snapshot.rollingStockName,
@@ -345,8 +351,6 @@ function RollingStock.fromSnapshot(snapshot)
         hookGlueMode = snapshotNumber(snapshot, "hookGlueMode") or 0,
         active = snapshot.active == true,
         textureTexts = copyTableWithStringKeys(snapshot.textureTexts or {}),
-        modelInfo = modelInfo,
-        axisNamesKnown = axisNamesKnownForModelInfo(modelInfo),
         axisValues = snapshot.axisValues or {},
         trackId = snapshotNumber(snapshot, "trackId") or -1,
         trackDistance = round2(snapshot.trackDistance) or -1,
@@ -888,7 +892,7 @@ end
 
 function RollingStock:updateAxisValues()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+    self:setAxisValues(collectAxisValues(self.rollingStockName, RollingStockModelInfoRegistry.get(self.xmlModel)))
 end
 
 function RollingStock:pullAxisValues()
@@ -919,7 +923,8 @@ function RollingStock:setAxisByNumber(axisNumber, axisValue)
     axisValue = tonumber(axisValue)
     if not axisNumber or not axisValue then return false end
 
-    if axisNameForNumber(self.modelInfo, axisNumber)
+    local modelInfo = RollingStockModelInfoRegistry.get(self.xmlModel)
+    if axisNameForNumber(modelInfo, axisNumber)
         and self:setAxisByNameFallback(axisNumber, axisValue) then
         setCachedAxisValue(self, axisNumber, axisValue)
         return true
@@ -945,7 +950,7 @@ function RollingStock:setAxisByNameFallback(axisNumber, axisValue)
     if not axisNumber or not axisValue then return false end
     if not DataClass.isCallable(EEPRollingstockSetAxis) then return false end
 
-    local axisName = axisNameForNumber(self.modelInfo, axisNumber)
+    local axisName = axisNameForNumber(RollingStockModelInfoRegistry.get(self.xmlModel), axisNumber)
     if not axisName then
         print(string.format("[#RollingStock] No axis name for %s axis %s", self.rollingStockName, tostring(axisNumber)))
         return false
@@ -956,17 +961,19 @@ end
 
 function RollingStock:getAxisNames()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.axisNames or {})
+    local modelInfo = RollingStockModelInfoRegistry.get(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.axisNames or {})
 end
 
 function RollingStock:getAxisNamesKnown()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    return self.axisNamesKnown == true
+    return axisNamesKnownForModelInfo(RollingStockModelInfoRegistry.get(self.xmlModel))
 end
 
 function RollingStock:getTextureNames()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.textureNames or {})
+    local modelInfo = RollingStockModelInfoRegistry.get(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.textureNames or {})
 end
 
 function RollingStock:setRotation(rotX, rotY, rotZ)
@@ -1296,13 +1303,21 @@ function RollingStock:peekSmoke() return self.smoke end
 
 function RollingStock:peekActive() return self.active end
 
-function RollingStock:peekAxisNamesKnown() return self.axisNamesKnown == true end
+function RollingStock:peekAxisNamesKnown()
+    return axisNamesKnownForModelInfo(RollingStockModelInfoRegistry.peek(self.xmlModel))
+end
 
-function RollingStock:peekAxisNames() return self:getAxisNames() end
+function RollingStock:peekAxisNames()
+    local modelInfo = RollingStockModelInfoRegistry.peek(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.axisNames or {})
+end
 
 function RollingStock:peekAxisValues() return copyTableWithStringKeys(self.axisValues or {}) end
 
-function RollingStock:peekTextureNames() return self:getTextureNames() end
+function RollingStock:peekTextureNames()
+    local modelInfo = RollingStockModelInfoRegistry.peek(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.textureNames or {})
+end
 
 function RollingStock:peekRotX() return self.rotX end
 
@@ -1312,39 +1327,44 @@ function RollingStock:peekRotZ() return self.rotZ end
 
 function RollingStock:peekXmlModel() return self.xmlModel end
 
+function RollingStock:refreshModelInfo(deferModelInfo, updateAxisValues)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local oldAxisNames = self:peekAxisNames()
+    local oldAxisNamesKnown = self:peekAxisNamesKnown()
+    local oldTextureNames = self:peekTextureNames()
+    local modelInfo = modelInfoForXmlModel(self.xmlModel, deferModelInfo == true)
+    if updateAxisValues then self:setAxisValues(collectAxisValues(self.rollingStockName, modelInfo)) end
+    if oldAxisNamesKnown ~= self:peekAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
+    if not TableUtils.sameDictEntries(oldAxisNames, self:peekAxisNames()) then markDirty(self, "axisNames") end
+    if not TableUtils.sameDictEntries(oldTextureNames, self:peekTextureNames()) then markDirty(self, "textureNames") end
+end
+
+function RollingStock:markModelInfoDirtyFields(dirtyFields)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    dirtyFields = dirtyFields or {}
+    if dirtyFields.axisNamesKnown then markDirty(self, "axisNamesKnown") end
+    if dirtyFields.axisNames then markDirty(self, "axisNames") end
+    if dirtyFields.textureNames then markDirty(self, "textureNames") end
+end
+
 function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
-    local oldAxisNames = self:getAxisNames()
-    local oldAxisNamesKnown = self:getAxisNamesKnown()
-    local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
     markLoaded(self, "xmlModel")
     self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
-    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
-    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
-    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+    self:refreshModelInfo(false, true)
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
-    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
-    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
-    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
-function RollingStock:setXmlModelFromSnapshot(model)
+function RollingStock:setXmlModelFromSnapshot(model, deferModelInfo)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
-    local oldAxisNames = self:getAxisNames()
-    local oldAxisNamesKnown = self:getAxisNamesKnown()
-    local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
     markLoaded(self, "xmlModel")
     self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
-    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
-    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
+    self:refreshModelInfo(deferModelInfo == true, false)
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
-    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
-    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
-    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
 function RollingStock:resetDirty()

@@ -1,5 +1,5 @@
-insulate("ce.hub.eep.StructureResourceParser", function ()
-    local Parser = require("ce.hub.eep.StructureResourceParser")
+insulate("ce.hub.eep.resources.StructureResourceParser", function ()
+    local Parser = require("ce.hub.eep.resources.StructureResourceParser")
 
     it("extracts localized model names", function ()
         local info = Parser.parseContent(table.concat({

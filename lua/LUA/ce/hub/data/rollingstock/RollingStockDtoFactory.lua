@@ -34,12 +34,23 @@ local function getXmlModel(stock)
     return cached(stock, function (source) return source:peekXmlModel() end, "xmlModel") or XML_MODEL_PLACEHOLDER
 end
 
-local function getAxisNamesKnown(stock)
+local function getAxisNamesKnown(stock, isSelected)
+    if isSelected and stock.getAxisNamesKnown then return stock:getAxisNamesKnown() end
     return cached(stock, function (source) return source:peekAxisNamesKnown() end, "axisNamesKnown") == true
 end
 
 local function copiedCachedTable(stock, readCachedValue, fieldName)
     return TableUtils.shallowcopy(cached(stock, readCachedValue, fieldName) or {})
+end
+
+local function getAxisNames(stock, isSelected)
+    if isSelected and stock.getAxisNames then return TableUtils.shallowcopy(stock:getAxisNames()) end
+    return copiedCachedTable(stock, function (source) return source:peekAxisNames() end, "axisNames")
+end
+
+local function getTextureNames(stock, isSelected)
+    if isSelected and stock.getTextureNames then return TableUtils.shallowcopy(stock:getTextureNames()) end
+    return copiedCachedTable(stock, function (source) return source:peekTextureNames() end, "textureNames")
 end
 
 -- DtoFields: class definition in RollingStockDtoTypes.d.lua
@@ -159,13 +170,11 @@ local dtoFields = {
         placeholder = false
     },
     axisNamesKnown = {
-        getValue = function (stock) return getAxisNamesKnown(stock) end,
+        getValue = function (stock, isSelected) return getAxisNamesKnown(stock, isSelected) end,
         placeholder = false
     },
     axisNames = {
-        getValue = function (stock)
-            return copiedCachedTable(stock, function (source) return source:peekAxisNames() end, "axisNames")
-        end,
+        getValue = function (stock, isSelected) return getAxisNames(stock, isSelected) end,
         placeholder = {}
     },
     axisValues = {
@@ -175,9 +184,7 @@ local dtoFields = {
         placeholder = {}
     },
     textureNames = {
-        getValue = function (stock)
-            return copiedCachedTable(stock, function (source) return source:peekTextureNames() end, "textureNames")
-        end,
+        getValue = function (stock, isSelected) return getTextureNames(stock, isSelected) end,
         placeholder = {}
     },
     rotX = {

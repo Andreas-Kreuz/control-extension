@@ -242,7 +242,8 @@ function TrainDiscovery.initFromAnl3(tableOfAnl3)
                 trackDistance = rs.trackDistance,
                 trackDirection = rs.trackDirection,
                 trackSystem = rs.trackSystem,
-                textureTexts = rs.textureTexts
+                textureTexts = rs.textureTexts,
+                deferModelInfo = true
             })
             if rs.trainName and rs.positionInTrain then
                 rollingStockNamesByTrain[rs.trainName] = rollingStockNamesByTrain[rs.trainName] or {}

@@ -143,7 +143,7 @@ function TrainRollingStockStore.seedRollingStockFromSnapshot(snapshot, createRol
 
     if allRollingStock[snapshot.rollingStockName] then
         local rollingStock = allRollingStock[snapshot.rollingStockName]
-        if snapshot.xmlModel then rollingStock:setXmlModelFromSnapshot(snapshot.xmlModel) end
+        if snapshot.xmlModel then rollingStock:setXmlModelFromSnapshot(snapshot.xmlModel, snapshot.deferModelInfo) end
         if snapshot.tag ~= nil then rollingStock:setTag(snapshot.tag) end
         if snapshot.smoke ~= nil then rollingStock:setSmoke(snapshot.smoke) end
         if snapshot.textureTexts ~= nil then rollingStock:setTextureTexts(snapshot.textureTexts) end

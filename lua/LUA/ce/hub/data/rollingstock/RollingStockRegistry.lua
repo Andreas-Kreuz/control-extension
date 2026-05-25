@@ -1,4 +1,5 @@
 local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
 local TrainRollingStockStore = require("ce.hub.data.trains.TrainRollingStockStore")
 
 local RollingStockRegistry = {}
@@ -31,6 +32,21 @@ end
 
 function RollingStockRegistry.getAll()
     return TrainRollingStockStore.getAllRollingStock()
+end
+
+function RollingStockRegistry.refreshModelInfoForXmlModels(xmlModels)
+    local xmlModelKeys = {}
+    local dirtyFieldsByXmlModel = {}
+    for _, xmlModel in ipairs(xmlModels or {}) do
+        xmlModelKeys[xmlModel or ""] = true
+        dirtyFieldsByXmlModel[xmlModel or ""] = RollingStockModelInfoRegistry.changedFieldsForXmlModel(xmlModel)
+    end
+    for _, rollingStock in pairs(TrainRollingStockStore.getAllRollingStock()) do
+        local xmlModelKey = rollingStock.xmlModel or ""
+        if xmlModelKeys[xmlModelKey] and rollingStock.markModelInfoDirtyFields then
+            rollingStock:markModelInfoDirtyFields(dirtyFieldsByXmlModel[xmlModelKey])
+        end
+    end
 end
 
 function RollingStockRegistry.getRemovedIds()

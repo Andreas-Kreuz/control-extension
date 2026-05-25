@@ -1,4 +1,4 @@
-insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
+insulate("ce.hub.eep.scenario.EepScenarioAnl3Discovery", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
     local TEMP_FILE = "spec/ce/hub/eep/_anl3_discovery_helper_tmp.xml"
@@ -19,19 +19,19 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
     local function buildDiscoveryTable(xml)
         originalEEPLoadData = _G.EEPLoadData
         rawset(_G, "EEPLoadData", _G.EEPLoadData or function () return false, nil end)
-        clearModule("ce.hub.eep.Anl3DiscoveryHelper")
-        clearModule("ce.hub.eep.Anl3ToTable")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Parser")
 
-        local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
-        local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
-        local root = assert(Anl3ToTable.loadAnlage(writeTempXml(xml)))
-        return Anl3DiscoveryHelper.buildDiscoveryTable(root)
+        local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
+        local EepScenarioAnl3Discovery = require("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
+        local root = assert(EepScenarioAnl3Parser.loadAnlage(writeTempXml(xml)))
+        return EepScenarioAnl3Discovery.buildDiscoveryTable(root)
     end
 
     after_each(function ()
         rawset(_G, "EEPLoadData", originalEEPLoadData)
         rawset(_G, "EEPLng", originalEEPLng)
-        clearModule("ce.hub.eep.StructureResourceParser")
+        clearModule("ce.hub.eep.resources.StructureResourceParser")
         os.remove(TEMP_FILE)
     end)
 
@@ -156,7 +156,7 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
     it("builds Lua structure names from ImmoIdx and localized model ini names", function ()
         local calls = 0
         rawset(_G, "EEPLng", "ENG")
-        package.loaded["ce.hub.eep.StructureResourceParser"] = {
+        package.loaded["ce.hub.eep.resources.StructureResourceParser"] = {
             infoForGsbname = function (gsbname)
                 calls = calls + 1
                 assert.equals("\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm", gsbname)
@@ -194,7 +194,7 @@ insulate("ce.hub.eep.Anl3DiscoveryHelper", function ()
     it("falls back to German model names for unknown EEP languages", function ()
         local requestedLanguage
         rawset(_G, "EEPLng", "ITA")
-        package.loaded["ce.hub.eep.StructureResourceParser"] = {
+        package.loaded["ce.hub.eep.resources.StructureResourceParser"] = {
             infoForGsbname = function ()
                 return {
                     modelNamesByLanguage = {

@@ -17,7 +17,7 @@ end
 local function applyField(dto, source, fieldName, dtoField, fieldPolicies, isSelected)
     local policyField = dtoField.policyField or fieldName
     if shouldPublishValue(fieldPolicies, policyField, isSelected) then
-        dto[fieldName] = dtoField.getValue(source)
+        dto[fieldName] = dtoField.getValue(source, isSelected)
     elseif shouldPublishPlaceholder(fieldPolicies, policyField, isSelected, dtoField) then
         dto[fieldName] = dtoField.placeholder
     end

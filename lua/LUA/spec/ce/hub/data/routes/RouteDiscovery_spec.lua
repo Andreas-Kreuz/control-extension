@@ -16,11 +16,11 @@ insulate("ce.hub.data.routes.RouteDiscovery", function ()
         clearModule("ce.hub.data.routes.Route")
         clearModule("ce.hub.data.routes.RouteRegistry")
         clearModule("ce.hub.data.routes.RouteDiscovery")
-        clearModule("ce.hub.eep.Anl3DiscoveryHelper")
-        clearModule("ce.hub.eep.Anl3ToTable")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Parser")
 
-        local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
-        local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
+        local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
+        local EepScenarioAnl3Discovery = require("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
         local RouteRegistry = require("ce.hub.data.routes.RouteRegistry")
 
         local routeXml = table.concat({
@@ -29,8 +29,8 @@ insulate("ce.hub.data.routes.RouteDiscovery", function ()
                                           optionsXml or "",
                                           "</sutrackp>"
                                       }, "")
-        local root = assert(Anl3ToTable.loadAnlage(writeTempXml(routeXml)))
-        Anl3DiscoveryHelper.fillDiscoveries(root)
+        local root = assert(EepScenarioAnl3Parser.loadAnlage(writeTempXml(routeXml)))
+        EepScenarioAnl3Discovery.fillDiscoveries(root)
         return RouteRegistry.getAll()
     end
 

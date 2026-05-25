@@ -1,4 +1,4 @@
-local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
+local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
 
 local TEMP_FILE = "spec/ce/hub/eep/_anl3_test_tmp.xml"
 
@@ -10,7 +10,7 @@ local function writeTempXml(content)
 end
 
 local function load(xmlPath)
-    local result = Anl3ToTable.loadAnlage(xmlPath)
+    local result = EepScenarioAnl3Parser.loadAnlage(xmlPath)
     assert(result, "loadAnlage returned nil")
     return result
 end
@@ -56,7 +56,7 @@ local MINIMAL_ANL3 = table.concat({
                                       "</sutrackp>",
                                   }, "")
 
-insulate("Anl3ToTable", function ()
+insulate("ce.hub.eep.scenario.EepScenarioAnl3Parser", function ()
     local path
     local ioOpenStub
 
@@ -73,7 +73,7 @@ insulate("Anl3ToTable", function ()
     end)
 
     it("returns nil and error message when file does not exist", function ()
-        local result, err = Anl3ToTable.loadAnlage("/nonexistent/file.anl3")
+        local result, err = EepScenarioAnl3Parser.loadAnlage("/nonexistent/file.anl3")
         assert.is_nil(result)
         assert.is_not_nil(err)
     end)
@@ -98,7 +98,7 @@ insulate("Anl3ToTable", function ()
             return fakeFile
         end)
 
-        local root, err = Anl3ToTable.loadAnlage("locked.anl3")
+        local root, err = EepScenarioAnl3Parser.loadAnlage("locked.anl3")
 
         assert.is_nil(err)
         assert.equals("sutrackp", root.tag)
@@ -119,10 +119,10 @@ insulate("Anl3ToTable", function ()
             return fakeFile
         end)
 
-        local result, err = Anl3ToTable.loadAnlage("locked.anl3")
+        local result, err = EepScenarioAnl3Parser.loadAnlage("locked.anl3")
 
         assert.is_nil(result)
-        assert.equals("Anl3ToTable: cannot read file: read failed", err)
+        assert.equals("EepScenarioAnl3Parser: cannot read file: read failed", err)
         assert.is_true(fakeFile.closed)
     end)
 
@@ -181,7 +181,7 @@ insulate("Anl3ToTable", function ()
 
     it("parses the real smallest anl3 file and returns sutrackp root", function ()
         local realPath = "../Resourcen/Anlagen/ce/Control_Extension-Demo-Testen/Control_Extension-Lua-Testbeispiel.anl3"
-        local root, err = Anl3ToTable.loadAnlage(realPath)
+        local root, err = EepScenarioAnl3Parser.loadAnlage(realPath)
         assert.is_nil(err)
         assert.is_not_nil(root)
         if root then

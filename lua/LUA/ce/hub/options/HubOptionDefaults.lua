@@ -6,6 +6,9 @@ local HubOptionDefaults = {}
 
 function HubOptionDefaults.create()
     return {
+        eepResources = {
+            rollingStockModelInfoBatchSize = 20
+        },
         ceTypes = {
             modules = {
                 ceType = HubCeTypes.Module,

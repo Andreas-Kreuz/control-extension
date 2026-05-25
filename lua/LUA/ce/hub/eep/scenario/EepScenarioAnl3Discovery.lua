@@ -1,4 +1,4 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.eep.Anl3DiscoveryHelper ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.scenario.EepScenarioAnl3Discovery ...") end
 
 local ScenarioDiscovery = require("ce.hub.data.scenario.ScenarioDiscovery")
 local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
@@ -7,9 +7,9 @@ local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
 local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
 local ContactDiscovery = require("ce.hub.data.contacts.ContactDiscovery")
 local RouteDiscovery = require("ce.hub.data.routes.RouteDiscovery")
-local StructureResourceParser = require("ce.hub.eep.StructureResourceParser")
+local StructureResourceParser = require("ce.hub.eep.resources.StructureResourceParser")
 
-local Anl3DiscoveryHelper = {}
+local EepScenarioAnl3Discovery = {}
 
 local function findChild(node, tag)
     for _, child in ipairs(node.children) do
@@ -354,14 +354,14 @@ local function buildDiscoveryTable(root)
     return dt
 end
 
-Anl3DiscoveryHelper.buildDiscoveryTable = buildDiscoveryTable
+EepScenarioAnl3Discovery.buildDiscoveryTable = buildDiscoveryTable
 
-function Anl3DiscoveryHelper.getLuaPath(root)
+function EepScenarioAnl3Discovery.getLuaPath(root)
     local eepLua = findChild(root, "EEPLua")
     return eepLua and eepLua.attrs.LUAPath or nil
 end
 
-function Anl3DiscoveryHelper.fillDiscoveries(root)
+function EepScenarioAnl3Discovery.fillDiscoveries(root)
     local dt = buildDiscoveryTable(root)
     ScenarioDiscovery.initFromAnl3(dt)
     RouteDiscovery.initFromAnl3(dt)
@@ -373,4 +373,4 @@ function Anl3DiscoveryHelper.fillDiscoveries(root)
     return dt.coverage, dt
 end
 
-return Anl3DiscoveryHelper
+return EepScenarioAnl3Discovery
