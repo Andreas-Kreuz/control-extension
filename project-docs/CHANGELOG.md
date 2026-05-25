@@ -246,7 +246,3 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 - 📖 Lua-Architektur um Speicherschutz, `.anl3`-Reload und Struktur-Metadaten ergänzt
 - 📖 Tutorial zur Ampelkreuzung mit Immobilien aktualisiert
 - 📖 Lua-Server-Vertragsnotizen für DTO-Änderungen ergänzt
-
-```
-
-```
