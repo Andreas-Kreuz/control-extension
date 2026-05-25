@@ -32,6 +32,15 @@ function Version:new(o)
     return o
 end
 
+function Version.pullCurrent()
+    local VersionInfo = require("ce.hub.data.version.VersionInfo")
+    return {
+        eepVersion = string.format("%.1f", EEPVer),
+        luaVersion = _VERSION,
+        singleVersion = VersionInfo.getProgramVersion()
+    }
+end
+
 function Version:update(values)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(values) == "table", "Need 'values' as table")

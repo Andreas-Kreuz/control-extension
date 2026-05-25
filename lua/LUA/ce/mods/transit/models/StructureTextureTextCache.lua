@@ -1,3 +1,4 @@
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local StructureTextureTextCache = {}
 
 local valuesByStructure = {}
@@ -17,7 +18,9 @@ function StructureTextureTextCache.set(displayStructure, surfaceNumber, text)
     if values[surfaceNumber] == nextText then return false end
 
     values[surfaceNumber] = nextText
-    return EEPStructureSetTextureText(displayStructure, surfaceNumber, nextText)
+    local structure = StructureRegistry.getOrCreate(displayStructure)
+    if structure:peekTextureText(surfaceNumber) == nextText then return false end
+    return structure:setTextureText(surfaceNumber, nextText)
 end
 
 function StructureTextureTextCache.reset(displayStructure)

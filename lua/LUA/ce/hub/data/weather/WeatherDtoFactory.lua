@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.weather.WeatherDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class WeatherDtoFactory
@@ -16,39 +18,39 @@ local KEY_ID = "id"
 -- DtoFields: class definition in WeatherDtoTypes.d.lua
 local dtoFields = {
     name = {
-        getValue = function (weather) return weather.name end,
+        getValue = peek(function (source) return source:peekName() end, "name"),
         placeholder = ""
     },
     season = {
-        getValue = function (weather) return weather.season end,
+        getValue = peek(function (source) return source:peekSeason() end, "season"),
         placeholder = 0
     },
     cloudsIntensity = {
-        getValue = function (weather) return weather.cloudsIntensity end,
+        getValue = peek(function (source) return source:peekCloudsIntensity() end, "cloudsIntensity"),
         placeholder = 0
     },
     cloudsMode = {
-        getValue = function (weather) return weather.cloudsMode end,
+        getValue = peek(function (source) return source:peekCloudsMode() end, "cloudsMode"),
         placeholder = 0
     },
     windIntensity = {
-        getValue = function (weather) return weather.windIntensity end,
+        getValue = peek(function (source) return source:peekWindIntensity() end, "windIntensity"),
         placeholder = 0
     },
     rainIntensity = {
-        getValue = function (weather) return weather.rainIntensity end,
+        getValue = peek(function (source) return source:peekRainIntensity() end, "rainIntensity"),
         placeholder = 0
     },
     snowIntensity = {
-        getValue = function (weather) return weather.snowIntensity end,
+        getValue = peek(function (source) return source:peekSnowIntensity() end, "snowIntensity"),
         placeholder = 0
     },
     hailIntensity = {
-        getValue = function (weather) return weather.hailIntensity end,
+        getValue = peek(function (source) return source:peekHailIntensity() end, "hailIntensity"),
         placeholder = 0
     },
     fogIntensity = {
-        getValue = function (weather) return weather.fogIntensity end,
+        getValue = peek(function (source) return source:peekFogIntensity() end, "fogIntensity"),
         placeholder = 0
     },
 }

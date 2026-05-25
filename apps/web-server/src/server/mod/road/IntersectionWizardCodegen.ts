@@ -11,6 +11,7 @@ import {
   IntersectionWizardTrafficType,
   IntersectionWizardTurnDirection,
 } from '@ce/web-shared';
+import { trafficLightModelConstantForName } from './RoadSelector';
 
 const turnDirectionSuffix: Record<IntersectionWizardTurnDirection, string> = {
   LEFT: 'Left',
@@ -124,7 +125,7 @@ function ampelVariableName(
   intersectionPrefix: string,
   used: Set<string>,
 ): string {
-  const suffix = upperFirst(sanitizeIdentifier(ampel.name, `K${index + 1}`));
+  const suffix = upperFirst(sanitizeIdentifier(trafficLightName(ampel), `K${index + 1}`));
   return uniqueIdentifier(`${intersectionPrefix}${suffix}`, `${intersectionPrefix}K${index + 1}`, used);
 }
 
@@ -303,7 +304,9 @@ function automaticIntersectionVariableName(draft: IntersectionWizardDraftAppDto)
 }
 
 function modelExpression(model: { modelConstant?: string; modelName?: string }): string {
-  if (model.modelConstant) return `TrafficLightModel.${model.modelConstant}`;
+  if (model.modelConstant) {
+    return `TrafficLightModel.${trafficLightModelConstantForName(model.modelConstant) ?? model.modelConstant}`;
+  }
   if (model.modelName === 'NO SIGNAL MODEL') return 'TrafficLightModel.NONE';
   return `TrafficLightModel.${sanitizeIdentifier(model.modelName ?? 'JS2_3er_mit_FG', 'JS2_3er_mit_FG')}`;
 }
@@ -312,6 +315,10 @@ function luaValue(value: string | number | undefined): string {
   if (value === undefined) return 'nil';
   if (typeof value === 'number') return String(value);
   return luaString(value);
+}
+
+function luaOptionalString(value: string | undefined): string {
+  return value?.trim() ? luaString(value) : 'nil';
 }
 
 function positiveSignalId(signalId: string | undefined): number | undefined {
@@ -324,6 +331,12 @@ function ampelKind(ampel: IntersectionWizardAmpelAppDto): NonNullable<Intersecti
   return positiveSignalId(ampel.signalId) === undefined && lightStructures(ampel).length > 0
     ? 'STRUCTURE_LIGHT'
     : 'SIGNAL';
+}
+
+function trafficLightName(ampel: IntersectionWizardAmpelAppDto): string {
+  return ampel.trafficType === 'PEDESTRIAN' || ampel.use === 'PEDESTRIAN_ONLY'
+    ? (ampel.pedestrianName ?? ampel.name)
+    : ampel.name;
 }
 
 function lightStructures(ampel: IntersectionWizardAmpelAppDto | IntersectionWizardLaneSignalAppDto) {
@@ -345,7 +358,7 @@ function trafficLightBaseConstructor(ampel: IntersectionWizardAmpelAppDto): stri
     return plainLightStructureConstructor(ampel.name, structure);
   }
   const signalId = positiveSignalId(ampel.signalId) ?? 0;
-  return `TrafficLight:newForSignal(${luaString(ampel.name)}, ${signalId}, ${modelExpression(ampel)})`;
+  return `TrafficLight:newForSignal(${luaString(trafficLightName(ampel))}, ${signalId}, ${modelExpression(ampel)})`;
 }
 
 function laneSignalBaseConstructor(signal: IntersectionWizardLaneSignalAppDto): string {
@@ -362,12 +375,16 @@ function plainLightStructureConstructor(
   name: string,
   structure: NonNullable<IntersectionWizardAmpelAppDto['lightStructures']>[number],
 ) {
-  return `TrafficLight:newForLightStructure(${luaString(name)},\n    ${[
+  const args = [
     luaValue(structure.structureRed),
     luaValue(structure.structureGreen),
-    luaValue(structure.structureYellow),
-    luaValue(structure.structureRequest),
-  ].join(',\n    ')}\n)`;
+    luaOptionalString(structure.structureYellow),
+    luaOptionalString(structure.structureRequest),
+  ];
+  if (structure.structureHousing || structure.structureBlend) {
+    args.push(luaOptionalString(structure.structureHousing), luaOptionalString(structure.structureBlend));
+  }
+  return `TrafficLight:newForLightStructure(${luaString(name)},\n    ${args.join(',\n    ')}\n)`;
 }
 
 function axisStructureCalls(ampel: IntersectionWizardAmpelAppDto | IntersectionWizardLaneSignalAppDto): string[] {
@@ -569,24 +586,8 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
   const pedestrianAmpelLines: { variable: string; line: string }[] = [];
 
   draft.ampeln.forEach((ampel, index) => {
+    if (ampel.use === 'PEDESTRIAN_ONLY' || ampel.trafficType === 'PEDESTRIAN') return;
     const variable = ampelVariableName(ampel, index, prefix, usedAmpelVars);
-    const sourceVariable = ampel.sourceAmpelId ? vehicleAmpelVars.get(ampel.sourceAmpelId) : undefined;
-    if (ampel.sourceAmpelId && sourceVariable && ampel.trafficType === 'PEDESTRIAN') {
-      pedestrianAmpelLines.push({
-        variable,
-        line: `local ${variable} = ${sourceVariable}:asPedestrianSignal(${luaString(ampel.name)})`,
-      });
-      pedestrianAmpelVars.set(ampel.id, variable);
-      return;
-    }
-    if (ampel.use === 'PEDESTRIAN_ONLY' || ampel.trafficType === 'PEDESTRIAN') {
-      pedestrianAmpelLines.push({
-        variable,
-        line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
-      });
-      pedestrianAmpelVars.set(ampel.id, variable);
-      return;
-    }
     ampelLines.push({
       variable,
       line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
@@ -601,7 +602,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       pedestrianAmpelVars.set(ampel.id, pedestrianVariable);
       pedestrianAmpelLines.push({
         variable: pedestrianVariable,
-        line: `local ${pedestrianVariable} = ${variable}:asPedestrianSignal(${luaString(ampel.pedestrianName || pedestrianVariable)})`,
+        line: `local ${pedestrianVariable} = ${variable}:withPedestrian(${luaString(ampel.pedestrianName || pedestrianVariable)})`,
       });
     }
     const extraLightStructures = lightStructures(ampel).slice(isPlainLightStructure(ampel) ? 1 : 0);
@@ -618,6 +619,25 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
       return lightVariable;
     });
     if (extraLightVars.length > 0) lightStructureAmpelVars.set(ampel.id, extraLightVars);
+  });
+  draft.ampeln.forEach((ampel, index) => {
+    if (ampel.use !== 'PEDESTRIAN_ONLY' && ampel.trafficType !== 'PEDESTRIAN') return;
+    const variable = ampelVariableName(ampel, index, prefix, usedAmpelVars);
+    const sourceVariable = ampel.sourceAmpelId ? vehicleAmpelVars.get(ampel.sourceAmpelId) : undefined;
+    if (ampel.sourceAmpelId && sourceVariable) {
+      const name = trafficLightName(ampel);
+      pedestrianAmpelLines.push({
+        variable,
+        line: `local ${variable} = ${sourceVariable}:withPedestrian(${luaString(name)})`,
+      });
+      pedestrianAmpelVars.set(ampel.id, variable);
+      return;
+    }
+    pedestrianAmpelLines.push({
+      variable,
+      line: `local ${variable} = ${chainCall(trafficLightBaseConstructor(ampel), trafficLightChainCalls(ampel))}`,
+    });
+    pedestrianAmpelVars.set(ampel.id, variable);
   });
   bodyLines.push(...sortedDeclarationLines(ampelLines));
   if (pedestrianAmpelLines.length > 0) {
@@ -662,7 +682,7 @@ export function generateIntersectionWizardLua(draft: IntersectionWizardDraftAppD
     const requestTrackIds = lane.requestTrackIds ?? [];
     const highlightTrackIds = lane.highlightTrackIds ?? [];
     const chainCalls = [
-      `setScriptVariableName(${luaString(variable)})`,
+      `setKpId(${luaString(variable)})`,
       ...(type === 'CAR' ? [] : [`setTrafficType(${trafficTypeLuaType[type]})`]),
       ...(lane.vehicleMultiplier && lane.vehicleMultiplier !== 1
         ? [`setVehicleMultiplier(${lane.vehicleMultiplier})`]
@@ -829,7 +849,7 @@ export function createDraftFromCurrentIntersection(
             ? 'TRAM'
             : 'CAR',
       modelName: ampel.modelId,
-      modelConstant: sanitizeIdentifier(ampel.modelId, ''),
+      modelConstant: trafficLightModelConstantForName(ampel.modelId) ?? sanitizeIdentifier(ampel.modelId, ''),
       lightStructures: signalId === undefined ? importedLightStructures : [],
       axisStructures: ampel.axisStructures,
     });
@@ -868,7 +888,9 @@ export function createDraftFromCurrentIntersection(
     return {
       id: `lane-${index + 1}`,
       name: lane.name || `FS${index + 1}`,
-      ...(lane.scriptVariableName?.trim() ? { luaVariableName: lane.scriptVariableName } : {}),
+      ...((lane.kpId ?? lane.scriptVariableName)?.trim()
+        ? { luaVariableName: lane.kpId ?? lane.scriptVariableName }
+        : {}),
       vehicleMultiplier: lane.vehicleMultiplier,
       ...(lane.countType === 'SIGNALS' || lane.countType === 'TRACKS' || lane.countType === 'CONTACTS'
         ? { countType: lane.countType }

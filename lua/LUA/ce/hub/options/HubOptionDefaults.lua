@@ -6,6 +6,9 @@ local HubOptionDefaults = {}
 
 function HubOptionDefaults.create()
     return {
+        eepResources = {
+            rollingStockModelInfoBatchSize = 20
+        },
         ceTypes = {
             modules = {
                 ceType = HubCeTypes.Module,
@@ -54,10 +57,12 @@ function HubOptionDefaults.create()
                 discoveryAndUpdate = true,
                 publish = true,
                 fieldUpdates = {
-                    tag = "always",
-                    stopDistance = "always",
-                    itemName = "always",
-                    functions = "always"
+                    position = "oninterest",
+                    waitingVehiclesCount = "oninterest",
+                    tag = "oninterest",
+                    stopDistance = "oninterest",
+                    itemName = "oninterest",
+                    functions = "oninterest"
                 },
                 fieldPublish = {
                     waitingVehiclesCount = "oninterest",
@@ -82,7 +87,10 @@ function HubOptionDefaults.create()
                 ceType = HubCeTypes.Switch,
                 discoveryAndUpdate = true,
                 publish = true,
-                fieldUpdates = {},
+                fieldUpdates = {
+                    position = "oninterest",
+                    tag = "oninterest"
+                },
                 fieldPublish = {}
             },
             structures = {
@@ -93,14 +101,20 @@ function HubOptionDefaults.create()
                     tag = "oninterest",
                     light = "oninterest",
                     smoke = "oninterest",
-                    fire = "oninterest"
+                    fire = "oninterest",
+                    pos_x = "oninterest",
+                    pos_y = "oninterest",
+                    pos_z = "oninterest",
+                    rot_x = "oninterest",
+                    rot_y = "oninterest",
+                    rot_z = "oninterest"
                 },
                 fieldPublish = {
                     tag = "always",
                     light = "always",
                     smoke = "always",
                     fire = "always",
-                    gsbname = "oninterest"
+                    gsbname = "always"
                 }
             },
             scenario = {

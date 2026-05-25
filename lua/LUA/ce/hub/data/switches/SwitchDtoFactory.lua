@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.switches.SwitchDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class SwitchDtoFactory
@@ -14,11 +16,11 @@ local KEY_ID = "id"
 -- DtoFields: class definition in SwitchDtoTypes.d.lua
 local dtoFields = {
     position = {
-        getValue = function (switch) return switch.position end,
+        getValue = peek(function (source) return source:peekPosition() end, "position"),
         placeholder = 0
     },
     tag = {
-        getValue = function (switch) return switch.tag end,
+        getValue = peek(function (source) return source:peekTag() end, "tag"),
         placeholder = ""
     },
 }

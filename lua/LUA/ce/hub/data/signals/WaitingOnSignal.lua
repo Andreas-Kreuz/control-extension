@@ -1,5 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.WaitingOnSignal ...") end
 
+local DataClass = require("ce.hub.data.DataClass")
+
 ---@class WaitingOnSignal
 ---@field id string
 ---@field signalId number|string
@@ -10,14 +12,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.signals.WaitingOnSignal 
 ---@field needsFullSend boolean
 local WaitingOnSignal = {}
 
-local function markDirty(waitingOnSignal, fieldName)
-    waitingOnSignal.dirtyFields[fieldName] = true
-end
-
 local function updateField(waitingOnSignal, fieldName, value)
-    local oldValue = waitingOnSignal[fieldName]
-    waitingOnSignal[fieldName] = value
-    if oldValue ~= value then markDirty(waitingOnSignal, fieldName) end
+    DataClass.replaceField(waitingOnSignal, fieldName, value)
 end
 
 function WaitingOnSignal:new(o)
@@ -27,10 +23,17 @@ function WaitingOnSignal:new(o)
 
     self.__index = self
     setmetatable(o, self)
-    o.dirtyFields = {}
-    o.needsFullSend = true
+    DataClass.init(o)
     return o
 end
+
+function WaitingOnSignal:peekSignalId() return self.signalId end
+
+function WaitingOnSignal:peekWaitingPosition() return self.waitingPosition end
+
+function WaitingOnSignal:peekVehicleName() return self.vehicleName end
+
+function WaitingOnSignal:peekWaitingCount() return self.waitingCount end
 
 function WaitingOnSignal:update(values)
     assert(type(self) == "table", "Call this method with ':'")
@@ -43,11 +46,11 @@ function WaitingOnSignal:update(values)
 end
 
 function WaitingOnSignal:resetDirty()
-    self.dirtyFields = {}
+    DataClass.resetDirty(self)
 end
 
 function WaitingOnSignal:hasDirtyFields()
-    return next(self.dirtyFields) ~= nil
+    return DataClass.hasDirtyFields(self)
 end
 
 return WaitingOnSignal

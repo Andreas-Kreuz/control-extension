@@ -194,7 +194,7 @@ function ListLayout<T>({
       : null;
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={{ mt: 1 }}>
       <TextField
         size="small"
         label={filterLabel}

@@ -1,5 +1,9 @@
 -- Lua code for testing the lane's functions
 describe("Lane ...", function ()
+    local function seedTrainRoute(trainName, route)
+        require("ce.hub.data.trains.TrainRegistry").seedFromSnapshot({ name = trainName, route = route })
+    end
+
     insulate("Approach compatibility", function ()
         require("ce.hub.eep.EepSimulator")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
@@ -27,18 +31,34 @@ describe("Lane ...", function ()
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 69, TrafficLightModel.Unsichtbar_2er))
                 :scriptVariableName("c1LaneA")
 
-            assert.equals("c1LaneA", lane:getScriptVariableName())
+            assert.equals("c1LaneA", lane:getKpId())
         end)
-        it("supports preferred chainable aliases", function ()
+        it("keeps setScriptVariableName chainable and sets kpId", function ()
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 70, TrafficLightModel.Unsichtbar_2er))
 
-            assert.equals(lane, lane:setScriptVariableName("c1LaneA"))
+            assert.equals(lane, lane:setScriptVariableName("c1LaneB"))
             assert.equals(lane, lane:setVehicleMultiplier(3))
             assert.equals(lane, lane:setHighlightTracks(11, 12))
             assert.equals(lane, lane:setLaneType(Lane.RequestType.NORMAL))
-            assert.equals("c1LaneA", lane:getScriptVariableName())
+            assert.equals("c1LaneB", lane:getKpId())
             assert.equals(3, lane.fahrzeugMultiplikator)
             assert.are.same({ 11, 12 }, lane.tracksForHighlighting)
+        end)
+        it("exposes stable structured request facts", function ()
+            local signal = TrafficLight:new("K1", 71, TrafficLightModel.Unsichtbar_2er)
+            local lane = Lane:new("Lane A", signal)
+
+            lane:vehicleEntered("#Car1")
+            local state = lane:getRequestState()
+
+            assert.equals(signal, lane:getLaneSignal())
+            assert.is_true(state.occupied)
+            assert.equals(1, state.vehicleCount)
+            assert.equals(0, state.waitCount)
+            assert.equals(Lane.RequestType.NORMAL, state.requestType)
+            assert.equals("counter", state.source)
+            assert.are.same({ "#Car1" }, state.queuedVehicleNames)
+            assert.are.same(state, lane:getRequestState())
         end)
         it("rejects invalid approaches", function ()
             local printStub = stub(_G, "print")
@@ -94,7 +114,7 @@ describe("Lane ...", function ()
             assert.equals(0, calls)
         end)
 
-        it("falls back to EEP when no hub train exists", function ()
+        it("uses the default route when no hub train exists", function ()
             local Lane, TrafficLight, TrafficLightModel, routeStub, routeCalls = setup()
             local lane = Lane:new("Lane EEP Route", TrafficLight:new("K2", 72, TrafficLightModel.Unsichtbar_2er))
 
@@ -106,8 +126,8 @@ describe("Lane ...", function ()
             clearModule("ce.hub.data.trains.TrainRegistry")
             clearModule("ce.hub.data.trains.Train")
 
-            assert.equals("EEP Route", firstVehiclesRoute)
-            assert.equals(1, calls)
+            assert.equals("Alle", firstVehiclesRoute)
+            assert.equals(0, calls)
         end)
     end)
     insulate("Register signals", function ()
@@ -120,6 +140,7 @@ describe("Lane ...", function ()
 
         -- Set the route for train "#Car1"
         EEPSetTrainRoute("#Car1", "Some Route")
+        seedTrainRoute("#Car1", "Some Route")
         -- Signal which is visible to tell the lanes traffic to drive
         local driveSignal = TrafficLight:new("driveSignal", signalId, TrafficLightModel.Unsichtbar_2er)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
@@ -169,6 +190,7 @@ describe("Lane ...", function ()
 
         -- Set the route for train "#Car1"
         EEPSetTrainRoute("#Car1", "Matching Route")
+        seedTrainRoute("#Car1", "Matching Route")
         -- Signal which is visible to tell the lanes traffic to drive
         local K1 = TrafficLight:new("K1", 55, TrafficLightModel.JS2_3er_mit_FG)
         local K2 = TrafficLight:new("K2", 56, TrafficLightModel.JS2_3er_mit_FG)
@@ -397,6 +419,7 @@ describe("Lane ...", function ()
 
         -- Set the route for train "#Car1"
         EEPSetTrainRoute("#Car1", "Some Route")
+        seedTrainRoute("#Car1", "Some Route")
         -- Signal which is visible to tell the lanes traffic to drive
         local K1 = TrafficLight:new("K1", signalId, TrafficLightModel.JS2_3er_ohne_FG)
         -- EEP Signal, which is used to start and stop the lanes traffic (needs to be switched to green too)
@@ -441,6 +464,9 @@ describe("Lane ...", function ()
         EEPSetTrainRoute("#Car1", "Route A")
         EEPSetTrainRoute("#Car2", "Route B")
         EEPSetTrainRoute("#Car3", "Route C")
+        seedTrainRoute("#Car1", "Route A")
+        seedTrainRoute("#Car2", "Route B")
+        seedTrainRoute("#Car3", "Route C")
 
         EEPStructureSetLight("#11_RED", false)
         EEPStructureSetLight("#21_RED", false)
@@ -525,6 +551,9 @@ describe("Lane ...", function ()
         EEPSetTrainRoute("#Car1", "Route A")
         EEPSetTrainRoute("#Car2", "Route B")
         EEPSetTrainRoute("#Car3", "Route C")
+        seedTrainRoute("#Car1", "Route A")
+        seedTrainRoute("#Car2", "Route B")
+        seedTrainRoute("#Car3", "Route C")
 
         EEPStructureSetLight("#11_RED", false)
         EEPStructureSetLight("#21_RED", false)
@@ -626,6 +655,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
             local lane =
                 Lane:new("Lane A", TrafficLight:new("LANE A", signalId, TrafficLightModel.Unsichtbar_2er))
 
@@ -644,6 +674,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
             local lane =
                 Lane:new("Lane A", TrafficLight:new("LANE A", signalId, TrafficLightModel.Unsichtbar_2er))
 
@@ -667,6 +698,8 @@ describe("Lane ...", function ()
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
             EEPSetTrainRoute("#Car2", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car2", "Some Route")
 
             EepSimulator.simulateQueueTrainOnSignal(signalId, "#Car1")
             EepSimulator.simulateQueueTrainOnSignal(signalId, "#Car2")
@@ -698,6 +731,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
 
             it("Traffic lights are not used", function () assert.is_false(lane.tracksUsedForRequest) end)
@@ -715,6 +749,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
 
             lane:useTrackForQueue(roadId)
@@ -736,6 +771,7 @@ describe("Lane ...", function ()
 
             -- Set the route for train "#Car1"
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
 
             EepSimulator.simulatePlaceTrainOnRoadTrack(roadId, "#Car1")
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 66, TrafficLightModel.Unsichtbar_2er))
@@ -806,6 +842,7 @@ describe("Lane ...", function ()
 
         it("stores lane state in the lane signal tag text", function ()
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
             EEPSignalSetTagText(166, "x=keep,")
             local laneSignal = TrafficLight:new("K1", 166, TrafficLightModel.Unsichtbar_2er)
             local lane = Lane:new("Lane Tag", laneSignal)
@@ -820,6 +857,7 @@ describe("Lane ...", function ()
 
         it("stores lane state only in the lane signal tag text", function ()
             EEPSetTrainRoute("#Car2", "Some Route")
+            seedTrainRoute("#Car2", "Some Route")
             local laneSignal = TrafficLight:new("K2", 167, TrafficLightModel.Unsichtbar_2er)
             local lane = Lane:new("Lane Slot Tag", laneSignal)
 
@@ -834,6 +872,7 @@ describe("Lane ...", function ()
 
         it("loads lane state from the lane signal tag text", function ()
             EEPSetTrainRoute("#Car1", "Some Route")
+            seedTrainRoute("#Car1", "Some Route")
             EEPSignalSetTagText(168, "f=2,p=Gruen,q=#Car1|#Car2,w=3,")
             local laneSignal = TrafficLight:new("K3", 168, TrafficLightModel.Unsichtbar_2er)
 

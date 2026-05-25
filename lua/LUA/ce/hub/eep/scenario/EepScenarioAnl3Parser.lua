@@ -1,4 +1,4 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.eep.Anl3ToTable ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.scenario.EepScenarioAnl3Parser ...") end
 
 -- Generic pure Lua XML parser for EEP .anl3 files.
 -- Does not call external tools or libraries.
@@ -11,7 +11,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.eep.Anl3ToTable ...") end
 --     text     = "content",          -- text content, only set when non-empty
 --   }
 
-local Anl3ToTable = {}
+local EepScenarioAnl3Parser = {}
 
 -- Convert UTF-8 encoded string to Latin-1 (Windows-1252).
 -- EEP uses Latin-1 internally, but .anl3 files are UTF-8.
@@ -36,11 +36,19 @@ end
 local function readAnlageContent(filename)
     local file, err = io.open(filename, "r")
     if not file then
-        return nil, "Anl3ToTable: cannot open file: " .. tostring(err)
+        return nil, "EepScenarioAnl3Parser: cannot open file: " .. tostring(err)
     end
 
-    local content = utf8ToLatin1(file:read("*a"))
+    local ok, rawContent, readErr = pcall(file.read, file, "*a")
     file:close()
+    if not ok then
+        return nil, "EepScenarioAnl3Parser: cannot read file: " .. tostring(rawContent)
+    end
+    if rawContent == nil then
+        return nil, "EepScenarioAnl3Parser: cannot read file: " .. tostring(readErr)
+    end
+
+    local content = utf8ToLatin1(rawContent)
     return content
 end
 
@@ -109,11 +117,11 @@ local function parseXmlContent(content)
     return root
 end
 
-function Anl3ToTable.loadAnlage(filename)
+function EepScenarioAnl3Parser.loadAnlage(filename)
     local content, err = readAnlageContent(filename)
     if not content then return nil, err end
 
     return parseXmlContent(content)
 end
 
-return Anl3ToTable
+return EepScenarioAnl3Parser

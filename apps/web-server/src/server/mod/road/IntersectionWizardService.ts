@@ -99,7 +99,53 @@ function summarizeDraft(draft: IntersectionWizardDraftAppDto): IntersectionWizar
   };
 }
 
+function basename(value: string): string {
+  return value.replace(/\\/g, '/').split('/').pop() ?? value;
+}
+
+function withoutExtension(value: string): string {
+  return value.replace(/\.[^.]+$/, '');
+}
+
+export function inferTrafficLightModelConstantFromItemName(itemNameWithModelPath: string | undefined) {
+  if (!itemNameWithModelPath) return undefined;
+  const normalizedPath = itemNameWithModelPath.replace(/\\/g, '/');
+  const normalizedPathLower = normalizedPath.toLocaleLowerCase();
+  if (normalizedPathLower === 'signale/signale/signal_unsichtbar.3dm') return 'Unsichtbar_2er';
+
+  const fileName = basename(normalizedPath);
+  const fileNameWithoutExtension = withoutExtension(fileName);
+  const normalizedFileName = fileName.toLocaleLowerCase();
+  const normalizedFileNameWithoutExtension = fileNameWithoutExtension.toLocaleLowerCase();
+  if (normalizedFileName.startsWith('3er') && normalizedFileName.endsWith('_js2.3dm')) {
+    return normalizedFileName.includes('fg') ? 'JS2_3er_mit_FG' : 'JS2_3er_ohne_FG';
+  }
+  if (normalizedFileName.startsWith('2er') && normalizedFileName.endsWith('_js2.3dm')) {
+    if (normalizedFileName.includes('fg')) return 'JS2_2er_nur_FG';
+    if (normalizedFileName.includes('gruengelb')) return 'JS2_2er_gelb_gruen_aus';
+    if (normalizedFileName.includes('rotgelb')) return 'JS2_2er_rot_gelb_aus';
+    if (normalizedFileName.includes('rotgruen')) return 'JS2_2er_rot_gruen';
+  }
+  if (normalizedFileNameWithoutExtension === '1erlinksmast_js2') return 'JS2_1er_gruen';
+  if (normalizedFileNameWithoutExtension.endsWith('_np1')) {
+    if (normalizedFileNameWithoutExtension.includes('fd') || normalizedFileNameWithoutExtension.includes('fe')) {
+      return 'NP1_3er_mit_FG';
+    }
+    if (normalizedFileNameWithoutExtension.includes('of')) return 'NP1_3er_ohne_FG';
+  }
+  return undefined;
+}
+
+function modelFromConstant(modelConstant: string | undefined, models: Record<string, TrafficLightModelAppDto>) {
+  if (!modelConstant) return undefined;
+  return Object.values(models).find(
+    (model) => (model.luaConstant ?? trafficLightModelConstantForName(model.name)) === modelConstant,
+  );
+}
+
 function modelFromSignalName(signalName: string | undefined, models: Record<string, TrafficLightModelAppDto>) {
+  const inferredModel = modelFromConstant(inferTrafficLightModelConstantFromItemName(signalName), models);
+  if (inferredModel) return inferredModel;
   if (!signalName) return undefined;
   const normalizedSignalName = signalName.toLocaleLowerCase();
   return Object.values(models).find((model) => normalizedSignalName.includes(model.name.toLocaleLowerCase()));
@@ -304,10 +350,9 @@ export default class IntersectionWizardService implements DomainRoomService {
       return { id, found: false };
     }
 
-    const model = modelFromSignalName(
-      signal.itemNameWithModelPath ?? signal.itemName,
-      this.roadSelector.getTrafficLightModels(),
-    );
+    const signalItemName = signal.itemNameWithModelPath ?? signal.itemName;
+    const inferredModelConstant = inferTrafficLightModelConstantFromItemName(signalItemName);
+    const model = modelFromSignalName(signalItemName, this.roadSelector.getTrafficLightModels());
     const suggestedTrafficLightModel = model?.name;
     const lookup: IntersectionWizardSignalLookupAppDto = {
       id,
@@ -321,7 +366,7 @@ export default class IntersectionWizardService implements DomainRoomService {
     if (signal.activeFunction !== undefined) lookup.activeFunction = signal.activeFunction;
     if (suggestedTrafficLightModel) lookup.suggestedTrafficLightModel = suggestedTrafficLightModel;
     const suggestedTrafficLightModelConstant =
-      model?.luaConstant ?? trafficLightModelConstantForName(suggestedTrafficLightModel);
+      model?.luaConstant ?? inferredModelConstant ?? trafficLightModelConstantForName(suggestedTrafficLightModel);
     if (suggestedTrafficLightModelConstant)
       lookup.suggestedTrafficLightModelConstant = suggestedTrafficLightModelConstant;
     return lookup;
@@ -335,7 +380,7 @@ export default class IntersectionWizardService implements DomainRoomService {
       signalId,
       use: 'VEHICLE_ONLY',
       trafficType: 'CAR',
-      modelName: 'Ampel_3er_XXX_mit_FG',
+      modelName: 'JS2 3er-Ampel mit Fußgängern',
       modelConstant: 'JS2_3er_mit_FG',
     };
   }

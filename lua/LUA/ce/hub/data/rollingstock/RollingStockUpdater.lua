@@ -3,6 +3,8 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStoc
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+local DataClass = require("ce.hub.data.DataClass")
+local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 local RollingStockUpdater = {}
@@ -14,7 +16,8 @@ function RollingStockUpdater.runUpdate()
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("rollingStocks") then return end
     local fieldPolicies = HubOptionsRegistry.getFieldUpdatePolicies("rollingStocks")
-    local activeRollingStock = EEPRollingstockGetActive and EEPRollingstockGetActive() or ""
+    local scenario = ScenarioRegistry.get()
+    local activeRollingStock = scenario and scenario:peekActiveRollingStock() or nil
 
     for trainName, train in pairs(TrainRegistry.getAll()) do
         local info = TrainDiscoveryCache.get(trainName) or {}
@@ -27,7 +30,7 @@ function RollingStockUpdater.runUpdate()
         for positionInTrain = 0, lastPositionInTrain, 1 do
             local rsName = TrainRegistry.rollingStockNameInTrain(train.name, positionInTrain)
             if rsName then
-                local rs = RollingStockRegistry.forName(rsName)
+                local rs = RollingStockRegistry.getOrCreate(rsName)
                 local selectionKey = tostring(rs.id or rsName)
                 local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.RollingStock, selectionKey)
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "trainName", isSelected) then
@@ -41,102 +44,67 @@ function RollingStockUpdater.runUpdate()
                 end
                 if positionInTrain == 0
                     and SyncPolicy.shouldUpdateField(fieldPolicies, "couplingFront", isSelected) then
-                    local ok, couplingFront = EEPRollingstockGetCouplingFront(rs.rollingStockName)
-                    if ok then
-                        ---@cast couplingFront number
-                        rs:setCouplingFront(couplingFront)
-                    end
+                    rs:pullCouplingFront()
                 end
                 if positionInTrain == lastPositionInTrain
                     and SyncPolicy.shouldUpdateField(fieldPolicies, "couplingRear", isSelected) then
-                    local ok, couplingRear = EEPRollingstockGetCouplingRear(rs.rollingStockName)
-                    if ok then
-                        ---@cast couplingRear number
-                        rs:setCouplingRear(couplingRear)
-                    end
+                    rs:pullCouplingRear()
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "length", isSelected) then
-                    local _, length = EEPRollingstockGetLength(rs.rollingStockName)
-                    if length then rs:setLength(length) end
+                    rs:pullLength()
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "propelled", isSelected) then
-                    local _, propelled = EEPRollingstockGetMotor(rs.rollingStockName)
-                    rs:setPropelled(propelled ~= false)
+                    rs:pullPropelled()
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "modelType", isSelected)
                     or SyncPolicy.shouldUpdateField(fieldPolicies, "modelTypeText", isSelected) then
-                    local _, modelType = EEPRollingstockGetModelType(rs.rollingStockName)
-                    if modelType then rs:setModelType(modelType) end
+                    rs:pullModelType()
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "tag", isSelected)
                     or SyncPolicy.shouldUpdateField(fieldPolicies, "nr", isSelected) then
-                    local _, tag = EEPRollingstockGetTagText(rs.rollingStockName)
-                    rs:setTag(tag or "")
+                    rs:pullTag()
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "hookStatus", isSelected)
-                    and EEPRollingstockGetHook then
-                    local ok, hookStatus = EEPRollingstockGetHook(rs.rollingStockName)
-                    if ok then rs:setHookStatus(hookStatus) end
+                if SyncPolicy.shouldUpdateField(fieldPolicies, "hookStatus", isSelected) then
+                    rs:pullHookStatus()
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "hookGlueMode", isSelected)
-                    and EEPRollingstockGetHookGlue then
-                    local ok, hookGlueMode = EEPRollingstockGetHookGlue(rs.rollingStockName)
-                    if ok then
-                        ---@cast hookGlueMode number
-                        rs:setHookGlueMode(hookGlueMode)
-                    end
+                if SyncPolicy.shouldUpdateField(fieldPolicies, "hookGlueMode", isSelected) then
+                    rs:pullHookGlueMode()
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "orientationForward", isSelected)
-                    and EEPRollingstockGetOrientation then
-                    local ok, orientationForward = EEPRollingstockGetOrientation(rs.rollingStockName)
-                    if ok then rs:setOrientationForward(orientationForward == true) end
+                if SyncPolicy.shouldUpdateField(fieldPolicies, "orientationForward", isSelected) then
+                    rs:pullOrientationForward()
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "smoke", isSelected) and EEPRollingstockGetSmoke then
-                    local ok, smoke = EEPRollingstockGetSmoke(rs.rollingStockName)
-                    if ok then rs:setSmoke(smoke) end
+                if SyncPolicy.shouldUpdateField(fieldPolicies, "smoke", isSelected) then
+                    rs:pullSmoke()
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
+                if activeRollingStock ~= nil and SyncPolicy.shouldUpdateField(fieldPolicies, "active", isSelected) then
                     rs:setActive(activeRollingStock == rs.rollingStockName)
                 end
-                if SyncPolicy.shouldUpdateField(fieldPolicies, "surfaceTexts", isSelected) then
-                    rs:updateTextureTexts()
+                if SyncPolicy.shouldUpdateField(fieldPolicies, "surfaceTexts", isSelected)
+                    and not DataClass.isLoaded(rs, "textureTexts") then
+                    rs:getTextureTexts()
                 end
                 if SyncPolicy.shouldUpdateField(fieldPolicies, "axisValues", isSelected) then
-                    rs:updateAxisValues()
+                    rs:pullAxisValues()
                 end
                 if (SyncPolicy.shouldUpdateField(fieldPolicies, "rotX", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "rotY", isSelected)
-                        or SyncPolicy.shouldUpdateField(fieldPolicies, "rotZ", isSelected))
-                    and EEPRollingstockGetRotation then
-                    local ok, rotX, rotY, rotZ = EEPRollingstockGetRotation(rs.rollingStockName)
-                    if ok then rs:setRotation(rotX, rotY, rotZ) end
+                        or SyncPolicy.shouldUpdateField(fieldPolicies, "rotZ", isSelected)) then
+                    rs:pullRotation()
                 end
                 if info.dirty or info.moved or info.created then
                     if SyncPolicy.shouldUpdateField(fieldPolicies, "trackId", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "trackDistance", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "trackDirection", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "trackSystem", isSelected) then
-                        local ok, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(
-                            rs.rollingStockName)
-                        if ok then
-                            ---@cast trackId number
-                            ---@cast trackDistance number
-                            ---@cast trackDirection number
-                            ---@cast trackSystem number
-                            rs:setTrack(trackId, trackDistance, trackDirection, trackSystem)
-                        end
+                        rs:pullTrack()
                     end
                     if SyncPolicy.shouldUpdateField(fieldPolicies, "posX", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "posY", isSelected)
                         or SyncPolicy.shouldUpdateField(fieldPolicies, "posZ", isSelected) then
-                        local hasPos, posX, posY, posZ = EEPRollingstockGetPosition(rs.rollingStockName)
-                        if hasPos then
-                            rs:setPosition(tonumber(posX) or -1, tonumber(posY) or -1, tonumber(posZ) or -1)
-                        end
+                        rs:pullPosition()
                     end
                     if SyncPolicy.shouldUpdateField(fieldPolicies, "mileage", isSelected) then
-                        local hasMileage, mileage = EEPRollingstockGetMileage(rs.rollingStockName)
-                        if hasMileage then rs:setMileage(mileage) end
+                        rs:pullMileage()
                     end
                 end
             end

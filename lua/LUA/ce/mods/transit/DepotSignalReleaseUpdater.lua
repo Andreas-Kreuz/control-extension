@@ -2,13 +2,12 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.transit.DepotSignalReleaseUp
 
 local DepotSignalRegistry = require("ce.mods.transit.DepotSignalRegistry")
 local Line = require("ce.mods.transit.Line")
+local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")
 
 local DepotSignalReleaseUpdater = {}
 local releasedFirstVehicleBySignal = {}
-
-local EEPSetSignal = _G.EEPSetSignal or function () return false end
 
 local function firstWaitingEntryId(signalId)
     return tostring(signalId) .. "-1"
@@ -31,7 +30,7 @@ function DepotSignalReleaseUpdater.runUpdate()
                     suppressUnknownRouteLog = true,
                     requireDepotSignalAutoRelease = true
                 }) then
-                EEPSetSignal(signalId, DepotSignalRegistry.getReleasePosition(signalId))
+                SignalRegistry.getOrCreate(signalId):setPosition(DepotSignalRegistry.getReleasePosition(signalId))
                 releasedFirstVehicleBySignal[signalId] = trainName
             end
         end

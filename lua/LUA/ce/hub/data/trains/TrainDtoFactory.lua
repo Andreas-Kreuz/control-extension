@@ -2,6 +2,9 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local cached = DtoFieldAccess.cached
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
@@ -18,59 +21,59 @@ local KEY_ID = "id"
 -- DtoFields: class definition in TrainDtoTypes.d.lua
 local dtoFields = {
     name = {
-        getValue = function (train) return train:getName() end,
+        getValue = peek(function (source) return source:peekName() end, "name"),
         placeholder = ""
     },
     route = {
-        getValue = function (train) return train:getRoute() end,
+        getValue = peek(function (source) return source:peekRoute() end, "route"),
         placeholder = ""
     },
     rollingStockCount = {
-        getValue = function (train) return train:getRollingStockCount() end,
+        getValue = peek(function (source) return source:peekRollingStockCount() end, "rollingStockCount"),
         placeholder = 0
     },
     length = {
-        getValue = function (train) return train:getLength() end,
+        getValue = peek(function (source) return source:peekLength() end, "length"),
         placeholder = 0
     },
     trackType = {
-        getValue = function (train) return train:getTrackType() end,
+        getValue = peek(function (source) return source:peekTrackType() end, "trackType"),
         placeholder = ""
     },
     movesForward = {
-        getValue = function (train) return train:getMovesForward() end,
+        getValue = peek(function (source) return source:peekMovesForward() end, "movesForward"),
         placeholder = false
     },
     speed = {
-        getValue = function (train) return train:getSpeed() end,
+        getValue = peek(function (source) return source:peekSpeed() end, "speed"),
         placeholder = 0
     },
     targetSpeed = {
-        getValue = function (train) return train:getTargetSpeed() end,
+        getValue = peek(function (source) return source:peekTargetSpeed() end, "targetSpeed"),
         placeholder = 0
     },
     couplingFront = {
-        getValue = function (train) return train:getCouplingFront() end,
+        getValue = peek(function (source) return source:peekCouplingFront() end, "couplingFront"),
         placeholder = 0
     },
     couplingRear = {
-        getValue = function (train) return train:getCouplingRear() end,
+        getValue = peek(function (source) return source:peekCouplingRear() end, "couplingRear"),
         placeholder = 0
     },
     lights = {
-        getValue = function (train) return train:getLights() end,
+        getValue = peek(function (source) return source:peekLights() end, "lights"),
         placeholder = { ["0"] = false, ["1"] = false, ["2"] = false, ["3"] = false }
     },
     active = {
-        getValue = function (train) return train:getActive() end,
+        getValue = peek(function (source) return source:peekActive() end, "active"),
         placeholder = false
     },
     inTrainyard = {
-        getValue = function (train) return train:getInTrainyard() end,
+        getValue = peek(function (source) return source:peekInTrainyard() end, "inTrainyard"),
         placeholder = false
     },
     trainyardId = {
-        getValue = function (train) return train:getTrainyardId() end,
+        getValue = peek(function (source) return source:peekTrainyardId() end, "trainyardId"),
         placeholder = ""
     },
 }
@@ -78,7 +81,7 @@ local dtoFields = {
 local function baseDto(train)
     return {
         ceType = CE_TYPE,
-        id = train:getName()
+        id = cached(train, function (source) return source:peekName() end, "name")
     }
 end
 

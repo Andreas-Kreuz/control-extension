@@ -103,7 +103,7 @@ local function toIntersectionDto(intersection, isSelected)
         id = intersection.id,
     }
     dto.name                   = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and intersection.name or
-    ""
+        ""
     dto.eepSaveId              = SyncPolicy.shouldPublishField(fieldPolicies, "eepSaveId", isSelected) and
         intersection.eepSaveId or -1
     dto.scriptVariableName     = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
@@ -146,8 +146,9 @@ local function toIntersectionLaneDto(lane, isSelected)
         lane.intersectionId or 0
     dto.name                       = SyncPolicy.shouldPublishField(fieldPolicies, "name", isSelected) and
         lane.name or ""
+    dto.kpId                       = lane.kpId or nil
     dto.scriptVariableName         = SyncPolicy.shouldPublishField(fieldPolicies, "scriptVariableName", isSelected) and
-        lane.scriptVariableName or nil
+        lane.kpId or nil
     dto.currentIndication          = SyncPolicy.shouldPublishField(fieldPolicies, "currentIndication", isSelected) and
         lane.currentIndication or
         ""
@@ -203,7 +204,9 @@ local function toIntersectionTrafficLightStructureDto(lightStructure)
         structureRed = lightStructure.structureRed,
         structureGreen = lightStructure.structureGreen,
         structureYellow = lightStructure.structureYellow,
-        structureRequest = lightStructure.structureRequest
+        structureRequest = lightStructure.structureRequest,
+        structureHousing = lightStructure.structureHousing,
+        structureBlend = lightStructure.structureBlend
     }
 end
 

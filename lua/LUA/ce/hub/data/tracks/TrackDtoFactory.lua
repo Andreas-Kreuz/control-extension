@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.tracks.TrackDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
@@ -26,11 +28,11 @@ local TRACK_CE_TYPES = {
 -- DtoFields: class definition in TrackDtoTypes.d.lua
 local dtoFields = {
     reserved = {
-        getValue = function (track) return track.reserved end,
+        getValue = peek(function (source) return source:peekReserved() end, "reserved"),
         placeholder = false
     },
     reservedByTrainName = {
-        getValue = function (track) return track.reservedByTrainName end,
+        getValue = peek(function (source) return source:peekReservedByTrainName() end, "reservedByTrainName"),
         placeholder = ""
     },
 }

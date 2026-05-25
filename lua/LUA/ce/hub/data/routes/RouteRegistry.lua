@@ -30,6 +30,10 @@ function RouteRegistry.replaceAll(routes)
     end
 end
 
+function RouteRegistry.get(id)
+    return allRoutes[id]
+end
+
 function RouteRegistry.getAll()
     local copy = {}
     for id, route in pairs(allRoutes) do copy[id] = route end

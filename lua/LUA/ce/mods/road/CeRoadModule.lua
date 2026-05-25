@@ -11,6 +11,7 @@ local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local RoadOptionDefaults = require("ce.mods.road.options.RoadOptionDefaults")
 local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
 local TableUtils = require("ce.hub.util.TableUtils")
+local RoadTippTextCoordinator = require("ce.mods.road.tipptext.RoadTippTextCoordinator")
 
 function CeRoadModule.loadSettingsFromSlot(eepSaveId) return IntersectionSettings.loadSettingsFromSlot(eepSaveId) end
 
@@ -36,6 +37,7 @@ end
 function CeRoadModule.run()
     if not CeRoadModule.enabled then return end
     Intersection.switchPhases()
+    RoadTippTextCoordinator.run()
 end
 
 return CeRoadModule

@@ -11,13 +11,18 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 local SignalDiscovery = {}
 
 local MAX_SIGNALS = 1000
-local EEPGetSignal = _G.EEPGetSignal or function () return 0 end
 
 local function discoverSignals()
+    local discoveredIds = {}
     for i = 1, MAX_SIGNALS do
-        if EEPGetSignal(i) > 0 and not SignalRegistry.has(i) then
-            SignalRegistry.add(Signal:new(i))
+        if Signal.exists(i) then
+            discoveredIds[i] = true
+            if not SignalRegistry.has(i) then SignalRegistry.add(Signal:new(i)) end
         end
+    end
+
+    for signalId in pairs(SignalRegistry.getAll()) do
+        if not discoveredIds[signalId] then SignalRegistry.remove(signalId) end
     end
 end
 
@@ -27,7 +32,13 @@ function SignalDiscovery.initFromAnl3(tableOfAnl3)
 
     local signals = {}
     for _, entry in ipairs(tableOfAnl3.signals or {}) do
-        if entry.keyId then signals[#signals + 1] = Signal:new(entry.keyId) end
+        if entry.keyId then
+            local signal = Signal:new(entry.keyId)
+            signal:seedTag(entry.tag or "")
+            if entry.tipTxt ~= nil then signal:seedTippText(entry.tipTxt) end
+            if entry.tipShow ~= nil then signal:seedTippTextVisible(entry.tipShow) end
+            signals[#signals + 1] = signal
+        end
     end
     SignalRegistry.replaceAll(signals)
 end
@@ -38,8 +49,7 @@ function SignalDiscovery.runInitialDiscovery()
 end
 
 function SignalDiscovery.runDiscovery()
-    if not HubOptionsRegistry.isAnyDiscoveryAndUpdateEnabled("signals", "waitingOnSignals") then return end
-    discoverSignals()
+    -- do nothing
 end
 
 return SignalDiscovery

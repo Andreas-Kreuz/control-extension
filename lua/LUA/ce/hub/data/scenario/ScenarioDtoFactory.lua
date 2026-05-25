@@ -2,6 +2,9 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.scenario.ScenarioDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local cached = DtoFieldAccess.cached
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class ScenarioDtoFactory
@@ -15,50 +18,62 @@ local CE_TYPE = HubCeTypes.Scenario
 local KEY_ID = "id"
 local ENTRY_ID = "scenario"
 
+local function scenarioName(scenario)
+    return cached(scenario, function (source) return source:peekName() end, "name") or ENTRY_ID
+end
+
+local function staticCameras(scenario)
+    return cached(scenario, function (source) return source:peekStaticCameras() end, "staticCameras") or {}
+end
+
+local function dynamicCameras(scenario)
+    return cached(scenario, function (source) return source:peekDynamicCameras() end, "dynamicCameras") or {}
+end
+
 -- DtoFields: class definition in ScenarioDtoTypes.d.lua
 local dtoFields = {
     name = {
-        getValue = function (scenario) return scenario.name or ENTRY_ID end,
+        getValue = scenarioName,
         placeholder = ENTRY_ID
     },
     scenarioName = {
-        getValue = function (scenario) return scenario.scenarioName end,
+        getValue = peek(function (source) return source:peekScenarioName() end, "scenarioName"),
         placeholder = ""
     },
     scenarioPath = {
-        getValue = function (scenario) return scenario.scenarioPath end,
+        getValue = peek(function (source) return source:peekScenarioPath() end, "scenarioPath"),
         placeholder = ""
     },
     savedWithEep = {
-        getValue = function (scenario) return scenario.savedWithEep end,
+        getValue = peek(function (source) return source:peekSavedWithEep() end, "savedWithEep"),
         placeholder = 0
     },
     scenarioLanguage = {
-        getValue = function (scenario) return scenario.scenarioLanguage end,
+        getValue = peek(function (source) return source:peekScenarioLanguage() end, "scenarioLanguage"),
         placeholder = ""
     },
     eepLanguage = {
-        getValue = function (scenario) return scenario.eepLanguage end,
+        getValue = peek(function (source) return source:peekEepLanguage() end, "eepLanguage"),
         placeholder = ""
     },
     activeTrain = {
-        getValue = function (scenario) return scenario.activeTrain end,
+        getValue = peek(function (source) return source:peekActiveTrain() end, "activeTrain"),
         placeholder = ""
     },
     activeRollingStock = {
-        getValue = function (scenario) return scenario.activeRollingStock end,
+        getValue = peek(function (source) return source:peekActiveRollingStock() end, "activeRollingStock"),
         placeholder = ""
     },
     timeLapse = {
-        getValue = function (scenario) return scenario.timeLapse end,
+        getValue = peek(function (source) return source:peekTimeLapse() end, "timeLapse"),
         placeholder = 0
     },
     staticCameras = {
-        getValue = function (scenario) return scenario.staticCameras or {} end,
+        getValue = staticCameras,
         placeholder = {}
     },
     dynamicCameras = {
-        getValue = function (scenario) return scenario.dynamicCameras or {} end,
+        getValue = dynamicCameras,
         placeholder = {}
     },
 }

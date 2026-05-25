@@ -22,10 +22,12 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
             light = true,
             smoke = false,
             fire = true,
+            gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm",
             getTag = function (self) return self.tag end,
             getLight = function (self) return self.light end,
             getSmoke = function (self) return self.smoke end,
-            getFire = function (self) return self.fire end
+            getFire = function (self) return self.fire end,
+            getGsbname = function (self) return self.gsbname end
         }
 
         local ceType, keyId, key, dto = StructureDtoFactory.createFullDto(structure)
@@ -48,7 +50,8 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
                         tag = "alpha",
                         light = true,
                         smoke = false,
-                        fire = true
+                        fire = true,
+                        gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm"
                     }, dto)
     end)
 
@@ -76,5 +79,28 @@ insulate("ce.hub.data.structures.StructureDtoFactory", function ()
                         tag = "changed",
                         fire = true
                     }, dto)
+    end)
+
+    it("publishes tag and gsbname even without structure interest", function ()
+        local StructureDtoFactory = require("ce.hub.data.structures.StructureDtoFactory")
+        local structure = {
+            id = "#7",
+            name = "#7_Ampel",
+            gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm",
+            tag = "p1=#4,",
+            light = false,
+            smoke = false,
+            fire = false,
+            getTag = function (self) return self.tag end,
+            getLight = function (self) return self.light end,
+            getSmoke = function (self) return self.smoke end,
+            getFire = function (self) return self.fire end,
+            getGsbname = function (self) return self.gsbname end
+        }
+
+        local _, _, _, dto = StructureDtoFactory.createFullDto(structure, false)
+
+        assert.equals("p1=#4,", dto.tag)
+        assert.equals("\\Immobilien\\Verkehr\\Signale\\Ampel.3dm", dto.gsbname)
     end)
 end)

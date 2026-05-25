@@ -1,4 +1,4 @@
-local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
+local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
 
 local TEMP_FILE = "spec/ce/hub/eep/_anl3_test_tmp.xml"
 
@@ -10,7 +10,7 @@ local function writeTempXml(content)
 end
 
 local function load(xmlPath)
-    local result = Anl3ToTable.loadAnlage(xmlPath)
+    local result = EepScenarioAnl3Parser.loadAnlage(xmlPath)
     assert(result, "loadAnlage returned nil")
     return result
 end
@@ -56,21 +56,74 @@ local MINIMAL_ANL3 = table.concat({
                                       "</sutrackp>",
                                   }, "")
 
-insulate("Anl3ToTable", function ()
+insulate("ce.hub.eep.scenario.EepScenarioAnl3Parser", function ()
     local path
+    local ioOpenStub
 
     before_each(function ()
         path = writeTempXml(MINIMAL_ANL3)
     end)
 
     after_each(function ()
+        if ioOpenStub then
+            ioOpenStub:revert()
+            ioOpenStub = nil
+        end
         os.remove(path)
     end)
 
     it("returns nil and error message when file does not exist", function ()
-        local result, err = Anl3ToTable.loadAnlage("/nonexistent/file.anl3")
+        local result, err = EepScenarioAnl3Parser.loadAnlage("/nonexistent/file.anl3")
         assert.is_nil(result)
         assert.is_not_nil(err)
+    end)
+
+    it("closes the file before converting and parsing content", function ()
+        local fakeFile = {
+            closed = false,
+            read = function (self, mode)
+                assert.equals("*a", mode)
+                return {
+                    gsub = function ()
+                        assert.is_true(self.closed)
+                        return MINIMAL_ANL3
+                    end
+                }
+            end,
+            close = function (self)
+                self.closed = true
+            end
+        }
+        ioOpenStub = stub(io, "open", function ()
+            return fakeFile
+        end)
+
+        local root, err = EepScenarioAnl3Parser.loadAnlage("locked.anl3")
+
+        assert.is_nil(err)
+        assert.equals("sutrackp", root.tag)
+        assert.is_true(fakeFile.closed)
+    end)
+
+    it("closes the file and returns a read error when file read fails", function ()
+        local fakeFile = {
+            closed = false,
+            read = function ()
+                return nil, "read failed"
+            end,
+            close = function (self)
+                self.closed = true
+            end
+        }
+        ioOpenStub = stub(io, "open", function ()
+            return fakeFile
+        end)
+
+        local result, err = EepScenarioAnl3Parser.loadAnlage("locked.anl3")
+
+        assert.is_nil(result)
+        assert.equals("EepScenarioAnl3Parser: cannot read file: read failed", err)
+        assert.is_true(fakeFile.closed)
     end)
 
     it("returns the root element as the document root", function ()
@@ -128,7 +181,7 @@ insulate("Anl3ToTable", function ()
 
     it("parses the real smallest anl3 file and returns sutrackp root", function ()
         local realPath = "../Resourcen/Anlagen/ce/Control_Extension-Demo-Testen/Control_Extension-Lua-Testbeispiel.anl3"
-        local root, err = Anl3ToTable.loadAnlage(realPath)
+        local root, err = EepScenarioAnl3Parser.loadAnlage(realPath)
         assert.is_nil(err)
         assert.is_not_nil(root)
         if root then

@@ -255,6 +255,7 @@ allow_defined_top = true
 -- 631 - line is too long
 files["lua/LUA/ce/hub/eep"].ignore = {"212", "131"}
 files["lua/LUA/ce/demo-anlagen"].ignore = {"131"}
+files["lua/LUA/ce/hub/CeHubModule.lua"].ignore = {"131"}
 files["lua/LUA/ce/hub/mods/CeModule.d.lua"].ignore = {"631"}
 files["lua/LUA/ce/mods/road/RoadTypes.d.lua"].ignore = {"631"}
 files["lua/LUA/ce/mods/road/data/RoadDtoFactory.lua"].ignore = {"631"}

@@ -1,10 +1,11 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLight ...") end
 
-local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
 local AxisStructureTrafficLight = require("ce.mods.road.AxisStructureTrafficLight")
 local LightStructureTrafficLight = require("ce.mods.road.LightStructureTrafficLight")
 local SignalIndication = require("ce.mods.road.SignalIndication")
-local fmt = require("ce.hub.eep.TippTextFormatter")
+local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 
 ------------------------------------------------------------------------------------------
 -- Klasse TrafficLight
@@ -19,7 +20,13 @@ TrafficLight.Use = {
     VEHICLE_AND_PEDESTRIAN = "VEHICLE_AND_PEDESTRIAN"
 }
 local registeredSignals = {}
+local allTrafficLights = {}
 local counter = -1
+function TrafficLight.getAll()
+    local copy = {}
+    for i, signal in ipairs(allTrafficLights) do copy[i] = signal end
+    return copy
+end
 
 
 ---
@@ -30,15 +37,16 @@ local counter = -1
 ---@param greenStructure? string Immobilie fuer Signalbild gelb (Licht an / aus)
 ---@param yellowStructure? string Immobilie fuer Signalbild gelb (Licht an / aus)
 ---@param requestStructure? string Immobilie fuer Signalbild "A" (Licht an / aus)
+---@param housingStructure? string Gehaeuse fuer Ampelaufsteller-Tags
+---@param blendStructure? string Blendschutz fuer Ampelaufsteller-Tags
 --
 function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                                   requestStructure)
+                                   requestStructure, housingStructure, blendStructure)
     assert(signalId, "Specify a signalId")
     assert(trafficLightModel, "Specify a trafficLightModel")
     local error = string.format("TrafficLight ID already used: %s - %s", signalId, trafficLightModel.name)
     assert(not registeredSignals[tostring(signalId)] or registeredSignals[tostring(signalId)].trafficLightModel ==
            trafficLightModel, error)
-    EEPShowInfoSignal(signalId, false)
     if signalId < 0 then counter = counter - 1 end
     local o = {
         vehicleSignalName = name,
@@ -46,12 +54,10 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
         use = TrafficLight.Use.VEHICLE_ONLY,
         signalId = signalId > 0 and signalId or counter,
         trafficLightModel = trafficLightModel,
-        currentIndication = signalId > 0 and trafficLightModel:indicationOf(EEPGetSignal(signalId)) or
+        currentIndication = signalId > 0 and
+            trafficLightModel:indicationOf(SignalRegistry.getOrCreate(signalId):pullPosition()) or
             SignalIndication.RED,
         debug = false,
-        laneInfo = "",
-        laneNameInfo = "",
-        phaseInfo = nil,
         buildInfo = "" .. tostring(signalId),
         lanes = {},
         ---@type table<LightStructureTrafficLight,boolean>
@@ -64,33 +70,38 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
     o = setmetatable(o, self)
 
     if redStructure or greenStructure or yellowStructure or requestStructure then
-        o:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure)
+        o:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure, housingStructure,
+                            blendStructure)
     end
 
     registeredSignals[tostring(signalId)] = o
+    table.insert(allTrafficLights, o)
     return o
 end
 
 function TrafficLight:new(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                          requestStructure)
+                          requestStructure, housingStructure, blendStructure)
     return self:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                             requestStructure)
+                             requestStructure, housingStructure, blendStructure)
 end
 
 function TrafficLight:newPedestrianOnly(name, signalId, trafficLightModel, redStructure, greenStructure,
-                                        yellowStructure, requestStructure)
+                                        yellowStructure, requestStructure, housingStructure, blendStructure)
     return self:newForSignal(name, signalId, trafficLightModel, redStructure, greenStructure, yellowStructure,
-                             requestStructure):asPedestrianOnly()
+                             requestStructure, housingStructure, blendStructure):asPedestrianOnly()
 end
 
-function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure)
-    local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+function TrafficLight:newForLightStructure(name, redStructure, greenStructure, yellowStructure, requestStructure,
+                                           housingStructure, blendStructure)
     return self:newForSignal(name, -1, TrafficLightModel.NONE, redStructure, greenStructure, yellowStructure,
-                             requestStructure)
+                             requestStructure, housingStructure, blendStructure)
 end
 
 function TrafficLight:asPedestrianSignal(pedestrianSignalName)
     assert(type(pedestrianSignalName) == "string", "Need 'pedestrianSignalName' as string")
+    if self.pedestrianSignalName == pedestrianSignalName and self.use == TrafficLight.Use.VEHICLE_AND_PEDESTRIAN then
+        return self
+    end
     self.pedestrianSignalName = pedestrianSignalName
     self.use = TrafficLight.Use.VEHICLE_AND_PEDESTRIAN
     return self
@@ -99,6 +110,7 @@ end
 function TrafficLight:withPedestrian(pedestrianSignalName) return self:asPedestrianSignal(pedestrianSignalName) end
 
 function TrafficLight:asPedestrianOnly()
+    if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then return self end
     self.pedestrianSignalName = self.pedestrianSignalName or self.vehicleSignalName
     self.vehicleSignalName = nil
     self.use = TrafficLight.Use.PEDESTRIAN_ONLY
@@ -111,9 +123,10 @@ end
 -- @param yellowStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel gelb oder rot-gelb ist
 -- @param requestStructure Name der Immobilie, deren Licht eingeschaltet wird, wenn die Ampel eine Anforderung erkennt
 --
-function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure)
+function TrafficLight:addLightStructure(redStructure, greenStructure, yellowStructure, requestStructure,
+                                        housingStructure, blendStructure)
     local lightStructure = LightStructureTrafficLight:new(redStructure, greenStructure, yellowStructure,
-                                                          requestStructure)
+                                                          requestStructure, housingStructure, blendStructure)
     self.lightStructures[lightStructure] = true
     return self
 end
@@ -137,107 +150,44 @@ function TrafficLight:addAxisStructure(structureName, axisName, positionDefault,
     return self
 end
 
---- Aktualisiert den Text f¸r die aktuelle Phase dieses Signalgebers
--- @param phaseInfo TippText f¸r die Phase
---
-function TrafficLight:setPhaseInfo(phaseInfo) self.phaseInfo = phaseInfo end
+local function tippTextStructure(lightStructure)
+    return lightStructure.housingStructure or lightStructure.redStructure
+end
 
---- Aktualsisiert den Text f¸r die Fahrspuren dieser Ampel
--- @param laneInfo TippText f¸r die Fahrspur
---
-function TrafficLight:setLaneInfo(laneInfo) self.laneInfo = laneInfo end
-
---- Aktualsisiert den Namen fuer die Fahrspur dieser Ampel
--- @param laneNameInfo TippText fuer den Fahrspurnamen
---
-function TrafficLight:setLaneNameInfo(laneNameInfo) self.laneNameInfo = laneNameInfo end
-
-function TrafficLight:showInfoText(showInfo)
-    if self.signalId > 0 then
-        EEPShowInfoSignal(self.signalId, showInfo)
-    else
-        for l in pairs(self.lightStructures) do
-            if l.redStructure then
-                EEPShowInfoStructure(l.redStructure, showInfo)
-                break
-            end
-        end
+local function addStructureName(structures, knownStructures, structureName)
+    if structureName and not knownStructures[structureName] then
+        table.insert(structures, structureName)
+        knownStructures[structureName] = true
     end
 end
 
-function TrafficLight:changeInfoText(infoText)
-    if self.signalId > 0 then
-        EEPChangeInfoSignal(self.signalId, infoText)
-    else
-        for l in pairs(self.lightStructures) do
-            if l.redStructure then
-                EEPChangeInfoStructure(l.redStructure, infoText)
-                break
-            end
-        end
-    end
+local function allTippTextStructures(lightStructure)
+    local structures = {}
+    local knownStructures = {}
+    addStructureName(structures, knownStructures, lightStructure.housingStructure)
+    addStructureName(structures, knownStructures, lightStructure.redStructure)
+    addStructureName(structures, knownStructures, lightStructure.greenStructure)
+    addStructureName(structures, knownStructures, lightStructure.yellowStructure)
+    addStructureName(structures, knownStructures, lightStructure.requestStructure)
+    addStructureName(structures, knownStructures, lightStructure.blendStructure)
+    return structures
 end
 
-local function getSignalFunctionsTippText(signalId, trafficLightModel)
-    if EEPGetSignalFunctions then
-        local text = {}
-        local found, trafficLightModelName = EEPGetSignalItemName(signalId, true)
-        if not found then return trafficLightModel.name end
-        table.insert(text, trafficLightModel.name)
-        table.insert(text, "<br>")
-        table.insert(text, trafficLightModelName)
-        local _, count = EEPGetSignalFunctions(signalId)
-        for i = 1, count do
-            local _, action = EEPGetSignalFunction(signalId, i)
-            table.insert(text, "<br>")
-            table.insert(text, EEPGetSignal(signalId) == i and "<b>" or "")
-            table.insert(text, i)
-            table.insert(text, ": ")
-            table.insert(text, trafficLightModel:indicationOf(i) or action)
-            table.insert(text, EEPGetSignal(signalId) == i and "</b>." or ".")
-        end
-        return table.concat(text, "")
-    else
-        return trafficLightModel.name
-    end
-end
+function TrafficLight:getSignalId() return self.signalId end
 
-function TrafficLight:vehicleSignalNameTippText()
-    local name = self.vehicleSignalName and "<b>" .. self.vehicleSignalName .. "</b>" or ""
-    local indication = self.currentIndication
-    if indication == SignalIndication.GREEN then
-        return fmt.green(name)
-    elseif indication == SignalIndication.OFF then
-        return fmt.greyText(name)
-    elseif indication == SignalIndication.YELLOW or indication == SignalIndication.REDYELLOW or
-        indication == SignalIndication.GREENYELLOW or indication == SignalIndication.OFF_BLINKING then
-        return fmt.bgYellow(name)
-    else
-        return fmt.bgRed(name)
-    end
-end
+function TrafficLight:getVehicleSignalName() return self.vehicleSignalName end
 
-function TrafficLight:pedestrianSignalNameTippText()
-    local name = self.pedestrianSignalName and "<b>" .. self.pedestrianSignalName .. "</b>" or ""
-    local indication = self.currentIndication
-    if indication == SignalIndication.PEDESTRIAN then
-        return fmt.green(name)
-    elseif indication == SignalIndication.OFF or indication == SignalIndication.OFF_BLINKING then
-        return fmt.greyText(name)
-    else
-        return fmt.bgRed(name)
-    end
-end
+function TrafficLight:getPedestrianSignalName() return self.pedestrianSignalName end
 
-function TrafficLight:signalNamesTippText()
-    if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then
-        return self:pedestrianSignalNameTippText()
-    elseif self.use == TrafficLight.Use.VEHICLE_AND_PEDESTRIAN then
-        return self:vehicleSignalNameTippText() .. "<br>" .. self:pedestrianSignalNameTippText()
-    else
-        return self:vehicleSignalNameTippText()
-    end
-end
+function TrafficLight:getUse() return self.use end
+
+function TrafficLight:getTrafficLightModel() return self.trafficLightModel end
+
+function TrafficLight:getCurrentIndication() return self.currentIndication end
+
+function TrafficLight:getReason() return self.reason end
+
+function TrafficLight:getSignalGroupsByUse() return self.signalGroupsByUse or {} end
 
 function TrafficLight:signalNamesText()
     if self.use == TrafficLight.Use.PEDESTRIAN_ONLY then
@@ -249,58 +199,32 @@ function TrafficLight:signalNamesText()
     end
 end
 
---- Stellt die vorher gesetzten Tipp-Texte dar.
---
-function TrafficLight:refreshInfo()
-    local showPhase = IntersectionSettings.showPhaseOnSignal
-    local showAllSignals = IntersectionSettings.showSignalIdOnSignal
-    local showModelInfo = IntersectionSettings.showModelInfoOnSignal
-    local showLaneName = IntersectionSettings.showLaneNamesOnSignal and self.laneNameInfo:len() > 0
-    local showNameAndColor = IntersectionSettings.showNameAndPhaseOnSignal
-    local showRequests = IntersectionSettings.showRequestsOnSignal and self.laneInfo:len() > 0
-    local showInfo = showAllSignals or showModelInfo or showLaneName or showNameAndColor or showRequests or showPhase
-
-    self:showInfoText(showInfo)
-    if showInfo then
-        local infoText = "<j>"
-
-        if showAllSignals then
-            infoText = fmt.appendUpTo1023(infoText, "Signal: " .. self.signalId)
-        end
-
-        if showModelInfo then
-            local signalFunctionsTippText = getSignalFunctionsTippText(self.signalId, self.trafficLightModel)
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, signalFunctionsTippText)
-        end
-
-        if showLaneName then
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, self.laneNameInfo)
-        end
-
-        if showNameAndColor and self.currentIndication then
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, self:signalNamesTippText())
-        end
-
-        if showRequests then
-            if infoText ~= "<j>" then infoText = fmt.appendUpTo1023(infoText, "<br>") end
-            infoText = fmt.appendUpTo1023(infoText, self.laneInfo)
-        end
-
-        if showPhase and self.phaseInfo then
-            infoText = fmt.appendUpTo1023(infoText, "<br><br><b>" .. "Phase: " .. "</b>")
-            infoText = fmt.appendUpTo1023(infoText, self.phaseInfo)
-        end
-
-        if showPhase and not showNameAndColor and self.currentIndication and self.reason then
-            infoText = fmt.appendUpTo1023(infoText, "<br><br>")
-            infoText = fmt.appendUpTo1023(infoText, string.format(" %s (%s) ", self.currentIndication, self.reason))
-        end
-
-        self:changeInfoText(infoText)
+function TrafficLight:getPrimaryTippTextStructure()
+    for lightStructure in pairs(self.lightStructures) do
+        local structureName = tippTextStructure(lightStructure)
+        if structureName then return structureName end
     end
+    return nil
+end
+
+function TrafficLight:getPrimaryTippTextStructures()
+    local structures = {}
+    local knownStructures = {}
+    for lightStructure in pairs(self.lightStructures) do
+        addStructureName(structures, knownStructures, tippTextStructure(lightStructure))
+    end
+    return structures
+end
+
+function TrafficLight:getAllTippTextStructures()
+    local structures = {}
+    local knownStructures = {}
+    for lightStructure in pairs(self.lightStructures) do
+        for _, structureName in ipairs(allTippTextStructures(lightStructure)) do
+            addStructureName(structures, knownStructures, structureName)
+        end
+    end
+    return structures
 end
 
 function TrafficLight.switchAll(signals, indication, reason)
@@ -342,20 +266,20 @@ function TrafficLight:switchStructureLight()
             local onOff = self.currentIndication == SignalIndication.RED or
                 self.currentIndication == SignalIndication.REDYELLOW
             lightDbg = lightDbg .. string.format(", Licht in %s: %s", lightTL.redStructure, onOff and "an" or "aus")
-            EEPStructureSetLight(lightTL.redStructure, onOff)
+            StructureRegistry.getOrCreate(lightTL.redStructure):setLight(onOff)
         end
         if lightTL.yellowStructure then
             local onOff = self.currentIndication == SignalIndication.YELLOW or
                 self.currentIndication == SignalIndication.REDYELLOW
             lightDbg = lightDbg ..
                 string.format(", Licht in %s: %s", lightTL.yellowStructure, onOff and "an" or "aus")
-            EEPStructureSetLight(lightTL.yellowStructure, onOff)
+            StructureRegistry.getOrCreate(lightTL.yellowStructure):setLight(onOff)
         end
         if lightTL.greenStructure then
             local onOff = self.currentIndication == SignalIndication.GREEN
             lightDbg = lightDbg ..
                 string.format(", Licht in %s: %s", lightTL.greenStructure, onOff and "an" or "aus")
-            EEPStructureSetLight(lightTL.greenStructure, onOff)
+            StructureRegistry.getOrCreate(lightTL.greenStructure):setLight(onOff)
         end
     end
     return lightDbg
@@ -382,12 +306,14 @@ function TrafficLight:switchStructureAxis()
 
         axisDbg = axisDbg ..
             string.format(", Achse %s in %s auf: %d", axisTL.axisName, axisTL.structureName, position)
-        EEPStructureSetAxis(axisTL.structureName, axisTL.axisName, position)
+        StructureRegistry.getOrCreate(axisTL.structureName):setAxis(axisTL.axisName, position)
     end
     return axisDbg
 end
 
-function TrafficLight:switchSignal(sigIndex) if self.signalId > 0 then EEPSetSignal(self.signalId, sigIndex, 1) end end
+function TrafficLight:switchSignal(sigIndex)
+    if self.signalId > 0 then SignalRegistry.getOrCreate(self.signalId):setPosition(sigIndex) end
+end
 
 --- Setzt die Anforderung fuer eine Ampel (damit sie weiﬂ, ob eine Anforderung vorliegt)
 --- @param hasRequest boolean wo liegt die Anforderung an
@@ -398,14 +324,13 @@ function TrafficLight:showRequestOnSignal(hasRequest)
         if lightTL.requestStructure then
             lightDbg = lightDbg ..
                 string.format(", Licht in %s: %s", lightTL.requestStructure, (hasRequest) and "an" or "aus")
-            EEPStructureSetLight(lightTL.requestStructure, hasRequest)
+            StructureRegistry.getOrCreate(lightTL.requestStructure):setLight(hasRequest)
         end
     end
 
     if (self.debug or TrafficLight.debug) and lightDbg ~= "" then
         print(string.format("[TrafficLight    ] Schalte Ampel %04d%s", self.signalId, lightDbg))
     end
-    self:refreshInfo()
 end
 
 function TrafficLight:print()

@@ -1,5 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.AxisStructureTrafficLight ...") end
 
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+
 ---@class AxisStructureTrafficLight
 ---@field structureName string Name der Immobilie, deren Achse gesteuert werden soll
 ---@field axisName string Name der Achse in der Immobilie, die gesteuert werden soll
@@ -25,7 +27,7 @@ function AxisStructureTrafficLight:new(structureName, axisName, positionDefault,
                                        positionYellow, positionRedYellow, positionPedestrian)
     assert(type(structureName) == "string", "Need 'structureName' as string")
     assert(type(axisName) == "string", "Need 'axisName' as string")
-    assert(EEPStructureGetAxis(structureName, axisName))
+    assert(StructureRegistry.getOrCreate(structureName):getAxis(axisName) ~= nil)
     assert(type(positionDefault) == "number", "Need 'positionDefault' as number")
     if positionRed then assert(type(positionRed) == "number", "Need 'positionRed' as number") end
     if positionGreen then assert(type(positionGreen) == "number", "Need 'positionGreen' as number") end

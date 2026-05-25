@@ -1,4 +1,5 @@
 local TransitSettings = require("ce.mods.transit.TransitSettings")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local RoadStationTippHelper = require("ce.hub.util.RoadStationTippHelper")
 local StructureTextureTextCache = require("ce.mods.transit.models.StructureTextureTextCache")
 
@@ -71,8 +72,9 @@ BusHS_Tram_dfi_6_RG3.displayEntries = function (displayStructure, stationQueueEn
     end
 
     local t = table.concat(text, "")
-    EEPChangeInfoStructure(displayStructure, t)
-    EEPShowInfoStructure(displayStructure, TransitSettings.showDepartureTippText)
+    local structure = StructureRegistry.getOrCreate(displayStructure)
+    structure:changeInfo(t)
+    structure:showInfo(TransitSettings.showDepartureTippText)
 end
 
 return BusHS_Tram_dfi_6_RG3

@@ -1,7 +1,7 @@
 {
   "name": "@ce/root",
   "private": true,
-  "version": "v0.0.8-alpha",
+  "version": "v0.0.9-alpha",
   "workspaces": [
     "apps/*",
     "packages/*",
@@ -24,7 +24,7 @@
     "clean:lua": "node ./scripts/clean-lua.mjs",
     "clean:web": "yarn workspace @ce/web-app run clean && yarn workspace @ce/web-shared run clean && yarn workspace @ce/web-server run clean",
     "dev:app": "yarn run sync-control-extension-version && yarn workspace @ce/web-shared run build && node ./scripts/run-parallel.mjs \"yarn workspace @ce/web-server run dev\" \"yarn workspace @ce/web-app run dev\"",
-    "dev:docs": "node ./scripts/run-update-doc-assets.mjs && node ./scripts/run-jekyll.mjs serve --incremental --livereload",
+    "dev:docs": "node ./scripts/run-update-doc-assets.mjs && node ./scripts/run-jekyll.mjs build && node ./scripts/run-jekyll.mjs serve --incremental --livereload",
     "dev:docs:manual": "node ./scripts/run-update-doc-assets.mjs && node ./scripts/run-jekyll.mjs serve --incremental",
     "dev:storybook": "yarn workspace @ce/web-shared run build && yarn workspace @ce/web-app run dev:storybook",
     "format": "yarn run format:apps && yarn run format:lua",

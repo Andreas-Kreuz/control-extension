@@ -11,7 +11,7 @@ yarn build                    # Build all (web-shared → web-app → web-server
 yarn build:docs:assets        # Generate missing docs screenshot/assets
 yarn build:docs:assets:force  # Force-regenerate docs screenshot/assets
 yarn dev:app                  # Dev mode: server + app in parallel
-yarn dev:docs                 # Incremental docs server with LiveReload, creates missing assets
+yarn dev:docs                 # Build docs once, then start incremental docs server with LiveReload
 yarn dev:docs:manual          # Docs server with manual refresh, creates missing assets
 yarn dev:storybook            # Storybook for the web app
 yarn run:app                  # Build then run server

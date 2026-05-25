@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.rail.Rail ...") end
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local fmt = require("ce.hub.eep.TippTextFormatter")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
 -- TODO extract all classes, not belonging to Rail itself, to separate files
 -- TODO create a RailCeModule so we can use it in the hub.
@@ -60,9 +61,11 @@ local function registerSignal(signalId)
     if not allSignals[signalId] then
         allSignals[signalId] = true
         _G["EEPOnSignal_" .. signalId] = function (x)
-            pdbg(dbg.signal_aenderung, "****** Signalstellung (" .. signalId .. ") geaendert auf: " .. x)
-            EEPChangeInfoSignal(signalId, "Signal: " .. signalId .. "\nStellung: " .. x)
-            EEPShowInfoSignal(signalId, true)
+            ProtectedExecution.run("EEPOnSignal_" .. signalId, function ()
+                pdbg(dbg.signal_aenderung, "****** Signalstellung (" .. signalId .. ") geaendert auf: " .. x)
+                EEPChangeInfoSignal(signalId, "Signal: " .. signalId .. "\nStellung: " .. x)
+                EEPShowInfoSignal(signalId, true)
+            end)
         end
         pdbg(dbg.signal_aenderung, "Registered: " .. "EEPOnSignal_" .. signalId)
         EEPRegisterSignal(signalId)
@@ -73,9 +76,11 @@ local function registerSwitch(switchId)
     if not allSwitches[switchId] then
         allSwitches[switchId] = true
         _G["EEPOnSwitch_" .. switchId] = function (x)
-            pdbg(dbg.weiche_aenderung, "****** Weichenstellung (" .. switchId .. ") geaendert auf: " .. x)
-            EEPChangeInfoSwitch(switchId, "Weiche: " .. switchId .. "\nStellung: " .. x)
-            EEPShowInfoSwitch(switchId, true)
+            ProtectedExecution.run("EEPOnSwitch_" .. switchId, function ()
+                pdbg(dbg.weiche_aenderung, "****** Weichenstellung (" .. switchId .. ") geaendert auf: " .. x)
+                EEPChangeInfoSwitch(switchId, "Weiche: " .. switchId .. "\nStellung: " .. x)
+                EEPShowInfoSwitch(switchId, true)
+            end)
         end
         pdbg(dbg.weiche_aenderung, "Registered: " .. "EEPOnSwitch_" .. switchId)
         EEPRegisterSwitch(switchId)

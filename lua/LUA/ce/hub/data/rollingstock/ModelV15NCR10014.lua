@@ -1,6 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.ModelV15NCR10014 ...") end
 local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
 
+local function rollingStockFor(rollingStockName)
+    return require("ce.hub.data.rollingstock.RollingStockRegistry").getOrCreate(rollingStockName)
+end
+
 local ModelV15NCR10014 = {}
 
 local citybusTexturesGelb = {
@@ -40,14 +44,14 @@ local function createCitybus(axisNames, textureTexts, doorAxisNames)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(line) == "string", "Need 'line' as string")
-        EEPRollingstockSetTextureText(rollingStockName, 4, line)
+        rollingStockFor(rollingStockName):setTextureText(4, line)
     end
 
     function citybus:setDestination(rollingStockName, destination)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(destination) == "string", "Need 'destination' as string")
-        EEPRollingstockSetTextureText(rollingStockName, 5, destination)
+        rollingStockFor(rollingStockName):setTextureText(5, destination)
     end
 
     function citybus:setOrigin(rollingStockName, origin)
@@ -72,21 +76,21 @@ local function createCitybus(axisNames, textureTexts, doorAxisNames)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(licencePlate) == "string", "Need 'licencePlate' as string")
-        EEPRollingstockSetTextureText(rollingStockName, 1, formatLicencePlateTextureText(licencePlate))
+        rollingStockFor(rollingStockName):setTextureText(1, formatLicencePlateTextureText(licencePlate))
     end
 
     function citybus:setWagonNumber(rollingStockName, wagonNumber)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(wagonNumber) == "string", "Need 'wagonNumber' as string")
-        EEPRollingstockSetTextureText(rollingStockName, 2, wagonNumber)
+        rollingStockFor(rollingStockName):setTextureText(2, wagonNumber)
     end
 
     function citybus:openDoors(rollingStockName)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         for _, axisName in ipairs(doorAxisNames) do
-            EEPRollingstockSetAxis(rollingStockName, axisName, 100)
+            rollingStockFor(rollingStockName):setAxis(axisName, 100)
         end
     end
 
@@ -94,7 +98,7 @@ local function createCitybus(axisNames, textureTexts, doorAxisNames)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         for _, axisName in ipairs(doorAxisNames) do
-            EEPRollingstockSetAxis(rollingStockName, axisName, 0)
+            rollingStockFor(rollingStockName):setAxis(axisName, 0)
         end
     end
 

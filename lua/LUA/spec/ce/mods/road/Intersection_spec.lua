@@ -41,6 +41,7 @@ insulate("Crossing", function ()
 
     local RIGHT_TURN_ROUTE = "TURN RIGHT"
     EEPSetTrainRoute("#Car2a", RIGHT_TURN_ROUTE)
+    require("ce.hub.data.trains.TrainRegistry").seedFromSnapshot({ name = "#Car2a", route = RIGHT_TURN_ROUTE })
 
     before_each(function ()
         EEPStructureSetLight("#5433_Straba Signal A", false)
@@ -141,7 +142,7 @@ insulate("Crossing", function ()
         local lane = intersection:newLane("Lane A", signal):setScriptVariableName("c1LaneA")
 
         assert.equals(lane, intersection.lanes[1])
-        assert.equals("c1LaneA", lane:getScriptVariableName())
+        assert.equals("c1LaneA", lane:getKpId())
     end)
 
     it("creates pedestrian crossings through the intersection", function ()
@@ -161,6 +162,29 @@ insulate("Crossing", function ()
         assert.are.same({ "Cam 1", "Cam 2", "Cam 3" }, intersection:getStaticCams())
     end)
 
+    it("shows phases in the crossing overview and shrinks the current phase bar", function ()
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local RoadTippTextGenerator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
+
+        crossing:setTippStructure("#Overview")
+        crossing.currentPhase = phaseA
+        crossing.currentPhaseStartedAt = 100
+        _G.EEPTime = 109
+        IntersectionSettings.showLanesOnStructure = true
+
+        local target = RoadTippTextGenerator.generate().structures["#Overview"]
+        local infoText = target.text
+
+        assert.is_true(target.visible)
+        assert.is_truthy(string.find(infoText, "<b>My Crossing</b>", 1, true))
+        assert.is_truthy(string.find(infoText, "<bgrgb=0,192,0>X___<bgrgb=255,255,255>__  <b>P1</b>", 1, true))
+        assert.is_truthy(string.find(
+            infoText,
+            "<bgrgb=201,201,201><fgrgb=0,0,0>X_____<bgrgb=255,255,255><fgrgb=0,0,0>  P2",
+            1,
+            true))
+        assert.is_nil(string.find(infoText, "Lane 1 N", 1, true))
+    end)
     insulate("Check initial stuff", function ()
         it("Lanes are there", function ()
             assert.is_same(lane1, crossing.lanes[1])
@@ -333,6 +357,7 @@ insulate("Check signal phase", function ()
 
     local RIGHT_TURN_ROUTE = "TURN RIGHT"
     EEPSetTrainRoute("#Car2a", RIGHT_TURN_ROUTE)
+    require("ce.hub.data.trains.TrainRegistry").seedFromSnapshot({ name = "#Car2a", route = RIGHT_TURN_ROUTE })
 
     c1Lane1Signal = TrafficLight:new("c1Lane1Signal", 11, TrafficLightModel.Unsichtbar_2er)
     c1Lane2Signal = TrafficLight:new("c1Lane2Signal", 12, TrafficLightModel.Unsichtbar_2er)
@@ -393,6 +418,7 @@ insulate("Check signal phase", function ()
     Scheduler.debug = false
     Intersection.debug = false
     TrafficPhase.debug = false
+    local printStub = stub(_G, "print")
     local crossingCeModule = require("ce.mods.road.CeRoadModule")
     ControlExtension.addModules(crossingCeModule)
 
@@ -949,4 +975,5 @@ insulate("Check signal phase", function ()
             it("# step13 - Signal L2 (12) ", function () assert.equals(U_R, afterTurnCarLeft) end)
         end
     end
+    printStub:revert()
 end)

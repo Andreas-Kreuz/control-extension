@@ -7,6 +7,107 @@ describe("ce.hub.data.rollingstock.RollingStock", function ()
     end)
 end)
 
+insulate("rolling stock facade getters", function ()
+    require("ce.hub.eep.EepSimulator")
+
+    it("keeps peek cache-only while getMileage reads through when not loaded", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local mileageCalls = 0
+        local mileageStub = stub(_G, "EEPRollingstockGetMileage", function (rollingStockName)
+            mileageCalls = mileageCalls + 1
+            assert.equals("MileageStock", rollingStockName)
+            return true, 123
+        end)
+
+        local stock = RollingStock:new({ rollingStockName = "MileageStock" })
+
+        assert.equals(-1, stock:peekMileage())
+        assert.equals(123, stock:getMileage())
+        assert.equals(1, mileageCalls)
+        assert.equals(123, stock:getMileage())
+        assert.equals(1, mileageCalls)
+
+        mileageStub:revert()
+    end)
+
+    it("does not read current texture text before writing a missing cached value", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local textureTexts = { ["TextureStock:1"] = "Line A" }
+        local getStub = stub(_G, "EEPRollingstockGetTextureText", function (rollingStockName, surfaceNumber)
+            return true, textureTexts[rollingStockName .. ":" .. surfaceNumber] or ""
+        end)
+        local setCalls = {}
+        local setStub = stub(_G, "EEPRollingstockSetTextureText", function (rollingStockName, surfaceNumber, text)
+            setCalls[#setCalls + 1] = {
+                rollingStockName = rollingStockName,
+                surfaceNumber = surfaceNumber,
+                text = text
+            }
+            textureTexts[rollingStockName .. ":" .. surfaceNumber] = text
+            return true
+        end)
+
+        local stock = RollingStock:new({ rollingStockName = "TextureStock" })
+
+        assert.is_true(stock:setTextureText(1, "Line A"))
+        assert.is_true(stock:setTextureText(1, "Line B"))
+
+        assert.same({
+                        { rollingStockName = "TextureStock", surfaceNumber = 1, text = "Line A" },
+                        { rollingStockName = "TextureStock", surfaceNumber = 1, text = "Line B" }
+                    }, setCalls)
+        assert.stub(getStub).was_not_called()
+
+        getStub:revert()
+        setStub:revert()
+    end)
+
+    it("keeps discovered sparse texture texts when selected refresh cannot read every lower surface", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local getCalls = {}
+        local getStub = stub(_G, "EEPRollingstockGetTextureText", function (_, surfaceNumber)
+            getCalls[#getCalls + 1] = surfaceNumber
+            if surfaceNumber == 5 then return true, "Live Destination" end
+            return false, nil
+        end)
+
+        local stock = RollingStock:new({
+            rollingStockName = "SparseTextureStock",
+            textureTexts = { ["5"] = "Discovered Destination", ["22"] = "  10  " }
+        })
+
+        stock:pullTextureTexts()
+
+        assert.same({ 5, 22 }, getCalls)
+        assert.equals("Live Destination", stock:peekTextureText(5))
+        assert.equals("  10  ", stock:peekTextureText(22))
+
+        getStub:revert()
+    end)
+
+    it("does not save unchanged rolling stock tag text", function ()
+        local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+        local saveCalls = {}
+        local setTagStub = stub(_G, "EEPRollingstockSetTagText", function (rollingStockName, tag)
+            saveCalls[#saveCalls + 1] = { rollingStockName = rollingStockName, tag = tag }
+            return true
+        end)
+
+        local stock = RollingStock:new({ rollingStockName = "SaveStock" })
+
+        stock:setValue("x", "1")
+        stock:resetDirty()
+        stock:setValue("x", "1")
+
+        assert.same({
+                        { rollingStockName = "SaveStock", tag = "x=1," }
+                    }, saveCalls)
+        assert.is_false(stock:hasDirtyFields())
+
+        setTagStub:revert()
+    end)
+end)
+
 insulate("parse rollingstockname", function ()
     local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
     local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
@@ -15,8 +116,8 @@ insulate("parse rollingstockname", function ()
     RollingStockModels.addModel("MyModel", "MODEL_A.3dm", RollingStockModel:new({ myMarker = "MODEL A" }))
     RollingStockModels.assignModel("MyModel;005", RollingStockModel:new({ myMarker = "MODEL B" }))
 
-    local stock1 = RollingStockRegistry.forName("MyModel;003")
-    local stock2 = RollingStockRegistry.forName("MyModel;005")
+    local stock1 = RollingStockRegistry.getOrCreate("MyModel;003")
+    local stock2 = RollingStockRegistry.getOrCreate("MyModel;005")
 
     it("stock1 name", function () assert.equals("MyModel;003", stock1.rollingStockName) end)
     it("stock2 name", function () assert.equals("MyModel;005", stock2.rollingStockName) end)
@@ -28,19 +129,29 @@ end)
 insulate("axis and texture metadata", function ()
     require("ce.hub.eep.EepSimulator")
 
+    local function stubModelInfo(info)
+        local Parser = require("ce.hub.eep.resources.RollingStockResourceParser")
+        local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
+        RollingStockModelInfoRegistry.reset()
+        local infoForXmlModelStub = stub(Parser, "infoForXmlModel", function () return info end)
+        finally(function ()
+            infoForXmlModelStub:revert()
+            RollingStockModelInfoRegistry.reset()
+        end)
+        return infoForXmlModelStub
+    end
+
     it("includes axis names, texture names and axis values in dto", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
         local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
-        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
-
-        EEPRollingstockSetAxisByNumber("AxisStock", 2, 75)
-        local stock = RollingStock:new({ rollingStockName = "AxisStock" })
-        stock.modelInfo = RollingStockModelInfo:new({
+        stubModelInfo({
             axisNamesKnown = true,
             axisNames = { [2] = "Fahrer" },
             textureNames = { [1] = "Fahrziel" }
         })
-        stock.axisNamesKnown = stock.modelInfo:getAxisNamesKnown()
+
+        EEPRollingstockSetAxisByNumber("AxisStock", 2, 75)
+        local stock = RollingStock:new({ rollingStockName = "AxisStock", xmlModel = "AxisModel.3dm" })
         stock:updateAxisValues()
 
         local _, _, _, dto = RollingStockDtoFactory.createFullDto(stock, true)
@@ -50,6 +161,90 @@ insulate("axis and texture metadata", function ()
         assert.equals("Fahrer", dto.axisNames["2"])
         assert.equals(75, dto.axisValues["2"])
         assert.equals("Fahrziel", dto.textureNames["1"])
+    end)
+
+    it("refreshes deferred model metadata after resource parsing", function ()
+        local Parser = require("ce.hub.eep.resources.RollingStockResourceParser")
+        local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TrainRollingStockStore = require("ce.hub.data.trains.TrainRollingStockStore")
+        local calls = 0
+        local infoForXmlModelStub = stub(Parser, "infoForXmlModel", function ()
+            calls = calls + 1
+            return {
+                axisNamesKnown = true,
+                axisNames = { [2] = "Fahrer" },
+                textureNames = { [1] = "Fahrziel" }
+            }
+        end)
+        finally(function ()
+            infoForXmlModelStub:revert()
+            RollingStockModelInfoRegistry.reset()
+            TrainRollingStockStore.reset()
+        end)
+
+        RollingStockModelInfoRegistry.reset()
+        TrainRollingStockStore.reset()
+        local stock = RollingStockRegistry.seedFromSnapshot({
+            rollingStockName = "DeferredModelStock",
+            xmlModel = "DeferredModel.3dm",
+            deferModelInfo = true
+        })
+
+        assert.equals(0, calls)
+        assert.is_false(stock:peekAxisNamesKnown())
+
+        local parsedXmlModels = RollingStockModelInfoRegistry.processPending(20)
+        RollingStockRegistry.refreshModelInfoForXmlModels(parsedXmlModels)
+
+        assert.equals(1, calls)
+        assert.is_true(stock:getAxisNamesKnown())
+        assert.equals("Fahrer", stock:getAxisNames()["2"])
+        assert.equals("Fahrziel", stock:getTextureNames()["1"])
+        assert.is_true(stock.dirtyFields.axisNamesKnown)
+        assert.is_true(stock.dirtyFields.axisNames)
+        assert.is_true(stock.dirtyFields.textureNames)
+    end)
+
+    it("uses cached metadata for unselected dto and parses metadata for selected dto", function ()
+        local Parser = require("ce.hub.eep.resources.RollingStockResourceParser")
+        local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
+        local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TrainRollingStockStore = require("ce.hub.data.trains.TrainRollingStockStore")
+        local calls = 0
+        local infoForXmlModelStub = stub(Parser, "infoForXmlModel", function ()
+            calls = calls + 1
+            return {
+                axisNamesKnown = true,
+                axisNames = { [2] = "Fahrer" },
+                textureNames = { [1] = "Fahrziel" }
+            }
+        end)
+        finally(function ()
+            infoForXmlModelStub:revert()
+            RollingStockModelInfoRegistry.reset()
+            TrainRollingStockStore.reset()
+        end)
+
+        RollingStockModelInfoRegistry.reset()
+        TrainRollingStockStore.reset()
+        local stock = RollingStockRegistry.seedFromSnapshot({
+            rollingStockName = "InterestModelStock",
+            xmlModel = "InterestModel.3dm",
+            deferModelInfo = true
+        })
+
+        local _, _, _, unselectedDto = RollingStockDtoFactory.createFullDto(stock, false)
+        assert.equals(0, calls)
+        assert.is_false(unselectedDto.axisNamesKnown)
+        assert.same({}, unselectedDto.axisNames)
+
+        local _, _, _, selectedDto = RollingStockDtoFactory.createFullDto(stock, true)
+        assert.equals(1, calls)
+        assert.is_true(selectedDto.axisNamesKnown)
+        assert.equals("Fahrer", selectedDto.axisNames["2"])
+        assert.equals("Fahrziel", selectedDto.textureNames["1"])
     end)
 
     it("fallback probes the first ten axis numbers without model metadata", function ()
@@ -64,15 +259,13 @@ insulate("axis and texture metadata", function ()
 
     it("does not fallback probe axis numbers when model metadata says there are no axes", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
-
-        EEPRollingstockSetAxisByNumber("NoAxisStock", 7, 42)
-        local stock = RollingStock:new({ rollingStockName = "NoAxisStock" })
-        stock.modelInfo = RollingStockModelInfo:new({
+        stubModelInfo({
             axisNamesKnown = true,
             axisNames = {}
         })
-        stock.axisNamesKnown = stock.modelInfo:getAxisNamesKnown()
+
+        EEPRollingstockSetAxisByNumber("NoAxisStock", 7, 42)
+        local stock = RollingStock:new({ rollingStockName = "NoAxisStock", xmlModel = "NoAxisModel.3dm" })
         stock:updateAxisValues()
 
         assert.is_true(stock:getAxisNamesKnown())
@@ -81,18 +274,17 @@ insulate("axis and texture metadata", function ()
 
     it("reads axis values by localized axis name when ByNumber is unavailable", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
         local originalGetAxisByNumber = _G.EEPRollingstockGetAxisByNumber
         local originalEEPLng = _G.EEPLng
+        stubModelInfo({
+            axisNames = { [2] = "Fahrer" },
+            axisNamesByLanguage = { ENG = { [2] = "Driver" }, GER = { [2] = "Fahrer" } }
+        })
         _G.EEPLng = "ENG"
         _G.EEPRollingstockGetAxisByNumber = nil
 
         EEPRollingstockSetAxis("NameAxisStock", "Driver", 66)
-        local stock = RollingStock:new({ rollingStockName = "NameAxisStock" })
-        stock.modelInfo = RollingStockModelInfo:new({
-            axisNames = { [2] = "Fahrer" },
-            axisNamesByLanguage = { ENG = { [2] = "Driver" }, GER = { [2] = "Fahrer" } }
-        })
+        local stock = RollingStock:new({ rollingStockName = "NameAxisStock", xmlModel = "NameAxisModel.3dm" })
         stock:updateAxisValues()
 
         _G.EEPRollingstockGetAxisByNumber = originalGetAxisByNumber
@@ -103,17 +295,16 @@ insulate("axis and texture metadata", function ()
 
     it("sets axis values by localized axis name when ByNumber is unavailable", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
         local originalSetAxisByNumber = _G.EEPRollingstockSetAxisByNumber
         local originalEEPLng = _G.EEPLng
-        _G.EEPLng = "ENG"
-        _G.EEPRollingstockSetAxisByNumber = nil
-
-        local stock = RollingStock:new({ rollingStockName = "SetNameAxisStock" })
-        stock.modelInfo = RollingStockModelInfo:new({
+        stubModelInfo({
             axisNames = { [2] = "Fahrer" },
             axisNamesByLanguage = { ENG = { [2] = "Driver" }, GER = { [2] = "Fahrer" } }
         })
+        _G.EEPLng = "ENG"
+        _G.EEPRollingstockSetAxisByNumber = nil
+
+        local stock = RollingStock:new({ rollingStockName = "SetNameAxisStock", xmlModel = "SetNameAxisModel.3dm" })
 
         assert.is_true(stock:setAxisByNumber(2, 33))
         local ok, value = EEPRollingstockGetAxis("SetNameAxisStock", "Driver")
@@ -127,13 +318,12 @@ insulate("axis and texture metadata", function ()
 
     it("sets axis values by localized axis name before trying ByNumber", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
-        local RollingStockModelInfo = require("ce.hub.data.rollingstock.RollingStockModelInfo")
-
-        local stock = RollingStock:new({ rollingStockName = "PreferNameAxisStock" })
-        stock.modelInfo = RollingStockModelInfo:new({
+        stubModelInfo({
             axisNames = { [8] = "Heckfl\252gel" },
             axisNamesByLanguage = { GER = { [8] = "Heckfl\252gel" } }
         })
+
+        local stock = RollingStock:new({ rollingStockName = "PreferNameAxisStock", xmlModel = "PreferAxisModel.3dm" })
 
         assert.is_true(stock:setAxisByNumber(8, 44))
 
@@ -165,12 +355,12 @@ insulate("axis and texture metadata", function ()
         })
 
         EepSimulator.simulateAddTrain("AxisUpdateTrain", "AxisUpdateStock")
-        local train = TrainRegistry.forName("AxisUpdateTrain")
+        local train = TrainRegistry.getOrCreate("AxisUpdateTrain")
         train:setRollingStockCount(1)
         TrainRegistry.setRollingStockNames("AxisUpdateTrain", { ["0"] = "AxisUpdateStock" })
         EEPRollingstockSetAxisByNumber("AxisUpdateStock", 2, 10)
 
-        local stock = RollingStockRegistry.forName("AxisUpdateStock")
+        local stock = RollingStockRegistry.getOrCreate("AxisUpdateStock")
         stock:resetDirty()
         InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "AxisUpdateStock")
 
@@ -182,6 +372,95 @@ insulate("axis and texture metadata", function ()
 
         InterestSyncRegistry.clearAll()
         HubOptionsRegistry.reset()
+    end)
+
+    it("does not refresh already loaded texture texts in the updater", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local getCalls = 0
+        local getStub = stub(_G, "EEPRollingstockGetTextureText", function ()
+            getCalls = getCalls + 1
+            return true, "Live"
+        end)
+        finally(function () getStub:revert() end)
+
+        HubOptionsRegistry.setOptions({
+            ceTypes = {
+                rollingStocks = {
+                    ceType = HubCeTypes.RollingStock,
+                    discoveryAndUpdate = true,
+                    fieldUpdates = { surfaceTexts = "oninterest" }
+                }
+            }
+        })
+
+        EepSimulator.simulateAddTrain("TextureUpdateTrain", "TextureUpdateStock")
+        local train = TrainRegistry.getOrCreate("TextureUpdateTrain")
+        train:setRollingStockCount(1)
+        TrainRegistry.setRollingStockNames("TextureUpdateTrain", { ["0"] = "TextureUpdateStock" })
+        RollingStockRegistry.seedFromSnapshot({
+            rollingStockName = "TextureUpdateStock",
+            textureTexts = { ["1"] = "Discovered" }
+        })
+        InterestSyncRegistry.startSyncFor(HubCeTypes.RollingStock, "TextureUpdateStock")
+
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(0, getCalls)
+
+        InterestSyncRegistry.clearAll()
+        HubOptionsRegistry.reset()
+    end)
+
+    it("updates active rolling stock from scenario without polling EEP per stock", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
+        local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local activeCalls = 0
+        local activeStub = stub(_G, "EEPRollingstockGetActive", function ()
+            activeCalls = activeCalls + 1
+            return "InactiveStock"
+        end)
+        finally(function () activeStub:revert() end)
+
+        HubOptionsRegistry.setOptions({
+            ceTypes = {
+                rollingStocks = {
+                    ceType = HubCeTypes.RollingStock,
+                    discoveryAndUpdate = true,
+                    fieldUpdates = { active = "always" }
+                }
+            }
+        })
+
+        EepSimulator.simulateAddTrain("ActiveRollingStockTrain", "InactiveStock", "ActiveStock")
+        local train = TrainRegistry.getOrCreate("ActiveRollingStockTrain")
+        train:setRollingStockCount(2)
+        TrainRegistry.setRollingStockNames("ActiveRollingStockTrain", {
+            ["0"] = "InactiveStock",
+            ["1"] = "ActiveStock"
+        })
+        RollingStockRegistry.seedFromSnapshot({ rollingStockName = "InactiveStock", active = true })
+        RollingStockRegistry.seedFromSnapshot({ rollingStockName = "ActiveStock", active = false })
+        ScenarioRegistry.set({ activeRollingStock = "ActiveStock" })
+
+        RollingStockUpdater.runUpdate()
+
+        assert.equals(0, activeCalls)
+        assert.is_false(RollingStockRegistry.get("InactiveStock"):peekActive())
+        assert.is_true(RollingStockRegistry.get("ActiveStock"):peekActive())
+
+        HubOptionsRegistry.reset()
+        ScenarioRegistry.set(nil)
     end)
 
     it("does not refresh axis values in the updater for unselected rolling stock", function ()
@@ -203,12 +482,12 @@ insulate("axis and texture metadata", function ()
         })
 
         EepSimulator.simulateAddTrain("AxisNoUpdateTrain", "AxisNoUpdateStock")
-        local train = TrainRegistry.forName("AxisNoUpdateTrain")
+        local train = TrainRegistry.getOrCreate("AxisNoUpdateTrain")
         train:setRollingStockCount(1)
         TrainRegistry.setRollingStockNames("AxisNoUpdateTrain", { ["0"] = "AxisNoUpdateStock" })
         EEPRollingstockSetAxisByNumber("AxisNoUpdateStock", 2, 10)
 
-        local stock = RollingStockRegistry.forName("AxisNoUpdateStock")
+        local stock = RollingStockRegistry.getOrCreate("AxisNoUpdateStock")
         stock:resetDirty()
 
         EEPRollingstockSetAxisByNumber("AxisNoUpdateStock", 2, 80)
@@ -231,11 +510,11 @@ insulate("axis and texture metadata", function ()
 
         HubOptionsRegistry.reset()
         EepSimulator.simulateAddTrain("RareFieldTrain", "RareFieldStock")
-        local train = TrainRegistry.forName("RareFieldTrain")
+        local train = TrainRegistry.getOrCreate("RareFieldTrain")
         train:setRollingStockCount(1)
         TrainRegistry.setRollingStockNames("RareFieldTrain", { ["0"] = "RareFieldStock" })
 
-        local stock = RollingStockRegistry.forName("RareFieldStock")
+        local stock = RollingStockRegistry.getOrCreate("RareFieldStock")
         local initialOrientationForward = stock:getOrientationForward()
         stock:resetDirty()
 
@@ -339,16 +618,16 @@ insulate("axis and texture metadata", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
         EepSimulator.simulateAddTrain("CouplingTrain", "CouplingFront", "CouplingMiddle", "CouplingRear")
-        local train = TrainRegistry.forName("CouplingTrain")
+        local train = TrainRegistry.getOrCreate("CouplingTrain")
         train:setRollingStockCount(3)
         TrainRegistry.setRollingStockNames("CouplingTrain", {
             ["0"] = "CouplingFront",
             ["1"] = "CouplingMiddle",
             ["2"] = "CouplingRear"
         })
-        RollingStockRegistry.forName("CouplingFront")
-        RollingStockRegistry.forName("CouplingMiddle")
-        RollingStockRegistry.forName("CouplingRear")
+        RollingStockRegistry.getOrCreate("CouplingFront")
+        RollingStockRegistry.getOrCreate("CouplingMiddle")
+        RollingStockRegistry.getOrCreate("CouplingRear")
 
         local frontCalls = {}
         local rearCalls = {}
@@ -396,10 +675,10 @@ insulate("axis and texture metadata", function ()
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
         EepSimulator.simulateAddTrain("SingleCouplingTrain", "SingleCouplingStock")
-        local train = TrainRegistry.forName("SingleCouplingTrain")
+        local train = TrainRegistry.getOrCreate("SingleCouplingTrain")
         train:setRollingStockCount(1)
         TrainRegistry.setRollingStockNames("SingleCouplingTrain", { ["0"] = "SingleCouplingStock" })
-        RollingStockRegistry.forName("SingleCouplingStock")
+        RollingStockRegistry.getOrCreate("SingleCouplingStock")
 
         local frontCalls = {}
         local rearCalls = {}
@@ -452,7 +731,7 @@ insulate("refresh model by XML model", function ()
         RollingStockModels.addModel("MyModel", "MODEL_A.3dm", RollingStockModel:new({ myMarker = "MODEL A" }))
         RollingStockModels.addModel("OtherModel", "MODEL_XML.3dm", RollingStockModel:new({ myMarker = "MODEL XML" }))
 
-        local stock = RollingStockRegistry.forName("MyModel;003")
+        local stock = RollingStockRegistry.getOrCreate("MyModel;003")
         stock:setXmlModel("MODEL_XML.3dm")
 
         assert.equals("MODEL XML", stock.model["myMarker"])

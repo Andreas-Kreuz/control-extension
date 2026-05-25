@@ -1,4 +1,5 @@
 local TransitSettings = require("ce.mods.transit.TransitSettings")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local RoadStationTippHelper = require("ce.hub.util.RoadStationTippHelper")
 
 -- Simple Structure - works with any model
@@ -30,8 +31,9 @@ SimpleStructure.displayEntries = function (displayStructure, stationQueueEntries
     end
 
     local t = table.concat(text, "")
-    EEPChangeInfoStructure(displayStructure, t)
-    EEPShowInfoStructure(displayStructure, TransitSettings.showDepartureTippText)
+    local structure = StructureRegistry.getOrCreate(displayStructure)
+    structure:changeInfo(t)
+    structure:showInfo(TransitSettings.showDepartureTippText)
 end
 
 return SimpleStructure

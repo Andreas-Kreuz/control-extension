@@ -1,5 +1,6 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.slots.DataSlotsUpdater ...") end
 
+local DataSlot = require("ce.hub.data.slots.DataSlot")
 local DataSlotNameResolver = require("ce.hub.data.slots.DataSlotNameResolver")
 local DataSlotsRegistry = require("ce.hub.data.slots.DataSlotsRegistry")
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
@@ -45,12 +46,11 @@ function DataSlotsUpdater.runUpdate()
 
     DataSlotNameResolver.updateSlotNames()
     for id in pairs(collectSlotIdsForRun()) do
-        local hResult, data = EEPLoadData(id)
-        if hResult then
-            local name = DataSlotNameResolver.getSlotName(id) or StorageUtility.getName(id) or "?"
-            filledSlots[id] = { id = id, name = name, data = data }
+        local slot, filled = DataSlot.loadFromEep(id, DataSlotNameResolver, StorageUtility)
+        if filled then
+            filledSlots[id] = slot
         else
-            emptySlots[id] = { id = id }
+            emptySlots[id] = slot
         end
     end
 

@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.runtime.RuntimeDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class RuntimeDtoFactory
@@ -18,15 +20,15 @@ local KEY_ID = "id"
 -- DtoFields: class definition in RuntimeDtoTypes.d.lua
 local dtoFields = {
     count = {
-        getValue = function (runtimeEntry) return runtimeEntry.count end,
+        getValue = peek(function (source) return source:peekCount() end, "count"),
         placeholder = 0
     },
     time = {
-        getValue = function (runtimeEntry) return runtimeEntry.time end,
+        getValue = peek(function (source) return source:peekTime() end, "time"),
         placeholder = 0
     },
     lastTime = {
-        getValue = function (runtimeEntry) return runtimeEntry.lastTime end,
+        getValue = peek(function (source) return source:peekLastTime() end, "lastTime"),
         placeholder = 0
     },
 }

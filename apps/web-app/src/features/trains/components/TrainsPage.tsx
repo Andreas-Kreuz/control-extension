@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { TrackType } from '@ce/web-shared';
+import TrainIcon from '@mui/icons-material/Train';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -11,12 +12,14 @@ import Switch from '@mui/material/Switch';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
+import { Link as RouterLink } from 'react-router-dom';
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
 import ListLayout from '../../../shared/layouts/ListLayout';
 import useSelectedElementNavigation from '../../../shared/layouts/useSelectedElementNavigation';
 import setTrackType from '../hooks/useSetTrackType';
+import useSelectedScenario from '../hooks/useSelectedScenario';
 import useTrackType from '../hooks/useTrackType';
 import useTrains from '../hooks/useTrains';
 import TrainCamerasSection from './TrainCamerasSection';
@@ -43,6 +46,8 @@ interface TrainsPageProps {
 
 const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
   const trains = useTrains();
+  const scenario = useSelectedScenario();
+  const activeTrainName = scenario?.activeTrain;
   const trackType = useTrackType();
   const setType = setTrackType();
   const handleSelectedElementChange = useSelectedElementNavigation(selectedElement);
@@ -60,46 +65,60 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
 
   const filterSlot = (
     <>
-      <ToggleButtonGroup
-        exclusive
-        size="small"
-        value={trackType}
-        onChange={(_event, value: TrackType | null) => {
-          if (value !== null) {
-            setType(value);
-          }
-        }}
-        sx={{
-          bgcolor: 'background.paper',
-          display: 'inline-flex',
-          flexWrap: 'wrap',
-          maxWidth: '100%',
-          width: 'fit-content',
-        }}
-      >
-        {chipData.map((data) => (
-          <ToggleButton key={data.key} value={data.key}>
-            {data.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={lineInfoOnly}
-            onChange={(event) => setLineInfoOnly(event.target.checked)}
-            slotProps={{ input: { 'aria-label': 'Nur Fahrzeuge mit Linieninformation anzeigen' } }}
+      <Grid container spacing={2} alignItems="center">
+        <Grid size={{ xs: 12, md: 'auto' }}>
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={trackType}
+            onChange={(_event, value: TrackType | null) => {
+              if (value !== null) {
+                setType(value);
+              }
+            }}
+            sx={{
+              bgcolor: 'background.paper',
+              display: 'inline-flex',
+              flexWrap: 'wrap',
+              maxWidth: '100%',
+              width: 'fit-content',
+            }}
+          >
+            {chipData.map((data) => (
+              <ToggleButton key={data.key} value={data.key}>
+                {data.label}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </Grid>
+        <Grid size={{ xs: 12, md: 'auto' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={lineInfoOnly}
+                onChange={(event) => setLineInfoOnly(event.target.checked)}
+                slotProps={{ input: { 'aria-label': 'Nur Fahrzeuge mit Linieninformation anzeigen' } }}
+              />
+            }
+            label="Nur mit Linieninformation"
           />
-        }
-        label="Nur mit Linieninformation"
-      />
+        </Grid>
+      </Grid>
       <PageHeadline gutterTop>Fahrzeuge {selectedTrackLabel}</PageHeadline>
     </>
   );
 
   return (
     <PageContainer>
-      <PageHeadline>Gleissystem</PageHeadline>
+      <PageHeadline
+        rightSettings={
+          <Button variant="contained" startIcon={<TrainIcon />} component={RouterLink} to="/train/selected">
+            Aktiver Zug
+          </Button>
+        }
+      >
+        Gleissystem
+      </PageHeadline>
       <ListLayout
         items={filteredTrains}
         keyExtractor={(train) => train.id}
@@ -113,7 +132,12 @@ const TrainsPage = ({ selectedElement }: TrainsPageProps) => {
           </Typography>
         )}
         renderListItem={(train, selected, onSelect) => (
-          <TrainListItem train={train} selected={selected} onSelect={onSelect} />
+          <TrainListItem
+            train={train}
+            selected={selected}
+            onSelect={onSelect}
+            isActive={!!activeTrainName && (activeTrainName === train.id || activeTrainName === train.name)}
+          />
         )}
         renderCard={(train, selected, onSelect, mobileExpansion) => (
           <TrainListCard train={train} selected={selected} onSelect={onSelect}>

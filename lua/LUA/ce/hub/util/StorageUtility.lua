@@ -1,5 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.util.StorageUtility ...") end
 
+local DataSlot = require("ce.hub.data.slots.DataSlot")
+
 local saveSlots = {}
 local savedValues = {}
 local StorageUtility = {}
@@ -49,7 +51,8 @@ function StorageUtility.getName(eepSaveId) return saveSlots[eepSaveId] end
 --
 function StorageUtility.loadTable(eepSaveId, name)
     name = name and name or "?"
-    local hResult, data = EEPLoadData(eepSaveId)
+    local slot = DataSlot:new({ id = eepSaveId, slotType = "filled", name = name })
+    local hResult, data = slot:pullData()
     if hResult then
         if StorageUtility.debug then
             print(string.format("[#StorageUtility] Laden: [OK] - %s - %s gefunden: %s", eepSaveId, name, data))
@@ -60,7 +63,7 @@ function StorageUtility.loadTable(eepSaveId, name)
         end
     end
 
-    return StorageUtility.parseTableFromString(data)
+    return StorageUtility.parseTableFromString(slot:peekData())
 end
 
 function StorageUtility.parseTableFromString(data)
@@ -145,7 +148,8 @@ function StorageUtility.saveTable(eepSaveId, table, name)
         ))
     end
     assert(text:len() <= maxLength)
-    local hresult = EEPSaveData(eepSaveId, text)
+    local slot = DataSlot:new({ id = eepSaveId, slotType = "filled", name = name })
+    local hresult = slot:setData(text)
     if StorageUtility.debug then
         print(string.format(
             "[#StorageUtility] Speichern [%s] - %s - %s gespeichert: %s",
@@ -233,7 +237,8 @@ end
 
 --- Lädt
 for i = 1, 1000 do
-    local hResult, data = EEPLoadData(i)
+    local slot = DataSlot:new({ id = i, slotType = "filled" })
+    local hResult, data = slot:pullData()
     if hResult then savedValues[i] = data end
     if StorageUtility.debug then StorageUtility.updateDebugFile() end
 end

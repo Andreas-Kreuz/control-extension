@@ -83,6 +83,11 @@ function DataSlotsRegistry.getEmpty()
     return emptySlots
 end
 
+function DataSlotsRegistry.get(slotType, slotId)
+    local slots = slotType == "filled" and filledSlots or emptySlots
+    return slots[slotId]
+end
+
 function DataSlotsRegistry.getRemovedFilledIds()
     local copy = {}
     for slotId in pairs(removedFilledSlotIds) do copy[slotId] = true end

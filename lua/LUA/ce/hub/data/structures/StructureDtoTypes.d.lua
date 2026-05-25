@@ -16,4 +16,4 @@
 ---@field light boolean
 ---@field smoke boolean
 ---@field fire boolean
----@field gsbname string|nil -- oninterest
+---@field gsbname string|nil -- always

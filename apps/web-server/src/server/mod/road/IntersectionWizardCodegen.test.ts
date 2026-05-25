@@ -614,11 +614,11 @@ function testCodegenCreatesIntersectionSetup(): void {
   );
   assert.match(
     lua,
-    /bahnhofHauptLane1 = bahnhofHaupt:newLane\("FS1", bahnhofHauptLane1Signal\)\n\s+:setScriptVariableName\("bahnhofHauptLane1"\)/,
+    /bahnhofHauptLane1 = bahnhofHaupt:newLane\("FS1", bahnhofHauptLane1Signal\)\n\s+:setKpId\("bahnhofHauptLane1"\)/,
   );
   assert.match(
     lua,
-    /bahnhofHauptLane2 = bahnhofHaupt:newLane\("FS2", bahnhofHauptLane2Signal\)\n\s+:setScriptVariableName\("bahnhofHauptLane2"\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)/,
+    /bahnhofHauptLane2 = bahnhofHaupt:newLane\("FS2", bahnhofHauptLane2Signal\)\n\s+:setKpId\("bahnhofHauptLane2"\)\n\s+:setTrafficType\(Lane\.Type\.TRAM\)/,
   );
   const laneBlock = lua.slice(lanesIndex, signalGroupsIndex);
   assert.doesNotMatch(laneBlock, /:setApproach\(Lane\.Approach/);
@@ -735,6 +735,8 @@ function testCodegenCreatesDedicatedPlainLightForAttachedLightStructure(): void 
         structureGreen: '#5538_Straba Signal links',
         structureYellow: '#5539_Straba Signal anhalten',
         structureRequest: '#5540_Straba Signal A',
+        structureHousing: '#5536_Straba Signal Gehäuse Mast 4',
+        structureBlend: '#5541_Straba Signal Gehäuse Blendschutz 4',
       },
     ],
   };
@@ -744,13 +746,58 @@ function testCodegenCreatesDedicatedPlainLightForAttachedLightStructure(): void 
   assert.match(lua, /local bahnhofHauptS1 = TrafficLight:newForSignal\("S1", 108, TrafficLightModel\.Unsichtbar_2er\)/);
   assert.match(
     lua,
-    /local bahnhofHauptS1Light1 = TrafficLight:newForLightStructure\("S1Light1",\n\s+"#5537_Straba Signal Halt",\n\s+"#5538_Straba Signal links",\n\s+"#5539_Straba Signal anhalten",\n\s+"#5540_Straba Signal A"\n\s+\)/,
+    /local bahnhofHauptS1Light1 = TrafficLight:newForLightStructure\("S1Light1",\n\s+"#5537_Straba Signal Halt",\n\s+"#5538_Straba Signal links",\n\s+"#5539_Straba Signal anhalten",\n\s+"#5540_Straba Signal A",\n\s+"#5536_Straba Signal Gehäuse Mast 4",\n\s+"#5541_Straba Signal Gehäuse Blendschutz 4"\n\s+\)/,
   );
   assert.doesNotMatch(lua, /:addLightStructure\(/);
   assert.match(
     lua,
     /bahnhofHaupt\n\s+:newSignalGroup\("sgSouthTramLeft"\)\n\s+:setScriptVariableName\("bahnhofHauptSgSouthTramLeft"\)\n\s+:setApproach\(Lane\.Approach\.SOUTH\)\n\s+:setTurnDirections\(Lane\.Directions\.LEFT\)\n\s+:addTramSignals\(bahnhofHauptS1, bahnhofHauptS1Light1\)/,
   );
+}
+
+function testCodegenUsesNilForEmptyOptionalPlainLightStructures(): void {
+  const draft = makeDraft();
+  draft.ampeln = [
+    {
+      id: 'ampel-s1',
+      name: 'S1',
+      kind: 'STRUCTURE_LIGHT',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'TRAM',
+      modelName: 'NONE',
+      modelConstant: 'NONE',
+      lightStructures: [
+        {
+          structureRed: '#3058_Straba Signal Halt',
+          structureGreen: '#3060_Straba Signal rechts',
+          structureYellow: '#3059_Straba Signal anhalten',
+          structureRequest: '',
+          structureHousing: '#3057_Straba Signal Gehäuse 4',
+          structureBlend: '',
+        },
+      ],
+      axisStructures: [],
+    },
+  ];
+  draft.signalGroups = [
+    {
+      id: 'sg-1',
+      name: 'sgEastTramHalfRight',
+      approach: 'EAST',
+      turnDirections: ['HALF_RIGHT'],
+      trafficType: 'TRAM',
+      showRequests: false,
+      ampelIds: ['ampel-s1'],
+    },
+  ];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.match(
+    lua,
+    /TrafficLight:newForLightStructure\("S1",\n\s+"#3058_Straba Signal Halt",\n\s+"#3060_Straba Signal rechts",\n\s+"#3059_Straba Signal anhalten",\n\s+nil,\n\s+"#3057_Straba Signal Gehäuse 4",\n\s+nil\n\s+\)/,
+  );
+  assert.doesNotMatch(lua, /""/);
 }
 
 function testCodegenWarnsForMultipleGroupsWithoutDefault(): void {
@@ -913,6 +960,93 @@ function testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal(
   assert.equal(draft.signalGroups[1]?.luaVariableName, 'sgSourceStraight');
   assert.equal(draft.lanes[0]?.signalSource, 'SIGNAL_GROUP');
   assert.equal(draft.lanes[0]?.signalGroupSignalId, 'sg-1');
+}
+
+function testCurrentIntersectionDraftUsesModelConstantsNotDisplayNames(): void {
+  const intersection: IntersectionAppDto = {
+    id: 10,
+    name: 'Model Name Crossing',
+    currentPhase: '',
+    manualPhase: '',
+    nextPhase: '',
+    ready: true,
+    greenTimeSeconds: 0,
+    staticCams: [],
+    signalGroupDefinitions: [
+      {
+        name: 'sgWestCarStraight',
+        approach: 'WEST',
+        turnDirections: ['STRAIGHT'],
+        trafficType: 'CAR',
+        signalIds: [10],
+      },
+    ],
+    phases: [],
+  };
+  const lanes: IntersectionLaneAppDto[] = [];
+  const ampeln: IntersectionTrafficLightAppDto[] = [
+    {
+      id: 10,
+      signalId: 10,
+      vehicleSignalName: 'K1',
+      use: 'VEHICLE_ONLY',
+      modelId: 'JS2_3er_mit_FG',
+      currentIndication: 'RED',
+      intersectionId: 10,
+      lightStructures: {},
+      axisStructures: [],
+    },
+  ];
+
+  const draft = createDraftFromCurrentIntersection(intersection, lanes, ampeln);
+
+  assert.equal(draft.ampeln[0]?.modelConstant, 'JS2_3er_mit_FG');
+  assert.equal(draft.ampeln[0]?.modelName, 'JS2_3er_mit_FG');
+  assert.match(draft.generatedLua, /TrafficLightModel\.JS2_3er_mit_FG/);
+  assert.doesNotMatch(draft.generatedLua, /TrafficLightModel\.Ampel_3er_XXX_mit_FG/);
+}
+
+function testStoredDraftWithDisplayNameModelConstantsGeneratesCorrectConstants(): void {
+  const draft = makeDraft();
+  draft.ampeln = [
+    {
+      id: 'ampel-1',
+      name: 'K1',
+      signalId: '364',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'CAR',
+      modelName: 'Ampel_3er_XXX_mit_FG',
+      modelConstant: 'Ampel_3er_XXX_mit_FG',
+    },
+    {
+      id: 'ampel-2',
+      name: 'K2',
+      signalId: '365',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'CAR',
+      modelName: 'Ampel_2er_Aus_Gelb-Grün',
+      modelConstant: 'Ampel_2er_Aus_Gelb_Grun',
+    },
+  ];
+  draft.signalGroups = [
+    {
+      id: 'sg-1',
+      name: 'sgSouthCarStraight',
+      approach: 'SOUTH',
+      turnDirections: ['STRAIGHT'],
+      trafficType: 'CAR',
+      showRequests: false,
+      ampelIds: ['ampel-1', 'ampel-2'],
+    },
+  ];
+  draft.lanes = [];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+
+  assert.match(lua, /TrafficLightModel\.JS2_3er_mit_FG/);
+  assert.doesNotMatch(lua, /TrafficLightModel\.Ampel_3er_XXX_mit_FG/);
+  assert.match(lua, /TrafficLightModel\.JS2_2er_gelb_gruen_aus/);
+  assert.doesNotMatch(lua, /TrafficLightModel\.Ampel_2er_Aus_Gelb_Grun/);
 }
 
 function testCurrentIntersectionDraftKeepsImportedLanesWithoutFallbackDefaults(): void {
@@ -1448,7 +1582,7 @@ function testCurrentIntersectionDraftRecreatesHohenfurtC1ControlModel(): void {
     assert.match(lua, new RegExp(`TrafficLight:newForLightStructure\\("${name}"`)),
   );
   ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7'].forEach((name) =>
-    assert.match(lua, new RegExp(`:asPedestrianSignal\\("${name}"\\)`)),
+    assert.match(lua, new RegExp(`:withPedestrian\\("${name}"\\)`)),
   );
   assert.match(lua, /TrafficLight:newForSignal\("F8", 94, TrafficLightModel\.JS2_2er_nur_FG\)/);
   assert.match(lua, /newLane\("Spur 4", c1Lane\d+Signal\)/);
@@ -1491,6 +1625,67 @@ function laneTrafficTypeForTest(
       .map((assignment) => draft.signalGroups.find((group) => group.id === assignment.signalGroupId)?.trafficType)
       .find((trafficType) => trafficType === 'TRAM') ?? 'CAR'
   );
+}
+
+function testCodegenReusesVehicleSignalForPedestrianSource(): void {
+  const draft = makeDraft();
+  draft.manualLuaVariableNames = false;
+  draft.lanes = [];
+  draft.ampeln = [
+    {
+      id: 'ampel-ped-1',
+      name: 'F5',
+      pedestrianName: 'F6',
+      sourceAmpelId: 'ampel-k4',
+      use: 'PEDESTRIAN_ONLY',
+      trafficType: 'PEDESTRIAN',
+      modelName: '',
+      modelConstant: '',
+    },
+    {
+      id: 'ampel-k4',
+      name: 'K4',
+      signalId: '17',
+      use: 'VEHICLE_ONLY',
+      trafficType: 'CAR',
+      modelName: 'Ampel_3er_XXX_ohne_FG',
+      modelConstant: 'JS2_3er_ohne_FG',
+    },
+  ];
+  draft.signalGroups = [
+    {
+      id: 'sg-1',
+      name: 'sgSouthCarStraight',
+      approach: 'SOUTH',
+      turnDirections: ['STRAIGHT'],
+      trafficType: 'CAR',
+      showRequests: false,
+      ampelIds: ['ampel-k4'],
+    },
+    {
+      id: 'sg-2',
+      name: 'sgSouthPed',
+      approach: 'SOUTH',
+      turnDirections: [],
+      trafficType: 'PEDESTRIAN',
+      showRequests: false,
+      pedestrianCrossingName: 'Furt Süd',
+      ampelIds: ['ampel-ped-1'],
+    },
+  ];
+  draft.phases = [];
+
+  const { lua } = generateIntersectionWizardLua(draft);
+  const trafficLightBlock = lua.slice(lua.indexOf('-- Ampeln'), lua.indexOf('-- Fussg.-Ampeln'));
+  const pedestrianBlock = lua.slice(lua.indexOf('-- Fussg.-Ampeln'), lua.indexOf('-- Fussgaengerfurten'));
+
+  assert.match(
+    trafficLightBlock,
+    /local c1K4 = TrafficLight:newForSignal\("K4", 17, TrafficLightModel\.JS2_3er_ohne_FG\)/,
+  );
+  assert.match(pedestrianBlock, /local c1F6 = c1K4:withPedestrian\("F6"\)/);
+  assert.doesNotMatch(pedestrianBlock, /TrafficLight:newForSignal\("K4"/);
+  assert.doesNotMatch(pedestrianBlock, /TrafficLight:newForSignal\("F6"/);
 }
 
 async function testPersistentServerStatePreservesOtherKeys(): Promise<void> {
@@ -1547,13 +1742,29 @@ export async function run(): Promise<void> {
     testCodegenCreatesDedicatedPlainLightForAttachedLightStructure,
   );
   await runTest(
+    'intersection wizard codegen uses nil for empty optional plain light structures',
+    testCodegenUsesNilForEmptyOptionalPlainLightStructures,
+  );
+  await runTest(
     'intersection wizard codegen warns for multi-group lanes without default',
     testCodegenWarnsForMultipleGroupsWithoutDefault,
   );
   await runTest('intersection wizard codegen creates pedestrian crossings', testCodegenCreatesPedestrianCrossings);
   await runTest(
+    'intersection wizard codegen reuses vehicle signals for pedestrian sources',
+    testCodegenReusesVehicleSignalForPedestrianSource,
+  );
+  await runTest(
     'current intersection import uses signal group metadata and reuses lane signal',
     testCurrentIntersectionDraftUsesSignalGroupMetadataAndReusesLaneSignal,
+  );
+  await runTest(
+    'current intersection import uses model constants not display names',
+    testCurrentIntersectionDraftUsesModelConstantsNotDisplayNames,
+  );
+  await runTest(
+    'stored draft with display-name modelConstants generates correct Lua constants',
+    testStoredDraftWithDisplayNameModelConstantsGeneratesCorrectConstants,
   );
   await runTest(
     'current intersection import keeps imported lanes without fallback defaults',

@@ -4,11 +4,16 @@ local Queue = require("ce.hub.util.Queue")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local SignalIndication = require("ce.mods.road.SignalIndication")
 local fmt = require("ce.hub.eep.TippTextFormatter")
+local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+local Track = require("ce.hub.data.tracks.Track")
+local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
 -- Lane starts here
 local Lane = {}
 Lane.debug = CeStartWithDebug or false
+
+local laneRegistry = {}
 local RouteDriveMode = { ONLY = "ONLY", ALSO = "ALSO" }
 local ROUTE_WILDCARD = "!ALL!"
 local DEFAULT_ROUTE = "Alle"
@@ -90,21 +95,13 @@ local function updateLaneSignal(lane, reason)
     end
 end
 
--- Might bring some performance
-local EEPGetTrainRoute = EEPGetTrainRoute
-local EEPRegisterRoadTrack = EEPRegisterRoadTrack
-local EEPIsRoadTrackReserved = EEPIsRoadTrackReserved
-local EEPGetSignalTrainsCount = EEPGetSignalTrainsCount
-local EEPGetSignalTrainName = EEPGetSignalTrainName
 local function routeForTrain(trainName)
-    local train = TrainRegistry.find(trainName)
+    local train = TrainRegistry.get(trainName)
     if train then
         local route = train:getRoute()
         if route and route ~= "" then return route end
     end
 
-    local ok, route = EEPGetTrainRoute(trainName)
-    if ok then return route end
     return DEFAULT_ROUTE
 end
 
@@ -224,26 +221,19 @@ local function getLaneSignalId(lane)
 end
 
 local function loadLaneSignalTagData(lane)
-    if type(EEPSignalGetTagText) ~= "function" then return {} end
-
     local signalId = getLaneSignalId(lane)
     if not signalId then return {} end
 
-    local ok, tagText = EEPSignalGetTagText(signalId)
-    if not ok then return {} end
-
-    return StorageUtility.parseTableFromString(tagText)
+    return StorageUtility.parseTableFromString(SignalRegistry.getOrCreate(signalId):getTag())
 end
 
 local function saveLaneSignalTagData(lane, laneData)
-    if type(EEPSignalSetTagText) ~= "function" then return end
-
     local signalId = getLaneSignalId(lane)
     if not signalId then return end
 
     local tagData = loadLaneSignalTagData(lane)
     for key, value in pairs(laneData) do tagData[key] = value end
-    EEPSignalSetTagText(signalId, StorageUtility.encodeTable(tagData))
+    SignalRegistry.getOrCreate(signalId):setTag(StorageUtility.encodeTable(tagData))
 end
 
 local function save(lane)
@@ -331,6 +321,26 @@ function Lane.getType() return "Lane" end
 
 function Lane:getName() return self.name end
 
+function Lane:getLaneSignal() return self.laneSignal end
+
+function Lane:getRequestState()
+    local source = "counter"
+    if self.tracksUsedForRequest then
+        source = "track"
+    elseif self.signalUsedForRequest then
+        source = "signal"
+    end
+
+    return {
+        occupied = not self.queue:isEmpty(),
+        vehicleCount = self.vehicleCount,
+        waitCount = self.waitCount,
+        requestType = self.requestType,
+        source = source,
+        queuedVehicleNames = self.queue:elements()
+    }
+end
+
 function Lane:getLaneType() return self.requestType end
 
 function Lane:setLaneType(requestType)
@@ -395,7 +405,9 @@ function Lane:checkRequests()
 
     for _, vehicle in ipairs(self.queue:elements()) do text = text .. "<br>" .. vehicle end
 
-    self.requestInfoText = text
+    if self.requestInfoText ~= text then
+        self.requestInfoText = text
+    end
     refreshRequests(self)
 end
 
@@ -415,7 +427,7 @@ function Lane:getRequestInfo() return self.requestInfoText or "KEINE ANFORDERUNG
 function Lane:useTrackForQueue(roadId)
     assert(not self.signalUsedForRequest, "CANNOT COUNT ON SIGNALS AND TRACKS")
     self.tracksUsedForRequest = true
-    EEPRegisterRoadTrack(roadId)
+    Track.registerRoadTrack(roadId)
     if not self.tracksForRequests[roadId] then self.tracksForRequests[roadId] = true end
     return self
 end
@@ -423,8 +435,8 @@ end
 function Lane:resetQueueFromRoadTracks()
     for _ = 1, self.queue:size(), 1 do self.queue:pop() end
     for strassenId in pairs(self.tracksForRequests) do
-        local ok, waiting, trainName = EEPIsRoadTrackReserved(strassenId, true)
-        assert(ok)
+        local track = TrackRegistry.getOrCreate("road", strassenId)
+        local waiting, trainName = track:pullReservation()
 
         if waiting then
             if not trainName then print(string.format("[#Lane] Kein Zug auf Strasse: %s", strassenId)) end
@@ -567,9 +579,8 @@ end
 function Lane:resetQueueFromSignal()
     for _ = 1, self.queue:size(), 1 do self.queue:pop() end
 
-    local wartend = EEPGetSignalTrainsCount(self.laneSignal.signalId)
-    for i = 1, wartend, 1 do
-        local trainName = EEPGetSignalTrainName(self.laneSignal.signalId, i)
+    local signal = SignalRegistry.getOrCreate(self.laneSignal.signalId)
+    for _, trainName in ipairs(signal:pullTrainNames()) do
         self.queue:push(trainName)
     end
     save(self)
@@ -716,15 +727,22 @@ function Lane:setTrafficType(signalType)
     return self
 end
 
-function Lane:getScriptVariableName() return self._scriptVariableName end
+function Lane:getKpId() return self._kpId end
 
-function Lane:setScriptVariableName(scriptVariableName)
-    assert(type(scriptVariableName) == "string", "Need 'scriptVariableName' as string")
-    self._scriptVariableName = scriptVariableName
+function Lane:setKpId(kpId)
+    assert(type(kpId) == "string", "Need 'kpId' as string")
+    if laneRegistry[kpId] and laneRegistry[kpId] ~= self then
+        print("[WARNING] Lane.setKpId: duplicate key '" .. kpId .. "'\n" .. debug.traceback())
+    end
+    self._kpId = kpId
+    self.kpId = kpId
+    laneRegistry[kpId] = self
     return self
 end
 
-function Lane:scriptVariableName(scriptVariableName) return self:setScriptVariableName(scriptVariableName) end
+function Lane:setScriptVariableName(scriptVariableName) return self:setKpId(scriptVariableName) end
+
+function Lane:scriptVariableName(scriptVariableName) return self:setKpId(scriptVariableName) end
 
 --- Erzeugt eine Fahrspur, welche durch genau ein EEP-Fahrspur-Signal gesteuert wird.
 ---@param name string @Name der Fahrspur einer Kreuzung
@@ -839,6 +857,13 @@ function Lane:signalChanged(signal)
     end
     self.currentIndication = signal.currentIndication
     updateLaneSignal(self, "Signal update: " .. signal.signalId)
+end
+
+function Lane.resolve(kpId)
+    assert(type(kpId) == "string", "Need kpId as string, got " .. type(kpId))
+    local lane = laneRegistry[kpId]
+    assert(lane, "No lane registered for: " .. kpId)
+    return lane
 end
 
 return Lane

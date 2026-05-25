@@ -1,4 +1,4 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.eep.Anl3DiscoveryHelper ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.scenario.EepScenarioAnl3Discovery ...") end
 
 local ScenarioDiscovery = require("ce.hub.data.scenario.ScenarioDiscovery")
 local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
@@ -7,8 +7,9 @@ local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
 local SwitchDiscovery = require("ce.hub.data.switches.SwitchDiscovery")
 local ContactDiscovery = require("ce.hub.data.contacts.ContactDiscovery")
 local RouteDiscovery = require("ce.hub.data.routes.RouteDiscovery")
+local StructureResourceParser = require("ce.hub.eep.resources.StructureResourceParser")
 
-local Anl3DiscoveryHelper = {}
+local EepScenarioAnl3Discovery = {}
 
 local function findChild(node, tag)
     for _, child in ipairs(node.children) do
@@ -49,6 +50,101 @@ end
 
 local function valueAsNumber(value)
     return value and tonumber(value) or nil
+end
+
+local function currentEepLanguage()
+    local language = type(EEPLng) == "string" and string.upper(EEPLng) or ""
+    if language == "ENG" or language == "GER" or language == "POL" or language == "FRA" then return language end
+    return "GER"
+end
+
+local function structureIdFromImmobileAttrs(attrs)
+    if attrs.ImmoIdx then return "#" .. tostring(attrs.ImmoIdx) end
+    return attrs.name or attrs.Name
+end
+
+local function modelNameFromGsbname(gsbname, modelNameCache)
+    if type(gsbname) ~= "string" or gsbname == "" then return nil end
+
+    if modelNameCache[gsbname] == nil then
+        local info = StructureResourceParser.infoForGsbname(gsbname)
+        modelNameCache[gsbname] =
+            StructureResourceParser.modelNameForLanguage(info, currentEepLanguage()) or false
+    end
+
+    return modelNameCache[gsbname] or nil
+end
+
+local function structureInfoFromImmobileAttrs(attrs, modelNameCache)
+    local id = structureIdFromImmobileAttrs(attrs)
+    if not id then return nil end
+
+    local modelName = modelNameFromGsbname(attrs.gsbname, modelNameCache)
+    if modelName and modelName ~= "" then
+        return {
+            id = id,
+            name = id .. "_" .. modelName
+        }
+    end
+
+    return {
+        id = id,
+        name = attrs.name or attrs.Name or id
+    }
+end
+
+local function boolFromAttr(val)
+    if val == nil then return nil end
+    return val ~= "0"
+end
+
+local function textureTextsFromNode(node)
+    local textureTexts = {}
+    for _, child in ipairs(node.children) do
+        if child.tag == "Text3DM" then
+            for _, textureText in ipairs(child.children) do
+                if textureText.tag == "TexText" then
+                    local anl3SurfaceIndex = tonumber(textureText.attrs.Idx)
+                    if anl3SurfaceIndex then
+                        textureTexts[tostring(anl3SurfaceIndex + 1)] = textureText.attrs.Text or ""
+                    end
+                end
+            end
+        end
+    end
+    if next(textureTexts) == nil then return nil end
+    return textureTexts
+end
+
+local function posAndRotFromDreibein(immobile)
+    for _, child in ipairs(immobile.children) do
+        if child.tag == "Dreibein" then
+            local v = child.children
+            if #v < 4 then return end
+            local px = tonumber(v[1].attrs.x)
+            if not px then return end
+            local py, pz = tonumber(v[1].attrs.y) or 0, tonumber(v[1].attrs.z) or 0
+            -- Columns of the rotation matrix
+            local v1x = tonumber(v[2].attrs.x) or 0
+            local v1y = tonumber(v[2].attrs.y) or 0
+            local v1z = tonumber(v[2].attrs.z) or 0
+            local v2z = tonumber(v[3].attrs.z) or 0
+            local v3z = tonumber(v[4].attrs.z) or 0
+            local ry = math.asin(math.max(-1, math.min(1, -v1z))) * 180 / math.pi
+            local rz, rx
+            if math.abs(math.cos(ry * math.pi / 180)) > 1e-6 then
+                rz = math.atan(v1y, v1x) * 180 / math.pi
+                rx = math.atan(v2z, v3z) * 180 / math.pi
+            else
+                -- Gimbal lock (rot_y = ±90°): encode all rotation into rot_z
+                local v2x = tonumber(v[3].attrs.x) or 0
+                local v2y = tonumber(v[3].attrs.y) or 0
+                rz = math.atan(-v2x, v2y) * 180 / math.pi
+                rx = 0
+            end
+            return px / 100, py / 100, pz / 100, rx, ry, rz
+        end
+    end
 end
 
 local function buildDiscoveryTable(root)
@@ -178,13 +274,16 @@ local function buildDiscoveryTable(root)
                         dt.rollingStocks[#dt.rollingStocks + 1] = {
                             name = rollmaterial.attrs.name,
                             model = rollmaterial.attrs.typ,
+                            tag = rollmaterial.attrs.LuaTag,
+                            smoke = tonumber(rollmaterial.attrs.Smoke),
                             trainName = train.name,
                             positionInTrain = train.rollingStockCount - 1,
                             trackType = train.trackType,
                             trackId = train.trackId,
                             trackDistance = train.trackDistance,
                             trackDirection = train.trackDirection,
-                            trackSystem = train.trackSystem
+                            trackSystem = train.trackSystem,
+                            textureTexts = textureTextsFromNode(rollmaterial)
                         }
                     end
                 end
@@ -195,14 +294,34 @@ local function buildDiscoveryTable(root)
 
     local gebaeudesammlungen = findAll(root, "Gebaeudesammlung")
     if #gebaeudesammlungen > 0 then dt.coverage.structures = true end
+    local structureModelNameCache = {}
     for _, gebaeude in ipairs(gebaeudesammlungen) do
         for _, immobilie in ipairs(gebaeude.children) do
-            if (immobilie.tag == "Immobilie" or immobilie.tag == "Immobile")
-                and (immobilie.attrs.name or immobilie.attrs.Name) then
-                dt.structures[#dt.structures + 1] = {
-                    name = immobilie.attrs.name or immobilie.attrs.Name,
-                    gsbname = immobilie.attrs.gsbname
-                }
+            if immobilie.tag == "Immobilie" or immobilie.tag == "Immobile" then
+                local structureInfo = structureInfoFromImmobileAttrs(immobilie.attrs, structureModelNameCache)
+                if structureInfo then
+                    local attrs = immobilie.attrs
+                    local pos_x, pos_y, pos_z, rot_x, rot_y, rot_z =
+                        posAndRotFromDreibein(immobilie)
+                    dt.structures[#dt.structures + 1] = {
+                        id = structureInfo.id,
+                        name = structureInfo.name,
+                        gsbname = attrs.gsbname,
+                        tag = attrs.LuaTag,
+                        tipTxt = attrs.TipTxt,
+                        tipShow = boolFromAttr(attrs.TipShow),
+                        light = boolFromAttr(attrs.Light),
+                        smoke = boolFromAttr(attrs.Smoke),
+                        fire = boolFromAttr(attrs.Fire),
+                        pos_x = pos_x,
+                        pos_y = pos_y,
+                        pos_z = pos_z,
+                        rot_x = rot_x,
+                        rot_y = rot_y,
+                        rot_z = rot_z,
+                        textureTexts = textureTextsFromNode(immobilie)
+                    }
+                end
             end
         end
     end
@@ -211,7 +330,10 @@ local function buildDiscoveryTable(root)
         if meldung.attrs.Key_Id then
             dt.signals[#dt.signals + 1] = {
                 name = meldung.attrs.name,
-                keyId = tonumber(meldung.attrs.Key_Id)
+                keyId = tonumber(meldung.attrs.Key_Id),
+                tag = meldung.attrs.LuaTag,
+                tipTxt = meldung.attrs.TipTxt,
+                tipShow = boolFromAttr(meldung.attrs.TipShow)
             }
         end
     end
@@ -232,14 +354,14 @@ local function buildDiscoveryTable(root)
     return dt
 end
 
-Anl3DiscoveryHelper.buildDiscoveryTable = buildDiscoveryTable
+EepScenarioAnl3Discovery.buildDiscoveryTable = buildDiscoveryTable
 
-function Anl3DiscoveryHelper.getLuaPath(root)
+function EepScenarioAnl3Discovery.getLuaPath(root)
     local eepLua = findChild(root, "EEPLua")
     return eepLua and eepLua.attrs.LUAPath or nil
 end
 
-function Anl3DiscoveryHelper.fillDiscoveries(root)
+function EepScenarioAnl3Discovery.fillDiscoveries(root)
     local dt = buildDiscoveryTable(root)
     ScenarioDiscovery.initFromAnl3(dt)
     RouteDiscovery.initFromAnl3(dt)
@@ -251,4 +373,4 @@ function Anl3DiscoveryHelper.fillDiscoveries(root)
     return dt.coverage, dt
 end
 
-return Anl3DiscoveryHelper
+return EepScenarioAnl3Discovery

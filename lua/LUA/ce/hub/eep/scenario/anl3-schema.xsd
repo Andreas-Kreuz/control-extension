@@ -1,0 +1,1562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EEP .anl3 XML Schema
+  Derived from 292 .anl3 files (EEP18 + Die_Moderne layouts).
+  All 109 element types are covered. Attribute types are descriptive, not strict validators.
+  xs:anyAttribute is used for elements with large sets of indexed attributes (Table, Options, etc.).
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!-- ====================================================================
+       Simple Types
+       ==================================================================== -->
+
+  <xs:simpleType name="BoolFlag">
+    <!-- EEP boolean as integer: 0 = false, 1 = true -->
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="0"/>
+      <xs:enumeration value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="LightValue">
+    <!-- 0=off, 1=on, 2=blinking -->
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="0"/>
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="SmokeFireValue">
+    <!-- 0=off, 1=low, 100=full -->
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="0"/>
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="100"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="WeichenstellungValue">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="2"/>
+      <xs:enumeration value="3"/>
+      <xs:enumeration value="4"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DKWTypeValue">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="1"/>
+      <xs:enumeration value="2"/>
+      <xs:enumeration value="3"/>
+      <xs:enumeration value="4"/>
+      <xs:enumeration value="5"/>
+      <xs:enumeration value="11"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ====================================================================
+       Root Element
+       ==================================================================== -->
+
+  <xs:element name="sutrackp">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="Version"                    minOccurs="0"/>
+        <xs:element ref="Settings"                   minOccurs="0"/>
+        <xs:element ref="Weather"                    minOccurs="0"/>
+        <xs:element ref="Options"                    minOccurs="0"/>
+        <xs:element ref="TimeTable"                  minOccurs="0"/>
+        <xs:element ref="EEPLua"                     minOccurs="0"/>
+        <xs:element ref="Beschreibung"               minOccurs="0"/>
+        <xs:element ref="Schandlaft"                 minOccurs="0"/>
+        <xs:element ref="Gebaeudesammlung"           minOccurs="0"/>
+        <xs:element ref="Gleissystem"                minOccurs="0"/>
+        <xs:element ref="Gleisbildstellpultsammlung" minOccurs="0"/>
+        <xs:element ref="Fuhrpark"                   minOccurs="0"/>
+        <xs:element ref="AnimRoll"                   minOccurs="0"/>
+        <xs:element ref="Goods"                      minOccurs="0"/>
+        <xs:element ref="CrowdSammlung"              minOccurs="0"/>
+        <xs:element ref="Kamera3D"                   minOccurs="0"/>
+        <xs:element ref="Kammerasammlung"            minOccurs="0"/>
+        <xs:element ref="Kollektor"                  minOccurs="0"/>
+      </xs:all>
+      <xs:attribute ref="xsi:noNamespaceSchemaLocation"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Top-level simple elements
+       ==================================================================== -->
+
+  <xs:element name="Version">
+    <xs:complexType>
+      <xs:attribute name="EEP"      type="xs:string"/>
+      <xs:attribute name="Edit3D"   type="xs:string"/>
+      <xs:attribute name="Language" type="xs:string"/>
+      <xs:attribute name="No3DMs"   type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Settings">
+    <!-- Many ActCamera_*, THotKey_*, Plan2D* attributes; allow any -->
+    <xs:complexType>
+      <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="EEPLua">
+    <xs:complexType>
+      <xs:attribute name="LUAPath" type="xs:string"/>
+      <xs:attribute name="LUAS"    type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Beschreibung">
+    <!-- Text content element (no attributes in practice) -->
+    <xs:complexType mixed="true"/>
+  </xs:element>
+
+  <xs:element name="Options">
+    <!-- RouteId_N, RouteName_N, SndId_N, SndName_N indexed attributes; allow any -->
+    <xs:complexType>
+      <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="TimeTable">
+    <!-- TTCount_N, TTId_N, TTName_N, TTEffect_N_M, TTRoute_N_M, TTSignal_N_M,
+         TTTime_N_M, TableId_N, VehicleId_N indexed attributes; allow any -->
+    <xs:complexType>
+      <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Weather
+       ==================================================================== -->
+
+  <xs:element name="Weather">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Local" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="AFSANL"              type="xs:string"/>
+      <xs:attribute name="BloomPower"          type="xs:string"/>
+      <xs:attribute name="BloomStart"          type="xs:string"/>
+      <xs:attribute name="DefaultT1"           type="xs:string"/>
+      <xs:attribute name="DefaultT2"           type="xs:string"/>
+      <xs:attribute name="DefaultT3"           type="xs:string"/>
+      <xs:attribute name="DefaultT4"           type="xs:string"/>
+      <xs:attribute name="DirLight"            type="xs:string"/>
+      <xs:attribute name="EEP6FOV"             type="xs:string"/>
+      <xs:attribute name="KeepTrNames"         type="xs:string"/>
+      <xs:attribute name="LeftSideTraffic"     type="xs:string"/>
+      <xs:attribute name="NewBreaks"           type="xs:string"/>
+      <xs:attribute name="OnlyNewPhysic"       type="xs:string"/>
+      <xs:attribute name="SDFile"              type="xs:string"/>
+      <xs:attribute name="SDIdx"               type="xs:string"/>
+      <xs:attribute name="SDTex"               type="xs:string"/>
+      <xs:attribute name="SkyColor1"           type="xs:string"/>
+      <xs:attribute name="SkyColor2"           type="xs:string"/>
+      <xs:attribute name="SkyColor3"           type="xs:string"/>
+      <xs:attribute name="SkyColor4"           type="xs:string"/>
+      <xs:attribute name="SkyColor5"           type="xs:string"/>
+      <xs:attribute name="SkyColor6"           type="xs:string"/>
+      <xs:attribute name="SkyColor7"           type="xs:string"/>
+      <xs:attribute name="SkyColor8"           type="xs:string"/>
+      <xs:attribute name="SkyPlane"            type="xs:string"/>
+      <xs:attribute name="SparkSlip"           type="xs:string"/>
+      <xs:attribute name="TS1"                 type="xs:string"/>
+      <xs:attribute name="TS2"                 type="xs:string"/>
+      <xs:attribute name="TS3"                 type="xs:string"/>
+      <xs:attribute name="TS4"                 type="xs:string"/>
+      <xs:attribute name="TerrainLOD"          type="xs:string"/>
+      <xs:attribute name="TerrainNoAA"         type="xs:string"/>
+      <xs:attribute name="TerrainNoise"        type="xs:string"/>
+      <xs:attribute name="TimeH"               type="xs:string"/>
+      <xs:attribute name="TimeInSec"           type="xs:string"/>
+      <xs:attribute name="TimeM"               type="xs:string"/>
+      <xs:attribute name="TimeS"               type="xs:string"/>
+      <xs:attribute name="TimeStep"            type="xs:string"/>
+      <xs:attribute name="TrainColl"           type="xs:string"/>
+      <xs:attribute name="bClock"              type="BoolFlag"/>
+      <xs:attribute name="bClouds"             type="BoolFlag"/>
+      <xs:attribute name="bDay"                type="BoolFlag"/>
+      <xs:attribute name="bMoon"               type="BoolFlag"/>
+      <xs:attribute name="bNight"              type="BoolFlag"/>
+      <xs:attribute name="bRain"               type="BoolFlag"/>
+      <xs:attribute name="bRandom"             type="BoolFlag"/>
+      <xs:attribute name="bSnow"               type="BoolFlag"/>
+      <xs:attribute name="bSun"                type="BoolFlag"/>
+      <xs:attribute name="bWind"               type="BoolFlag"/>
+      <xs:attribute name="iCloudsMlt"          type="xs:string"/>
+      <xs:attribute name="iExtFog"             type="xs:string"/>
+      <xs:attribute name="iRain"               type="xs:string"/>
+      <xs:attribute name="iSeason"             type="xs:string"/>
+      <xs:attribute name="iSnow"               type="xs:string"/>
+      <xs:attribute name="iSunMoonOrientation" type="xs:string"/>
+      <xs:attribute name="iTimeMoon"           type="xs:string"/>
+      <xs:attribute name="iTimeRandom"         type="xs:string"/>
+      <xs:attribute name="iTimeSun"            type="xs:string"/>
+      <xs:attribute name="iWind"               type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Local">
+    <xs:complexType>
+      <xs:attribute name="Id"      type="xs:string"/>
+      <xs:attribute name="PosX"    type="xs:string"/>
+      <xs:attribute name="PosY"    type="xs:string"/>
+      <xs:attribute name="PosZ"    type="xs:string"/>
+      <xs:attribute name="Radius"  type="xs:string"/>
+      <xs:attribute name="Sound"   type="xs:string"/>
+      <xs:attribute name="Volume"  type="xs:string"/>
+      <xs:attribute name="bClouds" type="BoolFlag"/>
+      <xs:attribute name="bMoon"   type="BoolFlag"/>
+      <xs:attribute name="bRain"   type="BoolFlag"/>
+      <xs:attribute name="bSnow"   type="BoolFlag"/>
+      <xs:attribute name="bSun"    type="BoolFlag"/>
+      <xs:attribute name="bWind"   type="BoolFlag"/>
+      <xs:attribute name="iClip"   type="xs:string"/>
+      <xs:attribute name="iExtFog" type="xs:string"/>
+      <xs:attribute name="iRain"   type="xs:string"/>
+      <xs:attribute name="iSnow"   type="xs:string"/>
+      <xs:attribute name="iWind"   type="xs:string"/>
+      <xs:attribute name="name"    type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Terrain / Landscape
+       ==================================================================== -->
+
+  <xs:element name="Schandlaft">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Atlas" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="AtlasDFile"      type="xs:string"/>
+      <xs:attribute name="AtlasHFile"      type="xs:string"/>
+      <xs:attribute name="AtlasMinTexX"    type="xs:string"/>
+      <xs:attribute name="AtlasMinTexY"    type="xs:string"/>
+      <xs:attribute name="AtlasMipMap"     type="xs:string"/>
+      <xs:attribute name="AtlasNFile"      type="xs:string"/>
+      <xs:attribute name="AtlasRatioX"     type="xs:string"/>
+      <xs:attribute name="AtlasRatioY"     type="xs:string"/>
+      <xs:attribute name="AtlasTexCount"   type="xs:string"/>
+      <xs:attribute name="FarbenFile"      type="xs:string"/>
+      <xs:attribute name="HoehenFile"      type="xs:string"/>
+      <xs:attribute name="HorizonFile"     type="xs:string"/>
+      <xs:attribute name="Routes"          type="xs:string"/>
+      <xs:attribute name="TextureBinFile"  type="xs:string"/>
+      <xs:attribute name="TextureScaleFile" type="xs:string"/>
+      <xs:attribute name="TexturenFile"    type="xs:string"/>
+      <xs:attribute name="dichte"          type="xs:string"/>
+      <xs:attribute name="extX"            type="xs:string"/>
+      <xs:attribute name="extY"            type="xs:string"/>
+      <xs:attribute name="h_max"           type="xs:string"/>
+      <xs:attribute name="h_min"           type="xs:string"/>
+      <xs:attribute name="posX"            type="xs:string"/>
+      <xs:attribute name="posY"            type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Atlas">
+    <xs:complexType>
+      <xs:attribute name="Idx"   type="xs:string"/>
+      <xs:attribute name="TexId" type="xs:string"/>
+      <xs:attribute name="flag"  type="xs:string"/>
+      <xs:attribute name="tuB"   type="xs:string"/>
+      <xs:attribute name="tuE"   type="xs:string"/>
+      <xs:attribute name="tvB"   type="xs:string"/>
+      <xs:attribute name="tvE"   type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Structures (Gebaeudesammlung / Immobile)
+       ==================================================================== -->
+
+  <xs:element name="Gebaeudesammlung">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Immobile" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="GebaudesammlungID" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Immobile">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="BeweglichesTeil"/>
+        <xs:element ref="Modell"/>
+        <xs:element ref="GBSObject"/>
+        <xs:element ref="DirLight"/>
+        <xs:element ref="OL_Iso"/>
+        <xs:element ref="OL_Ofs"/>
+        <xs:element ref="OL_Zig"/>
+        <xs:element ref="Text3DM"/>
+      </xs:choice>
+      <!-- Identity -->
+      <xs:attribute name="ImmoIdx"      type="xs:positiveInteger" use="required"/>
+      <xs:attribute name="gsbname"      type="xs:string"          use="required"/>
+      <!-- Lua tag text; used by Ampelaufsteller and other scripted structures -->
+      <xs:attribute name="LuaTag"       type="xs:string"/>
+      <!-- State flags -->
+      <xs:attribute name="Light"        type="LightValue"/>
+      <xs:attribute name="Smoke"        type="SmokeFireValue"/>
+      <xs:attribute name="Fire"         type="SmokeFireValue"/>
+      <xs:attribute name="Active"       type="xs:string"/>
+      <xs:attribute name="LockEd"       type="BoolFlag"/>
+      <!-- Animation -->
+      <xs:attribute name="AniPlayCnt"   type="xs:string"/>
+      <xs:attribute name="AniPlayIdx0"  type="xs:string"/>
+      <xs:attribute name="Progress"     type="xs:string"/>
+      <xs:attribute name="Duration"     type="xs:string"/>
+      <!-- Switch/track coupling -->
+      <xs:attribute name="weichenstellung" type="WeichenstellungValue"/>
+      <xs:attribute name="DKWType"      type="DKWTypeValue"/>
+      <xs:attribute name="Route"        type="BoolFlag"/>
+      <xs:attribute name="Signal"       type="xs:string"/>
+      <xs:attribute name="Key_Id"       type="xs:string"/>
+      <xs:attribute name="kollektorID"  type="xs:string"/>
+      <!-- Visual / rendering -->
+      <xs:attribute name="u1"           type="xs:string"/>
+      <xs:attribute name="u2"           type="xs:string"/>
+      <xs:attribute name="u3"           type="xs:string"/>
+      <xs:attribute name="DisableSSAO"  type="xs:string"/>
+      <xs:attribute name="DisableShadow" type="xs:string"/>
+      <xs:attribute name="ATOGRND"      type="BoolFlag"/>
+      <!-- Tree animation -->
+      <xs:attribute name="TreeShake"    type="xs:string"/>
+      <!-- Water / swimming objects -->
+      <xs:attribute name="Swim"         type="xs:string"/>
+      <xs:attribute name="TotalDist"    type="xs:string"/>
+      <xs:attribute name="VolDist"      type="xs:string"/>
+      <!-- Proximity trigger (IT = Interaktions-Trigger) -->
+      <xs:attribute name="ITColor"      type="xs:string"/>
+      <xs:attribute name="ITMode"       type="xs:string"/>
+      <xs:attribute name="ITRadius"     type="xs:string"/>
+      <xs:attribute name="ITRepeat"     type="xs:string"/>
+      <xs:attribute name="ITScale"      type="xs:string"/>
+      <xs:attribute name="ITSpeed"      type="xs:string"/>
+      <xs:attribute name="ITTime"       type="xs:string"/>
+      <!-- Sound -->
+      <xs:attribute name="Sound"        type="xs:string"/>
+      <xs:attribute name="Field"        type="xs:string"/>
+      <!-- Hook attachment -->
+      <xs:attribute name="Hook"         type="xs:string"/>
+      <!-- Tooltip -->
+      <xs:attribute name="TipShow"      type="BoolFlag"/>
+      <xs:attribute name="TipTxt"       type="xs:string"/>
+      <xs:attribute name="TipBGCR"      type="xs:string"/>
+      <xs:attribute name="TipBGCG"      type="xs:string"/>
+      <xs:attribute name="TipBGCB"      type="xs:string"/>
+      <xs:attribute name="TipFGCR"      type="xs:string"/>
+      <xs:attribute name="TipFGCG"      type="xs:string"/>
+      <xs:attribute name="TipFGCB"      type="xs:string"/>
+      <!-- Description (sometimes used as internal label) -->
+      <xs:attribute name="Beschreibung" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Structure sub-elements
+       ==================================================================== -->
+
+  <xs:element name="BeweglichesTeil">
+    <xs:complexType>
+      <xs:attribute name="Parameter"   type="xs:string"/>
+      <xs:attribute name="Settings"    type="xs:string"/>
+      <xs:attribute name="count"       type="xs:string"/>
+      <xs:attribute name="kollektorID" type="xs:string"/>
+      <xs:attribute name="teilid"      type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="DirLight">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OL_Iso">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OL_Ofs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OL_Zig">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="GBSObject">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="GBSElement" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="GleissystemID" type="xs:string"/>
+      <xs:attribute name="Height"        type="xs:string"/>
+      <xs:attribute name="ITRadius"      type="xs:string"/>
+      <xs:attribute name="Name"          type="xs:string"/>
+      <xs:attribute name="Width"         type="xs:string"/>
+      <xs:attribute name="id"            type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="GBSElement">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Modell"/>
+        <xs:element ref="Signal"/>
+        <xs:element ref="TakeSwitch"/>
+        <xs:element ref="Tracks1"/>
+        <xs:element ref="Tracks2"/>
+        <xs:element ref="Tracks3"/>
+        <xs:element ref="Tracks4"/>
+      </xs:choice>
+      <xs:attribute name="Kammera" type="xs:string"/>
+      <xs:attribute name="x"       type="xs:string"/>
+      <xs:attribute name="y"       type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="TakeSwitch">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Tracks1">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Tracks2">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Tracks3">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Tracks4">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Track System (Gleissystem / Gleis)
+       ==================================================================== -->
+
+  <xs:element name="Gleissystem">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="Gleis"/>
+        <xs:element ref="Gleisverbindung"/>
+      </xs:choice>
+      <xs:attribute name="GleissystemID"      type="xs:string"/>
+      <xs:attribute name="TrackSystemNumber"  type="xs:string"/>
+      <xs:attribute name="type"               type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Gleisverbindung">
+    <xs:complexType>
+      <xs:attribute name="Anschluss1" type="xs:string"/>
+      <xs:attribute name="Anschluss2" type="xs:string"/>
+      <xs:attribute name="Flags"      type="xs:string"/>
+      <xs:attribute name="GleisID1"   type="xs:string"/>
+      <xs:attribute name="GleisID2"   type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Gleis">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Anfangsfuehrungsverdrehung"/>
+        <xs:element ref="Charakteristik"/>
+        <xs:element ref="Curve"/>
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="Field"/>
+        <xs:element ref="Frame"/>
+        <xs:element ref="Interval"/>
+        <xs:element ref="Kontakt"/>
+        <xs:element ref="KontaktZiel"/>
+        <xs:element ref="Meldung"/>
+        <xs:element ref="Text3DM"/>
+        <xs:element ref="Twist"/>
+      </xs:choice>
+      <xs:attribute name="Anfang"         type="xs:string"/>
+      <xs:attribute name="ElectSideE"     type="xs:string"/>
+      <xs:attribute name="ElectSideS"     type="xs:string"/>
+      <xs:attribute name="Ende"           type="xs:string"/>
+      <xs:attribute name="GleisID"        type="xs:string"/>
+      <xs:attribute name="Key_Id"         type="xs:string"/>
+      <xs:attribute name="LockEd"         type="BoolFlag"/>
+      <xs:attribute name="Mode"           type="xs:string"/>
+      <xs:attribute name="NextSigFn1"     type="xs:string"/>
+      <xs:attribute name="NextSigFn2"     type="xs:string"/>
+      <xs:attribute name="NextSigFn3"     type="xs:string"/>
+      <xs:attribute name="NextSigFn4"     type="xs:string"/>
+      <xs:attribute name="NextSigFn5"     type="xs:string"/>
+      <xs:attribute name="NoSound"        type="xs:string"/>
+      <xs:attribute name="OneWay"         type="xs:string"/>
+      <xs:attribute name="SegTab"         type="xs:string"/>
+      <xs:attribute name="SignalData"     type="xs:string"/>
+      <xs:attribute name="TipBGCB"       type="xs:string"/>
+      <xs:attribute name="TipBGCG"       type="xs:string"/>
+      <xs:attribute name="TipBGCR"       type="xs:string"/>
+      <xs:attribute name="TipFGCB"       type="xs:string"/>
+      <xs:attribute name="TipFGCG"       type="xs:string"/>
+      <xs:attribute name="TipFGCR"       type="xs:string"/>
+      <xs:attribute name="TipShow"       type="BoolFlag"/>
+      <xs:attribute name="TipTxt"        type="xs:string"/>
+      <xs:attribute name="clsid"         type="xs:string"/>
+      <xs:attribute name="data"          type="xs:string"/>
+      <xs:attribute name="gleisID"       type="xs:string"/>
+      <xs:attribute name="gleissystemID" type="xs:string"/>
+      <xs:attribute name="gsbname"       type="xs:string"/>
+      <xs:attribute name="scale"         type="xs:string"/>
+      <xs:attribute name="stil"          type="xs:string"/>
+      <xs:attribute name="u3"            type="xs:string"/>
+      <xs:attribute name="weichenstellung" type="WeichenstellungValue"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Anfangsfuehrungsverdrehung">
+    <xs:complexType>
+      <xs:attribute name="Wert" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Charakteristik">
+    <xs:complexType>
+      <xs:attribute name="Fuehrungsverdrehung" type="xs:string"/>
+      <xs:attribute name="Kruemmung"           type="xs:string"/>
+      <xs:attribute name="Kurve"               type="xs:string"/>
+      <xs:attribute name="Laenge"              type="xs:string"/>
+      <xs:attribute name="Torsion"             type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Interval">
+    <xs:complexType>
+      <xs:attribute name="far"  type="xs:string"/>
+      <xs:attribute name="near" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Field">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Curve Geometry
+       ==================================================================== -->
+
+  <xs:element name="Curve">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Arc"/>
+        <xs:element ref="Clothoid"/>
+        <xs:element ref="Cubic"/>
+        <xs:element ref="EEPCurve"/>
+        <xs:element ref="Helix"/>
+        <xs:element ref="Line"/>
+        <xs:element ref="PolygonalChain"/>
+        <xs:element ref="Rotator"/>
+        <xs:element ref="Spline"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Arc">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="VectorBundle2" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Clothoid">
+    <xs:complexType>
+      <xs:attribute name="a" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Cubic">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Position"/>
+        <xs:element ref="Vector"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="EEPCurve">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Frame" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="Anfangsfuehrungsverdrehung" type="xs:string"/>
+      <xs:attribute name="Fuehrungsverdrehung"        type="xs:string"/>
+      <xs:attribute name="Kruemmung"                  type="xs:string"/>
+      <xs:attribute name="Kurve"                      type="xs:string"/>
+      <xs:attribute name="Laenge"                     type="xs:string"/>
+      <xs:attribute name="Torsion"                    type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Helix">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="VectorBundle2" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="a" type="xs:string"/>
+      <xs:attribute name="b" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Line">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Vector"/>
+        <xs:element ref="VectorBundle"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="PolygonalChain">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="VectorBundle" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Rotator">
+    <xs:complexType>
+      <xs:attribute name="a" type="xs:string"/>
+      <xs:attribute name="b" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Spline">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Cubic" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Twist
+       ==================================================================== -->
+
+  <xs:element name="Twist">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="CombinedTwist"/>
+        <xs:element ref="DirectionalTwist"/>
+        <xs:element ref="LinearTwist"/>
+        <xs:element ref="PiecewiseCircularTwist"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CombinedTwist">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Twist" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="DirectionalTwist">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Vector" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="bFrozen" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LinearTwist">
+    <xs:complexType>
+      <xs:attribute name="endangle"   type="xs:string"/>
+      <xs:attribute name="startangle" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="PiecewiseCircularTwist">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="TwistAngle" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="TwistAngle">
+    <xs:complexType>
+      <xs:attribute name="s"     type="xs:string"/>
+      <xs:attribute name="value" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Signals and Contacts
+       ==================================================================== -->
+
+  <xs:element name="Meldung">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="KontaktZiel"/>
+        <xs:element ref="Route"/>
+        <xs:element ref="Signal"/>
+        <xs:element ref="Text3DM"/>
+      </xs:choice>
+      <xs:attribute name="HSCX"        type="xs:string"/>
+      <xs:attribute name="HSCY"        type="xs:string"/>
+      <xs:attribute name="HSCZ"        type="xs:string"/>
+      <xs:attribute name="Hofs"        type="xs:string"/>
+      <xs:attribute name="HofsZ"       type="xs:string"/>
+      <xs:attribute name="HrotZ"       type="xs:string"/>
+      <xs:attribute name="Key_Id"      type="xs:string"/>
+      <xs:attribute name="LockEd"      type="BoolFlag"/>
+      <xs:attribute name="LuaTag"      type="xs:string"/>
+      <xs:attribute name="ParaOderAnti" type="xs:string"/>
+      <xs:attribute name="Position"    type="xs:string"/>
+      <xs:attribute name="Routes"      type="xs:string"/>
+      <xs:attribute name="Show"        type="xs:string"/>
+      <xs:attribute name="TipBGCB"    type="xs:string"/>
+      <xs:attribute name="TipBGCG"    type="xs:string"/>
+      <xs:attribute name="TipBGCR"    type="xs:string"/>
+      <xs:attribute name="TipFGCB"    type="xs:string"/>
+      <xs:attribute name="TipFGCG"    type="xs:string"/>
+      <xs:attribute name="TipFGCR"    type="xs:string"/>
+      <xs:attribute name="TipShow"    type="BoolFlag"/>
+      <xs:attribute name="TipTxt"     type="xs:string"/>
+      <xs:attribute name="VSCX"       type="xs:string"/>
+      <xs:attribute name="VSCY"       type="xs:string"/>
+      <xs:attribute name="VSCZ"       type="xs:string"/>
+      <xs:attribute name="Vofs"       type="xs:string"/>
+      <xs:attribute name="VofsZ"      type="xs:string"/>
+      <xs:attribute name="VrotZ"      type="xs:string"/>
+      <xs:attribute name="clsid"      type="xs:string"/>
+      <xs:attribute name="fireOnAnti" type="xs:string"/>
+      <xs:attribute name="fireOnPara" type="xs:string"/>
+      <xs:attribute name="name"       type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Signal">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Table"/>
+        <xs:element ref="Wartender"/>
+      </xs:choice>
+      <xs:attribute name="ActDelay"        type="xs:string"/>
+      <xs:attribute name="Count"           type="xs:string"/>
+      <xs:attribute name="Delay"           type="xs:string"/>
+      <xs:attribute name="Fn01"            type="xs:string"/>
+      <xs:attribute name="Fn02"            type="xs:string"/>
+      <xs:attribute name="Fn03"            type="xs:string"/>
+      <xs:attribute name="Fn04"            type="xs:string"/>
+      <xs:attribute name="Fn05"            type="xs:string"/>
+      <xs:attribute name="Fn06"            type="xs:string"/>
+      <xs:attribute name="Fn07"            type="xs:string"/>
+      <xs:attribute name="Fn08"            type="xs:string"/>
+      <xs:attribute name="Fn09"            type="xs:string"/>
+      <xs:attribute name="Fn10"            type="xs:string"/>
+      <xs:attribute name="Geschwindigkeit" type="xs:string"/>
+      <xs:attribute name="SignalData"      type="xs:string"/>
+      <xs:attribute name="StopAt"          type="xs:string"/>
+      <xs:attribute name="stellung"        type="xs:string"/>
+      <xs:attribute name="wirkungsdistanz" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Wartender">
+    <xs:complexType>
+      <xs:attribute name="fuhrparkID"       type="xs:string"/>
+      <xs:attribute name="sollgeschwindigkeit" type="xs:string"/>
+      <xs:attribute name="zugverbandID"     type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Kontakt">
+    <!-- Many TDir_N, TRouteId_N, TSpeed_N, TTime_N, TTrainId_N indexed attrs -->
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="ToRoutes"/>
+        <xs:element ref="WaitingTrains"/>
+      </xs:choice>
+      <xs:attribute name="ActDelay"      type="xs:string"/>
+      <xs:attribute name="ActTeiler"     type="xs:string"/>
+      <xs:attribute name="AnimID"        type="xs:string"/>
+      <xs:attribute name="AxisFilter"    type="xs:string"/>
+      <xs:attribute name="AxisPos"       type="xs:string"/>
+      <xs:attribute name="CheckAuto"     type="xs:string"/>
+      <xs:attribute name="ConnectF"      type="xs:string"/>
+      <xs:attribute name="ConnectR"      type="xs:string"/>
+      <xs:attribute name="Delay"         type="xs:string"/>
+      <xs:attribute name="Group"         type="xs:string"/>
+      <xs:attribute name="KontaktDist"   type="xs:string"/>
+      <xs:attribute name="KontaktZiel"   type="xs:string"/>
+      <xs:attribute name="LastOfs"       type="xs:string"/>
+      <xs:attribute name="LastTrainID"   type="xs:string"/>
+      <xs:attribute name="Light"         type="xs:string"/>
+      <xs:attribute name="LockEd"        type="BoolFlag"/>
+      <xs:attribute name="LuaFn"         type="xs:string"/>
+      <xs:attribute name="LuaSet"        type="xs:string"/>
+      <xs:attribute name="NameFilter"    type="xs:string"/>
+      <xs:attribute name="ParaOderAnti"  type="xs:string"/>
+      <xs:attribute name="Position"      type="xs:string"/>
+      <xs:attribute name="Route"         type="xs:string"/>
+      <xs:attribute name="Route2"        type="xs:string"/>
+      <xs:attribute name="SetAuto"       type="xs:string"/>
+      <xs:attribute name="SetType"       type="xs:string"/>
+      <xs:attribute name="SetValue"      type="xs:string"/>
+      <xs:attribute name="SigNeg"        type="xs:string"/>
+      <xs:attribute name="SignalData"    type="xs:string"/>
+      <xs:attribute name="Teiler"        type="xs:string"/>
+      <xs:attribute name="TimeFrom"      type="xs:string"/>
+      <xs:attribute name="TimeTo"        type="xs:string"/>
+      <xs:attribute name="TipBGCB"      type="xs:string"/>
+      <xs:attribute name="TipBGCG"      type="xs:string"/>
+      <xs:attribute name="TipBGCR"      type="xs:string"/>
+      <xs:attribute name="TipFGCB"      type="xs:string"/>
+      <xs:attribute name="TipFGCG"      type="xs:string"/>
+      <xs:attribute name="TipFGCR"      type="xs:string"/>
+      <xs:attribute name="TipShow"      type="BoolFlag"/>
+      <xs:attribute name="TipTxt"       type="xs:string"/>
+      <xs:attribute name="ToRoutesNeg"   type="xs:string"/>
+      <xs:attribute name="TrainDist"    type="xs:string"/>
+      <xs:attribute name="TrainID"      type="xs:string"/>
+      <xs:attribute name="TrainID2"     type="xs:string"/>
+      <xs:attribute name="TrainNewName" type="xs:string"/>
+      <xs:attribute name="TrainSide"    type="xs:string"/>
+      <xs:attribute name="VolDist"      type="xs:string"/>
+      <xs:attribute name="Wartender"    type="xs:string"/>
+      <xs:attribute name="Wechseln"     type="xs:string"/>
+      <xs:attribute name="clsid"        type="xs:string"/>
+      <xs:attribute name="fireOnAnti"   type="xs:string"/>
+      <xs:attribute name="fireOnPara"   type="xs:string"/>
+      <xs:attribute name="zuStellung"   type="xs:string"/>
+      <!-- TDir_N, TRouteId_N, TSpeed_N, TTime_N, TTrainId_N (0–28) -->
+      <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="KontaktZiel">
+    <xs:complexType/>
+  </xs:element>
+
+  <xs:element name="ToRoutes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="WaitingTrains">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Route">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="CloseSignal"/>
+        <xs:element ref="CloseSignalStat"/>
+        <xs:element ref="Layers"/>
+        <xs:element ref="OpenSignal"/>
+        <xs:element ref="OpenSignalStat"/>
+        <xs:element ref="Tracks"/>
+        <xs:element ref="TracksDir"/>
+      </xs:choice>
+      <xs:attribute name="Color"  type="xs:string"/>
+      <xs:attribute name="Start"  type="xs:string"/>
+      <xs:attribute name="Stop"   type="xs:string"/>
+      <xs:attribute name="Target" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CloseSignal">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CloseSignalStat">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OpenSignal">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="OpenSignalStat">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Tracks">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="TracksDir">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Layers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Gleisbildstellpult (Signal panel)
+       ==================================================================== -->
+
+  <xs:element name="Gleisbildstellpultsammlung">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Gleisbildstellpult" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Gleisbildstellpult">
+    <xs:complexType>
+      <xs:attribute name="bottom"      type="xs:string"/>
+      <xs:attribute name="kollektorID" type="xs:string"/>
+      <xs:attribute name="left"        type="xs:string"/>
+      <xs:attribute name="right"       type="xs:string"/>
+      <xs:attribute name="top"         type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Rolling Stock (Fuhrpark / Zugverband / Rollmaterial)
+       ==================================================================== -->
+
+  <xs:element name="Fuhrpark">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Zugverband" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="FuhrparkID" type="xs:string"/>
+      <xs:attribute name="clsid"      type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Zugverband">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Gleisort"/>
+        <xs:element ref="Rollmaterial"/>
+      </xs:choice>
+      <xs:attribute name="Favorite"              type="xs:string"/>
+      <xs:attribute name="Geschwindigkeit"        type="xs:string"/>
+      <xs:attribute name="Hide"                  type="xs:string"/>
+      <xs:attribute name="LastDir"               type="xs:string"/>
+      <xs:attribute name="LightStat"             type="xs:string"/>
+      <xs:attribute name="Route"                 type="xs:string"/>
+      <xs:attribute name="StepStop"              type="xs:string"/>
+      <xs:attribute name="ZugID"                 type="xs:string"/>
+      <xs:attribute name="autopilot"             type="xs:string"/>
+      <xs:attribute name="clsid"                 type="xs:string"/>
+      <xs:attribute name="kupplunghinten"         type="xs:string"/>
+      <xs:attribute name="kupplungvorn"           type="xs:string"/>
+      <xs:attribute name="name"                  type="xs:string"/>
+      <xs:attribute name="sollgeschwindigkeit"    type="xs:string"/>
+      <xs:attribute name="sollgeschwindigkeit_kp" type="xs:string"/>
+      <xs:attribute name="wirkungsdistanz"        type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Rollmaterial">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="AxisPreset"/>
+        <xs:element ref="CCamDir"/>
+        <xs:element ref="CCamPos"/>
+        <xs:element ref="Modell"/>
+        <xs:element ref="PxActor"/>
+        <xs:element ref="Text3DM"/>
+        <xs:element ref="Zugmaschine"/>
+      </xs:choice>
+      <xs:attribute name="ActCabin"   type="xs:string"/>
+      <xs:attribute name="Active"     type="xs:string"/>
+      <xs:attribute name="Favorite"   type="xs:string"/>
+      <xs:attribute name="Flags"      type="xs:string"/>
+      <xs:attribute name="GlueExtra"  type="xs:string"/>
+      <xs:attribute name="Hook"       type="xs:string"/>
+      <xs:attribute name="ImmoIdx"    type="xs:string"/>
+      <xs:attribute name="LightStat"  type="xs:string"/>
+      <xs:attribute name="LockEd"     type="BoolFlag"/>
+      <xs:attribute name="LuaTag"     type="xs:string"/>
+      <xs:attribute name="Masse"      type="xs:string"/>
+      <xs:attribute name="Reibung"    type="xs:string"/>
+      <xs:attribute name="RollIdx"    type="xs:string"/>
+      <xs:attribute name="Smoke"      type="xs:string"/>
+      <xs:attribute name="TotalDist"  type="xs:string"/>
+      <xs:attribute name="Wartender"  type="xs:string"/>
+      <xs:attribute name="ausrichtung" type="xs:string"/>
+      <xs:attribute name="bremsung"   type="xs:string"/>
+      <xs:attribute name="clsid"      type="xs:string"/>
+      <xs:attribute name="hUeberhang" type="xs:string"/>
+      <xs:attribute name="maxbremsung" type="xs:string"/>
+      <xs:attribute name="name"       type="xs:string"/>
+      <xs:attribute name="typ"        type="xs:string"/>
+      <xs:attribute name="vUeberhang" type="xs:string"/>
+      <xs:attribute name="zuStellung" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Zugmaschine">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Getriebe"/>
+        <xs:element ref="Motor"/>
+      </xs:choice>
+      <xs:attribute name="gang"     type="xs:string"/>
+      <xs:attribute name="leistung" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Getriebe">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Gang" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="treibradradius" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Gang">
+    <xs:complexType>
+      <xs:attribute name="uebersetzung" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Motor">
+    <xs:complexType>
+      <xs:attribute name="leistung" type="xs:string"/>
+      <xs:attribute name="u1"       type="xs:string"/>
+      <xs:attribute name="u2"       type="xs:string"/>
+      <xs:attribute name="u3"       type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="AxisPreset">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="GroupName" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="PxActor">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Table" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CCamDir">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="CCamPos">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Animated Objects (AnimRoll)
+       ==================================================================== -->
+
+  <xs:element name="AnimRoll">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="AnimElement" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="count" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="AnimElement">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Gleisort" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="DOFShiftFar"     type="xs:string"/>
+      <xs:attribute name="FocalIdx"        type="xs:string"/>
+      <xs:attribute name="ITRadius"        type="xs:string"/>
+      <xs:attribute name="ITSpeed"         type="xs:string"/>
+      <xs:attribute name="LastDir"         type="xs:string"/>
+      <xs:attribute name="LockEd"          type="BoolFlag"/>
+      <xs:attribute name="Route"           type="xs:string"/>
+      <xs:attribute name="SetType"         type="xs:string"/>
+      <xs:attribute name="Signal"          type="xs:string"/>
+      <xs:attribute name="Vofs"            type="xs:string"/>
+      <xs:attribute name="gsbname"         type="xs:string"/>
+      <xs:attribute name="id"              type="xs:string"/>
+      <xs:attribute name="u1"              type="xs:string"/>
+      <xs:attribute name="u2"              type="xs:string"/>
+      <xs:attribute name="u3"              type="xs:string"/>
+      <xs:attribute name="wirkungsdistanz" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Goods (physics objects)
+       ==================================================================== -->
+
+  <xs:element name="Goods">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Good" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="count" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Good">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="AVel"/>
+        <xs:element ref="BeweglichesTeil"/>
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="LVel"/>
+        <xs:element ref="Modell"/>
+        <xs:element ref="Table"/>
+      </xs:choice>
+      <xs:attribute name="GoodIdx" type="xs:string"/>
+      <xs:attribute name="LockEd"  type="BoolFlag"/>
+      <xs:attribute name="gsbname" type="xs:string"/>
+      <xs:attribute name="u1"      type="xs:string"/>
+      <xs:attribute name="u2"      type="xs:string"/>
+      <xs:attribute name="u3"      type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="AVel">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LVel">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Crowd Simulation
+       ==================================================================== -->
+
+  <xs:element name="CrowdSammlung">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Crowd" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Crowd">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="Force"/>
+        <xs:element ref="Sink"/>
+        <xs:element ref="Source"/>
+        <xs:element ref="Zwangskraft"/>
+      </xs:choice>
+      <xs:attribute name="ID"   type="xs:string"/>
+      <xs:attribute name="Name" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Force">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="Vektor"/>
+      </xs:choice>
+      <xs:attribute name="Active"        type="xs:string"/>
+      <xs:attribute name="Amplification" type="xs:string"/>
+      <xs:attribute name="ForceType"     type="xs:string"/>
+      <xs:attribute name="MaxRange"      type="xs:string"/>
+      <xs:attribute name="MinRange"      type="xs:string"/>
+      <xs:attribute name="Range"         type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Sink">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="KontaktZiel"/>
+      </xs:choice>
+      <xs:attribute name="Active"   type="xs:string"/>
+      <xs:attribute name="MaxRange" type="xs:string"/>
+      <xs:attribute name="MinRange" type="xs:string"/>
+      <xs:attribute name="Range"    type="xs:string"/>
+      <xs:attribute name="SinkSide" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Source">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="KontaktZiel"/>
+        <xs:element ref="ModelType"/>
+      </xs:choice>
+      <xs:attribute name="Active"               type="xs:string"/>
+      <xs:attribute name="MaxRange"             type="xs:string"/>
+      <xs:attribute name="MaximumFlockSize"     type="xs:string"/>
+      <xs:attribute name="MaximumOmegaCount"    type="xs:string"/>
+      <xs:attribute name="MinRange"             type="xs:string"/>
+      <xs:attribute name="MinimumFlockSize"     type="xs:string"/>
+      <xs:attribute name="ProductionRate"       type="xs:string"/>
+      <xs:attribute name="Range"                type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ModelType">
+    <xs:complexType mixed="true"/>
+  </xs:element>
+
+  <xs:element name="Zwangskraft">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Dreibein" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute name="Active"         type="xs:string"/>
+      <xs:attribute name="Damping"        type="xs:string"/>
+      <xs:attribute name="Depth"          type="xs:string"/>
+      <xs:attribute name="Height"         type="xs:string"/>
+      <xs:attribute name="Limit"          type="xs:string"/>
+      <xs:attribute name="MaxRange"       type="xs:string"/>
+      <xs:attribute name="MinRange"       type="xs:string"/>
+      <xs:attribute name="Range"          type="xs:string"/>
+      <xs:attribute name="Width"          type="xs:string"/>
+      <xs:attribute name="ZwangskraftType" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Cameras
+       ==================================================================== -->
+
+  <xs:element name="Kamera3D">
+    <!-- CamIdx0–CamIdx169, Progress, cnt, id; allow any -->
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Kammera" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Kammerasammlung">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Kammera" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="cnt" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Kammera">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dir"/>
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="Gleisort"/>
+        <xs:element ref="Gleisort2"/>
+        <xs:element ref="Look1"/>
+      </xs:choice>
+      <xs:attribute name="DOF"          type="xs:string"/>
+      <xs:attribute name="DOFShiftFar"  type="xs:string"/>
+      <xs:attribute name="DOFShiftNear" type="xs:string"/>
+      <xs:attribute name="DOFSubDist"   type="xs:string"/>
+      <xs:attribute name="Duration"     type="xs:string"/>
+      <xs:attribute name="Dynamic"      type="xs:string"/>
+      <xs:attribute name="FOV"          type="xs:string"/>
+      <xs:attribute name="FStopIdx"     type="xs:string"/>
+      <xs:attribute name="FocalIdx"     type="xs:string"/>
+      <xs:attribute name="Geschwindigkeit" type="xs:string"/>
+      <xs:attribute name="Gyroscope"    type="xs:string"/>
+      <xs:attribute name="Interpolate"  type="xs:string"/>
+      <xs:attribute name="MarkedZOfs"   type="xs:string"/>
+      <xs:attribute name="NextID"       type="xs:string"/>
+      <xs:attribute name="PPFilter"     type="xs:string"/>
+      <xs:attribute name="PPParam_W"    type="xs:string"/>
+      <xs:attribute name="PPParam_X"    type="xs:string"/>
+      <xs:attribute name="PPParam_Y"    type="xs:string"/>
+      <xs:attribute name="PPParam_Z"    type="xs:string"/>
+      <xs:attribute name="Select"       type="xs:string"/>
+      <xs:attribute name="SleepB"       type="xs:string"/>
+      <xs:attribute name="SleepE"       type="xs:string"/>
+      <xs:attribute name="SubDist"      type="xs:string"/>
+      <xs:attribute name="TakeSwitch"   type="xs:string"/>
+      <xs:attribute name="TrainID"      type="xs:string"/>
+      <xs:attribute name="id"           type="xs:string"/>
+      <xs:attribute name="name"         type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Dir">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Look1">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Gleisort">
+    <xs:complexType>
+      <xs:attribute name="ausrichtung"  type="xs:string"/>
+      <xs:attribute name="gleisID"      type="xs:string"/>
+      <xs:attribute name="gleissystemID" type="xs:string"/>
+      <xs:attribute name="parameter"    type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Gleisort2">
+    <xs:complexType>
+      <xs:attribute name="ausrichtung"  type="xs:string"/>
+      <xs:attribute name="gleisID"      type="xs:string"/>
+      <xs:attribute name="gleissystemID" type="xs:string"/>
+      <xs:attribute name="parameter"    type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Kollektor (track collector)
+       ==================================================================== -->
+
+  <xs:element name="Kollektor">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Dreibein"/>
+        <xs:element ref="Gleis"/>
+      </xs:choice>
+      <xs:attribute name="id" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Shared geometry / model elements
+       ==================================================================== -->
+
+  <xs:element name="Dreibein">
+    <!-- Coordinate frame (3 vectors) -->
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Vektor" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Vektor">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Modell">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Achse"/>
+        <xs:element ref="Table"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Achse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Achse" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="Parameter" type="xs:string"/>
+      <xs:attribute name="Velocity"  type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Text3DM">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="TexText" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="TexText">
+    <xs:complexType>
+      <xs:attribute name="BgCol"  type="xs:string"/>
+      <xs:attribute name="Center" type="xs:string"/>
+      <xs:attribute name="FgCol"  type="xs:string"/>
+      <xs:attribute name="FntDat" type="xs:string"/>
+      <xs:attribute name="Font"   type="xs:string"/>
+      <xs:attribute name="Idx"    type="xs:string"/>
+      <xs:attribute name="Text"   type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Frame">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Position"/>
+        <xs:element ref="Vector"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Position">
+    <xs:complexType>
+      <xs:attribute name="x" type="xs:string"/>
+      <xs:attribute name="y" type="xs:string"/>
+      <xs:attribute name="z" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Vector">
+    <xs:complexType>
+      <xs:attribute name="dx" type="xs:string"/>
+      <xs:attribute name="dy" type="xs:string"/>
+      <xs:attribute name="dz" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="VectorBundle">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Position"/>
+        <xs:element ref="Vector"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="VectorBundle2">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Position"/>
+        <xs:element ref="Vector"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ====================================================================
+       Generic Table (indexed data array used across many elements)
+       Count + e0..eN entries; allow any attribute to handle large N.
+       ==================================================================== -->
+
+  <xs:element name="Table">
+    <xs:complexType>
+      <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

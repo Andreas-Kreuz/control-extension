@@ -1,3 +1,6 @@
+# Temp / local scratch
+/tmp/
+
 # Yarn
 .yarn/*
 !.yarn/cache

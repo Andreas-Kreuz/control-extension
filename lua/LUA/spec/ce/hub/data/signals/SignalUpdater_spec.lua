@@ -25,6 +25,8 @@ insulate("ce.hub.data.signals.SignalUpdater", function ()
         if eepSignalGetTagTextStub then eepSignalGetTagTextStub:revert() end
         if eepGetSignalTrainsCountStub then eepGetSignalTrainsCountStub:revert() end
         if eepGetSignalTrainNameStub then eepGetSignalTrainNameStub:revert() end
+        local InterestSyncRegistry = package.loaded["ce.hub.data.InterestSyncRegistry"]
+        if InterestSyncRegistry then InterestSyncRegistry.clearAll() end
         eepGetSignalStub = nil
         eepSignalGetTagTextStub = nil
         eepGetSignalTrainsCountStub = nil
@@ -35,6 +37,12 @@ insulate("ce.hub.data.signals.SignalUpdater", function ()
         local Signal = require("ce.hub.data.signals.Signal")
         local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
         SignalRegistry.add(Signal:new(signalId))
+    end
+
+    local function selectSignal(signalId)
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        InterestSyncRegistry.startSyncFor(HubCeTypes.Signal, tostring(signalId))
     end
 
     local function stubSignalState(states)
@@ -51,9 +59,22 @@ insulate("ce.hub.data.signals.SignalUpdater", function ()
         end)
     end
 
+    it("does not refresh position or waiting count for unselected signals by default", function ()
+        stubSignalState({ [4] = { position = 2, waitingCount = 1, vehicles = { "Train A" } } })
+        addSignal(4)
+
+        local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
+
+        SignalUpdater.runUpdate()
+
+        assert.stub(eepGetSignalStub).was_not_called()
+        assert.stub(eepGetSignalTrainsCountStub).was_not_called()
+    end)
+
     it("updates waiting vehicle names in SignalUpdater", function ()
         stubSignalState({ [5] = { position = 1, waitingCount = 1, vehicles = { "Train A" } } })
         addSignal(5)
+        selectSignal(5)
 
         local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
         local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")
@@ -67,6 +88,7 @@ insulate("ce.hub.data.signals.SignalUpdater", function ()
     it("throttles unchanged waiting vehicle name reads", function ()
         stubSignalState({ [5] = { position = 1, waitingCount = 1, vehicles = { "Train A" } } })
         addSignal(5)
+        selectSignal(5)
 
         local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
 
@@ -84,6 +106,7 @@ insulate("ce.hub.data.signals.SignalUpdater", function ()
         local states = { [6] = { position = 1, waitingCount = 0, vehicles = {} } }
         stubSignalState(states)
         addSignal(6)
+        selectSignal(6)
 
         local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
         local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")

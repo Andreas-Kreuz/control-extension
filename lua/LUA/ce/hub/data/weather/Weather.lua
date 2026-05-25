@@ -37,6 +37,33 @@ function Weather:new(o)
     return o
 end
 
+local function unwrapNumeric(getter)
+    if type(getter) ~= "function" then return nil end
+
+    local ok, valueA, valueB = pcall(getter)
+    if not ok then return nil end
+    if type(valueA) == "boolean" then
+        if valueA ~= true then return nil end
+        return valueB
+    end
+    return valueA
+end
+
+function Weather.pullCurrent()
+    return {
+        id = "weather",
+        name = "weather",
+        season = unwrapNumeric(EEPGetSeason),
+        cloudsIntensity = unwrapNumeric(EEPGetCloudsIntensity),
+        cloudsMode = unwrapNumeric(EEPGetCloudsMode),
+        windIntensity = unwrapNumeric(EEPGetWindIntensity),
+        rainIntensity = unwrapNumeric(EEPGetRainIntensity),
+        snowIntensity = unwrapNumeric(EEPGetSnowIntensity),
+        hailIntensity = unwrapNumeric(EEPGetHailIntensity),
+        fogIntensity = unwrapNumeric(EEPGetFogIntensity)
+    }
+end
+
 function Weather:update(values)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(values) == "table", "Need 'values' as table")

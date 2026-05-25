@@ -65,6 +65,7 @@ insulate("ce.hub.data.trains.TrainDiscovery anl3 seed", function ()
         addStub("EEPIsControlTrackReserved", function () return false, false, nil end)
         addStub("EEPGetTrainSpeed", function () return true, 0 end)
         addStub("EEPRollingstockGetTrack", function () return true, 101, 12, 1, 1 end)
+        addStub("print", function () end)
 
         local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
         local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
@@ -107,5 +108,39 @@ insulate("ce.hub.data.trains.TrainDiscovery anl3 seed", function ()
         assert.is_not_nil(RollingStockRegistry.getAll()["RS A"])
         assert.is_true(TrackRegistry.get("rail", 101).reserved)
         assert.equals("#Train A", TrackRegistry.get("rail", 101).reservedByTrainName)
+    end)
+
+    it("seeds tag and smoke from anl3 rolling stock entries", function ()
+        local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local getTextureStub = stub(_G, "EEPRollingstockGetTextureText", function () return true, "" end)
+        local setTextureStub = stub(_G, "EEPRollingstockSetTextureText", function () return true end)
+
+        TrainDiscovery.initFromAnl3({
+            coverage = { trains = true, rollingStocks = true },
+            trains = { { name = "#Train A", rollingStockCount = 1, trackType = "road", onTracks = {} } },
+            rollingStocks = {
+                {
+                    name = "RS A",
+                    model = "BUS\\A.3dm",
+                    tag = "line=7,",
+                    smoke = 100,
+                    trainName = "#Train A",
+                    positionInTrain = 0,
+                    textureTexts = { ["1"] = "7", ["5"] = "Zentrum" }
+                }
+            }
+        })
+
+        local rs = RollingStockRegistry.getAll()["RS A"]
+        assert.equals("line=7,", rs:getTag())
+        assert.same(100, rs:getSmoke())
+        assert.equals("7", rs:getTextureText(1))
+        assert.equals("Zentrum", rs:getTextureText(5))
+        assert.stub(getTextureStub).was_not_called()
+        assert.stub(setTextureStub).was_not_called()
+
+        getTextureStub:revert()
+        setTextureStub:revert()
     end)
 end)

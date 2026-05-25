@@ -272,7 +272,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
                 vehicleSignalName = signalHead.vehicleSignalName,
                 pedestrianSignalName = signalHead.pedestrianSignalName,
                 use = signalHead.use,
-                modelId = signalHead.trafficLightModel.name,
+                modelId = signalHead.trafficLightModel.id,
                 currentIndication = signalHead.currentIndication,
                 intersectionId = intersectionIdCounter,
                 lightStructures = {},
@@ -298,7 +298,9 @@ function RoadDataCollector.collectCrossings(allIntersections)
                     structureRed = lightStructure.redStructure,
                     structureGreen = lightStructure.greenStructure,
                     structureYellow = lightStructure.yellowStructure or lightStructure.redStructure,
-                    structureRequest = lightStructure.requestStructure
+                    structureRequest = lightStructure.requestStructure,
+                    structureHousing = lightStructure.housingStructure,
+                    structureBlend = lightStructure.blendStructure
                 }
                 lightStructureId = lightStructureId + 1
             end
@@ -341,7 +343,7 @@ function RoadDataCollector.collectCrossings(allIntersections)
             id = intersectionId .. "-" .. lane.name,
             intersectionId = intersectionId,
             name = lane.name,
-            scriptVariableName = optionalValueFromGetterOrField(lane, "getScriptVariableName", "_scriptVariableName"),
+            kpId = optionalValueFromGetterOrField(lane, "getKpId", "_kpId"),
             currentIndication = currentIndication,
             vehicleMultiplier = lane.fahrzeugMultiplikator,
             laneSignalId = lane.laneSignal and lane.laneSignal.signalId or nil,
@@ -396,8 +398,8 @@ function RoadDataCollector.collectModuleSettings()
         },
         {
             category = "Tipp-Texte für Ampeln",
-            name = "Fahrspurnamen einblenden",
-            description = "Zeigt an Fahrspur-Signalen den Namen der Fahrspur",
+            name = "Fahrspursignale einblenden",
+            description = "Zeigt an Fahrspur-Signalen Kurzname, Farbe und Fahrspurname",
             type = "boolean",
             value = IntersectionSettings.showLaneNamesOnSignal,
             eepFunction = "IntersectionSettings.setShowLaneNamesOnSignal"
@@ -405,7 +407,7 @@ function RoadDataCollector.collectModuleSettings()
         {
             category = "Tipp-Texte für Ampeln",
             name = "Kurzname und Farbe",
-            description = "Zeigt den farbigen Signalnamen und das aktuelle Signalbild",
+            description = "Zeigt den farbigen Signalnamen an Ampeln und Immobilienampel-Gehaeusen",
             type = "boolean",
             value = IntersectionSettings.showNameAndPhaseOnSignal,
             eepFunction = "IntersectionSettings.setShowNameAndPhaseOnSignal"
@@ -429,7 +431,7 @@ function RoadDataCollector.collectModuleSettings()
         {
             category = "Tipp-Texte für Kreuzungen",
             name = "Kreuzungsübersicht einblenden",
-            description = "Zeigt Fahrspuren und deren Phase",
+            description = "Zeigt Phasen und markiert die aktuelle Phase",
             type = "boolean",
             value = IntersectionSettings.showLanesOnStructure,
             eepFunction = "IntersectionSettings.setShowLanesOnStructure"

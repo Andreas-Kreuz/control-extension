@@ -6,6 +6,8 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.hub.eep.EepSimulatorStore")
         require("ce.hub.eep.EepSimulator")
+        clearModule("ce.hub.data.trains.Train")
+        clearModule("ce.hub.data.trains.TrainRegistry")
         clearModule("ce.hub.data.rollingstock.RollingStock")
         clearModule("ce.hub.data.rollingstock.RollingStockRegistry")
         clearModule("ce.mods.transit.data.TransitTrain")
@@ -75,6 +77,7 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
     it("sets origin on each rolling stock model", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
         local transitTrain = newTransitTrain()
         local calls = {}
         local model = {
@@ -83,8 +86,9 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
             end
         }
         EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
-        RollingStockRegistry.forName("RS1").model = model
-        RollingStockRegistry.forName("RS2").model = model
+        TrainRegistry.setRollingStockNames("T1", { ["0"] = "RS1", ["1"] = "RS2" })
+        RollingStockRegistry.getOrCreate("RS1").model = model
+        RollingStockRegistry.getOrCreate("RS2").model = model
 
         transitTrain:setOrigin("Depot")
 
@@ -100,6 +104,7 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local RoadStation = require("ce.mods.transit.RoadStation")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
         local transitTrain = newTransitTrain()
         local calls = {}
         local model = {
@@ -108,8 +113,9 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
             end
         }
         EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
-        RollingStockRegistry.forName("RS1").model = model
-        RollingStockRegistry.forName("RS2").model = model
+        TrainRegistry.setRollingStockNames("T1", { ["0"] = "RS1", ["1"] = "RS2" })
+        RollingStockRegistry.getOrCreate("RS1").model = model
+        RollingStockRegistry.getOrCreate("RS2").model = model
 
         transitTrain:setNextStations({
             { station = RoadStation.forName("Central"), platform = "2", departureInMinutes = 3 },
@@ -122,9 +128,37 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
                     }, calls)
     end)
 
+    it("does not update rolling stock next stop for equivalent next stations", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local RoadStation = require("ce.mods.transit.RoadStation")
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local transitTrain = newTransitTrain()
+        local calls = {}
+        local model = {
+            setNextStop = function (_, rollingStockName, nextStop)
+                table.insert(calls, { rollingStockName = rollingStockName, nextStop = nextStop })
+            end
+        }
+        local nextStations = {
+            { station = RoadStation.forName("Central"), platform = "2", departureInMinutes = 3 },
+        }
+        EepSimulator.simulateAddTrain("T1", "RS1")
+        TrainRegistry.setRollingStockNames("T1", { ["0"] = "RS1" })
+        RollingStockRegistry.getOrCreate("RS1").model = model
+
+        transitTrain:setNextStations(nextStations)
+        transitTrain:setNextStations(nextStations)
+
+        assert.same({
+                        { rollingStockName = "RS1", nextStop = "Central" },
+                    }, calls)
+    end)
+
     it("clears next stop on each rolling stock model without next stations", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
         local transitTrain = newTransitTrain()
         local calls = {}
         local model = {
@@ -133,8 +167,9 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
             end
         }
         EepSimulator.simulateAddTrain("T1", "RS1", "RS2")
-        RollingStockRegistry.forName("RS1").model = model
-        RollingStockRegistry.forName("RS2").model = model
+        TrainRegistry.setRollingStockNames("T1", { ["0"] = "RS1", ["1"] = "RS2" })
+        RollingStockRegistry.getOrCreate("RS1").model = model
+        RollingStockRegistry.getOrCreate("RS2").model = model
 
         transitTrain:setNextStations(nil)
 
@@ -151,7 +186,7 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
         local transitTrain, calls = newTransitTrainWithValueWriter()
         local model = { setLine = function () end }
         EepSimulator.simulateAddTrain("T1", "RS1")
-        RollingStockRegistry.forName("RS1").model = model
+        RollingStockRegistry.getOrCreate("RS1").model = model
 
         transitTrain:setLine("10")
 
@@ -165,7 +200,7 @@ insulate("ce.mods.transit.data.TransitTrain", function ()
         local transitTrain, calls = newTransitTrainWithValueWriter()
         local model = { setDestination = function () end }
         EepSimulator.simulateAddTrain("T1", "RS1")
-        RollingStockRegistry.forName("RS1").model = model
+        RollingStockRegistry.getOrCreate("RS1").model = model
 
         transitTrain:setDestination("Central")
 

@@ -1,8 +1,10 @@
 // App contract populated by:
 // apps/web-server/src/server/mod/road/RoadSelector.ts
 export interface IntersectionTrafficLightStructureAppDto {
+  structureBlend?: string;
   structureRed?: string;
   structureGreen?: string;
+  structureHousing?: string;
   structureYellow?: string;
   structureRequest?: string;
 }

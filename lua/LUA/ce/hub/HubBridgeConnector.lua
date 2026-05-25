@@ -49,6 +49,10 @@ function HubBridgeConnector.registerStatePublishers()
 end
 
 function HubBridgeConnector.registerFunctions()
+    local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
+    local Scenario = require("ce.hub.data.scenario.Scenario")
+    local Structure = require("ce.hub.data.structures.Structure")
+    local Train = require("ce.hub.data.trains.Train")
     ServerExchangeCoordinator.registerAllowedCommand(
         "HubInterestSync.startSyncFor",
         InterestSyncRegistry.startSyncFor
@@ -56,6 +60,74 @@ function HubBridgeConnector.registerFunctions()
     ServerExchangeCoordinator.registerAllowedCommand(
         "HubInterestSync.stopSyncFor",
         InterestSyncRegistry.stopSyncFor
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setPositionByName",
+        Structure.setPositionByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setRotationByName",
+        Structure.setRotationByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setLightByName",
+        Structure.setLightByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Structure.setTagByName",
+        Structure.setTagByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Scenario.setCamera",
+        Scenario.setCamera
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Scenario.setPerspectiveCamera",
+        Scenario.setPerspectiveCamera
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Scenario.setCameraPosition",
+        Scenario.setCameraPosition
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Scenario.setCameraRotation",
+        Scenario.setCameraRotation
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Train.setActiveByName",
+        Train.setActiveByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Train.setSpeedByName",
+        Train.setSpeedByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Train.setCouplingFrontByName",
+        Train.setCouplingFrontByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Train.setCouplingRearByName",
+        Train.setCouplingRearByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "Train.setLightByName",
+        Train.setLightByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "RollingStock.setActiveByName",
+        RollingStock.setActiveByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "RollingStock.setUserCameraByName",
+        RollingStock.setUserCameraByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "RollingStock.setAxisByName",
+        RollingStock.setAxisByName
+    )
+    ServerExchangeCoordinator.registerAllowedCommand(
+        "RollingStock.setAxisByNumberByName",
+        RollingStock.setAxisByNumberByName
     )
 end
 

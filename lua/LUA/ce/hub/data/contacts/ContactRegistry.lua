@@ -24,6 +24,10 @@ function ContactRegistry.replaceAll(contacts)
     end
 end
 
+function ContactRegistry.get(id)
+    return allContacts[id]
+end
+
 function ContactRegistry.getAll()
     local copy = {}
     for id, contact in pairs(allContacts) do copy[id] = contact end

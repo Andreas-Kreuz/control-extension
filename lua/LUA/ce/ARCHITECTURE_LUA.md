@@ -128,3 +128,81 @@ Jede DtoFactory enthält einen Querverweis auf die zugehörige TypeScript-Defini
 ```
 
 Umgekehrt verweist jede TypeScript-LuaDto-Datei auf ihre Lua-DtoFactory.
+
+---
+
+## EEP-Threading und Speicherschutz
+
+### Threading-Modell von EEP
+
+EEP ruft `EEPMain()` im Hauptthread auf. Das Speichern der Anlage (`.anl3`) erfolgt auf
+einem **Hintergrundthread**, der intern einen Schreib-Mutex hält. EEP ist also nicht
+vollständig single-threaded.
+
+EEP-API-Aufrufe aus dem Hauptthread (z.B. `EEPStructureGetModelType`, `EEPGetSignal`,
+`EEPLoadData`) belegen denselben Mutex. Laufen Hauptthread und Speicher-Thread
+gleichzeitig, entsteht ein Deadlock — EEP friert dauerhaft ein.
+
+### Der Speicherschutz im Hub
+
+`CeHubModule` sperrt alle EEP-API-Aufrufe für die Dauer eines Speichervorgangs.
+Dazu werden zwei EEP-Callbacks genutzt:
+
+- `EEPOnBeforeSaveAnl()` (ab EEP 17) — feuert bevor der Hintergrundthread startet
+- `EEPOnSaveAnl(path)` — feuert nachdem der Schreibvorgang abgeschlossen ist
+
+```text
+EEPOnBeforeSaveAnl()  →  savingInProgress = true
+                                |
+                    CeHubModule.run() kehrt sofort zurück
+                    (keine EEP-API-Aufrufe im Hauptzyklus)
+                                |
+EEPOnSaveAnl(path)    →  savingInProgress = false
+                          Anl3-Reload nach 3 Zyklen einplanen
+```
+
+Ein Sicherheitstimeout von 300 Zyklen hebt die Sperre automatisch auf, falls
+`EEPOnSaveAnl` unerwartet ausbleibt.
+
+Implementiert in `ce/hub/CeHubModule.lua`.
+
+### Regeln für EEP-API-Aufrufe
+
+**Regel 1: EEP-API-Aufrufe nur innerhalb von `CeHubModule.run()`**
+
+Alle EEP-API-Aufrufe müssen innerhalb des normalen Hub-Zyklus erfolgen — in Updatern,
+Discovery-Funktionen oder Tasks, die von `CeHubModule.run()` ausgelöst werden. Nur dort
+greift der Speicherschutz.
+
+EEP-Callbacks (`EEPOnSaveAnl`, `EEPOnBeforeSaveAnl`, `EEPOnSignal_x`, …) dürfen keine
+EEP-API-Aufrufe machen, die den Schreib-Mutex belegen könnten.
+
+**Regel 2: Registry-Daten wiederverwenden, nicht neu abfragen**
+
+Beim Anl3-Reload nach jedem Speichern enthält die Registry bereits alle EEP-seitig
+abgefragten Daten aus der initialen Discovery. Statische Eigenschaften wie Position,
+Rotation und Modelltyp von Strukturen ändern sich zur Laufzeit nicht.
+
+Bestehende Registry-Einträge beim Reload niemals erneut über EEP-API-Aufrufe befüllen.
+EEP-API-Aufrufe beim Reload nur für Entitäten machen, die noch nicht in der Registry
+vorhanden sind.
+
+**Regel 3: EEP-API-Aufrufe pro Zyklus minimal halten**
+
+Discovery-Funktionen durchlaufen große Indexbereiche (bis 50.000 Strukturen, je 1.000
+Signale und Weichen). Das ist für die initiale Discovery unvermeidlich. Bei Reloads und
+laufenden Updates gilt:
+
+- Vorhandene Registry-Daten nicht redundant neu abfragen
+- Neue Entitäten sofort nach Erkennung registrieren, um Wiederholungen zu vermeiden
+- Je mehr EEP-API-Aufrufe pro Zyklus, desto länger das Zeitfenster für einen Deadlock
+
+### Anl3-Reload nach dem Speichern
+
+Nach `EEPOnSaveAnl` plant der Hub einen Anl3-Reload mit 3 Zyklen Verzögerung, damit EEP
+die Datei vollständig freigibt, bevor sie gelesen wird. Der Reload befüllt die Registries
+mit Metadaten aus der `anl3`-Datei (z.B. `gsbname` für Strukturen), die über die EEP-API
+allein nicht zugänglich sind. Dabei gilt Regel 2: bestehende Registry-Einträge werden
+wiederverwendet, keine redundanten API-Aufrufe.
+
+Implementiert in `ce/hub/data/structures/StructureDiscovery.lua` (`initFromAnl3`).

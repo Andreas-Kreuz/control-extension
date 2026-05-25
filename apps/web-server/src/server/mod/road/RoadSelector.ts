@@ -23,11 +23,24 @@ const knownTrafficLightModelConstants: Record<string, string> = {
   Ampel_NP1_mit_FG: 'NP1_3er_mit_FG',
   Ampel_NP1_ohne_FG: 'NP1_3er_ohne_FG',
   Ak_Ampel_2er_nur_FG: 'JS2_2er_nur_FG',
-  'Ampel_2er_Aus_Gelb-Grün': 'JS2_2er_OFF_YELLOW_GREEN',
+  'Ampel_2er_Aus_Gelb-Grün': 'JS2_2er_gelb_gruen_aus',
+  Ampel_2er_Aus_Gelb_Gruen: 'JS2_2er_gelb_gruen_aus',
+  Ampel_2er_Aus_Gelb_Grun: 'JS2_2er_gelb_gruen_aus',
+  Ampel_2er_Rot_Gelb_Aus: 'JS2_2er_rot_gelb_aus',
+  Ampel_2er_Rot_Gruen: 'JS2_2er_rot_gruen',
+  Ampel_1er_Gruen: 'JS2_1er_gruen',
   Ampel_3er_XXX_mit_FG: 'JS2_3er_mit_FG',
   Ampel_3er_XXX_ohne_FG: 'JS2_3er_ohne_FG',
+  'JS2 3er-Ampel mit Fußgängern': 'JS2_3er_mit_FG',
+  'JS2 3er-Ampel mit Fussgängern': 'JS2_3er_mit_FG',
+  'JS2 3er-Ampel mit Fussgaengern': 'JS2_3er_mit_FG',
+  'JS2 3er-Ampel ohne Fußgänger': 'JS2_3er_ohne_FG',
+  'JS2 3er-Ampel ohne Fussgänger': 'JS2_3er_ohne_FG',
+  'JS2 3er-Ampel ohne Fussgaenger': 'JS2_3er_ohne_FG',
   'Unsichtbares Signal': 'Unsichtbar_2er',
+  Unsichtbares_Signal: 'Unsichtbar_2er',
   'NO SIGNAL MODEL': 'NONE',
+  NO_SIGNAL_MODEL: 'NONE',
 };
 
 const oppositeApproach: Record<string, string> = {
@@ -113,6 +126,7 @@ export default class RoadSelector {
           id: dto.id,
           intersectionId: dto.intersectionId,
           name: dto.name,
+          ...(dto.kpId !== undefined ? { kpId: dto.kpId } : {}),
           ...(dto.scriptVariableName !== undefined ? { scriptVariableName: dto.scriptVariableName } : {}),
           currentIndication: dto.currentIndication,
           vehicleMultiplier: dto.vehicleMultiplier,
@@ -167,12 +181,11 @@ export default class RoadSelector {
       state,
       CeTypes.RoadTrafficLightModel,
       (dto) => {
-        const luaConstant = trafficLightModelConstantForName(dto.name);
         return {
           id: dto.id,
           name: dto.name,
           type: dto.type,
-          ...(luaConstant !== undefined ? { luaConstant } : {}),
+          luaConstant: dto.id,
           positionRed: dto.positionRed,
           positionGreen: dto.positionGreen,
           positionYellow: dto.positionYellow,

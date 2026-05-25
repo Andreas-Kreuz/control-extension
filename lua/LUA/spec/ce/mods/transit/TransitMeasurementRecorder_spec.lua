@@ -60,7 +60,7 @@ insulate("TransitMeasurementRecorder", function ()
         EepSimulator.simulateAddTrain(trainName, rollingStockName)
         if measured then EEPRollingstockSetTagText(rollingStockName, "v=1,") end
 
-        local train = TrainRegistry.forName(trainName)
+        local train = TrainRegistry.getOrCreate(trainName)
         local transitTrain = TransitTrainRegistry.forTrain(train)
         train:setRoute(route.routeName)
         transitTrain:changeDestination(route.destination, route.line.nr)

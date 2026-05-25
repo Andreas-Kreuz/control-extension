@@ -7,7 +7,7 @@ function TrafficLightModelsDataCollector.collectTrafficLightModels()
     local trafficLightModels = {}
     for _, model in pairs(TrafficLightModel.allModels) do
         table.insert(trafficLightModels, {
-            id = model.name,
+            id = model.id,
             name = model.name,
             type = "road",
             positions = {

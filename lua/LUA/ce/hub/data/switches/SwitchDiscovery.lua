@@ -11,13 +11,18 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 local SwitchDiscovery = {}
 
 local MAX_SWITCHES = 1000
-local EEPGetSwitch = _G.EEPGetSwitch or function () return 0 end
 
 local function discoverSwitches()
+    local discoveredIds = {}
     for i = 1, MAX_SWITCHES do
-        if EEPGetSwitch(i) > 0 and not SwitchRegistry.has(i) then
-            SwitchRegistry.add(Switch:new(i))
+        if Switch.exists(i) then
+            discoveredIds[i] = true
+            if not SwitchRegistry.has(i) then SwitchRegistry.add(Switch:new(i)) end
         end
+    end
+
+    for switchId in pairs(SwitchRegistry.getAll()) do
+        if not discoveredIds[switchId] then SwitchRegistry.remove(switchId) end
     end
 end
 
@@ -29,7 +34,7 @@ function SwitchDiscovery.initFromAnl3(tableOfAnl3)
     for _, entry in ipairs(tableOfAnl3.switches or {}) do
         if entry.keyId then
             local switch = Switch:new(entry.keyId)
-            if entry.position then switch:setPosition(entry.position) end
+            if entry.position then switch:seedPosition(entry.position) end
             switches[#switches + 1] = switch
         end
     end
@@ -42,8 +47,7 @@ function SwitchDiscovery.runInitialDiscovery()
 end
 
 function SwitchDiscovery.runDiscovery()
-    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("switches") then return end
-    discoverSwitches()
+    -- do nothing
 end
 
 return SwitchDiscovery

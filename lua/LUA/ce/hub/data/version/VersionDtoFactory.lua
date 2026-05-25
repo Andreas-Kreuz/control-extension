@@ -2,6 +2,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.version.VersionDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
 ---@class VersionDtoFactory
@@ -22,15 +24,15 @@ local dtoFields = {
         placeholder = ENTRY_ID
     },
     eepVersion = {
-        getValue = function (versionInfo) return versionInfo.eepVersion end,
+        getValue = peek(function (source) return source:peekEepVersion() end, "eepVersion"),
         placeholder = ""
     },
     luaVersion = {
-        getValue = function (versionInfo) return versionInfo.luaVersion end,
+        getValue = peek(function (source) return source:peekLuaVersion() end, "luaVersion"),
         placeholder = ""
     },
     singleVersion = {
-        getValue = function (versionInfo) return versionInfo.singleVersion end,
+        getValue = peek(function (source) return source:peekSingleVersion() end, "singleVersion"),
         placeholder = ""
     },
 }

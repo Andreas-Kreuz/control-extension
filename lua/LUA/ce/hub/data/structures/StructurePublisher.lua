@@ -28,7 +28,7 @@ function StructurePublisher.syncState()
     local removedIds = StructureRegistry.getRemovedIds()
 
     for structureId in pairs(addedIds) do
-        local structure = StructureRegistry.forId(structureId)
+        local structure = StructureRegistry.get(structureId)
         if structure then
             local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
             DataChangeBus.fireDataAdded(StructureDtoFactory.createFullDto(structure, isSelected))

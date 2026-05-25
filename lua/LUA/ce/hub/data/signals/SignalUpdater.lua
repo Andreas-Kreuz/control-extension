@@ -8,43 +8,17 @@ local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 ---@field runUpdate fun(options: table|nil):nil
 local SignalUpdater = {}
 
-local EEPGetSignal = _G.EEPGetSignal or function () return 0 end
-local EEPSignalGetTagText = _G.EEPSignalGetTagText or function () return false, nil end
-local EEPGetSignalTrainsCount = _G.EEPGetSignalTrainsCount or function () return 0 end
-local EEPGetSignalTrainName = _G.EEPGetSignalTrainName or function () return nil end
-local EEPGetSignalStopDistance = _G.EEPGetSignalStopDistance or function () return false, nil end
-local EEPGetSignalItemName = _G.EEPGetSignalItemName or function () return false, nil end
-local EEPGetSignalFunctions = _G.EEPGetSignalFunctions or function () return false, 0 end
-local EEPGetSignalFunction = _G.EEPGetSignalFunction or function () return false, nil end
 local waitingVehicleNameUpdateInterval = 10
 local updateCount = 0
 local previousWaitingCounts = {}
 
-local function readFunctions(id, position)
-    local functionsOk, functionCount = EEPGetSignalFunctions(id)
-    if not functionsOk or not functionCount or functionCount == 0 then return nil, nil end
-
-    local fns = {}
-    local activeFunction = nil
-    for selIndex = 1, functionCount do
-        local ok, fn = EEPGetSignalFunction(id, selIndex)
-        if ok then
-            local fnValue = tostring(fn)
-            fns[#fns + 1] = fnValue
-            if position == fn then activeFunction = fnValue end
-        end
-    end
-
-    return #fns > 0 and fns or nil, activeFunction
-end
-
 local function collectWaitingOnSignals(signals)
     local waitingOnSignals = {}
     for _, signal in pairs(signals) do
-        local count = signal:getWaitingVehiclesCount()
+        local count = signal:peekWaitingVehiclesCount()
         if count and count > 0 then
             for pos = 1, count do
-                local vehicleName = EEPGetSignalTrainName(signal.id, pos)
+                local vehicleName = signal:pullWaitingVehicleName(pos)
                 waitingOnSignals[#waitingOnSignals + 1] = {
                     id = signal.id .. "-" .. pos,
                     signalId = signal.id,
@@ -82,39 +56,37 @@ function SignalUpdater.runUpdate()
     local signals = SignalRegistry.getAll()
     local changedWatchedSignalIds = {}
     local watchedSignalIds = WaitingOnSignalRegistry.getWatchedSignalIds()
+    local updateWaitingVehicleNames = shouldUpdateWaitingVehicleNames(HubOptionsRegistry)
 
     for _, signal in pairs(signals) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
-        local position = EEPGetSignal(signal.id)
         local previousWaitingCount = previousWaitingCounts[signal.id] or 0
-        local waitingCount = EEPGetSignalTrainsCount(signal.id) or 0
-        signal:setPosition(position)
-        signal:setWaitingVehiclesCount(waitingCount)
-        previousWaitingCounts[signal.id] = waitingCount
-        if watchedSignalIds[signal.id] and previousWaitingCount ~= waitingCount then
-            changedWatchedSignalIds[signal.id] = true
+        if SyncPolicy.shouldUpdateField(fields, "position", isSelected) then
+            signal:pullPosition()
+        end
+        if SyncPolicy.shouldUpdateField(fields, "waitingVehiclesCount", isSelected) then
+            local waitingCount = signal:pullWaitingVehiclesCount() or 0
+            previousWaitingCounts[signal.id] = waitingCount
+            if updateWaitingVehicleNames and watchedSignalIds[signal.id] and previousWaitingCount ~= waitingCount then
+                changedWatchedSignalIds[signal.id] = true
+            end
         end
 
         if SyncPolicy.shouldUpdateField(fields, "tag", isSelected) then
-            local _, tag = EEPSignalGetTagText(signal.id)
-            signal:setTag(tag or "")
+            signal:pullTag()
         end
         if SyncPolicy.shouldUpdateField(fields, "stopDistance", isSelected) then
-            local ok, stopDistance = EEPGetSignalStopDistance(signal.id)
-            signal:setStopDistance(ok and stopDistance or nil)
+            signal:pullStopDistance()
         end
         if SyncPolicy.shouldUpdateField(fields, "itemName", isSelected) then
-            local ok, itemName = EEPGetSignalItemName(signal.id, false)
-            local okPath, itemNameWithModelPath = EEPGetSignalItemName(signal.id, true)
-            signal:setItemName(ok and itemName or nil, okPath and itemNameWithModelPath or nil)
+            signal:pullItemName()
         end
         if SyncPolicy.shouldUpdateField(fields, "functions", isSelected) then
-            local signalFunctions, activeFunction = readFunctions(signal.id, position)
-            signal:setFunctions(signalFunctions, activeFunction)
+            signal:pullFunctions()
         end
     end
 
-    if shouldUpdateWaitingVehicleNames(HubOptionsRegistry) then
+    if updateWaitingVehicleNames then
         if updateCount % waitingVehicleNameUpdateInterval == 0 then
             WaitingOnSignalRegistry.set(collectWaitingOnSignals(signals))
         elseif next(changedWatchedSignalIds) then

@@ -1,6 +1,8 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.contacts.ContactDtoFactory ...") end
 
 local DtoBuilder = require("ce.hub.data.DtoBuilder")
+local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
+local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
@@ -14,11 +16,11 @@ local KEY_ID = "id"
 -- DtoFields: class definition in ContactDtoTypes.d.lua
 local dtoFields = {
     luaFn = {
-        getValue = function (contact) return contact:getLuaFn() end,
+        getValue = peek(function (source) return source:peekLuaFn() end, "luaFn"),
         placeholder = ""
     },
     tipTxt = {
-        getValue = function (contact) return contact:getTipTxt() end,
+        getValue = peek(function (source) return source:peekTipTxt() end, "tipTxt"),
         placeholder = ""
     },
 }

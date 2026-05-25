@@ -14,15 +14,15 @@ insulate("ce.hub.data.scenario.ScenarioDiscovery", function ()
         _G.EEPLoadData = _G.EEPLoadData or function () return false, nil end
 
         clearModule("ce.hub.data.scenario.ScenarioDiscovery")
-        clearModule("ce.hub.eep.Anl3DiscoveryHelper")
-        clearModule("ce.hub.eep.Anl3ToTable")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Parser")
 
-        local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
-        local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
+        local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
+        local EepScenarioAnl3Discovery = require("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
         local ScenarioDiscovery = require("ce.hub.data.scenario.ScenarioDiscovery")
 
-        local root = assert(Anl3ToTable.loadAnlage(writeTempXml(xml)))
-        Anl3DiscoveryHelper.fillDiscoveries(root)
+        local root = assert(EepScenarioAnl3Parser.loadAnlage(writeTempXml(xml)))
+        EepScenarioAnl3Discovery.fillDiscoveries(root)
         return ScenarioDiscovery
     end
 

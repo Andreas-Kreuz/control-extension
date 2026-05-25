@@ -2,10 +2,10 @@
 require("ce.demo-anlagen.tutorial-ampel.Control_Extension-Tutorial-Ampelkreuzung-2-main")
 
 -- Schalte Tipp-Texte ein
-local CrossingSetting = require("ce.mods.road.IntersectionSetting")
-CrossingSetting.showSignalIdOnSignal = true
-CrossingSetting.showSequenceOnSignal = true
-CrossingSetting.showRequestsOnSignal = true
+local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+IntersectionSettings.showSignalIdOnSignal = true
+IntersectionSettings.showSequenceOnSignal = true
+IntersectionSettings.showRequestsOnSignal = true
 
 [EEPLuaData]
 DS_100 = "f=2,p=Rot,q=#Opal Vitaro MEDIA MARKT|#Opal Vitaro MEDIA MARKT;001,w=0,"

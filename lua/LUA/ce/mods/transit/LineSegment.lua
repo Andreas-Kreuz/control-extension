@@ -4,6 +4,7 @@ local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry"
 
 local LineSegment = {}
 LineSegment.debug = CeDebugLoad or false
+local registry = {}
 
 --- Creates a new Bus or Tram Station
 ---@param routeName string with the EEP-Route Name
@@ -373,6 +374,28 @@ function LineSegment:toJsonStatic()
         lineNr = self.line.nr,
         stations = stations
     }
+end
+
+function LineSegment:setKpId(kpId)
+    assert(type(kpId) == "string", "Need 'kpId' as string")
+    if registry[kpId] and registry[kpId] ~= self then
+        print("[WARNING] LineSegment.setKpId: duplicate key '" .. kpId .. "'\n" .. debug.traceback())
+    end
+    self._kpId = kpId
+    self.kpId = kpId
+    registry[kpId] = self
+    return self
+end
+
+function LineSegment:getKpId() return self._kpId end
+
+function LineSegment:setScriptVariableName(name) return self:setKpId(name) end
+
+function LineSegment.resolve(kpId)
+    assert(type(kpId) == "string", "Need kpId as string, got " .. type(kpId))
+    local segment = registry[kpId]
+    assert(segment, "No segment registered for: " .. kpId)
+    return segment
 end
 
 return LineSegment

@@ -6,6 +6,7 @@ local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")
 local TrainDiscoveryCache = require("ce.hub.data.trains.TrainDiscoveryCache")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
 local TrainDiscovery = {}
 TrainDiscovery.debug = CeStartWithDebug or false
@@ -47,25 +48,31 @@ local function registerHooks()
 
     local _EEPOnTrainCoupling = EEPOnTrainCoupling or function (_, _, _) end
     _G.EEPOnTrainCoupling = function (trainA, trainB, trainNew)
-        dirtyTrainNames[trainA] = true
-        dirtyTrainNames[trainB] = true
-        dirtyTrainNames[trainNew] = true
-        return _EEPOnTrainCoupling(trainA, trainB, trainNew)
+        ProtectedExecution.run("EEPOnTrainCoupling", function ()
+            dirtyTrainNames[trainA] = true
+            dirtyTrainNames[trainB] = true
+            dirtyTrainNames[trainNew] = true
+            _EEPOnTrainCoupling(trainA, trainB, trainNew)
+        end)
     end
 
     local _EEPOnTrainLooseCoupling = EEPOnTrainLooseCoupling or function (_, _, _) end
     _G.EEPOnTrainLooseCoupling = function (trainA, trainB, trainOld)
-        dirtyTrainNames[trainA] = true
-        dirtyTrainNames[trainB] = true
-        dirtyTrainNames[trainOld] = true
-        return _EEPOnTrainLooseCoupling(trainA, trainB, trainOld)
+        ProtectedExecution.run("EEPOnTrainLooseCoupling", function ()
+            dirtyTrainNames[trainA] = true
+            dirtyTrainNames[trainB] = true
+            dirtyTrainNames[trainOld] = true
+            _EEPOnTrainLooseCoupling(trainA, trainB, trainOld)
+        end)
     end
 
     local _EEPOnTrainExitTrainyard = EEPOnTrainExitTrainyard or function (_, _) end
     _G.EEPOnTrainExitTrainyard = function (depotId, trainName)
-        local _ = depotId
-        movedTrainNames[trainName] = true
-        return _EEPOnTrainExitTrainyard(depotId, trainName)
+        ProtectedExecution.run("EEPOnTrainExitTrainyard", function ()
+            local _ = depotId
+            movedTrainNames[trainName] = true
+            _EEPOnTrainExitTrainyard(depotId, trainName)
+        end)
     end
 
     hooksRegistered = true
@@ -120,7 +127,7 @@ local function syncRollingStockComposition(train)
         local rollingStockName = EEPGetRollingstockItemName(train.name, i)
         currentNamesByIndex[tostring(i)] = rollingStockName
         currentNames[rollingStockName] = true
-        RollingStockRegistry.forName(rollingStockName)
+        RollingStockRegistry.getOrCreate(rollingStockName)
     end
 
     for _, rollingStockName in pairs(TrainRegistry.allRollingStockNamesOf(train.name)) do
@@ -148,7 +155,7 @@ local function buildSnapshot(detected, dirtyTrains, movedTrains, trainTracks, tr
     for trainName in pairs(detected) do
         local trainOnMap, speed = EEPGetTrainSpeed(trainName)
         if trainOnMap then
-            local train, created = TrainRegistry.forName(trainName)
+            local train, created = TrainRegistry.getOrCreate(trainName)
             local previousInfo = TrainDiscoveryCache.get(trainName) or {}
             local dirty = created or (dirtyTrains[trainName] and true or false)
             local moved = created or dirty or train:getSpeed() ~= 0 or speed ~= 0 or
@@ -226,13 +233,17 @@ function TrainDiscovery.initFromAnl3(tableOfAnl3)
             RollingStockRegistry.seedFromSnapshot({
                 rollingStockName = rs.name,
                 xmlModel = rs.model,
+                tag = rs.tag,
+                smoke = rs.smoke,
                 trainName = rs.trainName,
                 positionInTrain = rs.positionInTrain,
                 trackType = rs.trackType,
                 trackId = rs.trackId,
                 trackDistance = rs.trackDistance,
                 trackDirection = rs.trackDirection,
-                trackSystem = rs.trackSystem
+                trackSystem = rs.trackSystem,
+                textureTexts = rs.textureTexts,
+                deferModelInfo = true
             })
             if rs.trainName and rs.positionInTrain then
                 rollingStockNamesByTrain[rs.trainName] = rollingStockNamesByTrain[rs.trainName] or {}

@@ -12,6 +12,7 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
 
     before_each(function ()
         clearModule("ce.hub.data.structures.StructureStatePublisher")
+        clearModule("ce.hub.data.structures.StructurePublisher")
         clearModule("ce.hub.data.structures.StructureDiscovery")
         clearModule("ce.hub.data.structures.StructureDtoFactory")
         clearModule("ce.hub.data.structures.StructureRegistry")
@@ -187,5 +188,54 @@ insulate("ce.hub.data.structures.StructureStatePublisher", function ()
         StructureStatePublisher.syncState()
 
         assert.is_nil(DataStore.get("ce.hub.Structure", "#4"))
+    end)
+
+    it("fills static fields for structures loaded from anl3", function ()
+        local StructureStatePublisher = require("ce.hub.data.structures.StructureStatePublisher")
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureUpdater = require("ce.hub.data.structures.StructureUpdater")
+        local DataStore = require("ce.hub.publish.InternalDataStore")
+
+        StructureDiscovery.initFromAnl3({
+            coverage = { structures = true },
+            structures = {
+                {
+                    id = "#2",
+                    name = "#2_Ampelmast",
+                    gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm",
+                    tag = "shed",
+                    light = true,
+                    smoke = false,
+                    fire = false,
+                    pos_x = 1.0,
+                    pos_y = 2.0,
+                    pos_z = 3.0,
+                    rot_x = 4.0,
+                    rot_y = 5.0,
+                    rot_z = 6.0
+                }
+            }
+        })
+        StructureUpdater.runInitialUpdate()
+        StructureStatePublisher.syncState()
+
+        assert.same({
+                        ceType = "ce.hub.Structure",
+                        id = "#2",
+                        name = "#2_Ampelmast",
+                        pos_x = 1,
+                        pos_y = 2,
+                        pos_z = 3,
+                        rot_x = 4,
+                        rot_y = 5,
+                        rot_z = 6,
+                        modelType = 22,
+                        modelTypeText = "Immobilie",
+                        tag = "shed",
+                        light = true,
+                        smoke = false,
+                        fire = false,
+                        gsbname = "\\Immobilien\\Verkehr\\Signale\\Ampel.3dm"
+                    }, DataStore.get("ce.hub.Structure", "#2"))
     end)
 end)

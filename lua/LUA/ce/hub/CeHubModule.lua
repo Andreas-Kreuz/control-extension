@@ -32,16 +32,14 @@ local SwitchUpdater = require("ce.hub.data.switches.SwitchUpdater")
 local TrainDiscovery = require("ce.hub.data.trains.TrainDiscovery")
 local TrainUpdater = require("ce.hub.data.trains.TrainUpdater")
 local RollingStockUpdater = require("ce.hub.data.rollingstock.RollingStockUpdater")
-local Anl3ToTable = require("ce.hub.eep.Anl3ToTable")
-local Anl3DiscoveryHelper = require("ce.hub.eep.Anl3DiscoveryHelper")
+local EepScenarioDataController = require("ce.hub.eep.scenario.EepScenarioDataController")
 local TimedExecution = require("ce.hub.util.TimedExecution")
 local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
+local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 
-local anl3Path = nil
-local activeAnl3Discovery = { success = false, coverage = {} }
-local pendingAnl3Path = nil
-local anl3ReloadPending = false
-local previousEEPOnSaveAnl = _G.EEPOnSaveAnl
+local savingInProgress = false
+local savingGuardCycles = 0
+local MAX_SAVING_GUARD_CYCLES = 300
 
 local function tk(group, func)
     if string.find(group, "^Discovery") then
@@ -59,21 +57,27 @@ local function tu(group, func)
     end
 end
 
-local function hasAnl3Coverage(alias)
-    return activeAnl3Discovery.success == true and activeAnl3Discovery.coverage
-        and activeAnl3Discovery.coverage[alias] == true
+-- This will tell us if the current data was already loaded from the screnario's anl3 file,
+-- so we can skip to discover data by EEP... function calls.
+local function hasAnl3Coverage(anl3Discovery, alias)
+    return anl3Discovery and anl3Discovery.success == true and anl3Discovery.coverage
+        and anl3Discovery.coverage[alias] == true
 end
 
-local function runInitialDataDiscovery()
-    if not hasAnl3Coverage("signals") then tk("Discovery-init/ce.hub.Signal", SignalDiscovery.runInitialDiscovery) end
-    if not hasAnl3Coverage("switches") then tk("Discovery-init/ce.hub.Switch", SwitchDiscovery.runInitialDiscovery) end
-    if not hasAnl3Coverage("structures") then
+local function runInitialDataDiscovery(anl3Discovery)
+    if not hasAnl3Coverage(anl3Discovery, "signals") then
+        tk("Discovery-init/ce.hub.Signal", SignalDiscovery.runInitialDiscovery)
+    end
+    if not hasAnl3Coverage(anl3Discovery, "switches") then
+        tk("Discovery-init/ce.hub.Switch", SwitchDiscovery.runInitialDiscovery)
+    end
+    if not hasAnl3Coverage(anl3Discovery, "structures") then
         tk("Discovery-init/ce.hub.Structure", StructureDiscovery.runInitialDiscovery)
     end
     tk("Discovery-init/ce.hub.Train", function ()
         TrainDiscovery.runInitialDiscovery({
-            skipTrackInitialization = hasAnl3Coverage("tracks"),
-            keepCache = hasAnl3Coverage("trains")
+            skipTrackInitialization = hasAnl3Coverage(anl3Discovery, "tracks"),
+            keepCache = hasAnl3Coverage(anl3Discovery, "trains")
         })
     end)
 
@@ -92,10 +96,16 @@ local function runInitialDataDiscovery()
     tk("Update-init/ce.hub.Weather", WeatherUpdater.runUpdate)
 end
 
-local function runDataUpdates()
-    if not hasAnl3Coverage("signals") then tu("Discovery/ce.hub.Signal", SignalDiscovery.runDiscovery) end
-    if not hasAnl3Coverage("switches") then tu("Discovery/ce.hub.Switch", SwitchDiscovery.runDiscovery) end
-    if not hasAnl3Coverage("structures") then tu("Discovery/ce.hub.Structure", StructureDiscovery.runDiscovery) end
+local function runDataUpdates(anl3Discovery)
+    if not hasAnl3Coverage(anl3Discovery, "signals") then
+        tu("Discovery/ce.hub.Signal", SignalDiscovery.runDiscovery)
+    end
+    if not hasAnl3Coverage(anl3Discovery, "switches") then
+        tu("Discovery/ce.hub.Switch", SwitchDiscovery.runDiscovery)
+    end
+    if not hasAnl3Coverage(anl3Discovery, "structures") then
+        tu("Discovery/ce.hub.Structure", StructureDiscovery.runDiscovery)
+    end
     tu("Discovery/ce.hub.Train", TrainDiscovery.runDiscovery)
 
     tu("Update/ce.hub.DataSlots", DataSlotsUpdater.runUpdate)
@@ -114,82 +124,7 @@ local function runDataUpdates()
 end
 
 function CeHubModule.setAnl3Path(path)
-    anl3Path = path
-end
-
-local function buildAnl3Result(path)
-    return {
-        success = false,
-        path = path,
-        scenarioName = nil,
-        luaPath = nil,
-        coverage = {}
-    }
-end
-
-local function scenarioNameFromLuaPath(luaPath)
-    if not luaPath then return nil end
-    local normalized = tostring(luaPath):gsub("/", "\\")
-    local slashPosition = nil
-    for index = #normalized, 1, -1 do
-        if normalized:sub(index, index) == "\\" then
-            slashPosition = index
-            break
-        end
-    end
-    local fileName = slashPosition and normalized:sub(slashPosition + 1) or normalized
-    return fileName:match("(.+)%.lua$")
-end
-
-local function pathsEqual(pathA, pathB)
-    if not pathA or not pathB then return false end
-    local normalizedA = tostring(pathA):gsub("/", "\\"):lower()
-    local normalizedB = tostring(pathB):gsub("/", "\\"):lower()
-    return normalizedA == normalizedB
-end
-
-local function runAnl3Discovery(path)
-    local result = buildAnl3Result(path)
-    if not path then return result end
-
-    local tableOfAnl3, err = Anl3ToTable.loadAnlage(path)
-    if tableOfAnl3 then
-        print(string.format("[CeHubModule] Successfully loaded Anl3 from %s", path))
-    else
-        print(string.format("[CeHubModule] Anl3 load failed: %s", tostring(err)))
-        result.error = err
-        return result
-    end
-    local scenarioName = EEPGetAnlName and EEPGetAnlName() or nil
-    local rawLuaPath = Anl3DiscoveryHelper.getLuaPath(tableOfAnl3) or ""
-    result.scenarioName = scenarioName
-    result.luaPath = rawLuaPath
-    if scenarioName then
-        local luaPathName = scenarioNameFromLuaPath(rawLuaPath)
-        if luaPathName ~= scenarioName then
-            print(
-                string.format(
-                    "[CeHubModule] Anl3 mismatch: EEPGetAnlName=%s but LUAPath=%s -- skipping anl3 discoveries",
-                    tostring(scenarioName),
-                    tostring(rawLuaPath)
-                )
-            )
-            result.error = "mismatch"
-            return result
-        end
-    end
-    local coverage = Anl3DiscoveryHelper.fillDiscoveries(tableOfAnl3)
-    result.success = true
-    result.coverage = coverage or {}
-    return result
-end
-
-local function reloadAnl3IfNeeded()
-    if not anl3ReloadPending then return end
-
-    activeAnl3Discovery = runAnl3Discovery(pendingAnl3Path or anl3Path)
-    pendingAnl3Path = nil
-    anl3ReloadPending = false
+    EepScenarioDataController.update({ setAnl3Path = true, anl3Path = path })
 end
 
 function CeHubModule.init()
@@ -198,17 +133,30 @@ function CeHubModule.init()
     end
     HubBridgeConnector.registerStatePublishers()
     HubBridgeConnector.registerFunctions()
-    activeAnl3Discovery = runAnl3Discovery(anl3Path)
-    runInitialDataDiscovery()
+    local anl3Discovery = EepScenarioDataController.init()
+    runInitialDataDiscovery(anl3Discovery)
     initialized = true
 end
 
 function CeHubModule.run()
+    if not initialized then
+        print("[CeHubModule] Warning: run called before module was initialized!")
+    end
     if not CeHubModule.enabled then
         return
     end
-    reloadAnl3IfNeeded()
-    runDataUpdates()
+    if savingInProgress then
+        savingGuardCycles = savingGuardCycles + 1
+        if savingGuardCycles >= MAX_SAVING_GUARD_CYCLES then
+            print("[CeHubModule] Warning: save guard timed out, resuming updates")
+            savingInProgress = false
+            savingGuardCycles = 0
+        else
+            return
+        end
+    end
+    local anl3Discovery = EepScenarioDataController.update()
+    runDataUpdates(anl3Discovery)
     Scheduler:runTasks()
 end
 
@@ -230,25 +178,22 @@ function CeHubModule.setOptions(options)
     return CeHubModule
 end
 
-function _G.EEPOnSaveAnl(Anlagenname)
-    if previousEEPOnSaveAnl then
-        previousEEPOnSaveAnl(Anlagenname)
-    else
+function EEPOnBeforeSaveAnl()
+    ProtectedExecution.run("EEPOnBeforeSaveAnl", function ()
+        savingInProgress = true
+        savingGuardCycles = 0
+        print("[CeHubModule] EEP speichert Anlage ...")
+    end)
+end
+
+function EEPOnSaveAnl(Anlagenname)
+    ProtectedExecution.run("EEPOnSaveAnl", function ()
+        savingInProgress = false
+        savingGuardCycles = 0
         print("Anlage gespeichert unter: " .. tostring(Anlagenname))
-    end
 
-    pendingAnl3Path = Anlagenname
-    anl3ReloadPending = true
-
-    if anl3Path and Anlagenname and not pathsEqual(anl3Path, Anlagenname) then
-        print(
-            string.format(
-                "[CeHubModule] Saved anl3 path differs from ControlExtension option. Please update " ..
-                "ControlExtension.setOptions({ anl3path = \"%s\" }).",
-                tostring(Anlagenname)
-            )
-        )
-    end
+        EepScenarioDataController.update({ savedAnl3Path = Anlagenname })
+    end)
 end
 
 return CeHubModule

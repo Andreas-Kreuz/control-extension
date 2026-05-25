@@ -21,7 +21,7 @@ function testSetRollingStockAxisQueuesNumberCommandWhenAxisNamesAreUnknown(): vo
     value: 101.7,
   });
 
-  assert.deepEqual(commands, ['EEPRollingstockSetAxisByNumber|RS-1|2|100']);
+  assert.deepEqual(commands, ['RollingStock.setAxisByNumberByName|RS-1|2|100']);
 }
 
 function testSetRollingStockAxisQueuesNameCommandWhenAxisNamesAreKnown(): void {
@@ -35,7 +35,7 @@ function testSetRollingStockAxisQueuesNameCommandWhenAxisNamesAreKnown(): void {
     value: 55.4,
   });
 
-  assert.deepEqual(commands, ['EEPRollingstockSetAxis|RS-1|Heckfluegel|55']);
+  assert.deepEqual(commands, ['RollingStock.setAxisByName|RS-1|Heckfluegel|55|8']);
 }
 
 function testSetTrainSpeedQueuesClampedTargetSpeedCommand(): void {
@@ -46,7 +46,7 @@ function testSetTrainSpeedQueuesClampedTargetSpeedCommand(): void {
     speed: 260.2,
   });
 
-  assert.deepEqual(commands, ['EEPSetTrainSpeed|#Train-1|250|true']);
+  assert.deepEqual(commands, ['Train.setSpeedByName|#Train-1|250|true']);
 }
 
 function testSetTrainCouplingQueuesFrontAndRearCommands(): void {
@@ -63,7 +63,10 @@ function testSetTrainCouplingQueuesFrontAndRearCommands(): void {
     enabled: false,
   });
 
-  assert.deepEqual(commands, ['EEPSetTrainCouplingFront|#Train-1|true', 'EEPSetTrainCouplingRear|#Train-1|false']);
+  assert.deepEqual(commands, [
+    'Train.setCouplingFrontByName|#Train-1|true',
+    'Train.setCouplingRearByName|#Train-1|false',
+  ]);
 }
 
 function testSetTrainLightQueuesValidatedLightCommand(): void {
@@ -80,7 +83,7 @@ function testSetTrainLightQueuesValidatedLightCommand(): void {
     enabled: false,
   });
 
-  assert.deepEqual(commands, ['EEPSetTrainLight|#Train-1|true|2']);
+  assert.deepEqual(commands, ['Train.setLightByName|#Train-1|true|2']);
 }
 
 function setupCommandHandlers() {

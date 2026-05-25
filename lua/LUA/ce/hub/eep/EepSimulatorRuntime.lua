@@ -1068,6 +1068,8 @@ local function create(simulator, globals)
 
     function Runtime.callEEPChangeInfoSwitch(switchId, text) end
 
+    function Runtime.callEEPShowInfoTextTop(red, green, blue, textSize, seconds, alignment, text) end
+
     -------------------------------
     -- Neu ab EEP 13 - Plugin 2  --
     -------------------------------

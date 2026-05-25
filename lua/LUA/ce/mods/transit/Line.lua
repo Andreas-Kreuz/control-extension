@@ -14,7 +14,7 @@ local lineSegmentsByRouteName = {}
 
 function Line.forName(name)
     local LineRegistry = require("ce.mods.transit.LineRegistry")
-    local line, _ = LineRegistry.forId(name)
+    local line, _ = LineRegistry.getOrCreate(name)
     return line
 end
 
@@ -110,7 +110,7 @@ function Line.setTrainSection(trainName, section)
     assert(type(trainName) == "string", "Need 'trainName' as string")
     assert(type(section) == "table" and section.type == "LineSegment", "Need 'section' as LineSegment")
 
-    local train = TrainRegistry.forName(trainName)
+    local train = TrainRegistry.getOrCreate(trainName)
     local transitTrain = TransitTrainRegistry.forTrain(train)
     local display = section:chooseDisplay()
 
@@ -128,14 +128,14 @@ end
 local function clearTransitDeparturesForTrain(train)
     for _, station in pairs(RoadStation.getAll()) do station:removeTrain(train.name) end
 
-    local transitTrain = TransitTrainRegistry.find(train.name)
+    local transitTrain = TransitTrainRegistry.get(train.name)
     if transitTrain then transitTrain:setNextStations({}) end
 end
 
 local function removeTransitInfoForTrain(train)
     clearTransitDeparturesForTrain(train)
 
-    local transitTrain = TransitTrainRegistry.find(train.name)
+    local transitTrain = TransitTrainRegistry.get(train.name)
     if not transitTrain then return end
 
     transitTrain:clearTransitInfo()
@@ -171,7 +171,7 @@ function Line.scheduleDeparture(trainName, station, timeInMinutes)
     assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
     assert(type(timeInMinutes) == "number", "Need 'timeInMinutes' as number")
 
-    local train = TrainRegistry.forName(trainName)
+    local train = TrainRegistry.getOrCreate(trainName)
     local lineSegment = lineSegmentForTrainAtStation(train, station)
     if lineSegment then
         lineSegment:prepareDepartureAt(train, station, timeInMinutes)
@@ -184,7 +184,7 @@ function Line.trainArrived(trainName, station)
     assert(type(station) == "table", "Need 'station' as table")
     assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
 
-    local train = TrainRegistry.forName(trainName)
+    local train = TrainRegistry.getOrCreate(trainName)
     local lineSegment, transitTrain = lineSegmentForTrainAtStation(train, station)
     if lineSegment then
         lineSegment:prepareDepartureAt(train, station, 0)
@@ -197,7 +197,7 @@ function Line.trainDeparted(trainName, station)
     assert(type(station) == "table", "Need 'station' as table")
     assert(station.type == "RoadStation", "Provide 'station' as 'RoadStation'")
 
-    local train = TrainRegistry.forName(trainName)
+    local train = TrainRegistry.getOrCreate(trainName)
     local lineSegment, transitTrain = lineSegmentForTrainAtStation(train, station)
     if not lineSegment then return end
     ---@cast transitTrain TransitTrain

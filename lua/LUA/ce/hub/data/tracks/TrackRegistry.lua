@@ -6,6 +6,7 @@ local Track = require("ce.hub.data.tracks.Track")
 ---@field add fun(trackType: string, track: table):nil
 ---@field replaceAll fun(trackType: string, tracks: table[]):nil
 ---@field get fun(trackType: string, trackId: string|number):Track|nil
+---@field getOrCreate fun(trackType: string, trackId: string|number):Track
 ---@field getAll fun(trackType: string):table<string, Track>
 ---@field markChanged fun(trackType: string, trackId: string|number):nil
 ---@field getChangedIds fun(trackType: string):table<string, boolean>
@@ -41,6 +42,17 @@ end
 
 function TrackRegistry.get(trackType, trackId)
     return tracksByType[trackType][tostring(trackId)]
+end
+
+function TrackRegistry.getOrCreate(trackType, trackId)
+    local track = TrackRegistry.get(trackType, trackId)
+    if track then return track end
+
+    track = Track:new({ id = tonumber(trackId) or trackId, trackType = trackType })
+    tracksByType[trackType][tostring(trackId)] = track
+    changedTrackIdsByType[trackType][tostring(trackId)] = true
+    initialListPendingByType[trackType] = true
+    return track
 end
 
 function TrackRegistry.getAll(trackType)

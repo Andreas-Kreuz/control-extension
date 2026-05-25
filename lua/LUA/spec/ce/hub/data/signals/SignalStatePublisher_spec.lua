@@ -74,21 +74,12 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
                         ["9"] = {
                             ceType = "ce.hub.Signal",
                             id = 9,
-                            position = 2,
-                            tag = "North",
+                            position = 0,
+                            tag = "",
                             waitingVehiclesCount = 0
                         }
                     }, DataStore.getCeType("ce.hub.Signal"))
-        assert.same({
-                        ["9-1"] = {
-                            ceType = "ce.hub.WaitingOnSignal",
-                            id = "9-1",
-                            signalId = 9,
-                            waitingPosition = 0,
-                            vehicleName = "",
-                            waitingCount = 0
-                        }
-                    }, DataStore.getCeType("ce.hub.WaitingOnSignal"))
+        assert.is_nil(DataStore.getCeType("ce.hub.WaitingOnSignal"))
     end)
 
     it("fires real oninterest values for selected signal and waiting entries", function ()
@@ -100,9 +91,9 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
         local DataStore = require("ce.hub.publish.InternalDataStore")
 
         SignalDiscovery.runInitialDiscovery()
-        SignalUpdater.runUpdate()
         InterestSyncRegistry.startSyncFor(HubCeTypes.Signal, "9")
         InterestSyncRegistry.startSyncFor(HubCeTypes.WaitingOnSignal, "9-1")
+        SignalUpdater.runUpdate()
         SignalStatePublisher.syncState()
 
         assert.equals(1, DataStore.get("ce.hub.Signal", "9").waitingVehiclesCount)
@@ -119,12 +110,19 @@ insulate("ce.hub.data.signals.SignalStatePublisher", function ()
     it("does not publish unselected waiting patches when only oninterest fields changed", function ()
         local SignalDiscovery = require("ce.hub.data.signals.SignalDiscovery")
         local SignalStatePublisher = require("ce.hub.data.signals.SignalStatePublisher")
-        local SignalUpdater = require("ce.hub.data.signals.SignalUpdater")
         local WaitingOnSignalRegistry = require("ce.hub.data.signals.WaitingOnSignalRegistry")
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 
         SignalDiscovery.runInitialDiscovery()
-        SignalUpdater.runUpdate()
+        WaitingOnSignalRegistry.set({
+            {
+                id = "9-1",
+                signalId = 9,
+                waitingPosition = 1,
+                vehicleName = "Train X",
+                waitingCount = 1
+            }
+        })
         SignalStatePublisher.syncState()
 
         local events = {}

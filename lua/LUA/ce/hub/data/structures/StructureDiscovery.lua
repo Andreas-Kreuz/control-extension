@@ -8,42 +8,50 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 ---@field initFromAnl3 fun(tableOfAnl3: table|nil):nil
 ---@field runInitialDiscovery fun():nil
 ---@field runDiscovery fun():nil
+---@field wasSeededFromAnl3 fun():boolean
 local StructureDiscovery = {}
 
-local MAX_STRUCTURES = 50000
-local EEPStructureGetModelType = _G.EEPStructureGetModelType or function () return false end
-local EEPStructureGetPosition = _G.EEPStructureGetPosition or function () end
-local EEPStructureGetRotation = _G.EEPStructureGetRotation or function () end
+local seededFromAnl3 = false
 
-local EEPStructureModelTypeText = {
-    [16] = "Gleis/Gleisobjekt",
-    [17] = "Schiene/Gleisobjekt",
-    [18] = "Strasse/Gleisobjekt",
-    [19] = "Sonstiges/Gleisobjekt",
-    [22] = "Immobilie",
-    [23] = "Landschaftselement/Fauna",
-    [24] = "Landschaftselement/Flora",
-    [25] = "Landschaftselement/Terra",
-    [38] = "Landschaftselement/Instancing"
-}
+function StructureDiscovery.wasSeededFromAnl3()
+    return seededFromAnl3
+end
+
+local MAX_STRUCTURES = 50000
 
 local function structureExists(name)
-    local exists = EEPStructureGetModelType(name)
-    return exists == true
+    return Structure.exists(name)
 end
 
 local function round2(value)
     return value and tonumber(string.format("%.2f", value)) or 0
 end
 
-local function applyStaticUpdate(structure)
-    local _, modelType = EEPStructureGetModelType(structure.name)
-    local _, posX, posY, posZ = EEPStructureGetPosition(structure.name)
-    local _, rotX, rotY, rotZ = EEPStructureGetRotation(structure.name)
+local function isStructureSignalHousing(structure)
+    local gsbname = string.lower(tostring(structure.gsbname or "")):gsub("/", "\\")
+    if string.match(gsbname, "^\\immobilien\\verkehr\\signale\\strabasigg.*ma1%.3dm$") then return true end
 
-    structure:setModelType(modelType or 0, EEPStructureModelTypeText[modelType] or "")
-    structure:setPosition(round2(posX), round2(posY), round2(posZ))
-    structure:setRotation(round2(rotX), round2(rotY), round2(rotZ))
+    local name = string.lower(tostring(structure.name or ""))
+    return string.find(name, "straba signal geh", 1, true) ~= nil or
+        string.find(name, "straba signal gehaeuse", 1, true) ~= nil or
+        string.find(name, "tram signal casing", 1, true) ~= nil
+end
+
+local function applyTagUpdateForHousing(structure)
+    if not isStructureSignalHousing(structure) then return end
+
+    structure:pullTag()
+end
+
+local function applyStaticUpdate(structure)
+    structure:pullModelType()
+    structure:pullPosition()
+    structure:pullRotation()
+end
+
+local function applyPositionAndRotation(structure)
+    structure:pullPosition()
+    structure:pullRotation()
 end
 
 local function discoverStructures()
@@ -52,13 +60,14 @@ local function discoverStructures()
     for i = 0, MAX_STRUCTURES do
         local name = "#" .. tostring(i)
         if structureExists(name) then
-            local structure = StructureRegistry.forId(name)
+            local structure = StructureRegistry.get(name)
             discoveredIds[name] = true
             if not structure then
                 structure = Structure:new(name)
                 StructureRegistry.add(structure)
             end
             applyStaticUpdate(structure)
+            applyTagUpdateForHousing(structure)
         end
     end
 
@@ -75,13 +84,46 @@ function StructureDiscovery.initFromAnl3(tableOfAnl3)
 
     local structures = {}
     for _, entry in ipairs(tableOfAnl3.structures or {}) do
-        if entry.name then
-            local structure = Structure:new(entry.name)
-            structure:setGsbname(entry.gsbname)
-            structures[#structures + 1] = structure
+        local id = entry.id or entry.name
+        if id then
+            local existing = StructureRegistry.get(id)
+            if existing then
+                existing:seedGsbname(entry.gsbname)
+                if entry.tag ~= nil then existing:seedTag(entry.tag) end
+                if entry.tipTxt ~= nil then existing:seedTippText(entry.tipTxt) end
+                if entry.tipShow ~= nil then existing:seedTippTextVisible(entry.tipShow) end
+                if entry.textureTexts ~= nil then existing:seedTextureTexts(entry.textureTexts) end
+                if entry.light ~= nil then existing:seedLight(entry.light) end
+                if entry.smoke ~= nil then existing:seedSmoke(entry.smoke) end
+                if entry.fire ~= nil then existing:seedFire(entry.fire) end
+                if entry.pos_x ~= nil then
+                    existing:seedPosition(round2(entry.pos_x), round2(entry.pos_y), round2(entry.pos_z))
+                    existing:seedRotation(round2(entry.rot_x), round2(entry.rot_y), round2(entry.rot_z))
+                end
+                structures[#structures + 1] = existing
+            else
+                local structure = Structure:new(id, entry.name)
+                structure:seedGsbname(entry.gsbname)
+                structure:seedModelType(22, "Immobilie")
+                if entry.tag ~= nil then structure:seedTag(entry.tag) end
+                if entry.tipTxt ~= nil then structure:seedTippText(entry.tipTxt) end
+                if entry.tipShow ~= nil then structure:seedTippTextVisible(entry.tipShow) end
+                if entry.textureTexts ~= nil then structure:seedTextureTexts(entry.textureTexts) end
+                if entry.light ~= nil then structure:seedLight(entry.light) end
+                if entry.smoke ~= nil then structure:seedSmoke(entry.smoke) end
+                if entry.fire ~= nil then structure:seedFire(entry.fire) end
+                if entry.pos_x ~= nil then
+                    structure:seedPosition(round2(entry.pos_x), round2(entry.pos_y), round2(entry.pos_z))
+                    structure:seedRotation(round2(entry.rot_x), round2(entry.rot_y), round2(entry.rot_z))
+                else
+                    applyPositionAndRotation(structure)
+                end
+                structures[#structures + 1] = structure
+            end
         end
     end
     StructureRegistry.replaceAll(structures)
+    seededFromAnl3 = true
 end
 
 function StructureDiscovery.runInitialDiscovery()

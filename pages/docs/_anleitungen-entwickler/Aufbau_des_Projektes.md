@@ -102,7 +102,7 @@ Im Projektverzeichnis `C:\GitHub\control-extension` steht dir eine Reihe von yar
 | `ce-help`                 | keine                                                | Diese Übersicht anzeigen.                                                                  |
 | `tools:check`             | keine                                                | Erforderliche externe Werkzeuge in `PATH` prüfen und bei Bedarf Install-Hinweise anzeigen. |
 | `dev:app`                 | keine                                                | App und Server im Entwicklungsmodus starten (automatischer re-build).                      |
-| `dev:docs`                | keine                                                | Inkrementellen Jekyll-Doku-Server mit Live-Reload starten und fehlende Assets erzeugen.    |
+| `dev:docs`                | keine                                                | Fehlende Assets erzeugen, Doku einmal bauen und danach inkrementell mit Live-Reload starten. |
 | `dev:docs:manual`         | keine                                                | Jekyll-Doku-Server mit manueller Aktualisierung starten und fehlende Assets erzeugen.      |
 | `dev:storybook`           | keine                                                | Storybook der Web-App für isolierte UI-Entwicklung starten.                                |
 | `run:app`                 | `build`                                              | App und Server mit `build` bauen und starten (ohne re-build).                              |

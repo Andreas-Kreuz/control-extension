@@ -24,8 +24,8 @@ local function addSignalsToGroup(self, signalType, ...)
         local existing = signal.signalGroupsByUse[logicalUse]
         assert(not existing or existing == self,
                "Signal logical use already belongs to signal group: " .. signal:signalNamesText())
-        signal.signalGroupsByUse[logicalUse] = self
-        self.signalHeads[signal] = signalType
+        if signal.signalGroupsByUse[logicalUse] ~= self then signal.signalGroupsByUse[logicalUse] = self end
+        if self.signalHeads[signal] ~= signalType then self.signalHeads[signal] = signalType end
     end
     return self
 end

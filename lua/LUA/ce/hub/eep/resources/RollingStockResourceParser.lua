@@ -1,4 +1,4 @@
-if CeDebugLoad then print("[#Start] Loading ce.hub.eep.RollingStockResourceParser ...") end
+if CeDebugLoad then print("[#Start] Loading ce.hub.eep.resources.RollingStockResourceParser ...") end
 
 local RollingStockResourceParser = {}
 

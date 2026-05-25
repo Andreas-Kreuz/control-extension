@@ -2,6 +2,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.RollingStoc
 
 local RollingStockModels = require("ce.hub.data.rollingstock.RollingStockModels")
 local RollingStockModelInfoRegistry = require("ce.hub.data.rollingstock.RollingStockModelInfoRegistry")
+local DataClass = require("ce.hub.data.DataClass")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local TableUtils = require("ce.hub.util.TableUtils")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
@@ -26,20 +27,17 @@ local EEPRollingstockModelTypeText = {
 }
 
 local function round2(value)
+    if value == nil then return nil end
     return tonumber(string.format("%.2f", tonumber(value) or 0)) or 0
 end
 
-local function collectTextureTexts(rollingStockName)
-    if not EEPRollingstockGetTextureText then return {} end
-    local surfaceTexts = {}
-    local surfaceNumber = 1
-    while true do
-        local ok, textureText = EEPRollingstockGetTextureText(rollingStockName, surfaceNumber)
-        if not ok then break end
-        surfaceTexts[tostring(surfaceNumber)] = textureText or ""
-        surfaceNumber = surfaceNumber + 1
-    end
-    return surfaceTexts
+local function snapshotNumber(snapshot, fieldName)
+    if snapshot[fieldName] == nil then return nil end
+    return tonumber(snapshot[fieldName])
+end
+
+local function markLoadedFromSnapshot(instance, snapshot, snapshotFieldName, fieldName)
+    if snapshot[snapshotFieldName] ~= nil then DataClass.markLoaded(instance, fieldName or snapshotFieldName) end
 end
 
 local function copyTableWithStringKeys(values)
@@ -56,6 +54,44 @@ local function sortedNumberKeys(values)
     end
     table.sort(keys)
     return keys
+end
+
+local function collectTextureTexts(rollingStockName, surfaceNumbers, existingTextureTexts)
+    local surfaceTexts = copyTableWithStringKeys(existingTextureTexts or {})
+    if not EEPRollingstockGetTextureText then return surfaceTexts end
+
+    if #surfaceNumbers > 0 then
+        for _, surfaceNumber in ipairs(surfaceNumbers) do
+            local ok, textureText = EEPRollingstockGetTextureText(rollingStockName, surfaceNumber)
+            if ok then surfaceTexts[tostring(surfaceNumber)] = textureText or "" end
+        end
+        return surfaceTexts
+    end
+
+    local surfaceNumber = 1
+    while true do
+        local ok, textureText = EEPRollingstockGetTextureText(rollingStockName, surfaceNumber)
+        if not ok then break end
+        surfaceTexts[tostring(surfaceNumber)] = textureText or ""
+        surfaceNumber = surfaceNumber + 1
+    end
+    return surfaceTexts
+end
+
+local function textureSurfaceNumbersForPull(rollingStock)
+    local surfaceNumbers = {}
+    for _, surfaceNumber in ipairs(sortedNumberKeys(rollingStock.textureTexts or {})) do
+        surfaceNumbers[#surfaceNumbers + 1] = surfaceNumber
+    end
+    local modelInfo = RollingStockModelInfoRegistry.get(rollingStock.xmlModel)
+    local modelTextureNames = modelInfo and modelInfo.textureNames or {}
+    for _, surfaceNumber in ipairs(sortedNumberKeys(modelTextureNames)) do
+        if rollingStock.textureTexts == nil or rollingStock.textureTexts[tostring(surfaceNumber)] == nil then
+            surfaceNumbers[#surfaceNumbers + 1] = surfaceNumber
+        end
+    end
+    table.sort(surfaceNumbers)
+    return surfaceNumbers
 end
 
 local function currentEepLanguage()
@@ -79,6 +115,13 @@ local function axisNamesKnownForModelInfo(modelInfo)
     if not modelInfo then return false end
     if type(modelInfo.getAxisNamesKnown) == "function" then return modelInfo:getAxisNamesKnown() end
     return modelInfo.axisNamesKnown == true
+end
+
+local function modelInfoForXmlModel(xmlModel, deferModelInfo)
+    if deferModelInfo then
+        return RollingStockModelInfoRegistry.peek(xmlModel)
+    end
+    return RollingStockModelInfoRegistry.get(xmlModel)
 end
 
 local function sortedAxisNumbers(modelInfo)
@@ -114,11 +157,11 @@ local function collectAxisValues(rollingStockName, modelInfo)
 
     for _, axisNumber in ipairs(axisNumbers) do
         local ok, axisValue = false, nil
-        if hasAxisMetadata and type(EEPRollingstockGetAxis) == "function" then
+        if hasAxisMetadata and DataClass.isCallable(EEPRollingstockGetAxis) then
             local axisName = axisNameForNumber(modelInfo, axisNumber)
             if axisName then ok, axisValue = EEPRollingstockGetAxis(rollingStockName, axisName) end
         end
-        if not ok and type(EEPRollingstockGetAxisByNumber) == "function" then
+        if not ok and DataClass.isCallable(EEPRollingstockGetAxisByNumber) then
             ok, axisValue = EEPRollingstockGetAxisByNumber(rollingStockName, axisNumber)
         end
         if ok then axisValues[tostring(axisNumber)] = tonumber(axisValue) or 0 end
@@ -149,8 +192,6 @@ end
 ---@field y number
 ---@field z number
 ---@field model RollingStockModel
----@field modelInfo table|nil
----@field axisNamesKnown boolean
 ---@field axisValues table<string, number>
 ---@field tag string
 ---@field orientationForward boolean
@@ -241,9 +282,12 @@ end
 ---@field hasDirtyFields fun(self: RollingStock):boolean
 ---@field openDoors fun(self: RollingStock):nil
 ---@field closeDoors fun(self: RollingStock):nil
----@field toJsonStatic fun(self: RollingStock):table
----@field toJsonDynamic fun(self: RollingStock):table
 local RollingStock = {}
+
+function RollingStock.exists(rollingStockName)
+    if not DataClass.isCallable(EEPRollingstockGetTrainName) then return false end
+    return EEPRollingstockGetTrainName(rollingStockName) == true
+end
 
 -- Field update policies (see RollingStockStaticDtoTypes.d.lua / RollingStockDynamicDtoTypes.d.lua):
 --   always   -> real value always included in DTO
@@ -254,79 +298,30 @@ local function markDirty(rollingStock, fieldName)
     rollingStock.dirtyFields[fieldName] = true
 end
 
+local function markLoaded(rollingStock, fieldName)
+    DataClass.markLoaded(rollingStock, fieldName)
+end
+
+local function setCachedAxisValue(rollingStock, axisKey, axisValue)
+    local value = tonumber(axisValue)
+    if not axisKey or not value then return false end
+    local key = tostring(axisKey)
+    rollingStock.axisValues = rollingStock.axisValues or {}
+    local oldValue = rollingStock.axisValues[key]
+    rollingStock.axisValues[key] = value
+    markLoaded(rollingStock, "axisValues")
+    if oldValue ~= value then markDirty(rollingStock, "axisValues") end
+    return true
+end
+
 ---Create a new RollingStock and init it
 ---@param o table
 ---@return RollingStock
 function RollingStock:new(o)
+    assert(type(self) == "table", "Call this method with ':'")
     assert(o.rollingStockName, "Provide a rollingStockName")
     assert(type(o.rollingStockName) == "string", "Need 'o.id' as string")
-    o.id = o.rollingStockName
-    local xmlModel = o.xmlModel
-
-    self.__index = self
-    setmetatable(o, self)
-
-    local _, couplingFront = EEPRollingstockGetCouplingFront(o.id) -- EEP 11.0
-    local _, couplingRear = EEPRollingstockGetCouplingRear(o.id)   -- EEP 11.0
-
-    local _, length = EEPRollingstockGetLength(o.id)               -- EEP 15
-    local _, propelled = EEPRollingstockGetMotor(o.id)             -- EEP 14.2
-    local _, modelType = EEPRollingstockGetModelType(o.id)         -- EEP 14.2
-    local _, tag = EEPRollingstockGetTagText(o.id)                 -- EEP 14.2
-    local orientationOk, orientationForward = EEPRollingstockGetOrientation and EEPRollingstockGetOrientation(o.id) or
-        false, nil
-    local smokeOk, smoke = EEPRollingstockGetSmoke and EEPRollingstockGetSmoke(o.id) or false, nil
-    local hookOk, hookStatus = EEPRollingstockGetHook and EEPRollingstockGetHook(o.id) or false, nil
-    local hookGlueOk, hookGlueMode = EEPRollingstockGetHookGlue and EEPRollingstockGetHookGlue(o.id) or false,
-        nil
-    local activeRollingStock = EEPRollingstockGetActive and EEPRollingstockGetActive() or ""
-
-    local _, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(o.id)
-    -- EEP 14.2
-
-    local hasPos, posX, posY, posZ = EEPRollingstockGetPosition(o.id) -- EEP 16.1
-    local hasMileage, mileage = EEPRollingstockGetMileage(o.id)       -- EEP 16.1
-    local rotationOk, rotX, rotY, rotZ = false, nil, nil, nil
-    if EEPRollingstockGetRotation then
-        rotationOk, rotX, rotY, rotZ = EEPRollingstockGetRotation(o.id)
-    end
-
-    o.type = "RollingStock"
-    o.trainName = ""
-    o.positionInTrain = -1
-    o.couplingFront = couplingFront or 1
-    o.couplingRear = couplingRear or 1
-    o.length = tonumber(string.format("%.2f", length or -1)) or -1
-    o.propelled = propelled ~= false
-    o.modelType = modelType or -1
-    o.modelTypeText = EEPRollingstockModelTypeText[modelType] or ""
-    o.tag = tag or ""
-    o.values = StorageUtility.parseTableFromString(tag)
-    o.orientationForward = orientationOk and orientationForward == true or false
-    o.smoke = smokeOk and smoke or 0
-    o.hookStatus = hookOk and hookStatus or 0
-    o.hookGlueMode = hookGlueOk and hookGlueMode or 0
-    o.active = activeRollingStock == o.id
-    o.textureTexts = collectTextureTexts(o.id)
-    o.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
-    o.axisNamesKnown = axisNamesKnownForModelInfo(o.modelInfo)
-    o.axisValues = collectAxisValues(o.id, o.modelInfo)
-    o.trackId = trackId or -1
-    o.trackDistance = tonumber(string.format("%.2f", trackDistance or -1)) or -1
-    o.trackDirection = trackDirection or -1
-    o.trackSystem = trackSystem or -1
-    o.x = hasPos and tonumber(posX) or -1
-    o.y = hasPos and tonumber(posY) or -1
-    o.z = hasPos and tonumber(posZ) or -1
-    o.mileage = hasMileage and tonumber(mileage) or -1
-    o.rotX = rotationOk and round2(rotX) or 0
-    o.rotY = rotationOk and round2(rotY) or 0
-    o.rotZ = rotationOk and round2(rotZ) or 0
-    o.xmlModel = xmlModel
-    o.model = RollingStockModels.modelFor(o.id, o.xmlModel)
-    o.dirtyFields = {}
-    o.needsFullSend = true
-    return o
+    return RollingStock.fromSnapshot(o)
 end
 
 function RollingStock.fromSnapshot(snapshot)
@@ -334,42 +329,40 @@ function RollingStock.fromSnapshot(snapshot)
     assert(type(snapshot.rollingStockName) == "string", "Need snapshot.rollingStockName as string")
 
     local xmlModel = snapshot.xmlModel
-    local modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(xmlModel)
+    modelInfoForXmlModel(xmlModel, snapshot.deferModelInfo == true)
     local tag = snapshot.tag or ""
     local o = {
         id = snapshot.rollingStockName,
         rollingStockName = snapshot.rollingStockName,
         type = "RollingStock",
         trainName = snapshot.trainName or "",
-        positionInTrain = tonumber(snapshot.positionInTrain) or -1,
-        couplingFront = tonumber(snapshot.couplingFront) or 1,
-        couplingRear = tonumber(snapshot.couplingRear) or 1,
-        length = tonumber(snapshot.length) or -1,
+        positionInTrain = snapshotNumber(snapshot, "positionInTrain") or -1,
+        couplingFront = snapshotNumber(snapshot, "couplingFront") or 1,
+        couplingRear = snapshotNumber(snapshot, "couplingRear") or 1,
+        length = snapshotNumber(snapshot, "length") or -1,
         propelled = snapshot.propelled ~= false,
-        modelType = tonumber(snapshot.modelType) or -1,
-        modelTypeText = EEPRollingstockModelTypeText[snapshot.modelType] or "",
+        modelType = snapshotNumber(snapshot, "modelType") or -1,
+        modelTypeText = snapshot.modelTypeText or EEPRollingstockModelTypeText[snapshot.modelType] or "",
         tag = tag,
         values = StorageUtility.parseTableFromString(tag),
         orientationForward = snapshot.orientationForward == true,
         smoke = snapshot.smoke or 0,
-        hookStatus = tonumber(snapshot.hookStatus) or 0,
-        hookGlueMode = tonumber(snapshot.hookGlueMode) or 0,
+        hookStatus = snapshotNumber(snapshot, "hookStatus") or 0,
+        hookGlueMode = snapshotNumber(snapshot, "hookGlueMode") or 0,
         active = snapshot.active == true,
-        textureTexts = snapshot.textureTexts or {},
-        modelInfo = modelInfo,
-        axisNamesKnown = axisNamesKnownForModelInfo(modelInfo),
+        textureTexts = copyTableWithStringKeys(snapshot.textureTexts or {}),
         axisValues = snapshot.axisValues or {},
-        trackId = tonumber(snapshot.trackId) or -1,
-        trackDistance = tonumber(string.format("%.2f", snapshot.trackDistance or -1)) or -1,
-        trackDirection = tonumber(snapshot.trackDirection) or -1,
-        trackSystem = tonumber(snapshot.trackSystem) or -1,
-        x = tonumber(snapshot.x) or -1,
-        y = tonumber(snapshot.y) or -1,
-        z = tonumber(snapshot.z) or -1,
-        mileage = tonumber(snapshot.mileage) or -1,
-        rotX = round2(snapshot.rotX),
-        rotY = round2(snapshot.rotY),
-        rotZ = round2(snapshot.rotZ),
+        trackId = snapshotNumber(snapshot, "trackId") or -1,
+        trackDistance = round2(snapshot.trackDistance) or -1,
+        trackDirection = snapshotNumber(snapshot, "trackDirection") or -1,
+        trackSystem = snapshotNumber(snapshot, "trackSystem") or -1,
+        x = snapshotNumber(snapshot, "x") or -1,
+        y = snapshotNumber(snapshot, "y") or -1,
+        z = snapshotNumber(snapshot, "z") or -1,
+        mileage = snapshotNumber(snapshot, "mileage") or -1,
+        rotX = round2(snapshot.rotX) or 0,
+        rotY = round2(snapshot.rotY) or 0,
+        rotZ = round2(snapshot.rotZ) or 0,
         xmlModel = xmlModel,
         model = RollingStockModels.modelFor(snapshot.rollingStockName, xmlModel),
         dirtyFields = {},
@@ -378,7 +371,59 @@ function RollingStock.fromSnapshot(snapshot)
 
     RollingStock.__index = RollingStock
     setmetatable(o, RollingStock)
+    DataClass.init(o)
+    markLoadedFromSnapshot(o, snapshot, "trainName")
+    markLoadedFromSnapshot(o, snapshot, "positionInTrain")
+    markLoadedFromSnapshot(o, snapshot, "couplingFront")
+    markLoadedFromSnapshot(o, snapshot, "couplingRear")
+    markLoadedFromSnapshot(o, snapshot, "length")
+    markLoadedFromSnapshot(o, snapshot, "propelled")
+    markLoadedFromSnapshot(o, snapshot, "modelType")
+    markLoadedFromSnapshot(o, snapshot, "modelType", "modelTypeText")
+    markLoadedFromSnapshot(o, snapshot, "modelTypeText")
+    markLoadedFromSnapshot(o, snapshot, "tag")
+    markLoadedFromSnapshot(o, snapshot, "orientationForward")
+    markLoadedFromSnapshot(o, snapshot, "smoke")
+    markLoadedFromSnapshot(o, snapshot, "hookStatus")
+    markLoadedFromSnapshot(o, snapshot, "hookGlueMode")
+    markLoadedFromSnapshot(o, snapshot, "active")
+    markLoadedFromSnapshot(o, snapshot, "textureTexts")
+    markLoadedFromSnapshot(o, snapshot, "axisValues")
+    markLoadedFromSnapshot(o, snapshot, "trackId")
+    markLoadedFromSnapshot(o, snapshot, "trackDistance")
+    markLoadedFromSnapshot(o, snapshot, "trackDirection")
+    markLoadedFromSnapshot(o, snapshot, "trackSystem")
+    markLoadedFromSnapshot(o, snapshot, "x")
+    markLoadedFromSnapshot(o, snapshot, "y")
+    markLoadedFromSnapshot(o, snapshot, "z")
+    markLoadedFromSnapshot(o, snapshot, "mileage")
+    markLoadedFromSnapshot(o, snapshot, "rotX")
+    markLoadedFromSnapshot(o, snapshot, "rotY")
+    markLoadedFromSnapshot(o, snapshot, "rotZ")
+    markLoadedFromSnapshot(o, snapshot, "xmlModel")
     return o
+end
+
+function RollingStock:pullInitial()
+    self:pullCouplingFront()
+    self:pullCouplingRear()
+    self:pullLength()
+    self:pullPropelled()
+    self:pullModelType()
+    self:pullTag()
+    self:pullOrientationForward()
+    self:pullSmoke()
+    self:pullHookStatus()
+    self:pullHookGlueMode()
+    self:pullActive()
+    self:pullTextureTexts()
+    self:pullAxisValues()
+    self:pullTrack()
+    self:pullPosition()
+    self:pullMileage()
+    self:pullRotation()
+    self:resetDirty()
+    return self
 end
 
 ---Adds or replaces a value in the rolling stock
@@ -398,19 +443,18 @@ end
 function RollingStock:getValue(key)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(key) == "string", "Need 'key' as string")
+    if not DataClass.isLoaded(self, "tag") then self:pullTag() end
     return self.values[key]
 end
 
 function RollingStock:save(clearCurrentInfo)
     local t = clearCurrentInfo and {} or self.values
-    local oldTag = self.tag
     local newTag = StorageUtility.encodeTable(t)
-    self.tag = newTag
+    if self.tag == newTag then return true end
     local hresult = EEPRollingstockSetTagText(self.rollingStockName, newTag)
     assert(hresult)
-    if oldTag ~= self.tag then
-        markDirty(self, "tag")
-    end
+    self:setTag(newTag)
+    return true
 end
 
 function RollingStock:setLine(line)
@@ -471,6 +515,7 @@ function RollingStock:setTrainName(trainName)
     assert(type(trainName) == "string", "Need 'trainName' as string")
     local oldTrainName = self.trainName
     self.trainName = trainName
+    markLoaded(self, "trainName")
     if oldTrainName ~= trainName then
         markDirty(self, "trainName")
     end
@@ -480,6 +525,14 @@ end
 ---@return string train trainName
 function RollingStock:getTrainName()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "trainName") then self:pullTrainName() end
+    return self.trainName
+end
+
+function RollingStock:pullTrainName()
+    if not DataClass.isCallable(EEPRollingstockGetTrainName) then return nil end
+    local ok, trainName = EEPRollingstockGetTrainName(self.rollingStockName)
+    if ok then self:setTrainName(trainName or "") end
     return self.trainName
 end
 
@@ -490,6 +543,7 @@ function RollingStock:setPositionInTrain(positionInTrain)
     assert(type(positionInTrain) == "number", "Need 'positionInTrain' as number")
     local oldPositionInTrain = self.positionInTrain
     self.positionInTrain = positionInTrain
+    markLoaded(self, "positionInTrain")
     if oldPositionInTrain ~= positionInTrain then
         markDirty(self, "positionInTrain")
     end
@@ -499,13 +553,32 @@ end
 ---@return number rolling stock position in the train
 function RollingStock:getPositionInTrain()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "positionInTrain") then self:pullPositionInTrain() end
     return self.positionInTrain
+end
+
+function RollingStock:pullPositionInTrain()
+    local trainName = self:getTrainName()
+    if not trainName or trainName == "" then return nil end
+    if not DataClass.isCallable(EEPGetRollingstockItemsCount)
+        or not DataClass.isCallable(EEPGetRollingstockItemName) then
+        return nil
+    end
+    local rollingStockCount = EEPGetRollingstockItemsCount(trainName) or 0
+    for positionInTrain = 0, rollingStockCount - 1 do
+        if EEPGetRollingstockItemName(trainName, positionInTrain) == self.rollingStockName then
+            self:setPositionInTrain(positionInTrain)
+            return self.positionInTrain
+        end
+    end
+    return nil
 end
 
 --- Get the length of this rolling stock
 ---@return number length of this rolling stock
 function RollingStock:getLength()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "length") then self:pullLength() end
     return self.length
 end
 
@@ -515,13 +588,22 @@ function RollingStock:setLength(length)
     length = tonumber(string.format("%.2f", length)) or 0
     local oldLength = self.length
     self.length = length
+    markLoaded(self, "length")
     if oldLength ~= length then markDirty(self, "length") end
+end
+
+function RollingStock:pullLength()
+    if not DataClass.isCallable(EEPRollingstockGetLength) then return nil end
+    local _, length = EEPRollingstockGetLength(self.rollingStockName)
+    if length then self:setLength(length) end
+    return self.length
 end
 
 --- Get the type of this rolling stock
 ---@return number type of this rolling stock
 function RollingStock:getModelType()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "modelType") then self:pullModelType() end
     return self.modelType
 end
 
@@ -532,14 +614,24 @@ function RollingStock:setModelType(modelType)
     local oldModelTypeText = self.modelTypeText
     self.modelType = modelType
     self.modelTypeText = EEPRollingstockModelTypeText[modelType] or ""
+    markLoaded(self, "modelType")
+    markLoaded(self, "modelTypeText")
     if oldModelType ~= modelType then markDirty(self, "modelType") end
     if oldModelTypeText ~= self.modelTypeText then markDirty(self, "modelTypeText") end
+end
+
+function RollingStock:pullModelType()
+    if not DataClass.isCallable(EEPRollingstockGetModelType) then return nil, nil end
+    local _, modelType = EEPRollingstockGetModelType(self.rollingStockName)
+    if modelType then self:setModelType(modelType) end
+    return self.modelType, self.modelTypeText
 end
 
 --- Get the type of this rolling stock
 ---@return string type of this rolling stock
 function RollingStock:getModelTypeText()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "modelTypeText") then self:pullModelType() end
     return self.modelTypeText
 end
 
@@ -547,29 +639,41 @@ end
 ---@return string type of this rolling stock
 function RollingStock:getTag()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "tag") then self:pullTag() end
     return self.tag
 end
+
+function RollingStock:peekTag() return self.tag end
 
 function RollingStock:setTag(tag)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(tag) == "string", "Need 'tag' as string")
     local oldTag = self.tag
-    local oldLicencePlate = self:getLicencePlate()
-    local oldWagonNumber = self:getWagonNumber()
+    local oldLicencePlate = self:peekLicencePlate()
+    local oldWagonNumber = self:peekWagonNumber()
     self.tag = tag
     self.values = StorageUtility.parseTableFromString(tag)
+    markLoaded(self, "tag")
     if oldTag ~= tag then markDirty(self, "tag") end
-    if oldLicencePlate ~= self:getLicencePlate() then markDirty(self, "licencePlate") end
-    if oldWagonNumber ~= self:getWagonNumber() then
+    if oldLicencePlate ~= self:peekLicencePlate() then markDirty(self, "licencePlate") end
+    if oldWagonNumber ~= self:peekWagonNumber() then
         markDirty(self, "vehicleNumber")
         markDirty(self, "nr")
     end
+end
+
+function RollingStock:pullTag()
+    if not DataClass.isCallable(EEPRollingstockGetTagText) then return nil end
+    local _, tag = EEPRollingstockGetTagText(self.rollingStockName)
+    self:setTag(tag or "")
+    return self.tag
 end
 
 --- Get the propelled value of this rolling stock
 ---@return boolean propelled value of this rolling stock
 function RollingStock:getPropelled()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "propelled") then self:pullPropelled() end
     return self.propelled
 end
 
@@ -578,7 +682,15 @@ function RollingStock:setPropelled(propelled)
     assert(type(propelled) == "boolean", "Need 'propelled' as boolean")
     local oldPropelled = self.propelled
     self.propelled = propelled
+    markLoaded(self, "propelled")
     if oldPropelled ~= propelled then markDirty(self, "propelled") end
+end
+
+function RollingStock:pullPropelled()
+    if not DataClass.isCallable(EEPRollingstockGetMotor) then return nil end
+    local _, propelled = EEPRollingstockGetMotor(self.rollingStockName)
+    self:setPropelled(propelled ~= false)
+    return self.propelled
 end
 
 function RollingStock:setOrientationForward(orientationForward)
@@ -586,11 +698,20 @@ function RollingStock:setOrientationForward(orientationForward)
     assert(type(orientationForward) == "boolean", "Need 'orientationForward' as boolean")
     local oldOrientationForward = self.orientationForward
     self.orientationForward = orientationForward
+    markLoaded(self, "orientationForward")
     if oldOrientationForward ~= orientationForward then markDirty(self, "orientationForward") end
+end
+
+function RollingStock:pullOrientationForward()
+    if not DataClass.isCallable(EEPRollingstockGetOrientation) then return nil end
+    local ok, orientationForward = EEPRollingstockGetOrientation(self.rollingStockName)
+    if ok then self:setOrientationForward(orientationForward == true) end
+    return self.orientationForward
 end
 
 function RollingStock:getOrientationForward()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "orientationForward") then self:pullOrientationForward() end
     return self.orientationForward
 end
 
@@ -599,11 +720,20 @@ function RollingStock:setSmoke(smoke)
     assert(type(smoke) == "number" or type(smoke) == "boolean", "Need 'smoke' as number|boolean")
     local oldSmoke = self.smoke
     self.smoke = smoke
+    markLoaded(self, "smoke")
     if oldSmoke ~= smoke then markDirty(self, "smoke") end
+end
+
+function RollingStock:pullSmoke()
+    if not DataClass.isCallable(EEPRollingstockGetSmoke) then return nil end
+    local ok, smoke = EEPRollingstockGetSmoke(self.rollingStockName)
+    if ok then self:setSmoke(smoke) end
+    return self.smoke
 end
 
 function RollingStock:getSmoke()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "smoke") then self:pullSmoke() end
     return self.smoke
 end
 
@@ -612,11 +742,20 @@ function RollingStock:setHookStatus(hookStatus)
     assert(type(hookStatus) == "number", "Need 'hookStatus' as number")
     local oldHookStatus = self.hookStatus
     self.hookStatus = hookStatus
+    markLoaded(self, "hookStatus")
     if oldHookStatus ~= hookStatus then markDirty(self, "hookStatus") end
+end
+
+function RollingStock:pullHookStatus()
+    if not DataClass.isCallable(EEPRollingstockGetHook) then return nil end
+    local ok, hookStatus = EEPRollingstockGetHook(self.rollingStockName)
+    if ok then self:setHookStatus(hookStatus) end
+    return self.hookStatus
 end
 
 function RollingStock:getHookStatus()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "hookStatus") then self:pullHookStatus() end
     return self.hookStatus
 end
 
@@ -625,11 +764,20 @@ function RollingStock:setHookGlueMode(hookGlueMode)
     assert(type(hookGlueMode) == "number", "Need 'hookGlueMode' as number")
     local oldHookGlueMode = self.hookGlueMode
     self.hookGlueMode = hookGlueMode
+    markLoaded(self, "hookGlueMode")
     if oldHookGlueMode ~= hookGlueMode then markDirty(self, "hookGlueMode") end
+end
+
+function RollingStock:pullHookGlueMode()
+    if not DataClass.isCallable(EEPRollingstockGetHookGlue) then return nil end
+    local ok, hookGlueMode = EEPRollingstockGetHookGlue(self.rollingStockName)
+    if ok then self:setHookGlueMode(hookGlueMode) end
+    return self.hookGlueMode
 end
 
 function RollingStock:getHookGlueMode()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "hookGlueMode") then self:pullHookGlueMode() end
     return self.hookGlueMode
 end
 
@@ -638,11 +786,19 @@ function RollingStock:setActive(active)
     assert(type(active) == "boolean", "Need 'active' as boolean")
     local oldActive = self.active
     self.active = active
+    markLoaded(self, "active")
     if oldActive ~= active then markDirty(self, "active") end
+end
+
+function RollingStock:pullActive()
+    local activeRollingStock = EEPRollingstockGetActive and EEPRollingstockGetActive() or ""
+    self:setActive(activeRollingStock == self.rollingStockName)
+    return self.active
 end
 
 function RollingStock:getActive()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "active") then self:pullActive() end
     return self.active
 end
 
@@ -650,18 +806,72 @@ function RollingStock:setTextureTexts(textureTexts)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     assert(type(textureTexts) == "table", "Need 'textureTexts' as table")
     local oldTextureTexts = self.textureTexts or {}
-    self.textureTexts = textureTexts
-    if not TableUtils.sameDictEntries(oldTextureTexts, textureTexts) then markDirty(self, "surfaceTexts") end
+    local nextTextureTexts = copyTableWithStringKeys(textureTexts)
+    self.textureTexts = nextTextureTexts
+    markLoaded(self, "textureTexts")
+    if not TableUtils.sameDictEntries(oldTextureTexts, nextTextureTexts) then markDirty(self, "surfaceTexts") end
 end
 
 function RollingStock:getTextureTexts()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "textureTexts") then self:pullTextureTexts() end
     return self.textureTexts or {}
 end
 
 function RollingStock:updateTextureTexts()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    self:setTextureTexts(collectTextureTexts(self.rollingStockName))
+    self:setTextureTexts(collectTextureTexts(self.rollingStockName, textureSurfaceNumbersForPull(self),
+                                            self.textureTexts))
+end
+
+function RollingStock:pullTextureTexts()
+    self:updateTextureTexts()
+    return self.textureTexts
+end
+
+function RollingStock:peekTextureText(surfaceNumber)
+    return self.textureTexts and self.textureTexts[tostring(surfaceNumber)] or nil
+end
+
+function RollingStock:pullTextureText(surfaceNumber)
+    local surface = tonumber(surfaceNumber)
+    if not surface or not DataClass.isCallable(EEPRollingstockGetTextureText) then return nil end
+    local ok, textureText = EEPRollingstockGetTextureText(self.rollingStockName, surface)
+    if not ok then return nil end
+
+    self.textureTexts = self.textureTexts or {}
+    self.textureTexts[tostring(surface)] = textureText or ""
+    markLoaded(self, "textureTexts")
+    return self.textureTexts[tostring(surface)]
+end
+
+function RollingStock:getTextureText(surfaceNumber)
+    local surface = tonumber(surfaceNumber)
+    if not surface then return nil end
+    local value = self:peekTextureText(surface)
+    if value ~= nil then return value end
+    return self:pullTextureText(surface)
+end
+
+function RollingStock:setTextureText(surfaceNumber, text)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local surface = tonumber(surfaceNumber)
+    if not surface then return false end
+    local value = text or ""
+    local cachedValue = self:peekTextureText(surface)
+    if cachedValue == value then return true end
+
+    local ok = true
+    if EEPRollingstockSetTextureText then
+        ok = EEPRollingstockSetTextureText(self.rollingStockName, surface, value) ~= false
+    end
+    if ok then
+        self.textureTexts = self.textureTexts or {}
+        self.textureTexts[tostring(surface)] = value
+        markLoaded(self, "textureTexts")
+        markDirty(self, "surfaceTexts")
+    end
+    return ok
 end
 
 function RollingStock:setAxisValues(axisValues)
@@ -670,17 +880,41 @@ function RollingStock:setAxisValues(axisValues)
     local nextAxisValues = copyTableWithStringKeys(axisValues)
     local oldAxisValues = self.axisValues or {}
     self.axisValues = nextAxisValues
+    markLoaded(self, "axisValues")
     if not TableUtils.sameDictEntries(oldAxisValues, nextAxisValues) then markDirty(self, "axisValues") end
 end
 
 function RollingStock:getAxisValues()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "axisValues") then self:pullAxisValues() end
     return copyTableWithStringKeys(self.axisValues or {})
 end
 
 function RollingStock:updateAxisValues()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+    self:setAxisValues(collectAxisValues(self.rollingStockName, RollingStockModelInfoRegistry.get(self.xmlModel)))
+end
+
+function RollingStock:pullAxisValues()
+    self:updateAxisValues()
+    return self.axisValues
+end
+
+function RollingStock:peekAxis(axisName)
+    return self.axisValues and self.axisValues[tostring(axisName)] or nil
+end
+
+function RollingStock:setAxis(axisName, axisValue)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not axisName then return false end
+    local value = tonumber(axisValue)
+    if not value then return false end
+    if self:peekAxis(axisName) == value then return true end
+    if not DataClass.isCallable(EEPRollingstockSetAxis) then return false end
+
+    local ok = EEPRollingstockSetAxis(self.rollingStockName, axisName, value) == true
+    if ok then setCachedAxisValue(self, axisName, value) end
+    return ok
 end
 
 function RollingStock:setAxisByNumber(axisNumber, axisValue)
@@ -689,17 +923,24 @@ function RollingStock:setAxisByNumber(axisNumber, axisValue)
     axisValue = tonumber(axisValue)
     if not axisNumber or not axisValue then return false end
 
-    if axisNameForNumber(self.modelInfo, axisNumber)
+    local modelInfo = RollingStockModelInfoRegistry.get(self.xmlModel)
+    if axisNameForNumber(modelInfo, axisNumber)
         and self:setAxisByNameFallback(axisNumber, axisValue) then
+        setCachedAxisValue(self, axisNumber, axisValue)
         return true
     end
 
-    if type(EEPRollingstockSetAxisByNumber) == "function" then
+    if DataClass.isCallable(EEPRollingstockSetAxisByNumber) then
         local ok = EEPRollingstockSetAxisByNumber(self.rollingStockName, axisNumber, axisValue)
-        if ok then return true end
+        if ok then
+            setCachedAxisValue(self, axisNumber, axisValue)
+            return true
+        end
     end
 
-    return self:setAxisByNameFallback(axisNumber, axisValue)
+    local ok = self:setAxisByNameFallback(axisNumber, axisValue)
+    if ok then setCachedAxisValue(self, axisNumber, axisValue) end
+    return ok
 end
 
 function RollingStock:setAxisByNameFallback(axisNumber, axisValue)
@@ -707,30 +948,32 @@ function RollingStock:setAxisByNameFallback(axisNumber, axisValue)
     axisNumber = tonumber(axisNumber)
     axisValue = tonumber(axisValue)
     if not axisNumber or not axisValue then return false end
-    if type(EEPRollingstockSetAxis) ~= "function" then return false end
+    if not DataClass.isCallable(EEPRollingstockSetAxis) then return false end
 
-    local axisName = axisNameForNumber(self.modelInfo, axisNumber)
+    local axisName = axisNameForNumber(RollingStockModelInfoRegistry.get(self.xmlModel), axisNumber)
     if not axisName then
         print(string.format("[#RollingStock] No axis name for %s axis %s", self.rollingStockName, tostring(axisNumber)))
         return false
     end
 
-    return EEPRollingstockSetAxis(self.rollingStockName, axisName, axisValue) == true
+    return self:setAxis(axisName, axisValue)
 end
 
 function RollingStock:getAxisNames()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.axisNames or {})
+    local modelInfo = RollingStockModelInfoRegistry.get(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.axisNames or {})
 end
 
 function RollingStock:getAxisNamesKnown()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    return self.axisNamesKnown == true
+    return axisNamesKnownForModelInfo(RollingStockModelInfoRegistry.get(self.xmlModel))
 end
 
 function RollingStock:getTextureNames()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
-    return copyTableWithStringKeys(self.modelInfo and self.modelInfo.textureNames or {})
+    local modelInfo = RollingStockModelInfoRegistry.get(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.textureNames or {})
 end
 
 function RollingStock:setRotation(rotX, rotY, rotZ)
@@ -745,6 +988,9 @@ function RollingStock:setRotation(rotX, rotY, rotZ)
     self.rotX = rotX
     self.rotY = rotY
     self.rotZ = rotZ
+    markLoaded(self, "rotX")
+    markLoaded(self, "rotY")
+    markLoaded(self, "rotZ")
     if oldRotX ~= rotX or oldRotY ~= rotY or oldRotZ ~= rotZ then
         markDirty(self, "rotX")
         markDirty(self, "rotY")
@@ -752,18 +998,28 @@ function RollingStock:setRotation(rotX, rotY, rotZ)
     end
 end
 
+function RollingStock:pullRotation()
+    if not DataClass.isCallable(EEPRollingstockGetRotation) then return nil, nil, nil end
+    local ok, rotX, rotY, rotZ = EEPRollingstockGetRotation(self.rollingStockName)
+    if ok then self:setRotation(rotX, rotY, rotZ) end
+    return self.rotX, self.rotY, self.rotZ
+end
+
 function RollingStock:getRotX()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "rotX") then self:pullRotation() end
     return self.rotX
 end
 
 function RollingStock:getRotY()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "rotY") then self:pullRotation() end
     return self.rotY
 end
 
 function RollingStock:getRotZ()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "rotZ") then self:pullRotation() end
     return self.rotZ
 end
 
@@ -774,15 +1030,24 @@ function RollingStock:setCouplingFront(couplingFront)
     assert(type(couplingFront) == "number", "Need 'positionInTrain' as number")
     local oldCoupling = self.couplingFront
     self.couplingFront = couplingFront
+    markLoaded(self, "couplingFront")
     if oldCoupling ~= couplingFront then
         markDirty(self, "couplingFront")
     end
+end
+
+function RollingStock:pullCouplingFront()
+    if not DataClass.isCallable(EEPRollingstockGetCouplingFront) then return nil end
+    local ok, couplingFront = EEPRollingstockGetCouplingFront(self.rollingStockName)
+    if ok then self:setCouplingFront(couplingFront) end
+    return self.couplingFront
 end
 
 --- Get the front coupling of the rolling stock
 ---@return number the front coupling of the rolling stock
 function RollingStock:getCouplingFront()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "couplingFront") then self:pullCouplingFront() end
     return self.couplingFront
 end
 
@@ -793,15 +1058,24 @@ function RollingStock:setCouplingRear(couplingRear)
     assert(type(couplingRear) == "number", "Need 'positionInTrain' as number")
     local oldCoupling = self.couplingRear
     self.couplingRear = couplingRear
+    markLoaded(self, "couplingRear")
     if oldCoupling ~= couplingRear then
         markDirty(self, "couplingRear")
     end
+end
+
+function RollingStock:pullCouplingRear()
+    if not DataClass.isCallable(EEPRollingstockGetCouplingRear) then return nil end
+    local ok, couplingRear = EEPRollingstockGetCouplingRear(self.rollingStockName)
+    if ok then self:setCouplingRear(couplingRear) end
+    return self.couplingRear
 end
 
 --- Get the rear coupling of the rolling stock
 ---@return number the rear coupling of the rolling stock
 function RollingStock:getCouplingRear()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "couplingRear") then self:pullCouplingRear() end
     return self.couplingRear
 end
 
@@ -809,6 +1083,7 @@ end
 ---@return number the track id of the rolling stock
 function RollingStock:getTrackId()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "trackId") then self:pullTrack() end
     return self.trackId
 end
 
@@ -828,16 +1103,28 @@ function RollingStock:setTrack(trackId, trackDistance, trackDirection, trackSyst
     self.trackDistance = trackDistance
     self.trackDirection = trackDirection
     self.trackSystem = trackSystem
+    markLoaded(self, "trackId")
+    markLoaded(self, "trackDistance")
+    markLoaded(self, "trackDirection")
+    markLoaded(self, "trackSystem")
     if oldId ~= trackId then markDirty(self, "trackId") end
     if oldDist ~= trackDistance then markDirty(self, "trackDistance") end
     if oldDir ~= trackDirection then markDirty(self, "trackDirection") end
     if oldSys ~= trackSystem then markDirty(self, "trackSystem") end
 end
 
+function RollingStock:pullTrack()
+    if not DataClass.isCallable(EEPRollingstockGetTrack) then return nil, nil, nil, nil end
+    local ok, trackId, trackDistance, trackDirection, trackSystem = EEPRollingstockGetTrack(self.rollingStockName)
+    if ok then self:setTrack(trackId, trackDistance, trackDirection, trackSystem) end
+    return self.trackId, self.trackDistance, self.trackDirection, self.trackSystem
+end
+
 --- Get the track distance of the rolling stock
 ---@return number the track distance of the rolling stock
 function RollingStock:getTrackDistance()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "trackDistance") then self:pullTrack() end
     return self.trackDistance
 end
 
@@ -845,6 +1132,7 @@ end
 ---@return number the track direction of the rolling stock
 function RollingStock:getTrackDirection()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "trackDirection") then self:pullTrack() end
     return self.trackDirection
 end
 
@@ -852,6 +1140,7 @@ end
 ---@return number the track system of the rolling stock
 function RollingStock:getTrackSystem()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "trackSystem") then self:pullTrack() end
     return self.trackSystem
 end
 
@@ -862,6 +1151,7 @@ function RollingStock:setTrackType(trackType)
     assert(type(trackType) == "string", "Need 'trackType' as string")
     local oldValue = self.trackType
     self.trackType = trackType
+    markLoaded(self, "trackType")
     if oldValue ~= trackType then
         markDirty(self, "trackType")
     end
@@ -887,15 +1177,26 @@ function RollingStock:setPosition(x, y, z)
     self.x = x
     self.y = y
     self.z = z
+    markLoaded(self, "x")
+    markLoaded(self, "y")
+    markLoaded(self, "z")
     if oldX ~= x then markDirty(self, "posX") end
     if oldY ~= y then markDirty(self, "posY") end
     if oldZ ~= z then markDirty(self, "posZ") end
+end
+
+function RollingStock:pullPosition()
+    if not DataClass.isCallable(EEPRollingstockGetPosition) then return nil, nil, nil end
+    local hasPos, posX, posY, posZ = EEPRollingstockGetPosition(self.rollingStockName)
+    if hasPos then self:setPosition(tonumber(posX) or -1, tonumber(posY) or -1, tonumber(posZ) or -1) end
+    return self.x, self.y, self.z
 end
 
 --- Get the x coordinate of this rolling stock
 ---@return number x coordinate of this rolling stock
 function RollingStock:getX()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "x") then self:pullPosition() end
     return self.x
 end
 
@@ -903,6 +1204,7 @@ end
 ---@return number y coordinate of this rolling stock
 function RollingStock:getY()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "y") then self:pullPosition() end
     return self.y
 end
 
@@ -910,6 +1212,7 @@ end
 ---@return number z coordinate of this rolling stock
 function RollingStock:getZ()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "z") then self:pullPosition() end
     return self.z
 end
 
@@ -920,15 +1223,24 @@ function RollingStock:setMileage(mileage)
     assert(type(mileage) == "number", "Need 'mileage' as number")
     local oldMileage = self.mileage
     self.mileage = mileage
+    markLoaded(self, "mileage")
     if oldMileage ~= mileage then
         markDirty(self, "mileage")
     end
+end
+
+function RollingStock:pullMileage()
+    if not DataClass.isCallable(EEPRollingstockGetMileage) then return nil end
+    local hasMileage, mileage = EEPRollingstockGetMileage(self.rollingStockName)
+    if hasMileage then self:setMileage(mileage) end
+    return self.mileage
 end
 
 --- Get the mileage of this rolling stock
 ---@return number mileage of this rolling stock
 function RollingStock:getMileage()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    if not DataClass.isLoaded(self, "mileage") then self:pullMileage() end
     return self.mileage
 end
 
@@ -937,37 +1249,122 @@ function RollingStock:getXmlModel()
     return self.xmlModel
 end
 
+function RollingStock:peekRollingStockName() return self.rollingStockName end
+
+function RollingStock:peekTrainName() return self.trainName end
+
+function RollingStock:peekPositionInTrain() return self.positionInTrain end
+
+function RollingStock:peekCouplingFront() return self.couplingFront end
+
+function RollingStock:peekCouplingRear() return self.couplingRear end
+
+function RollingStock:peekLength() return self.length end
+
+function RollingStock:peekPropelled() return self.propelled end
+
+function RollingStock:peekModelType() return self.modelType end
+
+function RollingStock:peekModelTypeText() return self.modelTypeText end
+
+function RollingStock:peekLicencePlate() return self.values[TagKeys.RollingStock.licencePlate] end
+
+function RollingStock:peekWagonNumber() return self.values[TagKeys.RollingStock.wagonNumber] end
+
+function RollingStock:peekWagonNr() return self:peekWagonNumber() end
+
+function RollingStock:peekTrackType() return self.trackType end
+
+function RollingStock:peekHookStatus() return self.hookStatus end
+
+function RollingStock:peekHookGlueMode() return self.hookGlueMode end
+
+function RollingStock:peekTextureTexts() return self.textureTexts end
+
+function RollingStock:peekTrackId() return self.trackId end
+
+function RollingStock:peekTrackDistance() return self.trackDistance end
+
+function RollingStock:peekTrackDirection() return self.trackDirection end
+
+function RollingStock:peekTrackSystem() return self.trackSystem end
+
+function RollingStock:peekX() return self.x end
+
+function RollingStock:peekY() return self.y end
+
+function RollingStock:peekZ() return self.z end
+
+function RollingStock:peekMileage() return self.mileage end
+
+function RollingStock:peekOrientationForward() return self.orientationForward end
+
+function RollingStock:peekSmoke() return self.smoke end
+
+function RollingStock:peekActive() return self.active end
+
+function RollingStock:peekAxisNamesKnown()
+    return axisNamesKnownForModelInfo(RollingStockModelInfoRegistry.peek(self.xmlModel))
+end
+
+function RollingStock:peekAxisNames()
+    local modelInfo = RollingStockModelInfoRegistry.peek(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.axisNames or {})
+end
+
+function RollingStock:peekAxisValues() return copyTableWithStringKeys(self.axisValues or {}) end
+
+function RollingStock:peekTextureNames()
+    local modelInfo = RollingStockModelInfoRegistry.peek(self.xmlModel)
+    return copyTableWithStringKeys(modelInfo and modelInfo.textureNames or {})
+end
+
+function RollingStock:peekRotX() return self.rotX end
+
+function RollingStock:peekRotY() return self.rotY end
+
+function RollingStock:peekRotZ() return self.rotZ end
+
+function RollingStock:peekXmlModel() return self.xmlModel end
+
+function RollingStock:refreshModelInfo(deferModelInfo, updateAxisValues)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    local oldAxisNames = self:peekAxisNames()
+    local oldAxisNamesKnown = self:peekAxisNamesKnown()
+    local oldTextureNames = self:peekTextureNames()
+    local modelInfo = modelInfoForXmlModel(self.xmlModel, deferModelInfo == true)
+    if updateAxisValues then self:setAxisValues(collectAxisValues(self.rollingStockName, modelInfo)) end
+    if oldAxisNamesKnown ~= self:peekAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
+    if not TableUtils.sameDictEntries(oldAxisNames, self:peekAxisNames()) then markDirty(self, "axisNames") end
+    if not TableUtils.sameDictEntries(oldTextureNames, self:peekTextureNames()) then markDirty(self, "textureNames") end
+end
+
+function RollingStock:markModelInfoDirtyFields(dirtyFields)
+    assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
+    dirtyFields = dirtyFields or {}
+    if dirtyFields.axisNamesKnown then markDirty(self, "axisNamesKnown") end
+    if dirtyFields.axisNames then markDirty(self, "axisNames") end
+    if dirtyFields.textureNames then markDirty(self, "textureNames") end
+end
+
 function RollingStock:setXmlModel(model)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
-    local oldAxisNames = self:getAxisNames()
-    local oldAxisNamesKnown = self:getAxisNamesKnown()
-    local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
+    markLoaded(self, "xmlModel")
     self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
-    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
-    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
-    self:setAxisValues(collectAxisValues(self.rollingStockName, self.modelInfo))
+    self:refreshModelInfo(false, true)
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
-    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
-    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
-    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
-function RollingStock:setXmlModelFromSnapshot(model)
+function RollingStock:setXmlModelFromSnapshot(model, deferModelInfo)
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     local oldXmlModel = self.xmlModel
-    local oldAxisNames = self:getAxisNames()
-    local oldAxisNamesKnown = self:getAxisNamesKnown()
-    local oldTextureNames = self:getTextureNames()
     self.xmlModel = model
+    markLoaded(self, "xmlModel")
     self.model = RollingStockModels.modelFor(self.rollingStockName, self.xmlModel)
-    self.modelInfo = RollingStockModelInfoRegistry.infoForXmlModel(self.xmlModel)
-    self.axisNamesKnown = axisNamesKnownForModelInfo(self.modelInfo)
+    self:refreshModelInfo(deferModelInfo == true, false)
     if oldXmlModel ~= model then markDirty(self, "xmlModel") end
-    if oldAxisNamesKnown ~= self:getAxisNamesKnown() then markDirty(self, "axisNamesKnown") end
-    if not TableUtils.sameDictEntries(oldAxisNames, self:getAxisNames()) then markDirty(self, "axisNames") end
-    if not TableUtils.sameDictEntries(oldTextureNames, self:getTextureNames()) then markDirty(self, "textureNames") end
 end
 
 function RollingStock:resetDirty()
@@ -978,60 +1375,76 @@ function RollingStock:hasDirtyFields()
     return next(self.dirtyFields) ~= nil
 end
 
+local function rollingStockFromRegistry(rollingStockName)
+    return require("ce.hub.data.rollingstock.RollingStockRegistry").get(rollingStockName)
+end
+
+local function printMissingRollingStock(rollingStockName)
+    print(string.format(
+        "[#RollingStock] Command ignored, rolling stock is not registered: %s",
+        tostring(rollingStockName)
+    ))
+end
+
+function RollingStock.setActiveByName(rollingStockName)
+    local rollingStockToActivate = rollingStockFromRegistry(rollingStockName)
+    if not rollingStockToActivate then
+        printMissingRollingStock(rollingStockName)
+        return false
+    end
+    if not DataClass.isCallable(EEPRollingstockSetActive) then return false end
+
+    local ok = EEPRollingstockSetActive(rollingStockName) ~= false
+    if ok then
+        local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
+        local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
+        for _, rollingStock in pairs(RollingStockRegistry.getAll()) do
+            rollingStock:setActive(rollingStock.rollingStockName == rollingStockName)
+        end
+        ScenarioRegistry.getOrCreate():setActiveRollingStock(rollingStockName)
+    end
+    return ok
+end
+
+function RollingStock.setUserCameraByName(rollingStockName, posX, posY, posZ, rotH, rotV, setDirectly)
+    local rollingStock = rollingStockFromRegistry(rollingStockName)
+    local x = tonumber(posX)
+    local y = tonumber(posY)
+    local z = tonumber(posZ)
+    local horizontal = tonumber(rotH)
+    local vertical = tonumber(rotV)
+    local activate = tonumber(setDirectly)
+    if not rollingStock or not x or not y or not z or not horizontal or not vertical then
+        if not rollingStock then printMissingRollingStock(rollingStockName) end
+        return false
+    end
+    if not DataClass.isCallable(EEPRollingstockSetUserCamera) then return false end
+    return EEPRollingstockSetUserCamera(rollingStockName, x, y, z, horizontal, vertical, activate) ~= false
+end
+
+function RollingStock.setAxisByName(rollingStockName, axisName, axisValue, axisNumber)
+    local rollingStock = rollingStockFromRegistry(rollingStockName)
+    if not rollingStock then
+        printMissingRollingStock(rollingStockName)
+        return false
+    end
+
+    local ok = rollingStock:setAxis(axisName, axisValue)
+    if ok and axisNumber then setCachedAxisValue(rollingStock, axisNumber, axisValue) end
+    return ok
+end
+
+function RollingStock.setAxisByNumberByName(rollingStockName, axisNumber, axisValue)
+    local rollingStock = rollingStockFromRegistry(rollingStockName)
+    if not rollingStock then
+        printMissingRollingStock(rollingStockName)
+        return false
+    end
+    return rollingStock:setAxisByNumber(axisNumber, axisValue)
+end
+
 function RollingStock:openDoors() self.model:openDoors(self.rollingStockName) end
 
 function RollingStock:closeDoors() self.model:closeDoors(self.rollingStockName) end
-
-function RollingStock:toJsonStatic()
-    return {
-        id = self.rollingStockName,
-        name = self.rollingStockName,
-        trainName = self:getTrainName(),
-        positionInTrain = self:getPositionInTrain(),
-        couplingFront = self:getCouplingFront(),
-        couplingRear = self:getCouplingRear(),
-        length = self:getLength(),
-        propelled = self:getPropelled(),
-        modelType = self:getModelType(),
-        modelTypeText = self:getModelTypeText(),
-        tag = self:getTag(),
-        orientationForward = self:getOrientationForward(),
-        smoke = self:getSmoke(),
-        hookStatus = self:getHookStatus(),
-        hookGlueMode = self:getHookGlueMode(),
-        active = self:getActive(),
-        axisNamesKnown = self:getAxisNamesKnown(),
-        axisNames = self:getAxisNames(),
-        axisValues = self:getAxisValues(),
-        textureNames = self:getTextureNames(),
-        licencePlate = self:getLicencePlate(),
-        vehicleNumber = self:getWagonNumber(),
-        nr = self:getWagonNr(),
-        trackId = self:getTrackId(),
-        trackDistance = self:getTrackDistance(),
-        trackDirection = self:getTrackDirection(),
-        trackSystem = self:getTrackSystem(),
-        trackType = self:getTrackType(),
-        posX = self:getX(),
-        posY = self:getY(),
-        posZ = self:getZ(),
-        mileage = self:getMileage()
-    }
-end
-
-function RollingStock:toJsonDynamic()
-    return {
-        id = self.id,
-        name = self.rollingStockName,
-        trackId = self:getTrackId(),
-        trackDistance = self:getTrackDistance(),
-        trackDirection = self:getTrackDirection(),
-        trackSystem = self:getTrackSystem(),
-        posX = self:getX(),
-        posY = self:getY(),
-        posZ = self:getZ(),
-        mileage = self:getMileage()
-    }
-end
 
 return RollingStock

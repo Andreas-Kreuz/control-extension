@@ -1,5 +1,5 @@
-insulate("ce.hub.eep.RollingStockResourceParser", function ()
-    local Parser = require("ce.hub.eep.RollingStockResourceParser")
+insulate("ce.hub.eep.resources.RollingStockResourceParser", function ()
+    local Parser = require("ce.hub.eep.resources.RollingStockResourceParser")
     local marker = string.char(4, 0, 0, 0, 4, 0, 0, 0)
     local one = string.char(0, 0, 128, 63)
 

@@ -54,6 +54,7 @@ insulate("MAN Citybus CR1 display updates", function ()
     local model
 
     before_each(function ()
+        require("ce.hub.data.trains.TrainRollingStockStore").reset()
         clearModule("ce.hub.data.rollingstock.ModelV15NCR10014")
         textureCalls = {}
         axisCalls = {}
@@ -119,12 +120,16 @@ insulate("MAN Citybus CR1 display updates", function ()
         end
 
         local expectedCalls = {}
+        local lastExpected
         for _, example in ipairs(examples) do
-            table.insert(expectedCalls, {
-                rollingStockName = "Bus1",
-                surfaceNumber = 1,
-                text = example.expected
-            })
+            if example.expected ~= lastExpected then
+                table.insert(expectedCalls, {
+                    rollingStockName = "Bus1",
+                    surfaceNumber = 1,
+                    text = example.expected
+                })
+                lastExpected = example.expected
+            end
         end
         assert.same(expectedCalls, textureCalls)
     end)

@@ -1,6 +1,10 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.rollingstock.MODELV15NJS20220 ...") end
 local RollingStockModel = require("ce.hub.data.rollingstock.RollingStockModel")
 
+local function rollingStockFor(rollingStockName)
+    return require("ce.hub.data.rollingstock.RollingStockRegistry").getOrCreate(rollingStockName)
+end
+
 local MODELV15NJS20220 = {}
 
 local destinationTextureTexts = {
@@ -46,7 +50,7 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(line) == "string", "Need 'line' as string")
         if hasTextureTexts then
-            EEPRollingstockSetTextureText(rollingStockName, 22, formatLineTextureText(line))
+            rollingStockFor(rollingStockName):setTextureText(22, formatLineTextureText(line))
         end
     end
 
@@ -55,10 +59,10 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(destination) == "string", "Need 'destination' as string")
         if hasTextureTexts then
-            EEPRollingstockSetAxis(rollingStockName, "Linie Fahrziel", 100)
-            EEPRollingstockSetTextureText(rollingStockName, 5, destination)
-            EEPRollingstockSetTextureText(rollingStockName, 6, "")
-            EEPRollingstockSetTextureText(rollingStockName, 18, destination)
+            rollingStockFor(rollingStockName):setAxis("Linie Fahrziel", 100)
+            rollingStockFor(rollingStockName):setTextureText(5, destination)
+            rollingStockFor(rollingStockName):setTextureText(6, "")
+            rollingStockFor(rollingStockName):setTextureText(18, destination)
         end
     end
 
@@ -67,7 +71,7 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(origin) == "string", "Need 'origin' as string")
         if hasTextureTexts then
-            EEPRollingstockSetTextureText(rollingStockName, 16, origin)
+            rollingStockFor(rollingStockName):setTextureText(16, origin)
         end
     end
 
@@ -76,8 +80,8 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(nextStop) == "string", "Need 'nextStop' as string")
         if hasTextureTexts then
-            EEPRollingstockSetTextureText(rollingStockName, 6, nextStop)
-            EEPRollingstockSetTextureText(rollingStockName, 17, nextStop)
+            rollingStockFor(rollingStockName):setTextureText(6, nextStop)
+            rollingStockFor(rollingStockName):setTextureText(17, nextStop)
         end
     end
 
@@ -92,8 +96,8 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         assert(type(nr) == "string", "Need 'nr' as string")
         if hasTextureTexts then
-            EEPRollingstockSetTextureText(rollingStockName, 23, nr)
-            EEPRollingstockSetTextureText(rollingStockName, 24, nr)
+            rollingStockFor(rollingStockName):setTextureText(23, nr)
+            rollingStockFor(rollingStockName):setTextureText(24, nr)
         end
     end
 
@@ -101,7 +105,7 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         if hasDoors then
-            EEPRollingstockSetAxis(rollingStockName, "TuerRechts", 100)
+            rollingStockFor(rollingStockName):setAxis("TuerRechts", 100)
         end
     end
 
@@ -109,7 +113,7 @@ local function createWagen(axisNames, textureTexts, hasDoors, hasTextureTexts)
         assert(type(self) == "table", "Call this method with ':'")
         assert(type(rollingStockName) == "string", "Need 'rollingStockName' as string")
         if hasDoors then
-            EEPRollingstockSetAxis(rollingStockName, "TuerRechts", 0)
+            rollingStockFor(rollingStockName):setAxis("TuerRechts", 0)
         end
     end
 

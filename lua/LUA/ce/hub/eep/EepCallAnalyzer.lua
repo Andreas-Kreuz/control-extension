@@ -18,6 +18,7 @@ local state = {
     calls = {},
     callbacks = {},
     discoveryCalls = {},
+    timings = {},
     stackTraces = {},
     wrappers = {},
     originals = {},
@@ -28,6 +29,7 @@ local function resetCounters()
     state.calls = {}
     state.callbacks = {}
     state.discoveryCalls = {}
+    state.timings = {}
     state.stackTraces = {
         calls = {},
         callbacks = {},
@@ -62,13 +64,36 @@ local function incrementStackTrace(target, name, stackTrace)
     target[name][stackTrace] = (target[name][stackTrace] or 0) + 1
 end
 
+local function recordTiming(name, elapsedTime)
+    local timing = state.timings[name]
+    if not timing then
+        timing = {
+            count = 0,
+            time = 0,
+            maxTime = 0
+        }
+        state.timings[name] = timing
+    end
+
+    timing.count = timing.count + 1
+    timing.time = timing.time + elapsedTime
+    if elapsedTime > timing.maxTime then timing.maxTime = elapsedTime end
+end
+
+local function pack(...)
+    return {
+        n = select("#", ...),
+        ...
+    }
+end
+
 local function collectStackTrace()
     if debug and debug.traceback then return debug.traceback("", 4) end
     return "debug.traceback unavailable"
 end
 
 local function countInvocation(name)
-    if not state.active then return end
+    if not state.active then return false end
 
     local stackTrace = collectStackTrace()
     if isCallbackName(name) then
@@ -82,12 +107,20 @@ local function countInvocation(name)
             incrementStackTrace(state.stackTraces.discoveryCalls, name, stackTrace)
         end
     end
+    return true
 end
 
 local function makeWrapper(name, original)
     local function wrapper(...)
-        countInvocation(name)
-        return original(...)
+        local shouldMeasure = countInvocation(name)
+        if not shouldMeasure then return original(...) end
+
+        local startTime = os.clock()
+        local result = pack(pcall(original, ...))
+        recordTiming(name, os.clock() - startTime)
+
+        if not result[1] then error(result[2], 0) end
+        return table.unpack(result, 2, result.n)
     end
     state.wrapperLookup[wrapper] = true
     return wrapper
@@ -130,6 +163,18 @@ local function copyNestedCounts(values)
     return copy
 end
 
+local function copyTimings(values)
+    local copy = {}
+    for key, value in pairs(values) do
+        copy[key] = {
+            count = value.count,
+            time = value.time,
+            maxTime = value.maxTime
+        }
+    end
+    return copy
+end
+
 local function buildResult()
     return {
         status = state.completed and "completed" or state.active and "running" or "disabled",
@@ -143,6 +188,7 @@ local function buildResult()
         calls = copyCounts(state.calls),
         callbacks = copyCounts(state.callbacks),
         discoveryCalls = copyCounts(state.discoveryCalls),
+        timings = copyTimings(state.timings),
         stackTraces = {
             calls = copyNestedCounts(state.stackTraces.calls),
             callbacks = copyNestedCounts(state.stackTraces.callbacks),
@@ -153,6 +199,29 @@ end
 
 local function outputFileName()
     return ExchangeDirRegistry.getExchangeDirectory() .. "/eep-call-analysis.json"
+end
+
+local function sortedTimingRows()
+    local rows = {}
+    for name, timing in pairs(state.timings) do
+        rows[#rows + 1] = {
+            name = name,
+            count = timing.count,
+            time = timing.time
+        }
+    end
+    table.sort(rows, function (left, right)
+        if left.time == right.time then return left.name < right.name end
+        return left.time > right.time
+    end)
+    return rows
+end
+
+local function printTimingSummary()
+    print("[#EepCallAnalyzer] EEP call timing summary:")
+    for _, row in ipairs(sortedTimingRows()) do
+        print(string.format("[#EepCallAnalyzer] %8d %10.3f ms %s", row.count, row.time * 1000, row.name))
+    end
 end
 
 local function writeResult()
@@ -226,6 +295,7 @@ function EepCallAnalyzer.endRun()
         local ok, resultOrError, fileName = pcall(writeResult)
         if ok then
             print("[#EepCallAnalyzer] Wrote EEP call analysis to " .. tostring(fileName))
+            printTimingSummary()
         else
             print("[#EepCallAnalyzer] FILE ERROR: " .. tostring(resultOrError))
         end

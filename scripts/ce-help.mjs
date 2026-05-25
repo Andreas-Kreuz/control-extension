@@ -16,7 +16,7 @@ const groups = [
       { name: 'dev:app', description: 'App und Server im Entwicklungsmodus starten (automatischer re-build)' },
       {
         name: 'dev:docs',
-        description: 'Inkrementellen Jekyll-Doku-Server mit Live-Reload starten und fehlende Assets erzeugen',
+        description: 'Doku-Assets erzeugen, Jekyll-Doku einmal bauen und danach inkrementell mit Live-Reload starten',
       },
       { name: 'dev:docs:manual', description: 'Jekyll-Doku-Server mit manueller Aktualisierung starten' },
       { name: 'dev:storybook', description: 'Storybook der Web-App für isolierte UI-Entwicklung starten' },

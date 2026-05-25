@@ -19,14 +19,12 @@ local function isReleaseFunction(signalFunction)
 end
 
 local function detectReleasePosition(signalId)
-    if type(_G.EEPGetSignalFunctions) ~= "function" or type(_G.EEPGetSignalFunction) ~= "function" then return nil end
+    local signal = SignalRegistry.getOrCreate(signalId)
+    local signalFunctions = signal:getFunctions()
+    if not signalFunctions or #signalFunctions == 0 then return nil end
 
-    local functionsOk, functionCount = _G.EEPGetSignalFunctions(signalId)
-    if not functionsOk or not functionCount or functionCount == 0 then return nil end
-
-    for selectionIndex = 1, functionCount do
-        local functionOk, signalFunction = _G.EEPGetSignalFunction(signalId, selectionIndex)
-        if functionOk and isReleaseFunction(signalFunction) then return selectionIndex end
+    for selectionIndex, signalFunction in ipairs(signalFunctions) do
+        if isReleaseFunction(signalFunction) then return selectionIndex end
     end
 
     return nil
@@ -71,8 +69,9 @@ function DepotSignalRegistry.updateRouteInterests()
     local waitingEntries = {}
 
     for signalId in pairs(depotSignalIds) do
-        local waitingCount = EEPGetSignalTrainsCount(signalId) or 0
-        local trainName = waitingCount > 0 and EEPGetSignalTrainName(signalId, 1) or nil
+        local waitingTrainNames = SignalRegistry.getOrCreate(signalId):pullTrainNames()
+        local waitingCount = #waitingTrainNames
+        local trainName = waitingTrainNames[1]
         local previousTrainName = interestedTrainBySignalId[signalId]
         local interestSource = INTEREST_SOURCE_PREFIX .. tostring(signalId)
 

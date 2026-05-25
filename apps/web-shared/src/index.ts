@@ -75,6 +75,12 @@ export type {
   IntersectionWizardSignalLookupAppDto,
   IntersectionWizardTrafficType,
 } from './dtos/app/roads/IntersectionWizardAppDto';
+export type {
+  AlignStructureSignalInstallerCommandAppDto,
+  FocusStructureSignalInstallerCameraCommandAppDto,
+  StructureSignalInstallerHousingKind,
+  StructureSignalInstallerTargetAppDto,
+} from './dtos/app/roads/StructureSignalInstallerAppDto';
 export type { TrafficLightModelAppDto } from './dtos/app/traffic-light-models/TrafficLightModelAppDto';
 export type { TransitLineAppDto } from './dtos/app/transit/TransitLineAppDto';
 export type { TransitLineSegmentAppDto } from './dtos/app/transit/TransitLineSegmentAppDto';
