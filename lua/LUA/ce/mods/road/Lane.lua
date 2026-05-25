@@ -105,6 +105,28 @@ local function routeForTrain(trainName)
     return DEFAULT_ROUTE
 end
 
+local function reconcileVehicleCountAndQueue(lane)
+    if lane.queue:size() < lane.vehicleCount then
+        if Lane.debug then
+            print(string.format(
+                "[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d",
+                lane.name,
+                lane.queue:size(),
+                lane.vehicleCount
+            ))
+        end
+        lane.vehicleCount = lane.queue:size()
+    end
+
+    while lane.queue:size() > lane.vehicleCount do
+        local trainFromQueue = lane.queue:pop()
+        if trainFromQueue == lane.firstGoodTrain then lane.firstGoodTrain = nil end
+        if Lane.debug then
+            print(string.format("[#Lane] AUTOCORRECT %s: Removed stale queued train %s", lane.name, trainFromQueue))
+        end
+    end
+end
+
 ---If trainname is provided, this function will add the train to the lane's queue
 ---@param lane Lane the current lane, where the correction will take place
 ---@param trainName string Name of the train
@@ -118,16 +140,7 @@ local function addTrainToQueue(lane, trainName)
         -- Remember the "first good vehicle"
         lane.firstGoodTrain = lane.firstGoodTrain or trainName
 
-        -- Fix queue length
-        if lane.vehicleCount ~= lane.queue:size() then
-            print(string.format(
-                "[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d",
-                lane.name,
-                lane.queue:size(),
-                lane.vehicleCount
-            ))
-            lane.vehicleCount = lane.queue:size()
-        end
+        reconcileVehicleCountAndQueue(lane)
     end
     if lane.queue:size() == 1 then
         lane.firstVehiclesRoute = routeForTrain(lane.queue:firstElement())
@@ -138,56 +151,49 @@ end
 ---@param lane Lane the current lane, where the correction will take place
 ---@param trainName string Name of the train
 local function popTrainFromQueue(lane, trainName)
-    if trainName and not lane.signalUsedForRequest then
+    if lane.signalUsedForRequest then return 0 end
+
+    local hasTrainName = trainName and trainName ~= ""
+    local numberOfPops = lane.queue:isEmpty() and 0 or 1
+    if hasTrainName then
         if trainName == lane.firstGoodTrain then lane.firstGoodTrain = nil end
 
-        local numberOfPops = lane.queue:size()
+        local firstGoodTrainIndex
+        numberOfPops = nil
         for i, trainFromQueue in pairs(lane.queue:elements()) do
             if trainFromQueue == trainName then
                 numberOfPops = i
                 break
             end
 
-            if trainFromQueue == lane.firstGoodTrain then
-                numberOfPops = i - 1
-                break
-            end
+            if trainFromQueue == lane.firstGoodTrain then firstGoodTrainIndex = i end
         end
+        if numberOfPops == nil then numberOfPops = firstGoodTrainIndex and firstGoodTrainIndex - 1 or lane.queue:size() end
+    end
 
-        -- Remove train and fix queue
-        if numberOfPops > 1 and Lane.debug then
-            print(string.format(
-                "[#Lane] AUTOCORRECT %s: Have to remove %d trains to get to %s",
-                lane.name,
-                numberOfPops,
-                trainName
-            ))
-        end
-        for _ = 1, numberOfPops, 1 do
-            local trainFromQueue = lane.queue:pop()
-            if Lane.debug and trainFromQueue ~= trainName then
-                print(string.format("[#Lane] AUTOCORRECT %s: Removed additional train %s", lane.name, trainFromQueue))
-            end
-        end
-
-        -- Fix queue length
-        if lane.vehicleCount ~= lane.queue:size() then
-            if Lane.debug and numberOfPops == 1 then
-                print(string.format(
-                    "[#Lane] AUTOCORRECT %s: New vehicle count from queue length: %d; Current count: %d",
-                    lane.name,
-                    lane.queue:size(),
-                    lane.vehicleCount
-                ))
-            end
-            lane.vehicleCount = lane.queue:size()
+    -- Remove train and fix queue
+    if numberOfPops > 1 and Lane.debug then
+        print(string.format(
+            "[#Lane] AUTOCORRECT %s: Have to remove %d trains to get to %s",
+            lane.name,
+            numberOfPops,
+            trainName
+        ))
+    end
+    for _ = 1, numberOfPops, 1 do
+        local trainFromQueue = lane.queue:pop()
+        if trainFromQueue == lane.firstGoodTrain then lane.firstGoodTrain = nil end
+        if hasTrainName and Lane.debug and trainFromQueue ~= trainName then
+            print(string.format("[#Lane] AUTOCORRECT %s: Removed additional train %s", lane.name, trainFromQueue))
         end
     end
+
     if not lane.queue:isEmpty() then
         lane.firstVehiclesRoute = routeForTrain(lane.queue:firstElement())
     else
         lane.firstVehiclesRoute = "NO VEHICLE"
     end
+    return numberOfPops
 end
 local function queueToText(queue) return table.concat(queue:elements(), "|") end
 
@@ -254,6 +260,7 @@ local function load(lane)
     lane.waitCount = data["w"] and tonumber(data["w"]) or 0
     lane.currentIndication = data["p"] or SignalIndication.RED
     lane.queue = queueFromText(data["q"], lane.vehicleCount)
+    reconcileVehicleCountAndQueue(lane)
     lane:checkRequests()
     updateLaneSignal(lane, "Neu geladen")
 
@@ -607,10 +614,11 @@ end
 --- The vehicle left this lane -> call this in a contact point
 ---@param trainName string name of the vehicle, i.e. train name in EEP
 function Lane:vehicleLeft(trainName)
-    self.vehicleCount = self.vehicleCount > 0 and self.vehicleCount - 1 or 0
-    popTrainFromQueue(self, trainName)
+    local removedVehicleCount = popTrainFromQueue(self, trainName)
+    self.vehicleCount = math.max(0, self.vehicleCount - removedVehicleCount)
+    reconcileVehicleCountAndQueue(self)
     refreshRequests(self)
-    updateLaneSignal(self, trainName .. " left")
+    updateLaneSignal(self, (trainName or "unknown train") .. " left")
     save(self)
 end
 
