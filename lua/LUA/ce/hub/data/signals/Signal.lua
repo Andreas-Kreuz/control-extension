@@ -202,6 +202,10 @@ function Signal:replaceStopDistance(stopDistance)
     DataClass.replaceField(self, "stopDistance", stopDistance)
 end
 
+function Signal:seedStopDistance(stopDistance)
+    self:replaceStopDistance(stopDistance)
+end
+
 function Signal:setStopDistance(stopDistance)
     self:replaceStopDistance(stopDistance)
 end
@@ -216,6 +220,10 @@ end
 function Signal:replaceItemName(itemName, itemNameWithModelPath)
     DataClass.replaceField(self, "itemName", itemName)
     DataClass.replaceField(self, "itemNameWithModelPath", itemNameWithModelPath)
+end
+
+function Signal:seedItemName(itemName, itemNameWithModelPath)
+    self:replaceItemName(itemName, itemNameWithModelPath)
 end
 
 function Signal:setItemName(itemName, itemNameWithModelPath)

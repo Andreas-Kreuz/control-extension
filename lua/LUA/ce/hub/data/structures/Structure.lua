@@ -227,9 +227,15 @@ function Structure:new(id, nameOrSeed, seedValues)
     return o
 end
 
+function Structure.readModelType(name, getter)
+    getter = getter or _G.EEPStructureGetModelType
+    if not name or not DataClass.isCallable(getter) then return false, nil end
+    return getter(name)
+end
+
 function Structure.exists(name)
-    if not name or not DataClass.isCallable(_G.EEPStructureGetModelType) then return false end
-    return _G.EEPStructureGetModelType(name) == true
+    local ok = Structure.readModelType(name)
+    return ok == true
 end
 
 function Structure:replacePosition(posX, posY, posZ)

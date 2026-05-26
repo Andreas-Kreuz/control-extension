@@ -8,6 +8,7 @@ local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegis
 
 local EepScenarioDataController = {}
 
+-- Path of an xml file called *.anl3, that matches the XML schema in (see) anl3-schema.xsd
 local anl3Path = nil
 local activeAnl3Discovery = { success = false, coverage = {} }
 local pendingAnl3Path = nil

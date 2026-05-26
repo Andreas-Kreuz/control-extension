@@ -17,7 +17,12 @@ local function discoverSignals()
     for i = 1, MAX_SIGNALS do
         if Signal.exists(i) then
             discoveredIds[i] = true
-            if not SignalRegistry.has(i) then SignalRegistry.add(Signal:new(i)) end
+            local signal = SignalRegistry.get(i)
+            if not signal then
+                signal = Signal:new(i)
+                SignalRegistry.add(signal)
+            end
+            if not signal:peekItemName() or not signal:peekItemNameWithModelPath() then signal:pullItemName() end
         end
     end
 
@@ -37,6 +42,10 @@ function SignalDiscovery.initFromAnl3(tableOfAnl3)
             signal:seedTag(entry.tag or "")
             if entry.tipTxt ~= nil then signal:seedTippText(entry.tipTxt) end
             if entry.tipShow ~= nil then signal:seedTippTextVisible(entry.tipShow) end
+            if entry.stopDistance ~= nil then signal:seedStopDistance(entry.stopDistance) end
+            if entry.itemName ~= nil or entry.itemNameWithModelPath ~= nil then
+                signal:seedItemName(entry.itemName, entry.itemNameWithModelPath)
+            end
             signals[#signals + 1] = signal
         end
     end

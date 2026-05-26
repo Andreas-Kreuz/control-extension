@@ -45,8 +45,10 @@ insulate("ce.hub.eep.scenario.EepScenarioAnl3Discovery", function ()
                                                         '<Kammera name="Fahrtwind" Dynamic="1"/>',
                                                         "</Kammerasammlung>",
                                                         '<Gleissystem GleissystemID="1" TrackSystemNumber="1">',
-                                                        '<Gleis GleisID="11"><Meldung name="S1" Key_Id="31"' ..
-                                                        ' LuaTag="s1tag," TipTxt="Signal 1" TipShow="1"/></Gleis>',
+                                                        '<Gleis GleisID="11"><Meldung name="Ampel2_1_neutr_oM_DH1"' ..
+                                                        ' Key_Id="31"' ..
+                                                        ' LuaTag="s1tag," TipTxt="Signal 1" TipShow="1">',
+                                                        '<Signal StopAt="100"/></Meldung></Gleis>',
                                                         "</Gleissystem>",
                                                         '<Gleissystem GleissystemID="2" TrackSystemNumber="2">',
                                                         '<Gleis GleisID="22"/></Gleissystem>',
@@ -114,6 +116,11 @@ insulate("ce.hub.eep.scenario.EepScenarioAnl3Discovery", function ()
         assert.equals(55, dt.tracks.auxiliary[1].id)
         assert.equals(66, dt.tracks.control[1].id)
         assert.equals(31, dt.signals[1].keyId)
+        assert.equals("Ampel2_1_neutr_oM_DH1", dt.signals[1].name)
+        assert.equals("Ampel2_1_neutr_oM_DH1", dt.signals[1].itemName)
+        assert.equals("Signale\\Signale\\Ampel2_1_neutr_oM_DH1.3dm",
+                      dt.signals[1].itemNameWithModelPath)
+        assert.equals(1.0, dt.signals[1].stopDistance)
         assert.equals("s1tag,", dt.signals[1].tag)
         assert.equals("Signal 1", dt.signals[1].tipTxt)
         assert.is_true(dt.signals[1].tipShow)
@@ -217,5 +224,35 @@ insulate("ce.hub.eep.scenario.EepScenarioAnl3Discovery", function ()
 
         assert.equals("GER", requestedLanguage)
         assert.equals("#3026_Straba Signal Geh\228use Mast 4", dt.structures[1].name)
+    end)
+
+    it("extracts DH1 signal model names from the road-mod anl3 fixture", function ()
+        originalEEPLoadData = _G.EEPLoadData
+        rawset(_G, "EEPLoadData", _G.EEPLoadData or function () return false, nil end)
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
+        clearModule("ce.hub.eep.scenario.EepScenarioAnl3Parser")
+
+        local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
+        local EepScenarioAnl3Discovery = require("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
+        local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+        local root = assert(EepScenarioAnl3Parser.loadAnlage(
+                                "../Resourcen/Anlagen/ce/road-mod/Kreuzung2_mit_DH1_Ampeln.anl3"))
+        local dt = EepScenarioAnl3Discovery.buildDiscoveryTable(root)
+
+        local signal9
+        local signal22
+        for _, signal in ipairs(dt.signals) do
+            if signal.keyId == 9 then signal9 = signal end
+            if signal.keyId == 22 then signal22 = signal end
+        end
+
+        assert.is_not_nil(signal9)
+        assert.equals(1.0, signal9.stopDistance)
+        assert.is_not_nil(signal22)
+        assert.equals("Ampel2_1_neutr_oM_DH1", signal22.itemName)
+        assert.equals("Signale\\Signale\\Ampel2_1_neutr_oM_DH1.3dm",
+                      signal22.itemNameWithModelPath)
+        assert.equals(TrafficLightModel.DH1_3er,
+                      TrafficLightModel.inferFromItemName(signal22.itemNameWithModelPath))
     end)
 end)

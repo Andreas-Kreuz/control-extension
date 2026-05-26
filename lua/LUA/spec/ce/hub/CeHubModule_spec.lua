@@ -158,6 +158,7 @@ insulate("CeHubModule", function ()
 
         assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Module").count)
         assert.equals(1, RuntimeMetrics.get("Discovery-init/ce.hub.Signal").count)
+        assert.equals(0, RuntimeMetrics.get("Discovery-init/ce.hub.Structure").count)
         assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Scenario").count)
         assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Structure").count)
         assert.equals(1, RuntimeMetrics.get("Update-init/ce.hub.Time").count)
@@ -165,12 +166,31 @@ insulate("CeHubModule", function ()
         assert.equals(1, RuntimeMetrics.get("Discovery-init/ce.hub.Train").count)
         assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Module").count)
         assert.equals(1, RuntimeMetrics.get("Discovery/ce.hub.Signal").count)
+        assert.equals(0, RuntimeMetrics.get("Discovery/ce.hub.Structure").count)
         assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Scenario").count)
         assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Structure").count)
         assert.equals(1, RuntimeMetrics.get("Update/ce.hub.Time").count)
         assert.equals(1, RuntimeMetrics.get("Update/ce.hub.RollingStock").count)
         assert.equals(1, RuntimeMetrics.get("Discovery/ce.hub.Train").count)
         assert.is_true(RuntimeMetrics.get("Discovery/ce.hub.Train").lastTime >= 0)
+    end)
+
+    it("starts non-anl3 structure discovery on the third run", function ()
+        local CeHubModule = require("ce.hub.CeHubModule")
+        local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
+
+        CeHubModule.init()
+
+        assert.equals(0, RuntimeMetrics.get("Discovery-init/ce.hub.Structure").count)
+
+        CeHubModule.run()
+        CeHubModule.run()
+
+        assert.equals(0, RuntimeMetrics.get("Discovery/ce.hub.Structure").count)
+
+        CeHubModule.run()
+
+        assert.equals(1, RuntimeMetrics.get("Discovery/ce.hub.Structure").count)
     end)
 
     it("marks EEP calls inside hub discovery phases separately #eepAnalyzer", function ()
@@ -186,6 +206,22 @@ insulate("CeHubModule", function ()
         assert.is_true(result.totals.calls > 0)
         assert.is_true(result.totals.discoveryCalls > 0)
         assert.is_true(result.totals.discoveryCalls <= result.totals.calls)
+    end)
+
+    it("runs EEP call analysis during initTasks without an anl3 path #eepAnalyzer", function ()
+        local ControlExtension = require("ce.ControlExtension")
+        local EepCallAnalyzer = require("ce.hub.eep.EepCallAnalyzer")
+
+        ControlExtension.setOptions({
+            eepCallAnalysis = { enabled = true, runs = 2 }
+        })
+
+        ControlExtension.initTasks()
+
+        local result = EepCallAnalyzer.getResult()
+        assert.equals(1, result.runsObserved)
+        assert.is_true(result.totals.calls > 0)
+        assert.is_true(result.totals.discoveryCalls > 0)
     end)
 
     it("skips expensive initial discovery scans when anl3 discovery succeeds", function ()

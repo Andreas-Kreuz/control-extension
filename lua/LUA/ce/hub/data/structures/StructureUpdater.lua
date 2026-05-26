@@ -80,9 +80,14 @@ local function updateStructureFields(structure, fields, isSelected)
     end
 end
 
-local function updateAllStructuresAsSelected(fields)
+local function loadInitialStructureFields()
     StructureRegistry.forEach(function (structure)
-        updateStructureFields(structure, fields, true)
+        structure:getTag()
+        structure:getLight()
+        structure:getSmoke()
+        structure:getFire()
+        structure:getPosition()
+        structure:getRotation()
     end)
 end
 
@@ -140,7 +145,7 @@ function StructureUpdater.runInitialUpdate()
         if StructureDiscovery.wasSeededFromAnl3() then
             resetAllStructures()
         else
-            updateAllStructuresAsSelected({})
+            loadInitialStructureFields()
             resetAllStructures()
         end
     end
