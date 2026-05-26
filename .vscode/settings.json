@@ -343,5 +343,7 @@
     }
   },
   "files.eol": "\n",
-  "stylua.targetReleaseVersion": "latest"
+  "stylua.targetReleaseVersion": "latest",
+  "Lua.completion.displayContext": 0,
+  "Lua.runtime.path": ["?.lua", "?/init.lua", "lua/LUA/?.lua"]
 }
