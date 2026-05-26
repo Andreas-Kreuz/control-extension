@@ -143,9 +143,11 @@
 - Key-ID: `id`
 - DtoFactory: `ce.mods.road.data.TrafficLightModelDtoFactory.createTrafficLightModelDto`
 
-| Name        | Typ                             |
-| ----------- | ------------------------------- |
-| `id`        | `string`                        |
-| `name`      | `string`                        |
-| `type`      | `string`                        |
-| `positions` | `TrafficLightModelPositionsDto` |
+| Name                  | Typ                             |
+| --------------------- | ------------------------------- |
+| `id`                  | `string`                        |
+| `name`                | `string`                        |
+| `type`                | `string`                        |
+| `modelNamePatterns`   | `string[]`                      |
+| `modelNameMatchOrder` | `number`                        |
+| `positions`           | `TrafficLightModelPositionsDto` |

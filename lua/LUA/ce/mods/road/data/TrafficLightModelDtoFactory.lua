@@ -30,6 +30,8 @@ local function toTrafficLightModelDto(definition)
         id = definition.id,
         name = definition.name,
         type = definition.type,
+        modelNamePatterns = definition.modelNamePatterns or {},
+        modelNameMatchOrder = definition.modelNameMatchOrder,
         positionRed = positions.positionRed,
         positionGreen = positions.positionGreen,
         positionYellow = positions.positionYellow,

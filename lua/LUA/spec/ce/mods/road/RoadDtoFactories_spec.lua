@@ -146,6 +146,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                     id = "road",
                     name = "road",
                     type = "road",
+                    modelNamePatterns = { "^road$" },
+                    modelNameMatchOrder = 1,
                     positions = {
                         positionRed = 1,
                         positionGreen = 2,
@@ -422,6 +424,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                             id = "road",
                             name = "road",
                             type = "road",
+                            modelNamePatterns = { "^road$" },
+                            modelNameMatchOrder = 1,
                             positionRed = 1,
                             positionGreen = 2,
                             positionYellow = 3,
