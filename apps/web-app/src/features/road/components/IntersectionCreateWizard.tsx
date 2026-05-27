@@ -831,13 +831,6 @@ function validateIntersectionWizardDraft(
       .filter((ampel): ampel is IntersectionWizardAmpelAppDto => Boolean(ampel));
     const signalAmpeln = groupAmpeln.filter((ampel) => !isStructureLightAmpel(ampel));
     const structureAmpeln = groupAmpeln.filter(isStructureLightAmpel);
-    const hasAssignedLaneSignal = draft.lanes.some(
-      (lane) =>
-        effectiveLaneSignalGroupAssignments(lane, draft.signalGroups).some(
-          (assignment) => assignment.signalGroupId === group.id,
-        ) && positiveSignalId(lane.signal.signalId) !== undefined,
-    );
-
     if (group.trafficType !== 'PEDESTRIAN' && group.turnDirections.length === 0) {
       addValidationError(
         validation,
@@ -847,7 +840,7 @@ function validateIntersectionWizardDraft(
         `${group.name}: Wähle mindestens eine Richtung.`,
       );
     }
-    if (signalAmpeln.length === 0 && !(structureAmpeln.length > 0 && hasAssignedLaneSignal)) {
+    if (signalAmpeln.length === 0 && structureAmpeln.length === 0) {
       addValidationError(
         validation,
         2,
