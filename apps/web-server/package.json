@@ -1,6 +1,6 @@
 {
   "name": "@ce/web-server",
-  "version": "v0.0.10-alpha",
+  "version": "v0.0.11-alpha",
   "description": "Control Extension Server für EEP",
   "type": "commonjs",
   "private": true,
