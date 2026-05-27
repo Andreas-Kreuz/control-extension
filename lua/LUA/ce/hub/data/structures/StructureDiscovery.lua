@@ -18,35 +18,27 @@ function StructureDiscovery.wasSeededFromAnl3()
 end
 
 local MAX_STRUCTURES = 50000
+local DISCOVERY_BATCH_SIZE = 100
+local nextDiscoveryIndex = 0
+local discoveredIds = {}
+local discoveryComplete = false
 
-local function structureExists(name)
-    return Structure.exists(name)
+local function readStructureModelType(name)
+    return Structure.readModelType(name)
 end
 
 local function round2(value)
     return value and tonumber(string.format("%.2f", value)) or 0
 end
 
-local function isStructureSignalHousing(structure)
-    local gsbname = string.lower(tostring(structure.gsbname or "")):gsub("/", "\\")
-    if string.match(gsbname, "^\\immobilien\\verkehr\\signale\\strabasigg.*ma1%.3dm$") then return true end
-
-    local name = string.lower(tostring(structure.name or ""))
-    return string.find(name, "straba signal geh", 1, true) ~= nil or
-        string.find(name, "straba signal gehaeuse", 1, true) ~= nil or
-        string.find(name, "tram signal casing", 1, true) ~= nil
-end
-
-local function applyTagUpdateForHousing(structure)
-    if not isStructureSignalHousing(structure) then return end
-
-    structure:pullTag()
-end
-
-local function applyStaticUpdate(structure)
-    structure:pullModelType()
+local function applyDiscoveryUpdate(structure, modelType)
+    structure:seedModelType(modelType)
     structure:pullPosition()
     structure:pullRotation()
+    structure:getTag()
+    structure:getLight()
+    structure:getSmoke()
+    structure:getFire()
 end
 
 local function applyPositionAndRotation(structure)
@@ -54,23 +46,7 @@ local function applyPositionAndRotation(structure)
     structure:pullRotation()
 end
 
-local function discoverStructures()
-    local discoveredIds = {}
-
-    for i = 0, MAX_STRUCTURES do
-        local name = "#" .. tostring(i)
-        if structureExists(name) then
-            local structure = StructureRegistry.get(name)
-            discoveredIds[name] = true
-            if not structure then
-                structure = Structure:new(name)
-                StructureRegistry.add(structure)
-            end
-            applyStaticUpdate(structure)
-            applyTagUpdateForHousing(structure)
-        end
-    end
-
+local function removeUndiscoveredStructures()
     for structureId in pairs(StructureRegistry.getAll()) do
         if not discoveredIds[structureId] then
             StructureRegistry.remove(structureId)
@@ -78,10 +54,39 @@ local function discoverStructures()
     end
 end
 
+local function discoverStructureBatch()
+    if discoveryComplete then return end
+
+    local scanEnd = math.min(MAX_STRUCTURES, nextDiscoveryIndex + DISCOVERY_BATCH_SIZE - 1)
+    for i = nextDiscoveryIndex, scanEnd do
+        local name = "#" .. tostring(i)
+        local exists, modelType = readStructureModelType(name)
+        if exists then
+            local structure = StructureRegistry.get(name)
+            discoveredIds[name] = true
+            if not structure then
+                structure = Structure:new(name)
+                StructureRegistry.add(structure)
+            end
+            applyDiscoveryUpdate(structure, modelType)
+        end
+    end
+
+    if scanEnd >= MAX_STRUCTURES then
+        discoveryComplete = true
+        removeUndiscoveredStructures()
+    else
+        nextDiscoveryIndex = scanEnd + 1
+    end
+end
+
 function StructureDiscovery.initFromAnl3(tableOfAnl3)
     if not tableOfAnl3 then return end
     if tableOfAnl3.coverage and not tableOfAnl3.coverage.structures then return end
 
+    discoveredIds = {}
+    nextDiscoveryIndex = 0
+    discoveryComplete = true
     local structures = {}
     for _, entry in ipairs(tableOfAnl3.structures or {}) do
         local id = entry.id or entry.name
@@ -128,11 +133,15 @@ end
 
 function StructureDiscovery.runInitialDiscovery()
     if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
-    discoverStructures()
+    discoveredIds = {}
+    nextDiscoveryIndex = 0
+    discoveryComplete = false
+    discoverStructureBatch()
 end
 
 function StructureDiscovery.runDiscovery()
-    -- do nothing
+    if not HubOptionsRegistry.isDiscoveryAndUpdateEnabled("structures") then return end
+    discoverStructureBatch()
 end
 
 return StructureDiscovery

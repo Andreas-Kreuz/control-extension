@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
@@ -98,6 +98,8 @@ const knownSignalModels: TrafficLightModelAppDto[] = [
     name: 'JS2_3er_mit_FG',
     type: 'VEHICLE_AND_PEDESTRIAN',
     luaConstant: 'JS2_3er_mit_FG',
+    modelNamePatterns: [],
+    modelNameMatchOrder: 0,
     positionRed: 1,
     positionGreen: 2,
     positionYellow: 3,
@@ -111,6 +113,8 @@ const knownSignalModels: TrafficLightModelAppDto[] = [
     name: 'JS2_2er_OFF_YELLOW_GREEN',
     type: 'VEHICLE_ONLY',
     luaConstant: 'JS2_2er_OFF_YELLOW_GREEN',
+    modelNamePatterns: [],
+    modelNameMatchOrder: 0,
     positionRed: 1,
     positionGreen: 2,
     positionYellow: 3,
@@ -124,6 +128,8 @@ const knownSignalModels: TrafficLightModelAppDto[] = [
     name: 'MA1_STRAB_3er_2_gruen',
     type: 'TRAM',
     luaConstant: 'MA1_STRAB_3er_2_gruen',
+    modelNamePatterns: [],
+    modelNameMatchOrder: 0,
     positionRed: 1,
     positionGreen: 2,
     positionYellow: 3,
@@ -137,6 +143,8 @@ const knownSignalModels: TrafficLightModelAppDto[] = [
     name: 'Unsichtbar_2er',
     type: 'INVISIBLE',
     luaConstant: 'Unsichtbar_2er',
+    modelNamePatterns: [],
+    modelNameMatchOrder: 0,
     positionRed: 1,
     positionGreen: 2,
     positionYellow: 0,

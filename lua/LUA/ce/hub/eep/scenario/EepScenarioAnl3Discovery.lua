@@ -98,6 +98,19 @@ local function boolFromAttr(val)
     return val ~= "0"
 end
 
+local function signalItemNameWithModelPath(itemName)
+    if type(itemName) ~= "string" or itemName == "" then return nil end
+    if itemName:find("\\", 1, true) or itemName:find("/", 1, true) then return itemName end
+    if itemName:lower():match("%.3dm$") then return "Signale\\Signale\\" .. itemName end
+    return "Signale\\Signale\\" .. itemName .. ".3dm"
+end
+
+local function signalStopDistanceFromMeldung(meldung)
+    local signal = findChild(meldung, "Signal")
+    local stopAt = signal and tonumber(signal.attrs.StopAt) or nil
+    return stopAt and stopAt / 100 or nil
+end
+
 local function textureTextsFromNode(node)
     local textureTexts = {}
     for _, child in ipairs(node.children) do
@@ -331,6 +344,9 @@ local function buildDiscoveryTable(root)
             dt.signals[#dt.signals + 1] = {
                 name = meldung.attrs.name,
                 keyId = tonumber(meldung.attrs.Key_Id),
+                itemName = meldung.attrs.name,
+                itemNameWithModelPath = signalItemNameWithModelPath(meldung.attrs.name),
+                stopDistance = signalStopDistanceFromMeldung(meldung),
                 tag = meldung.attrs.LuaTag,
                 tipTxt = meldung.attrs.TipTxt,
                 tipShow = boolFromAttr(meldung.attrs.TipShow)

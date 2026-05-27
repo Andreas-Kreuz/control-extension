@@ -1,6 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.structures.StructureUpdater ...") end
 
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+local SignalHousingStructure = require("ce.hub.data.structures.SignalHousingStructure")
 local SyncPolicy = require("ce.hub.sync.SyncPolicy")
 
 ---@class StructureUpdater
@@ -27,11 +28,6 @@ local dynamicFieldNames = {
     "rot_z"
 }
 
-local function isStructureSignalHousing(structure)
-    local gsbname = string.lower(tostring(structure:peekGsbname() or "")):gsub("/", "\\")
-    return string.match(gsbname, "^\\immobilien\\verkehr\\signale\\strabasigg.*ma1%.3dm$") ~= nil
-end
-
 local function shouldUpdateTag(fields, isSelected)
     return SyncPolicy.shouldUpdateField(fields, "tag", isSelected)
 end
@@ -49,7 +45,7 @@ local function refreshHousingStructureCache()
 
     local structureIds = {}
     StructureRegistry.forEach(function (structure, structureId)
-        if isStructureSignalHousing(structure) then structureIds[#structureIds + 1] = structureId end
+        if SignalHousingStructure.isSignalHousing(structure) then structureIds[#structureIds + 1] = structureId end
     end)
     housingStructureCache.ids = structureIds
     housingStructureCache.revision = revision
@@ -80,9 +76,14 @@ local function updateStructureFields(structure, fields, isSelected)
     end
 end
 
-local function updateAllStructuresAsSelected(fields)
+local function loadInitialStructureFields()
     StructureRegistry.forEach(function (structure)
-        updateStructureFields(structure, fields, true)
+        structure:getTag()
+        structure:getLight()
+        structure:getSmoke()
+        structure:getFire()
+        structure:getPosition()
+        structure:getRotation()
     end)
 end
 
@@ -140,7 +141,7 @@ function StructureUpdater.runInitialUpdate()
         if StructureDiscovery.wasSeededFromAnl3() then
             resetAllStructures()
         else
-            updateAllStructuresAsSelected({})
+            loadInitialStructureFields()
             resetAllStructures()
         end
     end

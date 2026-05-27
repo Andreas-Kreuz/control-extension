@@ -186,6 +186,8 @@ export default class RoadSelector {
           name: dto.name,
           type: dto.type,
           luaConstant: dto.id,
+          modelNamePatterns: dto.modelNamePatterns,
+          modelNameMatchOrder: dto.modelNameMatchOrder,
           positionRed: dto.positionRed,
           positionGreen: dto.positionGreen,
           positionYellow: dto.positionYellow,

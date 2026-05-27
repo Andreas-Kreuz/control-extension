@@ -202,6 +202,10 @@ function Signal:replaceStopDistance(stopDistance)
     DataClass.replaceField(self, "stopDistance", stopDistance)
 end
 
+function Signal:seedStopDistance(stopDistance)
+    self:replaceStopDistance(stopDistance)
+end
+
 function Signal:setStopDistance(stopDistance)
     self:replaceStopDistance(stopDistance)
 end
@@ -216,6 +220,10 @@ end
 function Signal:replaceItemName(itemName, itemNameWithModelPath)
     DataClass.replaceField(self, "itemName", itemName)
     DataClass.replaceField(self, "itemNameWithModelPath", itemNameWithModelPath)
+end
+
+function Signal:seedItemName(itemName, itemNameWithModelPath)
+    self:replaceItemName(itemName, itemNameWithModelPath)
 end
 
 function Signal:setItemName(itemName, itemNameWithModelPath)
@@ -315,9 +323,9 @@ function Signal:changeInfo(text)
     return ok
 end
 
-function Signal:showInfo(visible)
+function Signal:showInfo(visible, force)
     local value = visible == true
-    if DataClass.isLoaded(self, "tippTextVisible") and self.tippTextVisible == value then return true end
+    if not force and DataClass.isLoaded(self, "tippTextVisible") and self.tippTextVisible == value then return true end
 
     local ok = true
     if _G.EEPShowInfoSignal then ok = _G.EEPShowInfoSignal(self.id, value) ~= false end
@@ -338,11 +346,11 @@ function Signal.setTippTextById(signalId, text)
     end
 end
 
-function Signal.showTippTextById(signalId, visible)
+function Signal.showTippTextById(signalId, visible, force)
     local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
     local signal = SignalRegistry.get(signalId)
     if signal then
-        signal:showInfo(visible)
+        signal:showInfo(visible, force)
     elseif _G.EEPShowInfoSignal then
         _G.EEPShowInfoSignal(signalId, visible == true)
     end

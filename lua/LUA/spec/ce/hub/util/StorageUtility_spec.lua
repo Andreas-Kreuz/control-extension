@@ -33,6 +33,28 @@ describe("ce.hub.util.StorageUtility", function ()
         it("calculateEepLuaData()",
            function () assert.equals("[EEPLuaData]\nDS_3 = \"true\"\n", StorageUtility.calcEepLuaData()) end)
     end)
+    insulate("encoded table length", function ()
+        require("ce.hub.eep.EepSimulator")
+        local StorageUtility = require("ce.hub.util.StorageUtility")
+
+        it("uses the same key-value framing as encodeTable", function ()
+            assert.equals(10, StorageUtility.encodedTableLength({ a = "1", bb = "22" }))
+            assert.equals("a=1,bb=22,", StorageUtility.encodeTable({ a = "1", bb = "22" }))
+        end)
+
+        it("encodes with a shrinking value when the original table is too long", function ()
+            local data = {
+                a = "1",
+                q = "one|two|three"
+            }
+            local function shrinkQueueText(value)
+                return string.match(value, "^(.*)|[^|]*$")
+            end
+
+            assert.equals("a=1,q=one,", StorageUtility.encodeTableWithShrinkingValue(data, "q", shrinkQueueText, 12))
+            assert.equals("one|two|three", data.q)
+        end)
+    end)
     insulate("number 5 is stored as 5.000000", function ()
         require("ce.hub.eep.EepSimulator")
         EEPSaveData(5, 5)

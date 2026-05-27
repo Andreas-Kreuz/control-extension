@@ -812,6 +812,42 @@ function draftSignalFromTrafficLight(
   };
 }
 
+function signalGroupSourceReferences(definition: IntersectionAppDto['signalGroupDefinitions'][number]): string[] {
+  return Array.from(
+    new Set(
+      [definition.scriptVariableName?.trim(), definition.name?.trim()].filter((reference): reference is string =>
+        Boolean(reference),
+      ),
+    ),
+  );
+}
+
+function hasSignalGroupReference(values: string[] | undefined, references: string[]): boolean {
+  return references.some((reference) => values?.includes(reference));
+}
+
+function signalGroupReferenceMap(
+  definitions: IntersectionAppDto['signalGroupDefinitions'],
+  signalGroups: IntersectionWizardSignalGroupAppDto[],
+): Map<string, string> {
+  const nameCounts = new Map<string, number>();
+  definitions.forEach((definition) => {
+    const name = definition.name?.trim();
+    if (name) nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
+  });
+
+  const result = new Map<string, string>();
+  definitions.forEach((definition, index) => {
+    const signalGroupId = signalGroups[index]?.id;
+    if (!signalGroupId) return;
+    const scriptVariableName = definition.scriptVariableName?.trim();
+    const name = definition.name?.trim();
+    if (scriptVariableName) result.set(scriptVariableName, signalGroupId);
+    if (name && nameCounts.get(name) === 1) result.set(name, signalGroupId);
+  });
+  return result;
+}
+
 export function createDraftFromCurrentIntersection(
   intersection: IntersectionAppDto,
   lanes: IntersectionLaneAppDto[],
@@ -830,11 +866,25 @@ export function createDraftFromCurrentIntersection(
       phasesBySignalGroup.set(signalGroupName, phaseNames);
     });
   });
+  const pedestrianSignalIds = new Set(
+    (intersection.signalGroupDefinitions ?? [])
+      .filter((definition) => normalizeTrafficType(definition.trafficType) === 'PEDESTRIAN')
+      .flatMap((definition) => definition.signalIds.map(String)),
+  );
+  const vehicleSignalIds = new Set(
+    (intersection.signalGroupDefinitions ?? [])
+      .filter((definition) => normalizeTrafficType(definition.trafficType) !== 'PEDESTRIAN')
+      .flatMap((definition) => definition.signalIds.map(String)),
+  );
   const draftAmpeln: IntersectionWizardAmpelAppDto[] = [];
   ampeln.forEach((ampel, index) => {
     const signalId = positiveSignalId(String(ampel.signalId));
     const importedLightStructures = Object.values(ampel.lightStructures ?? {});
     const baseName = ampel.vehicleSignalName || ampel.pedestrianSignalName || `K${index + 1}`;
+    const isPedestrianOnlyBySignalGroup =
+      ampel.use === 'VEHICLE_ONLY' &&
+      pedestrianSignalIds.has(String(ampel.signalId)) &&
+      !vehicleSignalIds.has(String(ampel.signalId));
     draftAmpeln.push({
       id: `ampel-${ampel.signalId}`,
       name: baseName,
@@ -843,7 +893,7 @@ export function createDraftFromCurrentIntersection(
       ...(signalId !== undefined ? { signalId: String(signalId) } : {}),
       use: ampel.use,
       trafficType:
-        ampel.use === 'PEDESTRIAN_ONLY'
+        ampel.use === 'PEDESTRIAN_ONLY' || isPedestrianOnlyBySignalGroup
           ? 'PEDESTRIAN'
           : ampel.modelId.toLocaleLowerCase().includes('strab')
             ? 'TRAM'
@@ -911,12 +961,13 @@ export function createDraftFromCurrentIntersection(
   const signalGroups: IntersectionWizardSignalGroupAppDto[] = [];
 
   (intersection.signalGroupDefinitions ?? []).forEach((definition, index) => {
+    const definitionReferences = signalGroupSourceReferences(definition);
     const groupLanes = lanes
       .map((lane, laneIndex) => ({ lane, draftLane: draftLanes[laneIndex] }))
       .filter(
         ({ lane }) =>
-          (lane.defaultSignalGroups ?? []).includes(definition.name) ||
-          (lane.routeRules ?? []).some((rule) => rule.signalGroups.includes(definition.name)),
+          hasSignalGroupReference(lane.defaultSignalGroups, definitionReferences) ||
+          (lane.routeRules ?? []).some((rule) => hasSignalGroupReference(rule.signalGroups, definitionReferences)),
       );
     const trafficType = normalizeTrafficType(definition.trafficType);
     const firstLane = groupLanes[0]?.draftLane;
@@ -986,12 +1037,11 @@ export function createDraftFromCurrentIntersection(
     });
   }
 
-  const signalGroupIdsBySourceName = new Map(
-    (intersection.signalGroupDefinitions ?? []).map((definition, index) => [definition.name, signalGroups[index]?.id]),
-  );
+  const signalGroupIdsBySourceName = signalGroupReferenceMap(intersection.signalGroupDefinitions ?? [], signalGroups);
   if (signalGroupIdsBySourceName.size === 0) {
     Array.from(phasesBySignalGroup.keys()).forEach((name, index) => {
-      signalGroupIdsBySourceName.set(name, signalGroups[index]?.id);
+      const signalGroupId = signalGroups[index]?.id;
+      if (signalGroupId) signalGroupIdsBySourceName.set(name, signalGroupId);
     });
   }
   const signalGroupById = new Map(signalGroups.map((signalGroup) => [signalGroup.id, signalGroup]));

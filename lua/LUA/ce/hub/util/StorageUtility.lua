@@ -120,6 +120,33 @@ local function pairsByKeys(t, f)
     return iter
 end
 
+function StorageUtility.encodedTableLength(table)
+    local length = 0
+    for k, v in pairsByKeys(table) do
+        assert(type(k) == "string", "Need 'k' as string")
+        assert(type(v) == "string", "Need 'v' as string")
+        assert(not string.find(k, ","))
+        assert(not string.find(v, ","))
+        length = length + k:len() + 1 + v:len() + 1
+    end
+    return length
+end
+function StorageUtility.encodeTableWithShrinkingValue(table, key, shrinkValue, maxLength)
+    maxLength = maxLength or StorageUtility.maxRollingStockTagLength
+    if StorageUtility.encodedTableLength(table) <= maxLength then
+        return StorageUtility.encodeTable(table, maxLength)
+    end
+
+    local shrunkTable = {}
+    for k, v in pairs(table) do shrunkTable[k] = v end
+    while shrunkTable[key] ~= nil and StorageUtility.encodedTableLength(shrunkTable) > maxLength do
+        local oldValue = shrunkTable[key]
+        shrunkTable[key] = shrinkValue(oldValue)
+        assert(shrunkTable[key] ~= oldValue, "Shrink function must change value")
+    end
+    return StorageUtility.encodeTable(shrunkTable, maxLength)
+end
+
 --- Speichert die Daten einer Tabelle in einen EEP-Datenslot, z.B.:
 --- StorageUtility serialisiert Tabellen bewusst als String. Das ist eine Modulentscheidung
 --- fuer persistente Key-Value-Daten und nicht die allgemeine Typgrenze von EEPSaveData.

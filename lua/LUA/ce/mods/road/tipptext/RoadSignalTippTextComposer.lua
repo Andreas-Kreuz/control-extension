@@ -129,6 +129,7 @@ function RoadSignalTippTextComposer.composeTippText(trafficLight, lane, phaseInf
     local showNameAndColor = options.showNameAndPhaseOnSignal and
         (not lane or signalIsPartOfSignalGroup(trafficLight))
     local requestState = options.showRequestsOnSignal and lane and lane:getRequestState() or nil
+    local laneKpId = options.showLaneNamesOnSignal and lane and lane:getKpId() or nil
     local reasonText = ""
     if showPhase and not showNameAndColor and trafficLight:getCurrentIndication() and trafficLight:getReason() then
         reasonText = string.format(" %s (%s) ", trafficLight:getCurrentIndication(), trafficLight:getReason())
@@ -176,6 +177,11 @@ function RoadSignalTippTextComposer.composeTippText(trafficLight, lane, phaseInf
         infoText = fmt.appendUpTo1023(infoText, signalNamesTippText(trafficLight))
         infoText = fmt.appendUpTo1023(infoText, " ")
         infoText = fmt.appendUpTo1023(infoText, fmt.bgLightBlue(lane:getName()))
+        if laneKpId then
+            infoText = fmt.appendUpTo1023(infoText, " (")
+            infoText = fmt.appendUpTo1023(infoText, laneKpId)
+            infoText = fmt.appendUpTo1023(infoText, ")")
+        end
         infoText = fmt.appendUpTo1023(infoText, ".")
         tippTextIsShown = true
     end

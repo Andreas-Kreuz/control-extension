@@ -56,10 +56,15 @@ end
 
 function ControlExtensionHub.initTasks()
     MainLoopRunner.debug = ControlExtensionHub.debug
-    MainLoopRunner.initModules(
-        ModuleRegistry.getModuleNames(),
-        ModuleRegistry.getRegisteredCeModules(),
-        serverEnabled)
+    EepCallAnalyzer.beginRun()
+    local ok = ProtectedExecution.run("ControlExtensionHub.initTasks", function ()
+        MainLoopRunner.initModules(
+            ModuleRegistry.getModuleNames(),
+            ModuleRegistry.getRegisteredCeModules(),
+            serverEnabled)
+    end)
+    EepCallAnalyzer.endRun()
+    return ok
 end
 
 function ControlExtensionHub.runTasks(cycleCount)

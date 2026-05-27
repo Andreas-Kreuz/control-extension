@@ -5,11 +5,13 @@ local TrafficLightModelsDataCollector = {}
 
 function TrafficLightModelsDataCollector.collectTrafficLightModels()
     local trafficLightModels = {}
-    for _, model in pairs(TrafficLightModel.allModels) do
+    for _, model in ipairs(TrafficLightModel.getAllOrdered()) do
         table.insert(trafficLightModels, {
             id = model.id,
             name = model.name,
             type = "road",
+            modelNamePatterns = model.modelNamePatterns or {},
+            modelNameMatchOrder = model.modelNameMatchOrder,
             positions = {
                 positionRed = model.signalIndexRed,
                 positionGreen = model.signalIndexGreen,

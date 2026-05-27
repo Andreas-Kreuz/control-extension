@@ -107,48 +107,57 @@ function withoutExtension(value: string): string {
   return value.replace(/\.[^.]+$/, '');
 }
 
-export function inferTrafficLightModelConstantFromItemName(itemNameWithModelPath: string | undefined) {
-  if (!itemNameWithModelPath) return undefined;
-  const normalizedPath = itemNameWithModelPath.replace(/\\/g, '/');
-  const normalizedPathLower = normalizedPath.toLocaleLowerCase();
-  if (normalizedPathLower === 'signale/signale/signal_unsichtbar.3dm') return 'Unsichtbar_2er';
-
-  const fileName = basename(normalizedPath);
-  const fileNameWithoutExtension = withoutExtension(fileName);
-  const normalizedFileName = fileName.toLocaleLowerCase();
-  const normalizedFileNameWithoutExtension = fileNameWithoutExtension.toLocaleLowerCase();
-  if (normalizedFileName.startsWith('3er') && normalizedFileName.endsWith('_js2.3dm')) {
-    return normalizedFileName.includes('fg') ? 'JS2_3er_mit_FG' : 'JS2_3er_ohne_FG';
-  }
-  if (normalizedFileName.startsWith('2er') && normalizedFileName.endsWith('_js2.3dm')) {
-    if (normalizedFileName.includes('fg')) return 'JS2_2er_nur_FG';
-    if (normalizedFileName.includes('gruengelb')) return 'JS2_2er_gelb_gruen_aus';
-    if (normalizedFileName.includes('rotgelb')) return 'JS2_2er_rot_gelb_aus';
-    if (normalizedFileName.includes('rotgruen')) return 'JS2_2er_rot_gruen';
-  }
-  if (normalizedFileNameWithoutExtension === '1erlinksmast_js2') return 'JS2_1er_gruen';
-  if (normalizedFileNameWithoutExtension.endsWith('_np1')) {
-    if (normalizedFileNameWithoutExtension.includes('fd') || normalizedFileNameWithoutExtension.includes('fe')) {
-      return 'NP1_3er_mit_FG';
-    }
-    if (normalizedFileNameWithoutExtension.includes('of')) return 'NP1_3er_ohne_FG';
-  }
-  return undefined;
+function normalizedModelLookupName(itemNameWithModelPath: string): string {
+  return withoutExtension(basename(itemNameWithModelPath)).toLocaleLowerCase();
 }
 
-function modelFromConstant(modelConstant: string | undefined, models: Record<string, TrafficLightModelAppDto>) {
-  if (!modelConstant) return undefined;
-  return Object.values(models).find(
-    (model) => (model.luaConstant ?? trafficLightModelConstantForName(model.name)) === modelConstant,
-  );
+function escapeRegExpLiteral(value: string): string {
+  return value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
+function luaPatternToRegExp(pattern: string): RegExp {
+  let source = '';
+  for (let i = 0; i < pattern.length; i += 1) {
+    const char = pattern.charAt(i);
+    const next = i + 1 < pattern.length ? pattern.charAt(i + 1) : undefined;
+    if (char === '^' || char === '$') {
+      source += char;
+    } else if (char === '.' && next === '*') {
+      source += '.*';
+      i += 1;
+    } else if (char === '.') {
+      source += '.';
+    } else if (char === '%' && next !== undefined) {
+      source += escapeRegExpLiteral(next);
+      i += 1;
+    } else {
+      source += escapeRegExpLiteral(char);
+    }
+  }
+  return new RegExp(source);
+}
+
+function sortedTrafficLightModels(models: Record<string, TrafficLightModelAppDto>) {
+  return Object.values(models).sort((a, b) => a.modelNameMatchOrder - b.modelNameMatchOrder);
 }
 
 function modelFromSignalName(signalName: string | undefined, models: Record<string, TrafficLightModelAppDto>) {
-  const inferredModel = modelFromConstant(inferTrafficLightModelConstantFromItemName(signalName), models);
-  if (inferredModel) return inferredModel;
   if (!signalName) return undefined;
-  const normalizedSignalName = signalName.toLocaleLowerCase();
+  const normalizedSignalName = normalizedModelLookupName(signalName);
+  const patternModel = sortedTrafficLightModels(models).find((model) =>
+    model.modelNamePatterns.some((pattern) => luaPatternToRegExp(pattern).test(normalizedSignalName)),
+  );
+  if (patternModel) return patternModel;
+
   return Object.values(models).find((model) => normalizedSignalName.includes(model.name.toLocaleLowerCase()));
+}
+
+export function inferTrafficLightModelConstantFromItemName(
+  itemNameWithModelPath: string | undefined,
+  models: Record<string, TrafficLightModelAppDto>,
+) {
+  const model = modelFromSignalName(itemNameWithModelPath, models);
+  return model?.luaConstant ?? trafficLightModelConstantForName(model?.name);
 }
 
 function normalizeDraft(input: Partial<IntersectionWizardDraftAppDto>): IntersectionWizardDraftAppDto {
@@ -351,7 +360,6 @@ export default class IntersectionWizardService implements DomainRoomService {
     }
 
     const signalItemName = signal.itemNameWithModelPath ?? signal.itemName;
-    const inferredModelConstant = inferTrafficLightModelConstantFromItemName(signalItemName);
     const model = modelFromSignalName(signalItemName, this.roadSelector.getTrafficLightModels());
     const suggestedTrafficLightModel = model?.name;
     const lookup: IntersectionWizardSignalLookupAppDto = {
@@ -366,7 +374,7 @@ export default class IntersectionWizardService implements DomainRoomService {
     if (signal.activeFunction !== undefined) lookup.activeFunction = signal.activeFunction;
     if (suggestedTrafficLightModel) lookup.suggestedTrafficLightModel = suggestedTrafficLightModel;
     const suggestedTrafficLightModelConstant =
-      model?.luaConstant ?? inferredModelConstant ?? trafficLightModelConstantForName(suggestedTrafficLightModel);
+      model?.luaConstant ?? trafficLightModelConstantForName(suggestedTrafficLightModel);
     if (suggestedTrafficLightModelConstant)
       lookup.suggestedTrafficLightModelConstant = suggestedTrafficLightModelConstant;
     return lookup;

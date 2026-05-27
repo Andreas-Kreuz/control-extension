@@ -142,4 +142,6 @@
 ---@field id string
 ---@field name string
 ---@field type string
+---@field modelNamePatterns string[]
+---@field modelNameMatchOrder number
 ---@field positions TrafficLightModelPositionsDto

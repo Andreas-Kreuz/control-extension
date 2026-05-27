@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -57,6 +57,7 @@ import type {
   IntersectionWizardTurnDirection,
   RouteAppDto,
   ScenarioAppDto,
+  SignalAppDto,
   StructureAppDto,
   TrafficLightModelAppDto,
   TrainListAppDto,
@@ -161,6 +162,104 @@ const signalGroupCardLargeQuery = '@container (min-width: 720px)';
 const signalGroupCardExtraLargeQuery = '@container (min-width: 1040px)';
 
 type TrafficLightModelOption = { label: string; model: TrafficLightModelAppDto };
+type TrafficLightModelAutocompleteOption =
+  | TrafficLightModelOption
+  | { modelListMode: 'ALL' | 'SCENARIO'; label: string };
+
+const trafficLightModelFilter = createFilterOptions<TrafficLightModelOption>({
+  stringify: (option) => `${option.label} ${option.model.luaConstant ?? ''} ${option.model.name}`,
+});
+const expandAllTrafficLightModelsOption = { modelListMode: 'ALL', label: 'Alle Signalmodelle anzeigen' } as const;
+const scenarioTrafficLightModelsOption = {
+  modelListMode: 'SCENARIO',
+  label: 'Nur verbaute Signalmodelle anzeigen',
+} as const;
+const invisibleSignalModelConstant = 'Unsichtbar_2er';
+
+function trafficLightModelOptionValue(option: TrafficLightModelOption): string {
+  return option.model.luaConstant ?? option.model.name;
+}
+
+function isTrafficLightModelOption(
+  option: TrafficLightModelAutocompleteOption | null,
+): option is TrafficLightModelOption {
+  return Boolean(option && !('modelListMode' in option));
+}
+
+function basename(value: string): string {
+  return value.replace(/\\/g, '/').split('/').pop() ?? value;
+}
+
+function withoutExtension(value: string): string {
+  return value.replace(/\.[^.]+$/, '');
+}
+
+function normalizedModelLookupName(itemNameWithModelPath: string): string {
+  return withoutExtension(basename(itemNameWithModelPath)).toLocaleLowerCase();
+}
+
+function escapeRegExpLiteral(value: string): string {
+  return value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
+function luaPatternToRegExp(pattern: string): RegExp {
+  let source = '';
+  for (let i = 0; i < pattern.length; i += 1) {
+    const char = pattern.charAt(i);
+    const next = i + 1 < pattern.length ? pattern.charAt(i + 1) : undefined;
+    if (char === '^' || char === '$') {
+      source += char;
+    } else if (char === '.' && next === '*') {
+      source += '.*';
+      i += 1;
+    } else if (char === '.') {
+      source += '.';
+    } else if (char === '%' && next !== undefined) {
+      source += escapeRegExpLiteral(next);
+      i += 1;
+    } else {
+      source += escapeRegExpLiteral(char);
+    }
+  }
+  return new RegExp(source);
+}
+
+function modelFromSignalName(signalName: string | undefined, models: Record<string, TrafficLightModelAppDto>) {
+  if (!signalName) return undefined;
+  const normalizedSignalName = normalizedModelLookupName(signalName);
+  const orderedModels = Object.values(models).sort((a, b) => a.modelNameMatchOrder - b.modelNameMatchOrder);
+  const patternModel = orderedModels.find((model) =>
+    model.modelNamePatterns.some((pattern) => luaPatternToRegExp(pattern).test(normalizedSignalName)),
+  );
+  if (patternModel) return patternModel;
+  return Object.values(models).find((model) => normalizedSignalName.includes(model.name.toLocaleLowerCase()));
+}
+
+function trafficLightModelOptionsForInput(
+  options: TrafficLightModelOption[],
+  state: Parameters<typeof trafficLightModelFilter>[1],
+  scenarioModelValues: Set<string>,
+  selectedValue: string | undefined,
+  showAllModels: boolean,
+): TrafficLightModelAutocompleteOption[] {
+  const filteredOptions = trafficLightModelFilter(options, state);
+  if (showAllModels || state.inputValue.trim()) {
+    return showAllModels
+      ? [scenarioTrafficLightModelsOption, ...filteredOptions]
+      : [...filteredOptions, expandAllTrafficLightModelsOption];
+  }
+
+  const scenarioOptions = options.filter((option) => scenarioModelValues.has(trafficLightModelOptionValue(option)));
+  const selectedOption = selectedValue
+    ? options.find((option) => trafficLightModelOptionValue(option) === selectedValue)
+    : undefined;
+  const visibleOptions = [...scenarioOptions];
+
+  if (!selectedOption || visibleOptions.some((option) => trafficLightModelOptionValue(option) === selectedValue)) {
+    return [...visibleOptions, expandAllTrafficLightModelsOption];
+  }
+  return [selectedOption, ...visibleOptions, expandAllTrafficLightModelsOption];
+}
 
 const hiddenToggleInfoTextSx = {
   '& .MuiFormHelperText-root': {
@@ -255,13 +354,13 @@ function automaticIntersectionLuaVariableName(draft: IntersectionWizardDraftAppD
 function laneLuaDisplayName(
   lane: IntersectionWizardLaneAppDto,
   index: number,
-  _intersectionPrefix: string,
-  useManualLuaVariableNames: boolean,
+  intersectionPrefix: string,
 ) {
-  if (useManualLuaVariableNames && lane.luaVariableName?.trim()) {
-    return sanitizeLuaIdentifier(lane.luaVariableName, `lane${index + 1}`);
+  const importedLuaVariableName = lane.luaVariableName?.trim();
+  if (importedLuaVariableName) {
+    return sanitizeLuaIdentifier(importedLuaVariableName, `lane${index + 1}`);
   }
-  return `lane${index + 1}`;
+  return sanitizeLuaIdentifier(`${intersectionPrefix}Lane${index + 1}`, `lane${index + 1}`);
 }
 
 function route(path: string, socketUrl: string) {
@@ -732,13 +831,6 @@ function validateIntersectionWizardDraft(
       .filter((ampel): ampel is IntersectionWizardAmpelAppDto => Boolean(ampel));
     const signalAmpeln = groupAmpeln.filter((ampel) => !isStructureLightAmpel(ampel));
     const structureAmpeln = groupAmpeln.filter(isStructureLightAmpel);
-    const hasAssignedLaneSignal = draft.lanes.some(
-      (lane) =>
-        effectiveLaneSignalGroupAssignments(lane, draft.signalGroups).some(
-          (assignment) => assignment.signalGroupId === group.id,
-        ) && positiveSignalId(lane.signal.signalId) !== undefined,
-    );
-
     if (group.trafficType !== 'PEDESTRIAN' && group.turnDirections.length === 0) {
       addValidationError(
         validation,
@@ -748,7 +840,7 @@ function validateIntersectionWizardDraft(
         `${group.name}: Wähle mindestens eine Richtung.`,
       );
     }
-    if (signalAmpeln.length === 0 && !(structureAmpeln.length > 0 && hasAssignedLaneSignal)) {
+    if (signalAmpeln.length === 0 && structureAmpeln.length === 0) {
       addValidationError(
         validation,
         2,
@@ -1032,8 +1124,10 @@ function IntersectionCreateWizard() {
   const [routeOptions, setRouteOptions] = useState<string[]>([]);
   const [scenarioStaticCameras, setScenarioStaticCameras] = useState<string[]>([]);
   const [scenarioIntersectionNames, setScenarioIntersectionNames] = useState<string[]>([]);
+  const [scenarioSignals, setScenarioSignals] = useState<SignalAppDto[]>([]);
   const [structures, setStructures] = useState<StructureAppDto[]>([]);
   const [trafficLightModels, setTrafficLightModels] = useState<Record<string, TrafficLightModelAppDto>>({});
+  const [showAllTrafficLightModels, setShowAllTrafficLightModels] = useState(false);
   const [showAdvancedIntersectionSettings, setShowAdvancedIntersectionSettings] = useState(false);
   const [sendPreparationSettings, setSendPreparationSettings] = useState(false);
   const [expandedAmpelId, setExpandedAmpelId] = useState('');
@@ -1057,6 +1151,14 @@ function IntersectionCreateWizard() {
         .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true })),
     [trafficLightModels],
   );
+  const scenarioTrafficLightModelValues = useMemo(() => {
+    const values = new Set<string>([invisibleSignalModelConstant]);
+    scenarioSignals.forEach((signal) => {
+      const model = modelFromSignalName(signal.itemNameWithModelPath ?? signal.itemName, trafficLightModels);
+      if (model) values.add(model.luaConstant ?? model.name);
+    });
+    return values;
+  }, [scenarioSignals, trafficLightModels]);
   const structureByName = useMemo(
     () => new Map(structures.map((structure) => [structure.name, structure])),
     [structures],
@@ -1166,6 +1268,10 @@ function IntersectionCreateWizard() {
   useApiDataRoomHandler(CeTypes.HubFreeSlot, (payload: string) => {
     const data = JSON.parse(payload) as Record<string, DataSlotAppDto>;
     setFreeSlots(Object.values(data).sort((a, b) => Number(a.id) - Number(b.id)));
+  });
+  useApiDataRoomHandler(CeTypes.HubSignal, (payload: string) => {
+    const data = JSON.parse(payload) as Record<string, SignalAppDto>;
+    setScenarioSignals(Object.values(data));
   });
   useApiDataRoomHandler(CeTypes.HubStructure, (payload: string) => {
     const data = JSON.parse(payload) as Record<string, StructureAppDto>;
@@ -1826,11 +1932,19 @@ function IntersectionCreateWizard() {
     return model.modelConstant || model.modelName;
   }
 
+  function selectedTrafficLightModelOption(
+    options: TrafficLightModelOption[],
+    model: Pick<IntersectionWizardAmpelAppDto, 'modelConstant' | 'modelName'>,
+  ) {
+    const selectedValue = modelSelectValue(model);
+    return options.find((option) => trafficLightModelOptionValue(option) === selectedValue) ?? null;
+  }
+
   function modelOptionsWithSelected(model: Pick<IntersectionWizardAmpelAppDto, 'modelConstant' | 'modelName'>) {
     const selectedModelValue = modelSelectValue(model);
     if (
       selectedModelValue &&
-      !trafficLightModelOptions.some((option) => (option.model.luaConstant ?? option.model.name) === selectedModelValue)
+      !trafficLightModelOptions.some((option) => trafficLightModelOptionValue(option) === selectedModelValue)
     ) {
       return [
         {
@@ -1845,6 +1959,73 @@ function IntersectionCreateWizard() {
       ];
     }
     return trafficLightModelOptions;
+  }
+
+  function renderTrafficLightModelAutocomplete(
+    model: Pick<IntersectionWizardAmpelAppDto, 'modelConstant' | 'modelName'>,
+    errorTexts: string[] | undefined,
+    onSelect: (option: TrafficLightModelOption | null) => void,
+    inputLabel?: string,
+    ariaLabel?: string,
+  ) {
+    const selectedModelValue = modelSelectValue(model);
+    const options = modelOptionsWithSelected(model);
+    return (
+      <Autocomplete<TrafficLightModelAutocompleteOption, false, false, false>
+        openOnFocus
+        size="small"
+        options={options}
+        value={selectedTrafficLightModelOption(options, model)}
+        blurOnSelect={false}
+        getOptionLabel={(option) =>
+          isTrafficLightModelOption(option) ? compactTrafficLightModelLabel(option.model) : option.label
+        }
+        isOptionEqualToValue={(option, value) =>
+          isTrafficLightModelOption(option) &&
+          isTrafficLightModelOption(value) &&
+          trafficLightModelOptionValue(option) === trafficLightModelOptionValue(value)
+        }
+        filterOptions={(availableOptions, state) =>
+          trafficLightModelOptionsForInput(
+            availableOptions.filter(isTrafficLightModelOption),
+            state,
+            scenarioTrafficLightModelValues,
+            selectedModelValue,
+            showAllTrafficLightModels,
+          )
+        }
+        onChange={(_event, option) => {
+          if (option && 'modelListMode' in option) {
+            setShowAllTrafficLightModels(option.modelListMode === 'ALL');
+            return;
+          }
+          onSelect(isTrafficLightModelOption(option) ? option : null);
+        }}
+        renderOption={(props, option) => {
+          if (!('modelListMode' in option)) return <li {...props}>{compactTrafficLightModelLabel(option.model)}</li>;
+          return (
+            <li
+              {...props}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={(event) => {
+                event.preventDefault();
+                setShowAllTrafficLightModels(option.modelListMode === 'ALL');
+              }}
+            >
+              {option.label}
+            </li>
+          );
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={inputLabel}
+            error={Boolean(errorTexts?.length)}
+            inputProps={{ ...params.inputProps, ...(ariaLabel ? { 'aria-label': ariaLabel } : {}) }}
+          />
+        )}
+      />
+    );
   }
 
   function toggleExpandedAmpel(ampelId: string) {
@@ -1938,8 +2119,6 @@ function IntersectionCreateWizard() {
   }
 
   function renderSignalAmpelEditor(group: IntersectionWizardSignalGroupAppDto, ampel: IntersectionWizardAmpelAppDto) {
-    const selectedModelValue = modelSelectValue(ampel);
-    const options = modelOptionsWithSelected(ampel);
     const sourceOptions = sourceSignalOptions(group, ampel);
     const errors = validation.ampelErrors[ampel.id] ?? {};
     const nameValue = ampelNameForSignalGroup(group, ampel);
@@ -2010,29 +2189,17 @@ function IntersectionCreateWizard() {
               errorTexts={errors.model}
               infoText="Notwendig für die Anzeige von rot, gelb, grün, usw."
             >
-              <FormControl size="small" fullWidth error={Boolean(errors.model?.length)}>
-                <Select
-                  value={selectedModelValue}
-                  inputProps={{ 'aria-label': `Signal-Modell ${ampel.name}` }}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    const option = options.find((entry) => (entry.model.luaConstant ?? entry.model.name) === value);
-                    patchAmpel(ampel.id, {
-                      modelName: option?.model.name ?? value,
-                      modelConstant: option?.model.luaConstant ?? value,
-                    });
-                  }}
-                >
-                  {options.map((option) => {
-                    const value = option.model.luaConstant ?? option.model.name;
-                    return (
-                      <MenuItem key={value} value={value}>
-                        {compactTrafficLightModelLabel(option.model)}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
+              {renderTrafficLightModelAutocomplete(
+                ampel,
+                errors.model,
+                (option) =>
+                  patchAmpel(ampel.id, {
+                    modelName: option?.model.name ?? '',
+                    modelConstant: option?.model.luaConstant ?? '',
+                  }),
+                undefined,
+                `Signal-Modell ${ampel.name}`,
+              )}
             </CompactToggleField>
           </>
         )}
@@ -2494,8 +2661,6 @@ function IntersectionCreateWizard() {
   }
 
   function renderLaneSignalFields(lane: IntersectionWizardLaneAppDto) {
-    const selectedModelValue = modelSelectValue(lane.signal);
-    const options = modelOptionsWithSelected(lane.signal);
     const errors = validation.laneErrors[lane.id] ?? {};
     const effectiveAssignments = effectiveLaneSignalGroupAssignments(lane, draft.signalGroups);
     const selectableSignalGroupOptions = effectiveAssignments
@@ -2576,36 +2741,27 @@ function IntersectionCreateWizard() {
             scheduleSignalLookup(`lane:${lane.id}`, signalId, () => void updateLaneSignalId(lane.id, signalId));
           }}
         />
-        <FormControl size="small" fullWidth error={Boolean(errors.signalModel?.length)}>
-          <Select
-            value={selectedModelValue}
-            onChange={(event) => {
-              const value = event.target.value;
-              const option = options.find((entry) => (entry.model.luaConstant ?? entry.model.name) === value);
+        <Box>
+          {renderTrafficLightModelAutocomplete(
+            lane.signal,
+            errors.signalModel,
+            (option) =>
               patchLane(lane.id, {
                 signal: {
                   ...lane.signal,
-                  modelName: option?.model.name ?? value,
-                  modelConstant: option?.model.luaConstant ?? value,
+                  modelName: option?.model.name ?? '',
+                  modelConstant: option?.model.luaConstant ?? '',
                 },
-              });
-            }}
-          >
-            {options.map((option) => {
-              const value = option.model.luaConstant ?? option.model.name;
-              return (
-                <MenuItem key={value} value={value}>
-                  {compactTrafficLightModelLabel(option.model)}
-                </MenuItem>
-              );
-            })}
-          </Select>
+              }),
+            'Signal-Modell',
+            `Signal-Modell ${lane.name}`,
+          )}
           {errors.signalModel?.length && (
-            <FormHelperText>
+            <FormHelperText error>
               <strong>{errors.signalModel.join(' ')}</strong>
             </FormHelperText>
           )}
-        </FormControl>
+        </Box>
       </Box>
     );
   }
@@ -2796,7 +2952,6 @@ function IntersectionCreateWizard() {
                       draft.manualLuaVariableNames
                         ? draft.luaVariableName
                         : automaticIntersectionLuaVariableName(draft),
-                      draft.manualLuaVariableNames === true,
                     )})`}
                     icon={<DirectionsCarIcon />}
                     variant="h6"

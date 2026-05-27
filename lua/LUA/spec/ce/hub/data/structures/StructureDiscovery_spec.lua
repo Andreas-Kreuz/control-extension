@@ -211,7 +211,51 @@ insulate("ce.hub.data.structures.StructureDiscovery", function ()
 
         StructureDiscovery.runInitialDiscovery()
 
+        assert.stub(structureGetModelTypeStub).was_not_called_with("#2_Straba Signal Gehaeuse Mast 4")
         assert.stub(structureGetTagTextStub).was_called_with("#2_Straba Signal Gehaeuse Mast 4")
+        assert.equals(22, StructureRegistry.get("#2"):getModelType())
         assert.equals("p1=#4,", StructureRegistry.get("#2"):getTag())
+    end)
+
+    it("discovers structures in batches of 100", function ()
+        structureGetModelTypeStub:revert()
+        structureGetModelTypeStub = stub(_G, "EEPStructureGetModelType", function (name)
+            if name == "#101" then return true, 22 end
+            return false
+        end)
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+
+        StructureDiscovery.runInitialDiscovery()
+
+        assert.stub(structureGetModelTypeStub).was_called_with("#0")
+        assert.stub(structureGetModelTypeStub).was_called_with("#99")
+        assert.stub(structureGetModelTypeStub).was_not_called_with("#100")
+        assert.is_nil(StructureRegistry.get("#101"))
+
+        StructureDiscovery.runDiscovery()
+
+        assert.stub(structureGetModelTypeStub).was_called_with("#100")
+        assert.stub(structureGetModelTypeStub).was_called_with("#199")
+        assert.equals(22, StructureRegistry.get("#101"):getModelType())
+    end)
+
+    it("removes stale structures only after the batched scan is complete", function ()
+        structureGetModelTypeStub:revert()
+        structureGetModelTypeStub = stub(_G, "EEPStructureGetModelType", function () return false end)
+        local Structure = require("ce.hub.data.structures.Structure")
+        local StructureDiscovery = require("ce.hub.data.structures.StructureDiscovery")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+        StructureRegistry.add(Structure:new("#900"))
+
+        StructureDiscovery.runInitialDiscovery()
+
+        assert.is_not_nil(StructureRegistry.get("#900"))
+
+        for _ = 1, 500 do
+            StructureDiscovery.runDiscovery()
+        end
+
+        assert.is_nil(StructureRegistry.get("#900"))
     end)
 end)

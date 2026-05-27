@@ -283,6 +283,7 @@ end
 
 function EepCallAnalyzer.endRun()
     if not state.active then return end
+    print("[#EepCallAnalyzer] runsObserved = " .. state.runsObserved + 1)
 
     state.runsObserved = state.runsObserved + 1
     EepCallAnalyzer.scanGlobals()

@@ -40,6 +40,8 @@ local ProtectedExecution = require("ce.hub.util.ProtectedExecution")
 local savingInProgress = false
 local savingGuardCycles = 0
 local MAX_SAVING_GUARD_CYCLES = 300
+local STRUCTURE_DISCOVERY_START_RUN = 3
+local runCount = 0
 
 local function tk(group, func)
     if string.find(group, "^Discovery") then
@@ -71,9 +73,6 @@ local function runInitialDataDiscovery(anl3Discovery)
     if not hasAnl3Coverage(anl3Discovery, "switches") then
         tk("Discovery-init/ce.hub.Switch", SwitchDiscovery.runInitialDiscovery)
     end
-    if not hasAnl3Coverage(anl3Discovery, "structures") then
-        tk("Discovery-init/ce.hub.Structure", StructureDiscovery.runInitialDiscovery)
-    end
     tk("Discovery-init/ce.hub.Train", function ()
         TrainDiscovery.runInitialDiscovery({
             skipTrackInitialization = hasAnl3Coverage(anl3Discovery, "tracks"),
@@ -103,7 +102,7 @@ local function runDataUpdates(anl3Discovery)
     if not hasAnl3Coverage(anl3Discovery, "switches") then
         tu("Discovery/ce.hub.Switch", SwitchDiscovery.runDiscovery)
     end
-    if not hasAnl3Coverage(anl3Discovery, "structures") then
+    if not hasAnl3Coverage(anl3Discovery, "structures") and runCount >= STRUCTURE_DISCOVERY_START_RUN then
         tu("Discovery/ce.hub.Structure", StructureDiscovery.runDiscovery)
     end
     tu("Discovery/ce.hub.Train", TrainDiscovery.runDiscovery)
@@ -135,6 +134,7 @@ function CeHubModule.init()
     HubBridgeConnector.registerFunctions()
     local anl3Discovery = EepScenarioDataController.init()
     runInitialDataDiscovery(anl3Discovery)
+    runCount = 0
     initialized = true
 end
 
@@ -155,6 +155,7 @@ function CeHubModule.run()
             return
         end
     end
+    runCount = runCount + 1
     local anl3Discovery = EepScenarioDataController.update()
     runDataUpdates(anl3Discovery)
     Scheduler:runTasks()

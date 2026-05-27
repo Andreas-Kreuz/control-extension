@@ -4,6 +4,8 @@ export interface TrafficLightModelLuaDto {
   id: string;
   name: string;
   type: string;
+  modelNamePatterns: string[];
+  modelNameMatchOrder: number;
   positionRed: number;
   positionGreen: number;
   positionYellow: number;

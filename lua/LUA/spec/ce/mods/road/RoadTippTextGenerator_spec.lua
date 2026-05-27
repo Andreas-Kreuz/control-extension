@@ -7,6 +7,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.hub.data.signals.SignalRegistry")
         clearModule("ce.hub.data.structures.StructureRegistry")
+        clearModule("ce.hub.data.structures.SignalHousingStructure")
         clearModule("ce.mods.road.IntersectionSettings")
         clearModule("ce.mods.road.Intersection")
         clearModule("ce.mods.road.Lane")
@@ -24,6 +25,15 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         return require("ce.mods.road.tipptext.RoadTippTextGenerator").generate().signals[signalId]
     end
 
+    local function addStructure(id, name, gsbname)
+        local Structure = require("ce.hub.data.structures.Structure")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+        local structure = Structure:new(id, name)
+        structure:setGsbname(gsbname)
+        StructureRegistry.add(structure)
+        return structure
+    end
+
     it("needs road state refresh only for waiting vehicle text", function ()
         local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
         local generator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
@@ -35,29 +45,34 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         assert.is_true(generator.needsRoadStateRefresh())
     end)
 
-    it("does not read domain details while all options are disabled", function ()
-        local Intersection = require("ce.mods.road.Intersection")
-        local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
-        local TrafficLight = require("ce.mods.road.TrafficLight")
-
-        local trafficLightStub = stub(TrafficLight, "getAll", function () error("no traffic light scan expected") end)
-        local signalRegistryStub = stub(SignalRegistry, "getAll", function () error("no signal scan expected") end)
-        local intersectionStub = stub(Intersection, "getAll", function ()
-            error("no intersection scan expected")
-        end)
-        finally(function ()
-            trafficLightStub:revert()
-            signalRegistryStub:revert()
-            intersectionStub:revert()
-        end)
-
+    it("does not generate tipp text while all options are disabled and no managed targets exist", function ()
         local generator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
 
-        assert.equals("false|false|false|false|false|false|false", generator.fingerprint())
+        assert.equals("false|false|false|false|false|false|false|0|0", generator.fingerprint())
         assert.are.same({
             signals = {},
             structures = {}
         }, generator.generate())
+    end)
+
+    it("generates managed clears while all options are disabled", function ()
+        local Signal = require("ce.hub.data.signals.Signal")
+        local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+
+        SignalRegistry.add(Signal:new(444))
+        addStructure("#5003", "#5003_Gehaeuse", "\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
+        TrafficLight:newForLightStructure("S6_main", "#6_Rot", "#6_Gruen", nil, nil, "#6_Gehaeuse")
+
+        local desired = require("ce.mods.road.tipptext.RoadTippTextGenerator").generate()
+
+        assert.is_false(desired.signals[444].visible)
+        assert.equals("", desired.signals[444].text)
+        assert.is_false(desired.structures["#5003_Gehaeuse"].visible)
+        assert.equals("", desired.structures["#5003_Gehaeuse"].text)
+        assert.is_false(desired.structures["#6_Gehaeuse"].visible)
+        assert.is_false(desired.structures["#6_Rot"].visible)
+        assert.is_false(desired.structures["#6_Gruen"].visible)
     end)
 
     it("does not fetch model data while model info is disabled", function ()
@@ -203,7 +218,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
         local laneSignal = TrafficLight:new("L1_main", 102, TrafficLightModel.Unsichtbar_2er)
-        Intersection:new("C1"):newLane("Lane 1", laneSignal)
+        Intersection:new("C1"):newLane("Lane 1", laneSignal):scriptVariableName("c1Lane1")
         IntersectionSettings.showLaneNamesOnSignal = true
 
         local state = desiredForSignal(102)
@@ -211,6 +226,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         assert.is_true(state.visible)
         assert.is_truthy(string.find(state.text, "<b>L1</b>", 1, true))
         assert.is_truthy(string.find(state.text, "Lane 1", 1, true))
+        assert.is_truthy(string.find(state.text, "c1Lane1", 1, true))
     end)
 
     it("shows short name and color for regular signals and grouped lane signals only", function ()
@@ -299,6 +315,61 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         assert.is_nil(desired.signals[332])
     end)
 
+    it("applies Signal-ID fallback to registered signal housing structures only", function ()
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+
+        addStructure("#5000", "#5000_Gehaeuse", "\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
+        addStructure("#5001", "#5001_Gehaeuse", "\\Immobilien\\Verkehr\\Sonstiges\\Haus.3dm")
+        IntersectionSettings.showSignalIdOnSignal = true
+
+        local desired = require("ce.mods.road.tipptext.RoadTippTextGenerator").generate()
+
+        assert.is_true(desired.structures["#5000_Gehaeuse"].visible)
+        assert.equals("<j>Immo: #5000", desired.structures["#5000_Gehaeuse"].text)
+        assert.is_nil(desired.structures["#5001_Gehaeuse"])
+    end)
+
+    it("keeps richer traffic light text for signal housing structures", function ()
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+        local TrafficLight = require("ce.mods.road.TrafficLight")
+
+        TrafficLight:newForLightStructure("S5_main", "#5_Rot", "#5_Gruen", nil, nil, "#5_Gehaeuse")
+        StructureRegistry.getOrCreate("#5_Gehaeuse"):setGsbname(
+            "\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm"
+        )
+        IntersectionSettings.showSignalIdOnSignal = true
+        IntersectionSettings.showNameAndPhaseOnSignal = true
+
+        local desired = require("ce.mods.road.tipptext.RoadTippTextGenerator").generate()
+
+        assert.is_true(desired.structures["#5_Gehaeuse"].visible)
+        assert.is_truthy(string.find(desired.structures["#5_Gehaeuse"].text, "Immo: #5", 1, true))
+        assert.is_truthy(string.find(desired.structures["#5_Gehaeuse"].text, "<b>S5</b>", 1, true))
+    end)
+
+    it("fingerprints structure registry changes while signal id text is enabled", function ()
+        local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
+        local generator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
+
+        IntersectionSettings.showSignalIdOnSignal = true
+        local firstFingerprint = generator.fingerprint()
+        addStructure("#5002", "#5002_Gehaeuse", "\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
+        local secondFingerprint = generator.fingerprint()
+
+        assert.is_true(firstFingerprint ~= secondFingerprint)
+    end)
+
+    it("fingerprints structure registry changes while signal id text is disabled", function ()
+        local generator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
+
+        local firstFingerprint = generator.fingerprint()
+        addStructure("#5004", "#5004_Gehaeuse", "\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
+        local secondFingerprint = generator.fingerprint()
+
+        assert.is_true(firstFingerprint ~= secondFingerprint)
+    end)
+
     it("shows structure housing targets and clears all related structure targets", function ()
         local IntersectionSettings = require("ce.mods.road.IntersectionSettings")
         local TrafficLight = require("ce.mods.road.TrafficLight")
@@ -314,9 +385,12 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
 
         IntersectionSettings.showNameAndPhaseOnSignal = false
         desired = require("ce.mods.road.tipptext.RoadTippTextGenerator").generate()
-        assert.is_nil(desired.structures["#2_Gehaeuse"])
-        assert.is_nil(desired.structures["#2_Rot"])
-        assert.is_nil(desired.structures["#2_Gruen"])
+        assert.is_false(desired.structures["#2_Gehaeuse"].visible)
+        assert.equals("", desired.structures["#2_Gehaeuse"].text)
+        assert.is_false(desired.structures["#2_Rot"].visible)
+        assert.equals("", desired.structures["#2_Rot"].text)
+        assert.is_false(desired.structures["#2_Gruen"].visible)
+        assert.equals("", desired.structures["#2_Gruen"].text)
     end)
 
     it("shows crossing overview phases with current phase emphasis and shrinking green bar", function ()

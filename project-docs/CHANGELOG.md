@@ -246,3 +246,43 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
 - 📖 Lua-Architektur um Speicherschutz, `.anl3`-Reload und Struktur-Metadaten ergänzt
 - 📖 Tutorial zur Ampelkreuzung mit Immobilien aktualisiert
 - 📖 Lua-Server-Vertragsnotizen für DTO-Änderungen ergänzt
+
+## **Control Extension v0.0.10-alpha** Vorschauversion
+
+### Neu in v0.0.10-alpha
+
+- ⭐ Unterstützung für DH1-Ampeln im Road-Modul.
+  Neue `TrafficLightModel`-Definitionen erkennen DH1-Signale automatisch und bilden die passenden Signalstellungen für Rot, Grün, Gelb, Aus und Fußgängerphasen ab.
+
+- ⭐ Neue Demo-Anlage mit DH1-Ampeln für das Road-Modul.
+  Enthalten ist die Anlage `Kreuzung1_mit_DH1_Ampeln` sowie ein passendes Lua-Beispiel.
+
+- ⭐ Der Kreuzungsassistent schlägt Signalmodelle aus den verbauten Signalen der aktuellen Anlage vor.
+  Die Modellauswahl zeigt zuerst die in der Anlage vorkommenden Signalmodelle und kann bei Bedarf auf alle bekannten Modelle erweitert werden.
+
+### Lua Änderungen in v0.0.10-alpha
+
+- ⭐ `TrafficLightModel` unterstützt jetzt Modellnamen-Patterns für die automatische Erkennung.
+  Diese Muster werden über die Road-DTOs an Server und App geliefert, damit Lua, Server und Kreuzungsassistent dieselbe Modellerkennung verwenden.
+
+- ⭐ Die `.anl3`-Erkennung übernimmt bei Signalen jetzt Modellpfad und Halteabstand.
+  Dadurch können Signalmodelle im Kreuzungsassistenten zuverlässiger automatisch vorbelegt werden.
+
+- ⭐ Die Struktur-Erkennung läuft in kleineren Batches und aktualisiert neben Position und Rotation auch Tag, Licht, Rauch und Feuer.
+
+- ⭐ Fahrspur-Tipptexte können jetzt zusätzlich die Kontaktpunkt-ID der Fahrspur anzeigen.
+
+### Behobene Fehler in v0.0.10-alpha
+
+- 🐞 Fahrspur-Warteschlangen mit sehr langen Zugnamen überschreiten die maximale Tag-Länge der EEP-Signale nicht mehr.
+
+- 🐞 Fahrspur-Warteschlangen bleiben konsistent, wenn ältere oder namenlose Fahrzeuge eine Fahrspur verlassen.
+
+- 🐞 Fußgängersignale kombinierter Ampeln werden korrekt beim Neuladen der Kreuzung erkannt.
+
+- 🐞 Der Kreuzungsassistent ordnet Ampelgruppen beim Überarbeiten vorhandener Kreuzungen auch über Script-Variablennamen zu.
+  Dadurch funktionieren doppelte Anzeigenamen und Fußgängergruppen mit mehreren Signalen zuverlässiger.
+
+- 🐞 Generierter Lua-Code verwendet für Fahrspuren stabile Kontaktpunkt-IDs (`setKpId`).
+
+- 🐞 Fehler in Demo-Anlage behoben, der das TrafficLightModel falsch angelegt hat.

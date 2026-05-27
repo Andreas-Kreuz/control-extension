@@ -146,6 +146,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                     id = "road",
                     name = "road",
                     type = "road",
+                    modelNamePatterns = { "^road$" },
+                    modelNameMatchOrder = 1,
                     positions = {
                         positionRed = 1,
                         positionGreen = 2,
@@ -422,6 +424,8 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
                             id = "road",
                             name = "road",
                             type = "road",
+                            modelNamePatterns = { "^road$" },
+                            modelNameMatchOrder = 1,
                             positionRed = 1,
                             positionGreen = 2,
                             positionYellow = 3,
@@ -628,12 +632,96 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
         local groupsByLane = {}
         for _, laneDto in ipairs(data.intersectionLanes) do groupsByLane[laneDto.name] = laneDto.defaultSignalGroups end
 
-        assert.same({ "sgCombined" }, groupsByLane["Spur 1"])
-        assert.same({ "sgCombined" }, groupsByLane["Spur 2"])
+        assert.same({ "sgCombinedScript" }, groupsByLane["Spur 1"])
+        assert.same({ "sgCombinedScript" }, groupsByLane["Spur 2"])
+        assert.same({ "sgCombinedScript" }, data.intersections[1].phases[1].signalGroups)
         assert.equals("sgCombinedScript", data.intersections[1].signalGroupDefinitions[1].scriptVariableName)
         assert.equals("WEST", data.intersections[1].signalGroupDefinitions[1].approach)
         assert.same({ "LEFT" }, data.intersections[1].signalGroupDefinitions[1].turnDirections)
         assert.equals("c1Lane1", data.intersectionLanes[1].kpId)
+    end)
+
+    it("collects duplicate signal group names through script-variable references", function ()
+        require("ce.hub.eep.EepSimulator")
+        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+
+        local signalHead1 = {
+            signalId = 379,
+            vehicleSignalName = "F3",
+            use = "VEHICLE_ONLY",
+            currentIndication = "RED",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local signalHead2 = {
+            signalId = 373,
+            pedestrianSignalName = "F5",
+            use = "PEDESTRIAN_ONLY",
+            currentIndication = "RED",
+            trafficLightModel = { name = "road" },
+            axisStructures = {},
+            lightStructures = {}
+        }
+        local crossing1 = {
+            getName = function () return "sgNorthPed" end,
+            getScriptVariableName = function () return "c3PedNorth" end,
+            getApproach = function () return "NORTH" end
+        }
+        local crossing2 = {
+            getName = function () return "sgNorthPed2" end,
+            getScriptVariableName = function () return "c3PedNorth2" end,
+            getApproach = function () return "NORTH" end
+        }
+        local signalGroup1 = {
+            name = "sgNorthPed",
+            getScriptVariableName = function () return "c3SgNorthPed" end,
+            getSignalHeads = function () return { [signalHead1] = "PEDESTRIAN" } end,
+            getPedestrianCrossings = function () return { crossing1 } end
+        }
+        local signalGroup2 = {
+            name = "sgNorthPed",
+            getScriptVariableName = function () return "c3SgNorthPed_2" end,
+            getSignalHeads = function () return { [signalHead2] = "PEDESTRIAN" } end,
+            getPedestrianCrossings = function () return { crossing2 } end
+        }
+        signalHead1.signalGroupsByUse = { PEDESTRIAN = signalGroup1 }
+        signalHead2.signalGroupsByUse = { PEDESTRIAN = signalGroup2 }
+        local phase = {
+            name = "P1",
+            prio = 4,
+            greenTimeSeconds = 12,
+            lanes = {},
+            signalGroups = { signalGroup1, signalGroup2 },
+            signalHeads = { [signalHead1] = "PEDESTRIAN", [signalHead2] = "PEDESTRIAN" }
+        }
+        local crossing = {
+            name = "A",
+            signalGroups = { signalGroup1, signalGroup2 },
+            staticCams = {},
+            getCurrentPhase = function () return nil end,
+            getManualPhase = function () return nil end,
+            getNextPhase = function () return nil end,
+            isGreenTimeFinished = function () return true end,
+            getGreenTimeSeconds = function () return 15 end,
+            getStaticCams = function (self) return self.staticCams end,
+            getPhases = function () return { phase } end
+        }
+
+        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local signalById = {}
+        for _, signal in ipairs(data.intersectionTrafficLights) do signalById[signal.signalId] = signal end
+
+        assert.same({ "c3SgNorthPed", "c3SgNorthPed_2" }, data.intersections[1].phases[1].signalGroups)
+        assert.same({ "c3SgNorthPed" }, data.intersections[1].pedestrianCrossings[1].signalGroups)
+        assert.same({ "c3SgNorthPed_2" }, data.intersections[1].pedestrianCrossings[2].signalGroups)
+        assert.equals("sgNorthPed", data.intersections[1].signalGroupDefinitions[1].name)
+        assert.equals("c3SgNorthPed", data.intersections[1].signalGroupDefinitions[1].scriptVariableName)
+        assert.equals("sgNorthPed", data.intersections[1].signalGroupDefinitions[2].name)
+        assert.equals("c3SgNorthPed_2", data.intersections[1].signalGroupDefinitions[2].scriptVariableName)
+        assert.equals("PEDESTRIAN_ONLY", signalById[379].use)
+        assert.is_nil(signalById[379].vehicleSignalName)
+        assert.equals("F3", signalById[379].pedestrianSignalName)
     end)
 
     it("collects implicit lane signal group links from the lane signal", function ()

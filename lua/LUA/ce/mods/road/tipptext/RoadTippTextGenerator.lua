@@ -3,7 +3,9 @@ if CeDebugLoad then print("[#Start] Loading ce.mods.road.tipptext.RoadTippTextGe
 local RoadOverviewTippTextComposer = require("ce.mods.road.tipptext.RoadOverviewTippTextComposer")
 local RoadSignalTippTextComposer = require("ce.mods.road.tipptext.RoadSignalTippTextComposer")
 local RoadTippTextOptions = require("ce.mods.road.tipptext.RoadTippTextOptions")
+local SignalHousingStructure = require("ce.hub.data.structures.SignalHousingStructure")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 
 local RoadTippTextGenerator = {}
@@ -15,11 +17,10 @@ end
 function RoadTippTextGenerator.fingerprint()
     local options = RoadTippTextOptions.read()
     local values = {
-        RoadTippTextOptions.fingerprint(options)
+        RoadTippTextOptions.fingerprint(options),
+        SignalRegistry.getRevision(),
+        StructureRegistry.getRevision()
     }
-    if options.showSignalIdOnSignal or options.showModelInfoOnSignal then
-        table.insert(values, SignalRegistry.getRevision())
-    end
     if RoadTippTextOptions.needsTrafficLightFacts(options) then
         for _, trafficLight in ipairs(TrafficLight.getAll()) do
             table.insert(values, RoadSignalTippTextComposer.fingerprint(trafficLight, options))
@@ -47,6 +48,32 @@ local function addStructureState(states, structureName, visible, text)
         visible = visible == true,
         text = text or ""
     }
+end
+
+local function shortTippName(name)
+    return name and string.match(name, "^([^_]+)") or nil
+end
+
+local function addManagedClears(desired)
+    for signalId in pairs(SignalRegistry.getAll()) do
+        addSignalState(desired.signals, signalId, false, "")
+    end
+    for _, trafficLight in ipairs(TrafficLight.getAll()) do
+        for _, structureName in ipairs(trafficLight:getAllTippTextStructures()) do
+            addStructureState(desired.structures, structureName, false, "")
+        end
+    end
+    StructureRegistry.forEach(function (structure, structureId)
+        local structureName = structure.name or structureId
+        if SignalHousingStructure.isSignalHousing(structure) then
+            addStructureState(desired.structures, structureName, false, "")
+        end
+    end)
+    for _, intersection in ipairs(RoadOverviewTippTextComposer.sortedIntersections()) do
+        if intersection:getTippStructure() then
+            addStructureState(desired.structures, intersection:getTippStructure(), false, "")
+        end
+    end
 end
 
 local function addTrafficLightState(desired, trafficLight, state)
@@ -77,6 +104,7 @@ function RoadTippTextGenerator.generate()
         signals = {},
         structures = {}
     }
+    addManagedClears(desired)
 
     if RoadTippTextOptions.needsTrafficLightFacts(options) then
         for _, trafficLight in ipairs(TrafficLight.getAll()) do
@@ -88,10 +116,17 @@ function RoadTippTextGenerator.generate()
 
     if options.showSignalIdOnSignal then
         for signalId in pairs(SignalRegistry.getAll()) do
-            if desired.signals[signalId] == nil then
+            if desired.signals[signalId] == nil or not desired.signals[signalId].visible then
                 addSignalState(desired.signals, signalId, true, "<j>Signal: " .. signalId)
             end
         end
+        StructureRegistry.forEach(function (structure, structureId)
+            local structureName = structure.name or structureId
+            if SignalHousingStructure.isSignalHousing(structure) and
+                (desired.structures[structureName] == nil or not desired.structures[structureName].visible) then
+                addStructureState(desired.structures, structureName, true, "<j>Immo: " .. shortTippName(structureName))
+            end
+        end)
     end
 
     for _, target in ipairs(overviewTargets) do

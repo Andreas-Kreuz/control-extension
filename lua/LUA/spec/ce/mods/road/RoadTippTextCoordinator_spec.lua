@@ -7,6 +7,8 @@ insulate("ce.mods.road.tipptext.RoadTippTextCoordinator", function ()
         clearModule("ce.hub.eep.EepSimulator")
         clearModule("ce.hub.data.signals.SignalRegistry")
         clearModule("ce.hub.data.structures.StructureRegistry")
+        clearModule("ce.hub.data.structures.SignalHousingStructure")
+        clearModule("ce.mods.road.IntersectionSettings")
         clearModule("ce.mods.road.Intersection")
         clearModule("ce.mods.road.TrafficLight")
         clearModule("ce.mods.road.tipptext.RoadTippTextOptions")
@@ -240,5 +242,104 @@ insulate("ce.mods.road.tipptext.RoadTippTextCoordinator", function ()
 
         assert.is_false(shownSignals[12])
         assert.equals("", changedSignals[12])
+    end)
+
+    it("applies initial clears for managed signal and structure targets after reload", function ()
+        local Signal = require("ce.hub.data.signals.Signal")
+        local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+        local Structure = require("ce.hub.data.structures.Structure")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+        local shownSignals = {}
+        local changedSignals = {}
+        local shownStructures = {}
+        local changedStructures = {}
+
+        local signal = Signal:new(13)
+        signal:seedTippText("")
+        signal:seedTippTextVisible(false)
+        SignalRegistry.add(signal)
+
+        local structure = Structure:new("#13", "#13_Gehaeuse")
+        structure:setGsbname("\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
+        structure:seedTippText("")
+        structure:seedTippTextVisible(false)
+        StructureRegistry.add(structure)
+
+        local showSignalStub = stub(_G, "EEPShowInfoSignal", function (signalId, visible)
+            shownSignals[signalId] = visible
+        end)
+        local changeSignalStub = stub(_G, "EEPChangeInfoSignal", function (signalId, text)
+            changedSignals[signalId] = text
+        end)
+        local showStructureStub = stub(_G, "EEPShowInfoStructure", function (structureName, visible)
+            shownStructures[structureName] = visible
+        end)
+        local changeStructureStub = stub(_G, "EEPChangeInfoStructure", function (structureName, text)
+            changedStructures[structureName] = text
+        end)
+        finally(function ()
+            showSignalStub:revert()
+            changeSignalStub:revert()
+            showStructureStub:revert()
+            changeStructureStub:revert()
+        end)
+
+        require("ce.mods.road.tipptext.RoadTippTextCoordinator").run()
+
+        assert.is_false(shownSignals[13])
+        assert.is_nil(changedSignals[13])
+        assert.is_false(shownStructures["#13_Gehaeuse"])
+        assert.is_nil(changedStructures["#13_Gehaeuse"])
+    end)
+
+    it("applies initial clears for newly discovered managed targets", function ()
+        local Signal = require("ce.hub.data.signals.Signal")
+        local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
+        local Structure = require("ce.hub.data.structures.Structure")
+        local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
+        local coordinator = require("ce.mods.road.tipptext.RoadTippTextCoordinator")
+        local shownSignals = {}
+        local changedSignals = {}
+        local shownStructures = {}
+        local changedStructures = {}
+
+        local showSignalStub = stub(_G, "EEPShowInfoSignal", function (signalId, visible)
+            shownSignals[signalId] = visible
+        end)
+        local changeSignalStub = stub(_G, "EEPChangeInfoSignal", function (signalId, text)
+            changedSignals[signalId] = text
+        end)
+        local showStructureStub = stub(_G, "EEPShowInfoStructure", function (structureName, visible)
+            shownStructures[structureName] = visible
+        end)
+        local changeStructureStub = stub(_G, "EEPChangeInfoStructure", function (structureName, text)
+            changedStructures[structureName] = text
+        end)
+        finally(function ()
+            showSignalStub:revert()
+            changeSignalStub:revert()
+            showStructureStub:revert()
+            changeStructureStub:revert()
+        end)
+
+        coordinator.run()
+
+        local signal = Signal:new(14)
+        signal:seedTippText("")
+        signal:seedTippTextVisible(false)
+        SignalRegistry.add(signal)
+
+        local structure = Structure:new("#14", "#14_Gehaeuse")
+        structure:setGsbname("\\Immobilien\\Verkehr\\Signale\\StrabaSigGM_4_MA1.3dm")
+        structure:seedTippText("")
+        structure:seedTippTextVisible(false)
+        StructureRegistry.add(structure)
+
+        coordinator.run()
+
+        assert.is_false(shownSignals[14])
+        assert.is_nil(changedSignals[14])
+        assert.is_false(shownStructures["#14_Gehaeuse"])
+        assert.is_nil(changedStructures["#14_Gehaeuse"])
     end)
 end)

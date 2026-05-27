@@ -153,6 +153,7 @@ local function laneFingerprintPart(lane, options)
         table.insert(values, state.source)
         table.insert(values, table.concat(state.queuedVehicleNames, "|"))
     end
+    if options.showLaneNamesOnSignal then table.insert(values, lane:getKpId() or "") end
     return table.concat(values, ":")
 end
 
