@@ -225,14 +225,6 @@ insulate("ce.mods.road.TrafficLightModel", function ()
         return string.lower(string.gsub(basename(value), "%.[^.]+$", ""))
     end
 
-    local function readFile(path)
-        local file = io.open(path, "rb")
-        if not file then return nil end
-        local text = file:read("*a")
-        file:close()
-        return text
-    end
-
     local function matchesAnyPattern(TrafficLightModel, name)
         local normalized = normalizedModelName(name)
         for _, model in ipairs(TrafficLightModel.getAllOrdered()) do
@@ -243,19 +235,60 @@ insulate("ce.mods.road.TrafficLightModel", function ()
         return false
     end
 
+    local ampelIniModels = {
+        ["Ampel_gBl_DH1.ini"] = 'Name_GER = "Ampel gelb blinkend"',
+        ["Ampel_1_gerade_DH1.ini"] = 'Name_GER = "Ampel gerade"',
+        ["Ampel2_Zus_rechts_DH1.ini"] = 'Name_GER = "Zusatz-Ampel rechts"',
+        ["Ampel_Einzel_FD_NP1.ini"] = 'Name_GER = "Ampel einzeln mit Fussgaenger"',
+        ["Ampel_2Spur_Mitte_NP1.ini"] = 'Description_GER = "Ampel zweispurig"',
+        ["Ampel_NurFussg_FD_NP1.ini"] = 'Name_GER = "Fussgaenger-Ampel"',
+        ["Baustellenampel_NP1.ini"] = 'Name_GER = "Baustellenampel"',
+        ["1erLinksMast_JS2.ini"] = 'Name_GER = "1er Ampel"',
+        ["2erFGwestMast_JS2.ini"] = 'Name_GER = "Fussgaenger-Ampel"',
+        ["2erGruenGelbLMitte_JS2.ini"] = 'Name_GER = "Ampel gelb/gruen"',
+        ["2erRotGelbMast_JS2.ini"] = 'Name_GER = "Ampel rot/gelb"',
+        ["2erRotGelbNormalMast_JS2.ini"] = 'Name_GER = "Ampel rot/gelb/gruen"',
+        ["2erRotGruenMast_JS2.ini"] = 'Name_GER = "Ampel rot/gruen"',
+        ["3erAmpel_FG_JS2.ini"] = 'Name_GER = "Ampel mit Fussgaenger"',
+        ["3erAmpel_JS2.ini"] = 'Name_GER = "Ampel ohne Fussgaenger"',
+        ["Andreaskreuz_DH1.ini"] = 'Name_GER = "Bahnuebergang"'
+    }
+
+    local ma1IniModels = {
+        ["StraBahnSignal_01_MA1.ini"] = table.concat({
+                                                          'Pos1_Fn_Name_GER = "Halt"',
+                                                          'Pos2_Fn_Name_GER = "Fahrt geradeaus"'
+                                                      }, "\n"),
+        ["StraBahnSignal_05_MA1.ini"] = table.concat({
+                                                          'Pos1_Fn_Name_GER = "Halt"',
+                                                          'Pos2_Fn_Name_GER = "Fahrt geradeaus"',
+                                                          'Pos3_Fn_Name_GER = "Halt erwarten"'
+                                                      }, "\n"),
+        ["StraBahnSignal_06_MA1.ini"] = table.concat({
+                                                          'Pos1_Fn_Name_GER = "Halt"',
+                                                          'Pos2_Fn_Name_GER = "Fahrt rechts"',
+                                                          'Pos3_Fn_Name_GER = "Halt erwarten"'
+                                                      }, "\n"),
+        ["StraBahnSignal_07_MA1.ini"] = table.concat({
+                                                          'Pos1_Fn_Name_GER = "Halt"',
+                                                          'Pos2_Fn_Name_GER = "Fahrt links"',
+                                                          'Pos3_Fn_Name_GER = "Halt erwarten"'
+                                                      }, "\n"),
+        ["StrabaSigGM_4_MA1.ini"] = table.concat({
+                                                      'Pos1_Fn_Name_GER = "Halt"',
+                                                      'Pos2_Fn_Name_GER = "Vorfahrt beachten"',
+                                                      'Pos3_Fn_Name_GER = "Halt erwarten"'
+                                                  }, "\n")
+    }
+
     it("detects every JS2, NP1 and DH1 Ampel ini model", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        local signalDir = "C:\\Spiele\\EEP18\\Resourcen\\Signale\\Signale"
-        local listing = io.popen('cmd /c dir /b "' .. signalDir .. '\\*.ini"')
-        if not listing then return end
 
         local checked = 0
-        for fileName in listing:lines() do
+        for fileName, content in pairs(ampelIniModels) do
             local hasSupportedSuffix = string.match(fileName, "_DH1%.ini$") or
                 string.match(fileName, "_NP1%.ini$") or string.match(fileName, "_JS2%.ini$")
             if hasSupportedSuffix then
-                local fullPath = signalDir .. "\\" .. fileName
-                local content = readFile(fullPath) or ""
                 local isAmpel = string.match(fileName, "[Aa]mpel") or
                     string.match(content, "Name_GER%s*=%s*\"[^\"]*[Aa]mpel") or
                     string.match(content, "Description_GER%s*=%s*\"[^\"]*[Aa]mpel")
@@ -266,20 +299,15 @@ insulate("ce.mods.road.TrafficLightModel", function ()
                 end
             end
         end
-        listing:close()
 
         assert.is_true(checked > 0)
     end)
 
     it("detects requested MA1 tram signal ini models", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
-        local signalDir = "C:\\Spiele\\EEP18\\Resourcen\\Signale\\Signale"
-        local listing = io.popen('cmd /c dir /b "' .. signalDir .. '\\*_MA1.ini"')
-        if not listing then return end
 
         local checked = 0
-        for fileName in listing:lines() do
-            local content = readFile(signalDir .. "\\" .. fileName) or ""
+        for fileName, content in pairs(ma1IniModels) do
             local positions = {}
             for index, label in string.gmatch(content, "Pos(%d+)_Fn_Name_GER%s*=%s*\"([^\"]*)\"") do
                 positions[tonumber(index)] = label
@@ -303,7 +331,6 @@ insulate("ce.mods.road.TrafficLightModel", function ()
                 assert.is_nil(model, fileName)
             end
         end
-        listing:close()
 
         assert.equals(4, checked)
     end)
