@@ -1,4 +1,4 @@
-﻿import { lazy } from 'react';
+﻿import { ReactNode, lazy, useEffect } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import navItems from './hooks/navItems';
 import RootLayout from './components/RootLayout';
@@ -16,6 +16,17 @@ const StatusRoute = lazy(() => import('../features/status/StatusRoute'));
 const TrainsRoute = lazy(() => import('../features/trains/TrainsRoute'));
 const AboutRoute = lazy(() => import('../features/about/AboutRoute'));
 
+const defaultDocumentTitle = 'Control Extension';
+const serverDocumentTitle = 'CE-Server';
+
+function DocumentTitleRoute(props: { title?: string; children: ReactNode }) {
+  useEffect(() => {
+    document.title = props.title ?? defaultDocumentTitle;
+  }, [props.title]);
+
+  return <>{props.children}</>;
+}
+
 const homeRoutes = [
   { path: '/', element: <HomeRoute /> },
   { path: '/transit/*', element: <LinesRoute /> },
@@ -28,10 +39,21 @@ const homeRoutes = [
 ];
 
 export const appRouter = createBrowserRouter([
-  { path: '/companion', element: <CompanionRoute /> },
+  {
+    path: '/companion',
+    element: (
+      <DocumentTitleRoute>
+        <CompanionRoute />
+      </DocumentTitleRoute>
+    ),
+  },
   {
     path: '/simple',
-    element: <WebLayoutSelector simple />,
+    element: (
+      <DocumentTitleRoute>
+        <WebLayoutSelector simple />
+      </DocumentTitleRoute>
+    ),
     children: homeRoutes.map((route) => ({
       path: '/simple' + route.path,
       element: route.element,
@@ -39,7 +61,11 @@ export const appRouter = createBrowserRouter([
   },
   {
     path: '/old',
-    element: <WebLayoutSelector />,
+    element: (
+      <DocumentTitleRoute>
+        <WebLayoutSelector />
+      </DocumentTitleRoute>
+    ),
     children: homeRoutes.map((route) => ({
       path: '/old' + route.path,
       element: route.element,
@@ -47,10 +73,35 @@ export const appRouter = createBrowserRouter([
   },
   {
     path: '/',
-    element: <RootLayout navItems={navItems} />,
+    element: (
+      <DocumentTitleRoute>
+        <RootLayout navItems={navItems} />
+      </DocumentTitleRoute>
+    ),
     children: homeRoutes,
   },
-  { path: '/status', element: <StatusRoute /> },
-  { path: '/server', element: <ServerRoute /> },
-  { path: '*', element: <div>Not Found: {window.location.pathname}</div> },
+  {
+    path: '/status',
+    element: (
+      <DocumentTitleRoute>
+        <StatusRoute />
+      </DocumentTitleRoute>
+    ),
+  },
+  {
+    path: '/server',
+    element: (
+      <DocumentTitleRoute title={serverDocumentTitle}>
+        <ServerRoute />
+      </DocumentTitleRoute>
+    ),
+  },
+  {
+    path: '*',
+    element: (
+      <DocumentTitleRoute>
+        <div>Not Found: {window.location.pathname}</div>
+      </DocumentTitleRoute>
+    ),
+  },
 ]);
