@@ -354,13 +354,13 @@ function automaticIntersectionLuaVariableName(draft: IntersectionWizardDraftAppD
 function laneLuaDisplayName(
   lane: IntersectionWizardLaneAppDto,
   index: number,
-  _intersectionPrefix: string,
-  useManualLuaVariableNames: boolean,
+  intersectionPrefix: string,
 ) {
-  if (useManualLuaVariableNames && lane.luaVariableName?.trim()) {
-    return sanitizeLuaIdentifier(lane.luaVariableName, `lane${index + 1}`);
+  const importedLuaVariableName = lane.luaVariableName?.trim();
+  if (importedLuaVariableName) {
+    return sanitizeLuaIdentifier(importedLuaVariableName, `lane${index + 1}`);
   }
-  return `lane${index + 1}`;
+  return sanitizeLuaIdentifier(`${intersectionPrefix}Lane${index + 1}`, `lane${index + 1}`);
 }
 
 function route(path: string, socketUrl: string) {
@@ -2952,7 +2952,6 @@ function IntersectionCreateWizard() {
                       draft.manualLuaVariableNames
                         ? draft.luaVariableName
                         : automaticIntersectionLuaVariableName(draft),
-                      draft.manualLuaVariableNames === true,
                     )})`}
                     icon={<DirectionsCarIcon />}
                     variant="h6"
