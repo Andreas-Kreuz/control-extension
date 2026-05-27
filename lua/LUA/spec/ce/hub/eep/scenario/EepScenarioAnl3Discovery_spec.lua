@@ -236,7 +236,7 @@ insulate("ce.hub.eep.scenario.EepScenarioAnl3Discovery", function ()
         local EepScenarioAnl3Discovery = require("ce.hub.eep.scenario.EepScenarioAnl3Discovery")
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
         local root = assert(EepScenarioAnl3Parser.loadAnlage(
-                                "../Resourcen/Anlagen/ce/road-mod/Kreuzung2_mit_DH1_Ampeln.anl3"))
+            "../Resourcen/Anlagen/ce/road-mod/Kreuzung1_mit_DH1_Ampeln.anl3"))
         local dt = EepScenarioAnl3Discovery.buildDiscoveryTable(root)
 
         local signal9
