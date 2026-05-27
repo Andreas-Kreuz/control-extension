@@ -140,11 +140,25 @@ end
 local TLM = TrafficLightModel
 
 -- Fuer die Strassenbahnsignale von MA1 - http://www.eep.euma.de/downloads/V80MA1F003.zip
-TLM.MA1_STRAB_4er_2_gruen = TLM:new("MA1_STRAB_4er_2_gruen", "MA1 STRAB 4er-Ampel (Stellung 2=grün)", 1, 2, 4, 4)
-TLM.MA1_STRAB_4er_3_gruen = TLM:new("MA1_STRAB_4er_3_gruen", "MA1 STRAB 4er-Ampel (Stellung 3=grün)", 1, 3, 4, 4)
+TLM.MA1_STRAB_4er_2_gruen = TLM:new(
+    "MA1_STRAB_4er_2_gruen",
+    "MA1 4er-Straba (Halt, Halt erwarten, Fahrt (2))",
+    1, -- red: "Halt" (1)
+    2, -- green: "Fahrt geradeaus/rechts/links" (2)
+    4, -- yellow: "Halt erwarten" (3)
+    4  -- redYellow: "Halt erwarten" (3)
+)
+TLM.MA1_STRAB_4er_3_gruen = TLM:new(
+    "MA1_STRAB_4er_3_gruen",
+    "MA1 4er-Straba (Halt, Halt erwarten, Fahrt (3))",
+    1, -- red: "Halt" (1)
+    3, -- green: "Fahrt geradeaus/rechts/links" (2)
+    4, -- yellow: "Halt erwarten" (3)
+    4  -- redYellow: "Halt erwarten" (3)
+)
 TLM.MA1_STRAB_2er_2_gruen = TLM:new(
     "MA1_STRAB_2er_2_gruen",
-    "MA1 STRAB 2er-Ampel (Stellung 2=grün)",
+    "MA1 4er-Straba (Halt, Fahrt)",
     1, -- red: "Halt" (1)
     2, -- green: "Fahrt geradeaus" (2)
     1, -- yellow: defaults to red: "Halt" (1)
@@ -158,7 +172,7 @@ TLM.MA1_STRAB_2er_2_gruen = TLM:new(
 )
 TLM.MA1_STRAB_3er_2_gruen = TLM:new(
     "MA1_STRAB_3er_2_gruen",
-    "MA1 STRAB 3er-Ampel (Stellung 2=grün)",
+    "MA1 4er-Straba (Halt, Halt erwarten, Fahrt)",
     1,   -- red: "Halt" (1)
     2,   -- green: "Fahrt geradeaus/rechts/links" (2)
     3,   -- yellow: "Halt erwarten" (3)
