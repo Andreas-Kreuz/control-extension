@@ -105,14 +105,7 @@ export const registerCommandMod = (
 
         const command =
           action.axisNamesKnown === true && axisName
-            ? 'RollingStock.setAxisByName|' +
-              action.rollingStockName +
-              '|' +
-              axisName +
-              '|' +
-              value +
-              '|' +
-              axisNumber
+            ? 'RollingStock.setAxisByName|' + action.rollingStockName + '|' + axisName + '|' + value + '|' + axisNumber
             : 'RollingStock.setAxisByNumberByName|' + action.rollingStockName + '|' + axisNumber + '|' + value;
         queueCommand(command);
       },

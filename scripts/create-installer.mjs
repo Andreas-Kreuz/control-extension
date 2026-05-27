@@ -159,7 +159,9 @@ function normalizeInstallPath(filePath) {
 function isInIgnoredSourceDir(filePath) {
   const relativePaths = ignoredSourceDirs.map((ignoredDir) => path.relative(ignoredDir, filePath));
 
-  return relativePaths.some((relativePath) => relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath));
+  return relativePaths.some(
+    (relativePath) => relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath),
+  );
 }
 
 function hasGlobChars(pattern) {

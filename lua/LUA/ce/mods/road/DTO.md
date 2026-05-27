@@ -57,17 +57,17 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 - Jeder Eintrag beschreibt eine Kreuzung mit eindeutiger `id` und einem `name`.
 - Wird eine Kreuzung manuell geschaltet, dann ist `manualPhase` gesetzt. Dann steuert der Nutzer über die EEP-Web-App die Phase.
 
-| Name               | Typ und Wertebereich / Beispiel                   | Beschreibung                                                                                                                                                       |
-| ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`               | `integer >= 1`; Beispiel: `1`                     | Laufende numerische ID je Kreuzung, erzeugt beim Collect in alphabetischer Reihenfolge der Kreuzungsnamen.                                                         |
-| `name`             | `string`; Beispiel: `Bahnhofstraße - Hauptstraße` | Kreuzungsname aus `Intersection:new(name, ...)`.                                                                                                                   |
-| `currentPhase`     | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der aktuell aktiven Phase aus `crossing:getCurrentPhase().name`. Wegen `nil` kann das Feld im JSON komplett fehlen.                                           |
-| `manualPhase`      | `string` oder nicht gesetzt; Beispiel: `P3`       | Name der manuell genutzten Phase aus `crossing:getManualPhase().name`.                                                                                             |
-| `nextPhase`        | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der als nächstes vorgesehenen Phase aus `crossing:getNextPhase().name`.                                                                                       |
-| `ready`            | `boolean`; Beispiel: `false`                      | Status aus `intersection:isGreenTimeFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                 |
-| `greenTimeSeconds` | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `TrafficPhase:new(...)`.                                                                           |
+| Name               | Typ und Wertebereich / Beispiel                   | Beschreibung                                                                                                                                                             |
+| ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`               | `integer >= 1`; Beispiel: `1`                     | Laufende numerische ID je Kreuzung, erzeugt beim Collect in alphabetischer Reihenfolge der Kreuzungsnamen.                                                               |
+| `name`             | `string`; Beispiel: `Bahnhofstraße - Hauptstraße` | Kreuzungsname aus `Intersection:new(name, ...)`.                                                                                                                         |
+| `currentPhase`     | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der aktuell aktiven Phase aus `crossing:getCurrentPhase().name`. Wegen `nil` kann das Feld im JSON komplett fehlen.                                                 |
+| `manualPhase`      | `string` oder nicht gesetzt; Beispiel: `P3`       | Name der manuell genutzten Phase aus `crossing:getManualPhase().name`.                                                                                                   |
+| `nextPhase`        | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der als nächstes vorgesehenen Phase aus `crossing:getNextPhase().name`.                                                                                             |
+| `ready`            | `boolean`; Beispiel: `false`                      | Status aus `intersection:isGreenTimeFinished()`: `true`, wenn die Kreuzung wieder umschaltbar ist.                                                                       |
+| `greenTimeSeconds` | `number > 0`; Beispiel: `15`                      | Standard-Grünphase in Sekunden aus `Intersection:new(...)` bzw. `TrafficPhase:new(...)`.                                                                                 |
 | `staticCams`       | `string[]`; Beispiel: `["Kreuzung 1 (von oben)"]` | Konfigurierte statische Kameranamen aus `Intersection:addStaticCam(...)`. Diese Namen werden im Web-Server später zu `Scenario.setCamera \| 0 \| <staticCam>` umgesetzt. |
-| `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `TrafficPhase`-Einträgen der Kreuzung.                                                                                         |
+| `phases`           | `IntersectionPhaseDto[]`                          | Statischer Signalzeitenplan aus den `TrafficPhase`-Einträgen der Kreuzung.                                                                                               |
 
 #### `IntersectionPhaseDto`
 
@@ -240,7 +240,7 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 
 ### Angrenzende UI-Events, aber nicht in `ce/mods/road` ausgewertet
 
-| Event                          | Zweck                                                            | Tatsächliche Auswertung                                                                                       |
-| ------------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Event                          | Zweck                                                            | Tatsächliche Auswertung                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `[Command Event] Change Cam`   | Umschalten auf statische Kamera aus `intersections[].staticCams` | Nicht in `ce/mods/road`, sondern im Web-Server-Command-Modul; daraus wird `Scenario.setCamera \| 0 \| <staticCam>`. |
-| `[Room] Join` / `[Room] Leave` | Beitritt und Verlassen von Socket-Räumen                         | Infrastruktur der Web-App/Web-Server-Schicht, nicht `ce/mods/road`.                                           |
+| `[Room] Join` / `[Room] Leave` | Beitritt und Verlassen von Socket-Räumen                         | Infrastruktur der Web-App/Web-Server-Schicht, nicht `ce/mods/road`.                                                 |

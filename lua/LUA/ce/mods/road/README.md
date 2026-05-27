@@ -149,10 +149,10 @@ Ampelgruppen beschreiben die Verkehrsströme, die eine Fahrspur freigeben könne
 
 Ältere direkte TrafficLight-Schreibweisen wie `TrafficLight:applyToLane(...)`, `driveOnDefaultSignals(...)`, `driveOnlyOn(...)`, `driveAlsoOn(...)` und `showRequestsOn(...)` bleiben zur Kompatibilität erhalten. Neue Anlagen sollten Ampelgruppen verwenden.
 
-| Parameter     | Typ                | Bedeutung                                                          |
-| ------------- | ------------------ | ------------------------------------------------------------------ |
+| Parameter     | Typ                | Bedeutung                                                         |
+| ------------- | ------------------ | ----------------------------------------------------------------- |
 | `signalGroup` | `SignalGroup`, ... | Eine oder mehrere Ampelgruppen, deren Grün die Fahrspur freigibt. |
-| `route`       | `string`, ...      | Eine oder mehrere Routen, für die eine Routensignal-Regel gilt.    |
+| `route`       | `string`, ...      | Eine oder mehrere Routen, für die eine Routensignal-Regel gilt.   |
 
 Beispiele:
 
@@ -412,8 +412,8 @@ also mit einem Doppelpunkt und nicht mit einem Punkt.
 
 Legt eine Ampelgruppe für einen Verkehrsfluss an. Jede logische Nutzung eines physischen `TrafficLight` darf nur in einer Ampelgruppe vorkommen. Ein kombiniertes Fahrzeug-/Fußgängersignal kann also einmal als Fahrzeug-Signal und einmal als Fußgänger-Signal verwendet werden, aber nicht in derselben Phase gleichzeitig freigegeben werden.
 
-| Parameter | Typ      | Bedeutung                                                            |
-| --------- | -------- | -------------------------------------------------------------------- |
+| Parameter | Typ      | Bedeutung                                                           |
+| --------- | -------- | ------------------------------------------------------------------- |
 | `name`    | `string` | Name der Ampelgruppe, z.B. `sgLane1Straight` oder `sgPedNorthSouth` |
 
 | Rückgabewert                                      |

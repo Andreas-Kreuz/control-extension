@@ -143,9 +143,13 @@ function installSignalHandler(signal) {
 
 async function runCypress() {
   return await new Promise((resolve) => {
-    cypressProcess = spawnInherited(process.execPath, [path.join(repoRoot, 'scripts', 'run-cypress.mjs'), ...cypressArgs], {
-      cwd: webAppDir,
-    });
+    cypressProcess = spawnInherited(
+      process.execPath,
+      [path.join(repoRoot, 'scripts', 'run-cypress.mjs'), ...cypressArgs],
+      {
+        cwd: webAppDir,
+      },
+    );
 
     cypressProcess.on('error', (error) => {
       console.error(error);

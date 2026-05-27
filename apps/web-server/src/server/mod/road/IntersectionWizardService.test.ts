@@ -36,11 +36,7 @@ function testInfersTrafficLightModelConstantsFromDtoPatterns(): void {
     JS2_3er_mit_FG: model('JS2_3er_mit_FG', ['^3er.*fg.*_js2$'], 2),
     JS2_3er_ohne_FG: model('JS2_3er_ohne_FG', ['^3er.*_js2$'], 3),
     JS2_2er_gelb_gruen_aus: model('JS2_2er_gelb_gruen_aus', ['^2ergruengelb.*_js2$'], 4),
-    JS2_2er_rot_gelb_aus: model(
-      'JS2_2er_rot_gelb_aus',
-      ['^2errotgelbausleger_js2$', '^2errotgelbmast_js2$'],
-      5,
-    ),
+    JS2_2er_rot_gelb_aus: model('JS2_2er_rot_gelb_aus', ['^2errotgelbausleger_js2$', '^2errotgelbmast_js2$'], 5),
     JS2_2er_rot_gelb_gruen_aus: model('JS2_2er_rot_gelb_gruen_aus', ['^2errotgelbnormal.*_js2$'], 6),
     JS2_2er_rot_gruen: model('JS2_2er_rot_gruen', ['^2errotgruen.*_js2$'], 7),
     JS2_1er_gruen: model('JS2_1er_gruen', ['^1erlinks.*_js2$'], 8),

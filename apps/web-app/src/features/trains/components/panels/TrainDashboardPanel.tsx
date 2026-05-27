@@ -56,7 +56,9 @@ function TrainDashboardPanel(props: { dashboard: TrainDashboardPanelModel; rolli
 
   return (
     <PageContainer>
-      <PageHeadline icon={<DashboardIcon color="primary" />} rightSettings={fuhrparkButton}>Aktiver Zug</PageHeadline>
+      <PageHeadline icon={<DashboardIcon color="primary" />} rightSettings={fuhrparkButton}>
+        Aktiver Zug
+      </PageHeadline>
       <Stack spacing={2}>
         <CardGridContainer>
           <Grid size={{ xs: 12 }}>

@@ -812,13 +812,11 @@ function draftSignalFromTrafficLight(
   };
 }
 
-function signalGroupSourceReferences(
-  definition: IntersectionAppDto['signalGroupDefinitions'][number],
-): string[] {
+function signalGroupSourceReferences(definition: IntersectionAppDto['signalGroupDefinitions'][number]): string[] {
   return Array.from(
     new Set(
-      [definition.scriptVariableName?.trim(), definition.name?.trim()].filter(
-        (reference): reference is string => Boolean(reference),
+      [definition.scriptVariableName?.trim(), definition.name?.trim()].filter((reference): reference is string =>
+        Boolean(reference),
       ),
     ),
   );

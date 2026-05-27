@@ -1,4 +1,4 @@
 interface:
-  display_name: "Control Extension Lua"
-  short_description: "Lua workflow for Control Extension"
-  default_prompt: "Use $control-extension-lua when editing or reviewing Lua code in control-extension."
+  display_name: 'Control Extension Lua'
+  short_description: 'Lua workflow for Control Extension'
+  default_prompt: 'Use $control-extension-lua when editing or reviewing Lua code in control-extension.'
