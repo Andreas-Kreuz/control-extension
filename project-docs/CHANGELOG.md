@@ -284,3 +284,5 @@ Aktuell kann sich mit jedem Release das Erscheinungsbild der App und die inneren
   Dadurch funktionieren doppelte Anzeigenamen und Fußgängergruppen mit mehreren Signalen zuverlässiger.
 
 - 🐞 Generierter Lua-Code verwendet für Fahrspuren stabile Kontaktpunkt-IDs (`setKpId`).
+
+- 🐞 Fehler in Demo-Anlage behoben, der das TrafficLightModel falsch angelegt hat.
