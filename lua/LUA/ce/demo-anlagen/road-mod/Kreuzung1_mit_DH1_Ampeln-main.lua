@@ -7,10 +7,10 @@ local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
 Intersection.debug = false
 
--- START Kreuzung c1 (c1)
+-- START Kreuzung c1 (Kreuzung mit DH1-Signalen ohne FG)
 do
     -- Kreuzung
-    local c1 = Intersection:new("c1", 15)
+    local c1 = Intersection:new("Kreuzung mit DH1-Signalen ohne FG", 15)
         :setScriptVariableName("c1")
         :setTippStructure("#60_1Spur_Fahrradständer2_AS3")
         :withStorage(2)
@@ -25,6 +25,7 @@ do
     local c1K6 = TrafficLight:newForSignal("K6", 20, TrafficLightModel.DH1_3er)
     local c1K7 = TrafficLight:newForSignal("K7", 8, TrafficLightModel.DH1_3er)
     local c1K8 = TrafficLight:newForSignal("K8", 19, TrafficLightModel.DH1_3er)
+    local c1K9 = TrafficLight:newForSignal("K9", 10, TrafficLightModel.DH1_3er)
     local c1S1 = TrafficLight:newForLightStructure("S1",
                                                    "#29_Straba Signal Halt",
                                                    "#28_Straba Signal geradeaus",
@@ -54,10 +55,10 @@ do
     -- Fahrspur-Ampeln
     local c1Lane1Signal = TrafficLight:newForSignal("FS1Signal", 12, TrafficLightModel.Unsichtbar_2er)
     local c1Lane2Signal = TrafficLight:newForSignal("FS2Signal", 13, TrafficLightModel.Unsichtbar_2er)
-    local c1Lane3Signal = TrafficLight:newForSignal("lane3Sig", 14, TrafficLightModel.Unsichtbar_2er)
-    local c1Lane4Signal = TrafficLight:newForSignal("lane4Sig", 7, TrafficLightModel.Unsichtbar_2er)
-    local c1Lane5Signal = TrafficLight:newForSignal("lane5Sig", 9, TrafficLightModel.Unsichtbar_2er)
-    local c1Lane6Signal = TrafficLight:newForSignal("lane6Sig", 15, TrafficLightModel.Unsichtbar_2er)
+    local c1Lane3Signal = TrafficLight:newForSignal("FS3Signal", 14, TrafficLightModel.Unsichtbar_2er)
+    local c1Lane4Signal = TrafficLight:newForSignal("FS4Signal", 7, TrafficLightModel.Unsichtbar_2er)
+    local c1Lane5Signal = TrafficLight:newForSignal("FS5Signal", 9, TrafficLightModel.Unsichtbar_2er)
+    local c1Lane6Signal = TrafficLight:newForSignal("FS6Signal", 15, TrafficLightModel.Unsichtbar_2er)
 
     -- Fahrspuren
     c1Lane1 = c1:newLane("FS1", c1Lane1Signal)
@@ -81,13 +82,13 @@ do
         :setScriptVariableName("c1SgWestCarStraight")
         :setApproach(Lane.Approach.WEST)
         :setTurnDirections(Lane.Directions.STRAIGHT)
-        :addVehicleSignals(c1K2, c1K1)
+        :addVehicleSignals(c1K1, c1K2)
     local c1SgWestCarLeft = c1
         :newSignalGroup("sgWestCarLeft")
         :setScriptVariableName("c1SgWestCarLeft")
         :setApproach(Lane.Approach.WEST)
         :setTurnDirections(Lane.Directions.LEFT)
-        :addVehicleSignals(c1K4, c1K3)
+        :addVehicleSignals(c1K3, c1K4)
     local c1SgNorthCarLeftRight = c1
         :newSignalGroup("sgNorthCarLeftRight")
         :setScriptVariableName("c1SgNorthCarLeftRight")
@@ -99,19 +100,19 @@ do
         :setScriptVariableName("c1SgWestTramStraight")
         :setApproach(Lane.Approach.WEST)
         :setTurnDirections(Lane.Directions.STRAIGHT)
-        :addTramSignals(c1S1, c1S2)
+        :addTramSignals(c1S2, c1S1)
     local c1SgEastCarStraightRight = c1
         :newSignalGroup("sgEastCarStraightRight")
         :setScriptVariableName("c1SgEastCarStraightRight")
         :setApproach(Lane.Approach.EAST)
         :setTurnDirections(Lane.Directions.STRAIGHT, Lane.Directions.RIGHT)
-        :addVehicleSignals(c1K5, c1K8)
+        :addVehicleSignals(c1K8, c1K5, c1K9)
     local c1SgEastTramStraight = c1
         :newSignalGroup("sgEastTramStraight")
         :setScriptVariableName("c1SgEastTramStraight")
         :setApproach(Lane.Approach.EAST)
         :setTurnDirections(Lane.Directions.STRAIGHT)
-        :addTramSignals(c1S3, c1S4)
+        :addTramSignals(c1S4, c1S3)
 
     -- Zuordnung der Ampelgruppen zu Fahrspuren
     c1Lane1:driveOnDefaultSignalGroups(c1SgWestCarStraight)
@@ -139,7 +140,7 @@ do
             c1SgEastTramStraight
         )
 end
--- END Kreuzung c1 (c1)
+-- END Kreuzung c1 (Kreuzung mit DH1-Signalen ohne FG)
 
 --------------------------------
 -- Lade Funktionen fuer Ampeln
@@ -164,7 +165,7 @@ function onLaneLeft(trainName, laneKpId)
 end
 
 local ControlExtension = require("ce.ControlExtension")
-    .setOptions({ anl3path = "Resourcen\\Anlagen\\ce\\road-mod\\Kreuzung2_mit_DH1_Ampeln.anl3", })
+    .setOptions({ anl3path = "Resourcen\\Anlagen\\ce\\road-mod\\Kreuzung1_mit_DH1_Ampeln.anl3", })
     .addModules(require("ce.mods.road.CeRoadModule"))
 
 function EEPMain()
