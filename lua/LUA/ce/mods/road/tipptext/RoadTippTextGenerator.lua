@@ -7,6 +7,7 @@ local SignalHousingStructure = require("ce.hub.data.structures.SignalHousingStru
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local StructureRegistry = require("ce.hub.data.structures.StructureRegistry")
 local TrafficLight = require("ce.mods.road.TrafficLight")
+local ZipperMerge = require("ce.mods.road.ZipperMerge")
 
 local RoadTippTextGenerator = {}
 
@@ -19,7 +20,8 @@ function RoadTippTextGenerator.fingerprint()
     local values = {
         RoadTippTextOptions.fingerprint(options),
         SignalRegistry.getRevision(),
-        StructureRegistry.getRevision()
+        StructureRegistry.getRevision(),
+        ZipperMerge.getRevision()
     }
     if RoadTippTextOptions.needsTrafficLightFacts(options) then
         for _, trafficLight in ipairs(TrafficLight.getAll()) do
@@ -111,6 +113,13 @@ function RoadTippTextGenerator.generate()
             local state = RoadSignalTippTextComposer.state(trafficLight, laneBySignal[trafficLight],
                                                            phasesBySignal[trafficLight], options)
             addTrafficLightState(desired, trafficLight, state)
+        end
+    end
+
+    for signalId in pairs(SignalRegistry.getAll()) do
+        if desired.signals[signalId] == nil or not desired.signals[signalId].visible then
+            local state = RoadSignalTippTextComposer.zipperMergeState(signalId)
+            if state.visible then addSignalState(desired.signals, signalId, state.visible, state.text) end
         end
     end
 

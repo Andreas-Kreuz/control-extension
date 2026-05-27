@@ -16,26 +16,30 @@ insulate("ce.mods.road.tipptext.RoadTippTextCoordinator", function ()
         clearModule("ce.mods.road.tipptext.RoadOverviewTippTextComposer")
         clearModule("ce.mods.road.tipptext.RoadTippTextGenerator")
         clearModule("ce.mods.road.tipptext.RoadTippTextCoordinator")
+        clearModule("ce.mods.road.ZipperMerge")
         clearModule("ce.mods.road.CeRoadModule")
         require("ce.hub.eep.EepSimulator")
     end)
 
-    it("is called by CeRoadModule.run after phase switching", function ()
+    it("is called by CeRoadModule.run after phase switching and zipper merges", function ()
         local CeRoadModule = require("ce.mods.road.CeRoadModule")
         local Intersection = require("ce.mods.road.Intersection")
         local RoadTippTextCoordinator = require("ce.mods.road.tipptext.RoadTippTextCoordinator")
+        local ZipperMerge = require("ce.mods.road.ZipperMerge")
         local calls = {}
 
         local switchStub = stub(Intersection, "switchPhases", function () table.insert(calls, "switch") end)
+        local zipperStub = stub(ZipperMerge, "runAll", function () table.insert(calls, "zipper") end)
         local runStub = stub(RoadTippTextCoordinator, "run", function () table.insert(calls, "tipp") end)
         finally(function ()
             switchStub:revert()
+            zipperStub:revert()
             runStub:revert()
         end)
 
         CeRoadModule.run()
 
-        assert.are.same({ "switch", "tipp" }, calls)
+        assert.are.same({ "switch", "zipper", "tipp" }, calls)
     end)
 
     it("does not update global signal tipp texts in Intersection.switchPhases", function ()
