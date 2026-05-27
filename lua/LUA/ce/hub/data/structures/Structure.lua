@@ -622,9 +622,9 @@ function Structure:changeInfo(text)
     return ok
 end
 
-function Structure:showInfo(visible)
+function Structure:showInfo(visible, force)
     local value = visible == true
-    if DataClass.isLoaded(self, "tippTextVisible") and self.tippTextVisible == value then return true end
+    if not force and DataClass.isLoaded(self, "tippTextVisible") and self.tippTextVisible == value then return true end
 
     local ok = true
     if _G.EEPShowInfoStructure then ok = _G.EEPShowInfoStructure(self.name, value) ~= false end
@@ -713,11 +713,11 @@ function Structure.setTippTextByName(structureName, text)
     end
 end
 
-function Structure.showTippTextByName(structureName, visible)
+function Structure.showTippTextByName(structureName, visible, force)
     if not structureName then return end
     local structure = registryStructure(structureName)
     if structure then
-        structure:showInfo(visible)
+        structure:showInfo(visible, force)
     elseif _G.EEPShowInfoStructure then
         _G.EEPShowInfoStructure(structureName, visible == true)
     end

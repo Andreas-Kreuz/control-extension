@@ -27,16 +27,18 @@ local function targetSet(states)
     return targets
 end
 
-local function applySignalStates(signalStates)
+local function applySignalStates(signalStates, knownTargets)
     for signalId, state in pairs(signalStates) do
-        Signal.showTippTextById(signalId, state.visible)
+        local force = knownTargets[signalId] ~= true
+        Signal.showTippTextById(signalId, state.visible, force)
         Signal.setTippTextById(signalId, state.text)
     end
 end
 
-local function applyStructureStates(structureStates)
+local function applyStructureStates(structureStates, knownTargets)
     for structureName, state in pairs(structureStates) do
-        Structure.showTippTextByName(structureName, state.visible)
+        local force = knownTargets[structureName] ~= true
+        Structure.showTippTextByName(structureName, state.visible, force)
         Structure.setTippTextByName(structureName, state.text)
     end
 end
@@ -50,8 +52,8 @@ function RoadTippTextCoordinator.run()
     local desired = RoadTippTextGenerator.generate()
     addMissingClears(desired.signals, lastSignalTargets)
     addMissingClears(desired.structures, lastStructureTargets)
-    applySignalStates(desired.signals)
-    applyStructureStates(desired.structures)
+    applySignalStates(desired.signals, lastSignalTargets)
+    applyStructureStates(desired.structures, lastStructureTargets)
 
     lastSignalTargets = targetSet(desired.signals)
     lastStructureTargets = targetSet(desired.structures)
