@@ -51,12 +51,14 @@ end
 -- Fuer die Signalstellung siehe Auswahlbox unter "Auswahl des Signalbegriffs"
 -- bei Rechtsklick auf das Signal im 2D Editor
 ----------------------------------------------------------------------------------------------------------------------
-Grundmodell_Ampel_3 = TrafficLightModel:new("Grundmodell Ampel 3",       -- Name des Modells
+Grundmodell_Ampel_3 = TrafficLightModel:new("Grundmodell_Ampel_3",       -- ID des Modells
+                                            "Grundmodell Ampel 3",       -- Name des Modells
                                             2,                           -- Signalstellung fuer rot   (2. Stellung)
                                             1,                           -- Signalstellung fuer gruen (1. Stellung)
                                             3)                           -- Signalstellung fuer gelb  (3. Stellung)
 
-Grundmodell_Ampel_3_FG = TrafficLightModel:new("Grundmodell Ampel 3 FG", -- Name des Modells
+Grundmodell_Ampel_3_FG = TrafficLightModel:new("Grundmodell_Ampel_3_FG", -- ID des Modells
+                                               "Grundmodell Ampel 3 FG", -- Name des Modells
                                                2,                        -- Signalstellung fuer rot   (2. Stellung)
                                                2,                        -- Signalstellung fuer rot   (2. Stellung)
                                                2,                        -- Signalstellung fuer rot   (2. Stellung)
