@@ -20,6 +20,26 @@ local function publishRemovedSlots(ceType, removedIds)
 end
 
 local function publishSlots(ceType, slots)
+    local hasSlot = false
+    local allSlotsNeedFullSend = true
+    for _, slot in pairs(slots) do
+        hasSlot = true
+        if not slot.needsFullSend then allSlotsNeedFullSend = false end
+    end
+
+    if hasSlot and allSlotsNeedFullSend then
+        if ceType == DataSlotDtoFactory.filledCeType() then
+            DataChangeBus.fireListChange(DataSlotDtoFactory.createFilledDataSlotDtoList(slots))
+        else
+            DataChangeBus.fireListChange(DataSlotDtoFactory.createEmptyDataSlotDtoList(slots))
+        end
+        for _, slot in pairs(slots) do
+            slot.needsFullSend = false
+            slot:resetDirty()
+        end
+        return
+    end
+
     for _, slot in pairs(slots) do
         if slot.needsFullSend then
             DataChangeBus.fireDataChanged(DataSlotDtoFactory.createFullDto(ceType, slot))

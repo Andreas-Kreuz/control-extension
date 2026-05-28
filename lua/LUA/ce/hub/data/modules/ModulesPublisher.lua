@@ -32,8 +32,31 @@ local function publishModule(module)
     end
 end
 
+local function allModulesNeedFullSend(modules)
+    local hasModule = false
+    for _, module in pairs(modules or {}) do
+        hasModule = true
+        if not module.needsFullSend then return false end
+    end
+    return hasModule
+end
+
+local function publishModuleList(modules)
+    DataChangeBus.fireListChange(ModuleDtoFactory.createModuleDtoList(modules))
+    for _, module in pairs(modules or {}) do
+        module.needsFullSend = false
+        module:resetDirty()
+    end
+end
+
 function ModulesPublisher.syncState()
     local registeredCeModules = ModulesRegistry.get()
+    if allModulesNeedFullSend(registeredCeModules) then
+        publishModuleList(registeredCeModules)
+        ModulesRegistry.clearRemoved()
+        return
+    end
+
     publishRemovedModules()
     for _, module in pairs(registeredCeModules) do publishModule(module) end
 end

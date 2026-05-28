@@ -5,7 +5,7 @@ local TimePublisher = require("ce.hub.data.time.TimePublisher")
 ---@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():nil
-TimeStatePublisher = {}
+local TimeStatePublisher = {}
 TimeStatePublisher.enabled = true
 local initialized = false
 TimeStatePublisher.name = "ce.hub.data.time.TimeStatePublisher"

@@ -8,7 +8,6 @@ local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
 
 local TrainPublisher = {}
 local baselineSent = false
-local needsFullBaseline = false
 local sentTrainIds = {}
 
 local function hasPayloadFields(dto)
@@ -44,11 +43,15 @@ local function publishBaseline(trains)
 
     DataChangeBus.fireListChange(HubCeTypes.Train, "id", list)
     baselineSent = true
-    needsFullBaseline = false
 end
 
-function TrainPublisher.requestFullSync()
-    needsFullBaseline = true
+local function allTrainsNeedFullSend(trains)
+    local hasTrain = false
+    for _, train in pairs(trains) do
+        hasTrain = true
+        if not train.needsFullSend then return false end
+    end
+    return hasTrain
 end
 
 function TrainPublisher.syncState()
@@ -60,7 +63,7 @@ function TrainPublisher.syncState()
     end
 
     local trains = TrainRegistry.getAll()
-    if needsFullBaseline or not baselineSent then
+    if not baselineSent or allTrainsNeedFullSend(trains) then
         publishBaseline(trains)
         TrainRegistry.clearPendingChanges()
         return

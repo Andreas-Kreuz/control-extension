@@ -12,6 +12,7 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 ---@field createPatchDto fun(structure: Structure, dirtyFields: table<string,boolean>, isSelected: boolean|nil):string,
 ---string,string|number,StructureDto
 ---@field createRemovalDto fun(structureId: string):string,string,string|number,table
+---@field createDtoList fun(structures: table<string, Structure>, isSelectedByValue: function|nil):string,string,table
 local StructureDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.Structure
@@ -118,6 +119,16 @@ end
 function StructureDtoFactory.createRemovalDto(structureId)
     local dto = { ceType = CE_TYPE, id = structureId }
     return CE_TYPE, KEY_ID, structureId, dto
+end
+
+function StructureDtoFactory.createDtoList(structures, isSelectedByValue)
+    local dtos = {}
+    for _, structure in pairs(structures or {}) do
+        local _, _, _, dto = StructureDtoFactory.createFullDto(
+            structure, isSelectedByValue and isSelectedByValue(structure) or false)
+        dtos[#dtos + 1] = dto
+    end
+    return CE_TYPE, KEY_ID, dtos
 end
 
 return StructureDtoFactory

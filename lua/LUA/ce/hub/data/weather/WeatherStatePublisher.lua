@@ -1,7 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.weather.WeatherStatePublisher ...") end
 local WeatherPublisher = require("ce.hub.data.weather.WeatherPublisher")
 
-WeatherStatePublisher = {}
+local WeatherStatePublisher = {}
 WeatherStatePublisher.enabled = true
 local initialized = false
 WeatherStatePublisher.name = "ce.hub.data.weather.WeatherStatePublisher"

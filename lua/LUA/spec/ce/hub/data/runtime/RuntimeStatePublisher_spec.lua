@@ -27,12 +27,18 @@ insulate("RuntimeStatePublisher", function ()
         local RuntimeStatePublisher = require("ce.hub.data.runtime.RuntimeStatePublisher")
         local published = {}
 
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function (ceType, keyId, list)
+            for _, dto in pairs(list or {}) do
+                table.insert(published, { ceType = ceType, keyId = keyId, key = dto[keyId], dto = dto })
+            end
+        end)
         local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
             table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
         end)
         local fireDataRemovedStub = stub(DataChangeBus, "fireDataRemoved", function ()
             error("runtime entries must not be removed when no completed snapshot is available")
         end)
+        finally(function () fireListChangeStub:revert() end)
         finally(function () fireDataChangedStub:revert() end)
         finally(function () fireDataRemovedStub:revert() end)
 

@@ -1,7 +1,7 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.framedata.FrameDataStatePublisher ...") end
 local FrameDataPublisher = require("ce.hub.data.framedata.FrameDataPublisher")
 
-FrameDataStatePublisher = {}
+local FrameDataStatePublisher = {}
 FrameDataStatePublisher.enabled = true
 local initialized = false
 FrameDataStatePublisher.name = "ce.hub.data.framedata.FrameDataStatePublisher"

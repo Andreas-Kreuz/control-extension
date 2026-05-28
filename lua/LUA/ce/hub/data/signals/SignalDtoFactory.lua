@@ -15,6 +15,7 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 ---isSelected: boolean|nil):string,string,
 ---string|number,WaitingOnSignalDto
 ---@field createWaitingOnSignalRemovalDto fun(waitingOnSignalId: string):string,string,string,table
+---@field createSignalDtoList fun(signals: table, isSelectedByValue: function|nil):string,string,table
 ---@field createWaitingOnSignalDtoList fun(waitingOnSignals: table):string,string,table
 local SignalDtoFactory = {}
 
@@ -137,11 +138,22 @@ function SignalDtoFactory.createWaitingOnSignalRemovalDto(waitingOnSignalId)
     return WAITING_CE_TYPE, KEY_ID, waitingOnSignalId, { ceType = WAITING_CE_TYPE, id = waitingOnSignalId }
 end
 
-function SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals)
+function SignalDtoFactory.createSignalDtoList(signals, isSelectedByValue)
+    local signalDtos = {}
+    for _, signal in pairs(signals or {}) do
+        local _, _, _, dto = SignalDtoFactory.createSignalDto(signal,
+                                                             isSelectedByValue and isSelectedByValue(signal) or false)
+        signalDtos[#signalDtos + 1] = dto
+    end
+    return SIGNAL_CE_TYPE, KEY_ID, signalDtos
+end
+
+function SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals, isSelectedByValue)
     local waitingOnSignalDtos = {}
-    for i = 1, #waitingOnSignals do
-        local _, _, _, dto = SignalDtoFactory.createWaitingOnSignalDto(waitingOnSignals[i])
-        waitingOnSignalDtos[i] = dto
+    for _, waitingOnSignal in pairs(waitingOnSignals or {}) do
+        local _, _, _, dto = SignalDtoFactory.createWaitingOnSignalDto(
+            waitingOnSignal, isSelectedByValue and isSelectedByValue(waitingOnSignal) or false)
+        waitingOnSignalDtos[#waitingOnSignalDtos + 1] = dto
     end
     return WAITING_CE_TYPE, KEY_ID, waitingOnSignalDtos
 end

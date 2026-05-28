@@ -5,7 +5,7 @@ local RuntimePublisher = require("ce.hub.data.runtime.RuntimePublisher")
 ---@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():nil
-RuntimeStatePublisher = {}
+local RuntimeStatePublisher = {}
 RuntimeStatePublisher.enabled = true
 local initialized = false
 RuntimeStatePublisher.name = "ce.hub.data.runtime.RuntimeStatePublisher"
