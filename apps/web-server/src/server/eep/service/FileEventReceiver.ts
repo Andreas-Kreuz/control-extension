@@ -10,6 +10,7 @@ export class FileEventReceiver {
   constructor(
     private readonly dir: string,
     private readonly onEventLine: (line: string) => void,
+    private readonly onTransferFinished: () => void = () => {},
   ) {}
 
   attach(): void {
@@ -43,6 +44,7 @@ export class FileEventReceiver {
           this.onEventLine(line);
         }
       }
+      this.onTransferFinished();
 
       performance.mark('eep:stop-wait-for-json');
       performance.measure(

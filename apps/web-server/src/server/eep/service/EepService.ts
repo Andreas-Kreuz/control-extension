@@ -34,6 +34,7 @@ export default class EepService implements CacheService {
   private eventLineAppeared: (line: string) => void = (_line: string) => {
     if (this.debug) console.log(_line);
   };
+  private eventTransferFinished: () => void = () => {};
   private logWasCleared: () => void = () => {
     if (this.debug) console.log('Log was cleared');
   };
@@ -101,6 +102,7 @@ export default class EepService implements CacheService {
     this.eventLineAppeared = (_line: string) => {
       if (this.debug) console.log(_line);
     };
+    this.eventTransferFinished = () => {};
     this.logLineAppeared = (_line: string) => {};
     this.logWasCleared = () => {
       if (this.debug) console.log('Log was cleared');
@@ -160,7 +162,11 @@ export default class EepService implements CacheService {
   }
 
   private attachEventsFromCeFile(): void {
-    this.fileEventReceiver = new FileEventReceiver(this.requireDir(), (line) => this.eventLineAppeared(line));
+    this.fileEventReceiver = new FileEventReceiver(
+      this.requireDir(),
+      (line) => this.eventLineAppeared(line),
+      () => this.eventTransferFinished(),
+    );
     this.fileEventReceiver.attach();
   }
 
@@ -170,6 +176,7 @@ export default class EepService implements CacheService {
       pipeIdentity.pipeName,
       (line) => this.eventLineAppeared(line),
       this.debug,
+      () => this.eventTransferFinished(),
     );
     this.pipeEventReceiver.start();
     this.descriptorWriter = new ServerTransportDescriptorWriter(this.requireDir());
@@ -238,6 +245,10 @@ export default class EepService implements CacheService {
 
   public setOnNewEventLine(eventLineFunction: (line: string) => void) {
     this.eventLineAppeared = eventLineFunction;
+  }
+
+  public setOnEventTransferFinished(eventTransferFinishedFunction: () => void) {
+    this.eventTransferFinished = eventTransferFinishedFunction;
   }
 
   public setOnLogCleared(logClearedFunction: () => void) {

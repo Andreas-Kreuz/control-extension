@@ -4,6 +4,8 @@ export type { ParsedCeTypeRoom } from './CeTypeRoom';
 export {
   ApiDataRoom,
   ServerStatsRoom,
+  DataTransferSummaryRoom,
+  DataTransferFieldsRoom,
   RuntimeStatisticsRoom,
   ModuleRoom,
   VersionRoom,
@@ -21,4 +23,5 @@ export {
   IntersectionRoom,
   IntersectionPhaseListRoom,
   RoadSettingsRoom,
+  RoadTrafficLightModelsRoom,
 } from './DomainRoomRegistry';

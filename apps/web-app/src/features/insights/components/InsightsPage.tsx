@@ -1,10 +1,13 @@
 ﻿import Grid from '@mui/material/Grid';
+import Inventory2RoundedIcon from '@mui/icons-material/Inventory2Rounded';
+import Button from '@mui/material/Button';
 import CardGridContainer from '../../../shared/layouts/CardGridContainer';
 import PageContainer from '../../../shared/layouts/PageContainer';
 import PageHeadline from '../../../shared/layouts/PageHeadline';
 import useStatistics from '../hooks/useStatistics';
 import TimeDesc from '../model/TimeDesc';
 import { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import InsightsRuntimeInfo from './InsightsRuntimeInfo';
 import InsightsStatisticsPanel from './InsightsStatisticsPanel';
 import InsightsStatusInfo from './InsightsStatusInfo';
@@ -86,6 +89,15 @@ function InsightsPage() {
           />
         </Grid>
       </CardGridContainer>
+      <Button
+        component={RouterLink}
+        startIcon={<Inventory2RoundedIcon />}
+        sx={{ mt: 3 }}
+        to="/insights/data-transfer"
+        variant="outlined"
+      >
+        Datenfluss anzeigen
+      </Button>
     </PageContainer>
   );
 }

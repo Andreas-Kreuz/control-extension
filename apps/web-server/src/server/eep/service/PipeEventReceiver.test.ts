@@ -34,7 +34,15 @@ async function runTest(name: string, fn: () => Promise<void>): Promise<void> {
 async function testIngestsNdjsonLines(): Promise<void> {
   const pipeIdentity = ServerPipeNameFactory.create();
   const seenLines: string[] = [];
-  const receiver = new PipeEventReceiver(pipeIdentity.pipeName, (line) => seenLines.push(line));
+  let finishedTransfers = 0;
+  const receiver = new PipeEventReceiver(
+    pipeIdentity.pipeName,
+    (line) => seenLines.push(line),
+    false,
+    () => {
+      finishedTransfers += 1;
+    },
+  );
 
   try {
     receiver.start();
@@ -51,6 +59,7 @@ async function testIngestsNdjsonLines(): Promise<void> {
 
     await waitFor(() => {
       assert.deepEqual(seenLines, ['{"eventCounter":1}', '{"eventCounter":2}']);
+      assert.equal(finishedTransfers, 1);
     });
   } finally {
     receiver.stop();
