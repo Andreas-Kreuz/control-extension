@@ -54,6 +54,10 @@ cmd /c yarn run format:lua
 cmd /c yarn run check:lua
 ```
 
+When running LuaLS manually, write temporary configs and logs outside the repository, for example under
+`C:\tmp\luals-control-extension`. Use `--logpath="C:\tmp\luals-control-extension"` and, if a temporary config is
+needed, `--configpath="C:\tmp\luals-control-extension\.luarc-ce.tmp.json"`.
+
 For narrower checks:
 
 ```powershell
