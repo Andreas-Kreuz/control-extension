@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field
 insulate("TransitMeasurementRecorder", function ()
     local EepSimulator = require("ce.hub.eep.EepSimulator")
     local Line = require("ce.mods.transit.Line")

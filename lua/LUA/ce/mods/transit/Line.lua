@@ -1,3 +1,22 @@
+---@class Line
+---@field type string
+---@field trafficType string
+---@field lineSegments table<string, LineSegment>
+---@field id string
+---@field nr string
+---@field debug boolean
+---@field valuesUpdated boolean|nil
+---@field forName fun(name: string):Line
+---@field new fun(self: Line, o: table):Line
+---@field addSection fun(self: Line, routeName: string, destination: string):LineSegment
+---@field createDepotSection fun(self: Line, routeName: string):LineSegment
+---@field scheduleDeparture fun(trainName: string, station: RoadStation, timeInMinutes: number):nil
+---@field trainArrived fun(trainName: string, station: RoadStation):nil
+---@field trainDeparted fun(trainName: string, station: RoadStation):nil
+---@field setTrainSection fun(trainName: string, section: LineSegment):nil
+---@field applyCachedRouteForTrain fun(train: Train):LineSegment|nil,TransitTrain|nil
+---@field getAll fun():table<string, Line>
+
 local LineSegment = require("ce.mods.transit.LineSegment")
 local RoadStation = require("ce.mods.transit.RoadStation")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")

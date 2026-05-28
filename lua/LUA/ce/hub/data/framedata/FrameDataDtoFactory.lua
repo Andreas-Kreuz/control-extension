@@ -11,7 +11,7 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 ---@field createFullDto fun(entry: table, isSelected?: boolean):string,string,string|number,FrameDataDto
 ---@field createPatchDto fun(entry: table, dirtyFields: table<string, boolean>, isSelected?: boolean):string,string,
 ---    string|number,FrameDataDto
----@field createFrameDataDtoList fun(entries: table):string,string,table
+---@field createFrameDataDtoList fun(entries: table, isSelectedByValue?: fun(value: table):boolean):string,string,table
 local FrameDataDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.FrameData

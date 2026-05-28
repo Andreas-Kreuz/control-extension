@@ -1,10 +1,30 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.PedestrianCrossing ...") end
 
+---@class PedestrianCrossing
+---@field type string
+---@field name string
+---@field approach LaneApproach
+---@field heading LaneHeading Deprecated: opposite of approach
+---@field _scriptVariableName string|nil
+---@field Approach table<string, LaneApproach>
+---@field Heading table<string, LaneHeading> Deprecated: use Approach
+---@field getType fun(self: PedestrianCrossing):string
+---@field getName fun(self: PedestrianCrossing):string
+---@field getScriptVariableName fun(self: PedestrianCrossing):string|nil
+---@field getApproach fun(self: PedestrianCrossing):LaneApproach
+---@field getHeading fun(self: PedestrianCrossing):LaneHeading Deprecated: opposite of approach
+---@field new fun(self: PedestrianCrossing, name: string):PedestrianCrossing
+---@field scriptVariableName fun(self: PedestrianCrossing, scriptVariableName: string):PedestrianCrossing
+---@field setScriptVariableName fun(self: PedestrianCrossing, scriptVariableName: string):PedestrianCrossing
+---@field setApproach fun(self: PedestrianCrossing, approach: LaneApproach):PedestrianCrossing
+---@field setHeading fun(self: PedestrianCrossing, heading: LaneHeading):PedestrianCrossing Deprecated: use setApproach
+
 local Lane = require("ce.mods.road.Lane")
 
 local PedestrianCrossing = {}
 PedestrianCrossing.Approach = Lane.Approach
 ---@deprecated Use PedestrianCrossing.Approach and setApproach(...).
+---@diagnostic disable-next-line: deprecated
 PedestrianCrossing.Heading = Lane.Heading
 
 function PedestrianCrossing.getType() return "PedestrianCrossing" end
@@ -23,7 +43,7 @@ function PedestrianCrossing:new(name)
         name = name,
         type = "PedestrianCrossing",
         approach = PedestrianCrossing.Approach.SOUTH,
-        heading = PedestrianCrossing.Heading.NORTH,
+        heading = Lane.headingFromApproach(PedestrianCrossing.Approach.SOUTH),
         _scriptVariableName = nil
     }
     self.__index = self
@@ -53,6 +73,7 @@ function PedestrianCrossing:setApproach(approach)
 end
 
 function PedestrianCrossing:setHeading(heading)
+    ---@diagnostic disable-next-line: deprecated
     if not PedestrianCrossing.Heading[heading] then
         print(string.format("[#PedestrianCrossing] No such heading: %s", tostring(heading)))
     else

@@ -16,7 +16,8 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 ---string|number,WaitingOnSignalDto
 ---@field createWaitingOnSignalRemovalDto fun(waitingOnSignalId: string):string,string,string,table
 ---@field createSignalDtoList fun(signals: table, isSelectedByValue: function|nil):string,string,table
----@field createWaitingOnSignalDtoList fun(waitingOnSignals: table):string,string,table
+---@field createWaitingOnSignalDtoList fun(waitingOnSignals: table,
+---    isSelectedByValue?: fun(value: table):boolean):string,string,table
 local SignalDtoFactory = {}
 
 local SIGNAL_CE_TYPE = HubCeTypes.Signal

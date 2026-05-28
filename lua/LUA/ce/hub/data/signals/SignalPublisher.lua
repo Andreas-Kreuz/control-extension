@@ -36,11 +36,13 @@ local function publishWaitingOnSignals()
         if not waitingOnSignal.needsFullSend then allWaitingOnSignalsNeedFullSend = false end
     end
 
+    local function isSelectedWaitingOnSignal(waitingOnSignal)
+        return InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
+    end
+
     if hasWaitingOnSignal and allWaitingOnSignalsNeedFullSend then
         DataChangeBus.fireListChange(SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals,
-                                                                                   function (waitingOnSignal)
-                return InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
-            end))
+                                                                                   isSelectedWaitingOnSignal))
         for _, waitingOnSignal in pairs(waitingOnSignals) do
             waitingOnSignal.needsFullSend = false
             if InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id)) then

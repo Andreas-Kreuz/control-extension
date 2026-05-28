@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 insulate("ce.hub.data.version.VersionUpdater", function ()
     local function clearModule(name) package.loaded[name] = nil end
     local originalEEPVer = _G.EEPVer

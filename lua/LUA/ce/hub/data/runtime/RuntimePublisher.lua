@@ -14,10 +14,11 @@ local function hasPayloadFields(dto)
 end
 
 function RuntimePublisher.syncState()
-    local runtimeEntries = RuntimeRegistry.get()
+    ---@type table<string, RuntimeEntry>
+    local runtimeEntries = RuntimeRegistry.get() or {}
     local hasEntry = false
     local allEntriesNeedFullSend = true
-    for _, runtimeEntry in pairs(runtimeEntries or {}) do
+    for _, runtimeEntry in pairs(runtimeEntries) do
         hasEntry = true
         if not runtimeEntry.needsFullSend then allEntriesNeedFullSend = false end
     end
@@ -25,7 +26,7 @@ function RuntimePublisher.syncState()
     if hasEntry and allEntriesNeedFullSend then
         DataChangeBus.fireListChange(RuntimeDtoFactory.createRuntimeDtoList(runtimeEntries))
         RuntimeRegistry.clearRemoved()
-        for _, runtimeEntry in pairs(runtimeEntries or {}) do
+        for _, runtimeEntry in pairs(runtimeEntries) do
             runtimeEntry.needsFullSend = false
             runtimeEntry:resetDirty()
         end
@@ -37,7 +38,7 @@ function RuntimePublisher.syncState()
     end
     RuntimeRegistry.clearRemoved()
 
-    for _, runtimeEntry in pairs(runtimeEntries or {}) do
+    for _, runtimeEntry in pairs(runtimeEntries) do
         if runtimeEntry.needsFullSend then
             DataChangeBus.fireDataChanged(RuntimeDtoFactory.createFullDto(runtimeEntry))
             runtimeEntry.needsFullSend = false

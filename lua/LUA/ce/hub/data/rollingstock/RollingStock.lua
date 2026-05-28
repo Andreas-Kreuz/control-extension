@@ -771,7 +771,7 @@ end
 function RollingStock:pullHookGlueMode()
     if not DataClass.isCallable(EEPRollingstockGetHookGlue) then return nil end
     local ok, hookGlueMode = EEPRollingstockGetHookGlue(self.rollingStockName)
-    if ok then self:setHookGlueMode(hookGlueMode) end
+    if ok and hookGlueMode then self:setHookGlueMode(hookGlueMode) end
     return self.hookGlueMode
 end
 
@@ -821,7 +821,7 @@ end
 function RollingStock:updateTextureTexts()
     assert(type(self) == "table" and self.type == "RollingStock", "Call this method with ':'")
     self:setTextureTexts(collectTextureTexts(self.rollingStockName, textureSurfaceNumbersForPull(self),
-                                            self.textureTexts))
+                                             self.textureTexts))
 end
 
 function RollingStock:pullTextureTexts()
@@ -981,9 +981,9 @@ function RollingStock:setRotation(rotX, rotY, rotZ)
     assert(type(rotX) == "number", "Need 'rotX' as number")
     assert(type(rotY) == "number", "Need 'rotY' as number")
     assert(type(rotZ) == "number", "Need 'rotZ' as number")
-    rotX = round2(rotX)
-    rotY = round2(rotY)
-    rotZ = round2(rotZ)
+    rotX = round2(rotX) or 0
+    rotY = round2(rotY) or 0
+    rotZ = round2(rotZ) or 0
     local oldRotX, oldRotY, oldRotZ = self.rotX, self.rotY, self.rotZ
     self.rotX = rotX
     self.rotY = rotY
@@ -1039,7 +1039,7 @@ end
 function RollingStock:pullCouplingFront()
     if not DataClass.isCallable(EEPRollingstockGetCouplingFront) then return nil end
     local ok, couplingFront = EEPRollingstockGetCouplingFront(self.rollingStockName)
-    if ok then self:setCouplingFront(couplingFront) end
+    if ok and couplingFront then self:setCouplingFront(couplingFront) end
     return self.couplingFront
 end
 
@@ -1067,7 +1067,7 @@ end
 function RollingStock:pullCouplingRear()
     if not DataClass.isCallable(EEPRollingstockGetCouplingRear) then return nil end
     local ok, couplingRear = EEPRollingstockGetCouplingRear(self.rollingStockName)
-    if ok then self:setCouplingRear(couplingRear) end
+    if ok and couplingRear then self:setCouplingRear(couplingRear) end
     return self.couplingRear
 end
 

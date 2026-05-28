@@ -1,3 +1,9 @@
+---@class TransitSettings
+---@field showDepartureTippText boolean
+---@field saveSlot number|nil
+---@field saveSettings fun():nil
+---@field setShowDepartureTippText fun(value: boolean):nil
+
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local RoadStation = require("ce.mods.transit.RoadStation")
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.TransitSettings ...") end

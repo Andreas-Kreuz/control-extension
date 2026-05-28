@@ -19,6 +19,7 @@ insulate("ce.mods.road.PedestrianCrossing", function ()
         assert.equals("Furt Nord", crossing:getName())
         assert.equals("c1PedCrossingNorth1", crossing:getScriptVariableName())
         assert.equals(PedestrianCrossing.Approach.NORTH, crossing:getApproach())
+        ---@diagnostic disable-next-line: deprecated
         assert.equals(PedestrianCrossing.Heading.SOUTH, crossing:getHeading())
     end)
 
@@ -33,9 +34,11 @@ insulate("ce.mods.road.PedestrianCrossing", function ()
         local PedestrianCrossing = require("ce.mods.road.PedestrianCrossing")
 
         local crossing = PedestrianCrossing:new("Furt Nord")
+        ---@diagnostic disable-next-line: deprecated
             :setHeading(PedestrianCrossing.Heading.NORTH)
 
         assert.equals(PedestrianCrossing.Approach.SOUTH, crossing:getApproach())
+        ---@diagnostic disable-next-line: deprecated
         assert.equals(PedestrianCrossing.Heading.NORTH, crossing:getHeading())
     end)
 

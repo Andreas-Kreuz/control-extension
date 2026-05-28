@@ -11,7 +11,7 @@ local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 ---@field createFullDto fun(timeData: table, isSelected?: boolean):string,string,string|number,TimeDto
 ---@field createPatchDto fun(timeData: table, dirtyFields: table<string, boolean>, isSelected?: boolean):string,
 ---    string,string|number,TimeDto
----@field createTimeDtoList fun(times: table):string,string,table
+---@field createTimeDtoList fun(times: table, isSelectedByValue?: fun(value: table):boolean):string,string,table
 local TimeDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.Time
@@ -67,6 +67,8 @@ function TimeDtoFactory.createPatchDto(timeData, dirtyFields, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
+---@param times table
+---@param isSelectedByValue? fun(value: table):boolean
 function TimeDtoFactory.createTimeDtoList(times, isSelectedByValue)
     local timeDtos = {}
     for _, timeData in pairs(times) do

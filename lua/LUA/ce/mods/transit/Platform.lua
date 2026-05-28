@@ -1,3 +1,11 @@
+---@class Platform
+---@field type string
+---@field id string
+---@field roadStation RoadStation
+---@field platformNumber number
+---@field new fun(self: Platform, roadStation: RoadStation, platformNumber: number):Platform
+---@field addDisplay fun(self: Platform, structureName: string, displayModel: table):nil
+
 local Platform = {}
 
 --- Creates a new Bus or Tram Station

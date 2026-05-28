@@ -750,6 +750,7 @@ insulate("licence plate and vehicle number tags", function ()
         local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
         local calls = {}
         local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        ---@diagnostic disable-next-line: missing-fields
         stock.model = {
             setLicencePlate = function (_, rollingStockName, licencePlate)
                 table.insert(calls, {
@@ -807,6 +808,7 @@ insulate("licence plate and vehicle number tags", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
         local calls = {}
         local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        ---@diagnostic disable-next-line: missing-fields
         stock.model = {
             setWagonNr = function (_, rollingStockName, wagonNumber)
                 table.insert(calls, { rollingStockName = rollingStockName, value = wagonNumber })
@@ -821,6 +823,7 @@ insulate("licence plate and vehicle number tags", function ()
         local RollingStock = require("ce.hub.data.rollingstock.RollingStock")
         local RollingStockDtoFactory = require("ce.hub.data.rollingstock.RollingStockDtoFactory")
         local stock = RollingStock:new({ rollingStockName = "TagStock" })
+        ---@diagnostic disable-next-line: missing-fields
         stock.model = {
             setLicencePlate = function () end,
             setWagonNumber = function () end

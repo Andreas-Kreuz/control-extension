@@ -30,6 +30,7 @@ insulate("ce.hub.util.ProtectedExecution", function ()
         end)
 
         assert.is_false(ok)
+        assert(type(err) == "string")
         assert.is_truthy(string.find(err, "boom", 1, true))
         assert.is_truthy(string.find(printedMessages[1], "[#spec.failure] ERROR:", 1, true))
         assert.is_truthy(string.find(printedMessages[1], "stack traceback", 1, true))

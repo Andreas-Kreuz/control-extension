@@ -1,5 +1,69 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.Intersection ...") end
 
+---@class Intersection
+---@field name string
+---@field lanes table<string, Lane>
+---@field signals table<string, SignalHead>
+---@field currentPhase TrafficPhase
+---@field phases TrafficPhase[]
+---@field signalGroups SignalGroup[]
+---@field pedestrianCrossings PedestrianCrossing[]
+---@field signalGroupsBySignalUse table<string, table<TrafficLight, SignalGroup>>
+---@field greenTimeFinished boolean
+---@field greenReached boolean
+---@field greenTimeSeconds number
+---@field staticCams string[]
+---@field nextPhase TrafficPhase|nil
+---@field manualPhase TrafficPhase|nil
+---@field eepSaveId number
+---@field _scriptVariableName string|nil
+---@field tippStructure string|nil
+---@field switchInStrictOrder boolean
+---@field debug boolean
+---@field allIntersections table<string, Intersection>
+---@field switchManuallyTo fun(crossingName: string, phaseName: string):nil
+---@field switchAutomatically fun(crossingName: string):nil
+---@field getType fun():string
+---@field getName fun(self: Intersection):string
+---@field getEepSaveId fun(self: Intersection):number
+---@field getScriptVariableName fun(self: Intersection):string|nil
+---@field getPhases fun(self: Intersection):TrafficPhase[]
+---@field getCurrentPhase fun(self: Intersection):TrafficPhase
+---@field getCurrentPhaseStartedAt fun(self: Intersection):number
+---@field getLanes fun(self: Intersection):Lane[]
+---@field getTippStructure fun(self: Intersection):string|nil
+---@field getNextPhase fun(self: Intersection):TrafficPhase|nil
+---@field getManualPhase fun(self: Intersection):TrafficPhase|nil
+---@field onSwitchedToPhase fun(self: Intersection, currentPhase: TrafficPhase):nil
+---@field calculateNextPhase fun(self: Intersection):TrafficPhase|nil
+---@field setManualPhase fun(self: Intersection, phaseName: string):nil
+---@field setAutomaticPhaseSelection fun(self: Intersection):nil
+---@field setSwitchInStrictOrder fun(self: Intersection, value: boolean):Intersection
+---@field getGreenTimeSeconds fun(self: Intersection):number
+---@field setGreenTimeFinished fun(self: Intersection, greenPhaseFinished: boolean):nil
+---@field isGreenTimeFinished fun(self: Intersection):boolean
+---@field setGreenReached fun(self: Intersection, greenPhaseReached: boolean):nil
+---@field isGreenReached fun(self: Intersection):boolean
+---@field setTippStructure fun(self: Intersection, tippStructure: string):Intersection
+---@field getStaticCams fun(self: Intersection):string[]
+---@field addStaticCams fun(self: Intersection, ...: string):Intersection
+---@field addStaticCam fun(self: Intersection, kameraName: string):Intersection
+---@field resetVehicles fun():nil
+---@field new fun(self: Intersection, name: string, greenTimeSeconds?: number):Intersection
+---@field withStorage fun(self: Intersection, eepSaveId?: number):Intersection
+---@field scriptVariableName fun(self: Intersection, scriptVariableName: string):Intersection
+---@field setScriptVariableName fun(self: Intersection, scriptVariableName: string):Intersection
+---@field newSignalGroup fun(self: Intersection, name: string):SignalGroup
+---@field newLane fun(self: Intersection, name: string, laneSignal: TrafficLight):Lane
+---@field newPedestrianCrossing fun(self: Intersection, name: string):PedestrianCrossing
+---@field signalGroupForSignalUse fun(self: Intersection, signalHead: TrafficLight, signalType: SignalType):SignalGroup
+---@field newPhase fun(self: Intersection, name: string, greenTimeSeconds?: number):TrafficPhase
+---@field addPhase fun(self: Intersection, phase: TrafficPhase):TrafficPhase
+---@field initPhases fun():nil
+---@field refreshRoadState fun():nil
+---@field switchPhases fun():nil
+---@field getAll fun():table<string, Intersection>
+
 local Task = require("ce.hub.scheduler.Task")
 local Scheduler = require("ce.hub.scheduler.Scheduler")
 local TrafficPhase = require("ce.mods.road.TrafficPhase")

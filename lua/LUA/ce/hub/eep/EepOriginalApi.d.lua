@@ -2548,8 +2548,9 @@ function EEPGetPerspectiveCamera(trainName) end
 --- Grad von 0 bis 359.9 (Blick nach hinten = 0.0, weiter gegen den Uhrzeigersinn).
 ---@param rotV number parameter ist die vertikale Kameraausrichtung (Drehung) um die Y-Achse (roter Kreis) in Grad
 --- von 0 bis 359.9 (Blick nach unten = 0.0, weiter im Uhrzeigersinn).
+---@param setDirectly? boolean ein optionaler 7. Parameter, wenn 1 wird die Kamera auf das Gerät eingestellt
 ---@return boolean ok rueckgabewert ist true, wenn die Ausfuehrung erfolgreich war, sonst false.
-function EEPRollingstockSetUserCamera(rollingstockName, posX, posY, posZ, rotH, rotV) end
+function EEPRollingstockSetUserCamera(rollingstockName, posX, posY, posZ, rotH, rotV, setDirectly) end
 
 --       ============================================================================
 -- Verfuegbar ab EEP 16.1 - Plugin 1; EEP 17.1 - Plugin 1.

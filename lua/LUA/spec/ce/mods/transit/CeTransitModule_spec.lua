@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field
 insulate("ce.mods.transit.CeTransitModule", function ()
     local function clearModule(name) package.loaded[name] = nil end
 

@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 insulate("RuntimeUpdater", function ()
     local function clearModule(name) package.loaded[name] = nil end
 

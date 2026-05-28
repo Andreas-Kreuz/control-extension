@@ -1,5 +1,28 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.publish.InternalDataStore ...") end
 
+---@alias DataStoreElement table
+
+---@alias DataStoreList table<any, DataStoreElement>
+
+---@alias DataStoreCeType table<string, DataStoreElement>
+
+---@alias DataStoreCeTypes table<string, DataStoreCeType>
+
+---@alias InternalDataStoreElement DataStoreElement
+
+---@alias InternalDataStoreList DataStoreList
+
+---@alias InternalDataStoreCeType DataStoreCeType
+
+---@alias InternalDataStoreCeTypes DataStoreCeTypes
+
+---@class InternalDataStore: EventListener
+---@field ceTypes InternalDataStoreCeTypes
+---@field reset fun(): nil
+---@field getCeType fun(ceType: string): DataStoreCeType|nil
+---@field get fun(ceType: string, key: string|number): DataStoreElement|nil
+---@field fireEvent fun(event: DataChangeEvent): nil
+
 local InternalDataStore = {
     ceTypes = {}
 }

@@ -1,5 +1,42 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.SignalGroup ...") end
 
+---@alias SignalType
+---| "BUS"
+---| "CAR"
+---| "TRAM"
+---| "PEDESTRIAN"
+---| "BICYCLE"
+
+---@class SignalGroup
+---@field type string
+---@field name string
+---@field _scriptVariableName string|nil
+---@field approach LaneApproach|nil
+---@field turnDirections LaneDirection[]
+---@field signalHeads table<SignalHead, SignalType>
+---@field pedestrianCrossings PedestrianCrossing[]
+---@field Type table<string, SignalType>
+---@field getType fun(self: SignalGroup):string
+---@field new fun(self: SignalGroup, name: string):SignalGroup
+---@field getName fun(self: SignalGroup):string
+---@field getScriptVariableName fun(self: SignalGroup):string|nil
+---@field setScriptVariableName fun(self: SignalGroup, scriptVariableName: string):SignalGroup
+---@field scriptVariableName fun(self: SignalGroup, scriptVariableName: string):SignalGroup
+---@field getApproach fun(self: SignalGroup):LaneApproach|nil
+---@field getTurnDirections fun(self: SignalGroup):LaneDirection[]
+---@field setApproach fun(self: SignalGroup, approach: LaneApproach):SignalGroup
+---@field setTurnDirections fun(self: SignalGroup, ...: LaneDirection):SignalGroup
+---@field addSignals fun(self: SignalGroup, signalType: SignalType, ...: SignalHead):SignalGroup
+---@field addVehicleSignals fun(self: SignalGroup, ...: SignalHead):SignalGroup
+---@field addTramSignals fun(self: SignalGroup, ...: SignalHead):SignalGroup
+---@field addPedestrianSignals fun(self: SignalGroup, ...: SignalHead):SignalGroup
+---@field addPedestrianCrossings fun(self: SignalGroup, ...: PedestrianCrossing):SignalGroup
+---@field addPedestrianCrossing fun(self: SignalGroup, ...: PedestrianCrossing):SignalGroup
+---@field getSignalHeads fun(self: SignalGroup):table<SignalHead, SignalType>
+---@field getPedestrianCrossings fun(self: SignalGroup):PedestrianCrossing[]
+---@field containsSignalHead fun(self: SignalGroup, signal: SignalHead):boolean
+---@field logicalUseFor fun(signalType: SignalType):string
+
 local SignalGroup = {}
 SignalGroup.Type = { BUS = "BUS", CAR = "CAR", TRAM = "TRAM", PEDESTRIAN = "PEDESTRIAN", BICYCLE = "BICYCLE" }
 

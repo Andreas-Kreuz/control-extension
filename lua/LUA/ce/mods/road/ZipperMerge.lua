@@ -158,6 +158,7 @@ end
 local function popUntilTrain(queue, trainName)
     if queue:isEmpty() then return 0 end
 
+    ---@type integer|nil
     local numberOfPops = 1
     local hasTrainName = trainName and trainName ~= ""
     if hasTrainName then

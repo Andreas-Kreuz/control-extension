@@ -1,5 +1,42 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitTrain ...") end
 
+---@class TransitTrain
+---@field id string
+---@field type string
+---@field hubTrain Train
+---@field line string|nil
+---@field destination string|nil
+---@field origin string|nil
+---@field direction string|nil
+---@field nextStations TransitTrainNextStation[]
+---@field dirtyFields table<string, boolean>
+---@field needsFullSend boolean
+---@field new fun(self: TransitTrain, hubTrain: Train):TransitTrain
+---@field setHubTrain fun(self: TransitTrain, hubTrain: Train):nil
+---@field setLine fun(self: TransitTrain, line: string|number):nil
+---@field getLine fun(self: TransitTrain):string|nil
+---@field updateLine fun(self: TransitTrain, line: string|number|nil):nil
+---@field setDestination fun(self: TransitTrain, destination: string):nil
+---@field getDestination fun(self: TransitTrain):string|nil
+---@field updateDestination fun(self: TransitTrain, destination: string|nil):nil
+---@field setOrigin fun(self: TransitTrain, origin: string):nil
+---@field getOrigin fun(self: TransitTrain):string|nil
+---@field updateOrigin fun(self: TransitTrain, origin: string|nil):nil
+---@field setDirection fun(self: TransitTrain, direction: string):nil
+---@field getDirection fun(self: TransitTrain):string|nil
+---@field updateDirection fun(self: TransitTrain, direction: string|nil):nil
+---@field setNextStations fun(self: TransitTrain, nextStations: TransitTrainNextStation[]|nil):nil
+---@field getNextStations fun(self: TransitTrain):TransitTrainNextStation[]
+---@field changeDestination fun(self: TransitTrain, destination: string, line: string|number):nil
+---@field clearTransitInfo fun(self: TransitTrain):nil
+---@field resetDirty fun(self: TransitTrain):nil
+---@field hasDirtyFields fun(self: TransitTrain):boolean
+
+---@class TransitTrainNextStation
+---@field station RoadStation
+---@field platform string
+---@field departureInMinutes number
+
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 local TagKeys = require("ce.hub.data.rollingstock.TagKeys")
 local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")

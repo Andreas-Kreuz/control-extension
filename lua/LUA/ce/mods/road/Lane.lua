@@ -1,5 +1,144 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.Lane ...") end
 
+---@alias LaneRequestType
+---| "NICHT VERWENDET"
+---| "ANFORDERUNG"
+---| "NORMAL"
+---| "FUSSGAENGER"
+
+---@alias LaneDirection
+---| "LEFT"
+---| "HALF-LEFT"
+---| "STRAIGHT"
+---| "HALF-RIGHT"
+---| "RIGHT"
+
+---@alias LaneApproach
+---| "NORTH"
+---| "NORTH_EAST"
+---| "EAST"
+---| "SOUTH_EAST"
+---| "SOUTH"
+---| "SOUTH_WEST"
+---| "WEST"
+---| "NORTH_WEST"
+
+---@alias LaneHeading LaneApproach Deprecated: use LaneApproach; heading is the opposite cardinal value.
+
+---@alias LaneType
+---| "BUS"
+---| "CAR"
+---| "TRAM"
+---| "PEDESTRIAN"
+---| "BICYCLE"
+
+---@class LaneRequestState
+---@field occupied boolean
+---@field vehicleCount number
+---@field waitCount number
+---@field requestType LaneRequestType
+---@field source "counter"|"track"|"signal"
+---@field queuedVehicleNames string[]
+
+---@class Lane
+---@field Directions table<string, LaneDirection>
+---@field Approach table<string, LaneApproach>
+---@field Heading table<string, LaneHeading> Deprecated: use Approach
+---@field RequestType table<string, LaneRequestType>
+---@field Type table<string, LaneType>
+---@field effectiveRouteDriveRules fun(lane: Lane, route: string):table|nil
+---@field calculatePriority fun(self: Lane, signals: table):number
+---@field checkRequests fun(self: Lane):nil
+---@field debug boolean
+---@field defaultDriveSignals table<TrafficLight, boolean>|nil
+---@field driveOnDefaultSignals fun(self: Lane, ...: TrafficLight):Lane
+---@field driveOnDefaultSignalGroups fun(self: Lane, ...: SignalGroup):Lane
+---@field driveOn fun(self: Lane, signal: SignalHead, ...: string):Lane
+---@field firstGoodTrain string|nil
+---@field firstVehiclesRoute string|nil
+---@field getLaneType fun(self: Lane):LaneRequestType
+---@field getLaneSignal fun(self: Lane):TrafficLight
+---@field getName fun(self: Lane):string
+---@field getRequestInfo fun(self: Lane):string
+---@field getRequestState fun(self: Lane):LaneRequestState
+---@field getType fun():string
+---@field getVehicleCount fun(self: Lane):number
+---@field getVehicleCountRoutes fun(self: Lane, routes: table):number
+---@field getWaitCount fun(self: Lane):number
+---@field hasRequest fun(self: Lane):boolean
+---@field incrementWaitCount fun(self: Lane):nil
+---@field laneCanDrive fun(lane: Lane, signals: table):boolean
+---@field laneSignal TrafficLight
+---@field name string
+---@field _kpId string|nil
+---@field new fun(self: Lane, name: string, laneSignal: TrafficLight, turnDirections?: string[],
+--- signalType?: string):Lane
+---@field queue Queue
+---@field activeLaneSettings any
+---@field currentIndication string
+---@field defaultSignalGroups table|nil
+---@field directions LaneDirection[]
+---@field approach LaneApproach
+---@field heading LaneHeading Deprecated: opposite of approach
+---@field requestInfoText string|nil
+---@field requestType LaneRequestType
+---@field routeDriveRules table<string, table<string, table<TrafficLight, boolean>>>|nil
+---@field tracksUsedForRequest boolean
+---@field fahrzeugMultiplikator number
+---@field requestSignals table<string, TrafficLight[]>|nil
+---@field resetQueueFromRoadTracks fun(self: Lane):nil
+---@field resetQueueFromSignal fun(self: Lane):nil
+---@field resetVehicles fun(self: Lane):nil
+---@field resetWaitCount fun(self: Lane):nil
+--- Starts route-bound drive signal registration. At least one route is required.
+---@field routes fun(self: Lane, ...: string):LaneRouteDriveBuilder
+---@field routesToCount table
+---@field getKpId fun(self: Lane):string|nil
+---@field scriptVariableName fun(self: Lane, scriptVariableName: string):Lane
+---@field setKpId fun(self: Lane, kpId: string):Lane
+---@field setScriptVariableName fun(self: Lane, scriptVariableName: string):Lane
+---@field setDirections fun(self: Lane, ...: LaneDirection):Lane
+---@field setApproach fun(self: Lane, approach: LaneApproach):Lane
+---@field setHeading fun(self: Lane, heading: LaneHeading):Lane Deprecated: use setApproach
+---@field setTurnDirections fun(self: Lane, ...: LaneDirection):Lane
+---@field setVehicleMultiplier fun(self: Lane, vehicleMultiplier: number):Lane
+---@field setFahrzeugMultiplikator fun(self: Lane, fahrzeugMultiplikator: number):Lane
+---@field setHighlightTracks fun(self: Lane, ...: number):Lane
+---@field setHighLightingTracks fun(self: Lane, ...: any):Lane
+---@field setLaneType fun(self: Lane, requestType: LaneRequestType):Lane
+---@field setTrafficType fun(self: Lane, trafficType: LaneType):Lane
+---@field showRequestsOn fun(self: Lane, signal: TrafficLight, ...: string):nil
+---@field showRequestsOnSignalGroups fun(self: Lane, ...: SignalGroup):Lane
+--- Indicates lane requests on the given signal, if the signal has
+--- a request structure defined. The additional ... parameter contains route
+--- names that can be given to indicate requests on these specific routes only.
+---@field signalUsedForRequest boolean
+---@field signalType string
+---@field switchSignalTo fun(self: Lane, indication: string, grund: string):nil
+---@field tracksForHighlighting table
+---@field tracksForRequests table
+---@field signalChanged fun(self: Lane, signal: SignalHead):nil
+---@field signalsToDriveOn table|nil
+---@field trafficType string
+---@field turnDirections LaneDirection[]
+---@field type string
+---@field useSignalForQueue fun(self: Lane):Lane
+---@field useTrackForQueue fun(self: Lane, roadId: number):Lane
+---@field vehicleCount number
+---@field vehicleEntered fun(self: Lane, trainName: string):nil
+---@field vehicleLeft fun(self: Lane, trainName: string):nil
+---@field waitCount number
+
+---@class LaneRouteDriveBuilder
+---@field lane Lane
+---@field selectedRoutes string[]
+---@field driveOnlyOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):LaneRouteDriveBuilder
+---@field driveAlsoOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):LaneRouteDriveBuilder
+---@field showRequestsOn fun(self: LaneRouteDriveBuilder, ...: TrafficLight):Lane
+---@field driveOnlyOnSignalGroups fun(self: LaneRouteDriveBuilder, ...: SignalGroup):LaneRouteDriveBuilder
+---@field driveAlsoOnSignalGroups fun(self: LaneRouteDriveBuilder, ...: SignalGroup):LaneRouteDriveBuilder
+---@field showRequestsOnSignalGroups fun(self: LaneRouteDriveBuilder, ...: SignalGroup):Lane
+
 local Queue = require("ce.hub.util.Queue")
 local StorageUtility = require("ce.hub.util.StorageUtility")
 local SignalIndication = require("ce.mods.road.SignalIndication")
@@ -154,6 +293,7 @@ local function popTrainFromQueue(lane, trainName)
     if lane.signalUsedForRequest then return 0 end
 
     local hasTrainName = trainName and trainName ~= ""
+    ---@type integer|nil
     local numberOfPops = lane.queue:isEmpty() and 0 or 1
     if hasTrainName then
         if trainName == lane.firstGoodTrain then lane.firstGoodTrain = nil end
@@ -783,7 +923,7 @@ function Lane:new(name, laneSignal, turnDirections, signalType)
         tracksUsedForRequest = false,
         tracksForRequests = {},
         approach = Lane.Approach.SOUTH,
-        heading = Lane.Heading.NORTH,
+        heading = Lane.headingFromApproach(Lane.Approach.SOUTH),
         turnDirections = { Lane.Directions.LEFT, Lane.Directions.STRAIGHT, Lane.Directions.RIGHT },
         directions = { Lane.Directions.LEFT, Lane.Directions.STRAIGHT, Lane.Directions.RIGHT },
         signalType = signalType or "NORMAL",
@@ -803,7 +943,7 @@ function Lane:new(name, laneSignal, turnDirections, signalType)
 end
 
 ---Sets the default signals which allow this lane to drive.
----@param ... Signal
+---@param ... TrafficLight
 function Lane:driveOnDefaultSignals(...)
     local signals = { ... }
     assert(#signals > 0, "Specify at least one signal")
@@ -848,7 +988,7 @@ end
 ---
 ---Sets the signal which is used to drive.
 ---Without routes it is registered as default signal, with routes as additional route signal.
----@param signal Signal
+---@param signal TrafficLight
 function Lane:driveOn(signal, ...)
     assert(signal.type == "TrafficLight")
     if signal == self.laneSignal then return self end
@@ -863,7 +1003,7 @@ end
 ---Called by the signal, if the signal changed
 ---This will update the internal signal by the canDrive method
 ---Wird von einer Ampel aufgerufen, dass über die driveOn() Methode für diese Fahrspur angemeldet wurde
----@param signal Signal
+---@param signal TrafficLight
 function Lane:signalChanged(signal)
     if signal ~= self.laneSignal then
         assert(self.signalsToDriveOn, "There is no signal registered on this lane: " ..

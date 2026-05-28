@@ -24,6 +24,7 @@ local TableUtils = require("ce.hub.util.TableUtils")
 ---@field fire boolean|nil
 ---@field gsbname string|nil
 ---@field dirtyFields table<string, boolean>
+---@field loadedFields table<string, boolean>|nil
 ---@field needsFullSend boolean
 local Structure = {}
 

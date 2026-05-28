@@ -65,7 +65,9 @@ insulate("EepCallAnalyzer #eepAnalyzer", function ()
         EEPGetSignal(1)
         rawset(_G, "EEPOnSignal_7", function () return true end)
         EepCallAnalyzer.scanGlobals()
+        ---@diagnostic disable-next-line: redundant-parameter
         _G.EEPOnSaveAnl("anlage.anl3")
+        ---@diagnostic disable-next-line
         _G.EEPOnSignal_7(2)
         EepCallAnalyzer.endRun()
 
@@ -111,7 +113,8 @@ insulate("EepCallAnalyzer #eepAnalyzer", function ()
         EepCallAnalyzer.beginRun()
         EepCallAnalyzer.runInDiscovery(function ()
             EEPGetSignal(1)
-            _G.EEPOnSaveAnl("anlage.anl3")
+            ---@diagnostic disable-next-line: redundant-parameter
+        _G.EEPOnSaveAnl("anlage.anl3")
         end)
         EEPGetSignal(2)
 

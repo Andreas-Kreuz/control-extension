@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 local EepScenarioAnl3Parser = require("ce.hub.eep.scenario.EepScenarioAnl3Parser")
 
 local TEMP_FILE = "spec/ce/hub/eep/_anl3_test_tmp.xml"

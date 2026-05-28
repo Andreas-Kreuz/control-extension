@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 insulate("ce.mods.road.TrafficLightModel", function ()
     it("infers known traffic light models from EEP item names", function ()
         local TrafficLightModel = require("ce.mods.road.TrafficLightModel")

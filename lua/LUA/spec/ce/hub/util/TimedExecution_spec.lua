@@ -77,6 +77,7 @@ insulate("TimedExecution", function ()
 
         local runtime = RuntimeMetrics.get("spec.protectedTimedFailure")
         assert.is_false(ok)
+        assert(type(err) == "string")
         assert.is_truthy(string.find(err, "boom", 1, true))
         assert.equals(1, runtime.count)
         assert.is_true(runtime.lastTime >= 0)

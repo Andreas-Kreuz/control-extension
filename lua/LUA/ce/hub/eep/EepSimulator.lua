@@ -921,8 +921,8 @@ end
 
 --- Definiert die benutzerdefinierte Mitfahrkamera eines Rollmaterials.
 --- Ab: EEP 16.1 - Plugin 1.
-function EEPRollingstockSetUserCamera(rollingstockName, posX, posY, posZ, rotH, rotV)
-    return Runtime.callEEPRollingstockSetUserCamera(rollingstockName, posX, posY, posZ, rotH, rotV)
+function EEPRollingstockSetUserCamera(rollingstockName, posX, posY, posZ, rotH, rotV, setDirectly)
+    return Runtime.callEEPRollingstockSetUserCamera(rollingstockName, posX, posY, posZ, rotH, rotV, setDirectly)
 end
 
 --- Liest die benutzerdefinierte Mitfahrkamera eines Rollmaterials aus.
