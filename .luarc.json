@@ -1,0 +1,61 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "Lua 5.3",
+  "runtime.fileEncoding": "ansi",
+  "runtime.path": [
+    "?.lua",
+    "?/init.lua",
+    "lua/LUA/?.lua",
+    "lua/LUA/?/init.lua"
+  ],
+  "workspace.library": [
+    "lua/LUA/ce/hub/eep/EepOriginalApi.d.lua",
+    "lua/LUA/spec/SpecTypes.d.lua"
+  ],
+  "workspace.checkThirdParty": "Disable",
+  "workspace.ignoreDir": [
+    ".git",
+    ".yarn",
+    "node_modules",
+    "apps",
+    "packages",
+    "services",
+    "pages",
+    "project-docs",
+    "scripts",
+    "assets",
+    "docs",
+    "lua/Resourcen",
+    "lua/modell-pakete",
+    "lua/LUA/ce/third-party"
+  ],
+  "diagnostics.globals": [
+    "AkDebugLoad",
+    "CeDebugLoad",
+    "CeStartWithDebug",
+    "CeTestingMode",
+    "Zugname",
+    "describe",
+    "it",
+    "before_each",
+    "after_each",
+    "insulate",
+    "pending",
+    "finally",
+    "stub"
+  ],
+  "diagnostics.globalsRegex": [
+    "^EEP[A-Za-z0-9_]*$"
+  ],
+  "diagnostics.disable": [
+    "lowercase-global"
+  ],
+  "diagnostics.unusedLocalExclude": [
+    "_*"
+  ],
+  "format.enable": true,
+  "completion.callSnippet": "Replace",
+  "completion.keywordSnippet": "Disable",
+  "hint.enable": true,
+  "telemetry.enable": false
+}
