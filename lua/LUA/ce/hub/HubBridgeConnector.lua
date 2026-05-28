@@ -19,8 +19,8 @@ end
 
 function HubBridgeConnector.registerStatePublishers()
     local ModuleRegistry = require("ce.hub.ModuleRegistry")
-    local ModulesDataCollector = require("ce.hub.data.modules.ModulesDataCollector")
-    ModulesDataCollector.setRegisteredCeModules(ModuleRegistry.getRegisteredCeModules())
+    local ModulesUpdater = require("ce.hub.data.modules.ModulesUpdater")
+    ModulesUpdater.setRegisteredCeModules(ModuleRegistry.getRegisteredCeModules())
 
     registerStatePublisher(require("ce.hub.data.modules.ModulesStatePublisher"), { "modules" })
     registerStatePublisher(require("ce.hub.data.version.VersionStatePublisher"), { "eepVersion" })

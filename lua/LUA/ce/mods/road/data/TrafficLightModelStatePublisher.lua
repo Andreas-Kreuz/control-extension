@@ -1,7 +1,5 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.TrafficLightModelStatePublisher ...") end
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local TrafficLightModelDtoFactory = require("ce.mods.road.data.TrafficLightModelDtoFactory")
-local TrafficLightModelsDataCollector = require("ce.mods.road.data.TrafficLightModelsDataCollector")
+local TrafficLightModelPublisher = require("ce.mods.road.data.TrafficLightModelPublisher")
 
 ---@class TrafficLightModelStatePublisher
 TrafficLightModelStatePublisher = {}
@@ -18,8 +16,7 @@ function TrafficLightModelStatePublisher.syncState()
     if not enabled then return end
     if not initialized then TrafficLightModelStatePublisher.initialize() end
 
-    local trafficLightModels = TrafficLightModelsDataCollector.collectTrafficLightModels()
-    DataChangeBus.fireListChange(TrafficLightModelDtoFactory.createTrafficLightModelDtoList(trafficLightModels))
+    TrafficLightModelPublisher.syncState()
 end
 
 return TrafficLightModelStatePublisher

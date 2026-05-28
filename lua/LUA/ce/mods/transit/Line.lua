@@ -207,16 +207,6 @@ function Line.trainDeparted(trainName, station)
     lineSegment:trainDeparted(train, station)
 end
 
-function Line:toJsonStatic()
-    local lineSegments = {}
-    for _, segment in pairs(self.lineSegments) do table.insert(lineSegments, segment:toJsonStatic()) end
-    return { id = self.id, nr = self.nr, trafficType = self.trafficType, lineSegments = lineSegments }
-end
-
-function Line.getLines()
-    local ret = {}
-    for _, line in pairs(lines) do table.insert(ret, line:toJsonStatic()) end
-    return ret
-end
+function Line.getAll() return lines end
 
 return Line

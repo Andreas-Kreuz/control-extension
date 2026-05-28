@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Datenmodell
 subtitle: Alle CeTypes und Datentypen der Control Extension im Überblick
@@ -14,7 +14,7 @@ Diese Datei dokumentiert das aktuell erzeugte Datenmodell der aktiven `Publisher
 Grundlagen der Beschreibung:
 
 - Primärquelle sind die heutigen `*Publisher.lua`, `*DtoFactory.lua` und die dazugehörigen Domain-Modelle wie `Train`, `RollingStock` oder `Structure`.
-- Discovery und Update werden heute durch `CeHubModule` orchestriert; die `*StatePublisher.lua`-Dateien sind nur noch dünne Sync-Adapter.
+- Discovery und Update werden heute durch `CeHubModule` orchestriert; die `*StatePublisher.lua`-Dateien sind nur noch schlanke Sync-Adapter.
 - Für Felder, die direkt aus EEP-Funktionen stammen, wurden Typ, Wertebereich und Beschreibung soweit möglich aus `Lua_manual.pdf` abgeleitet.
 - Wo das Datenmodell nicht direkt aus EEP stammt, sondern aus Bibliothekslogik, ist das in der Beschreibung vermerkt.
 
@@ -632,7 +632,7 @@ Schema:
 ## `syncState()`-Transport
 
 Die heutigen Hub-Publisher senden ihre Nutzdaten über `DataChangeBus.fire*()`.
-Die `*StatePublisher.lua`-Dateien sind dünne Adapter auf die eigentlichen Publisher.
+Die `*StatePublisher.lua`-Dateien sind schlanke Adapter auf die eigentlichen Publisher.
 `syncState()` liefert keine Nutzdaten zurück.
 
 ## Verwendete EEP-Funktionen und Handbuchbezug

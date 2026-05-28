@@ -359,22 +359,6 @@ function LineSegment:trainDeparted(train, currentStation)
     end
 end
 
-function LineSegment:toJsonStatic()
-    local stations = {}
-    for _, s in ipairs(self.stationInfos) do
-        ---@type RoadStation
-        local station = s.station
-        local timeToStation = s.timeToStation
-        table.insert(stations, { station = { name = station.name }, timeToStation = timeToStation })
-    end
-    return {
-        id = self.id,
-        destination = self.destination,
-        routeName = self.routeName,
-        lineNr = self.line.nr,
-        stations = stations
-    }
-end
 
 function LineSegment:setKpId(kpId)
     assert(type(kpId) == "string", "Need 'kpId' as string")

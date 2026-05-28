@@ -34,12 +34,12 @@ Das Paket ist jetzt in drei Bereiche gegliedert:
   [SignalIndication.lua](./SignalIndication.lua),
   [TramSwitch.lua](./TramSwitch.lua)
 - [data/](./data/):
-  [RoadDataCollector.lua](./data/RoadDataCollector.lua),
   [RoadDtoFactory.lua](./data/RoadDtoFactory.lua),
+  [RoadPublisher.lua](./data/RoadPublisher.lua),
   [RoadStatePublisher.lua](./data/RoadStatePublisher.lua),
   [TrafficLightModelDtoFactory.lua](./data/TrafficLightModelDtoFactory.lua),
+  [TrafficLightModelPublisher.lua](./data/TrafficLightModelPublisher.lua),
   [TrafficLightModelStatePublisher.lua](./data/TrafficLightModelStatePublisher.lua),
-  [TrafficLightModelsDataCollector.lua](./data/TrafficLightModelsDataCollector.lua),
   [RoadDtoTypes.d.lua](./data/RoadDtoTypes.d.lua),
   [RoadDtoTypes.d.md](./data/RoadDtoTypes.d.md)
 - [bridge/](./bridge/):
@@ -56,7 +56,7 @@ Das Paket besteht aktuell aus fünf funktionalen Bereichen:
 
 1. Domänenmodell: `SignalIndication`, `TrafficLightModel`, `TrafficLight`, `Lane`, `TrafficPhase`, `Intersection`
 2. Modul- und Laufzeitintegration: `CeRoadModule`, `IntersectionSettings`
-3. Datenexport: `RoadDataCollector`, `TrafficLightModelsDataCollector`, `RoadDtoFactory`, `TrafficLightModelDtoFactory`
+3. Datenexport: `RoadPublisher`, `TrafficLightModelPublisher`, `RoadDtoFactory`, `TrafficLightModelDtoFactory`
 4. Web-Anbindung: `RoadStatePublisher`, `TrafficLightModelStatePublisher`, `RoadBridgeConnector`
 5. EEP-Helfer und Wertobjekte: `AxisStructureTrafficLight`, `LightStructureTrafficLight`, `TramSwitch`, `Bus`, `LaneSettings`
 
@@ -67,7 +67,7 @@ Der reguläre Ablauf sieht fachlich so aus:
 3. `CeRoadModule.run()` ruft zyklisch `Intersection.switchPhases()` auf.
 4. `Intersection` berechnet je Kreuzung die nächste Phase und plant deren Ablauf über `Task` und `Scheduler`.
 5. `TrafficLight` setzt Signalstellungen, Lichtimmobilien, Achsen und Tipptexte in EEP um.
-6. Die Publisher senden Web-Zustände über `DataChangeBus`, die Datenbeschaffung dafür liegt in den Collectors unter `data/`.
+6. Die Publisher senden Web-Zustände über `DataChangeBus`; die DTO-Erzeugung liegt in den Factories unter `data/`.
 
 Wichtig: Die Web-Schicht liest den Zustand aus den Fachobjekten aus, steuert aber nicht den Kernablauf. Die Umschaltlogik liegt vollständig in `Intersection`, `TrafficPhase`, `Lane` und `TrafficLight`.
 

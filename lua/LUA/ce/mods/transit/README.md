@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Linien für den Nahverkehr
 subtitle: Die Dateien in diesem Verzeichnis dienenen dazu Linien und Haltestellen zu verwalten
@@ -13,7 +13,7 @@ Dieses Paket ermöglicht die Steuerung von ÖPNV-Linien in der EEP-Anlage.
 
 ⚠ **EEPRollingstockSetTagText in den Fahrzeugen wird verwendet, wenn Du die Lua-Funktionen in den Kontaktpunkten nutzt**.
 
-Die öffentliche API dieses Moduls liegt im Top-Level des Pakets. Für den Datenexport liegen die DTO-Factories, Collector und StatePublisher unter [`data/`](./data/), die Web-Anbindung liegt unter [`web/`](./web/).
+Die öffentliche API dieses Moduls liegt im Top-Level des Pakets. Für den Datenexport liegen Publisher, DtoFactories und schlanke StatePublisher-Adapter unter [`data/`](./data/), die Web-Anbindung liegt unter [`web/`](./web/).
 
 ## Begriffe
 

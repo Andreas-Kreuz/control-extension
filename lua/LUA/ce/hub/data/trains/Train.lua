@@ -72,8 +72,6 @@ local EEPGetTrainLength = EepCompatibilityApi.EEPGetTrainLength
 ---@field closeDoors fun(self: Train):nil
 ---@field resetDirty fun(self: Train):nil
 ---@field hasDirtyFields fun(self: Train):boolean
----@field toJsonStatic fun(self: Train):table
----@field toJsonDynamic fun(self: Train):table
 local Train = {}
 local TRAIN_LIGHT_SOURCES = { 0, 1, 2, 3 }
 
@@ -796,33 +794,5 @@ function Train.setLightByName(trainName, enabled, source)
     return train:setLight(enabled, source)
 end
 
-function Train:toJsonStatic()
-    return {
-        id = self:getName(),
-        route = self:getRoute(),
-        rollingStockCount = self:getRollingStockCount(),
-        length = self:getLength(),
-        trackType = self:getTrackType(),
-        movesForward = self:getMovesForward(),
-        speed = self:getSpeed(),
-        targetSpeed = self:getTargetSpeed(),
-        couplingFront = self:getCouplingFront(),
-        couplingRear = self:getCouplingRear(),
-        lights = self:getLights(),
-        active = self:getActive(),
-        inTrainyard = self:getInTrainyard(),
-        trainyardId = self:getTrainyardId(),
-        occupiedTacks = self:getOnTrack()
-    }
-end
-
-function Train:toJsonDynamic()
-    return {
-        id = self:getName(),
-        trackType = self:getTrackType(),
-        speed = self:getSpeed(),
-        occupiedTacks = self:getOnTrack()
-    }
-end
 
 return Train

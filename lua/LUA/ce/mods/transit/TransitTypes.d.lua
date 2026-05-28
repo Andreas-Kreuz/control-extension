@@ -59,8 +59,7 @@
 ---@field trainDeparted fun(trainName: string, station: RoadStation):nil
 ---@field setTrainSection fun(trainName: string, section: LineSegment):nil
 ---@field applyCachedRouteForTrain fun(train: Train):LineSegment|nil,TransitTrain|nil
----@field toJsonStatic fun(self: Line):table
----@field getLines fun():table<string, Line>
+---@field getAll fun():table<string, Line>
 
 ---@class LineSegment
 ---@field id string
@@ -90,7 +89,6 @@
 ---@field getFirstStation fun(self: LineSegment):RoadStation|nil
 ---@field prepareDepartureAt fun(self: LineSegment, train: Train, nextStation: RoadStation, timeInMinutes: number):nil
 ---@field trainDeparted fun(self: LineSegment, train: Train, currentStation: RoadStation):nil
----@field toJsonStatic fun(self: LineSegment):table
 
 ---@class DepotDisplay
 ---@field line string

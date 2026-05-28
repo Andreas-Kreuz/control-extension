@@ -2,10 +2,12 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.TrafficLightModelDtoFactory ...") end
 
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
+local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
 
 ---@class TrafficLightModelDtoFactory
 ---@field createTrafficLightModelDto fun(definition: table):string,string,string|number,TrafficLightModelDto
 ---@field createTrafficLightModelDtoList fun(definitions: table):string,string,table
+---@field createTrafficLightModelDtoListFromModels fun():string,string,table
 local TrafficLightModelDtoFactory = {}
 
 local CE_TYPE = RoadCeTypes.TrafficLightModel
@@ -55,6 +57,29 @@ function TrafficLightModelDtoFactory.createTrafficLightModelDtoList(definitions)
         dtos[key] = dto
     end
     return CE_TYPE, KEY_ID, dtos
+end
+
+function TrafficLightModelDtoFactory.createTrafficLightModelDtoListFromModels()
+    local trafficLightModels = {}
+    for _, model in ipairs(TrafficLightModel.getAllOrdered()) do
+        table.insert(trafficLightModels, {
+            id = model.id,
+            name = model.name,
+            type = "road",
+            modelNamePatterns = model.modelNamePatterns or {},
+            modelNameMatchOrder = model.modelNameMatchOrder,
+            positions = {
+                positionRed = model.signalIndexRed,
+                positionGreen = model.signalIndexGreen,
+                positionYellow = model.signalIndexYellow,
+                positionRedYellow = model.signalIndexRedYellow,
+                positionPedestrians = model.signalIndexPedestrian,
+                positionOff = model.signalIndexSwitchOff,
+                positionOffBlinking = model.signalIndexBlinkYellow
+            }
+        })
+    end
+    return TrafficLightModelDtoFactory.createTrafficLightModelDtoList(trafficLightModels)
 end
 
 return TrafficLightModelDtoFactory

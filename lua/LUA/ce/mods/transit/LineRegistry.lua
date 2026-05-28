@@ -1,9 +1,4 @@
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
 local Line = require("ce.mods.transit.Line")
-local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
-local TransitDtoFactory = require("ce.mods.transit.data.TransitDtoFactory")
-local TransitOptionsRegistry = require("ce.mods.transit.options.TransitOptionsRegistry")
 local LineRegistry = {}
 local allLines = {}
 
@@ -30,7 +25,6 @@ end
 ---A line appeared on the map
 function LineRegistry.lineAppeared(_)
     -- is included in "LineRegistry.fireChangeLinesEvent()"
-    -- DataChangeBus.fireDataAdded("lines", "id", line:toJsonStatic())
 end
 
 ---A line dissappeared from the map
@@ -41,17 +35,7 @@ function LineRegistry.lineDisappeared(lineName)
 end
 
 function LineRegistry.fireChangeLinesEvent()
-    if not TransitOptionsRegistry.isPublishEnabled("lineNames") then return end
-    local modifiedLines = {}
-    for _, line in pairs(allLines) do
-        if line.valuesUpdated then
-            modifiedLines[line.id] = line
-            line.valuesUpdated = false
-        end
-    end
-    DataChangeBus.fireListChange(TransitDtoFactory.createLineNameDtoList(modifiedLines, function (line)
-        return InterestSyncRegistry.isSelected(TransitCeTypes.LineName, tostring(line.id or line.nr))
-    end))
+    require("ce.mods.transit.data.TransitLinePublisher").syncLineNames()
 end
 
 return LineRegistry

@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Hub-Daten
 subtitle: Erfassen, Strukturieren und Veröffentlichen von EEP-Daten über den Datenbus
@@ -26,11 +26,11 @@ Die aktive Struktur folgt dabei einem einheitlichen Muster:
 2. Laufende Discovery und Updates in `module.run()`
 3. Veröffentlichungen in den jeweiligen `*Publisher.syncState(...)`
 
-Die verbleibenden `*StatePublisher.lua`-Dateien sind heute nur noch dünne Sync-Adapter, damit die Hub-Integration stabil bleibt.
+Die verbleibenden `*StatePublisher.lua`-Dateien sind heute nur noch schlanke Sync-Adapter, damit die Hub-Integration stabil bleibt.
 
 ## Datenbereiche und CeTypes
 
-Jeder Datenbereich hat einen eigenen Unterordner. Dynamische Weltobjekte nutzen in der Regel die volle Klassenstruktur, einfache Singleton-Daten meist nur `Registry + Updater + Publisher`.
+Jeder Datenbereich hat einen eigenen Unterordner. Dynamische Weltobjekte nutzen in der Regel die volle Klassenstruktur, einfache Singleton-Daten meist nur `Registry + Updater + Publisher`. Datenexporte verwenden keine `*DataCollector`; der `Publisher` wählt die zu sendenden Quellen und die `DtoFactory` erzeugt die DTO-Struktur.
 
 - [rollingstock/](rollingstock/) - Rollmaterial
 - [trains/](trains/) - Züge, RollingStock-Discovery und Gleisbelegung

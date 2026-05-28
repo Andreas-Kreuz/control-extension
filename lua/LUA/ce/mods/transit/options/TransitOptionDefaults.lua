@@ -4,7 +4,7 @@ local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 
 local TransitOptionDefaults = {}
 
--- NOTE: data collection cannot be disabled per ceType — the entire module is skipped on loading.
+-- NOTE: Data is always available on module usage, so updates cannot be disabled.
 -- Only publish and field-level policies (always / oninterest / never) are configurable here.
 function TransitOptionDefaults.create()
     return {

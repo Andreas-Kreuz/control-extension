@@ -5,7 +5,7 @@ insulate("RuntimeStatePublisher", function ()
     local currentRenderFrameStub
 
     before_each(function ()
-        clearModule("ce.hub.data.runtime.RuntimeDataCollector")
+        clearModule("ce.hub.data.runtime.RuntimeUpdater")
         clearModule("ce.hub.data.runtime.RuntimeDtoFactory")
         clearModule("ce.hub.data.runtime.RuntimeStatePublisher")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -23,9 +23,8 @@ insulate("RuntimeStatePublisher", function ()
 
     it("publishes the last completed runtime snapshot only once", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
-        local RuntimeDataCollector = require("ce.hub.data.runtime.RuntimeDataCollector")
-        local RuntimeStatePublisher = require("ce.hub.data.runtime.RuntimeStatePublisher")
         local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
+        local RuntimeStatePublisher = require("ce.hub.data.runtime.RuntimeStatePublisher")
         local published = {}
 
         local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
@@ -40,7 +39,7 @@ insulate("RuntimeStatePublisher", function ()
         RuntimeStatePublisher.syncState()
         assert.equals(0, #published)
 
-        RuntimeDataCollector.setLastCycleRuntimeEntries(
+        RuntimeUpdater.setLastCycleRuntimeEntries(
             {
                 sample = {
                     ceType = "ce.hub.Runtime",
