@@ -5,10 +5,12 @@ local DtoBuilder = require("ce.hub.data.DtoBuilder")
 local DtoFieldAccess = require("ce.hub.data.DtoFieldAccess")
 local peek = DtoFieldAccess.peek
 local HubCeTypes = require("ce.hub.data.HubCeTypes")
+local HubOptionsRegistry = require("ce.hub.options.HubOptionsRegistry")
 
 ---@class FrameDataDtoFactory
----@field createFullDto fun(entry: table):string,string,string|number,FrameDataDto
----@field createPatchDto fun(entry: table, dirtyFields: table<string, boolean>):string,string,string|number,FrameDataDto
+---@field createFullDto fun(entry: table, isSelected?: boolean):string,string,string|number,FrameDataDto
+---@field createPatchDto fun(entry: table, dirtyFields: table<string, boolean>, isSelected?: boolean):string,string,
+---    string|number,FrameDataDto
 ---@field createFrameDataDtoList fun(entries: table):string,string,table
 local FrameDataDtoFactory = {}
 
@@ -31,34 +33,37 @@ local dtoFields = {
     },
 }
 
-local function buildFrameDataDto(entry)
+local function buildFrameDataDto(entry, isSelected)
     return DtoBuilder.buildFullDto({
                                        ceType = CE_TYPE,
                                        id = entry.id
-                                   }, entry, dtoFields)
+                                   }, entry, dtoFields, HubOptionsRegistry.getFieldPublishPolicies("frameData"),
+                                   isSelected == true)
 end
 
-local function buildFrameDataPatchDto(entry, dirtyFields)
+local function buildFrameDataPatchDto(entry, dirtyFields, isSelected)
     return DtoBuilder.buildPatchDto({
                                         ceType = CE_TYPE,
                                         id = entry.id
-                                    }, entry, dirtyFields, dtoFields)
+                                    }, entry, dirtyFields, dtoFields,
+                                    HubOptionsRegistry.getFieldPublishPolicies("frameData"), isSelected == true)
 end
 
-function FrameDataDtoFactory.createFullDto(entry)
-    local dto = buildFrameDataDto(entry)
+function FrameDataDtoFactory.createFullDto(entry, isSelected)
+    local dto = buildFrameDataDto(entry, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function FrameDataDtoFactory.createPatchDto(entry, dirtyFields)
-    local dto = buildFrameDataPatchDto(entry, dirtyFields)
+function FrameDataDtoFactory.createPatchDto(entry, dirtyFields, isSelected)
+    local dto = buildFrameDataPatchDto(entry, dirtyFields, isSelected)
     return CE_TYPE, KEY_ID, dto[KEY_ID], dto
 end
 
-function FrameDataDtoFactory.createFrameDataDtoList(entries)
+function FrameDataDtoFactory.createFrameDataDtoList(entries, isSelectedByValue)
     local dtos = {}
     for _, entry in pairs(entries) do
-        local _, _, _, dto = FrameDataDtoFactory.createFullDto(entry)
+        local _, _, _, dto =
+            FrameDataDtoFactory.createFullDto(entry, isSelectedByValue and isSelectedByValue(entry) or false)
         dtos[#dtos + 1] = dto
     end
     return CE_TYPE, KEY_ID, dtos

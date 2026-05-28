@@ -1,13 +1,15 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.data.TransitLinePublisher ...") end
 
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+local IncrementalListPublisher = require("ce.hub.publish.IncrementalListPublisher")
 local Line = require("ce.mods.transit.Line")
 local TransitCeTypes = require("ce.mods.transit.data.TransitCeTypes")
 local TransitLineDtoFactory = require("ce.mods.transit.data.TransitLineDtoFactory")
 local TransitOptionsRegistry = require("ce.mods.transit.options.TransitOptionsRegistry")
 
 local TransitLinePublisher = {}
+local linePublisher = IncrementalListPublisher:new()
+local lineNamePublisher = IncrementalListPublisher:new()
 
 local function isSelectedLine(line)
     return InterestSyncRegistry.isSelected(TransitCeTypes.Line, tostring(line.id or line.nr))
@@ -20,25 +22,26 @@ end
 function TransitLinePublisher.syncLines()
     if not TransitOptionsRegistry.isPublishEnabled("lines") then return end
 
-    DataChangeBus.fireListChange(TransitLineDtoFactory.createDtoList(Line.getAll(), isSelectedLine))
+    linePublisher:publish(TransitLineDtoFactory.createDtoList(Line.getAll(), isSelectedLine))
 end
 
 function TransitLinePublisher.syncLineNames()
     if not TransitOptionsRegistry.isPublishEnabled("lineNames") then return end
 
-    local modifiedLines = {}
     for _, line in pairs(Line.getAll()) do
-        if line.valuesUpdated then
-            modifiedLines[line.id] = line
-            line.valuesUpdated = false
-        end
+        line.valuesUpdated = false
     end
-    DataChangeBus.fireListChange(TransitLineDtoFactory.createLineNameDtoList(modifiedLines, isSelectedLineName))
+    lineNamePublisher:publish(TransitLineDtoFactory.createLineNameDtoList(Line.getAll(), isSelectedLineName))
 end
 
 function TransitLinePublisher.syncState()
     TransitLinePublisher.syncLines()
     TransitLinePublisher.syncLineNames()
+end
+
+function TransitLinePublisher.requestFullSync()
+    linePublisher:requestFullSync(TransitCeTypes.Line)
+    lineNamePublisher:requestFullSync(TransitCeTypes.LineName)
 end
 
 return TransitLinePublisher

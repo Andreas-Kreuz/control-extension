@@ -58,6 +58,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
 
     it("generates zipper merge debug tipp text through managed signal states", function ()
         local ZipperMerge = require("ce.mods.road.ZipperMerge")
+        ZipperMerge.debug = true
         local zipperMerge = ZipperMerge:new("Merge Debug", 445, 446)
 
         zipperMerge:trafficOnMain("#Car1")

@@ -134,8 +134,9 @@ function TransitDtoFactory.createStationDto(station, isSelected)
     return TransitCeTypes.Station, "id", dto.id, dto
 end
 
-function TransitDtoFactory.createStationDtoList(stations)
-    return createDtoList(TransitCeTypes.Station, "id", stations, TransitDtoFactory.createStationDto)
+function TransitDtoFactory.createStationDtoList(stations, isSelectedByValue)
+    return createDtoList(TransitCeTypes.Station, "id", stations, TransitDtoFactory.createStationDto,
+                         isSelectedByValue)
 end
 
 function TransitDtoFactory.createLineDto(line, isSelected)

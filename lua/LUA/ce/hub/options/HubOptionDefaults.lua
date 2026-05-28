@@ -35,8 +35,16 @@ function HubOptionDefaults.create()
                 ceType = HubCeTypes.FrameData,
                 discoveryAndUpdate = true,
                 publish = true,
-                fieldUpdates = {},
-                fieldPublish = {}
+                fieldUpdates = {
+                    framesPerSecond = "oninterest",
+                    currentFrame = "oninterest",
+                    currentRenderFrame = "oninterest"
+                },
+                fieldPublish = {
+                    framesPerSecond = "oninterest",
+                    currentFrame = "oninterest",
+                    currentRenderFrame = "oninterest"
+                }
             },
             saveSlots = {
                 ceType = HubCeTypes.SaveSlot,
@@ -128,8 +136,20 @@ function HubOptionDefaults.create()
                 ceType = HubCeTypes.Time,
                 discoveryAndUpdate = true,
                 publish = true,
-                fieldUpdates = {},
-                fieldPublish = {}
+                fieldUpdates = {
+                    name = "oninterest",
+                    timeComplete = "oninterest",
+                    timeH = "oninterest",
+                    timeM = "oninterest",
+                    timeS = "oninterest"
+                },
+                fieldPublish = {
+                    name = "oninterest",
+                    timeComplete = "oninterest",
+                    timeH = "oninterest",
+                    timeM = "oninterest",
+                    timeS = "oninterest"
+                }
             },
             routes = {
                 ceType = HubCeTypes.Route,
@@ -215,7 +235,7 @@ function HubOptionDefaults.create()
                     length = "always",
                     trackType = "always",
                     movesForward = "always",
-                    speed = "always",
+                    speed = "oninterest",
                     targetSpeed = "oninterest",
                     couplingFront = "oninterest",
                     couplingRear = "oninterest",

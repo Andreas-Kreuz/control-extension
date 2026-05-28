@@ -25,4 +25,11 @@ function TransitStatePublisher.syncState()
     TransitModuleSettingsPublisher.syncState()
 end
 
+function TransitStatePublisher.requestFullSync()
+    if TransitTrainPublisher.requestFullSync then TransitTrainPublisher.requestFullSync() end
+    if TransitLinePublisher.requestFullSync then TransitLinePublisher.requestFullSync() end
+    if TransitStationPublisher.requestFullSync then TransitStationPublisher.requestFullSync() end
+    if TransitModuleSettingsPublisher.requestFullSync then TransitModuleSettingsPublisher.requestFullSync() end
+end
+
 return TransitStatePublisher

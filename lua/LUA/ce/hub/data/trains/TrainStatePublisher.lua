@@ -19,4 +19,8 @@ function TrainStatePublisher.syncState()
     TrainPublisher.syncState()
 end
 
+function TrainStatePublisher.requestFullSync()
+    if TrainPublisher.requestFullSync then TrainPublisher.requestFullSync() end
+end
+
 return TrainStatePublisher

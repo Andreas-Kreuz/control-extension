@@ -39,4 +39,24 @@ insulate("ce.hub.data.InterestSyncRegistry", function ()
         assert.is_false(InterestSyncRegistry.isSelected("ce.hub.Train", "T2"))
         assert.same({ T1 = true }, InterestSyncRegistry.getSelectedKeys("ce.hub.Train"))
     end)
+
+    it("does not re-arm initial sends for unchanged manual interest", function ()
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+
+        InterestSyncRegistry.startSyncFor("ce.hub.Train", "T1")
+        InterestSyncRegistry.markSent("ce.hub.Train", "T1")
+        InterestSyncRegistry.startSyncFor("ce.hub.Train", "T1")
+
+        assert.is_false(InterestSyncRegistry.needsInitialSend("ce.hub.Train", "T1"))
+    end)
+
+    it("does not re-arm initial sends for unchanged source interest", function ()
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+
+        InterestSyncRegistry.startSyncForSource("ce.hub.Train", "T1", "depot:1")
+        InterestSyncRegistry.markSent("ce.hub.Train", "T1")
+        InterestSyncRegistry.startSyncForSource("ce.hub.Train", "T1", "depot:1")
+
+        assert.is_false(InterestSyncRegistry.needsInitialSend("ce.hub.Train", "T1"))
+    end)
 end)

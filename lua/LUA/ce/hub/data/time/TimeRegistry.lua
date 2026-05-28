@@ -6,7 +6,7 @@ local TimeRegistry = {}
 
 local timeData = nil
 
-function TimeRegistry.set(entries)
+function TimeRegistry.set(entries, updatedFields)
     local rawTimeData = entries and entries[1] or nil
     if not rawTimeData then
         timeData = nil
@@ -14,7 +14,7 @@ function TimeRegistry.set(entries)
     end
 
     if timeData then
-        timeData:update(rawTimeData)
+        timeData:update(rawTimeData, updatedFields)
     else
         timeData = TimeData:new(rawTimeData)
     end

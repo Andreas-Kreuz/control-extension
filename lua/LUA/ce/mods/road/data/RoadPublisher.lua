@@ -1,13 +1,14 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.data.RoadPublisher ...") end
 
-local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+local IncrementalListPublisher = require("ce.hub.publish.IncrementalListPublisher")
 local Intersection = require("ce.mods.road.Intersection")
 local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 local RoadOptionsRegistry = require("ce.mods.road.options.RoadOptionsRegistry")
 
 local RoadPublisher = {}
+local listPublisher = IncrementalListPublisher:new()
 
 local function isSelectedIntersection(intersection)
     return InterestSyncRegistry.isSelected(RoadCeTypes.Intersection, tostring(intersection.id))
@@ -33,25 +34,33 @@ function RoadPublisher.syncState()
     local crossingData = RoadDtoFactory.createCrossingDtos(Intersection.allIntersections)
 
     if RoadOptionsRegistry.isPublishEnabled("intersections") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionDtoList(crossingData.intersections,
-                                                                              isSelectedIntersection))
+        listPublisher:publish(RoadDtoFactory.createIntersectionDtoList(crossingData.intersections,
+                                                                       isSelectedIntersection))
     end
     if RoadOptionsRegistry.isPublishEnabled("intersectionLanes") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes,
-                                                                                  isSelectedLane))
+        listPublisher:publish(RoadDtoFactory.createIntersectionLaneDtoList(crossingData.intersectionLanes,
+                                                                           isSelectedLane))
     end
     if RoadOptionsRegistry.isPublishEnabled("intersectionPhases") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionPhaseDtoList(
-            crossingData.intersectionPhases, isSelectedPhase))
+        listPublisher:publish(RoadDtoFactory.createIntersectionPhaseDtoList(crossingData.intersectionPhases,
+                                                                            isSelectedPhase))
     end
     if RoadOptionsRegistry.isPublishEnabled("intersectionTrafficLights") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionTrafficLightDtoList(
+        listPublisher:publish(RoadDtoFactory.createIntersectionTrafficLightDtoList(
             crossingData.intersectionTrafficLights, isSelectedSignal))
     end
     if RoadOptionsRegistry.isPublishEnabled("moduleSettings") then
-        DataChangeBus.fireListChange(RoadDtoFactory.createIntersectionModuleSettingDtoList(
+        listPublisher:publish(RoadDtoFactory.createIntersectionModuleSettingDtoList(
             RoadDtoFactory.createModuleSettings(), isSelectedModuleSetting))
     end
+end
+
+function RoadPublisher.requestFullSync()
+    listPublisher:requestFullSync(RoadCeTypes.Intersection)
+    listPublisher:requestFullSync(RoadCeTypes.IntersectionLane)
+    listPublisher:requestFullSync(RoadCeTypes.IntersectionPhase)
+    listPublisher:requestFullSync(RoadCeTypes.IntersectionTrafficLight)
+    listPublisher:requestFullSync(RoadCeTypes.ModuleSetting)
 end
 
 return RoadPublisher

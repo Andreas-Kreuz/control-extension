@@ -19,4 +19,8 @@ function RoadStatePublisher.syncState()
     RoadPublisher.syncState()
 end
 
+function RoadStatePublisher.requestFullSync()
+    if RoadPublisher.requestFullSync then RoadPublisher.requestFullSync() end
+end
+
 return RoadStatePublisher

@@ -196,6 +196,7 @@ insulate("ce.mods.road.ZipperMerge", function ()
     end)
 
     it("exposes debug tipp texts for the road tipp text composer", function ()
+        ZipperMerge.debug = true
         local zipperMerge = ZipperMerge:new("Debug", 551, 552)
         zipperMerge:trafficOnMain("#Car1")
 

@@ -16,7 +16,9 @@ insulate("ce.hub.data.time.TimeDtoFactory", function ()
             timeS = 3
         }
 
-        local listRoom, listKeyId, timeDtos = TimeDtoFactory.createTimeDtoList({ timeData })
+        local listRoom, listKeyId, timeDtos = TimeDtoFactory.createTimeDtoList({ timeData }, function ()
+            return true
+        end)
         timeData.timeS = 9
 
         assert.equals("ce.hub.Time", listRoom)

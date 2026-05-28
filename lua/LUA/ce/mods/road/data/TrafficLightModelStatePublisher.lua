@@ -19,4 +19,8 @@ function TrafficLightModelStatePublisher.syncState()
     TrafficLightModelPublisher.syncState()
 end
 
+function TrafficLightModelStatePublisher.requestFullSync()
+    if TrafficLightModelPublisher.requestFullSync then TrafficLightModelPublisher.requestFullSync() end
+end
+
 return TrafficLightModelStatePublisher
