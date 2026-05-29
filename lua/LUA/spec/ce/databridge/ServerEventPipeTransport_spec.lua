@@ -76,8 +76,8 @@ insulate("ce.databridge.ServerEventPipeTransport", function ()
             assert.is_false(ServerEventPipeTransport.writeOutgoingEvents("{\"kind\":\"event\"}"))
         end)
         assert.equals(
-            "[#ServerEventPipeTransport] HINWEIS: Starte LUA/ce/control-extension-server.exe im " ..
-            "EEP-Verzeichnis, wenn du den Web Server der Control Extension fuer EEP verwenden willst.",
+            "[ServerEventPipeTransport] HINWEIS: Wenn du die Control Extension App nutzen möchtest, " ..
+            "starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis.",
             printedMessages[1]
         )
     end)

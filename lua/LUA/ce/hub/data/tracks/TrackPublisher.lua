@@ -34,7 +34,8 @@ function TrackPublisher.syncState()
                 local trackId = tostring(track.id)
                 local isSelected = InterestSyncRegistry.isSelected(ceType, trackId)
                 local needsInitialSend = InterestSyncRegistry.needsInitialSend(ceType, trackId)
-                if TrackRegistry.isInitialListPending(trackType) or track.needsFullSend or needsInitialSend then
+                if not TrackRegistry.isInitialListPending(trackType) and
+                    (track.needsFullSend or needsInitialSend) then
                     DataChangeBus.fireDataChanged(TrackDtoFactory.createTrackDto(trackType, track, true))
                     InterestSyncRegistry.markSent(ceType, trackId)
                     track.needsFullSend = false
@@ -44,6 +45,18 @@ function TrackPublisher.syncState()
                                                                                            track.dirtyFields,
                                                                                            isSelected)
                     if hasPayloadFields(dto) then DataChangeBus.fireDataChanged(dtoCeType, keyId, key, dto) end
+                    track:resetDirty()
+                end
+            end
+
+            if TrackRegistry.isInitialListPending(trackType) then
+                local ceType, keyId, list = TrackDtoFactory.createTrackDtoList(trackType,
+                                                                               TrackRegistry.getAll(trackType),
+                                                                               true)
+                DataChangeBus.fireListChange(ceType, keyId, list)
+                for _, track in pairs(TrackRegistry.getAll(trackType)) do
+                    InterestSyncRegistry.markSent(TrackDtoFactory.ceTypeForTrackType(trackType), tostring(track.id))
+                    track.needsFullSend = false
                     track:resetDirty()
                 end
             end

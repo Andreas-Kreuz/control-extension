@@ -1,5 +1,41 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLightModel ...") end
 
+---@class TrafficLightModel
+---@field name string
+---@field signalIndexRed number
+---@field signalIndexGreen number
+---@field signalIndexYellow number
+---@field signalIndexRedYellow number
+---@field signalIndexPedestrian number
+---@field signalIndexSwitchOff number
+---@field signalIndexBlinkYellow number
+---@field signalIndexGreenYellow number
+---@field modelNamePatterns string[]
+---@field modelNameMatchOrder number
+---@field allModels table<string, TrafficLightModel>
+---@field MA1_STRAB_4er_2_gruen TrafficLightModel
+---@field MA1_STRAB_4er_3_gruen TrafficLightModel
+---@field MA1_STRAB_2er_2_gruen TrafficLightModel
+---@field MA1_STRAB_3er_2_gruen TrafficLightModel
+---@field NP1_3er_mit_FG TrafficLightModel
+---@field NP1_3er_ohne_FG TrafficLightModel
+---@field JS2_2er_nur_FG TrafficLightModel
+---@field JS2_2er_OFF_YELLOW_GREEN TrafficLightModel
+---@field JS2_3er_mit_FG TrafficLightModel
+---@field JS2_3er_ohne_FG TrafficLightModel
+---@field Unsichtbar_2er TrafficLightModel
+---@field NONE TrafficLightModel
+---@field new fun(self: TrafficLightModel, name: string, signalIndexRed: number, signalIndexGreen: number,
+--- signalIndexYellow?: number, signalIndexRedYellow?: number, signalIndexPedestrian?: number,
+--- signalIndexSwitchOff?: number, signalIndexBlinkYellow?: number,
+--- signalIndexGreenYellow?: number):TrafficLightModel
+---@field getAllOrdered fun():TrafficLightModel[]
+---@field matchModelNames fun(self: TrafficLightModel, ...: string):TrafficLightModel
+---@field inferFromItemName fun(itemNameWithModelPath: string|nil):TrafficLightModel|nil
+---@field print fun(self: TrafficLightModel):nil
+---@field signalIndexOf fun(self: TrafficLightModel, indication: string):number
+---@field indicationOf fun(self: TrafficLightModel, signalIndex: number):string
+
 local SignalIndication = require("ce.mods.road.SignalIndication")
 ------------------------------------------------------------------------------------------
 -- Klasse TrafficLightModel

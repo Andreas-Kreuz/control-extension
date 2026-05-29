@@ -11,14 +11,14 @@ local descriptor
 local lastErrorMessage
 
 local function serverStartHint()
-    return "HINWEIS: Starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis, " ..
-        "wenn du den Web Server der Control Extension fuer EEP verwenden willst."
+    return "HINWEIS: Wenn du die Control Extension App nutzen möchtest, " ..
+        "starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis."
 end
 
 local function logFailure(message)
     if lastErrorMessage == message then return end
     lastErrorMessage = message
-    print("[#ServerEventPipeTransport] " .. message)
+    print("[ServerEventPipeTransport] " .. message)
 end
 
 local function safeClose(file)

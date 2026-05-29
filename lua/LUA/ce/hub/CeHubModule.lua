@@ -183,7 +183,9 @@ function EEPOnBeforeSaveAnl()
     ProtectedExecution.run("EEPOnBeforeSaveAnl", function ()
         savingInProgress = true
         savingGuardCycles = 0
-        print("[CeHubModule] EEP speichert Anlage ...")
+        if debug then
+            print("[CeHubModule] EEP speichert Anlage ...")
+        end
     end)
 end
 
@@ -191,8 +193,9 @@ function EEPOnSaveAnl(Anlagenname)
     ProtectedExecution.run("EEPOnSaveAnl", function ()
         savingInProgress = false
         savingGuardCycles = 0
-        print("Anlage gespeichert unter: " .. tostring(Anlagenname))
-
+        if debug then
+            print("Anlage gespeichert unter: " .. tostring(Anlagenname))
+        end
         EepScenarioDataController.update({ savedAnl3Path = Anlagenname })
     end)
 end

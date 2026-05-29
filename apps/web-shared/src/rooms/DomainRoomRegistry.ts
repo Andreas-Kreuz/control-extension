@@ -2,6 +2,8 @@ import DomainRoom from './DomainRoom';
 
 const ApiDataRoom = new DomainRoom('API Data');
 const ServerStatsRoom = new DomainRoom('App.ServerStats');
+const DataTransferSummaryRoom = new DomainRoom('App.DataTransferSummary');
+const DataTransferFieldsRoom = new DomainRoom('App.DataTransferFields');
 const RuntimeStatisticsRoom = new DomainRoom('App.RuntimeStatistics');
 const ModuleRoom = new DomainRoom('App.Modules');
 const VersionRoom = new DomainRoom('App.Version');
@@ -26,6 +28,8 @@ const RoadSettingsRoom = new DomainRoom('App.RoadSettings');
 const RoadTrafficLightModelsRoom = new DomainRoom('App.RoadTrafficLightModels');
 export { ApiDataRoom };
 export { ServerStatsRoom };
+export { DataTransferSummaryRoom };
+export { DataTransferFieldsRoom };
 export { RuntimeStatisticsRoom };
 export { ModuleRoom };
 export { VersionRoom };

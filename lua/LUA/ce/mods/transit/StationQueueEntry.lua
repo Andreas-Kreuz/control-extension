@@ -1,5 +1,16 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.StationQueueEntry ...") end
 
+---@class StationQueueEntry
+---@field trainName string
+---@field line string
+---@field destination string
+---@field timeInMinutes number
+---@field platform string
+---@field new fun(self: StationQueueEntry, trainName: string, destination: string, line: string,
+--- timeInMinutes: number, platform: string):StationQueueEntry
+---@field keyFor fun(trainName: string, destination: string, line: string):string
+---@field getKey fun(self: StationQueueEntry):string
+
 local StationQueueEntry = {}
 function StationQueueEntry:new(trainName, destination, line, timeInMinutes, platform)
     assert(type(self) == "table", "Call this method with ':'")

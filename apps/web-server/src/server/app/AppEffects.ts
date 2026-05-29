@@ -315,6 +315,9 @@ export default class AppEffects {
     eepService.setOnNewEventLine((eventLines: string) => {
       this.eepDataEffects.onNewEventLine(eventLines);
     });
+    eepService.setOnEventTransferFinished(() => {
+      this.eepDataEffects.onEventTransferFinished();
+    });
 
     this.registerMods(this.eepDataEffects, eepService);
 

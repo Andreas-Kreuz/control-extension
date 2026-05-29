@@ -1,5 +1,16 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.transit.StationQueue ...") end
 
+---@class StationQueue
+---@field type string
+---@field entries table<string, StationQueueEntry>
+---@field entriesByArrival StationQueueEntry[]
+---@field new fun(self: StationQueue):StationQueue
+---@field push fun(self: StationQueue, trainName: string, destination: string, line: string,
+--- timeInMinutes: number, platform?: string):nil
+---@field pop fun(self: StationQueue, trainName: string, destination: string, line: string):nil
+---@field removeTrain fun(self: StationQueue, trainName: string):boolean
+---@field getTrainEntries fun(self: StationQueue, platform?: string):table
+
 local StationQueueEntry = require("ce.mods.transit.StationQueueEntry")
 
 local StationQueue = {}

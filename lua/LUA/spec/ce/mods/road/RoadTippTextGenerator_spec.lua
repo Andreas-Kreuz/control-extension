@@ -13,6 +13,7 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
         clearModule("ce.mods.road.Lane")
         clearModule("ce.mods.road.SignalGroup")
         clearModule("ce.mods.road.TrafficLight")
+        clearModule("ce.mods.road.ZipperMerge")
         clearModule("ce.mods.road.tipptext.RoadTippTextOptions")
         clearModule("ce.mods.road.tipptext.RoadSignalTippTextComposer")
         clearModule("ce.mods.road.tipptext.RoadOverviewTippTextComposer")
@@ -48,11 +49,27 @@ insulate("ce.mods.road.tipptext.RoadTippTextGenerator", function ()
     it("does not generate tipp text while all options are disabled and no managed targets exist", function ()
         local generator = require("ce.mods.road.tipptext.RoadTippTextGenerator")
 
-        assert.equals("false|false|false|false|false|false|false|0|0", generator.fingerprint())
+        assert.equals("false|false|false|false|false|false|false|0|0|0", generator.fingerprint())
         assert.are.same({
             signals = {},
             structures = {}
         }, generator.generate())
+    end)
+
+    it("generates zipper merge debug tipp text through managed signal states", function ()
+        local ZipperMerge = require("ce.mods.road.ZipperMerge")
+        ZipperMerge.debug = true
+        local zipperMerge = ZipperMerge:new("Merge Debug", 445, 446)
+
+        zipperMerge:trafficOnMain("#Car1")
+        local desired = require("ce.mods.road.tipptext.RoadTippTextGenerator").generate()
+
+        assert.is_true(desired.signals[445].visible)
+        assert.is_truthy(string.find(desired.signals[445].text, "ZipperMerge Merge Debug", 1, true))
+        assert.is_truthy(string.find(desired.signals[445].text, "Signal: main", 1, true))
+        assert.is_truthy(string.find(desired.signals[445].text, "Main count: 1", 1, true))
+        assert.is_true(desired.signals[446].visible)
+        assert.is_truthy(string.find(desired.signals[446].text, "Signal: merge", 1, true))
     end)
 
     it("generates managed clears while all options are disabled", function ()

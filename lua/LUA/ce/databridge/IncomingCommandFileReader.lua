@@ -42,11 +42,11 @@ end
 function IncomingCommandFileReader.readAndExecuteIncomingCommands()
     local okPrepare, commandFileName = SafeFileIo.run("IncomingCommandFileReader.prepareCommandFile",
                                                       commandsToCeFileName or "commands-to-ce", prepareCommandFile)
-    if not okPrepare then return end
+    if not okPrepare or type(commandFileName) ~= "string" then return end
 
     local okRead, commands = SafeFileIo.run("IncomingCommandFileReader.readFile", commandFileName, readFile,
                                             commandFileName)
-    if not okRead then return end
+    if not okRead or type(commands) ~= "string" then return end
 
     if commands:len() < lastConsumedByteOffset then lastConsumedByteOffset = 0 end
 

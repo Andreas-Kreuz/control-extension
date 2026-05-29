@@ -82,7 +82,14 @@ async function testCompleteResetApplies(): Promise<void> {
   effects.onNewEventLine(JSON.stringify({ eventCounter: 1, type: 'CompleteReset', payload: { info: 'lua restart' } }));
   effects.refreshStateIfRequired();
 
-  assert.deepEqual(lastWrittenState(cache), { eventCounter: 1, ceTypes: {} });
+  assert.deepEqual(lastWrittenState(cache), {
+    eventCounter: 1,
+    ceTypes: {},
+    dataTransfer: {
+      seenCeTypes: {},
+      totals: {},
+    },
+  });
 }
 
 async function testStaleCounterOneIsIgnored(): Promise<void> {
@@ -104,6 +111,44 @@ async function testStaleCounterOneIsIgnored(): Promise<void> {
   assert.deepEqual(cache.writes, []);
 }
 
+async function testLastTransferUsesTransportBoundary(): Promise<void> {
+  const { effects, cache } = createEffects();
+
+  effects.onNewEventLine(
+    JSON.stringify({
+      eventCounter: 1,
+      type: 'DataChanged',
+      payload: { ceType: 'ce.test', keyId: 'id', element: { id: 'entry-1', value: 'alpha' } },
+    }),
+  );
+  effects.onNewEventLine(
+    JSON.stringify({
+      eventCounter: 2,
+      type: 'DataChanged',
+      payload: { ceType: 'ce.test', keyId: 'id', element: { id: 'entry-2', other: 'beta' } },
+    }),
+  );
+  effects.onEventTransferFinished();
+  effects.onNewEventLine(
+    JSON.stringify({
+      eventCounter: 3,
+      type: 'DataChanged',
+      payload: { ceType: 'ce.other', keyId: 'id', element: { id: 'entry-3', value: 'gamma' } },
+    }),
+  );
+  effects.refreshStateIfRequired();
+
+  const state = lastWrittenState(cache) as CachedState & {
+    dataTransfer: { last: { ceTypes: Record<string, unknown> } };
+  };
+  assert.deepEqual(Object.keys(state.dataTransfer.last.ceTypes), ['ce.other']);
+  assert.deepEqual(state.dataTransfer.last.ceTypes['ce.other'], {
+    updateCount: 1,
+    initialUpdateCount: 1,
+    fields: { id: 1, value: 1 },
+  });
+}
+
 async function testStopClearsRefreshTimer(): Promise<void> {
   const { effects } = createEffects();
   const timer = (effects as unknown as { refreshTimer: NodeJS.Timeout }).refreshTimer;
@@ -117,6 +162,7 @@ export async function run(): Promise<void> {
   await runTest('EepDataEffects applies expected next event counter', testExpectedCounterApplies);
   await runTest('EepDataEffects applies CompleteReset even with reset counter', testCompleteResetApplies);
   await runTest('EepDataEffects ignores stale counter one events', testStaleCounterOneIsIgnored);
+  await runTest('EepDataEffects resets last transfer at transport boundaries', testLastTransferUsesTransportBoundary);
   await runTest('EepDataEffects stop clears the refresh timer', testStopClearsRefreshTimer);
 }
 

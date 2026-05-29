@@ -21,6 +21,7 @@ export default class EepDataEffects {
   private jsonApiController: JsonApiRoomObserver;
   private refreshSettings = { pending: true, inProgress: false };
   private refreshTimer: NodeJS.Timeout;
+  private dataTransferOpen = false;
 
   constructor(
     router: express.Router,
@@ -87,6 +88,7 @@ export default class EepDataEffects {
       this.announceStateChange();
       this.refreshSettings.inProgress = false;
       this.refreshSettings.pending = false;
+      this.dataTransferOpen = false;
     }
   }
 
@@ -98,10 +100,11 @@ export default class EepDataEffects {
 
       // Fire this event only if it is expected or a complete reset
       if (expectedEventNr === receivedEventNr || event.type === 'CompleteReset') {
-        this.store.onNewEvent(event);
+        this.store.onNewEvent(event, { appendToLastTransfer: this.dataTransferOpen });
         if (event.type === 'CompleteReset') {
           this.interestSyncService?.replayRetainedInterests();
         }
+        this.dataTransferOpen = true;
         this.refreshSettings.pending = true;
       } else if (receivedEventNr > expectedEventNr) {
         console.error(
@@ -114,6 +117,10 @@ export default class EepDataEffects {
       console.error(jsonString.length, jsonString.substr(0, 20));
       console.error(e);
     }
+  }
+
+  onEventTransferFinished(): void {
+    this.dataTransferOpen = false;
   }
 
   announceStateChange(): void {

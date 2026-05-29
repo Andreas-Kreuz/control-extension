@@ -4,6 +4,7 @@ local SignalIndication = require("ce.mods.road.SignalIndication")
 local SignalRegistry = require("ce.hub.data.signals.SignalRegistry")
 local TrafficLight = require("ce.mods.road.TrafficLight")
 local TrafficLightModel = require("ce.mods.road.TrafficLightModel")
+local ZipperMerge = require("ce.mods.road.ZipperMerge")
 local fmt = require("ce.hub.eep.TippTextFormatter")
 
 local RoadSignalTippTextComposer = {}
@@ -112,6 +113,7 @@ function RoadSignalTippTextComposer.fingerprint(trafficLight, options)
         table.insert(values, trafficLight:getCurrentIndication() or "")
         table.insert(values, trafficLight:getReason() or "")
     end
+    table.insert(values, ZipperMerge.debugTippTextForSignalId(trafficLight:getSignalId()) or "")
     if trafficLight:getSignalId() <= 0 then
         for _, structureName in ipairs(trafficLight:getAllTippTextStructures()) do
             table.insert(values, structureName)
@@ -130,6 +132,7 @@ function RoadSignalTippTextComposer.composeTippText(trafficLight, lane, phaseInf
         (not lane or signalIsPartOfSignalGroup(trafficLight))
     local requestState = options.showRequestsOnSignal and lane and lane:getRequestState() or nil
     local laneKpId = options.showLaneNamesOnSignal and lane and lane:getKpId() or nil
+    local zipperMergeText = ZipperMerge.debugTippTextForSignalId(signalId)
     local reasonText = ""
     if showPhase and not showNameAndColor and trafficLight:getCurrentIndication() and trafficLight:getReason() then
         reasonText = string.format(" %s (%s) ", trafficLight:getCurrentIndication(), trafficLight:getReason())
@@ -214,6 +217,12 @@ function RoadSignalTippTextComposer.composeTippText(trafficLight, lane, phaseInf
         tippTextIsShown = true
     end
 
+    if textIsNotEmpty(zipperMergeText) then
+        if tippTextIsShown then infoText = fmt.appendUpTo1023(infoText, "<br>") end
+        infoText = fmt.appendUpTo1023(infoText, zipperMergeText)
+        tippTextIsShown = true
+    end
+
     if not tippTextIsShown and not showPhase then return "" end
 
     -- Phase information: phase matrix is separated more strongly from the signal-local blocks.
@@ -236,6 +245,20 @@ function RoadSignalTippTextComposer.state(trafficLight, lane, phaseInfo, options
     return {
         visible = textIsNotEmpty(infoText),
         text = infoText
+    }
+end
+
+function RoadSignalTippTextComposer.zipperMergeState(signalId)
+    local infoText = ZipperMerge.debugTippTextForSignalId(signalId)
+    if not textIsNotEmpty(infoText) then
+        return {
+            visible = false,
+            text = ""
+        }
+    end
+    return {
+        visible = true,
+        text = "<j>" .. infoText
     }
 end
 

@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Road-Datenmodell
 subtitle: JSON-Datenmodell der Ampel- und Kreuzungssteuerung
@@ -7,21 +7,21 @@ feature-img: '/docs/assets/headers/SourceCode.png'
 img: '/docs/assets/headers/SourceCode.png'
 ---
 
-# Datenmodell der JSON-Collector in `ce/mods/road`
+# Datenmodell der JSON-Publisher in `ce/mods/road`
 
 Diese Datei beschreibt das aktuell aus `lua/LUA/ce/mods/road` erzeugte JSON-Datenmodell.
 
 Wichtige Vorbemerkungen:
 
-- Primärquellen sind `TrafficLightModelStatePublisher.lua`, `RoadStatePublisher.lua` und die von ihnen verwendeten Modelle.
-- Beide Collector erzeugen ihre Nutzdaten fachlich über `DataChangeBus.fireListChange(...)`. `syncState()` liefert keine Nutzdaten zurück.
-- Der Lua-Collector sendet Listen. Der Web-Server normalisiert diese Listen danach zu Objekt-Mappings nach `keyId` und speichert sie so in `lua/LUA/ce/databridge/exchange/server-state.json`.
+- Primärquellen sind `TrafficLightModelPublisher.lua`, `RoadPublisher.lua`, die von ihnen verwendeten Modelle und die zugehörigen DtoFactories.
+- Beide Publisher erzeugen ihre Nutzdaten fachlich über `DataChangeBus.fireListChange(...)`. `syncState()` liefert keine Nutzdaten zurück.
+- Die Lua-Publisher senden Listen. Der Web-Server normalisiert diese Listen danach zu Objekt-Mappings nach `keyId` und speichert sie so in `lua/LUA/ce/databridge/exchange/server-state.json`.
 
-## `TrafficLightModelStatePublisher`
+## `TrafficLightModelPublisher`
 
-| Collector                         | CeType                           |
+| Publisher                         | CeType                           |
 | --------------------------------- | -------------------------------- |
-| `TrafficLightModelStatePublisher` | `ce.mods.road.TrafficLightModel` |
+| `TrafficLightModelPublisher` | `ce.mods.road.TrafficLightModel` |
 
 ### CeType `ce.mods.road.TrafficLightModel`
 
@@ -42,15 +42,15 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `positions.positionOff`         | `integer >= 1` oder nicht gesetzt; Beispiel: `7`                 | Signalstellung für ausgeschaltete Ampel.                                                 |
 | `positions.positionOffBlinking` | `integer >= 1` oder nicht gesetzt; Beispiel: `8`                 | Signalstellung für gelb blinkende Ampel.                                                 |
 
-## `RoadStatePublisher`
+## `RoadPublisher`
 
-| Collector            | CeType                                  |
+| Publisher            | CeType                                  |
 | -------------------- | --------------------------------------- |
-| `RoadStatePublisher` | `ce.mods.road.Intersection`             |
-| `RoadStatePublisher` | `ce.mods.road.IntersectionPhase`        |
-| `RoadStatePublisher` | `ce.mods.road.IntersectionTrafficLight` |
-| `RoadStatePublisher` | `ce.mods.road.IntersectionLane`         |
-| `RoadStatePublisher` | `ce.mods.road.ModuleSetting`            |
+| `RoadPublisher` | `ce.mods.road.Intersection`             |
+| `RoadPublisher` | `ce.mods.road.IntersectionPhase`        |
+| `RoadPublisher` | `ce.mods.road.IntersectionTrafficLight` |
+| `RoadPublisher` | `ce.mods.road.IntersectionLane`         |
+| `RoadPublisher` | `ce.mods.road.ModuleSetting`            |
 
 ### CeType `ce.mods.road.Intersection`
 
@@ -59,7 +59,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 
 | Name               | Typ und Wertebereich / Beispiel                   | Beschreibung                                                                                                                                                             |
 | ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`               | `integer >= 1`; Beispiel: `1`                     | Laufende numerische ID je Kreuzung, erzeugt beim Collect in alphabetischer Reihenfolge der Kreuzungsnamen.                                                               |
+| `id`               | `integer >= 1`; Beispiel: `1`                     | Laufende numerische ID je Kreuzung, erzeugt durch die DtoFactory in alphabetischer Reihenfolge der Kreuzungsnamen.                                                               |
 | `name`             | `string`; Beispiel: `Bahnhofstraße - Hauptstraße` | Kreuzungsname aus `Intersection:new(name, ...)`.                                                                                                                         |
 | `currentPhase`     | `string` oder nicht gesetzt; Beispiel: `P1a`      | Name der aktuell aktiven Phase aus `crossing:getCurrentPhase().name`. Wegen `nil` kann das Feld im JSON komplett fehlen.                                                 |
 | `manualPhase`      | `string` oder nicht gesetzt; Beispiel: `P3`       | Name der manuell genutzten Phase aus `crossing:getManualPhase().name`.                                                                                                   |
@@ -120,7 +120,7 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `modelId`                              | `string`; Beispiel: `Unsichtbares Signal`                                                                                  | Name des zugeordneten `TrafficLightModel`.                                                                                                                                                                                |
 | `currentIndication`                    | `string`, Werte aus `SignalIndication`; Beispiel: `Rot`                                                                    | Aktuelle Signalindikation. Bei positiven Signal-IDs initial aus `EEPGetSignal(signalId)` und `TrafficLightModel:indicationOf(...)`, danach aus der Lua-Logik gepflegt. Typische Werte im Snapshot: `Rot`, `Grün`, `Fußg`. |
 | `intersectionId`                       | `integer >= 1`; Beispiel: `1`                                                                                              | Numerische Referenz auf `intersections.id`.                                                                                                                                                                               |
-| `lightStructures`                      | Objekt mit String-Schlüsseln oder leeres Array/Objekt; Beispiel: `{ "0": { "structureRed": "#5525_Straba Signal Halt" } }` | Zusatz-Immobilien mit Lichtsteuerung. Der Collector serialisiert hier bewusst kein Array, sondern ein Objekt mit Schlüsseln `"0"`, `"1"` usw.                                                                             |
+| `lightStructures`                      | Objekt mit String-Schlüsseln oder leeres Array/Objekt; Beispiel: `{ "0": { "structureRed": "#5525_Straba Signal Halt" } }` | Zusatz-Immobilien mit Lichtsteuerung. Die DtoFactory serialisiert hier bewusst kein Array, sondern ein Objekt mit Schlüsseln `"0"`, `"1"` usw.                                                                             |
 | `lightStructures.<n>.structureRed`     | `string` oder nicht gesetzt; Beispiel: `#5525_Straba Signal Halt`                                                          | Immobilie, deren Licht bei Rot oder Rot-Gelb geschaltet wird. Verwendet später `EEPStructureSetLight(...)`.                                                                                                               |
 | `lightStructures.<n>.structureGreen`   | `string` oder nicht gesetzt; Beispiel: `#5436_Straba Signal rechts`                                                        | Immobilie für Grün.                                                                                                                                                                                                       |
 | `lightStructures.<n>.structureYellow`  | `string` oder nicht gesetzt; Beispiel: `#5526_Straba Signal anhalten`                                                      | Immobilie für Gelb; fällt beim Anlegen auf `structureRed` zurück.                                                                                                                                                         |
@@ -144,15 +144,15 @@ Diese Signalstellungen können als `signalIndex` für `EEPSetSignal(signalId, si
 | `id`                         | `string`, pro Fahrspur eindeutig; Beispiel: `1-K1 - Fahrspur 01`         | Zusammengesetzter Schlüssel aus numerischer Kreuzungs-ID und Fahrspurname.                                                                                                                |
 | `intersectionId`             | `integer >= 1`; Beispiel: `1`                                            | Referenz auf `intersections.id`.                                                                                                                                                          |
 | `name`                       | `string`; Beispiel: `K1 - Fahrspur 01`                                   | Fahrspurname aus `Lane:new(...)`.                                                                                                                                                         |
-| `currentIndication`          | `string`, festes Mapping; Beispiel: `GREEN`                              | Vom Collector normalisierte Signalindikation. Werte: `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN`. Quelle ist `lane.currentIndication`, also indirekt die Ampelsteuerung. |
+| `currentIndication`          | `string`, festes Mapping; Beispiel: `GREEN`                              | Von der DtoFactory normalisierte Signalindikation. Werte: `NONE`, `YELLOW`, `RED`, `RED_YELLOW`, `GREEN`, `PEDESTRIAN`. Quelle ist `lane.currentIndication`, also indirekt die Ampelsteuerung. |
 | `vehicleMultiplier`          | `number >= 0`; Beispiel: `15`                                            | Prioritätsfaktor aus `lane.fahrzeugMultiplikator`.                                                                                                                                        |
-| `type`                       | `string`, `NORMAL`, `TRAM` oder `PEDESTRIAN`; Beispiel: `TRAM`           | Vom Collector abgeleiteter Fahrspurtyp: Fußgänger bei `Lane.RequestType.FUSSGAENGER`, Tram bei `lane.trafficType == "TRAM"`, sonst `NORMAL`.                                              |
+| `type`                       | `string`, `NORMAL`, `TRAM` oder `PEDESTRIAN`; Beispiel: `TRAM`           | Von der DtoFactory abgeleiteter Fahrspurtyp: Fußgänger bei `Lane.RequestType.FUSSGAENGER`, Tram bei `lane.trafficType == "TRAM"`, sonst `NORMAL`.                                              |
 | `countType`                  | `string`, `CONTACTS`, `SIGNALS` oder `TRACKS`; Beispiel: `CONTACTS`      | Art der Anforderungsermittlung: Kontaktpunkte, Signalwarteschlange oder Straßen-/Track-Reservierung.                                                                                      |
 | `waitingTrains`              | `string[]`; Beispiel: `["#Linie 10 - Zug 2"]`                            | Aktuelle Fahrspurwarteschlange aus `lane.queue`. Je nach Konfiguration stammen die Namen aus Kontaktpunkten, `EEPGetSignalTrainName(...)` oder Track-Registrierung.                       |
 | `waitingForGreenCyclesCount` | `integer >= 0`; Beispiel: `6`                                            | Anzahl verpasster Grünzyklen aus `lane.waitCount`.                                                                                                                                        |
 | `directions`                 | `string[]`, Werte aus `Lane.Directions`; Beispiel: `["LEFT","STRAIGHT"]` | Konfigurierte Fahrtrichtungen. Mögliche Werte: `LEFT`, `HALF-LEFT`, `STRAIGHT`, `HALF-RIGHT`, `RIGHT`.                                                                                    |
-| `phases`                     | `string[]`; Beispiel: `["P1","P1a"]`                                     | Alle Phasen, in denen diese Fahrspur vorkommt. Vom Collector aus den Phasen abgeleitet.                                                                                                   |
-| `tracks`                     | `string[]`; Beispiel: `[]`                                               | Optional konfigurierte Gleis-/Straßennamen für Hervorhebung. Keine direkte EEP-Abfrage im Collector.                                                                                      |
+| `phases`                     | `string[]`; Beispiel: `["P1","P1a"]`                                     | Alle Phasen, in denen diese Fahrspur vorkommt. Von der DtoFactory aus den Phasen abgeleitet.                                                                                                   |
+| `tracks`                     | `string[]`; Beispiel: `[]`                                               | Optional konfigurierte Gleis-/Straßennamen für Hervorhebung. Keine direkte EEP-Abfrage im Publisher.                                                                                      |
 
 ### CeType `ce.mods.road.ModuleSetting`
 
@@ -183,29 +183,29 @@ Alle derzeit verfügbaren `IntersectionSettings` sind boolesche Anzeigeeinstellu
 
 ### Tatsächlicher Transportpfad
 
-1. `TrafficLightModelStatePublisher` und `RoadStatePublisher` rufen `DataChangeBus.fireListChange(ceType, keyId, list)` auf.
+1. `TrafficLightModelStatePublisher` und `RoadPublisher` rufen `DataChangeBus.fireListChange(ceType, keyId, list)` auf.
 2. `ServerEventBuffer` puffert daraus JSON-Zeilen-Events im Speicher.
 3. `ServerExchangeCoordinator.runServerExchangeCycle(...)` schreibt diese Events über `ServerExchangeFileIo.writeOutgoingEvents(...)` in den Austauschkanal; der persistierte State liegt in `lua/LUA/ce/databridge/exchange/server-state.json`.
 4. `apps/web-server/src/server/eep/server-data/EepDataStore.ts` normalisiert `ListChanged` zu `ceTypes[ceType][element[keyId]] = element`.
 5. `apps/web-server/src/server/eep/server-data/static/ServerData.ts` serialisiert diese Objekt-Mappings für REST und Socket-API.
 6. Die Web-App hört mit `useApiDataRoomHandler(...)` auf den API-Datenräumen und macht daraus per `Object.values(JSON.parse(payload))` wieder Listen.
 
-### Vergleich Collector-Modell, Web-Server-State und Web-App
+### Vergleich Publisher-Modell, Web-Server-State und Web-App
 
 Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen Repo liegen die Road-Consumer tatsächlich unter `apps/web-app/src/mod/intersections`.
 
-| Raumname                         | Collector-Form in Lua      | Form im Web-Server-State / API | Web-App-Nutzung                                                                                      | Abgleich                                                                                                                                                                                          |
+| Raumname                         | Publisher-Form in Lua      | Form im Web-Server-State / API | Web-App-Nutzung                                                                                      | Abgleich                                                                                                                                                                                          |
 | -------------------------------- | -------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ce.mods.road.TrafficLightModel` | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Inhalt des Snapshots passt zum Collector; die Web-App hat dafür derzeit keinen Consumer.                                                                                                          |
+| `ce.mods.road.TrafficLightModel` | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Inhalt des Snapshots passt zum Publisher; die Web-App hat dafür derzeit keinen Consumer.                                                                                                          |
 | `ce.mods.road.Intersection`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersections.tsx`, `useIntersection.tsx`, `IntersectionOverview.tsx`, `IntersectionDetails.tsx` | Passt weitgehend. Achtung: `currentPhase`, `manualPhase` und `nextPhase` können im JSON fehlen, sind im TS-Modell aber als Pflicht-`string` typisiert.                                            |
 | `road-intersection-phases`       | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | `useIntersectionPhases.tsx`, `useIntersectionPhase.tsx`, `IntersectionDetails.tsx`                   | Wird aktiv genutzt. Wichtig: `intersectionId` ist hier ein `string` mit dem Kreuzungsnamen, nicht die numerische ID. Die Web-App berücksichtigt das korrekt über `useIntersectionPhase(i?.name)`. |
-| `road-intersection-signals`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Snapshot und Collector passen fachlich zusammen. `lightStructures` bleibt auch im Server-State ein Objekt mit String-Indizes.                                                                     |
+| `road-intersection-signals`      | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Snapshot und Publisher passen fachlich zusammen. `lightStructures` bleibt auch im Server-State ein Objekt mit String-Indizes.                                                                     |
 | `road-intersection-lanes`        | Liste mit Schlüssel `id`   | Objekt-Mapping nach `id`       | Im aktuellen Intersections-Modul ungenutzt                                                           | Daten werden erzeugt und im State gehalten, aktuell aber nicht in `src/mod/intersections` dargestellt.                                                                                            |
 | `road-module-settings`           | Liste mit Schlüssel `name` | Objekt-Mapping nach `name`     | `useIntersectionSettings.tsx`, `ModuleSettingsButton`, `ModuleSetting.tsx`                           | Passt. Die Web-App behandelt die Daten generisch als `LuaSetting<boolean>`.                                                                                                                       |
 
 ### Auffällige Schema- und Integrationsbesonderheiten
 
-- Der Collector liefert Listen, der Web-Server-State speichert dieselben CeTypes aber als Objekte nach `keyId`. Das ist die Form, die auch die Web-App empfängt.
+- Der Publisher liefert Listen, der Web-Server-State speichert dieselben CeTypes aber als Objekte nach `keyId`. Das ist die Form, die auch die Web-App empfängt.
 - `road-intersection-phases.intersectionId` ist ein Kreuzungsname (`string`), während `road-intersection-lanes.intersectionId` und `road-intersection-signals.intersectionId` numerische IDs sind.
 - `road-intersection-signals.lightStructures` wird als Objekt mit String-Indizes serialisiert, nicht als JSON-Array.
 - Mehrere Felder in `ce.mods.road.Intersection` sind optional, weil Lua-`nil`-Felder beim JSON-Export nicht erscheinen.
@@ -214,16 +214,16 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 
 ## Events in `ce/mods/road`
 
-### Von den Collectoren erzeugte Daten-Events
+### Von den Publishern erzeugte Daten-Events
 
 | Ursprung in `ce/mods/road`                    | Eventtyp      | CeType / Schlüssel                      |
 | --------------------------------------------- | ------------- | --------------------------------------- |
-| `TrafficLightModelStatePublisher.syncState()` | `ListChanged` | `ce.mods.road.TrafficLightModel` / `id` |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `ce.mods.road.Intersection` / `id`      |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-lanes` / `id`        |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-phases` / `id`       |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-intersection-signals` / `id`      |
-| `RoadStatePublisher.syncState()`              | `ListChanged` | `road-module-settings` / `name`         |
+| `TrafficLightModelPublisher.syncState()` | `ListChanged` | `ce.mods.road.TrafficLightModel` / `id` |
+| `RoadPublisher.syncState()`              | `ListChanged` | `ce.mods.road.Intersection` / `id`      |
+| `RoadPublisher.syncState()`              | `ListChanged` | `road-intersection-lanes` / `id`        |
+| `RoadPublisher.syncState()`              | `ListChanged` | `road-intersection-phases` / `id`       |
+| `RoadPublisher.syncState()`              | `ListChanged` | `road-intersection-signals` / `id`      |
+| `RoadPublisher.syncState()`              | `ListChanged` | `road-module-settings` / `name`         |
 
 ### In `ce/mods/road` ausgewertete Eingangs-Events und Callbacks
 
@@ -244,3 +244,5 @@ Hinweis: Im Auftrag wird `apps/web-app/src/intersections` genannt. Im aktuellen 
 | ------------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `[Command Event] Change Cam`   | Umschalten auf statische Kamera aus `intersections[].staticCams` | Nicht in `ce/mods/road`, sondern im Web-Server-Command-Modul; daraus wird `Scenario.setCamera \| 0 \| <staticCam>`. |
 | `[Room] Join` / `[Room] Leave` | Beitritt und Verlassen von Socket-Räumen                         | Infrastruktur der Web-App/Web-Server-Schicht, nicht `ce/mods/road`.                                                 |
+
+

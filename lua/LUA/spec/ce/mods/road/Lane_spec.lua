@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 -- Lua code for testing the lane's functions
 describe("Lane ...", function ()
     local function seedTrainRoute(trainName, route)
@@ -15,14 +16,17 @@ describe("Lane ...", function ()
                 :setApproach(Lane.Approach.NORTH)
 
             assert.equals(Lane.Approach.NORTH, lane.approach)
+            ---@diagnostic disable-next-line: deprecated
             assert.equals(Lane.Heading.SOUTH, lane.heading)
         end)
 
         it("maps legacy heading to opposite approach", function ()
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 67, TrafficLightModel.Unsichtbar_2er))
+            ---@diagnostic disable-next-line: deprecated
                 :setHeading(Lane.Heading.NORTH)
 
             assert.equals(Lane.Approach.SOUTH, lane.approach)
+            ---@diagnostic disable-next-line: deprecated
             assert.equals(Lane.Heading.NORTH, lane.heading)
         end)
 
@@ -63,6 +67,7 @@ describe("Lane ...", function ()
         it("rejects invalid approaches", function ()
             local printStub = stub(_G, "print")
             local lane = Lane:new("Lane A", TrafficLight:new("K1", 68, TrafficLightModel.Unsichtbar_2er))
+            ---@diagnostic disable-next-line: param-type-mismatch
             lane:setApproach("UP")
 
             assert.equals(Lane.Approach.SOUTH, lane.approach)
@@ -896,6 +901,7 @@ describe("Lane ...", function ()
             local okTag, tagText = EEPSignalGetTagText(169)
 
             assert.is_true(okTag)
+            assert(type(tagText) == "string")
             assert.is_true(tagText:len() <= 1024)
             assert.is_truthy(string.find(tagText, "q=", 1, true))
             assert.is_truthy(string.find(tagText, firstName, 1, true))
@@ -920,6 +926,7 @@ describe("Lane ...", function ()
             local laneSignal = TrafficLight:new("K6", 171, TrafficLightModel.Unsichtbar_2er)
             local lane = Lane:new("Lane Missing Leave Name", laneSignal)
 
+            ---@diagnostic disable-next-line: param-type-mismatch
             lane:vehicleLeft(nil)
             lane:vehicleEntered("#Car4")
 

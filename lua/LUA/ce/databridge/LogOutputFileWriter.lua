@@ -1,7 +1,6 @@
 ---@diagnostic disable: param-type-mismatch, cast-local-type, need-check-nil
 if CeDebugLoad then print("[#Start] Loading ce.databridge.LogOutputFileWriter ...") end
 local ExchangeDirRegistry = require("ce.databridge.ExchangeDirRegistry")
-local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
 local os = require("os")
 
 local LogOutputFileWriter = {}
@@ -88,6 +87,7 @@ function LogOutputFileWriter.initialize()
     end
 
     deleteLogFile()
+    local IncomingCommandExecutor = require("ce.databridge.IncomingCommandExecutor")
     IncomingCommandExecutor.registerAllowedCommand("clearlog", clearlog)
     IncomingCommandExecutor.registerAllowedCommand("print", print)
     initialized = true

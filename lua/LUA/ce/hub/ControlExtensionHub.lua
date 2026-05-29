@@ -1,7 +1,5 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.ControlExtensionHub ...") end
 
-require("ce.databridge.IoInit").initialize()
-
 local MainLoopRunner = require("ce.hub.MainLoopRunner")
 local ModuleRegistry = require("ce.hub.ModuleRegistry")
 local ProtectedExecution = require("ce.hub.util.ProtectedExecution")

@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 insulate("ce.hub.data.signals.SignalDiscovery", function ()
     local function clearModule(name) package.loaded[name] = nil end
 

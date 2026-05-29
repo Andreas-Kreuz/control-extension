@@ -1,4 +1,4 @@
-# Architektur `ce.databridge`
+﻿# Architektur `ce.databridge`
 
 ## Zweck
 
@@ -69,7 +69,7 @@ Verantwortlichkeiten:
 - Schreiben der Exportdatei und des Ready-Markers
 - Lesen neuer Befehle aus der Kommandodatei
 
-Dieses Modul ist bewusst infrastrukturell. Es kennt keine Json-Collector und keine Fachobjekte.
+Dieses Modul dient allein der Infrastrukturanbindung. Es kennt keine Publisher, DtoFactories und keine Fachobjekte.
 
 ### [IncomingCommandExecutor.lua](./IncomingCommandExecutor.lua)
 
@@ -193,7 +193,7 @@ Wenn StatePublisher ihre Events nicht mehr wie erwartet erzeugen oder nicht seri
 `ce/databridge` arbeitet eng mit diesen Paketen zusammen:
 
 - `ce.hub`: typischer Aufruf von `runServerOutputCycle(...)`
-- `ce.hub.data`, `ce.mods.road`, `ce.mods.transit`: liefern Collector und Remote-Funktionen
+- `ce.hub.data`, `ce.mods.road`, `ce.mods.transit`: liefern Publisher, DtoFactories und Remote-Funktionen
 - `ce.hub.publish.DataChangeBus`: erzeugt Events, die über den `ServerEventBuffer` gesammelt werden
 - `ce.hub.data.runtime.RuntimeMetrics`: sammelt Laufzeitmetriken des Kommunikationszyklus
 
@@ -204,5 +204,5 @@ Bei Änderungen in `ce/databridge` zuerst diese Fragen beantworten:
 1. Betrifft die Änderung das Dateihandshake, die Befehlsausführung oder nur Logging?
 2. Welche andere Seite spricht dasselbe Protokoll mit, insbesondere Web-Server oder Web-App?
 3. Wird ein globales Verhalten wie `print` oder `assert` geändert?
-4. Kann die Änderung dazu führen, dass Collector oder Remote-Funktionen erst zur Laufzeit scheitern?
+4. Kann die Änderung dazu führen, dass Publisher oder Remote-Funktionen erst zur Laufzeit scheitern?
 5. Muss die Beschreibung in [README.md](./README.md) mit angepasst werden?

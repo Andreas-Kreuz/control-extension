@@ -16,9 +16,26 @@ function ContactPublisher.syncState()
     end
 
     local addedIds = ContactRegistry.getAddedIds()
+    local contacts = ContactRegistry.getAll()
+    local hasContact = false
+    local allContactsNeedFullSend = true
+
+    for _, contact in pairs(contacts) do
+        hasContact = true
+        if not contact.needsFullSend then allContactsNeedFullSend = false end
+    end
+
+    if hasContact and allContactsNeedFullSend then
+        DataChangeBus.fireListChange(ContactDtoFactory.createDtoList(contacts, function (contact)
+            return InterestSyncRegistry.isSelected(HubCeTypes.Contact, contact.id)
+        end))
+        for _, contact in pairs(contacts) do contact.needsFullSend = false end
+        ContactRegistry.clearPendingChanges()
+        return
+    end
 
     for contactId in pairs(addedIds) do
-        local contact = ContactRegistry.getAll()[contactId]
+        local contact = contacts[contactId]
         if contact then
             local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Contact, contactId)
             DataChangeBus.fireDataAdded(ContactDtoFactory.createFullDto(contact, isSelected))
@@ -26,7 +43,7 @@ function ContactPublisher.syncState()
         end
     end
 
-    for _, contact in pairs(ContactRegistry.getAll()) do
+    for _, contact in pairs(contacts) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Contact, contact.id)
         local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Contact, contact.id)
         if not addedIds[contact.id] and (contact.needsFullSend or needsInitialSend) then

@@ -22,11 +22,35 @@ function RollingStockPublisher.syncState()
         return
     end
 
+    local rollingStocks = RollingStockRegistry.getAll()
+    local hasRollingStock = false
+    local allRollingStocksNeedFullSend = true
+
+    for _, rs in pairs(rollingStocks) do
+        hasRollingStock = true
+        if not rs.needsFullSend then allRollingStocksNeedFullSend = false end
+    end
+
+    if hasRollingStock and allRollingStocksNeedFullSend then
+        DataChangeBus.fireListChange(RollingStockDtoFactory.createDtoList(rollingStocks, function (rs)
+            return InterestSyncRegistry.isSelected(HubCeTypes.RollingStock, rs.id)
+        end))
+        for _, rs in pairs(rollingStocks) do
+            rs.needsFullSend = false
+            if InterestSyncRegistry.isSelected(HubCeTypes.RollingStock, rs.id) then
+                InterestSyncRegistry.markSent(HubCeTypes.RollingStock, rs.id)
+            end
+            rs:resetDirty()
+        end
+        RollingStockRegistry.clearPendingChanges()
+        return
+    end
+
     for stockId in pairs(RollingStockRegistry.getRemovedIds()) do
         DataChangeBus.fireDataRemoved(RollingStockDtoFactory.createRemovalDto(stockId))
     end
 
-    for _, rs in pairs(RollingStockRegistry.getAll()) do
+    for _, rs in pairs(rollingStocks) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.RollingStock, rs.id)
         local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.RollingStock, rs.id)
 

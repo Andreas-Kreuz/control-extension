@@ -1,4 +1,4 @@
-insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
+insulate("ce.hub.data.scenario.ScenarioUpdater", function ()
     local function clearModule(name) package.loaded[name] = nil end
     local originalEEPLng = _G.EEPLng
     local originalEEPGetAnlVer = _G.EEPGetAnlVer
@@ -10,7 +10,8 @@ insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
     local originalEEPGetTimeLapse = _G.EEPGetTimeLapse
 
     before_each(function ()
-        clearModule("ce.hub.data.scenario.ScenarioDataCollector")
+        clearModule("ce.hub.data.scenario.ScenarioUpdater")
+        clearModule("ce.hub.data.scenario.ScenarioRegistry")
         clearModule("ce.hub.data.scenario.ScenarioDiscovery")
 
         rawset(_G, "EEPLng", "GER")
@@ -41,9 +42,13 @@ insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
         rawset(_G, "EEPGetTimeLapse", originalEEPGetTimeLapse)
     end)
 
-    it("collects scenario metadata and active selections", function ()
-        local ScenarioDataCollector = require("ce.hub.data.scenario.ScenarioDataCollector")
+    it("updates scenario metadata and active selections", function ()
+        local ScenarioRegistry = require("ce.hub.data.scenario.ScenarioRegistry")
+        local ScenarioUpdater = require("ce.hub.data.scenario.ScenarioUpdater")
 
+        ScenarioUpdater.runUpdate()
+
+        local scenario = ScenarioRegistry.get()
         assert.same({
                         id = "scenario",
                         name = "scenario",
@@ -56,7 +61,9 @@ insulate("ce.hub.data.scenario.ScenarioDataCollector", function ()
                         activeRollingStock = "BR 218",
                         timeLapse = 4,
                         staticCameras = { "Bahnhof", "Kreuzung" },
-                        dynamicCameras = { "Fahrtwind" }
-                    }, ScenarioDataCollector.collectScenario())
+                        dynamicCameras = { "Fahrtwind" },
+                        dirtyFields = {},
+                        needsFullSend = true
+                    }, scenario)
     end)
 end)

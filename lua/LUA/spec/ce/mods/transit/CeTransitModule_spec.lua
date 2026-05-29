@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field
 insulate("ce.mods.transit.CeTransitModule", function ()
     local function clearModule(name) package.loaded[name] = nil end
 
@@ -10,9 +11,11 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         clearModule("ce.mods.transit.LineRegistry")
         clearModule("ce.mods.transit.RoadStation")
         clearModule("ce.mods.transit.data.TransitTrainRegistry")
+        clearModule("ce.mods.transit.data.TransitTrainPublisher")
         clearModule("ce.mods.transit.data.TransitTrainUpdater")
         clearModule("ce.mods.transit.options.TransitOptionsRegistry")
         clearModule("ce.mods.transit.data.TransitDtoFactory")
+        clearModule("ce.hub.publish.DataChangeBus")
         clearModule("ce.hub.data.signals.Signal")
         clearModule("ce.hub.data.signals.SignalRegistry")
         clearModule("ce.hub.data.signals.WaitingOnSignal")
@@ -107,6 +110,29 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         assert.is_false(InterestSyncRegistry.isSelected(HubCeTypes.Train, "#DepotInterestTrain"))
     end)
 
+    it("does not re-arm train initial sends while the same depot train keeps waiting", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        local TrainPublisher = require("ce.hub.data.trains.TrainPublisher")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+
+        EepSimulator.simulateAddTrain("#DepotStableInterestTrain", "Depot Stable Interest RS")
+        TrainRegistry.getOrCreate("#DepotStableInterestTrain")
+        EepSimulator.simulateQueueTrainOnSignal(707, "#DepotStableInterestTrain")
+        CeTransitModule:registerDepotSignals(707)
+
+        CeTransitModule.run()
+        assert.is_true(InterestSyncRegistry.needsInitialSend(HubCeTypes.Train, "#DepotStableInterestTrain"))
+        TrainPublisher.syncState()
+        assert.is_false(InterestSyncRegistry.needsInitialSend(HubCeTypes.Train, "#DepotStableInterestTrain"))
+
+        CeTransitModule.run()
+
+        assert.is_false(InterestSyncRegistry.needsInitialSend(HubCeTypes.Train, "#DepotStableInterestTrain"))
+    end)
+
     it("does not remove user interest when depot interest ends", function ()
         local EepSimulator = require("ce.hub.eep.EepSimulator")
         local CeTransitModule = require("ce.mods.transit.CeTransitModule")
@@ -187,6 +213,61 @@ insulate("ce.mods.transit.CeTransitModule", function ()
         assert.equals("42", transitTrain:getLine())
         assert.equals("Cached Destination", transitTrain:getDestination())
         assert.equals("North", transitTrain:getDirection())
+    end)
+
+    it("does not derive transit train state for unrelated hub trains", function ()
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local Line = require("ce.mods.transit.Line")
+        local RoadStation = require("ce.mods.transit.RoadStation")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainRegistry = require("ce.mods.transit.data.TransitTrainRegistry")
+
+        EepSimulator.simulateAddTrain("#KnownTransitTrain", "KnownTransitTrain RS")
+        EepSimulator.simulateAddTrain("#PlainHubTrain", "PlainHubTrain RS")
+
+        local startStation = RoadStation:new("Known Transit Start", -1)
+        local segment = Line.forName("KT"):addSection("Known Transit Route", "Known Transit Destination")
+        segment:addStop(startStation:platform(1), 0)
+        TrainRegistry.getOrCreate("#KnownTransitTrain"):setRoute(segment.routeName)
+        TrainRegistry.getOrCreate("#PlainHubTrain"):setRoute("Plain Hub Route")
+
+        CeTransitModule.run()
+
+        assert.is_not_nil(TransitTrainRegistry.get("#KnownTransitTrain"))
+        assert.is_nil(TransitTrainRegistry.get("#PlainHubTrain"))
+    end)
+
+    it("does not publish repeated unchanged transit train updates after route reconciliation", function ()
+        local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local CeTransitModule = require("ce.mods.transit.CeTransitModule")
+        local Line = require("ce.mods.transit.Line")
+        local RoadStation = require("ce.mods.transit.RoadStation")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local TransitTrainPublisher = require("ce.mods.transit.data.TransitTrainPublisher")
+        local dataChanges = {}
+
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function () end)
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
+            table.insert(dataChanges, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        finally(function () fireListChangeStub:revert() end)
+        finally(function () fireDataChangedStub:revert() end)
+
+        EepSimulator.simulateAddTrain("#StableTransitTrain", "StableTransitTrain RS")
+
+        local startStation = RoadStation:new("Stable Transit Start", -1)
+        local segment = Line.forName("ST"):addSection("Stable Transit Route", "Stable Transit Destination")
+        segment:addStop(startStation:platform(1), 0)
+        TrainRegistry.getOrCreate("#StableTransitTrain"):setRoute(segment.routeName)
+
+        CeTransitModule.run()
+        TransitTrainPublisher.syncState()
+        CeTransitModule.run()
+        TransitTrainPublisher.syncState()
+
+        assert.equals(0, #dataChanges)
     end)
 
     it("station DTO: platforms always present, queue absent when not selected (default options)", function ()

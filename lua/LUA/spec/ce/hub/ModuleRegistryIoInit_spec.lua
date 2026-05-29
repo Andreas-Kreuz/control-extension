@@ -1,4 +1,4 @@
-insulate("ControlExtensionHub IO init", function ()
+insulate("ControlExtension IO init", function ()
     require("ce.hub.eep.EepSimulator")
 
     local function clearModule(name) package.loaded[name] = nil end
@@ -12,15 +12,20 @@ insulate("ControlExtensionHub IO init", function ()
         clearModule("ce.databridge.IoInit")
     end)
 
-    it("calls IoInit.initialize while requiring ControlExtensionHub", function ()
+    it("calls IoInit.initialize before loading ControlExtensionHub", function ()
         local initCalls = 0
         local IoInit = require("ce.databridge.IoInit")
-        local initializeStub = stub(IoInit, "initialize", function () initCalls = initCalls + 1 end)
+        local hubLoadedDuringInit = false
+        local initializeStub = stub(IoInit, "initialize", function ()
+            initCalls = initCalls + 1
+            hubLoadedDuringInit = package.loaded["ce.hub.ControlExtensionHub"] ~= nil
+        end)
         finally(function () initializeStub:revert() end)
 
-        require("ce.hub.ControlExtensionHub")
+        require("ce.ControlExtension")
 
         assert.equals(1, initCalls)
+        assert.is_false(hubLoadedDuringInit)
     end)
 
     it("does not call IoInit.initialize again from ControlExtension.initTasks", function ()

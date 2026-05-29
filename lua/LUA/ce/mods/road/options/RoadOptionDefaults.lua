@@ -4,7 +4,7 @@ local RoadCeTypes = require("ce.mods.road.data.RoadCeTypes")
 
 local RoadOptionDefaults = {}
 
--- NOTE: data collection cannot be disabled per ceType — the entire module is skipped on loading.
+-- NOTE: Data is always available on module usage, so updates cannot be disabled.
 -- Only publish and field-level policies (always / oninterest / never) are configurable here.
 function RoadOptionDefaults.create()
     return {

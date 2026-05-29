@@ -1,3 +1,6 @@
+-- Start DataBridge log mirroring before the public entry point loads the hub.
+require("ce.databridge.IoInit").initialize()
+
 if CeDebugLoad then print("[#Start] Loading ce.ControlExtension ...") end
 
 local ControlExtensionHub = require("ce.hub.ControlExtensionHub")

@@ -3,7 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainRegistry ...
 local Train = require("ce.hub.data.trains.Train")
 local TrainRollingStockStore = require("ce.hub.data.trains.TrainRollingStockStore")
 
-if _G.CeTestingMode then TrainRollingStockStore.reset() end
+if CeTestingMode then TrainRollingStockStore.reset() end
 
 local TrainRegistry = {}
 TrainRegistry.debug = CeStartWithDebug or false

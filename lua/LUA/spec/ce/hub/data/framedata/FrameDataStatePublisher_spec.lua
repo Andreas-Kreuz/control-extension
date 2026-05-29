@@ -9,6 +9,7 @@ insulate("FrameDataStatePublisher", function ()
         clearModule("ce.hub.data.framedata.FrameDataStatePublisher")
         clearModule("ce.hub.data.framedata.FrameDataUpdater")
         clearModule("ce.hub.publish.DataChangeBus")
+        clearModule("ce.hub.data.InterestSyncRegistry")
 
         stubFPS = stub(_G, "EEPGetFramesPerSecond", function () return 60 end)
         stubFrame = stub(_G, "EEPGetCurrentFrame", function () return 15 end)
@@ -21,7 +22,7 @@ insulate("FrameDataStatePublisher", function ()
         stubRenderFrame:revert()
     end)
 
-    it("publishes frame data as a single entry", function ()
+    it("publishes placeholder frame data until the entry is selected", function ()
         local DataChangeBus = require("ce.hub.publish.DataChangeBus")
         local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")
         local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
@@ -41,13 +42,42 @@ insulate("FrameDataStatePublisher", function ()
         assert.same({
                         ceType = "ce.hub.FrameData",
                         id = "frameData",
+                        framesPerSecond = 0,
+                        currentFrame = 0,
+                        currentRenderFrame = 0
+                    }, published[1].dto)
+    end)
+
+    it("publishes real frame data for selected entries", function ()
+        local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+        local FrameDataStatePublisher = require("ce.hub.data.framedata.FrameDataStatePublisher")
+        local FrameDataUpdater = require("ce.hub.data.framedata.FrameDataUpdater")
+        local HubCeTypes = require("ce.hub.data.HubCeTypes")
+        local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
+        local published = {}
+
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
+            table.insert(published, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        finally(function () fireDataChangedStub:revert() end)
+
+        InterestSyncRegistry.startSyncFor(HubCeTypes.FrameData, "frameData")
+        FrameDataUpdater.runUpdate()
+        FrameDataStatePublisher.syncState()
+        assert.equals(1, #published)
+        assert.equals("ce.hub.FrameData", published[1].ceType)
+        assert.equals("id", published[1].keyId)
+        assert.equals("frameData", published[1].key)
+        assert.same({
+                        ceType = "ce.hub.FrameData",
+                        id = "frameData",
                         framesPerSecond = 60,
                         currentFrame = 15,
                         currentRenderFrame = 15948
                     }, published[1].dto)
     end)
 
-    it("publishes nil values when EEP functions are not available", function ()
+    it("publishes placeholders when EEP functions are not available and the entry is not selected", function ()
         rawset(_G, "EEPGetFramesPerSecond", nil)
         rawset(_G, "EEPGetCurrentFrame", nil)
         rawset(_G, "EEPGetCurrentRenderFrame", nil)
@@ -72,7 +102,10 @@ insulate("FrameDataStatePublisher", function ()
         assert.equals(1, #published)
         assert.same({
                         ceType = "ce.hub.FrameData",
-                        id = "frameData"
+                        id = "frameData",
+                        framesPerSecond = 0,
+                        currentFrame = 0,
+                        currentRenderFrame = 0
                     }, published[1].dto)
     end)
 end)

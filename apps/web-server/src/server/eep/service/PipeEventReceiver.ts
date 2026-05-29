@@ -8,6 +8,7 @@ export class PipeEventReceiver {
     private readonly pipeName: string,
     private readonly onEventLine: (line: string) => void,
     private readonly debug = false,
+    private readonly onTransferFinished: () => void = () => {},
   ) {}
 
   start(): void {
@@ -60,5 +61,6 @@ export class PipeEventReceiver {
       this.onEventLine(remaining);
     }
     this.buffers.delete(socket);
+    this.onTransferFinished();
   }
 }

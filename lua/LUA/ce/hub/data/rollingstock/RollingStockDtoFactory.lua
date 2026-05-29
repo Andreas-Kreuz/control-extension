@@ -14,6 +14,7 @@ local TableUtils = require("ce.hub.util.TableUtils")
 ---@field createPatchDto fun(stock: RollingStock, dirtyFields: table<string,boolean>, isSubscribed: boolean|nil):
 ---string,string,string,RollingStockDto
 ---@field createRemovalDto fun(stockId: string):string,string,string,table
+---@field createDtoList fun(stocks: table<string, RollingStock>, isSelectedByValue: function|nil):string,string,table
 local RollingStockDtoFactory = {}
 
 local CE_TYPE = HubCeTypes.RollingStock
@@ -237,6 +238,16 @@ end
 function RollingStockDtoFactory.createRemovalDto(stockId)
     local dto = { ceType = CE_TYPE, id = stockId }
     return CE_TYPE, KEY_ID, stockId, dto
+end
+
+function RollingStockDtoFactory.createDtoList(stocks, isSelectedByValue)
+    local dtos = {}
+    for _, stock in pairs(stocks or {}) do
+        local _, _, _, dto = RollingStockDtoFactory.createFullDto(
+            stock, isSelectedByValue and isSelectedByValue(stock) or false)
+        dtos[#dtos + 1] = dto
+    end
+    return CE_TYPE, KEY_ID, dtos
 end
 
 return RollingStockDtoFactory

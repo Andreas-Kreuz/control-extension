@@ -28,8 +28,8 @@ function ServerExchangeCoordinator.initialize(serverShallBeUsed)
     -- Print hint if server should be used but is not ready
     if serverShallBeUsed and not ServerExchangeFileIo.isServerRunning() then
         print(
-            "HINWEIS: Starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis, " ..
-            "wenn du den Web Server der Control Extension für EEP verwenden willst."
+            "HINWEIS: Wenn du die Control Extension App nutzen möchtest, " ..
+            "starte LUA/ce/control-extension-server.exe im EEP-Verzeichnis."
         )
     end
 

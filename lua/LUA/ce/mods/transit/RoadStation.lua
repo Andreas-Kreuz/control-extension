@@ -1,3 +1,31 @@
+---@class RoadStation
+---@field type string
+---@field name string
+---@field displays table
+---@field platforms table<number, Platform>
+---@field queue StationQueue
+---@field routePlatforms table<string, table>
+---@field eepSaveId number
+---@field debug boolean
+---@field queueToText fun(queue: StationQueue):string
+---@field trainArrivesIn fun(self: RoadStation, trainName: string, destination: string, lineNr: string,
+--- timeInMinutes: number):nil
+---@field trainLeft fun(self: RoadStation, trainName: string, destination: string, lineNr: string):nil
+---@field removeTrain fun(self: RoadStation, trainName: string):nil
+---@field setPlatform fun(self: RoadStation, segment: LineSegment, platform: number):nil
+---@field updateRoutesOnPlatform fun(self: RoadStation, platformName: string):nil
+---@field updateDisplays fun(self: RoadStation):nil
+---@field addDisplay fun(self: RoadStation, structure: string, model: table, platformNr?: any):nil
+---@field platform fun(self: RoadStation, platformNr: any):Platform
+---@field getKpId fun(self: RoadStation):string|nil
+---@field setKpId fun(self: RoadStation, kpId: string):RoadStation
+---@field setScriptVariableName fun(self: RoadStation, name: string):RoadStation
+---@field resolve fun(kpId: string):RoadStation
+---@field new fun(self: RoadStation, name: string, eepSaveId: number):RoadStation
+---@field forName fun(name: string):RoadStation
+---@field showTippText fun():nil
+---@field getAll fun():table<string, RoadStation>
+
 local Platform = require("ce.mods.transit.Platform")
 local StationQueue = require("ce.mods.transit.StationQueue")
 local StorageUtility = require("ce.hub.util.StorageUtility")

@@ -69,3 +69,10 @@
 ---@field createLineNameDto fun(line: Line|table):string,string,string|number,TransitLineDto
 ---@field createLineNameDtoList fun(lines: table):string,string,table
 ---@field createTransitTrainDto fun(transitTrain: TransitTrain|table):string,string,string|number,TransitTrainDto
+
+---@class TransitLineDtoFactory
+---@field createLineSegmentDto fun(lineSegment: LineSegment|table):TransitLineSegmentDto
+---@field createFullDto fun(line: Line|table, isSelected?: boolean):string,string,string|number,TransitLineDto
+---@field createDtoList fun(lines: table):string,string,table
+---@field createLineNameFullDto fun(line: Line|table, isSelected?: boolean):string,string,string|number,TransitLineDto
+---@field createLineNameDtoList fun(lines: table):string,string,table

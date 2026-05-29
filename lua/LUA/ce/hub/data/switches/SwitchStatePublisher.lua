@@ -5,7 +5,7 @@ local SwitchPublisher = require("ce.hub.data.switches.SwitchPublisher")
 ---@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():nil
-SwitchStatePublisher = {}
+local SwitchStatePublisher = {}
 SwitchStatePublisher.enabled = true
 local initialized = false
 SwitchStatePublisher.name = "ce.hub.data.switches.SwitchStatePublisher"

@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Eigene Module entwickeln
 subtitle: Wie Du ein eigenes CeModule baust und in die Control Extension integrierst
@@ -71,9 +71,10 @@ Das geht zu jedem beliebigen Zeitpunkt — am naheliegendsten in `run()`, aber a
 
 Die Konvention der eingebauten Module:
 
-1. Ein `*StatePublisher` sammelt mit einem `*DataCollector` die aktuellen Zustände.
+1. Ein `*Publisher` entscheidet, welche Zustände veröffentlicht werden.
 2. Eine `*DtoFactory` wandelt die Zustände in Datentransferobjekte (DTOs) um.
-3. Die DTOs werden nach `ceType` einsortiert: `ceType:string` → `dtoId:string|number` → `dto:table`.
+3. Ein schlanker `*StatePublisher` registriert den Publisher im Hub-Lebenszyklus.
+4. Die DTOs werden nach `ceType` einsortiert: `ceType:string` → `dtoId:string|number` → `dto:table`.
 
 CeTypes und DTO-Strukturen aller eingebauten Module sind in [hub/data/DTO.md](hub/data/DTO.md) dokumentiert.
 

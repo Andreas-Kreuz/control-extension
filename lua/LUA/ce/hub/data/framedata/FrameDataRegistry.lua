@@ -6,7 +6,7 @@ local FrameDataRegistry = {}
 
 local frameData = nil
 
-function FrameDataRegistry.set(value)
+function FrameDataRegistry.set(value, updatedFields)
     local rawFrameData = value and value[1] or nil
     if not rawFrameData then
         frameData = nil
@@ -14,7 +14,7 @@ function FrameDataRegistry.set(value)
     end
 
     if frameData then
-        frameData:update(rawFrameData)
+        frameData:update(rawFrameData, updatedFields)
     else
         frameData = FrameData:new(rawFrameData)
     end

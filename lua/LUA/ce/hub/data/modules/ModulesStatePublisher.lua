@@ -5,10 +5,10 @@ local ModulesPublisher = require("ce.hub.data.modules.ModulesPublisher")
 ---@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():nil
-ModulesStatePublisher = {}
+local ModulesStatePublisher = {}
 ModulesStatePublisher.enabled = true
 local initialized = false
-ModulesStatePublisher.name = "ce.hub.ModulesStatePublisher"
+ModulesStatePublisher.name = "ce.hub.data.modules.ModulesStatePublisher"
 ModulesStatePublisher.ceTypes = require("ce.hub.data.HubCeTypes").Module
 
 function ModulesStatePublisher.initialize()

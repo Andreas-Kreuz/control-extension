@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: CeModule — Entwickler
 subtitle: Was ein CeModule ist, wie es sich verhält und wie man eines entwickelt
@@ -97,10 +97,11 @@ Das geht zu jedem beliebigen Zeitpunkt — am naheliegendsten in `run()`, aber a
 
 Die Konvention der eingebauten Module:
 
-1. Ein `*StatePublisher` sammelt mit einem `*DataCollector` die aktuellen Zustände.
+1. Ein `*Publisher` entscheidet, welche Zustände veröffentlicht werden.
 2. Eine `*DtoFactory` wandelt die Zustände in Datentransferobjekte (DTOs) um.
-3. Die DTOs werden nach `ceType` einsortiert: `ceType:string` → `dtoId:string|number` → `dto:table`.
-4. Änderungen werden über `DataChangeBus.fire*()` veröffentlicht.
+3. Ein schlanker `*StatePublisher` registriert den Publisher im Hub-Lebenszyklus.
+4. Die DTOs werden nach `ceType` einsortiert: `ceType:string` → `dtoId:string|number` → `dto:table`.
+5. Änderungen werden über `DataChangeBus.fire*()` veröffentlicht.
 
 `StatePublisher` sind dabei keine einfachen Datenklassen, sondern zustandsbehaftete Adapter mit eigenem Lebenszyklus: registrieren, einmalig initialisieren, zyklisch synchronisieren. Mehr dazu in [hub/README_DEV.md](../README_DEV.md).
 

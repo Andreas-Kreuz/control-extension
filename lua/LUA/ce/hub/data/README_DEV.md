@@ -1,4 +1,4 @@
----
+﻿---
 layout: page_with_toc
 title: Hub-Daten - Entwickler
 subtitle: Architektur, DTO-Fluss und Verantwortlichkeiten im ce.hub.data-Paket
@@ -38,7 +38,7 @@ Die Grundregeln sind:
 - Jede Objekt-Domain besitzt eine Registry mit Lookup über die Pflicht-ID. Train und RollingStock teilen sich intern den gekoppelten `TrainRollingStockStore`; die Kompatibilitätsmodule `TrainRegistry` und `RollingStockRegistry` bleiben trotzdem die öffentlichen Einstiege.
 - `*DtoFactory` und `*Publisher` halten die bestehenden DTO-Verträge stabil. Sie lesen Werte cache-only über `peekX()` oder äquivalente cache-only Hilfsfunktionen und lösen keine EEP-Lesezugriffe aus.
 - Direkte `EEP*Set*`-Aufrufe gehören in die passende `setX(...)`-Methode der Datenklasse. Direkte `EEP*Get*`-Aufrufe gehören in die passende `pullX(...)`-Methode der Datenklasse. Ausnahme sind Discovery-Existenzprüfungen und wenige globale Singleton-Fassaden wie Scenario, FrameData, Weather oder Time.
-- Alte Collector-Module sollen nicht mehr erweitert oder neu verwendet werden. Wenn sie nur noch von Tests referenziert werden, sind sie Altlasten und können entfernt oder in die Fassade überführt werden.
+- Es gibt keine aktiven `*DataCollector`-Module mehr. Quellenwahl liegt im `Publisher`, DTO-Aufbau in der `DtoFactory`; Domain-Objekte stellen keine `toJson*()`-Methoden bereit.
 
 Für Felder einer Datenklasse gilt dieses Namensschema:
 
@@ -77,7 +77,7 @@ ceType : string
 4. Eine `*DtoFactory` serialisiert Domain-Objekte oder Patches in DTOs.
 5. Der Publisher veröffentlicht Änderungen über `DataChangeBus.fire*()`.
 
-Die historischen `*StatePublisher.lua`-Dateien sind auf dem aktiven Pfad nur noch dünne Adapter, die `Publisher.syncState(...)` mit den zugehörigen Optionen aufrufen.
+Die historischen `*StatePublisher.lua`-Dateien sind auf dem aktiven Pfad nur noch schlanke Adapter, die `Publisher.syncState(...)` mit den zugehörigen Optionen aufrufen.
 
 ## Optionen und Verantwortlichkeiten
 

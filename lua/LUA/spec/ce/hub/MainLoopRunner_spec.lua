@@ -17,10 +17,9 @@ insulate("MainLoopRunner", function ()
         clearModule("ce.hub.data.version.VersionStatePublisher")
         clearModule("ce.hub.data.modules.ModuleDtoFactory")
         clearModule("ce.hub.data.version.VersionDtoFactory")
-        clearModule("ce.hub.data.modules.ModulesDataCollector")
-        clearModule("ce.hub.data.version.VersionDataCollector")
+        clearModule("ce.hub.data.modules.ModulesUpdater")
         clearModule("ce.hub.data.version.VersionInfo")
-        clearModule("ce.hub.data.runtime.RuntimeDataCollector")
+        clearModule("ce.hub.data.runtime.RuntimeUpdater")
         clearModule("ce.hub.data.runtime.RuntimeMetrics")
         clearModule("ce.hub.data.runtime.RuntimeDtoFactory")
         clearModule("ce.hub.data.runtime.RuntimeStatePublisher")
@@ -98,6 +97,10 @@ insulate("MainLoopRunner", function ()
                 id = key
             }
         end)
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function (ceType, _, list)
+            if ceType ~= "ce.hub.Runtime" then return end
+            for _, element in pairs(list or {}) do capturedRuntimeEvents[#capturedRuntimeEvents + 1] = element end
+        end)
         local printEventCounterStub = stub(DataChangeBus, "printEventCounter", function () end)
 
         local readAndExecuteIncomingCommandsStub = stub(IncomingCommandFileReader, "readAndExecuteIncomingCommands",
@@ -112,6 +115,7 @@ insulate("MainLoopRunner", function ()
         local writeStub = stub(DataStoreFileWriter, "write",
                                function () dataStoreWriteCalls = dataStoreWriteCalls + 1 end)
         finally(function () fireDataChangedStub:revert() end)
+        finally(function () fireListChangeStub:revert() end)
         finally(function () printEventCounterStub:revert() end)
         finally(function () readAndExecuteIncomingCommandsStub:revert() end)
         finally(function () isServerReadyStub:revert() end)

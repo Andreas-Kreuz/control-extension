@@ -1,5 +1,69 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficLight ...") end
 
+---@class TrafficLight
+---@field Use table<string, string>
+---@field type string
+---@field vehicleSignalName string|nil
+---@field pedestrianSignalName string|nil
+---@field use string
+---@field signalId number
+---@field trafficLightModel TrafficLightModel
+---@field currentIndication string
+---@field lightStructures table
+---@field axisStructures table
+---@field reason string
+---@field lanes table
+---@field signalGroupsByUse table<string, SignalGroup>|nil
+---@field debug boolean
+---@field buildInfo string
+---@field getAll fun():TrafficLight[]
+---@field getSignalId fun(self: TrafficLight):number
+---@field getVehicleSignalName fun(self: TrafficLight):string|nil
+---@field getPedestrianSignalName fun(self: TrafficLight):string|nil
+---@field getUse fun(self: TrafficLight):string
+---@field getTrafficLightModel fun(self: TrafficLight):TrafficLightModel
+---@field getCurrentIndication fun(self: TrafficLight):string
+---@field getReason fun(self: TrafficLight):string|nil
+---@field getSignalGroupsByUse fun(self: TrafficLight):table<string, SignalGroup>
+---@field getPrimaryTippTextStructure fun(self: TrafficLight):string|nil
+---@field getPrimaryTippTextStructures fun(self: TrafficLight):string[]
+---@field getAllTippTextStructures fun(self: TrafficLight):string[]
+---@field newForSignal fun(self: TrafficLight, name: string, signalId: number,
+--- trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string,
+--- yellowStructure?: string, requestStructure?: string, housingStructure?: string,
+--- blendStructure?: string):TrafficLight
+---@field new fun(self: TrafficLight, name: string, signalId: number, trafficLightModel: TrafficLightModel,
+--- redStructure?: string, greenStructure?: string, yellowStructure?: string, requestStructure?: string,
+--- housingStructure?: string, blendStructure?: string):TrafficLight
+---@field newPedestrianOnly fun(self: TrafficLight, name: string, signalId: number,
+--- trafficLightModel: TrafficLightModel, redStructure?: string, greenStructure?: string,
+--- yellowStructure?: string, requestStructure?: string, housingStructure?: string,
+--- blendStructure?: string):TrafficLight
+---@field newForLightStructure fun(self: TrafficLight, name: string, redStructure?: string,
+--- greenStructure?: string, yellowStructure?: string, requestStructure?: string, housingStructure?: string,
+--- blendStructure?: string):TrafficLight
+---@field asPedestrianSignal fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
+---@field withPedestrian fun(self: TrafficLight, pedestrianSignalName: string):TrafficLight
+---@field asPedestrianOnly fun(self: TrafficLight):TrafficLight
+---@field signalNamesText fun(self: TrafficLight):string
+---@field addLightStructure fun(self: TrafficLight, redStructure?: string, greenStructure?: string,
+--- yellowStructure?: string, requestStructure?: string, housingStructure?: string,
+--- blendStructure?: string):TrafficLight
+---@field addAxisStructure fun(self: TrafficLight, structureName: string, axisName: string, positionDefault: number,
+--- positionRed?: number, positionGreen?: number, positionYellow?: number,
+--- positionRedYellow?: number, positionPedestrian?: number):TrafficLight
+---@field switchAll fun(signals: table, indication: string, reason?: string):nil
+---@field switchTo fun(self: TrafficLight, indication: string, reason?: string):nil
+---@field switchStructureLight fun(self: TrafficLight):string
+---@field switchStructureAxis fun(self: TrafficLight):string
+---@field switchSignal fun(self: TrafficLight, sigIndex: number):nil
+---@field showRequestOnSignal fun(self: TrafficLight, hasRequest: boolean):nil
+---@field print fun(self: TrafficLight):nil
+---@field changed fun(self: TrafficLight):nil
+---@field applyToLane fun(self: TrafficLight, lane: Lane, ...: string):nil
+
+---@alias SignalHead TrafficLight
+
 local AxisStructureTrafficLight = require("ce.mods.road.AxisStructureTrafficLight")
 local LightStructureTrafficLight = require("ce.mods.road.LightStructureTrafficLight")
 local SignalIndication = require("ce.mods.road.SignalIndication")
@@ -55,7 +119,8 @@ function TrafficLight:newForSignal(name, signalId, trafficLightModel, redStructu
         signalId = signalId > 0 and signalId or counter,
         trafficLightModel = trafficLightModel,
         currentIndication = signalId > 0 and
-            trafficLightModel:indicationOf(SignalRegistry.getOrCreate(signalId):pullPosition()) or
+            trafficLightModel:indicationOf(SignalRegistry.getOrCreate(signalId):pullPosition() or
+                                           trafficLightModel.signalIndexRed) or
             SignalIndication.RED,
         debug = false,
         buildInfo = "" .. tostring(signalId),

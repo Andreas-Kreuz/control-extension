@@ -40,13 +40,17 @@ function FrameData.pullCurrent()
     }
 end
 
-function FrameData:update(values)
+function FrameData:update(values, updatedFields)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(values) == "table", "Need 'values' as table")
 
-    updateField(self, "framesPerSecond", values.framesPerSecond)
-    updateField(self, "currentFrame", values.currentFrame)
-    updateField(self, "currentRenderFrame", values.currentRenderFrame)
+    if not updatedFields or updatedFields.framesPerSecond then
+        updateField(self, "framesPerSecond", values.framesPerSecond)
+    end
+    if not updatedFields or updatedFields.currentFrame then updateField(self, "currentFrame", values.currentFrame) end
+    if not updatedFields or updatedFields.currentRenderFrame then
+        updateField(self, "currentRenderFrame", values.currentRenderFrame)
+    end
 end
 
 function FrameData:resetDirty()

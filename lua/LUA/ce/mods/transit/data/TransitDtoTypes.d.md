@@ -12,7 +12,7 @@
 ## CeType `ce.mods.transit.Line`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitLineDto`
+- DtoFactory: `ce.mods.transit.data.TransitLineDtoFactory.createFullDto`
 
 | Name           | Typ                       |
 | -------------- | ------------------------- |
@@ -38,7 +38,7 @@
 ## CeType `ce.mods.transit.LineName`
 
 - Key-ID: `id`
-- DtoFactory: `ce.mods.transit.data.TransitDtoFactory.createTransitLineNameDto`
+- DtoFactory: `ce.mods.transit.data.TransitLineDtoFactory.createLineNameFullDto`
 
 | Name           | Typ                       |
 | -------------- | ------------------------- |

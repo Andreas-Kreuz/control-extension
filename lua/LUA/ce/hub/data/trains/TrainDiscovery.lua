@@ -1,5 +1,13 @@
 if CeDebugLoad then print("[#Start] Loading ce.hub.data.trains.TrainDiscovery ...") end
 
+---@alias TrainNameSet table<string, boolean>
+---@alias TrainTrackIds table<string, number>
+---@alias TrainTracksByTrain table<string, TrainTrackIds>
+---@alias TrainTracksByType table<string, TrainTracksByTrain>
+---@alias TrainUpdateInfo table<string, any>
+---@alias TrainUpdateInfos table<string, TrainUpdateInfo>
+---@alias TrainInfosFn fun(d: TrainNameSet, dt: TrainNameSet, m: TrainNameSet, tt: TrainTracksByType): TrainUpdateInfos
+
 local RollingStockRegistry = require("ce.hub.data.rollingstock.RollingStockRegistry")
 local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 local TrackRegistry = require("ce.hub.data.tracks.TrackRegistry")

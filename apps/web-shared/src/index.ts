@@ -28,6 +28,12 @@ export type { RouteAppDto } from './dtos/app/routes/RouteAppDto';
 export type { RuntimeAppDto } from './dtos/app/runtime/RuntimeAppDto';
 export type { FrameDataAppDto } from './dtos/app/framedata/FrameDataAppDto';
 export type { ServerStatsAppDto } from './dtos/app/server/ServerStatsAppDto';
+export type {
+  DataTransferCeTypeSummaryAppDto,
+  DataTransferFieldAppDto,
+  DataTransferFieldsAppDto,
+  DataTransferSummaryAppDto,
+} from './dtos/app/server/DataTransferAppDto';
 export type { UpdateReleaseAppDto, UpdateStatusAppDto, UpdateStatusState } from './dtos/app/server/UpdateStatusAppDto';
 export type {
   RuntimeStatisticsAppDto,
@@ -93,6 +99,8 @@ export { CeTypeRoom } from './rooms/CeTypeRoom';
 export type { ParsedCeTypeRoom } from './rooms/CeTypeRoom';
 export { ApiDataRoom } from './rooms/DomainRoomRegistry';
 export { ServerStatsRoom } from './rooms/DomainRoomRegistry';
+export { DataTransferSummaryRoom } from './rooms/DomainRoomRegistry';
+export { DataTransferFieldsRoom } from './rooms/DomainRoomRegistry';
 export { RuntimeStatisticsRoom } from './rooms/DomainRoomRegistry';
 export { ModuleRoom } from './rooms/DomainRoomRegistry';
 export { VersionRoom } from './rooms/DomainRoomRegistry';

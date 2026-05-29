@@ -27,7 +27,33 @@ local function publishWaitingOnSignals()
     local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
-    for _, waitingOnSignal in pairs(WaitingOnSignalRegistry.getAll()) do
+    local waitingOnSignals = WaitingOnSignalRegistry.getAll()
+    local hasWaitingOnSignal = false
+    local allWaitingOnSignalsNeedFullSend = true
+
+    for _, waitingOnSignal in pairs(waitingOnSignals) do
+        hasWaitingOnSignal = true
+        if not waitingOnSignal.needsFullSend then allWaitingOnSignalsNeedFullSend = false end
+    end
+
+    local function isSelectedWaitingOnSignal(waitingOnSignal)
+        return InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
+    end
+
+    if hasWaitingOnSignal and allWaitingOnSignalsNeedFullSend then
+        DataChangeBus.fireListChange(SignalDtoFactory.createWaitingOnSignalDtoList(waitingOnSignals,
+                                                                                   isSelectedWaitingOnSignal))
+        for _, waitingOnSignal in pairs(waitingOnSignals) do
+            waitingOnSignal.needsFullSend = false
+            if InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id)) then
+                InterestSyncRegistry.markSent(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
+            end
+            waitingOnSignal:resetDirty()
+        end
+        return
+    end
+
+    for _, waitingOnSignal in pairs(waitingOnSignals) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.WaitingOnSignal, tostring(waitingOnSignal.id))
         local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.WaitingOnSignal,
                                                                        tostring(waitingOnSignal.id))
@@ -53,7 +79,29 @@ function SignalPublisher.syncState()
     local InterestSyncRegistry = require("ce.hub.data.InterestSyncRegistry")
     local HubCeTypes = require("ce.hub.data.HubCeTypes")
 
-    for _, signal in pairs(SignalRegistry.getAll()) do
+    local signals = SignalRegistry.getAll()
+    local hasSignal = false
+    local allSignalsNeedFullSend = true
+
+    for _, signal in pairs(signals) do
+        hasSignal = true
+        if not signal.needsFullSend then allSignalsNeedFullSend = false end
+    end
+
+    if HubOptionsRegistry.isPublishEnabled("signals") and hasSignal and allSignalsNeedFullSend then
+        DataChangeBus.fireListChange(SignalDtoFactory.createSignalDtoList(signals, function (signal)
+            return InterestSyncRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
+        end))
+        for _, signal in pairs(signals) do
+            signal.needsFullSend = false
+            if InterestSyncRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id)) then
+                InterestSyncRegistry.markSent(HubCeTypes.Signal, tostring(signal.id))
+            end
+            signal:resetDirty()
+        end
+    end
+
+    for _, signal in pairs(signals) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Signal, tostring(signal.id))
         local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Signal, tostring(signal.id))
         if HubOptionsRegistry.isPublishEnabled("signals") and

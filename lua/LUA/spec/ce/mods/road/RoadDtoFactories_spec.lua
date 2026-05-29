@@ -475,7 +475,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
 
     it("collects ordered intersection phases with sorted signal heads", function ()
         require("ce.hub.eep.EepSimulator")
-        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+        local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 
         local signalHead1 = {
             signalId = 1,
@@ -517,7 +517,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             getPhases = function () return { phase } end
         }
 
-        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local data = RoadDtoFactory.createCrossingDtos({ A = crossing })
 
         assert.same({
                         id = "A-P1",
@@ -551,7 +551,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
 
     it("collects lane signal group links when one default drive signal belongs to a combined group", function ()
         require("ce.hub.eep.EepSimulator")
-        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+        local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 
         local signalHead1 = {
             signalId = 1,
@@ -628,7 +628,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             getPhases = function () return { phase } end
         }
 
-        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local data = RoadDtoFactory.createCrossingDtos({ A = crossing })
         local groupsByLane = {}
         for _, laneDto in ipairs(data.intersectionLanes) do groupsByLane[laneDto.name] = laneDto.defaultSignalGroups end
 
@@ -643,7 +643,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
 
     it("collects duplicate signal group names through script-variable references", function ()
         require("ce.hub.eep.EepSimulator")
-        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+        local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 
         local signalHead1 = {
             signalId = 379,
@@ -708,7 +708,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             getPhases = function () return { phase } end
         }
 
-        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local data = RoadDtoFactory.createCrossingDtos({ A = crossing })
         local signalById = {}
         for _, signal in ipairs(data.intersectionTrafficLights) do signalById[signal.signalId] = signal end
 
@@ -726,7 +726,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
 
     it("collects implicit lane signal group links from the lane signal", function ()
         require("ce.hub.eep.EepSimulator")
-        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
+        local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 
         local laneSignal = {
             signalId = 92,
@@ -779,7 +779,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             getPhases = function () return { phase } end
         }
 
-        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local data = RoadDtoFactory.createCrossingDtos({ A = crossing })
 
         assert.same({ "sgLane1Straight" }, data.intersectionLanes[1].defaultSignalGroups)
         assert.same({ "sgLane1Straight" }, data.intersectionLanes[1].defaultRequestSignalGroups)
@@ -790,7 +790,6 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
     it("does not publish scriptVariableName methods when metadata is unset", function ()
         require("ce.hub.eep.EepSimulator")
         local json = require("ce.third-party.json")
-        local RoadDataCollector = require("ce.mods.road.data.RoadDataCollector")
         local RoadDtoFactory = require("ce.mods.road.data.RoadDtoFactory")
 
         local queue = { elements = function () return {} end }
@@ -831,7 +830,7 @@ insulate("ce.mods.road.RoadDtoFactories", function ()
             getPhases = function () return { phase } end
         }
 
-        local data = RoadDataCollector.collectCrossings({ A = crossing })
+        local data = RoadDtoFactory.createCrossingDtos({ A = crossing })
         local _, _, intersections = RoadDtoFactory.createIntersectionDtoList(data.intersections)
         local _, _, lanes = RoadDtoFactory.createIntersectionLaneDtoList(data.intersectionLanes)
 

@@ -44,15 +44,15 @@ function TimeData.pullCurrent()
     }
 end
 
-function TimeData:update(values)
+function TimeData:update(values, updatedFields)
     assert(type(self) == "table", "Call this method with ':'")
     assert(type(values) == "table", "Need 'values' as table")
 
-    updateField(self, "name", values.name)
-    updateField(self, "timeComplete", values.timeComplete)
-    updateField(self, "timeH", values.timeH)
-    updateField(self, "timeM", values.timeM)
-    updateField(self, "timeS", values.timeS)
+    if not updatedFields or updatedFields.name then updateField(self, "name", values.name) end
+    if not updatedFields or updatedFields.timeComplete then updateField(self, "timeComplete", values.timeComplete) end
+    if not updatedFields or updatedFields.timeH then updateField(self, "timeH", values.timeH) end
+    if not updatedFields or updatedFields.timeM then updateField(self, "timeM", values.timeM) end
+    if not updatedFields or updatedFields.timeS then updateField(self, "timeS", values.timeS) end
 end
 
 function TimeData:resetDirty()

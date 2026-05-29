@@ -1,3 +1,5 @@
+---@alias Crossing any
+
 -- THIS IS A COMPAT FILE FOR THE OLD API.
 local Intersection = require("ce.mods.road.Intersection")
 local IntersectionSettings = require("ce.mods.road.IntersectionSettings")

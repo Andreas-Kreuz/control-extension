@@ -5,7 +5,7 @@ local StructurePublisher = require("ce.hub.data.structures.StructurePublisher")
 ---@field name string
 ---@field initialize fun():nil
 ---@field syncState fun():nil
-StructureStatePublisher = {}
+local StructureStatePublisher = {}
 StructureStatePublisher.enabled = true
 local initialized = false
 StructureStatePublisher.name = "ce.hub.data.structures.StructureStatePublisher"

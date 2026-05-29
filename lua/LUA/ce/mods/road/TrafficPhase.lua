@@ -1,5 +1,35 @@
 if CeDebugLoad then print("[#Start] Loading ce.mods.road.TrafficPhase ...") end
 
+---@class TrafficPhase
+---@field type string
+---@field name string
+---@field intersection Intersection|nil
+---@field signalGroups SignalGroup[]
+---@field signalHeads table<SignalHead, SignalType>
+---@field signalUsesBySignalHead table<SignalHead, table<string, boolean>>|nil
+---@field greenTimeSeconds number
+---@field crossing Intersection|nil
+---@field prio number
+---@field lanes table<Lane, boolean>
+---@field debug boolean
+---@field Type table<string, SignalType>
+---@field getType fun():string
+---@field getName fun(self: TrafficPhase):string
+---@field new fun(self: TrafficPhase, name: string, greenTimeSeconds?: number):TrafficPhase
+---@field initPhase fun(self: TrafficPhase):nil
+---@field signalHeadsToTurnRedAndGreen fun(self: TrafficPhase, oldPhase?: TrafficPhase):
+---(table<SignalHead, SignalType>, table<SignalHead, SignalType>)
+---@field tasksForPhaseChangeFrom fun(self: TrafficPhase, oldPhase?: TrafficPhase, afterRedTask?: any):table
+---@field getLanes fun(self: TrafficPhase):table<Lane, boolean>
+---@field lanesNamesText fun(self: TrafficPhase):string
+---@field addSignalGroups fun(self: TrafficPhase, ...: SignalGroup):TrafficPhase
+---@field addSignalGroup fun(self: TrafficPhase, ...: SignalGroup):TrafficPhase
+---@field lanesSortedByPriority fun(self: TrafficPhase):Lane[], number, number
+---@field lanesSortedByName fun(self: TrafficPhase):Lane[]
+---@field phasePriorityComparator fun(phase1: TrafficPhase, phase2: TrafficPhase):boolean
+---@field calculatePriority fun(self: TrafficPhase):number
+---@field resetWaitCount fun(self: TrafficPhase):nil
+
 local Task = require("ce.hub.scheduler.Task")
 local SignalGroup = require("ce.mods.road.SignalGroup")
 

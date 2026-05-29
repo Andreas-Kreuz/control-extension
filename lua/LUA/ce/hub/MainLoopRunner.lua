@@ -3,7 +3,7 @@ if CeDebugLoad then print("[#Start] Loading ce.hub.MainLoopRunner ...") end
 local DataChangeBus = require("ce.hub.publish.DataChangeBus")
 local DataStoreFileWriter = require("ce.databridge.DataStoreFileWriter")
 local IncomingCommandFileReader = require("ce.databridge.IncomingCommandFileReader")
-local RuntimeDataCollector = require("ce.hub.data.runtime.RuntimeDataCollector")
+local RuntimeUpdater = require("ce.hub.data.runtime.RuntimeUpdater")
 local RuntimeMetrics = require("ce.hub.data.runtime.RuntimeMetrics")
 local ServerExchangeCoordinator = require("ce.databridge.ServerExchangeCoordinator")
 local StatePublisherRegistry = require("ce.hub.StatePublisherRegistry")
@@ -211,7 +211,7 @@ function MainLoopRunner.runCycle(cycleCount, executionOrderModuleNames, register
                             serverOutputTime, dataStoreWriteTime))
     end
 
-    RuntimeDataCollector.setLastCycleRuntimeEntries(copyRuntimeEntries(RuntimeMetrics.getAll()), publishRuntime)
+    RuntimeUpdater.setLastCycleRuntimeEntries(copyRuntimeEntries(RuntimeMetrics.getAll()), publishRuntime)
     RuntimeMetrics.resetAll()
 
     if publishRuntime then DataChangeBus.printEventCounter() end

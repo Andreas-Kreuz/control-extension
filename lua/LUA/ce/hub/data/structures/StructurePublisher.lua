@@ -26,6 +26,29 @@ function StructurePublisher.syncState()
 
     local addedIds = StructureRegistry.getAddedIds()
     local removedIds = StructureRegistry.getRemovedIds()
+    local structures = StructureRegistry.getAll()
+    local hasStructure = false
+    local allStructuresNeedFullSend = true
+
+    for _, structure in pairs(structures) do
+        hasStructure = true
+        if not structure.needsFullSend then allStructuresNeedFullSend = false end
+    end
+
+    if hasStructure and allStructuresNeedFullSend then
+        DataChangeBus.fireListChange(StructureDtoFactory.createDtoList(structures, function (structure)
+            return InterestSyncRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
+        end))
+        for _, structure in pairs(structures) do
+            structure.needsFullSend = false
+            if InterestSyncRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id)) then
+                InterestSyncRegistry.markSent(HubCeTypes.Structure, tostring(structure.id))
+            end
+            structure:resetDirty()
+        end
+        StructureRegistry.clearPendingChanges()
+        return
+    end
 
     for structureId in pairs(addedIds) do
         local structure = StructureRegistry.get(structureId)
@@ -41,7 +64,7 @@ function StructurePublisher.syncState()
         DataChangeBus.fireDataRemoved(StructureDtoFactory.createRemovalDto(structureId))
     end
 
-    for structureId, structure in pairs(StructureRegistry.getAll()) do
+    for structureId, structure in pairs(structures) do
         local isSelected = InterestSyncRegistry.isSelected(HubCeTypes.Structure, tostring(structure.id))
         local needsInitialSend = InterestSyncRegistry.needsInitialSend(HubCeTypes.Structure, tostring(structure.id))
         if not addedIds[structureId]

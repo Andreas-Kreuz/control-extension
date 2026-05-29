@@ -31,7 +31,7 @@ const homeRoutes = [
   { path: '/', element: <HomeRoute /> },
   { path: '/transit/*', element: <LinesRoute /> },
   { path: '/road/*', element: <RoadRoute /> },
-  { path: '/insights', element: <InsightsRoute /> },
+  { path: '/insights/*', element: <InsightsRoute /> },
   { path: '/about', element: <AboutRoute /> },
   { path: '/train/*', element: <TrainsRoute /> },
   { path: '/data/*', element: <DataRoute /> },

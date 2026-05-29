@@ -10,6 +10,7 @@ insulate("ce.hub.data.trains.TrainRegistry", function ()
         clearModule("ce.hub.data.trains.TrainPublisher")
         clearModule("ce.hub.data.trains.TrainRegistry")
         clearModule("ce.hub.data.trains.TrainDtoFactory")
+        clearModule("ce.hub.FullSyncMarker")
         clearModule("ce.hub.data.rollingstock.RollingStock")
         clearModule("ce.hub.data.rollingstock.RollingStockRegistry")
         clearModule("ce.hub.publish.DataChangeBus")
@@ -50,6 +51,81 @@ insulate("ce.hub.data.trains.TrainRegistry", function ()
 
         assert.same("R1", InternalDataStore.get(HubCeTypes.Train, "T1").route)
         assert.is_not_nil(InternalDataStore.get(HubCeTypes.Train, "T2"))
+    end)
+
+    it("publishes train baseline as a list and later sends changed fields only", function ()
+        local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local TrainPublisher = require("ce.hub.data.trains.TrainPublisher")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local listChanges = {}
+        local dataAdded = {}
+        local dataChanges = {}
+
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function (ceType, keyId, list)
+            table.insert(listChanges, { ceType = ceType, keyId = keyId, list = list })
+        end)
+        local fireDataAddedStub = stub(DataChangeBus, "fireDataAdded", function (ceType, keyId, key, dto)
+            table.insert(dataAdded, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
+            table.insert(dataChanges, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        finally(function () fireListChangeStub:revert() end)
+        finally(function () fireDataAddedStub:revert() end)
+        finally(function () fireDataChangedStub:revert() end)
+
+        EepSimulator.simulateAddTrain("T1", "RS1")
+        EepSimulator.simulateAddTrain("T2", "RS2")
+
+        local train1 = TrainRegistry.getOrCreate("T1")
+        TrainRegistry.getOrCreate("T2")
+
+        TrainPublisher.syncState()
+
+        assert.equals(1, #listChanges)
+        assert.equals(2, #listChanges[1].list)
+        assert.equals(0, #dataAdded)
+        assert.equals(0, #dataChanges)
+
+        train1:updateRoute("Changed Route")
+        TrainPublisher.syncState()
+
+        assert.equals(1, #dataChanges)
+        assert.same({
+                        ceType = "ce.hub.Train",
+                        id = "T1",
+                        route = "Changed Route"
+                    }, dataChanges[1].dto)
+    end)
+
+    it("publishes train full-sync requests as a single list baseline", function ()
+        local DataChangeBus = require("ce.hub.publish.DataChangeBus")
+        local EepSimulator = require("ce.hub.eep.EepSimulator")
+        local FullSyncMarker = require("ce.hub.FullSyncMarker")
+        local TrainPublisher = require("ce.hub.data.trains.TrainPublisher")
+        local TrainRegistry = require("ce.hub.data.trains.TrainRegistry")
+        local listChanges = {}
+        local dataChanges = {}
+
+        local fireListChangeStub = stub(DataChangeBus, "fireListChange", function (ceType, keyId, list)
+            table.insert(listChanges, { ceType = ceType, keyId = keyId, list = list })
+        end)
+        local fireDataChangedStub = stub(DataChangeBus, "fireDataChanged", function (ceType, keyId, key, dto)
+            table.insert(dataChanges, { ceType = ceType, keyId = keyId, key = key, dto = dto })
+        end)
+        finally(function () fireListChangeStub:revert() end)
+        finally(function () fireDataChangedStub:revert() end)
+
+        EepSimulator.simulateAddTrain("T1", "RS1")
+        TrainRegistry.getOrCreate("T1")
+
+        TrainPublisher.syncState()
+        FullSyncMarker.requestFullSync()
+        TrainPublisher.syncState()
+
+        assert.equals(2, #listChanges)
+        assert.equals(0, #dataChanges)
     end)
 
     it("sends ondemand fields with real values only for selected trains", function ()

@@ -1,7 +1,8 @@
-import InsightsPage from './components/InsightsPage';
+import { useRoutes } from 'react-router-dom';
+import routes from './routes';
 
 function InsightsRoute() {
-  return <InsightsPage />;
+  return useRoutes(routes);
 }
 
 export default InsightsRoute;

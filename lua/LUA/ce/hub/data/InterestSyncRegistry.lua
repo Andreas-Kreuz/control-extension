@@ -22,8 +22,9 @@ function InterestSyncRegistry.startSyncFor(ceType, key)
     assert(type(ceType) == "string", "Need 'ceType' as string")
     assert(type(key) == "string", "Need 'key' as string")
 
+    local wasSelected = InterestSyncRegistry.isSelected(ceType, key)
     ensureCeTypeTable(selectedByCeType, ceType)[key] = true
-    ensureCeTypeTable(pendingInitialSendByCeType, ceType)[key] = true
+    if not wasSelected then ensureCeTypeTable(pendingInitialSendByCeType, ceType)[key] = true end
 end
 
 function InterestSyncRegistry.stopSyncFor(ceType, key)
@@ -41,10 +42,11 @@ function InterestSyncRegistry.startSyncForSource(ceType, key, source)
     assert(type(key) == "string", "Need 'key' as string")
     assert(type(source) == "string", "Need 'source' as string")
 
+    local wasSelected = InterestSyncRegistry.isSelected(ceType, key)
     local selectedByKey = ensureCeTypeTable(sourceSelectedByCeType, ceType)
     selectedByKey[key] = selectedByKey[key] or {}
     selectedByKey[key][source] = true
-    ensureCeTypeTable(pendingInitialSendByCeType, ceType)[key] = true
+    if not wasSelected then ensureCeTypeTable(pendingInitialSendByCeType, ceType)[key] = true end
 end
 
 function InterestSyncRegistry.stopSyncForSource(ceType, key, source)
