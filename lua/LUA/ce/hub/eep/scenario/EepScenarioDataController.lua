@@ -14,6 +14,7 @@ local activeAnl3Discovery = { success = false, coverage = {} }
 local pendingAnl3Path = nil
 local anl3ReloadPending = false
 local anl3ReloadDelayCycles = 0
+local debug = CeStartWithDebug or false
 local updateCallCount = 0
 local DEFAULT_ROLLING_STOCK_MODEL_INFO_BATCH_SIZE = 20
 
@@ -56,14 +57,18 @@ end
 
 local function runAnl3Discovery(path)
     local startTime = os.clock()
-    print(string.format("[CeHubModule] Anlage laden: %s", path))
+    if debug then
+        print(string.format("[CeHubModule] Anlage laden: %s", path))
+    end
     local result = buildAnl3Result(path)
     if not path then return result end
     -- EEPShowInfoTextTop(0.8, 1, 0.8, 1, 10, 1, string.format("Lade Anlage ..."))
 
     local tableOfAnl3, err = EepScenarioAnl3Parser.loadAnlage(path)
     if tableOfAnl3 then
-        print(string.format("[CeHubModule] Anlage laden erfolgreich: %s", path))
+        if debug then
+            print(string.format("[CeHubModule] Anlage laden erfolgreich: %s", path))
+        end
     else
         print(string.format("[CeHubModule] Laden der Anlage fehlgeschlagen: %s", tostring(err)))
         result.error = err
@@ -78,7 +83,9 @@ local function runAnl3Discovery(path)
         if luaPathName ~= scenarioName then
             print(
                 string.format(
-                    "[CeHubModule] Anl3 mismatch: EEPGetAnlName=%s but LUAPath=%s -- skipping anl3 discoveries",
+                    "[CeHubModule] Das Lesen der Anlage wird übersprungen. Name der geöffneten Anlage ist " ..
+                    "\n-- '%s' (aus EEPGetAnlName)" ..
+                    "\n-- '%s' (angegebener Pfad in Optionen)",
                     tostring(scenarioName),
                     tostring(rawLuaPath)
                 )
